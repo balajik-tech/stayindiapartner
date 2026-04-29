@@ -1,0 +1,522 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:stayindia_owner/core/theme/app_colors.dart';
+import '../cubit/bookings_cubit.dart';
+import '../cubit/bookings_state.dart';
+import 'room_selection_page.dart';
+import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
+import '../widgets/booking_card.dart';
+import 'package:stayindia_owner/features/bookings/domain/booking.dart';
+import 'package:stayindia_owner/core/constants/ui_constants.dart';
+
+class _BookingsPageWithScroll extends StatefulWidget {
+  const _BookingsPageWithScroll();
+
+  @override
+  State<_BookingsPageWithScroll> createState() => _BookingsPageWithScrollState();
+}
+
+class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with SingleTickerProviderStateMixin {
+  final ScrollController _scrollController = ScrollController();
+  late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      context.read<BookingsCubit>().loadMoreBookings();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<BookingsCubit, BookingsState>(
+      listener: (context, state) {
+        if (state.successMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.successMessage!),
+              backgroundColor: const Color(0xFF12B76A),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+            ),
+          );
+        }
+        if (state.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage!),
+              backgroundColor: Colors.red.shade600,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+            ),
+          );
+        }
+        if (state.status == BookingsStatus.success && state.scannedBooking != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BlocProvider.value(
+                value: context.read<BookingsCubit>(),
+                child: RoomSelectionPage(
+                  bookingId: state.scannedBooking!.bookingId,
+                  hostelId: state.scannedBooking!.hostelId,
+                  tenantName: state.scannedBooking!.tenantName,
+                  preAllocatedRoomId: state.scannedBooking!.roomId,
+                  preAllocatedBedNumber: state.scannedBooking!.bedNumber,
+                ),
+              ),
+            ),
+          );
+          context.read<BookingsCubit>().clearScannedBooking();
+        }
+      },
+      child: BlocBuilder<BookingsCubit, BookingsState>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              _buildPowerfulHeader(context, state),
+              _buildSegmentedTabs(state),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildTabContent(context, state, state.requests, 'No pending requests', 'New booking requests will appear here'),
+                    _buildTabContent(context, state, state.checkIns, 'No active residents', 'Manage your current residents here'),
+                    _buildHistoryTab(context, state),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPowerfulHeader(BuildContext context, BookingsState state) {
+    if (_isSearching) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(20.w, 20.h, 12.w, 10.h),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 44.h,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F9FB),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  onChanged: (value) => context.read<BookingsCubit>().searchBookings(value),
+                  decoration: InputDecoration(
+                    hintText: 'Search by name, phone, room...',
+                    hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
+                    prefixIcon: Icon(Icons.search_rounded, color: AppColors.greyText, size: 20.sp),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            _buildHeaderAction(Icons.close_rounded, () {
+              setState(() {
+                _isSearching = false;
+                _searchController.clear();
+              });
+              context.read<BookingsCubit>().searchBookings('');
+            }),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 20.h, 12.w, 10.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Bookings',
+                style: TextStyle(
+                  fontSize: 28.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.darkText,
+                  letterSpacing: -1,
+                ),
+              ),
+              Text(
+                'Manage your hostel residents',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: AppColors.greyText,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              _buildHeaderAction(Icons.search_rounded, () {
+                setState(() => _isSearching = true);
+              }),
+              _buildHeaderAction(Icons.filter_list_rounded, () => _showFilterSheet(context)),
+              _buildHeaderAction(Icons.refresh_rounded, () => context.read<BookingsCubit>().fetchBookings()),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderAction(IconData icon, VoidCallback onTap) {
+    return Container(
+      margin: EdgeInsets.only(left: 8.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FB),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: IconButton(
+        onPressed: onTap,
+        icon: Icon(icon, color: AppColors.darkText, size: 22.sp),
+        visualDensity: VisualDensity.compact,
+      ),
+    );
+  }
+
+  Widget _buildSegmentedTabs(BookingsState state) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F4F7),
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        labelColor: AppColors.darkText,
+        unselectedLabelColor: AppColors.greyText,
+        labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
+        unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        tabs: [
+          _buildTabItem('Requests', state.requests.length),
+          _buildTabItem('Active', state.checkIns.length),
+          const Tab(text: 'History'),
+        ],
+      ),
+    );
+  }
+
+  Tab _buildTabItem(String label, int count) {
+    return Tab(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(label),
+          if (count > 0) ...[
+            SizedBox(width: 6.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+              decoration: BoxDecoration(
+                color: count > 5 ? Colors.red.shade50 : AppColors.primaryBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w900,
+                  color: count > 5 ? Colors.red.shade700 : AppColors.primaryBlue,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabContent(BuildContext context, BookingsState state, List<Booking> items, String emptyTitle, String emptySubtitle) {
+    if (state.status == BookingsStatus.loading && state.bookings.isEmpty) {
+      return ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        itemCount: 5,
+        itemBuilder: (context, index) => const TenantCardSkeleton(),
+      );
+    }
+
+    if (items.isEmpty) {
+      return _buildEmptyState(emptyTitle, emptySubtitle);
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => context.read<BookingsCubit>().fetchBookings(),
+      color: AppColors.primaryBlue,
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, UIConstants.bottomPadding(context) + 20.h),
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: items.length + (state.isLoadMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index < items.length) {
+            return BookingCard(booking: items[index]);
+          }
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHistoryTab(BuildContext context, BookingsState state) {
+    final historyBookings = state.bookings.where((b) => [BookingStatus.cancelled, BookingStatus.checkedOut].contains(b.status)).toList();
+    return _buildTabContent(context, state, historyBookings, 'No history found', 'Completed stays will appear here');
+  }
+
+  Widget _buildEmptyState(String title, String subtitle) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(24.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.inbox_rounded, size: 64.sp, color: AppColors.greyText.withValues(alpha: 0.2)),
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            title,
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+          ),
+          SizedBox(height: 8.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40.w),
+            child: Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterSheet(BuildContext context) {
+    final cubit = context.read<BookingsCubit>();
+    String? tempKycStatus = cubit.state.kycStatus;
+    String? tempRoomType = cubit.state.roomType;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+              ),
+              SizedBox(height: 24.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Filter Bookings',
+                    style: TextStyle(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setSheetState(() {
+                        tempKycStatus = null;
+                        tempRoomType = null;
+                      });
+                      cubit.changeFilter(kycStatus: '', roomType: '');
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(foregroundColor: AppColors.primaryBlue),
+                    child: Text('Reset', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24.h),
+              _buildFilterSection(
+                'KYC Status',
+                ['Verified', 'Pending'],
+                tempKycStatus,
+                (val) => setSheetState(() => tempKycStatus = val),
+              ),
+              SizedBox(height: 24.h),
+              _buildFilterSection(
+                'Room Type',
+                ['1 Sharing', '2 Sharing', '3 Sharing'],
+                tempRoomType,
+                (val) => setSheetState(() => tempRoomType = val),
+              ),
+              SizedBox(height: 32.h),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    cubit.changeFilter(
+                      kycStatus: tempKycStatus ?? '',
+                      roomType: tempRoomType ?? '',
+                    );
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Apply Filters',
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 8.h),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterSection(
+    String title,
+    List<String> options,
+    String? selectedValue,
+    Function(String?) onSelected,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.greyText,
+            letterSpacing: 0.5,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        Wrap(
+          spacing: 10.w,
+          runSpacing: 10.h,
+          children: options.map((opt) {
+            final isSelected = selectedValue == opt;
+            return InkWell(
+              onTap: () => onSelected(isSelected ? null : opt),
+              borderRadius: BorderRadius.circular(12.r),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.08) : Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: isSelected ? AppColors.primaryBlue : Colors.grey.shade200,
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                ),
+                child: Text(
+                  opt,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    color: isSelected ? AppColors.primaryBlue : AppColors.darkText,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class BookingsPage extends StatelessWidget {
+  const BookingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: _BookingsPageWithScroll(),
+      ),
+    );
+  }
+}

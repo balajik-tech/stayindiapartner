@@ -1,30 +1,27 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/theme/app_theme.dart';
-import 'core/theme/app_colors.dart';
-import 'presentation/auth/login_page.dart';
-import 'presentation/main_navigation_page.dart';
-import 'presentation/auth/cubit/auth_cubit.dart';
-import 'presentation/auth/registration_personal_page.dart';
-import 'presentation/profile/cubit/hostel_cubit.dart';
-import 'presentation/bookings/bloc/bookings_bloc.dart';
-import 'presentation/dashboard/bloc/dashboard_bloc.dart';
-import 'presentation/tenants/bloc/tenants_bloc.dart';
-import 'presentation/maintenance/cubit/maintenance_cubit.dart';
-import 'presentation/notices/cubit/notice_cubit.dart';
-import 'presentation/staff/cubit/staff_cubit.dart';
-import 'presentation/payments/cubit/payment_cubit.dart';
 
-import 'domain/repositories/room_repository.dart';
-import 'domain/repositories/dashboard_repository.dart';
-import 'domain/repositories/tenant_repository.dart';
-import 'domain/repositories/maintenance_repository.dart';
-import 'domain/repositories/notice_repository.dart';
-import 'domain/repositories/staff_repository.dart';
+import 'features/navigation/presentation/pages/main_navigation_page.dart';
+import 'features/auth/presentation/cubit/auth_cubit.dart';
+import 'features/auth/presentation/pages/registration_personal_page.dart';
+import 'features/auth/presentation/pages/auth_gate.dart';
+import 'features/profile/presentation/cubit/hostel_cubit.dart';
+import 'features/bookings/cubit/bookings_cubit.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
+import 'features/maintenance/presentation/cubit/maintenance_cubit.dart';
+import 'features/notices/presentation/cubit/notice_cubit.dart';
+import 'features/staff/presentation/cubit/staff_cubit.dart';
+import 'features/payments/presentation/cubit/payment_cubit.dart';
+import 'package:stayindia_owner/features/communities/presentation/cubit/community_cubit.dart';
+import 'package:stayindia_owner/features/communities/presentation/cubit/owner_community_cubit.dart';
 
-import 'core/services/token_storage.dart';
+
 import 'core/services/notification_service.dart';
 import 'core/utils/logger.dart';
 
@@ -33,12 +30,10 @@ import 'injection_container.dart' as di;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Global Error Handling Barrier
   FlutterError.onError = (details) {
-    AppLogger.error('❌ FLUTTER FRAMEWORK ERROR: ${details.exception}', details.exception, details.stack);
+    AppLogger.error('FLUTTER FRAMEWORK ERROR: ${details.exception}', details.exception, details.stack);
   };
   
-  // Custom Error Widget for Production
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Material(
       child: Container(
@@ -62,7 +57,6 @@ void main() async {
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
-                // Restart logic or simple back
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
               child: const Text('Try Again', style: TextStyle(color: Colors.white)),
@@ -74,7 +68,7 @@ void main() async {
   };
   
   PlatformDispatcher.instance.onError = (error, stack) {
-    AppLogger.error('❌ ASYNC/PLATFORM ERROR: $error', error, stack);
+    AppLogger.error('ASYNC/PLATFORM ERROR: $error', error, stack);
     return true;
   };
 
@@ -84,8 +78,15 @@ void main() async {
   
   AppLogger.info('Stay India Owner App Initialized');
   
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  
   runApp(const StayIndiaOwnerApp());
 }
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class StayIndiaOwnerApp extends StatelessWidget {
   const StayIndiaOwnerApp({super.key});
@@ -95,35 +96,50 @@ class StayIndiaOwnerApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => di.sl<AuthCubit>()..loadCurrentUser(),
+          create: (context) => di.sl<AuthCubit>()..restoreSession(),
         ),
         BlocProvider(
           create: (context) => di.sl<HostelCubit>()..getHostels(),
         ),
         BlocProvider(
-          create: (context) => di.sl<BookingsBloc>(),
+          create: (context) => di.sl<BookingsCubit>(),
         ),
         BlocProvider(
-          create: (context) => di.sl<DashboardBloc>(),
+          create: (context) => di.sl<DashboardCubit>(),
         ),
         BlocProvider(
-          create: (context) => di.sl<TenantsBloc>(),
+          create: (context) => di.sl<TenantCubit>(),
         ),
         BlocProvider(create: (context) => di.sl<MaintenanceCubit>()),
         BlocProvider(create: (context) => di.sl<NoticeCubit>()),
         BlocProvider(create: (context) => di.sl<StaffCubit>()),
         BlocProvider(create: (context) => di.sl<PaymentCubit>()),
+        BlocProvider(create: (context) => di.sl<ProfileCubit>()),
+        BlocProvider(create: (context) => di.sl<CommunityCubit>()),
+        BlocProvider(create: (context) => di.sl<OwnerCommunityCubit>()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(390, 844),
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {
-          return MaterialApp(
-            title: 'Stay India Owner',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            home: const AuthGate(),
+          return BlocListener<AuthCubit, AuthState>(
+            listener: (context, state) {
+              if (state is AuthUnauthenticated) {
+                
+                navigatorKey.currentState?.popUntil((route) => route.isFirst);
+              }
+            },
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              title: 'Stay India Owner',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              home: const AuthGate(
+                dashboard: MainNavigationPage(),
+                registration: RegistrationPersonalPage(),
+              ),
+            ),
           );
         },
       ),
@@ -131,102 +147,4 @@ class StayIndiaOwnerApp extends StatelessWidget {
   }
 }
 
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AuthCubit, AuthState>(
-      buildWhen: (previous, current) {
-        // Only rebuild AuthGate for major state changes
-        return current is AuthInitial || 
-               current is AuthSuccess || 
-               current is Unauthenticated ||
-               (previous is AuthInitial && current is AuthLoading);
-      },
-      builder: (context, state) {
-        AppLogger.debug('AuthGate: Building with state: $state');
-        if (state is AuthInitial || (state is AuthLoading && state is! AuthSuccess)) {
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    height: 150.h,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.apartment_rounded,
-                      size: 120.sp,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                  SizedBox(height: 48.h),
-                  const CircularProgressIndicator(
-                    color: AppColors.primaryBlue,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        if (state is AuthRestorationError) {
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-              child: Padding(
-                padding: EdgeInsets.all(24.w),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.wifi_off_rounded, size: 80.sp, color: Colors.grey),
-                    SizedBox(height: 32.h),
-                    Text(
-                      'Connection Error',
-                      style: TextStyle(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkText,
-                      ),
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'We couldn\'t restore your session. Please check your internet connection.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16.sp, color: AppColors.greyText),
-                    ),
-                    SizedBox(height: 40.h),
-                    ElevatedButton(
-                      onPressed: () => context.read<AuthCubit>().loadCurrentUser(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
-                        padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 14.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                      ),
-                      child: Text('Retry', style: TextStyle(color: Colors.white, fontSize: 16.sp)),
-                    ),
-                    TextButton(
-                      onPressed: () => context.read<AuthCubit>().logout(),
-                      child: Text('Go to Login', style: TextStyle(color: AppColors.greyText, fontSize: 14.sp)),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-        
-        if (state is AuthSuccess) {
-          final shouldRegister = state.isNewUser || !state.owner.isProfileComplete;
-          return shouldRegister 
-            ? const RegistrationPersonalPage() 
-            : const MainNavigationPage();
-        } else {
-          return const LoginPage();
-        }
-      },
-    );
-  }
-}

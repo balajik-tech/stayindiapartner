@@ -14,7 +14,6 @@ class ErrorInterceptor extends Interceptor {
       err.stackTrace,
     );
 
-    // Pass the mapped exception along
     handler.next(DioException(
       requestOptions: err.requestOptions,
       response: err.response,

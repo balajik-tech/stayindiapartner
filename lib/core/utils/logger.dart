@@ -7,8 +7,8 @@ class AppLogger {
       errorMethodCount: 8,
       lineLength: 120,
       colors: true,
-      printEmojis: true,
-      printTime: false,
+      printEmojis: false,
+      dateTimeFormat: DateTimeFormat.none,
     ),
   );
 
@@ -21,7 +21,7 @@ class AppLogger {
   }
 
   static void success(String message) {
-    _logger.i('✅ SUCCESS: $message');
+    _logger.i('SUCCESS: $message');
   }
 
   static void warning(String message) {
@@ -33,6 +33,6 @@ class AppLogger {
   }
   
   static void purple(String message) {
-     _logger.t(message); // Using trace for special highlights
+     _logger.t(message); 
   }
 }

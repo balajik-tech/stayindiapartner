@@ -30,52 +30,55 @@ class SocketService {
       .enableReconnection()
       .setReconnectionDelay(2000)
       .setReconnectionAttempts(20)
-      .setTransports(['websocket', 'polling']) // Allow polling fallback
+      .setTransports(['websocket', 'polling']) 
       .build());
 
     _socket!.onConnect((_) {
-      AppLogger.info('🚀 Socket: Connected to server');
-      // Auto re-join last community if exists
+      AppLogger.info(' Socket: Connected to server');
       if (_lastRoomId != null && _lastUserId != null) {
-        AppLogger.info('🔄 Socket: Auto-rejoining room $_lastRoomId');
+        AppLogger.info(' Socket: Auto-rejoining room $_lastRoomId');
         joinCommunity(_lastRoomId!, _lastUserId!, role: _lastRole ?? 'OWNER');
       }
     });
 
     _socket!.onConnectError((err) {
-      AppLogger.error('❌ Socket: Connection error: $err');
+      AppLogger.error(' Socket: Connection error: $err');
     });
 
     _socket!.onConnectTimeout((err) {
-      AppLogger.error('❌ Socket: Connection timeout: $err');
+      AppLogger.error(' Socket: Connection timeout: $err');
     });
 
     _socket!.onError((err) {
-      AppLogger.error('❌ Socket: Error: $err');
+      AppLogger.error(' Socket: Error: $err');
     });
 
     _socket!.on('joined_community', (data) {
-      AppLogger.info('✅ Socket: Successfully joined room ${data['hostelId']}');
+      AppLogger.success(' Socket: Successfully joined room ${data['hostelId']}');
+    });
+
+    _socket!.on('error', (data) {
+      AppLogger.error(' Socket: Server returned error: $data');
     });
 
     _socket!.on('new_message', (data) {
-      AppLogger.debug('📩 Socket: New message received');
+      AppLogger.debug(' Socket: New message received');
       _messageController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('new_booking', (data) {
-      AppLogger.info('🎁 Received new_booking notification: $data');
+      AppLogger.info(' Received new_booking notification: $data');
       _bookingController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('dashboard_refresh', (data) {
-      AppLogger.info('🔄 Received dashboard_refresh request: $data');
+      AppLogger.info(' Received dashboard_refresh request: $data');
       _dashboardRefreshController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('user_typing', (data) {
       if (data['userName'] != null) {
-        AppLogger.debug('✍️ Socket: User typing: ${data['userName']}');
+        AppLogger.debug(' Socket: User typing: ${data['userName']}');
         _typingController.add(data['userName']);
       }
     });
@@ -86,16 +89,26 @@ class SocketService {
       }
     });
 
-    _socket!.onDisconnect((_) => AppLogger.warning('👋 Socket: Disconnected from server'));
+    _socket!.onDisconnect((_) => AppLogger.warning(' Socket: Disconnected from server'));
     
-    _socket!.onConnectError((err) => AppLogger.error('❌ Socket: Connection error: $err'));
   }
 
   void joinCommunity(String hostelId, String userId, {String role = 'OWNER'}) {
+    if (hostelId.isEmpty) {
+      AppLogger.warning(' Socket: Attempted to join room with empty hostelId. Ignoring.');
+      return;
+    }
+
+    if (_lastRoomId != null && _lastRoomId != hostelId) {
+      AppLogger.info(' Socket: Leaving previous room $_lastRoomId before joining $hostelId');
+      leaveCommunity(_lastRoomId!);
+    }
+
     _lastRoomId = hostelId;
     _lastUserId = userId;
     _lastRole = role;
 
+    AppLogger.debug(' Socket: Emitting join_community | Room: $hostelId, User: $userId, Role: $role');
     _socket?.emit('join_community', {
       'hostelId': hostelId,
       'userId': userId,
@@ -126,5 +139,16 @@ class SocketService {
   void disconnect() {
     _socket?.disconnect();
     _socket = null;
+  }
+
+  
+  
+  void dispose() {
+    _messageController.close();
+    _typingController.close();
+    _stopTypingController.close();
+    _bookingController.close();
+    _dashboardRefreshController.close();
+    disconnect();
   }
 }

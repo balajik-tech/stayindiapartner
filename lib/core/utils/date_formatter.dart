@@ -6,13 +6,11 @@ class DateFormatter {
       return 'Not set';
     }
     try {
-      // Normalize input: if it's an ISO string, take the date part to prevent timezone shifts
       String normalized = dateStr;
       if (dateStr.contains('T')) {
         normalized = dateStr.split('T')[0];
       }
 
-      // Handle YYYY-MM-DD
       if (normalized.length >= 10) {
         final parts = normalized.substring(0, 10).split('-');
         if (parts.length == 3) {
@@ -25,7 +23,6 @@ class DateFormatter {
         }
       }
 
-      // Fallback for other formats
       final date = DateTime.parse(dateStr).toLocal();
       return DateFormat('MMM dd, yyyy').format(date);
     } catch (e) {
@@ -55,6 +52,28 @@ class DateFormatter {
       return DateFormat('EEE, MMM dd, yyyy').format(date);
     } catch (e) {
       return dateStr;
+    }
+  }
+  static String formatTimeAgo(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateStr).toLocal();
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inSeconds < 60) {
+        return 'Just now';
+      } else if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays}d ago';
+      } else {
+        return DateFormat('MMM dd').format(date);
+      }
+    } catch (e) {
+      return '';
     }
   }
 }

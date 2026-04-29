@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# AI & Temporary Scratch Files
+scratch/
+.gemini/
+.antigravity/
+analyze_output.txt
+fix_errors.py
+query.py
+test.js
+test_db.js
+sync_indexes.js
+seed_*.js

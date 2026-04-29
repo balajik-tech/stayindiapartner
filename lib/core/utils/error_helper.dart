@@ -51,7 +51,6 @@ class ErrorHelper {
       return errorStr.replaceFirst("exception: ", "");
     }
 
-    // Mask very technical or long errors
     if (errorStr.length > 60 || errorStr.contains("null check") || errorStr.contains("type error")) {
       return "An unexpected error occurred. Please try again.";
     }

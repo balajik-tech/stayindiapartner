@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 class BouncingWrapper extends StatefulWidget {
   final Widget child;
-  final VoidCallback onTap;
+  final Function? onTap;
   final double scaleFactor;
   final Duration animationDuration;
 
@@ -42,13 +42,17 @@ class _BouncingWrapperState extends State<BouncingWrapper>
   }
 
   void _onTapDown(TapDownDetails details) {
-    HapticFeedback.lightImpact();
-    _controller.forward();
+    if (widget.onTap != null) {
+      HapticFeedback.lightImpact();
+      _controller.forward();
+    }
   }
 
   void _onTapUp(TapUpDetails details) {
-    _controller.reverse();
-    widget.onTap();
+    if (widget.onTap != null) {
+      _controller.reverse();
+      widget.onTap!();
+    }
   }
 
   void _onTapCancel() {

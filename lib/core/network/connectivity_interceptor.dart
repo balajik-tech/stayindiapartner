@@ -10,7 +10,11 @@ class ConnectivityInterceptor extends Interceptor {
   ) async {
     final connectivityResult = await Connectivity().checkConnectivity();
     
-    if (connectivityResult.contains(ConnectivityResult.none)) {
+    
+    final isLocalRequest = options.baseUrl.contains('localhost') || 
+                          options.baseUrl.contains('127.0.0.1');
+
+    if (connectivityResult.contains(ConnectivityResult.none) && !isLocalRequest) {
       return handler.reject(
         DioException(
           requestOptions: options,

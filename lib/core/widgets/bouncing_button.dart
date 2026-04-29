@@ -5,7 +5,7 @@ import 'bouncing_wrapper.dart';
 
 class BouncingButton extends StatelessWidget {
   final Widget child;
-  final VoidCallback onTap;
+  final Function? onTap;
   final Color? backgroundColor;
   final double? height;
   final double? elevation;

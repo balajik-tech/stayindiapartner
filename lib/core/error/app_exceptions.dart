@@ -8,7 +8,7 @@ abstract class AppException implements Exception {
   AppException({required this.message, this.code, this.originalError});
 
   @override
-  String toString() => 'AppException: $message (Code: $code)';
+  String toString() => message;
 }
 
 class NetworkException extends AppException {
@@ -36,7 +36,6 @@ class UnexpectedException extends AppException {
   UnexpectedException({required super.message, super.code, super.originalError});
 }
 
-/// Helper to map DioException to AppException
 AppException mapDioException(DioException e) {
   switch (e.type) {
     case DioExceptionType.connectionTimeout:

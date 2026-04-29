@@ -1,138 +1,118 @@
 class ApiConstants {
-  // Use the production base URL
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.koushiksoftwaresolutions.online/api',
+    defaultValue: 'https://api.koushiksoftwaresolutions.online/api/v1',
   );
 
-  // Auth
   static const String requestOtp = '/auth/request-otp';
   static const String verifyOtp = '/auth/verify-otp';
   static const String getMe = '/auth/me';
 
-  // Hostels
   static const String hostels = '/hostels';
   static const String hostelsHome = '/hostels/home';
-  // GET /hostels/public/{id} - use: '$hostels/public/$id'
-  // GET /hostels/{id} - use: '$hostels/$id'
 
-  // Bookings
   static const String bookings = '/bookings';
   static const String ownerBookings = '/bookings/owner-bookings';
   static const String myBookings = '/bookings/my-bookings';
   static const String manualCheckin = '/bookings/manual-checkin';
   static const String scanBooking = '/bookings/scan';
-  static const String assignRoom = '/bookings/checkin'; // Aliased to checkin for room assignment
-  static const String checkoutBooking = '/bookings/checkout'; // + /{id}
+  static const String assignRoom = '/bookings/checkin'; 
+  static const String checkoutBooking = '/bookings/checkout'; 
   static const String cancelBooking = '/bookings/cancel';
-  static const String confirmBooking = '/bookings/confirm'; // + /{id}
+  static const String confirmBooking = '/bookings/confirm'; 
   static const String pendingBookings = '/bookings/owner-bookings';
 
-  // Rooms
   static const String rooms = '/rooms';
   static const String roomsOccupancy = '/rooms/occupancy';
   static const String roomsFloors = '/rooms/floors';
   static const String roomsByFloor = '/rooms/by-floor';
-  static const String roomBeds = '/rooms'; // + /{roomId}/beds
-  static const String roomBedDetail = '/rooms/bed'; // + /{roomId}/{bedNumber}
-  static const String roomBedHistory = '/rooms/bed-history'; // + /{roomId}/{bedNumber}
-  static const String roomsPublic = '/rooms/public/hostel'; // + /{hostelId}
+  static const String roomBeds = '/rooms'; 
+  static const String roomBedDetail = '/rooms/bed'; 
+  static const String roomBedHistory = '/rooms/bed-history'; 
+  static const String roomsPublic = '/rooms/public/hostel'; 
 
-  // Dashboard
-  static const String dashboardDailyOps = '/dashboard/daily-operations'; // + /{hostelId}
+  static const String dashboardBase = '/dashboard';
+  static const String dashboardDailyOps = '/dashboard/daily-operations'; 
   static const String dashboardOccupancy = '/dashboard/occupancy';
+  static const String dashboardRentDue = '/dashboard/rent-due';
 
-  // Food Menu
-  static const String foodMenu = '/food-menu'; // POST: save, GET: /{hostelId}/{day}, DELETE: /{hostelId}/{day}
-  static const String foodMenuWeekly = '/food-menu/weekly'; // DELETE: /{hostelId}
-  static const String foodMenuPublic = '/food-menu/public'; // GET: /{hostelId}
+  static const String foodMenu = '/food-menu'; 
+  static const String foodMenuWeekly = '/food-menu/weekly'; 
+  static const String foodMenuPublic = '/food-menu/public'; 
 
-  // Settings
-  static const String settings = '/settings'; // GET /{hostelId}
-  // PATCH /{hostelId}/profile, /amenities, /house-rules, /room-configuration, /notifications
+  static const String settings = '/settings'; 
 
-  // Tenants
   static const String tenants = '/tenants';
-  static const String tenantDetail = '/tenants'; // GET /:id?hostelId=
+  static const String tenantDetail = '/tenants'; 
 
-  // Community
-  static const String community = '/community'; // GET /{hostelId}/messages, POST /message, GET /{hostelId}
+  static const String community = '/community'; 
 
-  // Owner Community
-  static const String ownerCommunity = '/owner-community'; // GET ?hostelId=, POST, GET /{id}, POST /{id}/replies
+  static const String ownerCommunity = '/owner-community'; 
+  static const String ownerCommunities = '/owner-communities'; 
 
-  // Announcements
   static const String announcements = '/announcements';
 
-  // Tickets (replaces /complaints and /maintenance — use type=COMPLAINT or type=MAINTENANCE)
-  static const String tickets = '/tickets'; // POST, GET, GET /{id}, PATCH /{id}, DELETE /{id}
+  static const String tickets = '/tickets'; 
 
-  // Notices
-  static const String notices = '/notices'; // POST, GET, GET /{id}, PATCH /{id}
+  static const String notices = '/notices'; 
 
-  // Payments
-  static const String payments = '/payments'; // POST, GET
-  static const String paymentPay = '/payments'; // PATCH /{id}/pay
-  static const String paymentRemind = '/payments'; // POST /{id}/remind
+  static const String payments = '/payments'; 
+  static const String paymentPay = '/payments'; 
+  static const String paymentRemind = '/payments'; 
   static const String paymentRemindBulk = '/payments/remind-bulk';
   static const String paymentReminders = '/payments/reminders';
-  static const String bills = '/bills'; // GET /{tenantId}?hostelId=
+  static const String bills = '/bills'; 
 
-  // Transactions
-  static const String transactions = '/transactions'; // POST
+  static const String transactions = '/transactions'; 
 
-  // Bookings (additional)
-  static const String bookingsCheckin = '/bookings/checkin'; // POST
-  static const String bookingsCheckinData = '/bookings/checkin-data'; // GET
-  static const String bookingsConfirmed = '/bookings/confirmed'; // GET
+  static const String bookingsCheckin = '/bookings/checkin'; 
+  static const String bookingsCheckinData = '/bookings/checkin-data'; 
+  static const String bookingsConfirmed = '/bookings/confirmed'; 
 
-  // Tenants (manual walk-in)
-  static const String tenantsManual = '/tenants/manual'; // POST
+  static const String tenantsManual = '/tenants/manual'; 
 
-  // Staff
-  static const String staff = '/staff'; // POST, GET, GET /{id}, PATCH /{id}, POST /{id}/activity
+  static const String staff = '/staff'; 
 
-  // Documents
-  static const String documents = '/documents'; // POST
-  static const String documentsHostel = '/documents/hostel'; // GET /{hostelId}
+  static const String financeStats = '/finance/stats';
+  static const String financeAnalytics = '/finance/analytics';
+  static const String financeRevenueHistory = '/finance/revenue-history';
 
-  // Reviews
-  static const String reviews = '/reviews'; // POST, GET /{id}
-  static const String reviewsHostel = '/reviews/hostel'; // GET /{hostelId}
+  static const String documents = '/documents'; 
+  static const String documentsHostel = '/documents/hostel'; 
 
-  // User Profile
-  static const String userProfile = '/users/profile'; // GET, PUT
-  static const String userCompleteProfile = '/users/complete-profile'; // POST
-  static const String userDeleteAccount = '/users/delete-account'; // DELETE
+  static const String reviews = '/reviews'; 
+  static const String reviewsHostel = '/reviews/hostel'; 
 
-  // User Hostels (public browsing)
-  static const String userHostels = '/users/hostels'; // GET, GET /{id}
+  static const String userProfile = '/users/profile'; 
+  static const String userCompleteProfile = '/users/complete-profile'; 
+  static const String userDeleteAccount = '/users/delete-account'; 
+  static const String userProfileImage = '/users/profile-image'; 
 
-  // Formatting image URLs
+  static const String userHostels = '/users/hostels'; 
+
   static String? getImageUrl(String? path) {
     if (path == null || path.isEmpty) {
       return null;
     }
     if (path.startsWith('http')) return path;
 
-    // S3 Support: If the path contains the stay-india prefix, it's an S3 key
     if (path.startsWith('stay-india/')) {
       const String s3BucketUrl = 'https://stay-india.s3.us-east-1.amazonaws.com';
       return '$s3BucketUrl/$path';
     }
 
-    // The server root is typically the baseUrl minus '/api'
-    final String serverRoot = baseUrl.endsWith('/api') 
-        ? baseUrl.substring(0, baseUrl.length - 4) 
-        : baseUrl;
+    String serverRoot = baseUrl;
+    if (serverRoot.endsWith('/api/v1')) {
+      serverRoot = serverRoot.substring(0, serverRoot.length - 7);
+    } else if (serverRoot.endsWith('/api')) {
+      serverRoot = serverRoot.substring(0, serverRoot.length - 4);
+    }
 
-    // Normalize path separators and remove leading slash
     String cleanPath = path.replaceAll('\\', '/');
     if (cleanPath.startsWith('/')) {
       cleanPath = cleanPath.substring(1);
     }
 
-    // Prepend 'uploads/' only if not already present
     if (!cleanPath.startsWith('uploads/')) {
       cleanPath = 'uploads/$cleanPath';
     }

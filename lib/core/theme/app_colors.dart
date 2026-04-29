@@ -5,7 +5,6 @@ class AppColors {
   static const Color backgroundGrey = Color(0xFFF8F9FB);
   static const Color white = Colors.white;
 
-  // Dashboard Card Colors
   static const Color totalBlue = Color(0xFFF0F4FF);
   static const Color totalBlueText = Color(0xFF2C5EBD);
 
@@ -19,4 +18,13 @@ class AppColors {
 
   static const Color cardShadow = Color(0x0A000000);
   static const Color roomCardBorder = Color(0xFFE5E5EA);
+
+  static const LinearGradient primaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF2C5EBD),
+      Color(0xFF1A3D8F),
+    ],
+  );
 }

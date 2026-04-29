@@ -1,0 +1,80 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:stayindia_owner/features/notices/domain/entities/notice.dart';
+import 'package:stayindia_owner/features/notices/domain/usecases/notice_usecases.dart';
+import 'package:stayindia_owner/core/utils/error_helper.dart';
+
+part 'notice_state.dart';
+
+class NoticeCubit extends Cubit<NoticeState> {
+  final CreateNoticeUseCase _createNotice;
+  final GetNoticesUseCase _getNotices;
+  final GetNoticeByIdUseCase _getNoticeById;
+  final UpdateNoticeUseCase _updateNotice;
+
+  NoticeCubit({
+    required CreateNoticeUseCase createNoticeUseCase,
+    required GetNoticesUseCase getNoticesUseCase,
+    required GetNoticeByIdUseCase getNoticeByIdUseCase,
+    required UpdateNoticeUseCase updateNoticeUseCase,
+  })  : _createNotice = createNoticeUseCase,
+        _getNotices = getNoticesUseCase,
+        _getNoticeById = getNoticeByIdUseCase,
+        _updateNotice = updateNoticeUseCase,
+        super(NoticeInitial());
+
+  Future<void> createNotice({
+    required String hostelId,
+    required String tenantId,
+    required String roomId,
+    required String bedNumber,
+    required String vacatingDate,
+    String? reason,
+  }) async {
+    emit(NoticeSubmitting());
+    try {
+      await _createNotice(
+        hostelId: hostelId,
+        tenantId: tenantId,
+        roomId: roomId,
+        bedNumber: bedNumber,
+        vacatingDate: vacatingDate,
+        reason: reason,
+      );
+      emit(NoticeSuccess());
+    } catch (e) {
+      emit(NoticeSubmitError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> loadNotices({String? hostelId, String? status}) async {
+    emit(NoticeLoading());
+    try {
+      final notices = await _getNotices(hostelId: hostelId, status: status);
+      emit(NoticesLoaded(notices: notices));
+    } catch (e) {
+      emit(NoticeLoadError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> updateNotice(String id, Map<String, dynamic> data, {String? hostelId}) async {
+    emit(NoticeUpdating());
+    try {
+      await _updateNotice(id, data);
+      emit(NoticeUpdateSuccess());
+      if (hostelId != null) {
+        await loadNotices(hostelId: hostelId);
+      }
+    } catch (e) {
+      emit(NoticeUpdateError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> loadNoticeById(String id) async {
+    try {
+      await _getNoticeById(id);
+    } catch (e) {
+      emit(NoticeLoadError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+}
