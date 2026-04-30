@@ -206,7 +206,7 @@ class TenantCard extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 9.sp,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w900,
           color: color,
           letterSpacing: 0.5,
@@ -227,7 +227,7 @@ class TenantCard extends StatelessWidget {
               Text(
                 label.toUpperCase(),
                 style: TextStyle(
-                  fontSize: 9.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.greyText,
                   letterSpacing: 0.5,

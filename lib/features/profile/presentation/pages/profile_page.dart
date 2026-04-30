@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -78,6 +79,14 @@ class ProfilePage extends StatelessWidget {
                         title: 'Subscription',
                         subtitle: 'Premium Plan  Pro Member',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionPage())),
+                      ),
+                      _PremiumTile(
+                        icon: Icons.card_membership_rounded,
+                        title: 'Digital Certificate',
+                        subtitle: 'Official Association Membership',
+                        onTap: () {
+                           
+                        },
                       ),
                     ],
                   ),
@@ -225,28 +234,59 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-class _AnimatedPremiumHeader extends StatelessWidget {
+class _AnimatedPremiumHeader extends StatefulWidget {
+  @override
+  State<_AnimatedPremiumHeader> createState() => _AnimatedPremiumHeaderState();
+}
+
+class _AnimatedPremiumHeaderState extends State<_AnimatedPremiumHeader> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart);
+    
+    
+    final profileCubit = context.read<ProfileCubit>();
+    if (profileCubit.state is ProfileInitial) {
+      profileCubit.loadProfile();
+    }
+    
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileCubit, ProfileState>(
+      buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
-        if (state is ProfileInitial) context.read<ProfileCubit>().loadProfile();
         final profile = state is ProfileLoaded ? state.profile : null;
         final name = profile?.fullName ?? 'Owner';
         final phone = profile != null ? '+91 ${profile.phone}' : 'Stay India Member';
 
-        return TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.easeOutQuart,
-          builder: (context, value, child) {
-            return Transform.translate(
-              offset: Offset(0, -20 * (1 - value)),
-              child: Opacity(
-                opacity: value,
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.fromLTRB(24.w, 64.h, 24.w, 48.h),
+        return AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            return Opacity(
+              opacity: _animation.value,
+              child: child,
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(24.w, 64.h, 24.w, 48.h),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFF14193F), Color(0xFF1A2151), Color(0xFF3359AD)],
@@ -265,6 +305,26 @@ class _AnimatedPremiumHeader extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              MainNavigationPage.scaffoldKey.currentState?.openDrawer();
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(8.r),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: Icon(Icons.menu_rounded, color: Colors.white, size: 24.sp),
+                            ),
+                          ),
+                          const SizedBox.shrink(), 
+                        ],
+                      ),
+                      SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.all(4.r),
                         decoration: BoxDecoration(
@@ -280,14 +340,23 @@ class _AnimatedPremiumHeader extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 20.h),
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 26.sp,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -0.8,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 26.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: -0.8,
+                            ),
+                          ),
+                          if (profile?.isVerifiedOwner ?? true) ...[ 
+                            SizedBox(width: 8.w),
+                            const Icon(Icons.verified, color: Colors.blue, size: 24),
+                          ],
+                        ],
                       ),
                       SizedBox(height: 4.h),
                       Text(
@@ -301,9 +370,6 @@ class _AnimatedPremiumHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-            );
-          },
         );
       },
     );

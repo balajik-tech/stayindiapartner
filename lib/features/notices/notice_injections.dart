@@ -13,6 +13,8 @@ void registerNoticeFeature(GetIt sl) {
         getNoticesUseCase: sl(),
         getNoticeByIdUseCase: sl(),
         updateNoticeUseCase: sl(),
+        postAnnouncementUseCase: sl(),
+        getAnnouncementsUseCase: sl(),
       ));
 
   

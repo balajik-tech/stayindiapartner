@@ -24,6 +24,10 @@ class CommunityRepositoryImpl implements CommunityRepository {
       remote.sendMessage(hostelId, text);
 
   @override
+  Future<void> sendImageMessage(String hostelId, String imagePath) => 
+      remote.sendImageMessage(hostelId, imagePath);
+
+  @override
   Future<List<AnnouncementEntity>> getAnnouncements(String hostelId) => 
       remote.getAnnouncements(hostelId);
 
@@ -53,8 +57,8 @@ class CommunityRepositoryImpl implements CommunityRepository {
       remote.getJoinedOwnerCommunities();
 
   @override
-  Future<List<CommunityDetailsEntity>> getAvailableOwnerCommunities() =>
-      remote.getAvailableOwnerCommunities();
+  Future<List<CommunityDetailsEntity>> getAvailableOwnerCommunities({Map<String, String>? filters}) =>
+      remote.getAvailableOwnerCommunities(filters: filters);
 
   @override
   Future<void> joinOwnerCommunity(String communityId) =>
@@ -81,10 +85,78 @@ class CommunityRepositoryImpl implements CommunityRepository {
     required String name,
     String? description,
     String? imagePath,
+    String? coverImagePath,
+    String? level,
+    String? stateId,
+    String? districtId,
+    String? wardId,
+    String? localityId,
   }) =>
       remote.createOwnerCommunity(
         name: name,
         description: description,
         imagePath: imagePath,
+        coverImagePath: coverImagePath,
+        level: level,
+        stateId: stateId,
+        districtId: districtId,
+        wardId: wardId,
+        localityId: localityId,
       );
+
+  @override
+  Future<List<Map<String, dynamic>>> getAssociations({String? parentId, String? level}) =>
+      remote.getAssociations(parentId: parentId, level: level);
+
+  @override
+  Future<void> joinAssociation(String associationId) =>
+      remote.joinAssociation(associationId);
+
+  @override
+  Future<void> createAssociation({
+    required String name,
+    required String level,
+    String? parentId,
+    String? description,
+  }) =>
+      remote.createAssociation(
+        name: name,
+        level: level,
+        parentId: parentId,
+        description: description,
+      );
+
+  @override
+  Future<void> updateOwnerCommunity({
+    required String communityId,
+    String? name,
+    String? description,
+    String? imagePath,
+    String? coverImagePath,
+  }) => remote.updateOwnerCommunity(
+    communityId: communityId,
+    name: name,
+    description: description,
+    imagePath: imagePath,
+    coverImagePath: coverImagePath,
+  );
+
+  @override
+  Future<void> removeMember({
+    required String communityId,
+    required String memberId,
+  }) => remote.removeMember(communityId, memberId);
+
+  @override
+  Future<void> broadcastSOS({
+    required String associationId,
+    required String issueType,
+    required String description,
+    String severity = 'HIGH',
+  }) => remote.broadcastSOS(
+    associationId: associationId,
+    issueType: issueType,
+    description: description,
+    severity: severity,
+  );
 }

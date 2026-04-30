@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/pages/property_setup_stepper_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/features/bookings/pages/bookings_page.dart';
@@ -29,14 +32,16 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/app_drawer.dart';
 
 class MainNavigationPage extends StatefulWidget {
-  const MainNavigationPage({super.key});
+  final int initialIndex;
+  static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  const MainNavigationPage({super.key, this.initialIndex = 0});
 
   @override
   State<MainNavigationPage> createState() => _MainNavigationPageState();
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   StreamSubscription? _bookingSubscription;
   String? _currentHostelId;
   
@@ -45,17 +50,19 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   void initState() {
     super.initState();
+    _initializePages();
+    _currentIndex = widget.initialIndex;
     _bookingSubscription = sl<SocketService>().bookingStream.listen(_onNewBooking);
   }
 
-  void _initializePages(String hostelId, String hostelName) {
+  void _initializePages() {
     if (_pages.isNotEmpty) return;
     _pages.addAll([
-      DashboardPage(key: ValueKey('dash_$hostelId')),
-      BookingsPage(key: ValueKey('book_$hostelId')),
-      const CommunitiesPage(key: ValueKey('comm')),
-      TenantsPage(key: ValueKey('tenant_$hostelId')),
-      const ProfilePage(),
+      const DashboardPage(key: ValueKey('dash_page')),
+      const BookingsPage(key: ValueKey('book_page')),
+      const CommunitiesPage(key: ValueKey('comm_page')),
+      const TenantsPage(key: ValueKey('tenant_page')),
+      const ProfilePage(key: ValueKey('profile_page')),
     ]);
   }
 
@@ -118,30 +125,48 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthCubit, AuthState>(
-          listener: (context, state) {},
+          listener: (context, state) {
+            if (state is AuthUnauthenticated) {
+              
+            }
+          },
+        ),
+        BlocListener<BookingsCubit, BookingsState>(
+          listener: (context, state) {
+            if (state.status == BookingsStatus.success && 
+               (state.successMessage?.contains('successfully') ?? false)) {
+              final hostelState = context.read<HostelCubit>().state;
+              if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+                final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+                context.read<DashboardCubit>().fetchDashboardData(hostelId);
+                setState(() => _currentIndex = 0);
+              }
+            }
+          },
         ),
         BlocListener<HostelCubit, HostelState>(
-          listenWhen: (previous, current) {
-            if (previous is! HostelLoaded || current is! HostelLoaded) return true;
-            final prevHostelId = previous.hostels[previous.selectedHostelIndex].id;
-            final currHostelId = current.hostels[current.selectedHostelIndex].id;
-            return prevHostelId != currHostelId;
-          },
           listener: (context, state) {
             if (state is HostelLoaded && state.hostels.isNotEmpty) {
               final hostelId = state.hostels[state.selectedHostelIndex].id;
-              if (hostelId.isEmpty) {
-                AppLogger.warning(' Hostel change detected but ID is empty. Skipping sync.');
-                return;
+              final ownerId = context.read<AuthCubit>().currentOwner?.id;
+
+              
+              context.read<CommunityCubit>().loadCommunityData(hostelId);
+              
+              
+              if (ownerId != null) {
+                for (var hostel in state.hostels) {
+                  context.read<CommunityCubit>().joinCommunity(hostel.id, ownerId);
+                }
               }
+
               _setupSocket(hostelId);
+              context.read<DashboardCubit>().fetchDashboardData(hostelId);
+              AppLogger.info('Hostel changed: $hostelId. Syncing data...');
               
-              AppLogger.info(' Hostel changed to $hostelId. Triggering initial sync.');
               
               
-              setState(() {
-                _pages.clear();
-              });
+
               
               context.read<DashboardCubit>().fetchDashboardData(hostelId);
               context.read<BookingsCubit>().fetchBookings();
@@ -149,13 +174,13 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
               context.read<MaintenanceCubit>().loadIssues(hostelId: hostelId);
               context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
               context.read<StaffCubit>().loadStaff(hostelId);
-              context.read<CommunityCubit>().loadCommunityData(hostelId);
               context.read<OwnerCommunityCubit>().loadCommunities();
             }
           },
         ),
       ],
       child: BlocBuilder<HostelCubit, HostelState>(
+        buildWhen: (previous, current) => previous != current,
         builder: (context, hostelState) {
           if (hostelState is HostelInitial || hostelState is HostelLoading) {
             return const Scaffold(
@@ -169,49 +194,105 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
               return _NoHostelsView();
             }
 
-            final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-            final hostelName = hostelState.hostels[hostelState.selectedHostelIndex].name;
-            _initializePages(hostelId, hostelName);
-
-            return BlocListener<BookingsCubit, BookingsState>(
-              listener: (context, BookingsState state) {
-                if (state.status == BookingsStatus.success && 
-                   (state.successMessage?.contains('successfully') ?? false)) {
-                  context.read<DashboardCubit>().fetchDashboardData(hostelId);
-                  
-                  setState(() => _currentIndex = 0);
-                }
-              },
-              child: Scaffold(
-                extendBody: true,
+            return Scaffold(
+                key: MainNavigationPage.scaffoldKey,
+                extendBody: false,
                 drawer: const AppDrawer(),
-                body: IndexedStack(index: _currentIndex, children: _pages),
+                body: IndexedStack(
+                  index: _currentIndex >= _pages.length ? 0 : _currentIndex, 
+                  children: _pages,
+                ),
                 bottomNavigationBar: _PremiumNavBar(
                   currentIndex: _currentIndex,
                   onTap: (index) {
                     HapticFeedback.lightImpact();
                     setState(() => _currentIndex = index);
-                    
-                    
-                    
+                  },
+                ),
+                floatingActionButton: _currentIndex == 0 ? _buildPremiumFAB(context) : null,
+                floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+              );
+          }
+
+          return const Scaffold(
+            body: Center(child: Text('Something went wrong. Please restart.')),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPremiumFAB(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12.h),
+      child: BouncingWrapper(
+        onTap: () {
+          HapticFeedback.heavyImpact();
+          final hostelState = context.read<HostelCubit>().state;
+          Hostel? currentHostel;
+          if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+            currentHostel = hostelState.hostels[hostelState.selectedHostelIndex];
+            
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PropertySetupStepperPage(existingHostel: currentHostel),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Please select or add a hostel first'),
+                backgroundColor: Colors.orange,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                action: SnackBarAction(
+                  label: 'ADD',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PropertySetupStepperPage()),
+                    );
                   },
                 ),
               ),
             );
           }
-
-          return const SizedBox.shrink();
         },
+        child: Container(
+          width: 56.w,
+          height: 56.w,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF7000), Color(0xFFFF9F00)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18.r),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF7000).withValues(alpha: 0.25),
+                blurRadius: 15,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Icon(Icons.add_rounded, color: Colors.white, size: 28.sp),
+        ),
       ),
     );
   }
 }
 
-class _PremiumNavBar extends StatelessWidget {
+class _PremiumNavBar extends StatelessWidget implements PreferredSizeWidget {
   final int currentIndex;
   final Function(int) onTap;
 
   const _PremiumNavBar({required this.currentIndex, required this.onTap});
+
+  @override
+  Size get preferredSize => Size.fromHeight(80.h);
 
   @override
   Widget build(BuildContext context) {
@@ -222,66 +303,66 @@ class _PremiumNavBar extends StatelessWidget {
         height: 72.h,
         margin: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
         padding: EdgeInsets.symmetric(horizontal: 8.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _NavBarItem(
+              index: 0,
+              currentIndex: currentIndex,
+              icon: Icons.grid_view_rounded,
+              activeIcon: Icons.grid_view_rounded,
+              label: 'Home',
+              onTap: onTap,
+            ),
+            _NavBarItem(
+              index: 1,
+              currentIndex: currentIndex,
+              icon: Icons.receipt_long_rounded,
+              activeIcon: Icons.receipt_long_rounded,
+              label: 'Bookings',
+              onTap: onTap,
+            ),
+            _NavBarItem(
+              index: 2,
+              currentIndex: currentIndex,
+              icon: Icons.forum_rounded,
+              activeIcon: Icons.forum_rounded,
+              label: 'Community',
+              isPrimary: true,
+              onTap: onTap,
+            ),
+            _NavBarItem(
+              index: 3,
+              currentIndex: currentIndex,
+              icon: Icons.groups_2_rounded,
+              activeIcon: Icons.groups_2_rounded,
+              label: 'Tenants',
+              onTap: onTap,
+            ),
+            _NavBarItem(
+              index: 4,
+              currentIndex: currentIndex,
+              icon: Icons.account_circle_rounded,
+              activeIcon: Icons.account_circle_rounded,
+              label: 'Profile',
+              onTap: onTap,
+            ),
+          ],
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _NavBarItem(
-            index: 0,
-            currentIndex: currentIndex,
-            icon: Icons.grid_view_rounded,
-            activeIcon: Icons.grid_view_rounded,
-            label: 'Home',
-            onTap: onTap,
-          ),
-          _NavBarItem(
-            index: 1,
-            currentIndex: currentIndex,
-            icon: Icons.receipt_long_rounded,
-            activeIcon: Icons.receipt_long_rounded,
-            label: 'Bookings',
-            onTap: onTap,
-          ),
-          _NavBarItem(
-            index: 2,
-            currentIndex: currentIndex,
-            icon: Icons.forum_rounded,
-            activeIcon: Icons.forum_rounded,
-            label: 'Community',
-            isPrimary: true,
-            onTap: onTap,
-          ),
-          _NavBarItem(
-            index: 3,
-            currentIndex: currentIndex,
-            icon: Icons.groups_2_rounded,
-            activeIcon: Icons.groups_2_rounded,
-            label: 'Tenants',
-            onTap: onTap,
-          ),
-          _NavBarItem(
-            index: 4,
-            currentIndex: currentIndex,
-            icon: Icons.account_circle_rounded,
-            activeIcon: Icons.account_circle_rounded,
-            label: 'Profile',
-            onTap: onTap,
-          ),
-        ],
-      ),
-    ),
-  );
-}
+    );
+  }
 }
 
 class _NavBarItem extends StatefulWidget {
@@ -307,28 +388,7 @@ class _NavBarItem extends StatefulWidget {
   State<_NavBarItem> createState() => _NavBarItemState();
 }
 
-class _NavBarItemState extends State<_NavBarItem> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+class _NavBarItemState extends State<_NavBarItem> {
   @override
   Widget build(BuildContext context) {
     final isSelected = widget.currentIndex == widget.index;
@@ -336,45 +396,34 @@ class _NavBarItemState extends State<_NavBarItem> with SingleTickerProviderState
 
     return Expanded(
       child: GestureDetector(
-        onTapDown: (_) => _controller.forward(),
-        onTapUp: (_) => _controller.reverse(),
-        onTapCancel: () => _controller.reverse(),
         onTap: () => widget.onTap(widget.index),
         behavior: HitTestBehavior.opaque,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            padding: EdgeInsets.symmetric(vertical: 6.h),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.04) : Colors.transparent,
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedScale(
-                  scale: isSelected ? 1.1 : 1.0,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.elasticOut,
-                  child: Icon(
-                    isSelected ? widget.activeIcon : widget.icon,
-                    color: color,
-                    size: widget.isPrimary ? 26.sp : 24.sp,
-                  ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(vertical: 6.h),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.04) : Colors.transparent,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isSelected ? widget.activeIcon : widget.icon,
+                color: color,
+                size: widget.isPrimary ? 26.sp : 24.sp,
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                widget.label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 10.sp,
+                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                  letterSpacing: -0.2,
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  widget.label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 10.sp,
-                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

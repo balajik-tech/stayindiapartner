@@ -10,6 +10,8 @@ class ProfileEntity extends Equatable {
   final String? dob;
   final String? gender;
   final String? avatar;
+  final String? associationId;
+  final bool isVerifiedOwner;
 
   const ProfileEntity({
     required this.id,
@@ -21,6 +23,8 @@ class ProfileEntity extends Equatable {
     this.dob,
     this.gender,
     this.avatar,
+    this.associationId,
+    this.isVerifiedOwner = false,
   });
 
   String get fullName => '$firstName $lastName'.trim();
@@ -36,5 +40,7 @@ class ProfileEntity extends Equatable {
         dob,
         gender,
         avatar,
+        associationId,
+        isVerifiedOwner,
       ];
 }

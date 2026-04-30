@@ -45,3 +45,12 @@ class UploadHostelImagesUseCase {
     return repository.uploadHostelImages(id, filePaths);
   }
 }
+
+class UpdateHostelLocationUseCase {
+  final HostelRepository repository;
+  UpdateHostelLocationUseCase(this.repository);
+
+  Future<void> call(String id, double lat, double lng) {
+    return repository.updateHostelLocation(id, lat, lng);
+  }
+}

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
@@ -11,6 +10,7 @@ import 'package:stayindia_owner/features/communities/presentation/cubit/owner_co
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
+import 'package:stayindia_owner/features/communities/presentation/pages/association_selection_page.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
   const OwnersCommunityPage({super.key});
@@ -25,6 +25,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   @override
   void initState() {
     super.initState();
+    context.read<OwnerCommunityCubit>().loadCommunities();
     _searchController.addListener(() {
       setState(() {});
     });
@@ -42,10 +43,17 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       length: 2,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
-        floatingActionButton: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
-          builder: (context, state) {
-            return _buildFAB();
-          },
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AssociationSelectionPage()),
+          ),
+          backgroundColor: AppColors.primaryBlue,
+          icon: const Icon(Icons.explore_rounded, color: Colors.white),
+          label: Text(
+            'Join Association',
+            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
         ),
         body: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
           builder: (context, state) {
@@ -76,21 +84,33 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               );
             }
             if (state is OwnerCommunityError) {
-              return Center(child: Text(state.message));
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline_rounded, size: 48.sp, color: Colors.red.shade300),
+                      SizedBox(height: 16.h),
+                      Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.outfit(color: AppColors.greyText),
+                      ),
+                      SizedBox(height: 24.h),
+                      ElevatedButton(
+                        onPressed: () => context.read<OwnerCommunityCubit>().loadCommunities(),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
             return const SizedBox.shrink();
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildFAB() {
-    return FloatingActionButton(
-      onPressed: _showCreateBottomSheet,
-      backgroundColor: AppColors.primaryBlue,
-      elevation: 4,
-      child: Icon(Icons.add_rounded, size: 28.sp, color: Colors.white),
     );
   }
 
@@ -292,7 +312,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Start a community or join others to connect with hostel owners and share experiences.',
+            'Join your local PG association to connect with other owners and access legal support.',
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 14.sp,
@@ -302,7 +322,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           ),
           SizedBox(height: 32.h),
           ElevatedButton(
-            onPressed: _showCreateBottomSheet,
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AssociationSelectionPage())),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
               minimumSize: Size(double.infinity, 54.h),
@@ -310,22 +330,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               elevation: 0,
             ),
             child: Text(
-              'Create Community',
+              'Join Association',
               style: GoogleFonts.outfit(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.white),
             ),
           ),
           const Spacer(),
         ],
       ),
-    );
-  }
-
-  void _showCreateBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const _CreateCommunitySheet(),
     );
   }
 }
@@ -347,6 +358,7 @@ class _CommunityCard extends StatelessWidget {
               communityName: community.name,
               communityIcon: community.image,
               communityDescription: community.description,
+              isOwnerChat: true,
             ),
           ),
         );
@@ -398,254 +410,37 @@ class _CommunityCard extends StatelessWidget {
                       color: AppColors.darkText,
                     ),
                   ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      community.description ?? 'No description provided.',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.outfit(
-                        fontSize: 14.sp,
-                        color: AppColors.greyText.withValues(alpha: 0.7),
-                      ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    community.description ?? 'No description provided.',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      fontSize: 14.sp,
+                      color: AppColors.greyText.withValues(alpha: 0.7),
                     ),
-                    SizedBox(height: 8.h),
-                    Row(
-                      children: [
-                        Icon(Icons.person_outline_rounded, size: 14.sp, color: AppColors.primaryBlue),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '${community.memberCount} members',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryBlue,
-                          ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: [
+                      Icon(Icons.person_outline_rounded, size: 14.sp, color: AppColors.primaryBlue),
+                      SizedBox(width: 4.w),
+                      Text(
+                        '${community.memberCount} members',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryBlue,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CreateCommunitySheet extends StatefulWidget {
-  const _CreateCommunitySheet();
-
-  @override
-  State<_CreateCommunitySheet> createState() => _CreateCommunitySheetState();
-}
-
-class _CreateCommunitySheetState extends State<_CreateCommunitySheet> {
-  final _nameController = TextEditingController();
-  final _descController = TextEditingController();
-  XFile? _selectedIcon;
-  bool _isLoading = false;
-
-  Future<void> _pickIcon() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 512,
-      maxHeight: 512,
-      imageQuality: 85,
-    );
-    if (image != null) {
-      setState(() => _selectedIcon = image);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.9,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(24.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildIconUpload(),
-                  SizedBox(height: 32.h),
-                  _buildLabel('Community Name'),
-                  _buildTextField(
-                    controller: _nameController,
-                    hint: 'e.g. Hyderabad Hostel Owners',
-                    autofocus: true,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 24.h),
-                  _buildLabel('Description'),
-                  _buildTextField(
-                    controller: _descController,
-                    hint: 'What is this community about?',
-                    maxLines: 4,
-                  ),
-                  SizedBox(height: 40.h),
-                  _buildSubmitButton(),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 16.h),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close_rounded, color: AppColors.darkText),
-          ),
-          SizedBox(width: 8.w),
-          Text(
-            'Create Community',
-            style: GoogleFonts.outfit(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.darkText,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIconUpload() {
-    return Center(
-      child: GestureDetector(
-        onTap: _pickIcon,
-        child: Column(
-          children: [
-            Container(
-              width: 100.w,
-              height: 100.w,
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(32.r),
-                border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.1), width: 2),
-                image: _selectedIcon != null
-                    ? DecorationImage(
-                        image: FileImage(File(_selectedIcon!.path)),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: _selectedIcon == null
-                  ? Icon(Icons.camera_alt_outlined, color: AppColors.primaryBlue, size: 32.sp)
-                  : null,
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              _selectedIcon == null ? 'Upload Icon' : 'Change Icon',
-              style: GoogleFonts.outfit(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryBlue,
-              ),
-            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildLabel(String label) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Text(
-        label,
-        style: GoogleFonts.outfit(
-          fontSize: 15.sp,
-          fontWeight: FontWeight.w700,
-          color: AppColors.darkText,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    bool autofocus = false,
-    int maxLines = 1,
-  }) {
-    return TextField(
-      controller: controller,
-      autofocus: autofocus,
-      maxLines: maxLines,
-      style: GoogleFonts.outfit(fontSize: 16.sp, fontWeight: FontWeight.w500),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 16.sp),
-        filled: true,
-        fillColor: Colors.grey.shade50,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r),
-          borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
-        ),
-        contentPadding: EdgeInsets.all(18.w),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return BlocConsumer<OwnerCommunityCubit, OwnerCommunityState>(
-      listener: (context, state) {
-        if (state is OwnerCommunityLoaded && _isLoading) {
-          Navigator.pop(context);
-        }
-      },
-      builder: (context, state) {
-        final isCreating = state is OwnerCommunityLoaded && state.isCreating;
-        return ElevatedButton(
-          onPressed: isCreating ? null : () {
-            if (_nameController.text.isNotEmpty) {
-              setState(() => _isLoading = true);
-              context.read<OwnerCommunityCubit>().createCommunity(
-                _nameController.text,
-                _descController.text,
-                _selectedIcon?.path,
-              );
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryBlue,
-            minimumSize: Size(double.infinity, 60.h),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),
-            elevation: 0,
-          ),
-          child: isCreating
-              ? const CircularProgressIndicator(color: Colors.white)
-              : Text(
-                  'Create Community',
-                  style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: Colors.white),
-                ),
-        );
-      },
     );
   }
 }
@@ -1014,26 +809,46 @@ class _ActionBtn extends StatelessWidget {
   }
 }
 
-class FadeInWrapper extends StatelessWidget {
+class FadeInWrapper extends StatefulWidget {
   final Widget child;
   const FadeInWrapper({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
+  State<FadeInWrapper> createState() => _FadeInWrapperState();
+}
+
+class _FadeInWrapperState extends State<FadeInWrapper> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
       duration: const Duration(milliseconds: 800),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
         return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
-            child: child,
-          ),
+          opacity: _animation.value,
+          child: child,
         );
       },
-      child: child,
+      child: widget.child,
     );
   }
 }

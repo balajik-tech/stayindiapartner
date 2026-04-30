@@ -87,6 +87,7 @@ class _RoomConfigurationView extends StatelessWidget {
                             sharingType: data['sharingType'],
                             roomType: data['roomType'],
                             rent: data['rent'],
+                            dailyRent: data['dailyRent'],
                             deposit: data['deposit'],
                             maintenance: data['maintenance'],
                             isMaster: false,
@@ -228,13 +229,52 @@ class _RoomConfigurationView extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () => _showDeleteDialog(context, room),
-                icon: Icon(
-                  Icons.delete_outline,
-                  color: const Color(0xFFF04438),
-                  size: 22.sp,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      AddRoomSheet.show(
+                        context,
+                        room: room,
+                        roomCubit: context.read<RoomCubit>(),
+                        onSave: (data) async {
+                          final updated = RoomDetail(
+                            id: room.id,
+                            hostelId: room.hostelId,
+                            roomTypename: data['roomTypename'],
+                            floor: data['floor'],
+                            floors: const [],
+                            sharingType: data['sharingType'],
+                            roomType: data['roomType'],
+                            rent: data['rent'],
+                            dailyRent: data['dailyRent'],
+                            deposit: data['deposit'],
+                            maintenance: data['maintenance'],
+                            isActive: room.isActive,
+                            isMaster: false,
+                            capacity: room.capacity, 
+                            beds: room.beds,
+                          );
+                          await context.read<RoomCubit>().updateRoom(updated);
+                        },
+                      );
+                    },
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      color: AppColors.primaryBlue,
+                      size: 22.sp,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => _showDeleteDialog(context, room),
+                    icon: Icon(
+                      Icons.delete_outline,
+                      color: const Color(0xFFF04438),
+                      size: 22.sp,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -242,9 +282,12 @@ class _RoomConfigurationView extends StatelessWidget {
           Row(
             children: [
               _buildInfoItem('Rent', room.rent.toStringAsFixed(0)),
+              if (room.dailyRent > 0) ...[
+                SizedBox(width: 24.w),
+                _buildInfoItem('Daily', room.dailyRent.toStringAsFixed(0)),
+              ],
               SizedBox(width: 24.w),
-              _buildInfoItem(
-                  'Deposit', room.deposit.toStringAsFixed(0)),
+              _buildInfoItem('Deposit', room.deposit.toStringAsFixed(0)),
             ],
           ),
         ],

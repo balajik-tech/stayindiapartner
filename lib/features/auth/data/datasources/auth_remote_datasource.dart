@@ -35,6 +35,11 @@ abstract class AuthRemoteDataSource {
 
   
   Future<void> deleteAccount();
+  Future<void> updateDeviceToken({
+    required String pushToken,
+    required String platform,
+    String? deviceId,
+  });
 }
 
 
@@ -236,6 +241,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       message: 'Account deletion failed. Please try again.',
       statusCode: response.statusCode,
     );
+  }
+
+  @override
+  Future<void> updateDeviceToken({
+    required String pushToken,
+    required String platform,
+    String? deviceId,
+  }) async {
+    AppLogger.info('Updating device token: $platform');
+    final response = await _dio.post(
+      ApiConstants.deviceToken,
+      data: {
+        'pushToken': pushToken,
+        'platform': platform,
+        'deviceId': deviceId,
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw ServerException(message: 'Failed to update device token');
+    }
   }
 
   

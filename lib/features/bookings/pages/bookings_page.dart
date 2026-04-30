@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
@@ -18,7 +19,6 @@ class _BookingsPageWithScroll extends StatefulWidget {
 }
 
 class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with SingleTickerProviderStateMixin {
-  final ScrollController _scrollController = ScrollController();
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
@@ -27,22 +27,16 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      context.read<BookingsCubit>().loadMoreBookings();
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -153,31 +147,52 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 20.h, 12.w, 10.h),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Bookings',
-                style: TextStyle(
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.darkText,
-                  letterSpacing: -1,
-                ),
+          GestureDetector(
+            onTap: () {
+              MainNavigationPage.scaffoldKey.currentState?.openDrawer();
+            },
+            child: Container(
+              padding: EdgeInsets.all(8.r),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F9FB),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              Text(
-                'Manage your hostel residents',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.greyText,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+              child: Icon(Icons.menu_rounded, color: AppColors.darkText, size: 24.sp),
+            ),
           ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Bookings',
+                  style: TextStyle(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkText,
+                    letterSpacing: -1,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'Manage residents',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: AppColors.greyText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8.w),
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildHeaderAction(Icons.search_rounded, () {
                 setState(() => _isSearching = true);
@@ -287,20 +302,27 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
     return RefreshIndicator(
       onRefresh: () => context.read<BookingsCubit>().fetchBookings(),
       color: AppColors.primaryBlue,
-      child: ListView.builder(
-        controller: _scrollController,
-        padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, UIConstants.bottomPadding(context) + 20.h),
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: items.length + (state.isLoadMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index < items.length) {
-            return BookingCard(booking: items[index]);
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification.metrics.pixels >= notification.metrics.maxScrollExtent - 200) {
+            context.read<BookingsCubit>().loadMoreBookings();
           }
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 20),
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          );
+          return false;
         },
+        child: ListView.builder(
+          padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, UIConstants.bottomPadding(context) + 20.h),
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemCount: items.length + (state.isLoadMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index < items.length) {
+              return BookingCard(booking: items[index]);
+            }
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            );
+          },
+        ),
       ),
     );
   }

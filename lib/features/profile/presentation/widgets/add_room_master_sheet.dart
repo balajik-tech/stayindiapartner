@@ -4,17 +4,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
-import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 
 class AddRoomMasterSheet extends StatefulWidget {
   final RoomDetail? room;
+  final int totalFloors;
   final Future<void> Function(Map<String, dynamic> data) onSave;
 
-  const AddRoomMasterSheet({super.key, this.room, required this.onSave});
+  const AddRoomMasterSheet({
+    super.key,
+    this.room,
+    required this.totalFloors,
+    required this.onSave,
+  });
 
   static Future<void> show(
     BuildContext context, {
     RoomDetail? room,
+    required int totalFloors,
     required RoomCubit roomCubit,
     required Future<void> Function(Map<String, dynamic> data) onSave,
   }) {
@@ -24,7 +30,11 @@ class AddRoomMasterSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: roomCubit,
-        child: AddRoomMasterSheet(room: room, onSave: onSave),
+        child: AddRoomMasterSheet(
+          room: room,
+          totalFloors: totalFloors,
+          onSave: onSave,
+        ),
       ),
     );
   }
@@ -37,11 +47,12 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
   bool _isSaving = false;
   late TextEditingController _nameController;
   late TextEditingController _rentController;
+  late TextEditingController _dailyRentController;
   late TextEditingController _depositController;
   late TextEditingController _maintenanceController;
   late String _selectedType;
   late String _selectedSharingType;
-  late int _selectedFloor;
+  late List<int> _selectedFloors;
 
   static const Map<String, String> _sharingTypeMap = {
     'SINGLE': 'Single Sharing',
@@ -69,6 +80,9 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
     _rentController = TextEditingController(
       text: room != null ? room.rent.toStringAsFixed(0) : '',
     );
+    _dailyRentController = TextEditingController(
+      text: room != null ? room.dailyRent.toStringAsFixed(0) : '',
+    );
     _depositController = TextEditingController(
       text: room != null ? room.deposit.toStringAsFixed(0) : '',
     );
@@ -77,13 +91,33 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
     );
     _selectedType = (room?.roomType == 'NON-AC') ? 'NON-AC' : 'AC';
     _selectedSharingType = _sharingTypeMap[room?.sharingType] ?? _sharingTypes.first;
-    _selectedFloor = room?.floor ?? 0;
+    
+    if (room != null && room.floors.isNotEmpty) {
+      _selectedFloors = List<int>.from(room.floors);
+    } else if (room != null) {
+      _selectedFloors = [room.floor];
+    } else {
+      _selectedFloors = [];
+    }
+
+    _rentController.addListener(_onRentChanged);
+  }
+
+  void _onRentChanged() {
+    final monthly = double.tryParse(_rentController.text) ?? 0;
+    if (monthly > 0) {
+      final daily = (monthly / 30).round();
+      _dailyRentController.text = daily.toString();
+    } else {
+      _dailyRentController.text = '';
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _rentController.dispose();
+    _dailyRentController.dispose();
     _depositController.dispose();
     _maintenanceController.dispose();
     super.dispose();
@@ -111,22 +145,30 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
           _buildHeader(isEditing),
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(24.w),
+              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 24.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildLabel('Room Type Name *'),
                   _buildTextField(_nameController, hint: 'e.g. AC Double Sharing'),
                   SizedBox(height: 20.h),
-                  _buildLabel('Sharing Type *'),
-                  _buildDropdown(
-                    value: _selectedSharingType,
-                    items: _sharingTypes,
-                    onChanged: (val) => setState(() => _selectedSharingType = val!),
-                  ),
-                  SizedBox(height: 20.h),
+                  
                   Row(
                     children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel('Sharing Type *'),
+                            _buildDropdown(
+                              value: _selectedSharingType,
+                              items: _sharingTypes,
+                              onChanged: (val) => setState(() => _selectedSharingType = val!),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 16.w),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,32 +182,74 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                           ],
                         ),
                       ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Floor *'),
-                            _buildDropdown(
-                              value: _selectedFloor.toString(),
-                              items: ['0', '1', '2', '3', '4', '5'],
-                              displayLabels: {
-                                '0': 'Ground Floor',
-                                '1': '1st Floor',
-                                '2': '2nd Floor',
-                                '3': '3rd Floor',
-                                '4': '4th Floor',
-                                '5': '5th Floor',
-                              },
-                              onChanged: (val) =>
-                                  setState(() => _selectedFloor = int.parse(val!)),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                   SizedBox(height: 24.h),
+
+                  _buildLabel('Select Floors *'),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(color: AppColors.roomCardBorder),
+                    ),
+                    child: Wrap(
+                      spacing: 12.w,
+                      runSpacing: 12.h,
+                      children: List.generate(widget.totalFloors + 1, (index) {
+                        final isSelected = _selectedFloors.contains(index);
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              if (isSelected) {
+                                _selectedFloors.remove(index);
+                              } else {
+                                _selectedFloors.add(index);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.primaryBlue : Colors.white,
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: isSelected ? AppColors.primaryBlue : AppColors.roomCardBorder,
+                              ),
+                              boxShadow: isSelected ? [
+                                BoxShadow(
+                                  color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ] : null,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isSelected) ...[
+                                  Icon(Icons.check_circle, color: Colors.white, size: 16.sp),
+                                  SizedBox(width: 6.w),
+                                ],
+                                Text(
+                                  index == 0 ? 'Ground' : '$index${_getOrdinal(index)} Floor',
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                    color: isSelected ? Colors.white : AppColors.darkText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                  
                   _buildLabel('Financial Details'),
                   SizedBox(height: 12.h),
                   Row(
@@ -181,8 +265,8 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                       SizedBox(width: 12.w),
                       Expanded(
                         child: _buildTextField(
-                          _depositController,
-                          label: 'Deposit',
+                          _dailyRentController,
+                          label: 'Daily Rent',
                           hint: '0',
                           keyboardType: TextInputType.number,
                         ),
@@ -190,15 +274,30 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                     ],
                   ),
                   SizedBox(height: 16.h),
-                  _buildTextField(
-                    _maintenanceController,
-                    label: 'Maintenance (per month)',
-                    hint: '0',
-                    keyboardType: TextInputType.number,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          _depositController,
+                          label: 'Deposit',
+                          hint: '0',
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: _buildTextField(
+                          _maintenanceController,
+                          label: 'Maintenance',
+                          hint: '0',
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 40.h),
                   _buildSaveButton(isEditing),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 30.h),
                 ],
               ),
             ),
@@ -326,13 +425,26 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
   Widget _buildSaveButton(bool isEditing) {
     return SizedBox(
       width: double.infinity,
-      child: BouncingButton(
-        onTap: _isSaving
+      child: ElevatedButton(
+        onPressed: _isSaving
             ? null
             : () async {
                 if (_nameController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a room type name')),
+                    const SnackBar(
+                      content: Text('Please enter a room type name'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                if (_selectedFloors.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please select at least one floor'),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                   return;
                 }
@@ -348,24 +460,24 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                     '5 Sharing': 'QUINTUPLE',
                   };
 
-                  final mappedSharingType = sharingTypeMap[_selectedSharingType] ?? _selectedSharingType;
+                  final mappedSharingType =
+                      sharingTypeMap[_selectedSharingType] ?? _selectedSharingType;
 
                   if (!isEditing) {
                     final roomState = context.read<RoomCubit>().state;
                     if (roomState is RoomLoaded) {
                       final exists = roomState.rooms.any((room) =>
                           room.isMaster &&
-                          room.floor == _selectedFloor &&
-                          room.sharingType == mappedSharingType &&
-                          room.roomType == _selectedType);
+                          room.roomTypename == _nameController.text.trim());
 
                       if (exists) {
                         if (mounted) {
                           setState(() => _isSaving = false);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Room master already exist.'),
-                                backgroundColor: Colors.red,
+                              content:
+                                  Text('Room master with this name already exists.'),
+                              backgroundColor: Colors.red,
                             ),
                           );
                         }
@@ -376,10 +488,12 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
 
                   await widget.onSave({
                     'roomTypename': _nameController.text.trim(),
-                    'floor': _selectedFloor,
+                    'floors': List<int>.from(_selectedFloors),
+                    'floor': _selectedFloors.first,
                     'sharingType': mappedSharingType,
                     'roomType': _selectedType,
                     'rent': double.tryParse(_rentController.text) ?? 0,
+                    'dailyRent': double.tryParse(_dailyRentController.text) ?? 0,
                     'deposit': double.tryParse(_depositController.text) ?? 0,
                     'maintenance': double.tryParse(_maintenanceController.text) ?? 0,
                   });
@@ -390,11 +504,25 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                 } catch (e) {
                   if (mounted) {
                     setState(() => _isSaving = false);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
                   }
                 }
               },
-        backgroundColor: _isSaving ? AppColors.greyText : AppColors.primaryBlue,
-        borderRadius: BorderRadius.circular(12.r),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryBlue,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: AppColors.greyText,
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          elevation: 0,
+        ),
         child: _isSaving
             ? SizedBox(
                 height: 20.h,
@@ -409,10 +537,19 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
               ),
       ),
     );
+  }
+
+  String _getOrdinal(int n) {
+    if (n >= 11 && n <= 13) return 'th';
+    switch (n % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
   }
 }

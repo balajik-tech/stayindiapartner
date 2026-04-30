@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
@@ -76,36 +77,40 @@ class _TenantsPageState extends State<TenantsPage> {
               );
             }
           },
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              _buildAppHeader(),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _SliverHeaderDelegate(
-                  height: 60.h,
-                  child: Container(
-                    color: const Color(0xFFF8F9FA),
-                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-                    child: _buildTabBar(),
+          child: RefreshIndicator(
+            onRefresh: () async => _loadData(),
+            color: AppColors.primaryBlue,
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              slivers: [
+                _buildAppHeader(),
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _SliverHeaderDelegate(
+                    height: 60.h,
+                    child: Container(
+                      color: const Color(0xFFF8F9FA),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                      child: _buildTabBar(),
+                    ),
                   ),
                 ),
-              ),
-              if (_selectedTabIndex == 0)
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
-                  sliver: SliverToBoxAdapter(
-                    child: _buildControlBar(context),
+                if (_selectedTabIndex == 0)
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
+                    sliver: SliverToBoxAdapter(
+                      child: _buildControlBar(context),
+                    ),
                   ),
-                ),
-              ..._buildSliverContent(context),
-            ],
+                ..._buildSliverContent(context),
+              ],
+            ),
           ),
         ),
       ),
       floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: UIConstants.bottomPadding(context)),
+        padding: EdgeInsets.only(bottom: 16.h),
         child: _buildFAB(context),
       ),
     );
@@ -117,29 +122,50 @@ class _TenantsPageState extends State<TenantsPage> {
         padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 8.h),
         child: Row(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Tenant Management',
-                  style: TextStyle(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.darkText,
-                    letterSpacing: -0.5,
-                  ),
+            GestureDetector(
+              onTap: () {
+                MainNavigationPage.scaffoldKey.currentState?.openDrawer();
+              },
+              child: Container(
+                padding: EdgeInsets.all(8.r),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: AppColors.roomCardBorder),
                 ),
-                Text(
-                  'Monitor and manage your property residents',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: AppColors.greyText,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+                child: Icon(Icons.menu_rounded, color: AppColors.darkText, size: 24.sp),
+              ),
             ),
-            const Spacer(),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Tenants',
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                      letterSpacing: -0.5,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Manage residents',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.greyText,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 8.w),
             _buildHeaderAction(Icons.refresh_rounded, () => _loadData()),
           ],
         ),
@@ -309,10 +335,20 @@ class _TenantsPageState extends State<TenantsPage> {
 
   List<Widget> _buildSliverContent(BuildContext context) {
     if (_selectedTabIndex == 1) {
-      return [const SliverFillRemaining(child: MaintenanceTabView())];
+      return [
+        SliverPadding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+          sliver: const SliverToBoxAdapter(child: MaintenanceTabView()),
+        )
+      ];
     }
     if (_selectedTabIndex == 2) {
-      return [const SliverFillRemaining(child: NoticesTabView())];
+      return [
+        SliverPadding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+          sliver: const SliverToBoxAdapter(child: NoticesTabView()),
+        )
+      ];
     }
 
     return [
@@ -378,7 +414,7 @@ class _TenantsPageState extends State<TenantsPage> {
 
   Widget _buildEmptyState({required IconData icon, required String title, required String message}) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40.w),
+      padding: EdgeInsets.only(left: 40.w, right: 40.w, bottom: 180.h),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

@@ -8,6 +8,7 @@ class OccupancyModel extends Occupancy {
     required super.noticeBeds,
     required super.awayBeds,
     required super.reservedBeds,
+    required super.overdueBeds,
     required super.floors,
   });
 
@@ -22,6 +23,7 @@ class OccupancyModel extends Occupancy {
       noticeBeds: summary['noticeBeds'] ?? 0,
       awayBeds: summary['awayBeds'] ?? 0,
       reservedBeds: summary['reservedBeds'] ?? 0,
+      overdueBeds: summary['overdueBeds'] ?? 0,
       floors: floorsJson.map((f) => FloorDataModel.fromJson(f)).toList(),
     );
   }
@@ -59,9 +61,12 @@ class RoomModel extends Room {
     required super.id,
     required super.roomNumber,
     required super.sharingType,
+    super.roomType,
     required super.occupancy,
     required super.tenantImages,
     required super.beds,
+    super.rent,
+    super.dailyRent,
   });
 
   factory RoomModel.fromJson(Map<String, dynamic> json) {
@@ -100,10 +105,13 @@ class RoomModel extends Room {
     return RoomModel(
       id: json['_id'] ?? json['roomId'] ?? '',
       roomNumber: json['roomTypename'] ?? '',
-      sharingType: json['sharingType'] ?? '',
+      sharingType: json['sharingType']?.toString() ?? '',
+      roomType: json['roomType']?.toString() ?? '',
       occupancy: '$occupied/$total beds',
       tenantImages: tenantImages,
       beds: beds,
+      rent: json['rent'] != null ? double.tryParse(json['rent'].toString()) : null,
+      dailyRent: json['dailyRent'] != null ? double.tryParse(json['dailyRent'].toString()) : null,
     );
   }
 }

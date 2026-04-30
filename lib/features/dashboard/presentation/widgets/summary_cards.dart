@@ -5,12 +5,13 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 
-class SummaryCard extends StatefulWidget {
+class SummaryCard extends StatelessWidget {
   final String count;
   final String label;
   final Color backgroundColor;
   final Color textColor;
   final VoidCallback? onTap;
+  final IconData? icon;
 
   const SummaryCard({
     super.key,
@@ -19,87 +20,62 @@ class SummaryCard extends StatefulWidget {
     required this.backgroundColor,
     required this.textColor,
     this.onTap,
+    this.icon,
   });
 
   @override
-  State<SummaryCard> createState() => _SummaryCardState();
-}
-
-class _SummaryCardState extends State<SummaryCard> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    
-    final softBgColor = widget.backgroundColor.withValues(alpha: 0.12);
-    final boldTextColor = widget.backgroundColor == Colors.white || widget.backgroundColor == const Color(0xFFF2F4F7)
-        ? widget.textColor
-        : widget.backgroundColor;
-
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap?.call();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          width: 82.w,
-          height: 94.h,
-          decoration: BoxDecoration(
-            color: softBgColor,
-            borderRadius: BorderRadius.circular(20.r), 
-            boxShadow: [
-              BoxShadow(
-                color: widget.backgroundColor.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
+      onTap: onTap,
+      child: Container(
+        width: 100.w,
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: [
+            BoxShadow(
+              color: backgroundColor.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 9.sp,
+                fontWeight: FontWeight.w800,
+                color: textColor.withValues(alpha: 0.7),
+                letterSpacing: 0.5,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                widget.count,
-                style: TextStyle(
-                  fontSize: 26.sp,
-                  fontWeight: FontWeight.w900, 
-                  color: boldTextColor,
+            ),
+            SizedBox(height: 4.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null)
+                  Icon(icon, color: textColor, size: 14.sp),
+                SizedBox(width: 4.w),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      count,
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w900,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                widget.label,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: boldTextColor.withValues(alpha: 0.8),
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -133,6 +109,7 @@ class DashboardHeader extends StatelessWidget {
           SizedBox(width: 12.w),
           Expanded(
             child: BlocBuilder<HostelCubit, HostelState>(
+              buildWhen: (previous, current) => previous != current,
               builder: (context, state) {
                 final String hostelName = (state is HostelLoaded && state.hostels.isNotEmpty)
                     ? state.hostels[state.selectedHostelIndex].name
@@ -225,7 +202,7 @@ class _CircleIconButton extends StatelessWidget {
                     badgeCount.toString(),
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 8.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -319,6 +296,7 @@ class HostelSelectionSheet extends StatelessWidget {
           SizedBox(height: 20.h),
           Flexible(
             child: BlocBuilder<HostelCubit, HostelState>(
+              buildWhen: (previous, current) => previous != current,
               builder: (context, state) {
                 if (state is! HostelLoaded) return const SizedBox();
 
@@ -368,6 +346,8 @@ class HostelSelectionSheet extends StatelessWidget {
                                 children: [
                                   Text(
                                     hostel.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 16.sp,
                                       fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -377,6 +357,8 @@ class HostelSelectionSheet extends StatelessWidget {
                                   if (hostel.city != null)
                                     Text(
                                       hostel.city!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 13.sp,
                                         color: AppColors.greyText,

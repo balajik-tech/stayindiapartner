@@ -24,6 +24,12 @@ class SendCommunityMessageUseCase {
   Future<void> call(String hostelId, String text) => repository.sendMessage(hostelId, text);
 }
 
+class SendCommunityImageUseCase {
+  final CommunityRepository repository;
+  SendCommunityImageUseCase(this.repository);
+  Future<void> call(String hostelId, String imagePath) => repository.sendImageMessage(hostelId, imagePath);
+}
+
 class GetAnnouncementsUseCase {
   final CommunityRepository repository;
   GetAnnouncementsUseCase(this.repository);
@@ -69,8 +75,8 @@ class GetJoinedOwnerCommunitiesUseCase {
 class GetAvailableOwnerCommunitiesUseCase {
   final CommunityRepository repository;
   GetAvailableOwnerCommunitiesUseCase(this.repository);
-  Future<List<CommunityDetailsEntity>> call() =>
-      repository.getAvailableOwnerCommunities();
+  Future<List<CommunityDetailsEntity>> call({Map<String, String>? filters}) =>
+      repository.getAvailableOwnerCommunities(filters: filters);
 }
 
 class JoinOwnerCommunityUseCase {
@@ -87,12 +93,25 @@ class CreateOwnerCommunityUseCase {
     required String name,
     String? description,
     String? imagePath,
-  }) =>
-      repository.createOwnerCommunity(
-        name: name,
-        description: description,
-        imagePath: imagePath,
-      );
+    String? coverImagePath,
+    String? level,
+    String? stateId,
+    String? districtId,
+    String? wardId,
+    String? localityId,
+  }) async {
+    return repository.createOwnerCommunity(
+      name: name,
+      description: description,
+      imagePath: imagePath,
+      coverImagePath: coverImagePath,
+      level: level,
+      stateId: stateId,
+      districtId: districtId,
+      wardId: wardId,
+      localityId: localityId,
+    );
+  }
 }
 
 class GetPendingJoinRequestsUseCase {
@@ -119,4 +138,33 @@ class GetCommunityInfoUseCase {
   final CommunityRepository repository;
   GetCommunityInfoUseCase(this.repository);
   Future<Map<String, dynamic>> call(String communityId) => repository.getCommunityInfo(communityId);
+}
+
+class GetAssociationsUseCase {
+  final CommunityRepository repository;
+  GetAssociationsUseCase(this.repository);
+  Future<List<Map<String, dynamic>>> call({String? parentId, String? level}) => 
+      repository.getAssociations(parentId: parentId, level: level);
+}
+
+class JoinAssociationUseCase {
+  final CommunityRepository repository;
+  JoinAssociationUseCase(this.repository);
+  Future<void> call(String associationId) => repository.joinAssociation(associationId);
+}
+
+class CreateAssociationUseCase {
+  final CommunityRepository repository;
+  CreateAssociationUseCase(this.repository);
+  Future<void> call({
+    required String name,
+    required String level,
+    String? parentId,
+    String? description,
+  }) => repository.createAssociation(
+    name: name,
+    level: level,
+    parentId: parentId,
+    description: description,
+  );
 }

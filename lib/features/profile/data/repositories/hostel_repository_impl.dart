@@ -64,4 +64,9 @@ class HostelRepositoryImpl implements HostelRepository {
   Future<Hostel> uploadHostelImages(String id, List<String> filePaths) async {
     return await remoteDataSource.uploadHostelImages(id, filePaths);
   }
+
+  @override
+  Future<void> updateHostelLocation(String id, double lat, double lng) async {
+    return await remoteDataSource.updateHostelLocation(id, lat, lng);
+  }
 }

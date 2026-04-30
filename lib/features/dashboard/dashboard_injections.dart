@@ -12,7 +12,10 @@ import 'presentation/cubit/rent_due_cubit.dart';
 void registerDashboardFeature(GetIt sl) {
   
   sl.registerFactory(
-    () => DashboardCubit(getDashboardDataUseCase: sl()),
+    () => DashboardCubit(
+      getDashboardDataUseCase: sl(),
+      deleteRoomUseCase: sl(),
+    ),
   );
 
   

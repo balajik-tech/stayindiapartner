@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final CommunityMessageEntity message;
@@ -72,14 +73,32 @@ class ChatMessageBubble extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        message.text,
-                        style: GoogleFonts.outfit(
-                          fontSize: 15.sp,
-                          color: isMe ? Colors.white : AppColors.darkText,
-                          height: 1.4,
+                      if (message.imageUrl != null && message.imageUrl!.isNotEmpty) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12.r),
+                          child: CachedNetworkImage(
+                            imageUrl: message.imageUrl!,
+                            placeholder: (context, url) => Container(
+                              height: 150.h,
+                              width: double.infinity,
+                              color: Colors.grey[200],
+                              child: const Center(child: CircularProgressIndicator()),
+                            ),
+                            errorWidget: (context, url, error) => const Icon(Icons.error),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
+                        if (message.text.isNotEmpty) SizedBox(height: 8.h),
+                      ],
+                      if (message.text.isNotEmpty)
+                        Text(
+                          message.text,
+                          style: GoogleFonts.outfit(
+                            fontSize: 15.sp,
+                            color: isMe ? Colors.white : AppColors.darkText,
+                            height: 1.4,
+                          ),
+                        ),
                       SizedBox(height: 6.h),
                       Row(
                         mainAxisSize: MainAxisSize.min,

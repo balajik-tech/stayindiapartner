@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/theme/app_theme.dart';
-
 import 'features/navigation/presentation/pages/main_navigation_page.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/pages/registration_personal_page.dart';
@@ -20,6 +19,11 @@ import 'features/staff/presentation/cubit/staff_cubit.dart';
 import 'features/payments/presentation/cubit/payment_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/community_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/owner_community_cubit.dart';
+import 'package:stayindia_owner/features/communities/presentation/cubit/association_cubit.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 
 import 'core/services/notification_service.dart';
@@ -30,8 +34,20 @@ import 'injection_container.dart' as di;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: await getApplicationDocumentsDirectory(),
+  );
+  
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   FlutterError.onError = (details) {
-    AppLogger.error('FLUTTER FRAMEWORK ERROR: ${details.exception}', details.exception, details.stack);
+    
+    final errorString = details.exception.toString();
+    if (!errorString.contains('parentDataDirty')) {
+      AppLogger.error('FLUTTER FRAMEWORK ERROR: ${details.exception}', details.exception, details.stack);
+    }
   };
   
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -117,6 +133,7 @@ class StayIndiaOwnerApp extends StatelessWidget {
         BlocProvider(create: (context) => di.sl<ProfileCubit>()),
         BlocProvider(create: (context) => di.sl<CommunityCubit>()),
         BlocProvider(create: (context) => di.sl<OwnerCommunityCubit>()),
+        BlocProvider(create: (context) => di.sl<AssociationCubit>()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(390, 844),

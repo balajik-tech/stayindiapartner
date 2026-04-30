@@ -11,6 +11,7 @@ abstract class CommunityRemoteDataSource {
     String? before,
   });
   Future<void> sendMessage(String hostelId, String text);
+  Future<void> sendImageMessage(String hostelId, String imagePath);
   Future<List<AnnouncementModel>> getAnnouncements(String hostelId);
   Future<void> postAnnouncement(String hostelId, String title, String content);
   Future<List<OwnerDiscussionModel>> getOwnerDiscussions(String hostelId);
@@ -23,7 +24,7 @@ abstract class CommunityRemoteDataSource {
 
   
   Future<List<CommunityDetailsModel>> getJoinedOwnerCommunities();
-  Future<List<CommunityDetailsModel>> getAvailableOwnerCommunities();
+  Future<List<CommunityDetailsModel>> getAvailableOwnerCommunities({Map<String, String>? filters});
   Future<void> joinOwnerCommunity(String communityId);
   Future<List<Map<String, dynamic>>> getPendingJoinRequests();
   Future<void> handleJoinRequest(String communityId, String requesterId, String action);
@@ -32,6 +33,36 @@ abstract class CommunityRemoteDataSource {
     required String name,
     String? description,
     String? imagePath,
+    String? coverImagePath,
+    String? level,
+    String? stateId,
+    String? districtId,
+    String? wardId,
+    String? localityId,
+  });
+
+  
+  Future<List<Map<String, dynamic>>> getAssociations({String? parentId, String? level});
+  Future<void> joinAssociation(String associationId);
+  Future<void> createAssociation({
+    required String name,
+    required String level,
+    String? parentId,
+    String? description,
+  });
+  Future<void> updateOwnerCommunity({
+    required String communityId,
+    String? name,
+    String? description,
+    String? imagePath,
+    String? coverImagePath,
+  });
+  Future<void> removeMember(String communityId, String memberId);
+  Future<void> broadcastSOS({
+    required String associationId,
+    required String issueType,
+    required String description,
+    String severity = 'HIGH',
   });
 }
 
@@ -93,6 +124,29 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to send message');
+    }
+  }
+
+  @override
+  Future<void> sendImageMessage(String hostelId, String imagePath) async {
+    AppLogger.info('Sending community image message');
+    final formData = FormData.fromMap({
+      'hostelId': hostelId,
+      'image': await MultipartFile.fromFile(imagePath),
+    });
+    
+    final response = await _dio.post(
+      '${ApiConstants.community}/message',
+      data: formData,
+      options: Options(
+        headers: {
+          'x-upload-folder': 'communities/messages',
+        },
+      ),
+    );
+    
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to send image message');
     }
   }
 
@@ -181,9 +235,12 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
   }
 
   @override
-  Future<List<CommunityDetailsModel>> getAvailableOwnerCommunities() async {
-    AppLogger.info('Fetching available owner communities');
-    final response = await _dio.get('${ApiConstants.ownerCommunities}/available');
+  Future<List<CommunityDetailsModel>> getAvailableOwnerCommunities({Map<String, String>? filters}) async {
+    AppLogger.info('Fetching available owner communities with filters: $filters');
+    final response = await _dio.get(
+      '${ApiConstants.ownerCommunities}/available',
+      queryParameters: filters,
+    );
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'] ?? [];
       return data.map((c) => CommunityDetailsModel.fromJson(c as Map<String, dynamic>)).toList();
@@ -247,21 +304,34 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     required String name,
     String? description,
     String? imagePath,
+    String? coverImagePath,
+    String? level,
+    String? stateId,
+    String? districtId,
+    String? wardId,
+    String? localityId,
   }) async {
-    AppLogger.info('Creating owner community: $name');
+    AppLogger.info('Creating owner community: $name at level: $level');
     
     dynamic data;
-    if (imagePath != null) {
+    final Map<String, dynamic> payload = {
+      'name': name,
+      'description': description,
+      'level': level,
+      'stateId': stateId,
+      'districtId': districtId,
+      'wardId': wardId,
+      'localityId': localityId,
+    }..removeWhere((key, value) => value == null);
+
+    if (imagePath != null || coverImagePath != null) {
       data = FormData.fromMap({
-        'name': name,
-        'description': description,
-        'image': await MultipartFile.fromFile(imagePath),
+        ...payload,
+        if (imagePath != null) 'image': await MultipartFile.fromFile(imagePath),
+        if (coverImagePath != null) 'coverImage': await MultipartFile.fromFile(coverImagePath),
       });
     } else {
-      data = {
-        'name': name,
-        'description': description,
-      };
+      data = payload;
     }
 
     final response = await _dio.post(
@@ -269,13 +339,147 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
       data: data,
       options: Options(
         headers: {
-          if (imagePath != null) 'x-upload-folder': 'communities',
+          if (imagePath != null || coverImagePath != null) 'x-upload-folder': 'communities',
         },
       ),
     );
     
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw Exception('Failed to create community');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getAssociations({String? parentId, String? level}) async {
+    AppLogger.info('Fetching associations: parentId=$parentId, level=$level');
+    final queryParams = <String, dynamic>{};
+    if (parentId != null) queryParams['parentId'] = parentId;
+    if (level != null) queryParams['level'] = level;
+
+    final response = await _dio.get(
+      ApiConstants.associations,
+      queryParameters: queryParams,
+    );
+    
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+    }
+    throw Exception('Failed to fetch associations');
+  }
+
+  @override
+  Future<void> joinAssociation(String associationId) async {
+    AppLogger.info('Joining association: $associationId');
+    final response = await _dio.post(
+      '${ApiConstants.associations}/join',
+      data: {'associationId': associationId},
+    );
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to join association');
+    }
+  }
+
+  @override
+  Future<void> createAssociation({
+    required String name,
+    required String level,
+    String? parentId,
+    String? description,
+  }) async {
+    AppLogger.info('Creating association: $name, level: $level');
+    final response = await _dio.post(
+      ApiConstants.associations,
+      data: {
+        'name': name,
+        'level': level,
+        'parentId': parentId,
+        'description': description,
+      },
+    );
+    
+    if (response.statusCode != 201 && response.statusCode != 200) {
+      throw Exception('Failed to create association');
+    }
+  }
+
+  @override
+  Future<void> updateOwnerCommunity({
+    required String communityId,
+    String? name,
+    String? description,
+    String? imagePath,
+    String? coverImagePath,
+  }) async {
+    AppLogger.info('Updating owner community: $communityId');
+    
+    dynamic data;
+    final Map<String, dynamic> payload = {
+      'name': name,
+      'description': description,
+    }..removeWhere((key, value) => value == null);
+
+    if (imagePath != null || coverImagePath != null) {
+      data = FormData.fromMap({
+        ...payload,
+        if (imagePath != null) 'image': await MultipartFile.fromFile(imagePath),
+        if (coverImagePath != null) 'coverImage': await MultipartFile.fromFile(coverImagePath),
+      });
+    } else {
+      data = payload;
+    }
+
+    final response = await _dio.put(
+      '${ApiConstants.ownerCommunities}/update/$communityId',
+      data: data,
+      options: Options(
+        headers: {
+          if (imagePath != null || coverImagePath != null) 'x-upload-folder': 'communities',
+        },
+      ),
+    );
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update community');
+    }
+  }
+
+  @override
+  Future<void> removeMember(String communityId, String memberId) async {
+    AppLogger.info('Removing member $memberId from community $communityId');
+    final response = await _dio.post(
+      '${ApiConstants.ownerCommunities}/kick',
+      data: {
+        'communityId': communityId,
+        'memberId': memberId,
+      },
+    );
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to remove member');
+    }
+  }
+
+  @override
+  Future<void> broadcastSOS({
+    required String associationId,
+    required String issueType,
+    required String description,
+    String severity = 'HIGH',
+  }) async {
+    AppLogger.info('Broadcasting SOS: $issueType');
+    final response = await _dio.post(
+      ApiConstants.sos,
+      data: {
+        'associationId': associationId,
+        'issueType': issueType,
+        'description': description,
+        'severity': severity,
+      },
+    );
+    
+    if (response.statusCode != 201 && response.statusCode != 200) {
+      throw Exception('Failed to broadcast SOS');
     }
   }
 }

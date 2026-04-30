@@ -14,6 +14,9 @@ import 'package:stayindia_owner/features/auth/domain/usecases/delete_account_use
 import 'package:stayindia_owner/features/auth/domain/usecases/has_active_session_usecase.dart';
 import 'package:stayindia_owner/core/utils/error_helper.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
+import 'package:stayindia_owner/features/auth/domain/repositories/auth_repository.dart';
+import 'package:stayindia_owner/core/services/notification_service.dart';
+import 'package:stayindia_owner/injection_container.dart' as di;
 
 part 'auth_state.dart';
 
@@ -32,6 +35,8 @@ class AuthCubit extends Cubit<AuthState> {
   final HasActiveSessionUseCase _hasActiveSession;
   final DeleteAccountUseCase _deleteAccount;
 
+  final AuthRepository _repository;
+
   AuthCubit({
     required RequestOtpUseCase requestOtpUseCase,
     required VerifyOtpUseCase verifyOtpUseCase,
@@ -40,6 +45,7 @@ class AuthCubit extends Cubit<AuthState> {
     required LogoutUseCase logoutUseCase,
     required HasActiveSessionUseCase hasActiveSessionUseCase,
     required DeleteAccountUseCase deleteAccountUseCase,
+    required AuthRepository repository,
   })  : _requestOtp = requestOtpUseCase,
         _verifyOtp = verifyOtpUseCase,
         _getCurrentOwner = getCurrentOwnerUseCase,
@@ -47,7 +53,24 @@ class AuthCubit extends Cubit<AuthState> {
         _logout = logoutUseCase,
         _hasActiveSession = hasActiveSessionUseCase,
         _deleteAccount = deleteAccountUseCase,
+        _repository = repository,
         super(AuthInitial());
+
+  Future<void> _syncDeviceToken() async {
+    try {
+      final notificationService = di.sl<NotificationService>();
+      final token = await notificationService.getToken();
+      if (token != null) {
+        await _repository.updateDeviceToken(
+          pushToken: token,
+          platform: Platform.isIOS ? 'ios' : 'android',
+        );
+        AppLogger.info('Device token synced successfully');
+      }
+    } catch (e) {
+      AppLogger.error('Failed to sync device token: $e');
+    }
+  }
 
   
 
@@ -64,6 +87,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final owner = await _getCurrentOwner();
       emit(AuthAuthenticated(owner: owner));
+      _syncDeviceToken();
       AppLogger.info('Session restored for owner: ${owner.id}');
     } on DioException catch (e) {
       final code = e.response?.statusCode;
@@ -118,6 +142,7 @@ class AuthCubit extends Cubit<AuthState> {
         owner: result.owner,
         isNewUser: result.isNewUser,
       ));
+      _syncDeviceToken();
       AppLogger.info(
         'OTP verified. Owner: ${result.owner.id}, isNewUser: ${result.isNewUser}',
       );

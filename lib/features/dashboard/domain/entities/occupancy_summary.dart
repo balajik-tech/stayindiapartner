@@ -5,6 +5,7 @@ class Occupancy {
   final int noticeBeds;
   final int awayBeds;
   final int reservedBeds;
+  final int overdueBeds;
   final List<FloorData> floors;
 
   Occupancy({
@@ -14,6 +15,7 @@ class Occupancy {
     required this.noticeBeds,
     required this.awayBeds,
     required this.reservedBeds,
+    required this.overdueBeds,
     required this.floors,
   });
 }
@@ -34,17 +36,23 @@ class Room {
   final String id;
   final String roomNumber;
   final String sharingType;
+  final String? roomType;
   final String occupancy; 
   final List<String> tenantImages;
   final List<BedInfo> beds;
+  final double? rent;
+  final double? dailyRent;
 
   Room({
     required this.id,
     required this.roomNumber,
     required this.sharingType,
+    this.roomType,
     required this.occupancy,
     required this.tenantImages,
     required this.beds,
+    this.rent,
+    this.dailyRent,
   });
 }
 

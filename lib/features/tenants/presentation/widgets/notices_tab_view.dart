@@ -3,11 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/notices/presentation/cubit/notice_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/notices/domain/entities/notice.dart';
+import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
-import 'package:stayindia_owner/core/constants/ui_constants.dart';
 
 class NoticesTabView extends StatefulWidget {
   const NoticesTabView({super.key});
@@ -22,57 +20,46 @@ class _NoticesTabViewState extends State<NoticesTabView> {
     return BlocBuilder<NoticeCubit, NoticeState>(
       builder: (context, state) {
         if (state is NoticeLoading) {
-          return ListView.builder(
-            padding: UIConstants.listBottomPadding(context).copyWith(top: 12.h, left: 20.w, right: 20.w),
-            itemCount: 8,
-            itemBuilder: (context, index) => const TenantCardSkeleton(),
+          return Column(
+            children: List.generate(
+              5,
+              (index) => const TenantCardSkeleton(),
+            ),
           );
         } else if (state is NoticeLoadError) {
           return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
         } else if (state is NoticesLoaded) {
           final notices = state.notices;
-          return RefreshIndicator(
-            onRefresh: () async {
-              final hostelState = context.read<HostelCubit>().state;
-              if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-                context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
-              }
-            },
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: UIConstants.listBottomPadding(context).copyWith(top: 12.h, left: 20.w, right: 20.w),
-              itemCount: notices.isEmpty ? 1 : 4 + notices.length,
-              itemBuilder: (context, index) {
-                if (notices.isEmpty) return _buildEmptyState();
-                
-                if (index == 0) return _buildSummaryBox(notices);
-                if (index == 1) return SizedBox(height: 24.h);
-                if (index == 2) {
-                  return Text(
-                    'Upcoming',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkText,
-                    ),
-                  );
-                }
-                if (index == 3) return SizedBox(height: 16.h);
-                
-                final noticeIndex = index - 4;
-                if (noticeIndex < notices.length) {
-                  return _buildNoticeCard(notices[noticeIndex]);
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+          final announcements = state.announcements;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (notices.isEmpty && announcements.isEmpty)
+                _buildEmptyState()
+              else ...[
+                if (notices.isNotEmpty) ...[
+                  _buildSummaryBox(notices),
+                  SizedBox(height: 24.h),
+                  _buildSectionTitle('Upcoming Vacancies'),
+                  SizedBox(height: 16.h),
+                  ...notices.map((n) => _buildNoticeCard(n)),
+                ],
+                if (announcements.isNotEmpty) ...[
+                  if (notices.isNotEmpty) SizedBox(height: 32.h),
+                  _buildSectionTitle('General Notices'),
+                  SizedBox(height: 16.h),
+                  ...announcements.map((a) => _buildAnnouncementCard(a)),
+                ],
+                SizedBox(height: 24.h),
+              ],
+            ],
           );
         } else if (state is NoticeSubmitting || state is NoticeUpdating || state is NoticeSuccess || state is NoticeUpdateSuccess) {
-          return ListView.builder(
-            padding: UIConstants.listBottomPadding(context).copyWith(top: 12.h, left: 20.w, right: 20.w),
-            itemCount: 8,
-            itemBuilder: (context, index) => const TenantCardSkeleton(),
+          return Column(
+            children: List.generate(
+              5,
+              (index) => const TenantCardSkeleton(),
+            ),
           );
         }
         return const SizedBox.shrink();
@@ -254,6 +241,70 @@ class _NoticesTabViewState extends State<NoticesTabView> {
               ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 18.sp,
+        fontWeight: FontWeight.bold,
+        color: AppColors.darkText,
+      ),
+    );
+  }
+
+  Widget _buildAnnouncementCard(AnnouncementEntity announcement) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.roomCardBorder),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.r),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.campaign_rounded, color: AppColors.primaryBlue, size: 20.sp),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      announcement.title,
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                    ),
+                    Text(
+                      DateFormat('dd MMM, yyyy').format(announcement.createdAt),
+                      style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            announcement.content,
+            style: TextStyle(fontSize: 14.sp, color: AppColors.darkText.withValues(alpha: 0.8), height: 1.5),
+          ),
         ],
       ),
     );

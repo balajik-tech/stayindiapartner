@@ -8,6 +8,7 @@ class CommunityDetailsModel extends CommunityDetailsEntity {
     super.image,
     required super.memberCount,
     super.status,
+    super.level,
   });
 
   factory CommunityDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +19,7 @@ class CommunityDetailsModel extends CommunityDetailsEntity {
       image: json['image']?.toString() ?? json['coverImage']?.toString(),
       memberCount: json['memberCount'] ?? 0,
       status: json['status']?.toString(),
+      level: json['level']?.toString(),
     );
   }
 }
@@ -29,6 +31,8 @@ class CommunityMessageModel extends CommunityMessageEntity {
     required super.senderName,
     super.senderAvatar,
     required super.text,
+    super.imageUrl,
+    super.roomId,
     required super.createdAt,
     super.type,
     super.isSystem,
@@ -69,6 +73,8 @@ class CommunityMessageModel extends CommunityMessageEntity {
                     authorData?['avatar']?.toString() ??
                     senderData?['image']?.toString() ?? json['avatar']?.toString(),
       text: json['text']?.toString() ?? '',
+      imageUrl: json['image']?.toString(),
+      roomId: json['roomId']?.toString(),
       createdAt: json['createdAt'] != null 
           ? DateTime.parse(json['createdAt'].toString()) 
           : DateTime.now(),

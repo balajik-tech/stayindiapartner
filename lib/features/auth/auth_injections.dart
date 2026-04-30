@@ -28,6 +28,7 @@ void registerAuthFeature(GetIt sl) {
       logoutUseCase: sl(),
       hasActiveSessionUseCase: sl(),
       deleteAccountUseCase: sl(),
+      repository: sl(),
     ),
   );
 

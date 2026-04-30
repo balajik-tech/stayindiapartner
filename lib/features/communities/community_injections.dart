@@ -5,6 +5,7 @@ import 'domain/repositories/community_repository.dart';
 import 'domain/usecases/community_usecases.dart';
 import 'presentation/cubit/community_cubit.dart';
 import 'presentation/cubit/owner_community_cubit.dart';
+import 'presentation/cubit/association_cubit.dart';
 
 void registerCommunityFeature(GetIt sl) {
   
@@ -13,6 +14,7 @@ void registerCommunityFeature(GetIt sl) {
       getCommunityDetailsUseCase: sl(),
       getCommunityMessagesUseCase: sl(),
       sendCommunityMessageUseCase: sl(),
+      sendCommunityImageUseCase: sl(),
       getAnnouncementsUseCase: sl(),
       postAnnouncementUseCase: sl(),
       getOwnerDiscussionsUseCase: sl(),
@@ -32,10 +34,20 @@ void registerCommunityFeature(GetIt sl) {
     ),
   );
 
+  sl.registerFactory(
+    () => AssociationCubit(
+      getAssociationsUseCase: sl(),
+      joinAssociationUseCase: sl(),
+      createAssociationUseCase: sl(),
+      profileCubit: sl(),
+    ),
+  );
+
   
   sl.registerLazySingleton(() => GetCommunityDetailsUseCase(sl()));
   sl.registerLazySingleton(() => GetCommunityMessagesUseCase(sl()));
   sl.registerLazySingleton(() => SendCommunityMessageUseCase(sl()));
+  sl.registerLazySingleton(() => SendCommunityImageUseCase(sl()));
   sl.registerLazySingleton(() => GetAnnouncementsUseCase(sl()));
   sl.registerLazySingleton(() => PostAnnouncementUseCase(sl()));
   sl.registerLazySingleton(() => GetOwnerDiscussionsUseCase(sl()));
@@ -47,6 +59,9 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetPendingJoinRequestsUseCase(sl()));
   sl.registerLazySingleton(() => HandleJoinRequestUseCase(sl()));
   sl.registerLazySingleton(() => GetCommunityInfoUseCase(sl()));
+  sl.registerLazySingleton(() => GetAssociationsUseCase(sl()));
+  sl.registerLazySingleton(() => JoinAssociationUseCase(sl()));
+  sl.registerLazySingleton(() => CreateAssociationUseCase(sl()));
 
   
   sl.registerLazySingleton<CommunityRepository>(

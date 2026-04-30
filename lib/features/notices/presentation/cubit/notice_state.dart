@@ -16,9 +16,10 @@ class NoticeLoading extends NoticeState {}
 
 class NoticesLoaded extends NoticeState {
   final List<Notice> notices;
-  const NoticesLoaded({required this.notices});
+  final List<AnnouncementEntity> announcements;
+  const NoticesLoaded({required this.notices, this.announcements = const []});
   @override
-  List<Object?> get props => [notices];
+  List<Object?> get props => [notices, announcements];
 }
 
 class NoticeUpdating extends NoticeState {}

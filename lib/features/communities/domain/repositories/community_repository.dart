@@ -9,6 +9,7 @@ abstract class CommunityRepository {
     String? before,
   });
   Future<void> sendMessage(String hostelId, String text);
+  Future<void> sendImageMessage(String hostelId, String imagePath);
   
   
   Future<List<AnnouncementEntity>> getAnnouncements(String hostelId);
@@ -25,7 +26,7 @@ abstract class CommunityRepository {
 
   
   Future<List<CommunityDetailsEntity>> getJoinedOwnerCommunities();
-  Future<List<CommunityDetailsEntity>> getAvailableOwnerCommunities();
+  Future<List<CommunityDetailsEntity>> getAvailableOwnerCommunities({Map<String, String>? filters});
   Future<void> joinOwnerCommunity(String communityId);
   Future<List<Map<String, dynamic>>> getPendingJoinRequests();
   Future<void> handleJoinRequest({
@@ -38,5 +39,38 @@ abstract class CommunityRepository {
     required String name,
     String? description,
     String? imagePath,
+    String? coverImagePath,
+    String? level,
+    String? stateId,
+    String? districtId,
+    String? wardId,
+    String? localityId,
+  });
+
+  
+  Future<List<Map<String, dynamic>>> getAssociations({String? parentId, String? level});
+  Future<void> joinAssociation(String associationId);
+  Future<void> createAssociation({
+    required String name,
+    required String level,
+    String? parentId,
+    String? description,
+  });
+  Future<void> updateOwnerCommunity({
+    required String communityId,
+    String? name,
+    String? description,
+    String? imagePath,
+    String? coverImagePath,
+  });
+  Future<void> removeMember({
+    required String communityId,
+    required String memberId,
+  });
+  Future<void> broadcastSOS({
+    required String associationId,
+    required String issueType,
+    required String description,
+    String severity = 'HIGH',
   });
 }

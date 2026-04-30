@@ -54,6 +54,14 @@ class _RoomMasterViewState extends State<_RoomMasterView>
     return '';
   }
 
+  int _totalFloors(BuildContext context) {
+    final hostelState = context.read<HostelCubit>().state;
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      return hostelState.hostels[hostelState.selectedHostelIndex].floors;
+    }
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,17 +176,21 @@ class _RoomMasterViewState extends State<_RoomMasterView>
             );
             return;
           }
+          final totalFloors = _totalFloors(context);
           AddRoomMasterSheet.show(
             context,
+            totalFloors: totalFloors,
             roomCubit: context.read<RoomCubit>(),
             onSave: (data) async => await context.read<RoomCubit>().createRoom(
                   hostelId: hostelId,
                   ownerId: ownerId,
                   roomTypename: data['roomTypename'],
                   floor: data['floor'],
+                  floors: data['floors'],
                   sharingType: data['sharingType'],
                   roomType: data['roomType'],
                   rent: data['rent'],
+                  dailyRent: data['dailyRent'],
                   deposit: data['deposit'],
                   maintenance: data['maintenance'],
                   isMaster: true,
@@ -232,8 +244,7 @@ class _RoomMasterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAc = room.roomType == 'AC';
-    return RepaintBoundary(
-      child: Container(
+    return Container(
         margin: EdgeInsets.only(bottom: 24.h),
         padding: EdgeInsets.symmetric(horizontal: 4.w),
         child: Column(
@@ -265,7 +276,7 @@ class _RoomMasterCard extends StatelessWidget {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        '${room.sharingType}    Floor ${room.floor}',
+                        '${room.sharingType}    ${room.floors.isEmpty ? 'Floor ${room.floor}' : 'Floors: ${room.floors.join(', ')}'}',
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: const Color(0xFF667085),
@@ -284,9 +295,11 @@ class _RoomMasterCard extends StatelessWidget {
                         hostelId: room.hostelId,
                         roomTypename: room.roomTypename,
                         floor: room.floor,
+                        floors: room.floors,
                         sharingType: room.sharingType,
                         roomType: room.roomType,
                         rent: room.rent,
+                        dailyRent: room.dailyRent,
                         deposit: room.deposit,
                         maintenance: room.maintenance,
                         isActive: value,
@@ -308,11 +321,15 @@ class _RoomMasterCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _FinanceItem(label: 'Rent', value: room.rent.toStringAsFixed(0)),
-                SizedBox(width: 24.w),
-                _FinanceItem(label: 'Deposit', value: room.deposit.toStringAsFixed(0)),
-                SizedBox(width: 24.w),
-                _FinanceItem(label: 'Maintenance', value: room.maintenance.toStringAsFixed(0)),
+                 _FinanceItem(label: 'Rent', value: room.rent.toStringAsFixed(0)),
+                 if (room.dailyRent > 0) ...[
+                   SizedBox(width: 24.w),
+                   _FinanceItem(label: 'Daily', value: room.dailyRent.toStringAsFixed(0)),
+                 ],
+                 SizedBox(width: 24.w),
+                 _FinanceItem(label: 'Deposit', value: room.deposit.toStringAsFixed(0)),
+                 SizedBox(width: 24.w),
+                 _FinanceItem(label: 'Maint.', value: room.maintenance.toStringAsFixed(0)),
               ],
             ),
             SizedBox(height: 20.h),
@@ -325,11 +342,19 @@ class _RoomMasterCard extends StatelessWidget {
                     color: const Color(0xFFF5F8FF),
                     textColor: AppColors.primaryBlue,
                     borderColor: const Color(0xFFD1E0FF),
-                    onPressed: () => AddRoomMasterSheet.show(
-                      context,
-                      room: room,
-                      roomCubit: context.read<RoomCubit>(),
-                      onSave: (data) async {
+                    onPressed: () {
+                      final hostelState = context.read<HostelCubit>().state;
+                      int totalFloors = 0;
+                      if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+                        totalFloors = hostelState.hostels[hostelState.selectedHostelIndex].floors;
+                      }
+                      
+                      AddRoomMasterSheet.show(
+                        context,
+                        room: room,
+                        totalFloors: totalFloors,
+                        roomCubit: context.read<RoomCubit>(),
+                        onSave: (data) async {
                         final capacity = _mapSharingToCapacity(data['sharingType']);
                         await context.read<RoomCubit>().updateRoom(
                           RoomDetail(
@@ -337,9 +362,11 @@ class _RoomMasterCard extends StatelessWidget {
                             hostelId: room.hostelId,
                             roomTypename: data['roomTypename'],
                             floor: data['floor'],
+                            floors: List<int>.from(data['floors']),
                             sharingType: data['sharingType'],
                             roomType: data['roomType'],
                             rent: data['rent'],
+                            dailyRent: data['dailyRent'],
                             deposit: data['deposit'],
                             maintenance: data['maintenance'],
                             isActive: room.isActive,
@@ -348,8 +375,9 @@ class _RoomMasterCard extends StatelessWidget {
                             beds: room.beds,
                           ),
                         );
-                      },
-                    ),
+                        },
+                      );
+                    },
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -368,7 +396,6 @@ class _RoomMasterCard extends StatelessWidget {
             SizedBox(height: 24.h),
             Divider(height: 1, color: AppColors.roomCardBorder.withValues(alpha: 0.6)),
           ],
-        ),
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/core/utils/logger.dart';
 import '../cubit/auth_cubit.dart';
 import 'login_page.dart';
 
@@ -35,39 +34,46 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   Widget? _activeView;
 
+  Widget? _determineView(AuthState state) {
+    if (state is AuthInitial || state is AuthSessionRestoring) {
+      return const _SplashScreen();
+    } else if (state is AuthAuthenticated) {
+      final reqReg = state.requiresRegistration;
+      if (reqReg || state is AuthProfileCompleted) {
+        return widget.registration;
+      } else {
+        return widget.dashboard;
+      }
+    } else if (state is AuthUnauthenticated) {
+      return const LoginPage();
+    } else if (state is AuthSessionRestoreError) {
+      return _SessionErrorScreen(
+        message: state.message,
+        onRetry: () => context.read<AuthCubit>().restoreSession(),
+        onLogin: () => context.read<AuthCubit>().logout(),
+      );
+    } else if (state is AuthOtpSent) {
+      return const LoginPage();
+    }
+    return null; 
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthCubit, AuthState>(
-      builder: (context, state) {
-        AppLogger.debug('AuthGate: Building for state ${state.runtimeType}');
-
-        if (state is AuthInitial || state is AuthSessionRestoring) {
-          _activeView = const _SplashScreen();
-        } else if (state is AuthAuthenticated) {
-          final reqReg = state.requiresRegistration;
-          AppLogger.info('AuthGate: Authenticated. requiresRegistration=$reqReg');
-          
-          if (reqReg || state is AuthProfileCompleted) {
-            _activeView = widget.registration;
-          } else {
-            _activeView = widget.dashboard;
-          }
-        } else if (state is AuthUnauthenticated) {
-          _activeView = const LoginPage();
-        } else if (state is AuthSessionRestoreError) {
-          _activeView = _SessionErrorScreen(
-            message: state.message,
-            onRetry: () => context.read<AuthCubit>().restoreSession(),
-            onLogin: () => context.read<AuthCubit>().logout(),
-          );
-        } else if (state is AuthOtpSent) {
-          // Keep showing login/OTP page flow
-          _activeView = const LoginPage();
+    return BlocConsumer<AuthCubit, AuthState>(
+      listenWhen: (previous, current) => _determineView(current) != null,
+      listener: (context, state) {
+        final nextView = _determineView(state);
+        if (nextView != null) {
+          setState(() {
+            _activeView = nextView;
+          });
         }
-
-        // If state is AuthLoading or AuthError, we keep the previous _activeView
-        // This prevents the screen from flickering back to LoginPage during transient actions.
-        return _activeView ?? const LoginPage();
+      },
+      builder: (context, state) {
+        
+        _activeView ??= _determineView(state) ?? const _SplashScreen();
+        return _activeView!;
       },
     );
   }

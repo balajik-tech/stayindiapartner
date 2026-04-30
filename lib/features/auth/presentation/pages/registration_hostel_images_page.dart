@@ -306,7 +306,7 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
 
               return Stack(
                 children: [
-                  Position(
+                  Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16.r),
@@ -384,11 +384,4 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
       ),
     );
   }
-}
-
-class Position extends StatelessWidget {
-  final Widget child;
-  const Position({super.key, required this.child});
-  @override
-  Widget build(BuildContext context) => child;
 }

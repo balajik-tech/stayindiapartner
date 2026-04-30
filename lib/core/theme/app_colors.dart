@@ -27,4 +27,10 @@ class AppColors {
       Color(0xFF1A3D8F),
     ],
   );
+
+  static const Color sosRed = Color(0xFFE53935);
+  static const Color sosRedLight = Color(0xFFFFEBEE);
+  
+  static const Color glassWhite = Color(0x33FFFFFF);
+  static const Color glassBorder = Color(0x1A000000);
 }

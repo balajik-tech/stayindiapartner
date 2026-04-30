@@ -11,6 +11,8 @@ class ProfileModel extends ProfileEntity {
     super.dob,
     super.gender,
     super.avatar,
+    super.associationId,
+    super.isVerifiedOwner = false,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,8 @@ class ProfileModel extends ProfileEntity {
       dob: json['dob']?.toString(),
       gender: json['gender']?.toString(),
       avatar: json['avatar']?.toString(),
+      associationId: json['associationId']?.toString(),
+      isVerifiedOwner: json['isVerifiedOwner'] ?? false,
     );
   }
 

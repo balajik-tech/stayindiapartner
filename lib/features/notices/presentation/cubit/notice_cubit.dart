@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stayindia_owner/features/notices/domain/entities/notice.dart';
 import 'package:stayindia_owner/features/notices/domain/usecases/notice_usecases.dart';
+import 'package:stayindia_owner/features/communities/domain/usecases/community_usecases.dart';
+import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/core/utils/error_helper.dart';
 
 part 'notice_state.dart';
@@ -11,17 +13,37 @@ class NoticeCubit extends Cubit<NoticeState> {
   final GetNoticesUseCase _getNotices;
   final GetNoticeByIdUseCase _getNoticeById;
   final UpdateNoticeUseCase _updateNotice;
+  final PostAnnouncementUseCase _postAnnouncement;
+  final GetAnnouncementsUseCase _getAnnouncements;
 
   NoticeCubit({
     required CreateNoticeUseCase createNoticeUseCase,
     required GetNoticesUseCase getNoticesUseCase,
     required GetNoticeByIdUseCase getNoticeByIdUseCase,
     required UpdateNoticeUseCase updateNoticeUseCase,
+    required PostAnnouncementUseCase postAnnouncementUseCase,
+    required GetAnnouncementsUseCase getAnnouncementsUseCase,
   })  : _createNotice = createNoticeUseCase,
         _getNotices = getNoticesUseCase,
         _getNoticeById = getNoticeByIdUseCase,
         _updateNotice = updateNoticeUseCase,
+        _postAnnouncement = postAnnouncementUseCase,
+        _getAnnouncements = getAnnouncementsUseCase,
         super(NoticeInitial());
+
+  Future<void> postAnnouncement({
+    required String hostelId,
+    required String title,
+    required String content,
+  }) async {
+    emit(NoticeSubmitting());
+    try {
+      await _postAnnouncement(hostelId, title, content);
+      emit(NoticeSuccess());
+    } catch (e) {
+      emit(NoticeSubmitError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
 
   Future<void> createNotice({
     required String hostelId,
@@ -51,7 +73,11 @@ class NoticeCubit extends Cubit<NoticeState> {
     emit(NoticeLoading());
     try {
       final notices = await _getNotices(hostelId: hostelId, status: status);
-      emit(NoticesLoaded(notices: notices));
+      List<AnnouncementEntity> announcements = [];
+      if (hostelId != null) {
+        announcements = await _getAnnouncements(hostelId);
+      }
+      emit(NoticesLoaded(notices: notices, announcements: announcements));
     } catch (e) {
       emit(NoticeLoadError(message: ErrorHelper.toFriendlyMessage(e)));
     }

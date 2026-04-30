@@ -10,6 +10,7 @@ import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:stayindia_owner/features/finance/presentation/pages/financial_dashboard_page.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
+import 'package:stayindia_owner/core/constants/ui_constants.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -29,6 +30,17 @@ class AppDrawer extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
               physics: const BouncingScrollPhysics(),
               children: [
+                _buildSectionLabel('PROPERTY'),
+                _buildPremiumMenuItem(
+                  context, 
+                  Icons.swap_horiz_rounded, 
+                  'Switch Property',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showSwitchHostelSheet(context);
+                  },
+                ),
+                SizedBox(height: 24.h),
                 _buildSectionLabel('MANAGEMENT'),
                 _buildPremiumMenuItem(
                   context, 
@@ -81,8 +93,10 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildGradientHeader(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
+      buildWhen: (previous, current) => previous != current,
       builder: (context, authState) {
         return BlocBuilder<HostelCubit, HostelState>(
+          buildWhen: (previous, current) => previous != current,
           builder: (context, hostelState) {
             String name = 'Owner';
             String phone = '';
@@ -320,4 +334,106 @@ class AppDrawer extends StatelessWidget {
       context.read<AuthCubit>().logout();
     }
   }
+
+  void _showSwitchHostelSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BlocBuilder<HostelCubit, HostelState>(
+        buildWhen: (previous, current) => previous != current,
+        builder: (context, state) {
+          if (state is! HostelLoaded) return const SizedBox.shrink();
+          
+          return Container(
+            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.greyText.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Text(
+                  'Switch Property',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 0.6.sh),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: state.hostels.length,
+                    itemBuilder: (context, index) {
+                      final hostel = state.hostels[index];
+                      final isSelected = index == state.selectedHostelIndex;
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.05) : Colors.white,
+                          border: Border.all(
+                            color: isSelected ? AppColors.primaryBlue : AppColors.greyText.withValues(alpha: 0.2),
+                          ),
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                        child: ListTile(
+                          onTap: () {
+                            context.read<HostelCubit>().selectHostel(index);
+                            Navigator.pop(context);
+                          },
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                          leading: Container(
+                            padding: EdgeInsets.all(10.r),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.primaryBlue : AppColors.greyText.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.apartment_rounded, 
+                              color: isSelected ? Colors.white : AppColors.greyText,
+                            ),
+                          ),
+                          title: Text(
+                            hostel.name,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                              color: isSelected ? AppColors.primaryBlue : AppColors.darkText,
+                            ),
+                          ),
+                          trailing: isSelected 
+                              ? Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 24.sp) 
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: UIConstants.bottomPadding(context)),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
+

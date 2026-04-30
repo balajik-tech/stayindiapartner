@@ -6,4 +6,5 @@ abstract class HostelRepository {
   Future<Hostel> updateHostel(Hostel hostel);
   Future<void> deleteHostel(String id);
   Future<Hostel> uploadHostelImages(String id, List<String> filePaths);
+  Future<void> updateHostelLocation(String id, double lat, double lng);
 }

@@ -43,4 +43,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<bool> hasActiveSession() => _tokenStorage.hasToken();
+
+  @override
+  Future<void> updateDeviceToken({
+    required String pushToken,
+    required String platform,
+    String? deviceId,
+  }) => _remote.updateDeviceToken(
+    pushToken: pushToken,
+    platform: platform,
+    deviceId: deviceId,
+  );
 }

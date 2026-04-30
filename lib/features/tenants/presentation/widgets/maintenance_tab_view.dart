@@ -8,7 +8,6 @@ import 'package:stayindia_owner/features/maintenance/presentation/cubit/maintena
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
-import 'package:stayindia_owner/core/constants/ui_constants.dart';
 
 class MaintenanceTabView extends StatefulWidget {
   const MaintenanceTabView({super.key});
@@ -54,10 +53,11 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
       },
       builder: (context, state) {
         if (state is MaintenanceLoading || state is MaintenanceSaving || state is MaintenanceSuccess) {
-          return ListView.builder(
-            padding: UIConstants.listBottomPadding(context).copyWith(top: 12.h, left: 20.w, right: 20.w),
-            itemCount: 8,
-            itemBuilder: (context, index) => const TenantCardSkeleton(),
+          return Column(
+            children: List.generate(
+              5,
+              (index) => const TenantCardSkeleton(),
+            ),
           );
         } else if (state is MaintenanceError) {
           return Center(
@@ -78,21 +78,18 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
           final filteredTickets = _filterTickets(summary.items);
           final groupedItems = _buildGroupedListItems(filteredTickets);
           
-          return RefreshIndicator(
-            onRefresh: () async => _reloadIssues(),
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: UIConstants.listBottomPadding(context).copyWith(top: 12.h, left: 20.w, right: 20.w),
-              itemCount: 4 + groupedItems.length,
-              itemBuilder: (context, index) {
-                if (index == 0) return _buildSearchBar();
-                if (index == 1) return Column(children: [SizedBox(height: 16.h), _buildFilterPills(summary.items)]);
-                if (index == 2) return Column(children: [SizedBox(height: 20.h), _buildSummaryCards(summary)]);
-                if (index == 3) return SizedBox(height: 24.h);
-                
-                return groupedItems[index - 4];
-              },
-            ),
+          return Column(
+            children: [
+              _buildSearchBar(),
+              ...[
+                SizedBox(height: 16.h),
+                _buildFilterPills(summary.items),
+                SizedBox(height: 20.h),
+                _buildSummaryCards(summary),
+                SizedBox(height: 24.h),
+              ],
+              ...groupedItems,
+            ],
           );
         }
         return const SizedBox.shrink();

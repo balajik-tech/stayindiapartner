@@ -22,7 +22,7 @@ class BouncingWrapper extends StatefulWidget {
 class _BouncingWrapperState extends State<BouncingWrapper>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _BouncingWrapperState extends State<BouncingWrapper>
       vsync: this,
       duration: widget.animationDuration,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleFactor)
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.7)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
@@ -66,12 +66,9 @@ class _BouncingWrapperState extends State<BouncingWrapper>
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
       behavior: HitTestBehavior.opaque,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: widget.child,
-        ),
+      child: FadeTransition(
+        opacity: _opacityAnimation,
+        child: widget.child,
       ),
     );
   }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/features/profile/presentation/widgets/add_hostel_sheet.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/pages/property_setup_stepper_page.dart';
 
 class MyHostelsPage extends StatefulWidget {
   const MyHostelsPage({super.key});
@@ -89,7 +88,7 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
           return const SizedBox.shrink();
         },
       ),
-      floatingActionButton: _buildFAB(context),
+      
     );
   }
 
@@ -111,6 +110,18 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
           letterSpacing: -0.5,
         ),
       ),
+      actions: [
+        IconButton(
+          onPressed: () {
+            Navigator.push(
+              context, 
+              MaterialPageRoute(builder: (context) => const PropertySetupStepperPage())
+            );
+          },
+          icon: Icon(Icons.add_business_rounded, color: AppColors.primaryBlue, size: 24.sp),
+        ),
+        SizedBox(width: 8.w),
+      ],
     );
   }
 
@@ -207,7 +218,7 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
           ),
           SizedBox(height: 32.h),
           ElevatedButton.icon(
-            onPressed: () => AddHostelSheet.show(context),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PropertySetupStepperPage())),
             icon: const Icon(Icons.add_rounded, color: Colors.white),
             label: const Text('Add My First Hostel'),
             style: ElevatedButton.styleFrom(
@@ -221,21 +232,6 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
     );
   }
 
-  Widget _buildFAB(BuildContext context) {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        HapticFeedback.mediumImpact();
-        AddHostelSheet.show(context);
-      },
-      backgroundColor: AppColors.primaryBlue,
-      elevation: 8,
-      icon: const Icon(Icons.add_rounded, color: Colors.white),
-      label: Text(
-        'Add Hostel',
-        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: Colors.white),
-      ),
-    );
-  }
 }
 
 class _PremiumHostelCard extends StatelessWidget {
@@ -390,28 +386,48 @@ class _PremiumHostelCard extends StatelessWidget {
   }
 }
 
-class _StaggeredEntry extends StatelessWidget {
+class _StaggeredEntry extends StatefulWidget {
   final Widget child;
   final int delayMs;
 
   const _StaggeredEntry({required this.child, required this.delayMs});
 
   @override
+  State<_StaggeredEntry> createState() => _StaggeredEntryState();
+}
+
+class _StaggeredEntryState extends State<_StaggeredEntry> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 600 + widget.delayMs),
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 600 + delayMs),
-      curve: Curves.easeOutQuart,
-      builder: (context, value, child) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
         return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 30 * (1 - value)),
-            child: child,
-          ),
+          opacity: _animation.value,
+          child: child,
         );
       },
-      child: child,
+      child: widget.child,
     );
   }
 }

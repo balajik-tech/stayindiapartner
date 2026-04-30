@@ -201,6 +201,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                 (room) {
                   final isPreAllocatedRoom = room.id == widget.preAllocatedRoomId;
                   return RoomCard(
+                    id: room.id,
                     roomNumber: room.roomNumber,
                     sharingType: room.sharingType,
                     occupancy: room.occupancy,

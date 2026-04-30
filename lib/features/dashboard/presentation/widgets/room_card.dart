@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'occupied_bed_sheet.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart';
-import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 
 class RoomCard extends StatefulWidget {
+  final String id;
   final String roomNumber;
   final String sharingType;
   final String occupancy;
@@ -19,9 +18,14 @@ class RoomCard extends StatefulWidget {
 
   final bool isPreAllocated;
   final String? preAllocatedBedNumber;
+  final bool isGridView;
+  final double? rent;
+  final double? dailyRent;
+  final String? roomType;
 
   const RoomCard({
     super.key,
+    required this.id,
     required this.roomNumber,
     required this.sharingType,
     required this.occupancy,
@@ -30,210 +34,165 @@ class RoomCard extends StatefulWidget {
     this.onBedTap,
     this.isPreAllocated = false,
     this.preAllocatedBedNumber,
+    this.isGridView = true,
+    this.rent,
+    this.dailyRent,
+    this.roomType,
   });
 
   @override
   State<RoomCard> createState() => _RoomCardState();
 }
 
-class _RoomCardState extends State<RoomCard> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+class _RoomCardState extends State<RoomCard> {
   @override
   Widget build(BuildContext context) {
-    String cleanRoomNum = widget.roomNumber.toLowerCase().startsWith('room') 
-        ? widget.roomNumber.substring(4).trim() 
-        : widget.roomNumber;
-
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          margin: EdgeInsets.only(bottom: 20.h),
-          padding: EdgeInsets.all(18.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-            border: Border.all(
-              color: AppColors.roomCardBorder.withValues(alpha: 0.3),
-              width: 1.5,
+      onLongPress: () => _showDeleteConfirmation(context),
+      child: Container(
+        margin: widget.isGridView ? EdgeInsets.zero : EdgeInsets.only(bottom: 16.h),
+        padding: EdgeInsets.all(widget.isGridView ? 8.w : 12.r),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
+          ],
+          border: Border.all(
+            color: Colors.grey.shade100,
+            width: 1,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 52.w,
-                    height: 52.w,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [const Color(0xFFEFF4FF), const Color(0xFFF1F3FE)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      cleanRoomNum,
-                      style: TextStyle(
-                        color: AppColors.primaryBlue,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 18.sp,
-                      ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    widget.roomNumber.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14.sp, 
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF1E325C),
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Room $cleanRoomNum',
-                          style: TextStyle(
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.darkText,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          '${widget.sharingType}  ${widget.occupancy}',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            color: AppColors.greyText.withValues(alpha: 0.8),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                ),
+                const Spacer(),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F4F9),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    widget.roomType ?? (widget.sharingType.contains('AC') ? 'AC' : 'NON-AC'),
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF9EA3B0),
                     ),
                   ),
-                  _StatusIndicator(occupancy: widget.occupancy),
-                ],
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              'Rent: ₹${widget.rent?.toStringAsFixed(0) ?? "0"}',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.grey.shade500,
               ),
-              SizedBox(height: 20.h),
-              Wrap(
-                spacing: 12.w,
-                runSpacing: 12.h,
-                children: widget.beds.map((bed) => _buildBedIcon(context, bed)).toList(),
-              ),
-            ],
-          ),
+            ),
+            SizedBox(height: 16.h),
+            Wrap(
+              spacing: widget.isGridView ? 2.w : 8.w,
+              runSpacing: widget.isGridView ? 8.h : 10.h,
+              alignment: WrapAlignment.start,
+              children: widget.beds.map((bed) => SizedBox(
+                width: widget.isGridView ? 48.w : 64.w, 
+                child: _buildBedItem(context, bed),
+              )).toList(),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildBedIcon(BuildContext context, BedInfo bed) {
-    bool isPreAllocatedBed = widget.isPreAllocated && bed.bedNumber == widget.preAllocatedBedNumber;
-    bool isOccupied = bed.status == 'OCCUPIED';
-    bool isReserved = bed.status == 'LOCKED' || bed.status == 'BOOKED';
-    bool isAway = bed.status == 'AWAY';
+  Widget _buildBedItem(BuildContext context, BedInfo bed) {
+    final status = bed.status;
+    Color bgColor;
+    Color borderColor;
+    Color textColor;
+    IconData icon = Icons.hotel_rounded;
+    String label = '';
+    String bedLetter = '';
     
-    Widget content;
-    if ((isOccupied || isReserved || isAway) && bed.tenantName != null) {
-      content = Container(
-        padding: EdgeInsets.all(2.w),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isAway 
-                ? Colors.orange.shade700 
-                : (isOccupied ? AppColors.primaryBlue.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.4)),
-            width: 2.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isAway 
-                  ? Colors.orange.withValues(alpha: 0.2) 
-                  : Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: CustomAvatar(
-          imageUrl: ApiConstants.getImageUrl(bed.tenantAvatar),
-          name: bed.tenantName!,
-          size: 44.0,
-          isCircle: true,
-        ),
-      );
-    } else {
-      String bedLabel = '';
-      try {
-        String cleanedNumber = bed.bedNumber.trim();
-        int? num = int.tryParse(cleanedNumber);
-        if (num != null && num >= 1 && num <= 26) {
-          bedLabel = String.fromCharCode(64 + num);
-        } else {
-          bedLabel = cleanedNumber.toUpperCase();
-        }
-      } catch (e) {
-        bedLabel = bed.bedNumber;
+    try {
+      int? num = int.tryParse(bed.bedNumber);
+      if (num != null && num >= 1 && num <= 26) {
+        bedLetter = String.fromCharCode(64 + num);
+      } else {
+        bedLetter = bed.bedNumber.toUpperCase();
       }
+    } catch (_) {
+      bedLetter = bed.bedNumber;
+    }
 
-      content = Container(
-        width: 46.w,
-        height: 46.w,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: AppColors.greyText.withValues(alpha: 0.1),
-            width: 1.5,
-          ),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          bedLabel,
-          style: TextStyle(
-            color: AppColors.greyText.withValues(alpha: 0.6),
-            fontSize: 15.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      );
+    switch (status) {
+      case 'OCCUPIED':
+        bgColor = const Color(0xFFFFEBEE); 
+        borderColor = const Color(0xFFEF9A9A);
+        textColor = const Color(0xFFC62828);
+        label = bed.tenantName ?? '';
+        break;
+      case 'FREE':
+        bgColor = const Color(0xFFE8F5E9); 
+        borderColor = const Color(0xFFA5D6A7);
+        textColor = const Color(0xFF2E7D32);
+        label = 'FREE';
+        break;
+      case 'NOTICE':
+        bgColor = const Color(0xFFFFF3E0); 
+        borderColor = const Color(0xFFFFCC80);
+        textColor = const Color(0xFFE65100);
+        label = 'NOTICE';
+        break;
+      case 'LOCKED':
+      case 'MAINTENANCE':
+        bgColor = const Color(0xFFF5F5F5);
+        borderColor = const Color(0xFFE0E0E0);
+        textColor = const Color(0xFF616161);
+        icon = Icons.build_rounded;
+        label = 'MAINT';
+        break;
+      case 'BOOKED':
+        bgColor = const Color(0xFFF3E5F5); 
+        borderColor = const Color(0xFFCE93D8);
+        textColor = const Color(0xFF6A1B9A);
+        label = 'BOOKED';
+        break;
+      default:
+        bgColor = Colors.grey.shade50;
+        borderColor = Colors.grey.shade200;
+        textColor = Colors.grey;
+        label = 'UNK';
     }
 
     return GestureDetector(
-      key: ValueKey('bed_${bed.bedNumber}'),
       onTap: () {
-        if ((isOccupied || isReserved || isAway) && bed.tenantId != null) {
+        if (status != 'FREE') {
           final hId = widget.hostelId ?? _getHostelId(context);
-          if (hId != null) {
+          if (hId != null && bed.tenantId != null) {
             OccupiedBedSheet.show(
               context,
               roomNumber: widget.roomNumber,
@@ -244,29 +203,40 @@ class _RoomCardState extends State<RoomCard> with SingleTickerProviderStateMixin
               hostelId: hId,
             );
           }
-        } else if (widget.onBedTap != null && (bed.status == 'FREE' || isPreAllocatedBed)) {
-          widget.onBedTap!(widget.roomNumber, bed.bedNumber);
         }
       },
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          content,
-          if (isPreAllocatedBed)
-            Positioned(
-              right: -2,
-              top: -2,
-              child: Container(
-                width: 14.w,
-                height: 14.w,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
+      child: Container(
+        width: 60.w,
+        height: 60.w,
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: borderColor, width: 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: textColor.withValues(alpha: 0.6), size: 16.sp),
+            Text(
+              bedLetter,
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w900,
+                color: textColor,
               ),
             ),
-        ],
+            Text(
+              label.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 7.sp,
+                fontWeight: FontWeight.w800,
+                color: textColor.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -278,57 +248,78 @@ class _RoomCardState extends State<RoomCard> with SingleTickerProviderStateMixin
     }
     return null;
   }
-}
 
-class _StatusIndicator extends StatelessWidget {
-  final String occupancy;
-  const _StatusIndicator({required this.occupancy});
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+          title: Text(
+            'Delete Room?',
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E325C)),
+          ),
+          content: Text(
+            'Are you sure you want to delete ${widget.roomNumber}? This action cannot be undone.',
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w700, fontSize: 14.sp),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final hId = widget.hostelId ?? _getHostelId(context);
+                if (hId == null) return;
 
-  @override
-  Widget build(BuildContext context) {
-    
-    bool isFull = false;
-    try {
-      final parts = occupancy.split('/');
-      if (parts.length >= 2) {
-        final occupied = int.tryParse(parts[0].trim()) ?? 0;
-        final totalPart = parts[1].trim().split(' ')[0];
-        final total = int.tryParse(totalPart) ?? 0;
-        isFull = occupied >= total && total > 0;
-      }
-    } catch (_) {
-      isFull = false;
-    }
-    
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: isFull ? const Color(0xFFFFF5F5) : const Color(0xFFF3FEF7),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6.w,
-            height: 6.w,
-            decoration: BoxDecoration(
-              color: isFull ? const Color(0xFFE03131) : const Color(0xFF099268),
-              shape: BoxShape.circle,
+                Navigator.pop(context); 
+
+                try {
+                  await context.read<DashboardCubit>().deleteRoom(widget.id, hId);
+                  
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Room ${widget.roomNumber} deleted successfully'),
+                        backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to delete room: $e'),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              ),
+              child: Text(
+                'Delete',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.sp),
+              ),
             ),
-          ),
-          SizedBox(width: 6.w),
-          Text(
-            isFull ? 'Full' : 'Available',
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w800,
-              color: isFull ? const Color(0xFFE03131) : const Color(0xFF099268),
-              letterSpacing: 0.2,
-            ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }
+
+

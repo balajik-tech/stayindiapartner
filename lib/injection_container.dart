@@ -23,6 +23,8 @@ import 'package:stayindia_owner/features/notices/notice_injections.dart';
 import 'package:stayindia_owner/features/payments/payment_injections.dart';
 import 'package:stayindia_owner/features/maintenance/maintenance_injections.dart';
 import 'package:stayindia_owner/features/finance/finance_injections.dart';
+import 'package:stayindia_owner/features/notifications/notification_injections.dart';
+import 'package:stayindia_owner/features/property_setup/property_setup_injections.dart';
 
 final sl = GetIt.instance;
 
@@ -38,6 +40,8 @@ Future<void> init() async {
   registerNoticeFeature(sl);
   registerPaymentFeature(sl);
   registerMaintenanceFeature(sl);
+  registerNotificationFeature(sl);
+  registerPropertySetupFeature(sl);
   initFinanceInjections();
   
   
@@ -64,8 +68,8 @@ Future<void> init() async {
     final dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
       ),
     );
     
@@ -79,7 +83,8 @@ Future<void> init() async {
           }
           options.headers['Accept'] = 'application/json';
           if (['POST', 'PUT', 'PATCH'].contains(options.method)) {
-            options.headers['Content-Type'] = 'application/json';
+            
+            options.headers['Content-Type'] ??= 'application/json';
           }
           AppLogger.debug('[REQUEST] ${options.method} ${options.uri}');
           return handler.next(options);

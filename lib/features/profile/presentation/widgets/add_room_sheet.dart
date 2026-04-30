@@ -36,6 +36,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
   bool _isSaving = false;
   late TextEditingController _nameController;
   late TextEditingController _rentController;
+  late TextEditingController _dailyRentController;
   late TextEditingController _depositController;
   late TextEditingController _maintenanceController;
   late String _selectedType;
@@ -77,6 +78,9 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     _rentController = TextEditingController(
       text: room != null ? room.rent.toStringAsFixed(0) : '',
     );
+    _dailyRentController = TextEditingController(
+      text: room != null ? room.dailyRent.toStringAsFixed(0) : '',
+    );
     _depositController = TextEditingController(
       text: room != null ? room.deposit.toStringAsFixed(0) : '',
     );
@@ -93,12 +97,26 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
         if (mounted) _onMappingChanged();
       });
     }
+
+    _rentController.addListener(_onRentChanged);
+  }
+
+  void _onRentChanged() {
+    final monthly = double.tryParse(_rentController.text) ?? 0;
+    final currentDaily = double.tryParse(_dailyRentController.text) ?? 0;
+    
+    
+    if (monthly > 0 && currentDaily == 0) {
+      final daily = (monthly / 30).round();
+      _dailyRentController.text = daily.toString();
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _rentController.dispose();
+    _dailyRentController.dispose();
     _depositController.dispose();
     _maintenanceController.dispose();
     super.dispose();
@@ -121,18 +139,27 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
         final template = state.rooms.firstWhere(
           (r) =>
               r.isMaster &&
-              r.floor == _selectedFloor &&
+              (r.floors.isEmpty
+                  ? r.floor == _selectedFloor
+                  : r.floors.contains(_selectedFloor)) &&
               r.roomType == _selectedType &&
               r.sharingType == backendSharingType,
         );
 
         setState(() {
           _rentController.text = template.rent.toStringAsFixed(0);
+          _dailyRentController.text = template.dailyRent.toStringAsFixed(0);
           _depositController.text = template.deposit.toStringAsFixed(0);
           _maintenanceController.text = template.maintenance.toStringAsFixed(0);
         });
       } catch (e) {
-        // Silently fail if no master template matches the current selection
+        
+        setState(() {
+          _rentController.clear();
+          _dailyRentController.clear();
+          _depositController.clear();
+          _maintenanceController.clear();
+        });
       }
     }
   }
@@ -231,8 +258,8 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                       SizedBox(width: 12.w),
                       Expanded(
                         child: _buildTextField(
-                          _depositController,
-                          label: 'Deposit',
+                          _dailyRentController,
+                          label: 'Daily Rent',
                           hint: '0',
                           keyboardType: TextInputType.number,
                         ),
@@ -240,11 +267,26 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                     ],
                   ),
                   SizedBox(height: 16.h),
-                  _buildTextField(
-                    _maintenanceController,
-                    label: 'Maintenance (per month)',
-                    hint: '0',
-                    keyboardType: TextInputType.number,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          _depositController,
+                          label: 'Deposit',
+                          hint: '0',
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: _buildTextField(
+                          _maintenanceController,
+                          label: 'Maintenance',
+                          hint: '0',
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 40.h),
                   _buildSaveButton(isEditing),
@@ -409,6 +451,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                         sharingTypeMap[_selectedSharingType] ?? _selectedSharingType,
                     'roomType': _selectedType,
                     'rent': double.tryParse(_rentController.text) ?? 0,
+                    'dailyRent': double.tryParse(_dailyRentController.text) ?? 0,
                     'deposit': double.tryParse(_depositController.text) ?? 0,
                     'maintenance':
                         double.tryParse(_maintenanceController.text) ?? 0,

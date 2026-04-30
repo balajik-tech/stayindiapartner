@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "730093151187",
+    "project_id": "stay-india-owner",
+    "storage_bucket": "stay-india-owner.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730093151187:android:a9bc20872776c1f18b8526",
+        "android_client_info": {
+          "package_name": "com.example.stayindia_owner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKIpOcnkMDeZFSnDFacJJ_GIBIevH-G_o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -10,6 +10,7 @@ class HostelCubit extends Cubit<HostelState> {
   final UpdateHostelUseCase _updateHostel;
   final DeleteHostelUseCase _deleteHostel;
   final UploadHostelImagesUseCase _uploadHostelImages;
+  final UpdateHostelLocationUseCase _updateHostelLocation;
 
   HostelCubit({
     required GetHostelsUseCase getHostelsUseCase,
@@ -17,11 +18,13 @@ class HostelCubit extends Cubit<HostelState> {
     required UpdateHostelUseCase updateHostelUseCase,
     required DeleteHostelUseCase deleteHostelUseCase,
     required UploadHostelImagesUseCase uploadHostelImagesUseCase,
+    required UpdateHostelLocationUseCase updateHostelLocationUseCase,
   })  : _getHostels = getHostelsUseCase,
         _createHostel = createHostelUseCase,
         _updateHostel = updateHostelUseCase,
         _deleteHostel = deleteHostelUseCase,
         _uploadHostelImages = uploadHostelImagesUseCase,
+        _updateHostelLocation = updateHostelLocationUseCase,
         super(HostelInitial());
 
   Future<void> getHostels({bool forceRefresh = false}) async {
@@ -148,6 +151,23 @@ class HostelCubit extends Cubit<HostelState> {
       if (isClosed) return;
       emit(HostelOperationSuccess(message: 'Hostel deleted successfully'));
       await getHostels();
+    } catch (e) {
+      if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+    }
+  }
+
+  Future<void> updateHostelLocation({
+    required String id,
+    required double lat,
+    required double lng,
+  }) async {
+    if (isClosed) return;
+    emit(HostelLoading());
+    try {
+      await _updateHostelLocation(id, lat, lng);
+      if (isClosed) return;
+      emit(HostelOperationSuccess(message: 'Property location updated successfully'));
+      await getHostels(forceRefresh: true);
     } catch (e) {
       if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
     }

@@ -13,6 +13,7 @@ abstract class HostelRemoteDataSource {
   Future<HostelModel> updateHostel(HostelModel hostel);
   Future<void> deleteHostel(String id);
   Future<HostelModel> uploadHostelImages(String id, List<String> filePaths);
+  Future<void> updateHostelLocation(String id, double lat, double lng);
 }
 
 class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
@@ -147,6 +148,22 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
       throw Exception('Failed to upload hostel images');
     } catch (e) {
       rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateHostelLocation(String id, double lat, double lng) async {
+    try {
+      final response = await dio.patch(
+        '${ApiConstants.propertyOccupancyStatus}/$id/location',
+        data: {'lat': lat, 'lng': lng},
+      );
+      
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update property location');
+      }
+    } catch (e) {
+      throw Exception('Error updating property location: $e');
     }
   }
 }

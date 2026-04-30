@@ -53,6 +53,7 @@ void registerProfileFeature(GetIt sl) {
         updateHostelUseCase: sl(),
         deleteHostelUseCase: sl(),
         uploadHostelImagesUseCase: sl(),
+        updateHostelLocationUseCase: sl(),
       ));
       
   sl.registerFactory(() => RoomCubit(
@@ -101,6 +102,7 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => UpdateHostelUseCase(sl()));
   sl.registerLazySingleton(() => DeleteHostelUseCase(sl()));
   sl.registerLazySingleton(() => UploadHostelImagesUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateHostelLocationUseCase(sl()));
 
   sl.registerLazySingleton(() => GetOccupancyUseCase(sl()));
   sl.registerLazySingleton(() => GetFloorWiseRoomsUseCase(sl()));

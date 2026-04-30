@@ -7,6 +7,7 @@ class ApiConstants {
   static const String requestOtp = '/auth/request-otp';
   static const String verifyOtp = '/auth/verify-otp';
   static const String getMe = '/auth/me';
+  static const String deviceToken = '/auth/device-token';
 
   static const String hostels = '/hostels';
   static const String hostelsHome = '/hostels/home';
@@ -35,6 +36,7 @@ class ApiConstants {
   static const String dashboardDailyOps = '/dashboard/daily-operations'; 
   static const String dashboardOccupancy = '/dashboard/occupancy';
   static const String dashboardRentDue = '/dashboard/rent-due';
+  static const String propertyOccupancyStatus = '/property'; 
 
   static const String foodMenu = '/food-menu'; 
   static const String foodMenuWeekly = '/food-menu/weekly'; 
@@ -51,11 +53,13 @@ class ApiConstants {
   static const String ownerCommunities = '/owner-communities'; 
 
   static const String announcements = '/announcements';
+  static const String associations = '/associations';
+  static const String sos = '/sos';
 
   static const String tickets = '/tickets'; 
 
   static const String notices = '/notices'; 
-
+  static const String notifications = '/notifications'; 
   static const String payments = '/payments'; 
   static const String paymentPay = '/payments'; 
   static const String paymentRemind = '/payments'; 

@@ -3,9 +3,11 @@ class RoomDetail {
   final String hostelId;
   final String roomTypename;
   final int floor;
+  final List<int> floors;
   final String sharingType;
   final String roomType; 
   final double rent;
+  final double dailyRent;
   final double deposit;
   final double maintenance;
   final bool isActive;
@@ -18,9 +20,11 @@ class RoomDetail {
     required this.hostelId,
     required this.roomTypename,
     required this.floor,
+    this.floors = const [],
     required this.sharingType,
     required this.roomType,
     required this.rent,
+    this.dailyRent = 0,
     required this.deposit,
     required this.maintenance,
     required this.isActive,

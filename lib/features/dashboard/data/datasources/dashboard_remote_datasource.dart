@@ -5,10 +5,13 @@ import 'package:stayindia_owner/features/dashboard/data/models/occupancy_model.d
 import 'package:stayindia_owner/features/dashboard/data/models/daily_operations_model.dart';
 import 'package:stayindia_owner/features/dashboard/data/models/rent_due_model.dart';
 
+import 'package:stayindia_owner/features/dashboard/data/models/occupancy_status_model.dart';
+
 abstract class DashboardRemoteDataSource {
   Future<OccupancyModel> getOccupancy(String hostelId);
   Future<DailyOperationsModel> getDailyOperations(String hostelId);
   Future<RentDueDetailsModel> getRentDueDetails(String hostelId);
+  Future<OccupancyStatusModel> getOccupancyStatus(String hostelId);
 }
 
 class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
@@ -54,5 +57,19 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     }
     
     throw Exception('Failed to load rent due details: ${response.statusCode}');
+  }
+
+  @override
+  Future<OccupancyStatusModel> getOccupancyStatus(String hostelId) async {
+    AppLogger.info('Fetching occupancy status (Geo-Fence) for hostel: $hostelId');
+    
+    final response = await _dio.get('${ApiConstants.propertyOccupancyStatus}/$hostelId/occupancy-status');
+    
+    if (response.statusCode == 200) {
+      final data = response.data['data'] ?? response.data;
+      return OccupancyStatusModel.fromJson(data);
+    }
+    
+    throw Exception('Failed to load occupancy status: ${response.statusCode}');
   }
 }

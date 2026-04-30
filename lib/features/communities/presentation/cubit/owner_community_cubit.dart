@@ -97,6 +97,26 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
     }
   }
 
+  Future<void> discoverCommunities({String? level, String? stateId, String? districtId, String? wardId, String? localityId}) async {
+    final s = state;
+    if (s is OwnerCommunityLoaded) {
+      emit(OwnerCommunityLoading());
+      try {
+        final filters = <String, String>{};
+        if (level != null) filters['level'] = level;
+        if (stateId != null) filters['stateId'] = stateId;
+        if (districtId != null) filters['districtId'] = districtId;
+        if (wardId != null) filters['wardId'] = wardId;
+        if (localityId != null) filters['localityId'] = localityId;
+
+        final results = await _getAvailable(filters: filters);
+        emit(s.copyWith(availableCommunities: results));
+      } catch (e) {
+        emit(OwnerCommunityError(message: ErrorHelper.toFriendlyMessage(e)));
+      }
+    }
+  }
+
   Future<void> joinCommunity(String communityId) async {
     final s = state;
     if (s is OwnerCommunityLoaded) {
@@ -126,7 +146,17 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
     }
   }
 
-  Future<void> createCommunity(String name, String description, [String? imagePath]) async {
+  Future<void> createCommunity(
+    String name,
+    String description, {
+    String? imagePath,
+    String? coverImagePath,
+    String? level,
+    String? stateId,
+    String? districtId,
+    String? wardId,
+    String? localityId,
+  }) async {
     final s = state;
     if (s is OwnerCommunityLoaded) {
       emit(s.copyWith(isCreating: true));
@@ -135,6 +165,12 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
           name: name,
           description: description,
           imagePath: imagePath,
+          coverImagePath: coverImagePath,
+          level: level,
+          stateId: stateId,
+          districtId: districtId,
+          wardId: wardId,
+          localityId: localityId,
         );
         await loadCommunities();
       } catch (e) {

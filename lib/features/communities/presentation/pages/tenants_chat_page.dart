@@ -10,12 +10,16 @@ import 'package:stayindia_owner/features/communities/presentation/widgets/chat_m
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:stayindia_owner/core/utils/image_compressor.dart';
 
-class TenantsChatPage extends StatefulWidget {
+class TenantsChatPage extends StatelessWidget {
   final String hostelId;
   final String? communityName;
   final String? communityIcon;
   final String? communityDescription;
+  final bool isOwnerChat;
 
   const TenantsChatPage({
     super.key,
@@ -23,13 +27,23 @@ class TenantsChatPage extends StatefulWidget {
     this.communityName,
     this.communityIcon,
     this.communityDescription,
+    this.isOwnerChat = false,
   });
 
   @override
-  State<TenantsChatPage> createState() => _TenantsChatPageState();
+  Widget build(BuildContext context) {
+    return const _TenantsChatView();
+  }
 }
 
-class _TenantsChatPageState extends State<TenantsChatPage> {
+class _TenantsChatView extends StatefulWidget {
+  const _TenantsChatView();
+
+  @override
+  State<_TenantsChatView> createState() => _TenantsChatViewState();
+}
+
+class _TenantsChatViewState extends State<_TenantsChatView> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -37,19 +51,25 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
   void initState() {
     super.initState();
     
-    final cubit = context.read<CommunityCubit>();
-    final ownerId = context.read<AuthCubit>().currentOwner?.id;
-    if (ownerId != null) {
-      cubit.joinCommunity(widget.hostelId, ownerId);
-    }
-
     
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final cubit = context.read<CommunityCubit>();
+      final ownerId = context.read<AuthCubit>().currentOwner?.id;
+      final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+      
+      if (ownerId != null) {
+        cubit.loadCommunityData(page.hostelId);
+        cubit.joinCommunity(page.hostelId, ownerId);
+      }
+    });
+
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels <= 40) {
-      context.read<CommunityCubit>().loadOlderMessages(widget.hostelId);
+      final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+      context.read<CommunityCubit>().loadOlderMessages(page.hostelId);
     }
   }
 
@@ -63,26 +83,53 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
   void _sendMessage() {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
-      context.read<CommunityCubit>().sendMessage(widget.hostelId, text);
+      final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+      context.read<CommunityCubit>().sendMessage(page.hostelId, text);
       _controller.clear();
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  Future<void> _pickAndSendImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (image != null) {
       
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Compressing and sending image...')),
+      );
+
+      final compressedFile = await ImageCompressor.compressImage(File(image.path));
+      if (compressedFile != null) {
+        if (!mounted) return;
+        final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+        context.read<CommunityCubit>().sendImageMessage(page.hostelId, compressedFile.path);
+        _scrollToBottom();
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: _buildAppBar(context),
+      appBar: _buildAppBar(context, page),
       body: Column(
         children: [
           Expanded(
@@ -161,6 +208,8 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
                         senderName: message.senderName,
                         senderAvatar: message.senderAvatar,
                         text: message.text,
+                        imageUrl: message.imageUrl,
+                        roomId: message.roomId,
                         createdAt: message.createdAt,
                         type: message.type,
                         isSystem: message.isSystem,
@@ -171,17 +220,44 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
                     },
                   );
                 }
+                if (state is CommunityError) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.w),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error_outline_rounded, size: 48.sp, color: Colors.red.shade300),
+                          SizedBox(height: 16.h),
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.outfit(color: AppColors.greyText),
+                          ),
+                          SizedBox(height: 24.h),
+                          ElevatedButton(
+                            onPressed: () {
+                              final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+                              context.read<CommunityCubit>().loadCommunityData(page.hostelId);
+                            },
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
                 return const SizedBox.shrink();
               },
             ),
           ),
-          _buildInputSection(),
+          _buildInputSection(page),
         ],
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, TenantsChatPage page) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -195,7 +271,7 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => CommunityDetailPage(communityId: widget.hostelId),
+              builder: (_) => CommunityDetailPage(communityId: page.hostelId),
             ),
           );
         },
@@ -207,14 +283,14 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
               decoration: BoxDecoration(
                 color: AppColors.primaryBlue.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(10.r),
-                image: widget.communityIcon != null
+                image: page.communityIcon != null
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(widget.communityIcon!),
+                        image: CachedNetworkImageProvider(page.communityIcon!),
                         fit: BoxFit.cover,
                       )
                     : null,
               ),
-              child: widget.communityIcon == null
+              child: page.communityIcon == null
                   ? Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 20.sp)
                   : null,
             ),
@@ -224,7 +300,7 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.communityName ?? 'Tenants Community',
+                    page.communityName ?? 'Tenants Community',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.outfit(
@@ -251,7 +327,7 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
     );
   }
 
-  Widget _buildInputSection() {
+  Widget _buildInputSection(TenantsChatPage page) {
     return Container(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h), 
       decoration: BoxDecoration(
@@ -266,6 +342,20 @@ class _TenantsChatPageState extends State<TenantsChatPage> {
       ),
       child: Row(
         children: [
+          if (page.isOwnerChat) ...[
+            BouncingWrapper(
+              onTap: _pickAndSendImage,
+              child: Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.add_photo_alternate_rounded, color: AppColors.primaryBlue, size: 20),
+              ),
+            ),
+            SizedBox(width: 12.w),
+          ],
           Expanded(
             child: Container(
               decoration: BoxDecoration(

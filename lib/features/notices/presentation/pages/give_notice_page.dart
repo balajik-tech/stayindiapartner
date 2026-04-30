@@ -10,6 +10,8 @@ import 'package:stayindia_owner/features/notices/presentation/cubit/notice_cubit
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 
+enum NoticeType { general, vacant }
+
 class GiveNoticePage extends StatefulWidget {
   final TenantEntity? tenant;
   const GiveNoticePage({super.key, this.tenant});
@@ -21,8 +23,11 @@ class GiveNoticePage extends StatefulWidget {
 class _GiveNoticePageState extends State<GiveNoticePage> {
   final _formKey = GlobalKey<FormState>();
   final _reasonController = TextEditingController();
+  final _titleController = TextEditingController();
   final _tenantSearchController = TextEditingController();
 
+  NoticeType _noticeType = NoticeType.vacant;
+  bool _sendToAllTenants = false;
   DateTime _noticeDate = DateTime.now();
   DateTime _vacatingDate = DateTime.now().add(const Duration(days: 30));
 
@@ -109,35 +114,15 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('Tenant Details'),
-                SizedBox(height: 16.h),
-                _buildTenantSelector(),
-                if (_selectedTenant != null) ...[
-                  SizedBox(height: 16.h),
-                  _buildSelectedTenantInfo(),
+                _buildTypeToggle(),
+                SizedBox(height: 32.h),
+                
+                if (_noticeType == NoticeType.general) ...[
+                  _buildGeneralNoticeSection(),
+                ] else ...[
+                  _buildVacantNoticeSection(),
                 ],
-                SizedBox(height: 32.h),
-                _buildSectionTitle('Dates'),
-                SizedBox(height: 16.h),
-                Row(
-                  children: [
-                    Expanded(child: _buildDatePicker('Notice Date', _noticeDate, (d) => setState(() => _noticeDate = d))),
-                    SizedBox(width: 16.w),
-                    Expanded(child: _buildDatePicker('Vacating Date', _vacatingDate, (d) => setState(() => _vacatingDate = d))),
-                  ],
-                ),
-                SizedBox(height: 32.h),
-                _buildSectionTitle('Reason (Optional)'),
-                SizedBox(height: 16.h),
-                TextFormField(
-                  controller: _reasonController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Relocating for work',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
-                  ),
-                ),
+                
                 SizedBox(height: 48.h),
                 _buildSubmitButton(context),
               ],
@@ -247,14 +232,154 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
     );
   }
 
+  Widget _buildTypeToggle() {
+    return Container(
+      padding: EdgeInsets.all(6.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          _buildTypeButton('General Notice', NoticeType.general),
+          _buildTypeButton('Vacant Notice', NoticeType.vacant),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeButton(String label, NoticeType type) {
+    final isSelected = _noticeType == type;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _noticeType = type),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.r),
+            boxShadow: isSelected
+                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))]
+                : null,
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+              color: isSelected ? AppColors.primaryBlue : AppColors.greyText,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGeneralNoticeSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildSectionTitle('Recipients'),
+            Row(
+              children: [
+                Text('All Tenants', style: TextStyle(fontSize: 13.sp, color: AppColors.greyText)),
+                Switch(
+                  value: _sendToAllTenants,
+                  onChanged: (val) => setState(() => _sendToAllTenants = val),
+                  activeThumbColor: AppColors.primaryBlue,
+                ),
+              ],
+            ),
+          ],
+        ),
+        SizedBox(height: 16.h),
+        if (!_sendToAllTenants) ...[
+          _buildTenantSelector(),
+          if (_selectedTenant != null) ...[
+            SizedBox(height: 16.h),
+            _buildSelectedTenantInfo(),
+          ],
+          SizedBox(height: 24.h),
+        ],
+        _buildSectionTitle('Title'),
+        SizedBox(height: 12.h),
+        TextFormField(
+          controller: _titleController,
+          decoration: InputDecoration(
+            hintText: 'e.g. Water Maintenance Update',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
+          ),
+          validator: (val) => val == null || val.isEmpty ? 'Please enter a title' : null,
+        ),
+        SizedBox(height: 24.h),
+        _buildSectionTitle('Message Content'),
+        SizedBox(height: 12.h),
+        TextFormField(
+          controller: _reasonController,
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: 'Type your message here...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
+          ),
+          validator: (val) => val == null || val.isEmpty ? 'Please enter message content' : null,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVacantNoticeSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Tenant Details'),
+        SizedBox(height: 16.h),
+        _buildTenantSelector(),
+        if (_selectedTenant != null) ...[
+          SizedBox(height: 16.h),
+          _buildSelectedTenantInfo(),
+        ],
+        SizedBox(height: 32.h),
+        _buildSectionTitle('Dates'),
+        SizedBox(height: 16.h),
+        Row(
+          children: [
+            Expanded(child: _buildDatePicker('Notice Date', _noticeDate, (d) => setState(() => _noticeDate = d))),
+            SizedBox(width: 16.w),
+            Expanded(child: _buildDatePicker('Vacating Date', _vacatingDate, (d) => setState(() => _vacatingDate = d))),
+          ],
+        ),
+        SizedBox(height: 32.h),
+        _buildSectionTitle('Reason (Optional)'),
+        SizedBox(height: 16.h),
+        TextFormField(
+          controller: _reasonController,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: 'e.g. Relocating for work',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSubmitButton(BuildContext context) {
     return BlocBuilder<NoticeCubit, NoticeState>(
       builder: (context, state) {
         final isLoading = state is NoticeSubmitting;
+        final isReady = _noticeType == NoticeType.general 
+            ? (_sendToAllTenants || _selectedTenant != null)
+            : (_selectedTenant != null);
+
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: (_selectedTenant == null || isLoading) ? null : () => _submit(context),
+            onPressed: (!isReady || isLoading) ? null : () => _submit(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
               padding: EdgeInsets.symmetric(vertical: 18.h),
@@ -270,15 +395,30 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
   }
 
   void _submit(BuildContext context) {
-    if (_formKey.currentState!.validate() && _selectedTenant != null) {
-      context.read<NoticeCubit>().createNotice(
-            hostelId: _selectedTenant!.hostelId,
-            tenantId: _selectedTenant!.id,
-            roomId: _selectedTenant!.roomId,
-            bedNumber: _selectedTenant!.bedNumber,
-            vacatingDate: DateFormat('yyyy-MM-dd').format(_vacatingDate),
-            reason: _reasonController.text,
-          );
+    if (!_formKey.currentState!.validate()) return;
+
+    final hostelState = context.read<HostelCubit>().state;
+    if (hostelState is! HostelLoaded || hostelState.hostels.isEmpty) return;
+    
+    final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+
+    if (_noticeType == NoticeType.general) {
+      context.read<NoticeCubit>().postAnnouncement(
+        hostelId: hostelId,
+        title: _titleController.text,
+        content: _reasonController.text,
+      );
+    } else {
+      if (_selectedTenant != null) {
+        context.read<NoticeCubit>().createNotice(
+              hostelId: hostelId,
+              tenantId: _selectedTenant!.id,
+              roomId: _selectedTenant!.roomId,
+              bedNumber: _selectedTenant!.bedNumber,
+              vacatingDate: DateFormat('yyyy-MM-dd').format(_vacatingDate),
+              reason: _reasonController.text,
+            );
+      }
     }
   }
 }
