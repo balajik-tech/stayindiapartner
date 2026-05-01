@@ -12,6 +12,17 @@ abstract class HostelState extends Equatable {
 
   @override
   List<Object?> get props => [lastFetched];
+
+  Map<String, dynamic> toJson() {
+    return {
+      'lastFetched': lastFetched?.toIso8601String(),
+    };
+  }
+
+  static HostelState? fromJson(Map<String, dynamic> json) {
+    
+    return null; 
+  }
 }
 
 class HostelInitial extends HostelState {
@@ -34,6 +45,14 @@ class HostelLoaded extends HostelState {
 
   @override
   List<Object?> get props => [hostels, selectedHostelIndex, lastFetched];
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'selectedHostelIndex': selectedHostelIndex,
+      'lastFetched': lastFetched?.toIso8601String(),
+    };
+  }
 }
 
 class HostelOperationSuccess extends HostelState {

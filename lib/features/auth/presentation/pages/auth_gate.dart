@@ -14,11 +14,8 @@ import 'login_page.dart';
 
 
 
-class AuthGate extends StatefulWidget {
-  
+class AuthGate extends StatelessWidget {
   final Widget dashboard;
-
-  
   final Widget registration;
 
   const AuthGate({
@@ -28,52 +25,38 @@ class AuthGate extends StatefulWidget {
   });
 
   @override
-  State<AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends State<AuthGate> {
-  Widget? _activeView;
-
-  Widget? _determineView(AuthState state) {
-    if (state is AuthInitial || state is AuthSessionRestoring) {
-      return const _SplashScreen();
-    } else if (state is AuthAuthenticated) {
-      final reqReg = state.requiresRegistration;
-      if (reqReg || state is AuthProfileCompleted) {
-        return widget.registration;
-      } else {
-        return widget.dashboard;
-      }
-    } else if (state is AuthUnauthenticated) {
-      return const LoginPage();
-    } else if (state is AuthSessionRestoreError) {
-      return _SessionErrorScreen(
-        message: state.message,
-        onRetry: () => context.read<AuthCubit>().restoreSession(),
-        onLogin: () => context.read<AuthCubit>().logout(),
-      );
-    } else if (state is AuthOtpSent) {
-      return const LoginPage();
-    }
-    return null; 
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthCubit, AuthState>(
-      listenWhen: (previous, current) => _determineView(current) != null,
-      listener: (context, state) {
-        final nextView = _determineView(state);
-        if (nextView != null) {
-          setState(() {
-            _activeView = nextView;
-          });
-        }
-      },
+    return BlocBuilder<AuthCubit, AuthState>(
+      buildWhen: (previous, current) =>
+          current is! AuthLoading &&
+          current is! AuthError &&
+          current is! AuthOtpSent, 
       builder: (context, state) {
+        if (state is AuthInitial || state is AuthSessionRestoring) {
+          return const _SplashScreen();
+        }
+
+        if (state is AuthAuthenticated) {
+          if (state.requiresRegistration) {
+            return registration;
+          }
+          return dashboard;
+        }
+
+        if (state is AuthUnauthenticated || state is AuthOtpSent) {
+          return const LoginPage();
+        }
+
+        if (state is AuthSessionRestoreError) {
+          return _SessionErrorScreen(
+            message: state.message,
+            onRetry: () => context.read<AuthCubit>().restoreSession(),
+            onLogin: () => context.read<AuthCubit>().logout(),
+          );
+        }
+
         
-        _activeView ??= _determineView(state) ?? const _SplashScreen();
-        return _activeView!;
+        return const LoginPage();
       },
     );
   }

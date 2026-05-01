@@ -12,6 +12,8 @@ abstract class RoomRemoteDataSource {
   Future<Map<String, dynamic>> getBedDetail(String roomId, String bedNumber);
   Future<List<Map<String, dynamic>>> getBedHistory(String roomId, String bedNumber);
   Future<RoomDetailModel> createRoom(RoomDetailModel room, String ownerId);
+  Future<List<RoomDetailModel>> bulkCreateRooms(List<RoomDetailModel> rooms, String ownerId);
+  Future<List<RoomDetailModel>> bulkUpsertRooms(List<RoomDetailModel> rooms, String ownerId);
   Future<RoomDetailModel> updateRoom(RoomDetailModel room);
   Future<void> deleteRoom(String id);
 }
@@ -144,6 +146,48 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
       }
     } catch (e) {
       throw Exception('Error creating room: $e');
+    }
+  }
+
+  @override
+  Future<List<RoomDetailModel>> bulkCreateRooms(List<RoomDetailModel> rooms, String ownerId) async {
+    try {
+      final response = await dio.post(
+        '${ApiConstants.rooms}/bulk',
+        data: rooms.map((r) => r.toCreateJson(ownerId)).toList(),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = response.data['data'] ?? response.data;
+        if (data is List) {
+          return data.map((j) => RoomDetailModel.fromJson(j)).toList();
+        }
+        return [];
+      } else {
+        throw Exception('Failed to create rooms in bulk');
+      }
+    } catch (e) {
+      throw Exception('Error creating rooms in bulk: $e');
+    }
+  }
+
+  @override
+  Future<List<RoomDetailModel>> bulkUpsertRooms(List<RoomDetailModel> rooms, String ownerId) async {
+    try {
+      final response = await dio.post(
+        '${ApiConstants.rooms}/bulk-upsert',
+        data: rooms.map((r) => r.toCreateJson(ownerId)).toList(),
+      );
+      if (response.statusCode == 200) {
+        final data = response.data['data'] ?? response.data;
+        if (data is List) {
+          return data.map((j) => RoomDetailModel.fromJson(j)).toList();
+        }
+        return [];
+      } else {
+        throw Exception('Failed to upsert rooms in bulk');
+      }
+    } catch (e) {
+      throw Exception('Error upserting rooms in bulk: $e');
     }
   }
 

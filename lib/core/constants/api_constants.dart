@@ -1,7 +1,7 @@
 class ApiConstants {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.koushiksoftwaresolutions.online/api/v1',
+    defaultValue: 'http://localhost:5050/api/v1',
   );
 
   static const String requestOtp = '/auth/request-otp';

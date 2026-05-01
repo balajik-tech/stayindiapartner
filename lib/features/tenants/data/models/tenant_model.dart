@@ -1,4 +1,6 @@
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
+
 
 class TenantModel extends TenantEntity {
   const TenantModel({
@@ -28,7 +30,10 @@ class TenantModel extends TenantEntity {
       bookingId: json['bookingId']?.toString() ?? '',
       hostelId: (json['hostel'] is Map ? json['hostel']['_id'] : json['hostel'])?.toString() ?? '',
       roomId: (json['roomId'] ?? (json['room'] is Map ? json['room']['_id'] : json['room']))?.toString() ?? '',
-      roomTypename: json['roomTypename']?.toString() ?? '',
+      roomTypename: StringUtils.formatRoomNumber(
+        json['roomTypename']?.toString() ?? '', 
+        json['floor'] is int ? json['floor'] : int.tryParse(json['floor']?.toString() ?? '0') ?? 0,
+      ),
       floor: json['floor'] is int ? json['floor'] : int.tryParse(json['floor']?.toString() ?? '0') ?? 0,
       bedNumber: json['bedNumber']?.toString() ?? '',
       firstName: json['firstName']?.toString() ?? '',
@@ -116,7 +121,10 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
               : json['bookingId'])
           ?.toString() ?? '',
       roomId: (room['_id'] ?? room['id'] ?? '').toString(),
-      roomTypename: room['roomTypename']?.toString() ?? '',
+      roomTypename: StringUtils.formatRoomNumber(
+        room['roomTypename']?.toString() ?? '', 
+        floorRaw is int ? floorRaw : int.tryParse(floorRaw?.toString() ?? '0') ?? 0,
+      ),
       floor: floorRaw is int
           ? floorRaw
           : int.tryParse(floorRaw?.toString() ?? '0') ?? 0,

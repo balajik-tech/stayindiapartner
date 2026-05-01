@@ -1,4 +1,6 @@
 import 'package:stayindia_owner/features/bookings/domain/booking.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
+
 
 class BookingModel extends Booking {
   BookingModel({
@@ -53,7 +55,7 @@ class BookingModel extends Booking {
       tenantName: fullName.isNotEmpty ? fullName : 'Unknown',
       tenantPhone: tenant['mobile']?.toString() ?? '',
       hostelName: hostel['name']?.toString() ?? '',
-      roomTypeName: room['roomTypename']?.toString() ?? '',
+      roomTypeName: StringUtils.formatRoomNumber(room['roomTypename']?.toString() ?? ''),
       bedNumber: json['bedNumber']?.toString() ?? '',
       status: status,
       checkInDate: json['checkInDate']?.toString() ?? json['startDate']?.toString() ?? '',
@@ -141,7 +143,7 @@ class ScanBookingResponseModel extends ScanBookingResponse {
       status: json['status'] ?? '',
       bookingStatus: json['bookingStatus'] ?? '',
       roomId: json['roomId'],
-      roomTypename: json['roomTypename'],
+      roomTypename: StringUtils.formatRoomNumber(json['roomTypename']?.toString() ?? ''),
       bedNumber: json['bedNumber'],
     );
   }

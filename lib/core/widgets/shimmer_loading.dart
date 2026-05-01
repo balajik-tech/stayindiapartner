@@ -175,3 +175,21 @@ class DetailsSkeleton extends StatelessWidget {
     );
   }
 }
+
+class DropdownSkeleton extends StatelessWidget {
+  const DropdownSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShimmerEffect(
+      child: Container(
+        height: 48,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+}

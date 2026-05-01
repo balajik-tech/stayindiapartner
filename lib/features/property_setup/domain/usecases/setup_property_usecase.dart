@@ -19,6 +19,11 @@ class SetupPropertyUseCase {
     required String area,
     required String city,
     required String state,
+    required String hostelType,
+    required List<String> images,
+    String? foodLicense,
+    String? hostelLicense,
+    String? tradeLicense,
   }) {
     return repository.setupCompleteProperty(
       hostelId: hostelId,
@@ -33,6 +38,11 @@ class SetupPropertyUseCase {
       area: area,
       city: city,
       state: state,
+      hostelType: hostelType,
+      images: images,
+      foodLicense: foodLicense,
+      hostelLicense: hostelLicense,
+      tradeLicense: tradeLicense,
     );
   }
 }

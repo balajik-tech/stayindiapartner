@@ -1,4 +1,6 @@
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
+
 
 class OccupancyModel extends Occupancy {
   OccupancyModel({
@@ -51,7 +53,7 @@ class FloorDataModel extends FloorData {
     return FloorDataModel(
       floorName: floorLabel,
       bedInfo: '$freeBeds/$totalBeds beds free',
-      rooms: roomsJson.map((r) => RoomModel.fromJson(r as Map<String, dynamic>)).toList(),
+      rooms: roomsJson.map((r) => RoomModel.fromJson(r as Map<String, dynamic>, floorLabel)).toList(),
     );
   }
 }
@@ -67,9 +69,12 @@ class RoomModel extends Room {
     required super.beds,
     super.rent,
     super.dailyRent,
+    super.maintenance,
+    super.features,
+    super.floorName,
   });
 
-  factory RoomModel.fromJson(Map<String, dynamic> json) {
+  factory RoomModel.fromJson(Map<String, dynamic> json, [String? floorName]) {
     final bedsJson = json['beds'] as List<dynamic>? ?? [];
     final occupied =
         bedsJson.where((b) => (b as Map)['status'] != 'FREE').length;
@@ -93,6 +98,7 @@ class RoomModel extends Room {
         tenantName: tenantName,
         tenantAvatar: tenant?['avatar']?.toString() ?? tenant?['userProfile']?['avatar']?.toString(),
         tenantId: tenant?['_id']?.toString() ?? tenant?['id']?.toString(),
+        isAway: tenant?['isAway'] == true,
       );
     }).toList();
 
@@ -104,7 +110,7 @@ class RoomModel extends Room {
 
     return RoomModel(
       id: json['_id'] ?? json['roomId'] ?? '',
-      roomNumber: json['roomTypename'] ?? '',
+      roomNumber: StringUtils.formatRoomNumber(json['roomTypename']?.toString() ?? '', floorName),
       sharingType: json['sharingType']?.toString() ?? '',
       roomType: json['roomType']?.toString() ?? '',
       occupancy: '$occupied/$total beds',
@@ -112,6 +118,9 @@ class RoomModel extends Room {
       beds: beds,
       rent: json['rent'] != null ? double.tryParse(json['rent'].toString()) : null,
       dailyRent: json['dailyRent'] != null ? double.tryParse(json['dailyRent'].toString()) : null,
+      maintenance: json['maintenance'] != null ? double.tryParse(json['maintenance'].toString()) : null,
+      features: (json['features'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      floorName: floorName,
     );
   }
 }

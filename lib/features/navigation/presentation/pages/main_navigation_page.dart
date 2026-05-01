@@ -15,7 +15,6 @@ import 'package:stayindia_owner/features/tenants/presentation/pages/tenants_page
 import 'package:stayindia_owner/features/profile/presentation/pages/profile_page.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
-import 'package:stayindia_owner/features/profile/presentation/widgets/add_hostel_sheet.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/communities_page.dart';
@@ -30,6 +29,9 @@ import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/app_drawer.dart';
+import '../widgets/global_action_sheet.dart';
+import 'package:stayindia_owner/features/tenants/presentation/pages/add_tenant_page.dart';
+import 'package:stayindia_owner/features/profile/presentation/pages/floor_management_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
@@ -107,7 +109,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   void _setupSocket(String hostelId) {
-    if (hostelId.isEmpty || _currentHostelId == hostelId) return;
+    if (hostelId.isEmpty) return;
 
     if (_currentHostelId != null) {
       sl<SocketService>().leaveCommunity(_currentHostelId!);
@@ -148,26 +150,17 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           listener: (context, state) {
             if (state is HostelLoaded && state.hostels.isNotEmpty) {
               final hostelId = state.hostels[state.selectedHostelIndex].id;
-              final ownerId = context.read<AuthCubit>().currentOwner?.id;
 
+              if (hostelId == _currentHostelId) return;
               
+              AppLogger.info('Hostel changed to: $hostelId. Syncing data...');
+
               context.read<CommunityCubit>().loadCommunityData(hostelId);
               
-              
-              if (ownerId != null) {
-                for (var hostel in state.hostels) {
-                  context.read<CommunityCubit>().joinCommunity(hostel.id, ownerId);
-                }
-              }
-
               _setupSocket(hostelId);
-              context.read<DashboardCubit>().fetchDashboardData(hostelId);
-              AppLogger.info('Hostel changed: $hostelId. Syncing data...');
               
-              
-              
+              _currentHostelId = hostelId;
 
-              
               context.read<DashboardCubit>().fetchDashboardData(hostelId);
               context.read<BookingsCubit>().fetchBookings();
               context.read<TenantCubit>().loadTenants(hostelId);
@@ -190,10 +183,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           }
 
           if (hostelState is HostelLoaded) {
-            if (hostelState.hostels.isEmpty) {
-              return _NoHostelsView();
-            }
-
             return Scaffold(
                 key: MainNavigationPage.scaffoldKey,
                 extendBody: false,
@@ -223,62 +212,95 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   Widget _buildPremiumFAB(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 12.h),
-      child: BouncingWrapper(
-        onTap: () {
-          HapticFeedback.heavyImpact();
-          final hostelState = context.read<HostelCubit>().state;
-          Hostel? currentHostel;
-          if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-            currentHostel = hostelState.hostels[hostelState.selectedHostelIndex];
-            
+    return BouncingWrapper(
+      onTap: () {
+        HapticFeedback.heavyImpact();
+        final hostelState = context.read<HostelCubit>().state;
+        Hostel? currentHostel;
+        if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+          currentHostel = hostelState.hostels[hostelState.selectedHostelIndex];
+        }
+
+        GlobalActionSheet.show(
+          context,
+          onNewProperty: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => PropertySetupStepperPage(existingHostel: currentHostel),
-              ),
+              MaterialPageRoute(builder: (context) => const PropertySetupStepperPage()),
             );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Please select or add a hostel first'),
-                backgroundColor: Colors.orange,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                action: SnackBarAction(
-                  label: 'ADD',
-                  textColor: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const PropertySetupStepperPage()),
-                    );
-                  },
+          },
+          onAddFloor: () {
+            if (currentHostel != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FloorManagementPage(hostel: currentHostel!),
                 ),
-              ),
+              );
+            } else {
+              _showNoHostelError(context);
+            }
+          },
+          onAddRoom: () {
+            if (currentHostel != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FloorManagementPage(hostel: currentHostel!),
+                ),
+              );
+            } else {
+              _showNoHostelError(context);
+            }
+          },
+          onAddTenant: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddTenantPage()),
             );
-          }
-        },
-        child: Container(
-          width: 56.w,
-          height: 56.w,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFF7000), Color(0xFFFF9F00)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18.r),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFFF7000).withValues(alpha: 0.25),
-                blurRadius: 15,
-                offset: const Offset(0, 6),
-              ),
-            ],
+          },
+        );
+      },
+      child: Container(
+        width: 52.w,
+        height: 52.w,
+        margin: EdgeInsets.only(bottom: 10.h),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFF7000), Color(0xFFFF9F00)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: Icon(Icons.add_rounded, color: Colors.white, size: 28.sp),
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.orange.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(Icons.add_rounded, color: Colors.white, size: 28.sp),
+      ),
+    );
+  }
+
+  void _showNoHostelError(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Please select or add a hostel first'),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+        action: SnackBarAction(
+          label: 'ADD',
+          textColor: Colors.white,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PropertySetupStepperPage()),
+            );
+          },
         ),
       ),
     );
@@ -292,178 +314,178 @@ class _PremiumNavBar extends StatelessWidget implements PreferredSizeWidget {
   const _PremiumNavBar({required this.currentIndex, required this.onTap});
 
   @override
-  Size get preferredSize => Size.fromHeight(80.h);
+  Size get preferredSize => Size.fromHeight(110.h);
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: true,
-      maintainBottomViewPadding: true,
-      child: Container(
-        height: 72.h,
-        margin: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
-        padding: EdgeInsets.symmetric(horizontal: 8.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+    return SizedBox(
+      height: 110.h,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 95.h,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.only(top: 15.h, left: 10.w, right: 10.w, bottom: 30.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _NavBarItem(
+                    index: 0,
+                    currentIndex: currentIndex,
+                    icon: Icons.grid_view_rounded,
+                    label: 'Home',
+                    onTap: onTap,
+                  ),
+                  _NavBarItem(
+                    index: 1,
+                    currentIndex: currentIndex,
+                    icon: Icons.receipt_long_rounded,
+                    label: 'Bookings',
+                    onTap: onTap,
+                  ),
+                  const Spacer(),
+                  _NavBarItem(
+                    index: 3,
+                    currentIndex: currentIndex,
+                    icon: Icons.groups_2_rounded,
+                    label: 'Tenants',
+                    onTap: onTap,
+                  ),
+                  _NavBarItem(
+                    index: 4,
+                    currentIndex: currentIndex,
+                    icon: Icons.account_circle_rounded,
+                    label: 'Profile',
+                    onTap: onTap,
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _NavBarItem(
-              index: 0,
-              currentIndex: currentIndex,
-              icon: Icons.grid_view_rounded,
-              activeIcon: Icons.grid_view_rounded,
-              label: 'Home',
-              onTap: onTap,
+          ),
+          
+          Positioned(
+            top: -5.h,
+            child: BouncingWrapper(
+              onTap: () => onTap(2),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 72.w,
+                    height: 72.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF5200),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF5200).withValues(alpha: 0.3),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.groups_rounded,
+                        color: Colors.white,
+                        size: 36.sp,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Community',
+                    style: TextStyle(
+                      color: currentIndex == 2 ? AppColors.primaryBlue : AppColors.greyText,
+                      fontSize: 10.sp,
+                      fontWeight: currentIndex == 2 ? FontWeight.w800 : FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            _NavBarItem(
-              index: 1,
-              currentIndex: currentIndex,
-              icon: Icons.receipt_long_rounded,
-              activeIcon: Icons.receipt_long_rounded,
-              label: 'Bookings',
-              onTap: onTap,
-            ),
-            _NavBarItem(
-              index: 2,
-              currentIndex: currentIndex,
-              icon: Icons.forum_rounded,
-              activeIcon: Icons.forum_rounded,
-              label: 'Community',
-              isPrimary: true,
-              onTap: onTap,
-            ),
-            _NavBarItem(
-              index: 3,
-              currentIndex: currentIndex,
-              icon: Icons.groups_2_rounded,
-              activeIcon: Icons.groups_2_rounded,
-              label: 'Tenants',
-              onTap: onTap,
-            ),
-            _NavBarItem(
-              index: 4,
-              currentIndex: currentIndex,
-              icon: Icons.account_circle_rounded,
-              activeIcon: Icons.account_circle_rounded,
-              label: 'Profile',
-              onTap: onTap,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _NavBarItem extends StatefulWidget {
+class _NavBarItem extends StatelessWidget {
   final int index;
   final int currentIndex;
   final IconData icon;
-  final IconData activeIcon;
   final String label;
-  final bool isPrimary;
   final Function(int) onTap;
 
   const _NavBarItem({
     required this.index,
     required this.currentIndex,
     required this.icon,
-    required this.activeIcon,
     required this.label,
-    this.isPrimary = false,
     required this.onTap,
   });
 
   @override
-  State<_NavBarItem> createState() => _NavBarItemState();
-}
-
-class _NavBarItemState extends State<_NavBarItem> {
-  @override
   Widget build(BuildContext context) {
-    final isSelected = widget.currentIndex == widget.index;
-    final color = isSelected ? AppColors.primaryBlue : AppColors.greyText.withValues(alpha: 0.5);
-
+    final isSelected = currentIndex == index;
+    
     return Expanded(
       child: GestureDetector(
-        onTap: () => widget.onTap(widget.index),
+        onTap: () => onTap(index),
         behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: EdgeInsets.symmetric(vertical: 6.h),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.04) : Colors.transparent,
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isSelected ? widget.activeIcon : widget.icon,
-                color: color,
-                size: widget.isPrimary ? 26.sp : 24.sp,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.primaryBlue : AppColors.greyText.withValues(alpha: 0.5),
+              size: 22.sp,
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? AppColors.darkText : AppColors.greyText.withValues(alpha: 0.5),
+                fontSize: 10.sp,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                letterSpacing: -0.2,
               ),
-              SizedBox(height: 2.h),
-              Text(
-                widget.label,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 10.sp,
-                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                  letterSpacing: -0.2,
+            ),
+            SizedBox(height: 4.h),
+            Opacity(
+              opacity: isSelected ? 1.0 : 0.0,
+              child: Container(
+                width: 4.w,
+                height: 4.w,
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryBlue,
+                  shape: BoxShape.circle,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _NoHostelsView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.home_work_outlined, size: 80.sp, color: AppColors.greyText),
-              SizedBox(height: 16.h),
-              Text('No Hostels Found', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
-              SizedBox(height: 8.h),
-              Text('You need to add a hostel to start managing it.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.greyText)),
-              SizedBox(height: 24.h),
-              ElevatedButton(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => const AddHostelSheet(),
-                  );
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryBlue, padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h)),
-                child: const Text('Add Your First Hostel', style: TextStyle(color: Colors.white)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

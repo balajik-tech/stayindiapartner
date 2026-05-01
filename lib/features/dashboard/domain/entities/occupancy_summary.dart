@@ -42,6 +42,9 @@ class Room {
   final List<BedInfo> beds;
   final double? rent;
   final double? dailyRent;
+  final double? maintenance;
+  final List<String> features;
+  final String? floorName;
 
   Room({
     required this.id,
@@ -53,6 +56,9 @@ class Room {
     required this.beds,
     this.rent,
     this.dailyRent,
+    this.maintenance,
+    this.features = const [],
+    this.floorName,
   });
 }
 
@@ -62,6 +68,7 @@ class BedInfo {
   final String? tenantName;
   final String? tenantAvatar;
   final String? tenantId;
+  final bool isAway;
 
   BedInfo({
     required this.bedNumber,
@@ -69,5 +76,6 @@ class BedInfo {
     this.tenantName,
     this.tenantAvatar,
     this.tenantId,
+    this.isAway = false,
   });
 }

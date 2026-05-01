@@ -9,7 +9,12 @@ class PropertySetupState extends Equatable {
   final String area;
   final String city;
   final String state;
+  final String pincode;
+  final String hostelType;
+  final String gstNumber;
+  final List<String> images;
   final List<String> selectedFloors;
+  final Map<String, int> floorRoomCounts; 
   final List<String> selectedAmenities;
   final bool isBulkMode;
   final String roomStartRange;
@@ -21,6 +26,10 @@ class PropertySetupState extends Equatable {
   final String? hostelId;
   final bool isSaving;
   final String? error;
+  final String? validationMessage;
+  final String? foodLicense;
+  final String? hostelLicense;
+  final String? tradeLicense;
 
   const PropertySetupState({
     this.currentStep = 0,
@@ -31,7 +40,12 @@ class PropertySetupState extends Equatable {
     this.area = '',
     this.city = '',
     this.state = '',
+    this.pincode = '',
+    this.hostelType = 'Co-ed',
+    this.gstNumber = '',
+    this.images = const [],
     this.selectedFloors = const [],
+    this.floorRoomCounts = const {},
     this.selectedAmenities = const [],
     this.isBulkMode = true,
     this.roomStartRange = '',
@@ -40,20 +54,24 @@ class PropertySetupState extends Equatable {
     this.roomType = 'Non-AC',
     this.masterPricing = const {
       'AC': {
-        '2': 0.0,
-        '3': 0.0,
-        '4': 0.0,
+        '2': {'rent': 0.0, 'deposit': 0.0},
+        '3': {'rent': 0.0, 'deposit': 0.0},
+        '4': {'rent': 0.0, 'deposit': 0.0},
       },
       'Non-AC': {
-        '2': 0.0,
-        '3': 0.0,
-        '4': 0.0,
+        '2': {'rent': 0.0, 'deposit': 0.0},
+        '3': {'rent': 0.0, 'deposit': 0.0},
+        '4': {'rent': 0.0, 'deposit': 0.0},
       },
     },
     this.rooms = const [],
     this.hostelId,
     this.isSaving = false,
     this.error,
+    this.validationMessage,
+    this.foodLicense,
+    this.hostelLicense,
+    this.tradeLicense,
   });
 
   PropertySetupState copyWith({
@@ -65,7 +83,12 @@ class PropertySetupState extends Equatable {
     String? area,
     String? city,
     String? state,
+    String? pincode,
+    String? hostelType,
+    String? gstNumber,
+    List<String>? images,
     List<String>? selectedFloors,
+    Map<String, int>? floorRoomCounts,
     List<String>? selectedAmenities,
     bool? isBulkMode,
     String? roomStartRange,
@@ -77,6 +100,10 @@ class PropertySetupState extends Equatable {
     String? hostelId,
     bool? isSaving,
     String? error,
+    String? validationMessage,
+    String? foodLicense,
+    String? hostelLicense,
+    String? tradeLicense,
   }) {
     return PropertySetupState(
       currentStep: currentStep ?? this.currentStep,
@@ -87,7 +114,12 @@ class PropertySetupState extends Equatable {
       area: area ?? this.area,
       city: city ?? this.city,
       state: state ?? this.state,
+      pincode: pincode ?? this.pincode,
+      hostelType: hostelType ?? this.hostelType,
+      gstNumber: gstNumber ?? this.gstNumber,
+      images: images ?? this.images,
       selectedFloors: selectedFloors ?? this.selectedFloors,
+      floorRoomCounts: floorRoomCounts ?? this.floorRoomCounts,
       selectedAmenities: selectedAmenities ?? this.selectedAmenities,
       isBulkMode: isBulkMode ?? this.isBulkMode,
       roomStartRange: roomStartRange ?? this.roomStartRange,
@@ -99,6 +131,10 @@ class PropertySetupState extends Equatable {
       hostelId: hostelId ?? this.hostelId,
       isSaving: isSaving ?? this.isSaving,
       error: error,
+      validationMessage: validationMessage ?? this.validationMessage,
+      foodLicense: foodLicense ?? this.foodLicense,
+      hostelLicense: hostelLicense ?? this.hostelLicense,
+      tradeLicense: tradeLicense ?? this.tradeLicense,
     );
   }
 
@@ -112,7 +148,12 @@ class PropertySetupState extends Equatable {
       'area': area,
       'city': city,
       'state': state,
+      'pincode': pincode,
+      'hostelType': hostelType,
+      'gstNumber': gstNumber,
+      'images': images,
       'selectedFloors': selectedFloors,
+      'floorRoomCounts': floorRoomCounts,
       'selectedAmenities': selectedAmenities,
       'isBulkMode': isBulkMode,
       'roomStartRange': roomStartRange,
@@ -122,6 +163,9 @@ class PropertySetupState extends Equatable {
       'masterPricing': masterPricing,
       'rooms': rooms,
       'hostelId': hostelId,
+      'foodLicense': foodLicense,
+      'hostelLicense': hostelLicense,
+      'tradeLicense': tradeLicense,
     };
   }
 
@@ -135,7 +179,12 @@ class PropertySetupState extends Equatable {
       area: json['area'] ?? '',
       city: json['city'] ?? '',
       state: json['state'] ?? '',
+      pincode: json['pincode'] ?? '',
+      hostelType: json['hostelType'] ?? 'Co-ed',
+      gstNumber: json['gstNumber'] ?? '',
+      images: List<String>.from(json['images'] ?? []),
       selectedFloors: List<String>.from(json['selectedFloors'] ?? []),
+      floorRoomCounts: Map<String, int>.from(json['floorRoomCounts'] ?? {}),
       selectedAmenities: List<String>.from(json['selectedAmenities'] ?? []),
       isBulkMode: json['isBulkMode'] ?? true,
       roomStartRange: json['roomStartRange'] ?? '',
@@ -145,6 +194,9 @@ class PropertySetupState extends Equatable {
       masterPricing: Map<String, dynamic>.from(json['masterPricing'] ?? {}),
       rooms: List<Map<String, dynamic>>.from(json['rooms'] ?? []),
       hostelId: json['hostelId'],
+      foodLicense: json['foodLicense'],
+      hostelLicense: json['hostelLicense'],
+      tradeLicense: json['tradeLicense'],
     );
   }
 
@@ -158,7 +210,12 @@ class PropertySetupState extends Equatable {
         area,
         city,
         state,
+        pincode,
+        hostelType,
+        gstNumber,
+        images,
         selectedFloors,
+        floorRoomCounts,
         selectedAmenities,
         isBulkMode,
         roomStartRange,
@@ -170,5 +227,8 @@ class PropertySetupState extends Equatable {
         hostelId,
         isSaving,
         error,
+        foodLicense,
+        hostelLicense,
+        tradeLicense,
       ];
 }

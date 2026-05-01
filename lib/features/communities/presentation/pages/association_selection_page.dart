@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bouncing_wrapper.dart';
+import '../../../../core/widgets/shimmer_loading.dart';
 import '../cubit/association_cubit.dart';
 import '../cubit/owner_community_cubit.dart';
 import '../../domain/entities/community_entity.dart';
@@ -83,8 +84,26 @@ class _AssociationSelectionPageState extends State<AssociationSelectionPage> {
   Widget _buildFilters() {
     return BlocBuilder<AssociationCubit, AssociationState>(
       builder: (context, state) {
+        if (state is AssociationError) {
+          return Container(
+            padding: EdgeInsets.all(20.w),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red),
+                SizedBox(width: 12.w),
+                Expanded(child: Text('Failed to load locations: ${state.message}', style: TextStyle(color: Colors.red, fontSize: 12.sp))),
+                TextButton(
+                  onPressed: () => context.read<AssociationCubit>().loadStates(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+
         final associationState = state is AssociationLoaded ? state : null;
-        
+        final isSubLoading = state is AssociationLoaded && state.isSubLoading;
+
         return Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
@@ -105,6 +124,7 @@ class _AssociationSelectionPageState extends State<AssociationSelectionPage> {
                 label: 'State',
                 value: selectedState,
                 items: associationState?.states ?? [],
+                isLoading: state is AssociationLoading,
                 onChanged: (val) {
                   setState(() {
                     selectedState = val;
@@ -123,6 +143,7 @@ class _AssociationSelectionPageState extends State<AssociationSelectionPage> {
                   label: 'District',
                   value: selectedDistrict,
                   items: associationState?.districts ?? [],
+                  isLoading: isSubLoading && (associationState?.districts?.isEmpty ?? true),
                   onChanged: (val) {
                     setState(() {
                       selectedDistrict = val;
@@ -141,6 +162,7 @@ class _AssociationSelectionPageState extends State<AssociationSelectionPage> {
                   label: 'Ward / Zone',
                   value: selectedWard,
                   items: associationState?.wards ?? [],
+                  isLoading: isSubLoading && (associationState?.wards?.isEmpty ?? true),
                   onChanged: (val) {
                     setState(() {
                       selectedWard = val;
@@ -158,6 +180,7 @@ class _AssociationSelectionPageState extends State<AssociationSelectionPage> {
                   label: 'Local Association',
                   value: selectedLocal,
                   items: associationState?.locals ?? [],
+                  isLoading: isSubLoading && (associationState?.locals?.isEmpty ?? true),
                   onChanged: (val) {
                     setState(() {
                       selectedLocal = val;
@@ -179,6 +202,7 @@ class _AssociationSelectionPageState extends State<AssociationSelectionPage> {
     required String? value,
     required List<dynamic> items,
     required ValueChanged<String?> onChanged,
+    bool isLoading = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,27 +212,29 @@ class _AssociationSelectionPageState extends State<AssociationSelectionPage> {
           style: GoogleFonts.outfit(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.greyText),
         ),
         SizedBox(height: 6.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundGrey,
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
-              isExpanded: true,
-              hint: Text('Select $label', style: GoogleFonts.outfit(fontSize: 14.sp)),
-              items: items.map((item) {
-                return DropdownMenuItem<String>(
-                  value: item['_id'],
-                  child: Text(item['name'], style: GoogleFonts.outfit(fontSize: 14.sp)),
-                );
-              }).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ),
+        isLoading && items.isEmpty 
+            ? const DropdownSkeleton()
+            : Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundGrey,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: value,
+                    isExpanded: true,
+                    hint: Text('Select $label', style: GoogleFonts.outfit(fontSize: 14.sp)),
+                    items: items.map((item) {
+                      return DropdownMenuItem<String>(
+                        value: item['_id'],
+                        child: Text(item['name'], style: GoogleFonts.outfit(fontSize: 14.sp)),
+                      );
+                    }).toList(),
+                    onChanged: onChanged,
+                  ),
+                ),
+              ),
       ],
     );
   }

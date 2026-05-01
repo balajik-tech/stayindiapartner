@@ -1,4 +1,6 @@
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
+
 
 class RoomDetailModel extends RoomDetail {
   RoomDetailModel({
@@ -24,7 +26,7 @@ class RoomDetailModel extends RoomDetail {
     return RoomDetailModel(
       id: json['_id'] ?? json['roomId'] ?? '',
       hostelId: json['hostel'] is Map ? json['hostel']['_id'] ?? '' : json['hostel'] ?? '',
-      roomTypename: json['roomTypename'] ?? '',
+      roomTypename: StringUtils.formatRoomNumber(json['roomTypename']?.toString() ?? '', (json['floor'] as num?)?.toInt() ?? 0),
       floor: (json['floor'] as num?)?.toInt() ?? 0,
       floors: json['floors'] is List
           ? (json['floors'] as List).map((e) => (e as num).toInt()).toList()

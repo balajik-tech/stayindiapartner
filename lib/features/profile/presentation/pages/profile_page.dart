@@ -14,13 +14,12 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'account_settings_page.dart';
 import 'my_hostels_page.dart';
-import 'room_master_page.dart';
 import 'subscription_page.dart';
 import 'help_support_page.dart';
 import 'hostel_profile_page.dart';
 import 'amenities_page.dart';
 import 'house_rules_page.dart';
-import 'room_configuration_page.dart';
+import 'floor_management_page.dart';
 import 'food_menu_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -114,30 +113,31 @@ class ProfilePage extends StatelessWidget {
                         subtitle: 'Timings & visitor policies',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HouseRulesPage())),
                       ),
-                      _PremiumTile(
-                        icon: Icons.view_quilt_rounded,
-                        title: 'Room Master',
-                        subtitle: 'Pricing, types & bed rules',
-                        onTap: () {
-                          final dashboardCubit = context.read<DashboardCubit>();
-                          final hostelState = context.read<HostelCubit>().state;
-                          if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                            dashboardCubit.fetchDashboardData(hostelState.hostels[hostelState.selectedHostelIndex].id);
+                      BlocBuilder<HostelCubit, HostelState>(
+                        builder: (context, state) {
+                          if (state is HostelLoaded && state.hostels.isNotEmpty) {
+                            final currentHostel = state.hostels[state.selectedHostelIndex];
+                            return _PremiumTile(
+                              icon: Icons.layers_rounded,
+                              title: 'Floor Management',
+                              subtitle: 'Manage floors, rooms & beds',
+                              isHighlighted: true,
+                              onTap: () {
+                                final dashboardCubit = context.read<DashboardCubit>();
+                                dashboardCubit.fetchDashboardData(currentHostel.id);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BlocProvider.value(
+                                      value: dashboardCubit,
+                                      child: FloorManagementPage(hostel: currentHostel),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
                           }
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider.value(value: dashboardCubit, child: const RoomMasterPage())));
-                        },
-                      ),
-                      _PremiumTile(
-                        icon: Icons.layers_rounded,
-                        title: 'Room Configuration',
-                        subtitle: 'Floor plans, rooms & beds',
-                        onTap: () {
-                          final dashboardCubit = context.read<DashboardCubit>();
-                          final hostelState = context.read<HostelCubit>().state;
-                          if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                            dashboardCubit.fetchDashboardData(hostelState.hostels[hostelState.selectedHostelIndex].id);
-                          }
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider.value(value: dashboardCubit, child: const RoomConfigurationPage())));
+                          return const SizedBox.shrink();
                         },
                       ),
                       _PremiumTile(

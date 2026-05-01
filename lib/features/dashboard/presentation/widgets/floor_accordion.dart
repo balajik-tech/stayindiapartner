@@ -8,7 +8,6 @@ class FloorAccordion extends StatefulWidget {
   final List<Widget> rooms;
   final bool isInitialExpanded;
   final bool isGridView;
-  final VoidCallback? onDelete;
 
   const FloorAccordion({
     super.key,
@@ -17,7 +16,6 @@ class FloorAccordion extends StatefulWidget {
     required this.rooms,
     this.isInitialExpanded = false,
     this.isGridView = false,
-    this.onDelete,
   });
 
   @override
@@ -50,51 +48,41 @@ class _FloorAccordionState extends State<FloorAccordion> {
               },
               borderRadius: BorderRadius.circular(20.r),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h), // Reduced from 12
                 child: Row(
                   children: [
                     Container(
-                      width: 4.w,
-                      height: 20.h,
+                      width: 3.w,
+                      height: 16.h, // Reduced from 20
                       decoration: BoxDecoration(
                         color: const Color(0xFFFF7000), 
-                        borderRadius: BorderRadius.circular(2.r),
+                        borderRadius: BorderRadius.circular(1.5.r),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Flexible(
+                      child: Text(
+                        widget.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14.sp, // Reduced from 16
+                          fontWeight: FontWeight.w700, // Reduced from 900
+                          color: const Color(0xFF1E293B), 
+                        ),
                       ),
                     ),
                     SizedBox(width: 10.w),
                     Flexible(
-                      child: Text(
-                        widget.title.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF1E325C), 
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Flexible(
                       child: _buildBedInfo(widget.bedInfo),
                     ),
                     const Spacer(),
-                    if (widget.onDelete != null)
-                      IconButton(
-                        onPressed: widget.onDelete,
-                        icon: Icon(Icons.delete_outline_rounded, size: 20.sp, color: Colors.red.withValues(alpha: 0.6)),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    SizedBox(width: 8.w),
                     Icon(
                       _isExpanded
                           ? Icons.keyboard_arrow_up_rounded
                           : Icons.keyboard_arrow_down_rounded,
-                      size: 24.sp,
-                      color: const Color(0xFF9EA3B0),
+                      size: 20.sp, // Reduced from 24
+                      color: const Color(0xFF94A3B8),
                     ),
                   ],
                 ),
@@ -110,7 +98,7 @@ class _FloorAccordionState extends State<FloorAccordion> {
                       runSpacing: 16.h,
                       children: widget.rooms.map((room) {
                         return SizedBox(
-                          width: (MediaQuery.of(context).size.width - 80.w) / 2, 
+                          width: (MediaQuery.of(context).size.width - 72.w) / 2, 
                           child: room,
                         );
                       }).toList(),
@@ -144,7 +132,7 @@ class _FloorAccordionState extends State<FloorAccordion> {
     return Text.rich(
       TextSpan(
         style: TextStyle(
-          fontSize: 14.sp,
+          fontSize: 12.sp, // Reduced from 14
           color: AppColors.greyText.withValues(alpha: 0.8),
           fontFamily: 'Roboto', 
         ),

@@ -100,3 +100,12 @@ class GetBedHistoryUseCase {
     return repository.getBedHistory(roomId, bedNumber);
   }
 }
+
+class BulkCreateRoomsUseCase {
+  final RoomRepository repository;
+  BulkCreateRoomsUseCase(this.repository);
+
+  Future<List<RoomDetail>> call(List<RoomDetail> rooms, String ownerId) {
+    return repository.bulkCreateRooms(rooms, ownerId);
+  }
+}

@@ -22,6 +22,9 @@ class HostelModel extends Hostel {
     super.contactNumber,
     super.description,
     super.propertyTag,
+    super.foodLicense,
+    super.hostelLicense,
+    super.tradeLicense,
   });
 
   factory HostelModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +55,9 @@ class HostelModel extends Hostel {
       coverImage: json['coverImage'] as String?,
       contactNumber: json['contactNumber'] as String?,
       description: json['description'] as String?,
+      foodLicense: json['foodLicense'] as String?,
+      hostelLicense: json['hostelLicense'] as String?,
+      tradeLicense: json['tradeLicense'] as String?,
     );
   }
 
@@ -77,6 +83,9 @@ class HostelModel extends Hostel {
       if (description != null) 'description': description,
       if (images != null) 'images': images,
       if (coverImage != null) 'coverImage': coverImage,
+      if (foodLicense != null) 'foodLicense': foodLicense,
+      if (hostelLicense != null) 'hostelLicense': hostelLicense,
+      if (tradeLicense != null) 'tradeLicense': tradeLicense,
     };
   }
 }

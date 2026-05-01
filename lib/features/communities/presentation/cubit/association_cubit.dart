@@ -18,12 +18,14 @@ class AssociationLoaded extends AssociationState {
   final List<Map<String, dynamic>>? districts;
   final List<Map<String, dynamic>>? wards;
   final List<Map<String, dynamic>>? locals;
+  final bool isSubLoading;
 
   const AssociationLoaded({
     required this.states,
     this.districts,
     this.wards,
     this.locals,
+    this.isSubLoading = false,
   });
 
   AssociationLoaded copyWith({
@@ -31,17 +33,19 @@ class AssociationLoaded extends AssociationState {
     List<Map<String, dynamic>>? districts,
     List<Map<String, dynamic>>? wards,
     List<Map<String, dynamic>>? locals,
+    bool? isSubLoading,
   }) {
     return AssociationLoaded(
       states: states ?? this.states,
       districts: districts ?? this.districts,
       wards: wards ?? this.wards,
       locals: locals ?? this.locals,
+      isSubLoading: isSubLoading ?? this.isSubLoading,
     );
   }
 
   @override
-  List<Object?> get props => [states, districts, wards, locals];
+  List<Object?> get props => [states, districts, wards, locals, isSubLoading];
 }
 
 class AssociationError extends AssociationState {
@@ -110,10 +114,10 @@ class AssociationCubit extends Cubit<AssociationState> {
   Future<void> loadDistricts(String stateId) async {
     final currentState = state;
     if (currentState is AssociationLoaded) {
-      emit(AssociationLoading());
+      emit(currentState.copyWith(isSubLoading: true));
       try {
         final districts = await _getAssociations(parentId: stateId, level: 'DISTRICT');
-        emit(currentState.copyWith(districts: districts, wards: [], locals: []));
+        emit(currentState.copyWith(districts: districts, wards: [], locals: [], isSubLoading: false));
       } catch (e) {
         emit(AssociationError(e.toString()));
       }
@@ -123,10 +127,10 @@ class AssociationCubit extends Cubit<AssociationState> {
   Future<void> loadWards(String districtId) async {
     final currentState = state;
     if (currentState is AssociationLoaded) {
-      emit(AssociationLoading());
+      emit(currentState.copyWith(isSubLoading: true));
       try {
         final wards = await _getAssociations(parentId: districtId, level: 'WARD');
-        emit(currentState.copyWith(wards: wards, locals: []));
+        emit(currentState.copyWith(wards: wards, locals: [], isSubLoading: false));
       } catch (e) {
         emit(AssociationError(e.toString()));
       }
@@ -136,10 +140,10 @@ class AssociationCubit extends Cubit<AssociationState> {
   Future<void> loadLocals(String wardId) async {
     final currentState = state;
     if (currentState is AssociationLoaded) {
-      emit(AssociationLoading());
+      emit(currentState.copyWith(isSubLoading: true));
       try {
         final locals = await _getAssociations(parentId: wardId, level: 'LOCAL');
-        emit(currentState.copyWith(locals: locals));
+        emit(currentState.copyWith(locals: locals, isSubLoading: false));
       } catch (e) {
         emit(AssociationError(e.toString()));
       }

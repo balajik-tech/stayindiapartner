@@ -34,6 +34,7 @@ class DashboardCubit extends Cubit<DashboardState> {
       selectedFloorIndex: currentIndex,
       searchQuery: currentSearch,
       isGridView: currentView,
+      selectedMetric: state.selectedMetric,
     ));
     
     try {
@@ -44,6 +45,7 @@ class DashboardCubit extends Cubit<DashboardState> {
         selectedFloorIndex: currentIndex,
         searchQuery: currentSearch,
         isGridView: currentView,
+        selectedMetric: state.selectedMetric,
       ));
       AppLogger.success('Dashboard data loaded successfully');
     } catch (e) {
@@ -54,6 +56,7 @@ class DashboardCubit extends Cubit<DashboardState> {
           selectedFloorIndex: currentIndex,
           searchQuery: currentSearch,
           isGridView: currentView,
+          selectedMetric: state.selectedMetric,
         ));
       }
     } finally {
@@ -128,6 +131,18 @@ class DashboardCubit extends Cubit<DashboardState> {
     } catch (e) {
       AppLogger.error('deleteRoomsBulk failed', e);
       rethrow;
+    }
+  }
+
+  void toggleMetric(String metric) {
+    if (isClosed) return;
+    final s = state;
+    if (s is DashboardLoaded) {
+      if (s.selectedMetric == metric) {
+        emit(s.copyWith(clearMetric: true));
+      } else {
+        emit(s.copyWith(selectedMetric: metric));
+      }
     }
   }
 }

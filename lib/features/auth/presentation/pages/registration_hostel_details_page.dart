@@ -111,7 +111,7 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
           name: _nameController.text,
           address: _addressController.text,
           city: _cityController.text,
-          state: _stateController.text,
+          stateName: _stateController.text,
           area: _areaController.text,
           district: _district,
           pincode: _pincode,

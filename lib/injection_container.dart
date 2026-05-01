@@ -94,11 +94,15 @@ Future<void> init() async {
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
-          if (e.response?.statusCode == 401) {
-            final isAuthPath = e.requestOptions.path.contains('/auth/') || 
-                              e.requestOptions.path.contains('/users/');
-            if (!isAuthPath) {
-              AppLogger.warning('Session expired (401). Logging out...');
+          final statusCode = e.response?.statusCode;
+          if (statusCode == 401 || statusCode == 404) {
+            final path = e.requestOptions.path;
+            final isLoginPath = path.contains('/auth/request-otp') || 
+                               path.contains('/auth/verify-otp') ||
+                               path.contains('/auth/login');
+                               
+            if (!isLoginPath) {
+              AppLogger.warning('Session expired or User not found ($statusCode) at $path. Logging out...');
               sl<AuthCubit>().logout();
             }
           }

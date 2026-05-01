@@ -417,7 +417,7 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
                           name: _nameController.text,
                           address: _addressController.text,
                           city: _cityController.text,
-                          state: _stateController.text,
+                          stateName: _stateController.text,
                           area: _areaController.text,
                           floors: int.tryParse(_floorsController.text) ?? 1,
                           hostelType: _selectedType,

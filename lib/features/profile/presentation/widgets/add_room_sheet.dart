@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
 
 class AddRoomSheet extends StatefulWidget {
   final RoomDetail? room;
+  final int? initialFloor;
   final Future<void> Function(Map<String, dynamic> data) onSave;
 
-  const AddRoomSheet({super.key, this.room, required this.onSave});
+  const AddRoomSheet({super.key, this.room, this.initialFloor, required this.onSave});
 
   static Future<void> show(
     BuildContext context, {
     RoomDetail? room,
+    int? initialFloor,
     required RoomCubit roomCubit,
     required Future<void> Function(Map<String, dynamic> data) onSave,
   }) {
@@ -23,7 +26,7 @@ class AddRoomSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: roomCubit,
-        child: AddRoomSheet(room: room, onSave: onSave),
+        child: AddRoomSheet(room: room, initialFloor: initialFloor, onSave: onSave),
       ),
     );
   }
@@ -59,7 +62,6 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     '5 Sharing',
   ];
 
-  static const List<String> _roomTypes = ['AC', 'NON-AC'];
 
   static const Map<int, String> _floorLabels = {
     0: 'Ground Floor',
@@ -89,7 +91,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     );
     _selectedType = (room?.roomType == 'NON-AC') ? 'NON-AC' : 'AC';
     _selectedSharingType = _sharingTypeMap[room?.sharingType] ?? _sharingTypes.first;
-    _selectedFloor = room?.floor ?? 0;
+    _selectedFloor = widget.initialFloor ?? room?.floor ?? 0;
     
     
     if (room == null) {
@@ -173,8 +175,8 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
+          topLeft: Radius.circular(32.r),
+          topRight: Radius.circular(32.r),
         ),
       ),
       child: Column(
@@ -182,115 +184,131 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
           _buildHeader(isEditing),
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(24.w),
+              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 40.h),
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLabel('Room Number / Name *'),
-                  _buildTextField(_nameController, hint: 'e.g. Room 101'),
-                  SizedBox(height: 20.h),
-                  _buildLabel('Sharing Type *'),
-                  _buildDropdown(
-                    value: _selectedSharingType,
-                    items: _sharingTypes,
-                    onChanged: (val) {
-                      setState(() => _selectedSharingType = val!);
-                      _onMappingChanged();
-                    },
+                  Text(
+                    'Basic Details',
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
                   ),
-                  SizedBox(height: 20.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Room Type *'),
-                            _buildDropdown(
-                              value: _selectedType,
-                              items: _roomTypes,
-                              onChanged: (val) {
-                                setState(() => _selectedType = val!);
-                                _onMappingChanged();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Floor *'),
-                            _buildDropdown(
-                              value: _selectedFloor.toString(),
-                              items: _floorLabels.keys
-                                  .map((k) => k.toString())
-                                  .toList(),
-                              displayLabels: _floorLabels
-                                  .map((k, v) => MapEntry(k.toString(), v)),
-                              onChanged: (val) {
-                                setState(() {
-                                  _selectedFloor = int.parse(val!);
-                                });
-                                _onMappingChanged();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  SizedBox(height: 16.h),
+                  _buildLabel('Room Number / Name'),
+                  _buildPremiumTextField(_nameController, hint: 'e.g. Room 101'),
                   SizedBox(height: 24.h),
-                  _buildLabel('Financial Details'),
-                  SizedBox(height: 12.h),
+                  
                   Row(
                     children: [
                       Expanded(
-                        child: _buildTextField(
-                          _rentController,
-                          label: 'Monthly Rent',
-                          hint: '0',
-                          keyboardType: TextInputType.number,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel('Sharing Type'),
+                            _buildPremiumDropdown(
+                              value: _selectedSharingType,
+                              items: _sharingTypes,
+                              onChanged: (val) {
+                                setState(() => _selectedSharingType = val!);
+                                _onMappingChanged();
+                              },
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: _buildTextField(
-                          _dailyRentController,
-                          label: 'Daily Rent',
-                          hint: '0',
-                          keyboardType: TextInputType.number,
+                      if (widget.initialFloor == null) ...[
+                        SizedBox(width: 16.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Floor'),
+                              _buildPremiumDropdown(
+                                value: _selectedFloor.toString(),
+                                items: _floorLabels.keys.map((k) => k.toString()).toList(),
+                                displayLabels: _floorLabels.map((k, v) => MapEntry(k.toString(), v)),
+                                onChanged: (val) {
+                                  setState(() => _selectedFloor = int.parse(val!));
+                                  _onMappingChanged();
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ],
+                  ),
+
+                  SizedBox(height: 32.h),
+                  Text(
+                    'Features',
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
                   ),
                   SizedBox(height: 16.h),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: _buildTextField(
-                          _depositController,
-                          label: 'Deposit',
-                          hint: '0',
-                          keyboardType: TextInputType.number,
-                        ),
+                      _buildFeatureIcon(
+                        icon: Icons.ac_unit_rounded,
+                        label: 'AC',
+                        isSelected: _selectedType == 'AC',
+                        onTap: () {
+                          setState(() => _selectedType = 'AC');
+                          _onMappingChanged();
+                        },
                       ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: _buildTextField(
-                          _maintenanceController,
-                          label: 'Maintenance',
-                          hint: '0',
-                          keyboardType: TextInputType.number,
-                        ),
+                      _buildFeatureIcon(
+                        icon: Icons.mode_fan_off_rounded,
+                        label: 'Non-AC',
+                        isSelected: _selectedType == 'NON-AC',
+                        onTap: () {
+                          setState(() => _selectedType = 'NON-AC');
+                          _onMappingChanged();
+                        },
+                      ),
+                      _buildFeatureIcon(
+                        icon: Icons.hot_tub_rounded,
+                        label: 'Geyser',
+                        isSelected: true, // Mocked for UI parity
+                        onTap: () {},
+                      ),
+                      _buildFeatureIcon(
+                        icon: Icons.wc_rounded,
+                        label: 'Attached',
+                        isSelected: true, // Mocked for UI parity
+                        onTap: () {},
                       ),
                     ],
                   ),
+
+                  SizedBox(height: 32.h),
+                  Text(
+                    'Financial Details',
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildPriceInput(
+                    label: 'Monthly Rent',
+                    controller: _rentController,
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildPriceInput(
+                    label: 'Daily Rent',
+                    controller: _dailyRentController,
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildPriceInput(
+                    label: 'Security Deposit',
+                    controller: _depositController,
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildPriceInput(
+                    label: 'Maintenance',
+                    controller: _maintenanceController,
+                  ),
+                  
                   SizedBox(height: 40.h),
                   _buildSaveButton(isEditing),
-                  SizedBox(height: 20.h),
                 ],
               ),
             ),
@@ -302,7 +320,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
 
   Widget _buildHeader(bool isEditing) {
     return Padding(
-      padding: EdgeInsets.all(24.w),
+      padding: EdgeInsets.all(24.r),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -310,13 +328,20 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
             isEditing ? 'Edit Room' : 'Add New Room',
             style: TextStyle(
               fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w900,
               color: AppColors.darkText,
             ),
           ),
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.close, color: AppColors.greyText, size: 24.sp),
+          BouncingWrapper(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: EdgeInsets.all(8.r),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.close_rounded, color: AppColors.greyText, size: 20.sp),
+            ),
           ),
         ],
       ),
@@ -325,91 +350,67 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
 
   Widget _buildLabel(String label) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.only(left: 4.w, bottom: 8.h),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w600,
-          color: AppColors.darkText,
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.greyText,
         ),
       ),
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller, {
-    String? label,
-    required String hint,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (label != null) ...[
-          Padding(
-            padding: EdgeInsets.only(bottom: 6.h),
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
-            ),
-          ),
-        ],
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          style: TextStyle(fontSize: 16.sp, color: AppColors.darkText),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
-            filled: true,
-            fillColor: const Color(0xFFF9FAFB),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 14.h,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.roomCardBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.roomCardBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.primaryBlue),
-            ),
-          ),
+  Widget _buildPremiumTextField(TextEditingController controller, {required String hint}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: TextField(
+        controller: controller,
+        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
+          border: InputBorder.none,
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildDropdown({
+  Widget _buildPremiumDropdown({
     required String value,
     required List<String> items,
     Map<String, String>? displayLabels,
-    required void Function(String?) onChanged,
+    required void Function(String?)? onChanged,
   }) {
+    final isDisabled = onChanged == null;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.roomCardBorder),
+        color: isDisabled ? Colors.grey.shade100 : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: value,
+          value: items.contains(value) ? value : items.first,
           isExpanded: true,
-          icon: Icon(Icons.keyboard_arrow_down, color: AppColors.greyText),
+          disabledHint: Text(
+            displayLabels?[value] ?? value,
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.greyText),
+          ),
+          icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.greyText, size: 20.sp),
           items: items.map((String item) {
             return DropdownMenuItem(
               value: item,
               child: Text(
                 displayLabels?[item] ?? item,
-                style: TextStyle(fontSize: 14.sp, color: AppColors.darkText),
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
               ),
             );
           }).toList(),
@@ -419,75 +420,152 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     );
   }
 
-  Widget _buildSaveButton(bool isEditing) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _isSaving
-            ? null
-            : () async {
-                if (_nameController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a room name')),
-                  );
-                  return;
-                }
-
-                setState(() => _isSaving = true);
-
-                try {
-                  final sharingTypeMap = {
-                    'Single Sharing': 'SINGLE',
-                    '2 Sharing': 'DOUBLE',
-                    '3 Sharing': 'TRIPLE',
-                    '4 Sharing': 'QUADRUPLE',
-                    '5 Sharing': 'QUINTUPLE',
-                  };
-
-                  await widget.onSave({
-                    'roomTypename': _nameController.text.trim(),
-                    'floor': _selectedFloor,
-                    'sharingType':
-                        sharingTypeMap[_selectedSharingType] ?? _selectedSharingType,
-                    'roomType': _selectedType,
-                    'rent': double.tryParse(_rentController.text) ?? 0,
-                    'dailyRent': double.tryParse(_dailyRentController.text) ?? 0,
-                    'deposit': double.tryParse(_depositController.text) ?? 0,
-                    'maintenance':
-                        double.tryParse(_maintenanceController.text) ?? 0,
-                  });
-
-                  if (mounted) {
-                    Navigator.pop(context);
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    setState(() => _isSaving = false);
-                  }
-                }
-              },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _isSaving ? AppColors.greyText : AppColors.primaryBlue,
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+  Widget _buildFeatureIcon({required IconData icon, required String label, required bool isSelected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: EdgeInsets.all(12.r),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.1) : Colors.grey.shade50,
+              shape: BoxShape.circle,
+              border: Border.all(color: isSelected ? AppColors.primaryBlue : Colors.grey.shade200),
+            ),
+            child: Icon(icon, color: isSelected ? AppColors.primaryBlue : Colors.grey.shade400, size: 24.sp),
           ),
-          elevation: 0,
+          SizedBox(height: 8.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10.sp,
+              color: isSelected ? AppColors.darkText : AppColors.greyText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriceInput({required String label, required TextEditingController controller}) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+          ),
         ),
+        Expanded(
+          flex: 3,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              children: [
+                Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.primaryBlue)),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: '0',
+                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSaveButton(bool isEditing) {
+    return BouncingWrapper(
+      onTap: _isSaving
+          ? () {}
+          : () async {
+              if (_nameController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a room name')),
+                );
+                return;
+              }
+
+              setState(() => _isSaving = true);
+
+              try {
+                final sharingTypeMap = {
+                  'Single Sharing': 'SINGLE',
+                  '2 Sharing': 'DOUBLE',
+                  '3 Sharing': 'TRIPLE',
+                  '4 Sharing': 'QUADRUPLE',
+                  '5 Sharing': 'QUINTUPLE',
+                };
+
+                await widget.onSave({
+                  'roomTypename': _nameController.text.trim(),
+                  'floor': _selectedFloor,
+                  'sharingType': sharingTypeMap[_selectedSharingType] ?? _selectedSharingType,
+                  'roomType': _selectedType,
+                  'rent': double.tryParse(_rentController.text) ?? 0,
+                  'dailyRent': double.tryParse(_dailyRentController.text) ?? 0,
+                  'deposit': double.tryParse(_depositController.text) ?? 0,
+                  'maintenance': double.tryParse(_maintenanceController.text) ?? 0,
+                });
+
+                if (mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                if (mounted) {
+                  setState(() => _isSaving = false);
+                }
+              }
+            },
+      child: Container(
+        width: double.infinity,
+        height: 54.h,
+        decoration: BoxDecoration(
+          color: AppColors.primaryBlue,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryBlue.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
         child: _isSaving
             ? SizedBox(
                 height: 20.h,
                 width: 20.h,
                 child: const CircularProgressIndicator(
                   color: Colors.white,
-                  strokeWidth: 2,
+                  strokeWidth: 3,
                 ),
               )
             : Text(
-                isEditing ? 'Update Room' : 'Add Room',
+                isEditing ? 'Update Room Details' : 'Add Room to Floor',
                 style: TextStyle(
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                   color: Colors.white,
                 ),
               ),

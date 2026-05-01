@@ -68,6 +68,7 @@ void registerProfileFeature(GetIt sl) {
         deleteRoomUseCase: sl(),
         getBedDetailUseCase: sl(),
         getBedHistoryUseCase: sl(),
+        bulkCreateRoomsUseCase: sl(),
       ));
       
   sl.registerFactory(() => FoodMenuCubit(
@@ -115,6 +116,7 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => DeleteRoomUseCase(sl()));
   sl.registerLazySingleton(() => GetBedDetailUseCase(sl()));
   sl.registerLazySingleton(() => GetBedHistoryUseCase(sl()));
+  sl.registerLazySingleton(() => BulkCreateRoomsUseCase(sl()));
 
   sl.registerLazySingleton(() => GetFoodMenuUseCase(sl()));
   sl.registerLazySingleton(() => SaveFoodMenuUseCase(sl()));

@@ -11,6 +11,7 @@ abstract class RoomRepository {
   Future<Map<String, dynamic>> getBedDetail(String roomId, String bedNumber);
   Future<List<Map<String, dynamic>>> getBedHistory(String roomId, String bedNumber);
   Future<RoomDetail> createRoom(RoomDetail room, String ownerId);
+  Future<List<RoomDetail>> bulkCreateRooms(List<RoomDetail> rooms, String ownerId);
   Future<RoomDetail> updateRoom(RoomDetail room);
   Future<void> deleteRoom(String id);
 }

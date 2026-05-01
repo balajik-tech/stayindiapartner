@@ -9,11 +9,12 @@ import '../widgets/summary_cards.dart';
 import '../widgets/floor_filter.dart';
 import '../widgets/floor_accordion.dart';
 import '../widgets/room_card.dart';
-import './rent_due_page.dart';
-import 'package:stayindia_owner/features/notifications/presentation/pages/notifications_page.dart';
-import 'package:stayindia_owner/features/dashboard/presentation/widgets/dashboard_secondary_stats_row.dart';
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart' as entity;
+import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:flutter/services.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
+import 'package:stayindia_owner/features/notifications/presentation/pages/notifications_page.dart';
+
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -33,41 +34,74 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFFFBFBFE),
-      child: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async => _refreshData(),
-          color: AppColors.primaryBlue,
-          displacement: 40,
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            slivers: [
-              
-              SliverToBoxAdapter(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    const _UnifiedHeader(),
-                    Positioned(
-                      bottom: -28.h, 
-                      left: 16.w,
-                      right: 16.w,
-                      child: const _SearchBarWidget(),
-                    ),
-                  ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: BlocListener<HostelCubit, HostelState>(
+          listenWhen: (prev, curr) => 
+            prev is HostelLoaded && curr is HostelLoaded && 
+            prev.selectedHostelIndex != curr.selectedHostelIndex,
+          listener: (context, state) {
+            _refreshData();
+          },
+          child: RefreshIndicator(
+            onRefresh: () async => _refreshData(),
+            color: AppColors.primaryBlue,
+            displacement: 40,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              slivers: [
+                // 1. Header
+                const SliverToBoxAdapter(child: _UnifiedHeader()),
+                
+                // 2. Stat Cards
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    child: const SummaryCardsSection(),
+                  ),
                 ),
-              ),
-              
-              
-              SliverToBoxAdapter(child: SizedBox(height: 48.h)),
-              
-              
-              const _FloorListSection(),
-              
-              
-              SliverToBoxAdapter(child: SizedBox(height: 100.h)),
-            ],
+
+                // 3. Floor Filter Chips
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    child: BlocBuilder<DashboardCubit, DashboardState>(
+                      buildWhen: (prev, curr) => 
+                        prev.runtimeType != curr.runtimeType ||
+                        prev.selectedFloorIndex != curr.selectedFloorIndex || 
+                        (prev is DashboardLoaded && curr is DashboardLoaded && prev.data.occupancy != curr.data.occupancy),
+                      builder: (context, state) {
+                        List<String> floors = ['All Floors'];
+                        if (state is DashboardLoaded) {
+                          floors.addAll(state.data.occupancy.floors.map((e) => e.floorName));
+                        }
+                        return FloorFilter(
+                          floors: floors,
+                          selectedIndex: state.selectedFloorIndex + 1,
+                          onSelected: (index) => context.read<DashboardCubit>().selectFloor(index - 1),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                // 4. Search Bar (Restored)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: const _SearchBarWidget(),
+                  ),
+                ),
+                
+                SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+
+                // 5. Floor Sections
+                const _FloorListSection(),
+                
+                SliverToBoxAdapter(child: SizedBox(height: 100.h)),
+              ],
+            ),
           ),
         ),
       ),
@@ -80,75 +114,93 @@ class _UnifiedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: const Color(0xFF0A2647),
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 56.h), 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return BlocBuilder<HostelCubit, HostelState>(
+      builder: (context, state) {
+        String hostelName = '...';
+        String hostelType = '';
+        
+        if (state is HostelLoaded && state.hostels.isNotEmpty) {
+          final hostel = state.hostels[state.selectedHostelIndex];
+          hostelName = hostel.name;
+          hostelType = hostel.propertyTag ?? hostel.hostelType.replaceAll('_', ' ');
+        }
+
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(bottom: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
+          ),
+          padding: EdgeInsets.fromLTRB(12.w, 12.h, 16.w, 12.h),
+          child: Row(
             children: [
+              // 1. Menu Icon
+              IconButton(
+                onPressed: () => MainNavigationPage.scaffoldKey.currentState?.openDrawer(),
+                icon: Icon(Icons.menu_rounded, color: const Color(0xFF1E293B), size: 24.sp),
+              ),
+              SizedBox(width: 4.w),
+              
+              // 2. Hostel Icon
+              Container(
+                width: 36.w,
+                height: 36.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(Icons.apartment_rounded, color: Colors.orange, size: 20.sp),
+              ),
+              SizedBox(width: 12.w),
+              
+              // 3. Hostel Name & Type
               Expanded(
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => MainNavigationPage.scaffoldKey.currentState?.openDrawer(),
-                      child: Container(
-                        padding: EdgeInsets.all(8.r),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: Icon(Icons.menu_rounded, color: Colors.white, size: 22.sp),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Container(
-                      padding: EdgeInsets.all(8.r),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Icon(Icons.apartment_rounded, color: Colors.white, size: 24.sp),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                child: GestureDetector(
+                  onTap: () => _showSwitchHostelSheet(context),
+                  behavior: HitTestBehavior.opaque,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'STAY INDIA',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.0,
+                          Flexible(
+                            child: Text(
+                              hostelName,
+                              style: TextStyle(
+                                color: const Color(0xFF1E293B),
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.2,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          Text(
-                            'PREMIUM HOSTEL',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6),
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                          SizedBox(width: 4.w),
+                          Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF64748B), size: 16.sp),
                         ],
                       ),
-                    ),
-                  ],
+                      Text(
+                        hostelType.toUpperCase(),
+                        style: TextStyle(
+                          color: const Color(0xFF94A3B8),
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+
+              
+              // 4. Notifications
               GestureDetector(
                 onTap: () {
+                  HapticFeedback.lightImpact();
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const NotificationsPage()),
@@ -157,253 +209,139 @@ class _UnifiedHeader extends StatelessWidget {
                 child: Stack(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(8.r),
+                      width: 38.w,
+                      height: 38.w,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: const Color(0xFFF1F5F9),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.orange, width: 1.5),
                       ),
-                      child: Icon(Icons.notifications_none_rounded, color: Colors.white, size: 28.sp),
+                      child: Icon(Icons.notifications_none_rounded, color: const Color(0xFF1E293B), size: 20.sp),
                     ),
                     Positioned(
-                      top: 4,
-                      right: 4,
+                      right: 8.w,
+                      top: 8.h,
                       child: Container(
-                        width: 10.r,
-                        height: 10.r,
-                        decoration: const BoxDecoration(
+                        width: 8.w,
+                        height: 8.w,
+                        decoration: BoxDecoration(
                           color: Colors.orange,
                           shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
+
             ],
           ),
-          SizedBox(height: 16.h),
-          
-          
-          const _SummaryCardsSection(),
-          
-          SizedBox(height: 12.h),
-          
-          
-          const DashboardSecondaryStatsRow(),
-          
-          SizedBox(height: 16.h),
-          
-          
-          const _FloorFilterChips(),
-        ],
-      ),
+        );
+      },
     );
   }
-}
 
-class _SearchBarWidget extends StatelessWidget {
-  const _SearchBarWidget();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DashboardCubit, DashboardState>(
-      buildWhen: (prev, curr) => prev.isGridView != curr.isGridView,
-      builder: (context, state) {
-        return Container(
-          height: 56.h,
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search_rounded, color: Colors.orange, size: 22.sp),
-              Expanded(
-                child: TextField(
-                  onChanged: (value) => context.read<DashboardCubit>().updateSearchQuery(value),
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
-                  decoration: InputDecoration(
-                    hintText: 'Search beds or tenants',
-                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
+  void _showSwitchHostelSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BlocBuilder<HostelCubit, HostelState>(
+        builder: (context, state) {
+          if (state is! HostelLoaded) return const SizedBox.shrink();
+          
+          return Container(
+            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 32.w,
+                    height: 3.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(1.5.r),
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                height: 36.h,
-                padding: EdgeInsets.all(2.r),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(18.r),
+                SizedBox(height: 20.h),
+                Text(
+                  'Switch Property',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1E293B),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    _ViewToggleIcon(
-                      isSelected: state.isGridView,
-                      icon: Icons.grid_view_rounded,
-                      onTap: () => context.read<DashboardCubit>().toggleViewType(true),
-                    ),
-                    _ViewToggleIcon(
-                      isSelected: !state.isGridView,
-                      icon: Icons.list_rounded,
-                      onTap: () => context.read<DashboardCubit>().toggleViewType(false),
-                    ),
-                  ],
+                SizedBox(height: 12.h),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 0.5.sh),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: state.hostels.length,
+                    itemBuilder: (context, index) {
+                      final hostel = state.hostels[index];
+                      final isSelected = index == state.selectedHostelIndex;
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 8.h),
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFFF1F5F9) : Colors.white,
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+                          ),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: ListTile(
+                          onTap: () {
+                            context.read<HostelCubit>().selectHostel(index);
+                            Navigator.pop(context);
+                          },
+                          dense: true,
+                          leading: Container(
+                            padding: EdgeInsets.all(8.r),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.apartment_rounded, 
+                              color: isSelected ? Colors.white : const Color(0xFF64748B),
+                              size: 18.sp,
+                            ),
+                          ),
+                          title: Text(
+                            hostel.name,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF1E293B),
+                            ),
+                          ),
+                          trailing: isSelected 
+                              ? Icon(Icons.check_circle_rounded, color: const Color(0xFF2563EB), size: 20.sp) 
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ViewToggleIcon extends StatelessWidget {
-  final bool isSelected;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _ViewToggleIcon({required this.isSelected, required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: double.infinity,
-        alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0A2647) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        child: Icon(
-          icon,
-          color: isSelected ? Colors.white : Colors.grey.shade400,
-          size: 18.sp,
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 }
 
-class _SummaryCardsSection extends StatelessWidget {
-  const _SummaryCardsSection();
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DashboardCubit, DashboardState>(
-      buildWhen: (prev, curr) {
-        if (prev is DashboardLoaded && curr is DashboardLoaded) {
-          return prev.data.occupancy != curr.data.occupancy;
-        }
-        return prev.runtimeType != curr.runtimeType;
-      },
-      builder: (context, state) {
-        final bool isLoading = state is DashboardLoading;
-        final data = state is DashboardLoaded ? state.data.occupancy : null;
-
-        return SizedBox(
-          height: 80.h,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.zero,
-            physics: const BouncingScrollPhysics(),
-            children: [
-              SummaryCard(
-                count: isLoading ? '...' : (data?.totalBeds.toString() ?? '0'),
-                label: 'TOTAL',
-                backgroundColor: const Color(0xFF1E325C), 
-                textColor: Colors.white,
-                icon: Icons.hotel_rounded,
-              ),
-              SizedBox(width: 12.w),
-              SummaryCard(
-                count: isLoading ? '...' : (data?.occupiedBeds.toString() ?? '0'),
-                label: 'ACTIVE',
-                backgroundColor: const Color(0xFFFF7000), 
-                textColor: Colors.white,
-                icon: Icons.person_rounded,
-              ),
-              SizedBox(width: 12.w),
-              SummaryCard(
-                count: isLoading ? '...' : (data?.freeBeds.toString() ?? '0'),
-                label: 'FREE',
-                backgroundColor: const Color(0xFF3498DB), 
-                textColor: Colors.white,
-                icon: Icons.hotel_rounded,
-              ),
-              SizedBox(width: 12.w),
-              SummaryCard(
-                count: isLoading ? '...' : (data?.noticeBeds.toString() ?? '0'),
-                label: 'NOTICE',
-                backgroundColor: const Color(0xFFF1C40F), 
-                textColor: Colors.white,
-                icon: Icons.access_time_filled_rounded,
-              ),
-              SizedBox(width: 12.w),
-              SummaryCard(
-                count: isLoading ? '...' : (data?.overdueBeds.toString() ?? '0'),
-                label: 'OVERDUE',
-                backgroundColor: Colors.red.shade600, 
-                textColor: Colors.white,
-                icon: Icons.assignment_late_rounded,
-                onTap: () {
-                  final hostelState = context.read<HostelCubit>().state;
-                  if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                    final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RentDuePage(hostelId: hostelId),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _FloorFilterChips extends StatelessWidget {
-  const _FloorFilterChips();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DashboardCubit, DashboardState>(
-      buildWhen: (prev, curr) => prev.selectedFloorIndex != curr.selectedFloorIndex || 
-          prev.runtimeType != curr.runtimeType ||
-          (prev is DashboardLoaded && curr is DashboardLoaded && prev.data.occupancy.floors.length != curr.data.occupancy.floors.length),
-      builder: (context, state) {
-        List<String> floors = ['All Floors'];
-        if (state is DashboardLoaded) {
-          floors.addAll(state.data.occupancy.floors.map((e) => e.floorName));
-        }
-
-        return FloorFilter(
-          floors: floors,
-          selectedIndex: state.selectedFloorIndex + 1,
-          onSelected: (index) => context.read<DashboardCubit>().selectFloor(index - 1),
-        );
-      },
-    );
-  }
-}
 
 class _FloorListSection extends StatelessWidget {
   const _FloorListSection();
@@ -437,6 +375,30 @@ class _FloorListSection extends StatelessWidget {
         }
 
         if (state is! DashboardLoaded) {
+          final hostelState = context.watch<HostelCubit>().state;
+          if (hostelState is HostelLoaded && hostelState.hostels.isEmpty) {
+            return SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.apartment_rounded, size: 80.sp, color: Colors.grey.shade300),
+                    SizedBox(height: 24.h),
+                    Text(
+                      'No Hostels Added',
+                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Add a hostel to start managing it here.',
+                      style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
           return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
 
@@ -455,12 +417,46 @@ class _FloorListSection extends StatelessWidget {
         }
 
         return SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final floor = displayFloors[index];
                 final filteredRooms = floor.rooms.where((room) {
+                  if (state.selectedMetric != null) {
+                    bool matchesMetric = false;
+                    switch (state.selectedMetric) {
+                      case 'total':
+                        matchesMetric = true;
+                        break;
+                      case 'free':
+                        matchesMetric = room.beds.any((b) => b.status.toLowerCase() == 'free');
+                        break;
+                      case 'occupied':
+                        matchesMetric = room.beds.any((b) => b.status.toLowerCase() == 'occupied');
+                        break;
+                      case 'notice':
+                        matchesMetric = room.beds.any((b) => b.status.toLowerCase() == 'notice');
+                        break;
+                      case 'overdue':
+                        matchesMetric = room.beds.any((b) => b.status.toLowerCase() == 'overdue');
+                        break;
+                      case 'inside':
+                        matchesMetric = room.beds.any((b) => b.status.toLowerCase() == 'inside');
+                        break;
+                      case 'outside':
+                        matchesMetric = room.beds.any((b) => b.status.toLowerCase() == 'outside');
+                        break;
+                      case 'away':
+                        matchesMetric = room.beds.any((b) => b.status.toLowerCase() == 'away' || b.status.toLowerCase() == 'unknown');
+                        break;
+                      default:
+                        matchesMetric = true;
+                    }
+                    if (!matchesMetric) return false;
+                  }
+
+                  // 2. Search Filter
                   if (query.isEmpty) return true;
                   final roomNum = room.roomNumber.toLowerCase();
                   final hasMatchingTenant = room.beds.any((bed) => 
@@ -471,13 +467,12 @@ class _FloorListSection extends StatelessWidget {
                 if (filteredRooms.isEmpty && query.isNotEmpty) return const SizedBox.shrink();
 
                 return Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
+                  padding: EdgeInsets.only(bottom: 16.h),
                   child: FloorAccordion(
                     title: floor.floorName,
                     bedInfo: floor.bedInfo,
                     isInitialExpanded: index == 0 || query.isNotEmpty,
                     isGridView: state.isGridView,
-                    onDelete: () => _showDeleteFloorConfirmation(context, floor.floorName, filteredRooms.map((r) => r.id).toList()),
                     rooms: filteredRooms.map<Widget>((room) => RoomCard(
                       id: room.id,
                       roomNumber: room.roomNumber,
@@ -492,7 +487,10 @@ class _FloorListSection extends StatelessWidget {
                         tenantName: b.tenantName,
                         tenantAvatar: b.tenantAvatar,
                         tenantId: b.tenantId,
+                        isAway: b.isAway,
                       )).toList(),
+                      roomType: room.roomType,
+                      room: room,
                     )).toList(),
                   ),
                 );
@@ -504,75 +502,49 @@ class _FloorListSection extends StatelessWidget {
       },
     );
   }
+}
 
-  void _showDeleteFloorConfirmation(BuildContext context, String floorName, List<String> roomIds) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-          title: Text(
-            'Delete Entire Floor?',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E325C)),
-          ),
-          content: Text(
-            'Are you sure you want to delete all ${roomIds.length} rooms on $floorName? This action is permanent and will remove all associated beds.',
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w700, fontSize: 14.sp),
+
+class _SearchBarWidget extends StatelessWidget {
+  const _SearchBarWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DashboardCubit, DashboardState>(
+      builder: (context, state) {
+        return Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 48.h,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search_rounded, color: const Color(0xFF64748B), size: 18.sp),
+                    Expanded(
+                      child: TextField(
+                        onChanged: (value) => context.read<DashboardCubit>().updateSearchQuery(value),
+                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w500),
+                        decoration: InputDecoration(
+                          hintText: 'Search room, tenant...',
+                          hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 13.sp),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10.w),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final cubit = context.read<DashboardCubit>();
-                final hostelId = context.read<HostelCubit>().state is HostelLoaded 
-                    ? (context.read<HostelCubit>().state as HostelLoaded).hostels[(context.read<HostelCubit>().state as HostelLoaded).selectedHostelIndex].id
-                    : null;
-                
-                if (hostelId == null) return;
-
-                Navigator.pop(context); 
-
-                try {
-                  await cubit.deleteRoomsBulk(roomIds, hostelId);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('$floorName deleted successfully'),
-                        backgroundColor: Colors.green,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to delete floor: $e'),
-                        backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                      ),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-              ),
-              child: Text(
-                'Delete Floor',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.sp),
-              ),
+            SizedBox(width: 10.w),
+            _ViewModeToggle(
+              isGridView: state.isGridView,
+              onChanged: (isGrid) => context.read<DashboardCubit>().toggleViewType(isGrid),
             ),
           ],
         );
@@ -581,4 +553,77 @@ class _FloorListSection extends StatelessWidget {
   }
 }
 
+class _ViewModeToggle extends StatelessWidget {
+  final bool isGridView;
+  final Function(bool) onChanged;
 
+  const _ViewModeToggle({required this.isGridView, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 96.w,
+      height: 44.h,
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(21.r),
+      ),
+      child: Stack(
+        children: [
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.elasticOut,
+            alignment: isGridView ? Alignment.centerLeft : Alignment.centerRight,
+            child: Container(
+              width: 42.w,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(18.r),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: BouncingWrapper(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    onChanged(true);
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    color: Colors.transparent,
+                    child: Icon(
+                      Icons.grid_view_rounded,
+                      size: 19.sp,
+                      color: isGridView ? Colors.white : const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: BouncingWrapper(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    onChanged(false);
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    color: Colors.transparent,
+                    child: Icon(
+                      Icons.list_rounded,
+                      size: 24.sp,
+                      color: !isGridView ? Colors.white : const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

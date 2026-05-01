@@ -201,11 +201,14 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                 (room) {
                   final isPreAllocatedRoom = room.id == widget.preAllocatedRoomId;
                   return RoomCard(
+                    room: room,
                     id: room.id,
                     roomNumber: room.roomNumber,
                     sharingType: room.sharingType,
                     occupancy: room.occupancy,
                     beds: room.beds,
+                    rent: room.rent,
+                    dailyRent: room.dailyRent,
                     onBedTap: (roomNumber, bedNumber) {
                       _showConfirmationDialog(context, room, bedNumber);
                     },
@@ -220,40 +223,132 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
     );
   }
 
-  void _showConfirmationDialog(
-      BuildContext context, Room room, String bedNumber) {
-    
+  void _showConfirmationDialog(BuildContext context, Room room, String bedNumber) {
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(widget.isRoomChange ? 'Move Tenant' : 'Allocate Bed'),
-        content: Text(
-            'Confirm ${widget.isRoomChange ? "moving" : "allocating"} Bed $bedNumber in Room ${room.roomNumber} to ${widget.tenantName}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.all(24.r),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext); 
-              context.read<BookingsCubit>().finalizeCheckin(
-                    bookingId: widget.bookingId,
-                    roomId: room.id,
-                    bedNumber: bedNumber,
-                    accessCode: widget.accessCode,
-                  );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlue,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(
-              widget.isRoomChange ? 'Confirm Move' : 'Confirm Check-in',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.r),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  widget.isRoomChange ? Icons.swap_horiz_rounded : Icons.person_add_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 32.sp,
+                ),
+              ),
+              SizedBox(height: 20.h),
+              Text(
+                widget.isRoomChange ? 'Confirm Room Change' : 'Confirm Check-in',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.darkText,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.greyText,
+                    height: 1.5,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Are you sure you want to allocate '),
+                    TextSpan(
+                      text: 'Room ${room.roomNumber}, Bed $bedNumber',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkText),
+                    ),
+                    const TextSpan(text: ' to '),
+                    TextSpan(
+                      text: widget.tenantName,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkText),
+                    ),
+                    const TextSpan(text: '?'),
+                  ],
+                ),
+              ),
+              SizedBox(height: 32.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(dialogContext),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: AppColors.greyText,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                        context.read<BookingsCubit>().finalizeCheckin(
+                          bookingId: widget.bookingId,
+                          roomId: room.id,
+                          bedNumber: bedNumber,
+                          accessCode: widget.accessCode,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryBlue,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Confirm',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

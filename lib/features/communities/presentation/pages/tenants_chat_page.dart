@@ -8,7 +8,6 @@ import 'package:stayindia_owner/features/communities/domain/entities/community_e
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/widgets/chat_message_bubble.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
-import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -266,62 +265,39 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
         onTap: () => Navigator.pop(context),
         child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 20),
       ),
-      title: BouncingWrapper(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => CommunityDetailPage(communityId: page.hostelId),
-            ),
-          );
-        },
-        child: Row(
-          children: [
-            Container(
-              width: 36.w,
-              height: 36.w,
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(10.r),
-                image: page.communityIcon != null
-                    ? DecorationImage(
-                        image: CachedNetworkImageProvider(page.communityIcon!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: page.communityIcon == null
-                  ? Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 20.sp)
+      title: Row(
+        children: [
+          Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              color: AppColors.primaryBlue.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(10.r),
+              image: page.communityIcon != null
+                  ? DecorationImage(
+                      image: CachedNetworkImageProvider(page.communityIcon!),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    page.communityName ?? 'Tenants Community',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
-                      color: AppColors.darkText,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16.sp,
-                    ),
-                  ),
-                  Text(
-                    'Tap for info',
-                    style: GoogleFonts.outfit(
-                      color: AppColors.primaryBlue,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11.sp,
-                    ),
-                  ),
-                ],
+            child: page.communityIcon == null
+                ? Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 20.sp)
+                : null,
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              page.communityName ?? 'Tenants Community',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.outfit(
+                color: AppColors.darkText,
+                fontWeight: FontWeight.w800,
+                fontSize: 16.sp,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       actions: const [],
     );

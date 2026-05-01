@@ -46,6 +46,7 @@ class RoomCubit extends Cubit<RoomState> {
   final DeleteRoomUseCase _deleteRoom;
   final GetBedDetailUseCase _getBedDetail;
   final GetBedHistoryUseCase _getBedHistory;
+  final BulkCreateRoomsUseCase _bulkCreateRooms;
 
   RoomCubit({
     required GetOccupancyUseCase getOccupancyUseCase,
@@ -59,6 +60,7 @@ class RoomCubit extends Cubit<RoomState> {
     required DeleteRoomUseCase deleteRoomUseCase,
     required GetBedDetailUseCase getBedDetailUseCase,
     required GetBedHistoryUseCase getBedHistoryUseCase,
+    required BulkCreateRoomsUseCase bulkCreateRoomsUseCase,
   })  : _getOccupancy = getOccupancyUseCase,
         _getFloorWiseRooms = getFloorWiseRoomsUseCase,
         _getRooms = getRoomsUseCase,
@@ -70,6 +72,7 @@ class RoomCubit extends Cubit<RoomState> {
         _deleteRoom = deleteRoomUseCase,
         _getBedDetail = getBedDetailUseCase,
         _getBedHistory = getBedHistoryUseCase,
+        _bulkCreateRooms = bulkCreateRoomsUseCase,
         super(RoomInitial());
 
   Future<void> getRooms({bool? isMaster}) async {
@@ -229,6 +232,73 @@ class RoomCubit extends Cubit<RoomState> {
       await _getBedHistory(roomId, bedNumber);
     } catch (e) {
       emit(RoomError(ErrorHandler.getErrorMessage(e)));
+    }
+  }
+
+  Future<void> bulkCreateRooms({
+    required String hostelId,
+    required String ownerId,
+    required List<RoomDetail> rooms,
+  }) async {
+    if (state is RoomLoading) return;
+    emit(RoomLoading());
+    try {
+      await _bulkCreateRooms(rooms, ownerId);
+      emit(RoomOperationSuccess('${rooms.length} rooms created successfully'));
+    } catch (e) {
+      emit(RoomError(ErrorHandler.getErrorMessage(e)));
+    }
+  }
+
+  Future<void> addFloor({
+    required String hostelId,
+    required String ownerId,
+    required String floorName,
+    required int roomCount,
+    required int bedsPerRoom,
+  }) async {
+    if (state is RoomLoading) return;
+    emit(RoomLoading());
+    try {
+      // Extract floor number from name (e.g. "3rd Floor" -> 3)
+      final floorNumber = int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      
+      final List<RoomDetail> rooms = [];
+      for (int i = 1; i <= roomCount; i++) {
+        // Construct room number: FloorNumber * 100 + i (e.g. 3rd floor, room 1 -> 301)
+        final roomNo = (floorNumber * 100) + i;
+        
+        rooms.add(RoomDetail(
+          id: '',
+          hostelId: hostelId,
+          roomTypename: roomNo.toString(),
+          floor: floorNumber,
+          sharingType: _mapCapacityToSharing(bedsPerRoom),
+          roomType: 'NON_AC', // Default
+          rent: 0, // Placeholder
+          deposit: 0, // Placeholder
+          maintenance: 0, // Placeholder
+          isActive: true,
+          isMaster: false,
+          capacity: bedsPerRoom,
+        ));
+      }
+      
+      await _bulkCreateRooms(rooms, ownerId);
+      emit(RoomOperationSuccess('Floor $floorName added with $roomCount rooms'));
+    } catch (e) {
+      emit(RoomError(ErrorHandler.getErrorMessage(e)));
+    }
+  }
+
+  String _mapCapacityToSharing(int capacity) {
+    switch (capacity) {
+      case 1: return 'SINGLE';
+      case 2: return 'DOUBLE';
+      case 3: return 'TRIPLE';
+      case 4: return 'QUADRUPLE';
+      case 5: return 'QUINTUPLE';
+      default: return 'SINGLE';
     }
   }
 }

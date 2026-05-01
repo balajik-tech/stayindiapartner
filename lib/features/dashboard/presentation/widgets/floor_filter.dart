@@ -16,10 +16,11 @@ class FloorFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 44.h,
+      height: 36.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
         itemCount: floors.length,
         separatorBuilder: (context, index) => SizedBox(width: 10.w),
         itemBuilder: (context, index) {
@@ -28,18 +29,20 @@ class FloorFilter extends StatelessWidget {
             child: GestureDetector(
               onTap: () => onSelected(index),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 7.h),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.orange : const Color(0xFF1E3A5F),
-                  borderRadius: BorderRadius.circular(12.r),
+                  color: isSelected ? Colors.orange : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: isSelected ? Colors.orange : const Color(0xFFE2E8F0),
+                  ),
                 ),
                 child: Text(
-                  floors[index].toUpperCase(),
+                  floors[index],
                   style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
+                    color: isSelected ? Colors.white : const Color(0xFF64748B),
+                    fontWeight: FontWeight.w600,
                     fontSize: 12.sp,
-                    letterSpacing: 0.5,
                   ),
                 ),
               ),

@@ -13,6 +13,7 @@ abstract class HostelRemoteDataSource {
   Future<HostelModel> updateHostel(HostelModel hostel);
   Future<void> deleteHostel(String id);
   Future<HostelModel> uploadHostelImages(String id, List<String> filePaths);
+  Future<HostelModel> uploadHostelLicenses(String id, {String? foodLicense, String? hostelLicense, String? tradeLicense});
   Future<void> updateHostelLocation(String id, double lat, double lng);
 }
 
@@ -146,6 +147,49 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
         return HostelModel.fromJson(data);
       }
       throw Exception('Failed to upload hostel images');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<HostelModel> uploadHostelLicenses(String id, {String? foodLicense, String? hostelLicense, String? tradeLicense}) async {
+    try {
+      final formData = FormData();
+      
+      if (foodLicense != null && foodLicense.isNotEmpty && !foodLicense.startsWith('http')) {
+        formData.files.add(MapEntry(
+          'foodLicense',
+          await MultipartFile.fromFile(foodLicense),
+        ));
+      }
+      
+      if (hostelLicense != null && hostelLicense.isNotEmpty && !hostelLicense.startsWith('http')) {
+        formData.files.add(MapEntry(
+          'hostelLicense',
+          await MultipartFile.fromFile(hostelLicense),
+        ));
+      }
+      
+      if (tradeLicense != null && tradeLicense.isNotEmpty && !tradeLicense.startsWith('http')) {
+        formData.files.add(MapEntry(
+          'tradeLicense',
+          await MultipartFile.fromFile(tradeLicense),
+        ));
+      }
+
+      if (formData.files.isEmpty) return throw Exception('No license files to upload');
+
+      final response = await dio.post(
+        '${ApiConstants.hostels}/$id/licenses',
+        data: formData,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data['data'] ?? response.data;
+        return HostelModel.fromJson(data);
+      }
+      throw Exception('Failed to upload hostel licenses');
     } catch (e) {
       rethrow;
     }

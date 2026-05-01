@@ -1,10 +1,10 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/usecases/hostel_usecases.dart';
 import 'package:stayindia_owner/core/utils/error_handler.dart';
 import 'hostel_state.dart';
 
-class HostelCubit extends Cubit<HostelState> {
+class HostelCubit extends HydratedCubit<HostelState> {
   final GetHostelsUseCase _getHostels;
   final CreateHostelUseCase _createHostel;
   final UpdateHostelUseCase _updateHostel;
@@ -25,7 +25,7 @@ class HostelCubit extends Cubit<HostelState> {
         _deleteHostel = deleteHostelUseCase,
         _uploadHostelImages = uploadHostelImagesUseCase,
         _updateHostelLocation = updateHostelLocationUseCase,
-        super(HostelInitial());
+        super(const HostelInitial());
 
   Future<void> getHostels({bool forceRefresh = false}) async {
     if (isClosed) return;
@@ -59,6 +59,7 @@ class HostelCubit extends Cubit<HostelState> {
         emit(HostelLoaded(
           hostels: loadedState.hostels,
           selectedHostelIndex: index,
+          lastFetched: loadedState.lastFetched,
         ));
       }
     }
@@ -70,7 +71,7 @@ class HostelCubit extends Cubit<HostelState> {
     required int floors,
     required String hostelType,
     required String city,
-    required String state,
+    required String stateName,
     String area = '',
     String district = '',
     String village = '',
@@ -82,7 +83,7 @@ class HostelCubit extends Cubit<HostelState> {
     double? lng,
   }) async {
     if (isClosed) return;
-    emit(HostelLoading());
+    emit(HostelLoading(lastFetched: state.lastFetched));
     try {
       final hostel = Hostel(
         id: '',
@@ -91,7 +92,7 @@ class HostelCubit extends Cubit<HostelState> {
         floors: floors,
         hostelType: hostelType,
         city: city,
-        state: state,
+        state: stateName,
         area: area,
         district: district,
         village: village,
@@ -108,7 +109,7 @@ class HostelCubit extends Cubit<HostelState> {
         message: 'Hostel created successfully',
         hostelId: createdHostel.id,
       ));
-      await getHostels();
+      await getHostels(forceRefresh: true);
     } catch (e) {
       if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
     }
@@ -116,12 +117,12 @@ class HostelCubit extends Cubit<HostelState> {
 
   Future<void> updateHostel(Hostel hostel) async {
     if (isClosed) return;
-    emit(HostelLoading());
+    emit(HostelLoading(lastFetched: state.lastFetched));
     try {
       await _updateHostel(hostel);
       if (isClosed) return;
       emit(HostelOperationSuccess(message: 'Hostel updated successfully'));
-      await getHostels();
+      await getHostels(forceRefresh: true);
     } catch (e) {
       if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
     }
@@ -132,12 +133,12 @@ class HostelCubit extends Cubit<HostelState> {
     required List<String> filePaths,
   }) async {
     if (isClosed) return;
-    emit(HostelLoading());
+    emit(HostelLoading(lastFetched: state.lastFetched));
     try {
       await _uploadHostelImages(id, filePaths);
       if (isClosed) return;
       emit(HostelOperationSuccess(message: 'Images uploaded successfully'));
-      await getHostels();
+      await getHostels(forceRefresh: true);
     } catch (e) {
       if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
     }
@@ -145,12 +146,12 @@ class HostelCubit extends Cubit<HostelState> {
 
   Future<void> deleteHostel(String id) async {
     if (isClosed) return;
-    emit(HostelLoading());
+    emit(HostelLoading(lastFetched: state.lastFetched));
     try {
       await _deleteHostel(id);
       if (isClosed) return;
       emit(HostelOperationSuccess(message: 'Hostel deleted successfully'));
-      await getHostels();
+      await getHostels(forceRefresh: true);
     } catch (e) {
       if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
     }
@@ -162,7 +163,7 @@ class HostelCubit extends Cubit<HostelState> {
     required double lng,
   }) async {
     if (isClosed) return;
-    emit(HostelLoading());
+    emit(HostelLoading(lastFetched: state.lastFetched));
     try {
       await _updateHostelLocation(id, lat, lng);
       if (isClosed) return;
@@ -171,5 +172,23 @@ class HostelCubit extends Cubit<HostelState> {
     } catch (e) {
       if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
     }
+  }
+
+  @override
+  HostelState? fromJson(Map<String, dynamic> json) {
+    try {
+      final lastFetchedStr = json['lastFetched'] as String?;
+      final lastFetched = lastFetchedStr != null ? DateTime.parse(lastFetchedStr) : null;
+      
+      
+      return HostelInitial(lastFetched: lastFetched);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Map<String, dynamic>? toJson(HostelState state) {
+    return state.toJson();
   }
 }

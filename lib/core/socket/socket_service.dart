@@ -99,6 +99,11 @@ class SocketService {
       return;
     }
 
+    if (_lastRoomId == hostelId) {
+      AppLogger.debug(' Socket: Already in room $hostelId. Skipping redundant join.');
+      return;
+    }
+
     if (_lastRoomId != null && _lastRoomId != hostelId) {
       AppLogger.info(' Socket: Leaving previous room $_lastRoomId before joining $hostelId');
       leaveCommunity(_lastRoomId!);

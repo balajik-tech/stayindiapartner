@@ -14,5 +14,10 @@ abstract class PropertySetupRepository {
     required String area,
     required String city,
     required String state,
+    required String hostelType,
+    required List<String> images,
+    String? foodLicense,
+    String? hostelLicense,
+    String? tradeLicense,
   });
 }

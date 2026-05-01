@@ -20,6 +20,9 @@ class Hostel {
   final String? contactNumber;
   final String? description;
   final String? propertyTag;
+  final String? foodLicense;
+  final String? hostelLicense;
+  final String? tradeLicense;
 
   Hostel({
     required this.id,
@@ -42,5 +45,8 @@ class Hostel {
     this.contactNumber,
     this.description,
     this.propertyTag,
+    this.foodLicense,
+    this.hostelLicense,
+    this.tradeLicense,
   });
 }

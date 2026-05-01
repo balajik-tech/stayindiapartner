@@ -48,6 +48,28 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
+  Future<List<RoomDetail>> bulkCreateRooms(List<RoomDetail> rooms, String ownerId) async {
+    final models = rooms.map((room) => RoomDetailModel(
+      id: room.id,
+      hostelId: room.hostelId,
+      roomTypename: room.roomTypename,
+      floor: room.floor,
+      floors: room.floors,
+      sharingType: room.sharingType,
+      roomType: room.roomType,
+      rent: room.rent,
+      dailyRent: room.dailyRent,
+      deposit: room.deposit,
+      maintenance: room.maintenance,
+      isActive: room.isActive,
+      isMaster: room.isMaster,
+      capacity: room.capacity,
+      beds: room.beds,
+    )).toList();
+    return await remoteDataSource.bulkCreateRooms(models, ownerId);
+  }
+
+  @override
   Future<RoomDetail> updateRoom(RoomDetail room) async {
     final model = RoomDetailModel(
       id: room.id,

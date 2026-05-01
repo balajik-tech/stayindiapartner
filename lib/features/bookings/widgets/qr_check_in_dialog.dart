@@ -262,7 +262,7 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
             },
             icon: Icon(Icons.check, size: 20.sp),
             label: Text(
-              'Manual Check-in',
+              'Verify Access Code',
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
             ),
             style: OutlinedButton.styleFrom(
@@ -272,6 +272,25 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.r),
               ),
+            ),
+          ),
+        ),
+        SizedBox(height: 16.h),
+        TextButton(
+          onPressed: () {
+            context.read<BookingsCubit>().manualCheckin(widget.booking.id, hostelId: widget.booking.hostelId);
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Proceeding to direct allocation...')),
+            );
+          },
+          child: Text(
+            'Directly Assign Bed (Skip Verification)',
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryBlue.withValues(alpha: 0.8),
+              decoration: TextDecoration.underline,
             ),
           ),
         ),
