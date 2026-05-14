@@ -97,4 +97,47 @@ class StockCubit extends Cubit<StockState> {
       emit(StockError(e.toString(), items: state.items, summary: state.summary));
     }
   }
+  Future<void> addTransaction({
+    required String propertyId,
+    required String itemName,
+    required String category,
+    required String unit,
+    required double quantity,
+    required double totalAmount,
+    required String paymentMode,
+    required String notes,
+  }) async {
+    emit(StockLoading(items: state.items, summary: state.summary));
+    try {
+      final existingItemIndex = state.items.indexWhere((i) => i.name.toLowerCase() == itemName.toLowerCase() && i.propertyId == propertyId);
+      
+      String itemId;
+      double pricePerUnit = quantity > 0 ? totalAmount / quantity : 0;
+      
+      if (existingItemIndex != -1) {
+        itemId = state.items[existingItemIndex].id;
+      } else {
+        final newItem = await repository.createStockItem(StockItem(
+          id: '',
+          propertyId: propertyId,
+          name: itemName,
+          category: category,
+          unit: unit,
+          currentQuantity: 0,
+          minimumThreshold: 10,
+          pricePerUnit: pricePerUnit,
+          createdBy: '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
+        itemId = newItem.id;
+      }
+      
+      await repository.addStock(itemId, quantity, pricePerUnit, totalAmount, paymentMode, DateTime.now(), notes);
+      emit(StockActionSuccess('Transaction added successfully', items: state.items, summary: state.summary));
+      loadStocks(propertyId);
+    } catch (e) {
+      emit(StockError(e.toString(), items: state.items, summary: state.summary));
+    }
+  }
 }

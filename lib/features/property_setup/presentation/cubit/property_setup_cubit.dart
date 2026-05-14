@@ -170,10 +170,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     if (index < 0 || index >= state.images.length) return;
     
     final path = state.images[index];
-    final croppedPath = await ImageUtils.cropImage(
-      path: path,
-      title: 'Crop Property Image',
-    );
+    final croppedPath = await _cropImage(path);
     
     if (croppedPath != null) {
       final currentImages = List<String>.from(state.images);
@@ -183,10 +180,8 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   }
 
   Future<String?> _cropImage(String path) async {
-    return await ImageUtils.cropImage(
-      path: path,
-      title: 'Crop Property Image',
-    );
+    // TODO: Implement image cropping logic
+    return path;
   }
 
   void removeImage(int index) {
@@ -480,14 +475,6 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
         foodLicense: state.foodLicense,
         hostelLicense: state.hostelLicense,
         tradeLicense: state.tradeLicense,
-        fireSafety: state.fireSafety,
-        policeNoc: state.policeNoc,
-        shopsEstablishment: state.shopsEstablishment,
-        gstRegistration: state.gstRegistration,
-        healthSanitation: state.healthSanitation,
-        utilityBill: state.utilityBill,
-        pollutionNoc: state.pollutionNoc,
-        residentVerification: state.residentVerification,
       );
       emit(state.copyWith(isSaving: false, currentStep: 4, hostelId: hostel.id)); 
     } catch (e) {

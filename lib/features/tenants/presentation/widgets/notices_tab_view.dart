@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/presentation/notices/cubit/notice_cubit.dart';
-import 'package:stayindia_owner/presentation/profile/cubit/hostel_cubit.dart';
-import 'package:stayindia_owner/presentation/profile/cubit/hostel_state.dart';
-import 'package:stayindia_owner/domain/entities/notice.dart';
-import 'package:stayindia_owner/presentation/common_widgets/shimmer_loading.dart';
+import 'package:stayindia_owner/features/notices/presentation/cubit/notice_cubit.dart';
 
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:stayindia_owner/features/notices/domain/entities/notice.dart';
+import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
 class NoticesTabView extends StatefulWidget {
   const NoticesTabView({super.key});
 

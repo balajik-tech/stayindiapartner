@@ -60,6 +60,8 @@ class StringUtils {
         return 'QUADRUPLE';
       case 5:
         return 'QUINTUPLE';
+      default:
+        return 'DORMITORY';
     }
   }
 }

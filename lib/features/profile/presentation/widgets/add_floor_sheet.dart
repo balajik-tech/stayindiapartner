@@ -240,7 +240,6 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
       bloc: widget.roomCubit,
       listener: (context, state) {
         if (state is RoomOperationSuccess) {
-          final floorName = _floorNameController.text.trim();
           Navigator.pop(context); // Close sheet
           
           // Refresh dashboard
@@ -308,7 +307,6 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                     floorName: floorName,
                     roomCount: _roomCount,
                     bedsPerRoom: 2,
-                    roomType: 'NON-AC', // Default, user can change later in the next screen
                   );
                 },
           child: Container(

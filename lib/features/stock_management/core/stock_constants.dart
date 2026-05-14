@@ -20,23 +20,29 @@ class StockConstants {
     ],
   };
 
-  static List<String> getAllItems() {
-    final List<String> items = [];
-    for (final category in masterList.values) {
-      for (final item in category) {
+  static List<Map<String, String>> getAllItems() {
+    final List<Map<String, String>> items = [];
+    for (final category in masterList.keys) {
+      for (final item in masterList[category]!) {
         if (item['name'] != null) {
-          items.add(item['name']!);
+          final Map<String, String> copy = Map.from(item);
+          copy['category'] = category;
+          items.add(copy);
         }
       }
     }
     return items;
   }
 
-  static String getLocalizedName(String name) {
-    return name; // TODO: Implement localization
+  static String getLocalizedName(Map<String, String> item, [String? langCode]) {
+    if (langCode == 'te' && item['nameTelugu'] != null) return item['nameTelugu']!;
+    if (langCode == 'hi' && item['nameHindi'] != null) return item['nameHindi']!;
+    if (langCode == 'ta' && item['nameTamil'] != null) return item['nameTamil']!;
+    if (langCode == 'kn' && item['nameKannada'] != null) return item['nameKannada']!;
+    return item['name'] ?? '';
   }
 
-  static String getLocalizedNameForEntity(StockItem item) {
-    return item.name; // TODO: Implement localization
+  static String getLocalizedNameForEntity(StockItem item, [String? langCode]) {
+    return item.name; // TODO: Implement actual localization based on langCode
   }
 }

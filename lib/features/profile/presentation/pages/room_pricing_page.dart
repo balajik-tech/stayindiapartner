@@ -44,7 +44,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
       if (roomState is RoomLoaded) {
         final masters = roomState.rooms.where((r) => r.isMaster).toList();
         if (masters.isNotEmpty) {
-          context.read<PropertySetupCubit>().updatePricingFromMasters(masters);
+          context.read<PropertySetupCubit>().updatePricingFromMasters();
         }
       }
     } catch (e) {
@@ -69,7 +69,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                   if (state is RoomLoaded) {
                     final masters = state.rooms.where((r) => r.isMaster).toList();
                     if (masters.isNotEmpty) {
-                      context.read<PropertySetupCubit>().updatePricingFromMasters(masters);
+                      context.read<PropertySetupCubit>().updatePricingFromMasters();
                     }
                   }
                 },
@@ -77,7 +77,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               BlocListener<PropertySetupCubit, PropertySetupState>(
                 listener: (context, state) {
                   if (state.currentStep == 4) {
-                    context.read<DashboardCubit>().fetchDashboardData([widget.hostel.id]);
+                    context.read<DashboardCubit>().fetchDashboardData(widget.hostel.id);
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => const MainNavigationPage()),

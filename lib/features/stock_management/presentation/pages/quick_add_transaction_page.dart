@@ -6,7 +6,6 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import '../cubit/stock_cubit.dart';
 import '../cubit/stock_state.dart';
 import '../../core/stock_constants.dart';
-import '../../domain/entities/stock_item.dart';
 import '../../data/models/stock_item_model.dart';
 
 class QuickAddTransactionPage extends StatefulWidget {
@@ -31,8 +30,6 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
   String _selectedPaymentMode = 'Cash';
   String? _selectedTeluguName;
   
-  StockItem? _matchedExistingItem;
-
   final List<String> _categories = ['Grocery', 'Perishables', 'Utilities', 'Maintenance', 'Staff', 'Misc'];
   final List<String> _units = ['kg', 'liters', 'pieces', 'packets', 'units'];
   final List<String> _paymentModes = ['UPI', 'Cash', 'Bank Transfer'];
@@ -95,12 +92,9 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
     );
 
     if (existingMatch.id.isNotEmpty) {
-      _matchedExistingItem = existingMatch;
       if (_priceController.text.isEmpty) {
         _priceController.text = existingMatch.pricePerUnit.toString();
       }
-    } else {
-      _matchedExistingItem = null;
     }
   }
 
@@ -389,6 +383,140 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
               child: SafeArea(
                 top: false,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    
+                    SizedBox(height: 16.h),
+                    Center(
+                      child: Container(
+                        width: 40.w,
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE2E8F0),
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: TextField(
+                        controller: searchController,
+                        onChanged: (val) {
+                          setSheetState(() {
+                            searchVal = val;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search items...',
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredItems[index];
+                          return ListTile(
+                            title: Text(item['name']!),
+                            onTap: () {
+                              _nameController.text = item['name']!;
+                              _onItemSearch(item['name']!);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Text(text, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String hint, {TextInputType? keyboardType, bool readOnly = false, bool isOptional = false}) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      readOnly: readOnly,
+      validator: isOptional ? null : (val) => val == null || val.isEmpty ? 'Required' : null,
+      decoration: InputDecoration(
+        hintText: hint,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      ),
+    );
+  }
+
+  Widget _buildDropdown(String value, List<String> items, void Function(String?) onChanged) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      ),
+    );
+  }
+
+  Widget _buildPaymentModeSelector() {
+    return Wrap(
+      spacing: 12.w,
+      children: _paymentModes.map((mode) {
+        final isSelected = _selectedPaymentMode == mode;
+        return ChoiceChip(
+          label: Text(mode),
+          selected: isSelected,
+          onSelected: (val) {
+            if (val) setState(() => _selectedPaymentMode = mode);
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            final qty = double.tryParse(_quantityController.text) ?? 0;
+            final total = double.tryParse(_totalController.text) ?? 0;
+            
+            context.read<StockCubit>().addTransaction(
+              propertyId: widget.propertyId,
+              itemName: _nameController.text,
+              category: _selectedCategory,
+              unit: _selectedUnit,
+              quantity: qty,
+              totalAmount: total,
+              paymentMode: _selectedPaymentMode,
+              notes: _noteController.text,
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+          backgroundColor: const Color(0xFF2C5990),
+        ),
+        child: Text('Submit Entry', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+      ),
+    );
+  }
+}

@@ -40,11 +40,50 @@ void registerProfileFeature(GetIt sl) {
         deleteOwnerAccountUseCase: sl(),
       ));
   
-  sl.registerFactory(() => HostelCubit(hostelRepository: sl()));
-  sl.registerFactory(() => RoomCubit(roomRepository: sl()));
-  sl.registerFactory(() => FoodMenuCubit(foodMenuRepository: sl()));
-  sl.registerFactory(() => SettingsCubit(settingsRepository: sl()));
-  sl.registerFactory(() => DocumentCubit(documentRepository: sl()));
+  sl.registerFactory(() => HostelCubit(
+        getHostelsUseCase: sl(),
+        createHostelUseCase: sl(),
+        updateHostelUseCase: sl(),
+        deleteHostelUseCase: sl(),
+        uploadHostelImagesUseCase: sl(),
+        updateHostelLocationUseCase: sl(),
+      ));
+
+  sl.registerFactory(() => RoomCubit(
+        getOccupancyUseCase: sl(),
+        getFloorWiseRoomsUseCase: sl(),
+        getRoomsUseCase: sl(),
+        getFloorsUseCase: sl(),
+        getRoomsByFloorUseCase: sl(),
+        getFreeBedsUseCase: sl(),
+        createRoomUseCase: sl(),
+        updateRoomUseCase: sl(),
+        deleteRoomUseCase: sl(),
+        getBedDetailUseCase: sl(),
+        getBedHistoryUseCase: sl(),
+        bulkCreateRoomsUseCase: sl(),
+      ));
+
+  sl.registerFactory(() => FoodMenuCubit(
+        getFoodMenuUseCase: sl(),
+        saveFoodMenuUseCase: sl(),
+      ));
+
+  sl.registerFactory(() => SettingsCubit(
+        getHostelSettingsUseCase: sl(),
+        updateHostelProfileUseCase: sl(),
+        updateHostelAmenitiesUseCase: sl(),
+        updateHostelHouseRulesUseCase: sl(),
+        updateHostelNotificationsUseCase: sl(),
+        updateHostelRoomConfigUseCase: sl(),
+        uploadHostelSettingsImagesUseCase: sl(),
+      ));
+
+  sl.registerFactory(() => DocumentCubit(
+        getDocumentsUseCase: sl(),
+        uploadDocumentUseCase: sl(),
+        deleteDocumentUseCase: sl(),
+      ));
 
   // ── Use-cases ──────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
