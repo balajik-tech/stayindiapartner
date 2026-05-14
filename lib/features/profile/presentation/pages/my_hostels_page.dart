@@ -88,7 +88,7 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
           return const SizedBox.shrink();
         },
       ),
-      
+      // FAB Removed as per requirements (moved to Dashboard)
     );
   }
 
@@ -110,18 +110,6 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
           letterSpacing: -0.5,
         ),
       ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            Navigator.push(
-              context, 
-              MaterialPageRoute(builder: (context) => const PropertySetupStepperPage())
-            );
-          },
-          icon: Icon(Icons.add_business_rounded, color: AppColors.primaryBlue, size: 24.sp),
-        ),
-        SizedBox(width: 8.w),
-      ],
     );
   }
 
@@ -386,48 +374,28 @@ class _PremiumHostelCard extends StatelessWidget {
   }
 }
 
-class _StaggeredEntry extends StatefulWidget {
+class _StaggeredEntry extends StatelessWidget {
   final Widget child;
   final int delayMs;
 
   const _StaggeredEntry({required this.child, required this.delayMs});
 
   @override
-  State<_StaggeredEntry> createState() => _StaggeredEntryState();
-}
-
-class _StaggeredEntryState extends State<_StaggeredEntry> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 600 + widget.delayMs),
-    );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart);
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 600 + delayMs),
+      curve: Curves.easeOutQuart,
+      builder: (context, value, child) {
         return Opacity(
-          opacity: _animation.value,
-          child: child,
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 30 * (1 - value)),
+            child: child,
+          ),
         );
       },
-      child: widget.child,
+      child: child,
     );
   }
 }

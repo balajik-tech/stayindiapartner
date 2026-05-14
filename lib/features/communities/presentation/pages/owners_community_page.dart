@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
@@ -52,7 +51,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           icon: const Icon(Icons.explore_rounded, color: Colors.white),
           label: Text(
             'Join Association',
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w700),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
         body: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
@@ -95,7 +94,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.outfit(color: AppColors.greyText),
+                        style: TextStyle(color: AppColors.greyText),
                       ),
                       SizedBox(height: 24.h),
                       ElevatedButton(
@@ -125,6 +124,18 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20),
         onPressed: () => Navigator.pop(context),
       ),
+      actions: [
+        IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.search_rounded, color: AppColors.greyText, size: 22.sp),
+          tooltip: 'Search',
+        ),
+        IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.notifications_none_rounded, color: AppColors.greyText, size: 22.sp),
+          tooltip: 'Notifications',
+        ),
+      ],
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(50.h),
         child: Container(
@@ -137,8 +148,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             indicatorWeight: 3,
             labelColor: AppColors.primaryBlue,
             unselectedLabelColor: AppColors.greyText,
-            labelStyle: GoogleFonts.outfit(fontSize: 15.sp, fontWeight: FontWeight.w800),
-            unselectedLabelStyle: GoogleFonts.outfit(fontSize: 15.sp, fontWeight: FontWeight.w600),
+            labelStyle: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
+            unselectedLabelStyle: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
             tabs: const [
               Tab(text: 'My Communities'),
               Tab(text: 'Discover'),
@@ -159,7 +170,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   SizedBox(width: 12.w),
                   Text(
                     'Owners Community',
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
                       color: AppColors.darkText,
                       fontWeight: FontWeight.w900,
                       fontSize: 26.sp,
@@ -171,7 +182,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               SizedBox(height: 4.h),
               Text(
                 'Connect, share & grow with other owners',
-                style: GoogleFonts.outfit(
+                style: TextStyle(
                   fontSize: 13.sp,
                   color: AppColors.greyText.withValues(alpha: 0.6),
                   fontWeight: FontWeight.w500,
@@ -189,12 +200,271 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       return _buildEmptyState();
     }
 
-    return ListView.builder(
+    return ListView(
       padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 80.h),
-      itemCount: joinedCommunities.length,
-      itemBuilder: (context, index) {
-        return _CommunityCard(community: joinedCommunities[index]);
+      children: [
+        _buildTopCommunitiesSection(joinedCommunities),
+        SizedBox(height: 24.h),
+        ...joinedCommunities.map((community) => _buildCommunityFeedCard(community)),
+      ],
+    );
+  }
+
+  Widget _buildTopCommunitiesSection(List<CommunityDetailsEntity> communities) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Your communities',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.darkText,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AssociationSelectionPage()),
+                ),
+                icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primaryBlue),
+                label: Text(
+                  'Join/Create',
+                  style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.w700, fontSize: 14.sp),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 16.h),
+        SizedBox(
+          height: 110.h,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: communities.length,
+            separatorBuilder: (context, index) => SizedBox(width: 12.w),
+            itemBuilder: (context, index) {
+              final community = communities[index];
+              return _buildCommunityStoryTile(community);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCommunityStoryTile(CommunityDetailsEntity community) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TenantsChatPage(
+              hostelId: community.id,
+              communityName: community.name,
+              communityIcon: community.image,
+              communityDescription: community.description,
+              isOwnerChat: true,
+            ),
+          ),
+        );
       },
+      child: Container(
+        width: 110.w,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22.r),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 14,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        padding: EdgeInsets.all(12.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16.r),
+                image: community.image != null
+                    ? DecorationImage(
+                        image: CachedNetworkImageProvider(community.image!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: community.image == null
+                  ? Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 24.sp)
+                  : null,
+            ),
+            SizedBox(height: 10.h),
+            Text(
+              community.name,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCommunityFeedCard(CommunityDetailsEntity community) {
+    return BouncingWrapper(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TenantsChatPage(
+              hostelId: community.id,
+              communityName: community.name,
+              communityIcon: community.image,
+              communityDescription: community.description,
+              isOwnerChat: true,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16.h),
+        padding: EdgeInsets.all(18.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(color: Colors.grey.shade100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 46.w,
+                  height: 46.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16.r),
+                    image: community.image != null
+                        ? DecorationImage(
+                            image: CachedNetworkImageProvider(community.image!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: community.image == null
+                      ? Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 24.sp)
+                      : null,
+                ),
+                SizedBox(width: 14.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              community.name,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.darkText,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryBlue.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Text(
+                              'COMMUNITY',
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryBlue,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6.h),
+                      Text(
+                        community.description ?? 'Connect with fellow owners and share updates.',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: AppColors.greyText.withValues(alpha: 0.85),
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(Icons.person_outline_rounded, color: AppColors.primaryBlue, size: 16.sp),
+                SizedBox(width: 6.w),
+                Text(
+                  '${community.memberCount} members',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: AppColors.greyText,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                  child: Text(
+                    'Open',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -225,7 +495,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search communities...',
-                hintStyle: GoogleFonts.outfit(
+                hintStyle: TextStyle(
                   color: AppColors.greyText.withValues(alpha: 0.5),
                   fontSize: 14.sp,
                 ),
@@ -270,7 +540,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           SizedBox(height: 16.h),
           Text(
             isTotalEmpty ? 'No new communities to join' : 'No results found',
-            style: GoogleFonts.outfit(
+            style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.greyText,
@@ -281,7 +551,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             isTotalEmpty 
               ? 'You are already in all active communities.'
               : 'Try searching with a different keyword.',
-            style: GoogleFonts.outfit(
+            style: TextStyle(
               fontSize: 14.sp,
               color: AppColors.greyText.withValues(alpha: 0.7),
             ),
@@ -304,7 +574,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           SizedBox(height: 24.h),
           Text(
             'No communities yet',
-            style: GoogleFonts.outfit(
+            style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.darkText,
@@ -314,7 +584,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           Text(
             'Join your local PG association to connect with other owners and access legal support.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: TextStyle(
               fontSize: 14.sp,
               color: AppColors.greyText.withValues(alpha: 0.7),
               height: 1.4,
@@ -331,115 +601,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             ),
             child: Text(
               'Join Association',
-              style: GoogleFonts.outfit(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.white),
             ),
           ),
           const Spacer(),
         ],
-      ),
-    );
-  }
-}
-
-class _CommunityCard extends StatelessWidget {
-  final CommunityDetailsEntity community;
-
-  const _CommunityCard({required this.community});
-
-  @override
-  Widget build(BuildContext context) {
-    return BouncingWrapper(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TenantsChatPage(
-              hostelId: community.id,
-              communityName: community.name,
-              communityIcon: community.image,
-              communityDescription: community.description,
-              isOwnerChat: true,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.all(20.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-          border: Border.all(color: Colors.grey.shade50),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 56.w,
-              height: 56.w,
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16.r),
-                image: community.image != null
-                    ? DecorationImage(
-                        image: CachedNetworkImageProvider(community.image!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: community.image == null
-                  ? Icon(Icons.groups_2_rounded, color: AppColors.primaryBlue, size: 28.sp)
-                  : null,
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    community.name,
-                    style: GoogleFonts.outfit(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.darkText,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    community.description ?? 'No description provided.',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
-                      fontSize: 14.sp,
-                      color: AppColors.greyText.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Row(
-                    children: [
-                      Icon(Icons.person_outline_rounded, size: 14.sp, color: AppColors.primaryBlue),
-                      SizedBox(width: 4.w),
-                      Text(
-                        '${community.memberCount} members',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryBlue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -481,7 +647,7 @@ class _JoinCommunitySheetState extends State<_JoinCommunitySheet> {
         children: [
           Text(
             'Available Communities',
-            style: GoogleFonts.outfit(
+            style: TextStyle(
               fontSize: 22.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.darkText,
@@ -549,7 +715,7 @@ class _JoinCommunitySheetState extends State<_JoinCommunitySheet> {
           SizedBox(height: 16.h),
           Text(
             _searchQuery.isEmpty ? 'No communities available' : 'No communities found',
-            style: GoogleFonts.outfit(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.greyText),
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.greyText),
           ),
         ],
       ),
@@ -609,11 +775,11 @@ class _AvailableCommunityItem extends StatelessWidget {
                 children: [
                   Text(
                     community.name,
-                    style: GoogleFonts.outfit(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
                   ),
                   Text(
                     '${community.memberCount} members',
-                    style: GoogleFonts.outfit(fontSize: 13.sp, fontWeight: FontWeight.w500, color: AppColors.greyText),
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w500, color: AppColors.greyText),
                   ),
                 ],
               ),
@@ -634,7 +800,7 @@ class _AvailableCommunityItem extends StatelessWidget {
             ),
             child: Text(
               isPending ? 'Requested' : 'Join', 
-              style: GoogleFonts.outfit(
+              style: TextStyle(
                 fontWeight: FontWeight.w700, 
                 color: isPending ? AppColors.greyText : Colors.white
               ),
@@ -674,7 +840,7 @@ class _PendingRequestsSection extends StatelessWidget {
                   ),
                   child: Text(
                     'NEW',
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w900,
                       color: Colors.orange.shade900,
@@ -684,7 +850,7 @@ class _PendingRequestsSection extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Text(
                   'Join Requests',
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.darkText,
@@ -734,14 +900,14 @@ class _PendingRequestsSection extends StatelessWidget {
                             children: [
                               Text(
                                 req['name'],
-                                style: GoogleFonts.outfit(
+                                style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               Text(
                                 'to $communityName',
-                                style: GoogleFonts.outfit(
+                                style: TextStyle(
                                   fontSize: 11.sp,
                                   color: AppColors.greyText,
                                 ),

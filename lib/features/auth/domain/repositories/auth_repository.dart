@@ -25,4 +25,5 @@ abstract class AuthRepository {
     required String platform,
     String? deviceId,
   });
+  Future<OwnerEntity> acceptPolicy({String version = '1.0'});
 }

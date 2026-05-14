@@ -9,6 +9,9 @@ class CommunityDetailsModel extends CommunityDetailsEntity {
     required super.memberCount,
     super.status,
     super.level,
+    super.stateId,
+    super.districtId,
+    super.wardId,
   });
 
   factory CommunityDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +23,9 @@ class CommunityDetailsModel extends CommunityDetailsEntity {
       memberCount: json['memberCount'] ?? 0,
       status: json['status']?.toString(),
       level: json['level']?.toString(),
+      stateId: json['stateId']?.toString(),
+      districtId: json['districtId']?.toString(),
+      wardId: json['wardId']?.toString(),
     );
   }
 }
@@ -64,14 +70,14 @@ class CommunityMessageModel extends CommunityMessageEntity {
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       senderId: sId,
       senderName: json['senderName']?.toString() ?? 
-                  senderData?['name']?.toString() ?? 
-                  userData?['name']?.toString() ?? 
-                  authorData?['name']?.toString() ?? 'Unknown',
+                   senderData?['name']?.toString() ?? 
+                   userData?['name']?.toString() ?? 
+                   authorData?['name']?.toString() ?? 'Unknown',
       senderAvatar: json['senderAvatar']?.toString() ?? 
-                    senderData?['avatar']?.toString() ?? 
-                    userData?['avatar']?.toString() ?? 
-                    authorData?['avatar']?.toString() ??
-                    senderData?['image']?.toString() ?? json['avatar']?.toString(),
+                     senderData?['avatar']?.toString() ?? 
+                     userData?['avatar']?.toString() ?? 
+                     authorData?['avatar']?.toString() ??
+                     senderData?['image']?.toString() ?? json['avatar']?.toString(),
       text: json['text']?.toString() ?? '',
       imageUrl: json['image']?.toString(),
       roomId: json['roomId']?.toString(),
@@ -127,6 +133,61 @@ class OwnerDiscussionModel extends OwnerDiscussionEntity {
           ? DateTime.parse(json['createdAt'].toString()) 
           : DateTime.now(),
       authorName: json['authorName']?.toString(),
+    );
+  }
+}
+
+class SocialPostModel extends SocialPostEntity {
+  const SocialPostModel({
+    required super.id,
+    required super.userId,
+    required super.userName,
+    super.userAvatar,
+    super.userRole,
+    required super.content,
+    required super.type,
+    required super.likesCount,
+    required super.commentsCount,
+    required super.isLiked,
+    required super.createdAt,
+    super.visibility,
+    super.poll,
+    super.userVote,
+    super.imageUrl,
+    super.videoUrl,
+    super.location,
+  });
+
+  factory SocialPostModel.fromJson(Map<String, dynamic> json) {
+    final userData = json['user'] is Map ? json['user'] as Map<String, dynamic> : null;
+    final authorData = json['author'] is Map ? json['author'] as Map<String, dynamic> : null;
+    
+    return SocialPostModel(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      userId: (json['userId'] ?? userData?['_id'] ?? authorData?['_id'] ?? '').toString(),
+      userName: json['userName']?.toString() ?? 
+                userData?['name']?.toString() ?? 
+                authorData?['name']?.toString() ?? 'Unknown',
+      userAvatar: json['userAvatar']?.toString() ?? 
+                  userData?['avatar']?.toString() ?? 
+                  authorData?['avatar']?.toString(),
+      userRole: json['userRole']?.toString() ?? 
+                userData?['role']?.toString() ?? 
+                authorData?['role']?.toString(),
+      content: json['content']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'POST',
+      likesCount: json['likesCount'] ?? json['likes_count'] ?? 0,
+      commentsCount: json['commentsCount'] ?? json['comments_count'] ?? 0,
+      isLiked: json['isLiked'] ?? json['is_liked'] ?? false,
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt'].toString()) 
+          : DateTime.now(),
+      visibility: json['visibility']?.toString(),
+      poll: json['poll'] is Map ? json['poll'] as Map<String, dynamic> : null,
+      userVote: json['userVote'] as int?,
+      imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString(),
+      videoUrl: json['video']?.toString() ?? json['videoUrl']?.toString(),
+      location: json['location'] is Map ? json['location'] as Map<String, dynamic> : null,
     );
   }
 }

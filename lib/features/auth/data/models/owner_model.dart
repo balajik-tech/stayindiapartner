@@ -13,6 +13,9 @@ class OwnerModel extends OwnerEntity {
     super.isProfileComplete,
     super.bedLimit,
     super.plan,
+    super.hasAcceptedPolicy,
+    super.role,
+    super.verificationBadge,
   });
 
   factory OwnerModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +47,9 @@ class OwnerModel extends OwnerEntity {
           json['isProfileComplete'] == true || json['is_profile_complete'] == true,
       bedLimit: bedLimit,
       plan: subscription['plan']?.toString() ?? 'free',
+      hasAcceptedPolicy: json['hasAcceptedPolicy'] == true,
+      role: json['role']?.toString() ?? 'owner',
+      verificationBadge: json['verificationBadge']?.toString(),
     );
   }
 
@@ -56,6 +62,9 @@ class OwnerModel extends OwnerEntity {
         'isProfileComplete': isProfileComplete,
         'bedLimit': bedLimit,
         'plan': plan,
+        'hasAcceptedPolicy': hasAcceptedPolicy,
+        'role': role,
+        if (verificationBadge != null) 'verificationBadge': verificationBadge,
       };
 
   
@@ -68,5 +77,8 @@ class OwnerModel extends OwnerEntity {
         isProfileComplete: entity.isProfileComplete,
         bedLimit: entity.bedLimit,
         plan: entity.plan,
+        hasAcceptedPolicy: entity.hasAcceptedPolicy,
+        role: entity.role,
+        verificationBadge: entity.verificationBadge,
       );
 }

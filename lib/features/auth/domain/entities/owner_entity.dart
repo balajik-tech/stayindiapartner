@@ -11,6 +11,9 @@ class OwnerEntity extends Equatable {
   final bool isProfileComplete;
   final int bedLimit;
   final String plan;
+  final bool hasAcceptedPolicy;
+  final String role;
+  final String? verificationBadge;
 
   const OwnerEntity({
     required this.id,
@@ -21,10 +24,23 @@ class OwnerEntity extends Equatable {
     this.isProfileComplete = false,
     this.bedLimit = 10,
     this.plan = 'free',
+    this.hasAcceptedPolicy = false,
+    this.role = 'owner',
+    this.verificationBadge,
   });
 
   bool get isNewOwner => !isProfileComplete;
   bool get isPremium => plan != 'free';
+  bool get isCook => role == 'cook';
+  bool get isWarden => role == 'warden';
+  bool get isManager => role == 'manager';
+  bool get isAnyStaff => ['cook', 'warden', 'manager'].contains(role);
+
+  bool hasPermission(String permission) {
+    // Basic implementation, can be extended based on actual permission logic
+    if (role == 'owner') return true;
+    return false; 
+  }
 
   OwnerEntity copyWith({
     String? id,
@@ -35,6 +51,9 @@ class OwnerEntity extends Equatable {
     bool? isProfileComplete,
     int? bedLimit,
     String? plan,
+    bool? hasAcceptedPolicy,
+    String? role,
+    String? verificationBadge,
   }) {
     return OwnerEntity(
       id: id ?? this.id,
@@ -45,6 +64,9 @@ class OwnerEntity extends Equatable {
       isProfileComplete: isProfileComplete ?? this.isProfileComplete,
       bedLimit: bedLimit ?? this.bedLimit,
       plan: plan ?? this.plan,
+      hasAcceptedPolicy: hasAcceptedPolicy ?? this.hasAcceptedPolicy,
+      role: role ?? this.role,
+      verificationBadge: verificationBadge ?? this.verificationBadge,
     );
   }
 
@@ -58,5 +80,8 @@ class OwnerEntity extends Equatable {
         isProfileComplete,
         bedLimit,
         plan,
+        hasAcceptedPolicy,
+        role,
+        verificationBadge,
       ];
 }

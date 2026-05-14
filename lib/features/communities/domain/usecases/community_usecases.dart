@@ -168,3 +168,59 @@ class CreateAssociationUseCase {
     description: description,
   );
 }
+
+class GetSocialFeedUseCase {
+  final CommunityRepository repository;
+  GetSocialFeedUseCase(this.repository);
+  Future<List<SocialPostEntity>> call({int limit = 20, int skip = 0}) => repository.getSocialFeed(limit: limit, skip: skip);
+}
+
+class CreateSocialPostUseCase {
+  final CommunityRepository repository;
+  CreateSocialPostUseCase(this.repository);
+  Future<SocialPostEntity> call({
+    String? communityId, 
+    required String content, 
+    String type = 'POST',
+    String? imagePath,
+    List<String>? pollOptions,
+    Map<String, dynamic>? location,
+  }) => repository.createSocialPost(
+    communityId: communityId,
+    content: content,
+    type: type,
+    imagePath: imagePath,
+    pollOptions: pollOptions,
+    location: location,
+  );
+}
+
+class TogglePostLikeUseCase {
+  final CommunityRepository repository;
+  TogglePostLikeUseCase(this.repository);
+  Future<void> call(String postId) => repository.togglePostLike(postId);
+}
+
+class GetPostCommentsUseCase {
+  final CommunityRepository repository;
+  GetPostCommentsUseCase(this.repository);
+  Future<List<Map<String, dynamic>>> call(String postId, {int limit = 20, int skip = 0}) => repository.getPostComments(postId, limit: limit, skip: skip);
+}
+
+class AddPostCommentUseCase {
+  final CommunityRepository repository;
+  AddPostCommentUseCase(this.repository);
+  Future<void> call(String postId, String text) => repository.addPostComment(postId, text);
+}
+
+class VotePollUseCase {
+  final CommunityRepository repository;
+  VotePollUseCase(this.repository);
+  Future<void> call(String postId, int optionIndex) => repository.votePoll(postId, optionIndex);
+}
+
+class DeleteSocialPostUseCase {
+  final CommunityRepository repository;
+  DeleteSocialPostUseCase(this.repository);
+  Future<void> call(String postId) => repository.deleteSocialPost(postId);
+}

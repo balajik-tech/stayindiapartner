@@ -62,6 +62,13 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetAssociationsUseCase(sl()));
   sl.registerLazySingleton(() => JoinAssociationUseCase(sl()));
   sl.registerLazySingleton(() => CreateAssociationUseCase(sl()));
+  sl.registerLazySingleton(() => GetSocialFeedUseCase(sl()));
+  sl.registerLazySingleton(() => CreateSocialPostUseCase(sl()));
+  sl.registerLazySingleton(() => TogglePostLikeUseCase(sl()));
+  sl.registerLazySingleton(() => GetPostCommentsUseCase(sl()));
+  sl.registerLazySingleton(() => AddPostCommentUseCase(sl()));
+  sl.registerLazySingleton(() => VotePollUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteSocialPostUseCase(sl()));
 
   
   sl.registerLazySingleton<CommunityRepository>(

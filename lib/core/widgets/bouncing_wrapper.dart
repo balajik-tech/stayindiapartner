@@ -4,13 +4,15 @@ import 'package:flutter/services.dart';
 class BouncingWrapper extends StatefulWidget {
   final Widget child;
   final Function? onTap;
+  final Function? onLongPress;
   final double scaleFactor;
   final Duration animationDuration;
 
   const BouncingWrapper({
     super.key,
     required this.child,
-    required this.onTap,
+    this.onTap,
+    this.onLongPress,
     this.scaleFactor = 0.95,
     this.animationDuration = const Duration(milliseconds: 100),
   });
@@ -22,7 +24,7 @@ class BouncingWrapper extends StatefulWidget {
 class _BouncingWrapperState extends State<BouncingWrapper>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _opacityAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -31,7 +33,7 @@ class _BouncingWrapperState extends State<BouncingWrapper>
       vsync: this,
       duration: widget.animationDuration,
     );
-    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.7)
+    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleFactor)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
@@ -61,14 +63,20 @@ class _BouncingWrapperState extends State<BouncingWrapper>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
-      behavior: HitTestBehavior.opaque,
-      child: FadeTransition(
-        opacity: _opacityAnimation,
-        child: widget.child,
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTapCancel: _onTapCancel,
+        onLongPress: widget.onLongPress != null ? () => widget.onLongPress!() : null,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) => Transform.scale(
+            scale: _scaleAnimation.value,
+            child: widget.child,
+          ),
+        ),
       ),
     );
   }

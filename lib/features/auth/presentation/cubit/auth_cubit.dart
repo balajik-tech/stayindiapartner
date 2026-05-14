@@ -204,6 +204,28 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   
+  Future<void> refreshProfile() async {
+    try {
+      final owner = await _getCurrentOwner();
+      emit(AuthAuthenticated(owner: owner));
+      AppLogger.info('Profile refreshed for owner: ${owner.id}');
+    } catch (e) {
+      AppLogger.error('refreshProfile failed', e);
+      // Don't emit error to avoid interrupting current state if just refreshing
+    }
+  }
+
+  Future<void> acceptPolicy() async {
+    try {
+      final owner = await _repository.acceptPolicy();
+      emit(AuthAuthenticated(owner: owner));
+      AppLogger.success('Policy accepted successfully');
+    } catch (e) {
+      AppLogger.error('acceptPolicy failed', e);
+      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
   OwnerEntity? get currentOwner {
     final s = state;
     return s is AuthAuthenticated ? s.owner : null;

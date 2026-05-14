@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:stayindia_owner/features/bookings/widgets/qr_scanner_screen.dart';
-import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_cubit.dart';
-import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
-import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
-import 'package:stayindia_owner/injection_container.dart' as di;
 
-enum BedStatus { free, occupied, notice, away }
+
+enum BedStatus { free, occupied, notice }
 
 class BedState {
   final BedStatus status;
@@ -18,7 +14,6 @@ class BedState {
   final String? vacatingDate;
   final String? tenantId;
   final String? hostelId;
-  final String? roomId;
   final String? roomNumber;
   final double? rent;
   final double? dailyRent;
@@ -36,7 +31,6 @@ class BedState {
     this.vacatingDate,
     this.tenantId,
     this.hostelId,
-    this.roomId,
     this.roomNumber,
     this.rent,
     this.dailyRent,
@@ -59,129 +53,6 @@ class BedDetailsSheet extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => BedDetailsSheet(state: state),
     );
-  }
-
-  void _openScanner(BuildContext context) async {
-    final String? result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QRScannerScreen()),
-    );
-
-    if (result != null && result.isNotEmpty && context.mounted) {
-      _showConfirmationDialog(context, result);
-    }
-  }
-
-  void _showConfirmationDialog(BuildContext context, String tenantData) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text(
-          "Confirm Assignment",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Assign this bed to the scanned user?", style: TextStyle(fontSize: 14.sp)),
-            SizedBox(height: 16.h),
-            _infoRow(Icons.bed_rounded, "Bed ${state.bedNumber}"),
-            _infoRow(Icons.meeting_room_rounded, "Room ${state.roomNumber ?? 'N/A'}"),
-            _infoRow(Icons.qr_code_2_rounded, "ID/Phone: $tenantData"),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text("CANCEL", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              _assignBed(context, tenantData);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF16A34A),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-            ),
-            child: const Text("CONFIRM", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _infoRow(IconData icon, String text) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h),
-      child: Row(
-        children: [
-          Icon(icon, size: 16.sp, color: Colors.grey),
-          SizedBox(width: 8.w),
-          Text(text, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-
-  void _assignBed(BuildContext context, String tenantPhone) async {
-    if (state.hostelId == null || state.roomId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error: Missing property data"), backgroundColor: Colors.red),
-      );
-      return;
-    }
-
-    final addTenantCubit = di.sl<AddTenantCubit>();
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Assigning bed..."), duration: Duration(seconds: 1)),
-    );
-
-    try {
-      await addTenantCubit.submit(
-        hostel: Hostel(
-          id: state.hostelId!,
-          name: state.hostelName ?? "",
-          address: state.hostelAddress ?? "",
-          floors: 0,
-          hostelType: "Co-Living",
-        ),
-        room: RoomDetail(
-          id: state.roomId!,
-          hostelId: state.hostelId!,
-          roomTypename: state.roomNumber ?? "",
-          floor: 0,
-          sharingType: "0",
-          roomType: "0",
-          rent: state.rent ?? 0,
-          deposit: 0,
-          maintenance: 0,
-          isActive: true,
-          isMaster: false,
-          capacity: 1,
-        ),
-        bed: state.bedNumber,
-        phone: tenantPhone,
-        rent: state.rent ?? 0,
-        startDate: DateTime.now(),
-      );
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Bed assigned successfully!"), backgroundColor: Colors.green),
-        );
-        Navigator.pop(context); // Close the sheet
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to assign: ${e.toString()}"), backgroundColor: Colors.red),
-        );
-      }
-    }
   }
 
   @override
@@ -210,7 +81,7 @@ class BedDetailsSheet extends StatelessWidget {
             _buildBrandingSection(),
             _buildQRSection(context),
             SizedBox(height: 32.h),
-            _buildActionRow(context),
+            _buildActionRow(),
             SizedBox(height: 32.h),
             _buildDoneButton(context),
             SizedBox(height: 20.h),
@@ -341,84 +212,79 @@ class BedDetailsSheet extends StatelessWidget {
       case BedStatus.notice:
         statusColor = const Color(0xFFEAB308);
         break;
-      case BedStatus.away:
-        statusColor = const Color(0xFFF59E0B);
-        break;
     }
 
-    return GestureDetector(
-      onTap: isFree ? () => _openScanner(context) : null,
-      child: AspectRatio(
-        aspectRatio: 1.1,
-        child: Container(
-          width: double.infinity,
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.all(24.r),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32.r),
-            border: Border.all(color: statusColor, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: statusColor.withValues(alpha: 0.1),
-                blurRadius: 30,
-                spreadRadius: 5,
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              if (isFree)
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 150.r,
-                      height: 150.r,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0FDF4),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.qr_code_scanner_rounded,
-                          color: const Color(0xFF22C55E),
-                          size: 75.sp,
-                        ),
-                      ),
+    return AspectRatio(
+      aspectRatio: 1.1,
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.all(24.r),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(32.r),
+          border: Border.all(color: statusColor, width: 3),
+          boxShadow: [
+            BoxShadow(
+              color: statusColor.withValues(alpha: 0.1),
+              blurRadius: 30,
+              spreadRadius: 5,
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (isFree)
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 150.r,
+                    height: 150.r,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FDF4),
+                      shape: BoxShape.circle,
                     ),
-                    SizedBox(height: 24.h),
-                    Text(
-                      "SCAN TO CHECK-IN",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w900,
+                    child: Center(
+                      child: Icon(
+                        Icons.qr_code_scanner_rounded,
                         color: const Color(0xFF22C55E),
-                        letterSpacing: 1.2,
+                        size: 75.sp,
                       ),
                     ),
-                  ],
-                )
-              else
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    QrImageView(
-                      data: "BED-${state.bedNumber}",
-                      version: QrVersions.auto,
-                      size: 160.r,
-                      padding: EdgeInsets.all(12.r),
-                      eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F172A)),
-                      dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Color(0xFF0F172A)),
+                  ),
+                  SizedBox(height: 24.h),
+                  Text(
+                    "SCAN TO CHECK-IN",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF22C55E),
+                      letterSpacing: 1.2,
                     ),
-                    SizedBox(height: 8.h),
-                  ],
-                ),
-              // Subtle corner accents
-              ..._buildCornerAccents(statusColor),
-            ],
-          ),
+                  ),
+                ],
+              )
+            else
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  QrImageView(
+                    data: "BED-${state.bedNumber}",
+                    version: QrVersions.auto,
+                    size: 160.r,
+                    padding: EdgeInsets.all(12.r),
+                    eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F172A)),
+                    dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Color(0xFF0F172A)),
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildGenerateNewBtn(),
+                ],
+              ),
+            // Subtle corner accents
+            ..._buildCornerAccents(statusColor),
+          ],
         ),
       ),
     );
@@ -448,9 +314,33 @@ class BedDetailsSheet extends StatelessWidget {
     );
   }
 
+  Widget _buildGenerateNewBtn() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.refresh_rounded, size: 14.sp, color: const Color(0xFF94A3B8)),
+          SizedBox(width: 6.w),
+          Text(
+            "GENERATE NEW",
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF94A3B8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  Widget _buildActionRow(BuildContext context) {
-    bool isFree = state.status == BedStatus.free;
+  Widget _buildActionRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -460,10 +350,7 @@ class BedDetailsSheet extends StatelessWidget {
           const Color(0xFF16A34A),
           const Color(0xFFF0FDF4),
         ),
-        GestureDetector(
-          onTap: isFree ? () => _openScanner(context) : null,
-          child: _buildActionPillIcon(Icons.qr_code_scanner_rounded, "SCAN", iconColor: const Color(0xFFF97316)),
-        ),
+        _buildActionPillIcon(Icons.qr_code_scanner_rounded, "SCAN", iconColor: const Color(0xFFF97316)),
         _buildActionPillIcon(Icons.qr_code_rounded, "QR", iconColor: const Color(0xFF2563EB)),
       ],
     );

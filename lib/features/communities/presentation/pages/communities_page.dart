@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +8,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/owners_community_page.dart';
+import 'package:stayindia_owner/features/communities/presentation/pages/association_intro_page.dart';
 
 class CommunitiesPage extends StatefulWidget {
   const CommunitiesPage({super.key});
@@ -58,22 +58,8 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
           backgroundColor: Colors.white,
           elevation: 0,
           toolbarHeight: 80.h,
-          leadingWidth: 70.w,
-          leading: Center(
-            child: GestureDetector(
-              onTap: () {
-                MainNavigationPage.scaffoldKey.currentState?.openDrawer();
-              },
-              child: Container(
-                padding: EdgeInsets.all(8.r),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(Icons.menu_rounded, color: AppColors.darkText, size: 24.sp),
-              ),
-            ),
-          ),
+          leading: const SizedBox.shrink(),
+          leadingWidth: 0,
           title: Text(
             'Community',
             style: GoogleFonts.outfit(
@@ -124,10 +110,13 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
 
   Widget _buildOwnersTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 100.h),
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 100.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildAssociationBanner(),
+          SizedBox(height: 24.h),
           _buildOwnersHeroCard(),
           SizedBox(height: 32.h),
           Row(
@@ -408,6 +397,70 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAssociationBanner() {
+    return BouncingWrapper(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AssociationIntroPage()),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF2C5990).withValues(alpha: 0.08),
+              const Color(0xFFF98125).withValues(alpha: 0.08),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: const Color(0xFF2C5990).withValues(alpha: 0.1)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: const BoxDecoration(
+                color: Color(0xFF2C5990),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.handshake_rounded, color: Colors.white, size: 20.sp),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Stay India Association',
+                    style: GoogleFonts.outfit(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF2C5990),
+                    ),
+                  ),
+                  Text(
+                    'Why Join Us? Learn the benefits.',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFF98125),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, color: const Color(0xFF2C5990).withValues(alpha: 0.3), size: 14.sp),
+          ],
+        ),
       ),
     );
   }

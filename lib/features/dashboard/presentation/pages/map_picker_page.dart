@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:stayindia_owner/core/location/location_service.dart';
 
 class MapPickerPage extends StatefulWidget {
   final LatLng? initialLocation;
@@ -34,16 +34,27 @@ class _MapPickerPageState extends State<MapPickerPage> {
   Future<void> _getCurrentLocation() async {
     setState(() => _isLoadingLocation = true);
     try {
-      final position = await Geolocator.getCurrentPosition();
-      final newLocation = LatLng(position.latitude, position.longitude);
+      final locationResult = await LocationService().getCurrentLocation();
+      final newLocation = LatLng(locationResult.latitude, locationResult.longitude);
       setState(() {
         _selectedLocation = newLocation;
         _mapController.move(newLocation, 15);
       });
     } catch (e) {
       if (mounted) {
+        String message = 'Failed to get current location';
+        if (e.toString().contains('Location services are disabled')) {
+          message = 'Location services are disabled. Please enable them.';
+        } else if (e.toString().contains('denied')) {
+          message = 'Location permissions denied.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to get current location')),
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {

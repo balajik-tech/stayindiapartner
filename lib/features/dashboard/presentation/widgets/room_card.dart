@@ -204,45 +204,26 @@ class _RoomCardState extends State<RoomCard> {
       status: bed.status,
       tenantName: bed.tenantName,
       tenantAvatar: bed.tenantAvatar,
-      isAway: bed.isAway,
       isSelected: widget.isPreAllocated && bed.bedNumber == widget.preAllocatedBedNumber,
       onTap: () {
-        if (widget.onBedTap != null) {
-          widget.onBedTap!(widget.roomNumber, bed.bedNumber);
-          return;
-        }
-        
         final bedStatus = _mapStatus(bed.status);
         final hId = widget.hostelId ?? _getHostelId(context);
-        String? hName;
-        String? hAddress;
-        
-        final hostelState = context.read<HostelCubit>().state;
-        if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-          final currentHostel = hostelState.hostels[hostelState.selectedHostelIndex];
-          hName = currentHostel.name;
-          hAddress = currentHostel.address;
-        }
-
         BedDetailsSheet.show(
           context,
           BedState(
             status: bedStatus,
-            bedNumber: "${widget.roomNumber}-${_getBedLetter(bed.bedNumber)}",
+            bedNumber: "${widget.roomNumber}-${bed.bedNumber}",
             tenantName: bed.tenantName,
             profileImage: bed.tenantAvatar,
             joiningDate: "01 May 2024", // Mock data for demonstration
             vacatingDate: bedStatus == BedStatus.notice ? "31 May 2024" : null,
             tenantId: bed.tenantId,
             hostelId: hId,
-            roomId: widget.id,
             roomNumber: widget.roomNumber,
             rent: widget.rent,
             dailyRent: widget.dailyRent,
             maintenance: widget.room.maintenance,
             amenities: widget.room.features,
-            hostelName: hName,
-            hostelAddress: hAddress,
           ),
         );
       },
@@ -255,8 +236,6 @@ class _RoomCardState extends State<RoomCard> {
         return BedStatus.free;
       case 'NOTICE':
         return BedStatus.notice;
-      case 'AWAY':
-        return BedStatus.away;
       default:
         return BedStatus.occupied;
     }
@@ -268,11 +247,5 @@ class _RoomCardState extends State<RoomCard> {
       return state.hostels[state.selectedHostelIndex].id;
     }
     return null;
-  }
-
-  String _getBedLetter(String bedNumber) {
-    final num = int.tryParse(bedNumber);
-    if (num == null) return bedNumber;
-    return String.fromCharCode(64 + num);
   }
 }

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'bed_card.dart';
 import 'bed_details_sheet.dart';
 
@@ -361,31 +358,18 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                 onPressed: () {
                   Navigator.pop(context);
                   final bedStatus = _mapStatus(bed.status);
-                  String? hName;
-                  String? hAddress;
-                  
-                  final hostelState = context.read<HostelCubit>().state;
-                  if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                    final currentHostel = hostelState.hostels[hostelState.selectedHostelIndex];
-                    hName = currentHostel.name;
-                    hAddress = currentHostel.address;
-                  }
-
-                    BedDetailsSheet.show(
-                      context,
-                      BedState(
-                        status: bedStatus,
-                        bedNumber: "${widget.room.roomNumber}-${_getBedLetter(bed.bedNumber)}",
-                        tenantName: bed.tenantName,
+                  BedDetailsSheet.show(
+                    context,
+                    BedState(
+                      status: bedStatus,
+                      bedNumber: "${widget.room.roomNumber}-${bed.bedNumber}",
+                      tenantName: bed.tenantName,
                       profileImage: bed.tenantAvatar,
                       joiningDate: "01 May 2024",
                       vacatingDate: bedStatus == BedStatus.notice ? "31 May 2024" : null,
                       tenantId: bed.tenantId,
                       hostelId: widget.hostelId,
-                      roomId: widget.room.id,
                       roomNumber: widget.room.roomNumber,
-                      hostelName: hName,
-                      hostelAddress: hAddress,
                     ),
                   );
                 },
@@ -442,31 +426,18 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
               onPressed: () {
                 Navigator.pop(context);
                 final bedStatus = _mapStatus(bed.status);
-                String? hName;
-                String? hAddress;
-                
-                final hostelState = context.read<HostelCubit>().state;
-                if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                  final currentHostel = hostelState.hostels[hostelState.selectedHostelIndex];
-                  hName = currentHostel.name;
-                  hAddress = currentHostel.address;
-                }
-
                 BedDetailsSheet.show(
                   context,
                   BedState(
                     status: bedStatus,
-                    bedNumber: "${widget.room.roomNumber}-${_getBedLetter(bed.bedNumber)}",
+                    bedNumber: "${widget.room.roomNumber}-${bed.bedNumber}",
                     tenantName: bed.tenantName,
                     profileImage: bed.tenantAvatar,
                     joiningDate: "01 May 2024",
                     vacatingDate: bedStatus == BedStatus.notice ? "31 May 2024" : null,
                     tenantId: bed.tenantId,
                     hostelId: widget.hostelId,
-                    roomId: widget.room.id,
                     roomNumber: widget.room.roomNumber,
-                    hostelName: hName,
-                    hostelAddress: hAddress,
                   ),
                 );
               },
@@ -513,11 +484,6 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
       default:
         return BedStatus.occupied;
     }
-  }
-  String _getBedLetter(String bedNumber) {
-    final num = int.tryParse(bedNumber);
-    if (num == null) return bedNumber;
-    return String.fromCharCode(64 + num);
   }
 }
 

@@ -8,7 +8,14 @@ import 'package:stayindia_owner/features/property_setup/presentation/pages/prope
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 
 class PropertySwitcherSheet extends StatelessWidget {
-  const PropertySwitcherSheet({super.key});
+  final VoidCallback? onAddProperty;
+  final Function(int)? onPropertySelected;
+
+  const PropertySwitcherSheet({
+    super.key,
+    this.onAddProperty,
+    this.onPropertySelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +58,15 @@ class PropertySwitcherSheet extends StatelessWidget {
                 BouncingWrapper(
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const PropertySetupStepperPage()),
-                    );
+                    if (onAddProperty != null) {
+                      onAddProperty!();
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const PropertySetupStepperPage()),
+                      );
+                    }
                   },
                   child: Container(
                     padding: EdgeInsets.all(8.r),
@@ -85,16 +97,24 @@ class PropertySwitcherSheet extends StatelessWidget {
 
                       return BouncingWrapper(
                         onTap: () {
-                          context.read<HostelCubit>().selectHostel(index);
+                          if (onPropertySelected != null) {
+                            onPropertySelected!(index);
+                          } else {
+                            context.read<HostelCubit>().selectHostel(index);
+                          }
                           Navigator.pop(context);
                         },
                         child: Container(
                           padding: EdgeInsets.all(12.r),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFFF1F5F9) : Colors.white,
+                            color: isSelected
+                                ? const Color(0xFFF1F5F9)
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(16.r),
                             border: Border.all(
-                              color: isSelected ? AppColors.primaryBlue : const Color(0xFFE2E8F0),
+                              color: isSelected
+                                  ? AppColors.primaryBlue
+                                  : const Color(0xFFE2E8F0),
                               width: isSelected ? 1.5 : 1,
                             ),
                           ),
@@ -114,7 +134,8 @@ class PropertySwitcherSheet extends StatelessWidget {
                                       : null,
                                 ),
                                 child: hostel.coverImage == null
-                                    ? Icon(Icons.apartment_rounded, color: Colors.orange, size: 24.sp)
+                                    ? Icon(Icons.apartment_rounded,
+                                        color: Colors.orange, size: 24.sp)
                                     : null,
                               ),
                               SizedBox(width: 16.w),
@@ -142,7 +163,8 @@ class PropertySwitcherSheet extends StatelessWidget {
                                 ),
                               ),
                               if (isSelected)
-                                Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 24.sp),
+                                Icon(Icons.check_circle_rounded,
+                                    color: AppColors.primaryBlue, size: 24.sp),
                             ],
                           ),
                         ),

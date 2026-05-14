@@ -159,4 +159,39 @@ class CommunityRepositoryImpl implements CommunityRepository {
     description: description,
     severity: severity,
   );
+
+  @override
+  Future<List<SocialPostEntity>> getSocialFeed({int limit = 20, int skip = 0}) => remote.getSocialFeed(limit: limit, skip: skip);
+
+  @override
+  Future<SocialPostEntity> createSocialPost({
+    String? communityId, 
+    required String content, 
+    String type = 'POST',
+    String? imagePath,
+    List<String>? pollOptions,
+    Map<String, dynamic>? location,
+  }) => remote.createSocialPost(
+    communityId: communityId,
+    content: content,
+    type: type,
+    imagePath: imagePath,
+    pollOptions: pollOptions,
+    location: location,
+  );
+
+  @override
+  Future<void> togglePostLike(String postId) => remote.togglePostLike(postId);
+
+  @override
+  Future<List<Map<String, dynamic>>> getPostComments(String postId, {int limit = 20, int skip = 0}) => remote.getPostComments(postId, limit: limit, skip: skip);
+
+  @override
+  Future<void> addPostComment(String postId, String text) => remote.addPostComment(postId, text);
+
+  @override
+  Future<void> votePoll(String postId, int optionIndex) => remote.votePoll(postId, optionIndex);
+
+  @override
+  Future<void> deleteSocialPost(String postId) => remote.deleteSocialPost(postId);
 }

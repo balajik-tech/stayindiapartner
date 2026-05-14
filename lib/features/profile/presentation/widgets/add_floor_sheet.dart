@@ -7,6 +7,10 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.d
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stayindia_owner/features/profile/presentation/pages/room_management_page.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 
 class AddFloorSheet extends StatefulWidget {
   final String hostelId;
@@ -44,7 +48,6 @@ class AddFloorSheet extends StatefulWidget {
 class _AddFloorSheetState extends State<AddFloorSheet> {
   final _floorNameController = TextEditingController();
   int _roomCount = 1;
-  int _bedsPerRoom = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -60,63 +63,46 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
       child: Column(
         children: [
           _buildHeader(),
-      Expanded(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 40.h),
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLabel('Floor Identity'),
-              _buildPremiumTextField(_floorNameController, hint: 'e.g. 3rd Floor'),
-              SizedBox(height: 32.h),
-              
-              Text(
-                'Capacity Configuration',
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 40.h),
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Floor Identity'),
+                  _buildPremiumTextField(_floorNameController, hint: 'e.g. 3rd Floor'),
+                  SizedBox(height: 32.h),
+                  
+                  Text(
+                    'Capacity Configuration',
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                  ),
+                  SizedBox(height: 16.h),
+                  
+                  _buildCounterRow(
+                    label: 'Total Rooms',
+                    value: _roomCount,
+                    onDecrement: () {
+                      if (_roomCount > 1) {
+                        setState(() => _roomCount--);
+                        HapticFeedback.lightImpact();
+                      }
+                    },
+                    onIncrement: () {
+                      if (_roomCount < 50) {
+                        setState(() => _roomCount++);
+                        HapticFeedback.mediumImpact();
+                      }
+                    },
+                  ),
+                  
+                  SizedBox(height: 48.h),
+                  _buildAddButton(),
+                ],
               ),
-              SizedBox(height: 16.h),
-              
-              _buildCounterRow(
-                label: 'Total Rooms',
-                value: _roomCount,
-                onDecrement: () {
-                  if (_roomCount > 1) {
-                    setState(() => _roomCount--);
-                    HapticFeedback.lightImpact();
-                  }
-                },
-                onIncrement: () {
-                  if (_roomCount < 50) {
-                    setState(() => _roomCount++);
-                    HapticFeedback.mediumImpact();
-                  }
-                },
-              ),
-              SizedBox(height: 20.h),
-              _buildCounterRow(
-                label: 'Beds per Room',
-                value: _bedsPerRoom,
-                onDecrement: () {
-                  if (_bedsPerRoom > 1) {
-                    setState(() => _bedsPerRoom--);
-                    HapticFeedback.lightImpact();
-                  }
-                },
-                onIncrement: () {
-                  if (_bedsPerRoom < 10) {
-                    setState(() => _bedsPerRoom++);
-                    HapticFeedback.mediumImpact();
-                  }
-                },
-              ),
-              
-              SizedBox(height: 48.h),
-              _buildAddButton(),
-            ],
+            ),
           ),
-        ),
-      ),
         ],
       ),
     );
@@ -254,8 +240,41 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
       bloc: widget.roomCubit,
       listener: (context, state) {
         if (state is RoomOperationSuccess) {
-          Navigator.pop(context);
+          final floorName = _floorNameController.text.trim();
+          Navigator.pop(context); // Close sheet
+          
+          // Refresh dashboard
           widget.dashboardCubit.fetchDashboardData(widget.hostelId);
+          
+          // Get current hostel
+          final hostelState = context.read<HostelCubit>().state;
+          Hostel? hostel;
+          if (hostelState is HostelLoaded) {
+            hostel = hostelState.hostels[hostelState.selectedHostelIndex];
+          }
+
+          if (hostel != null) {
+            final floorInput = _floorNameController.text.trim();
+            final floorNum = int.tryParse(floorInput.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+            final normalizedFloorName = floorNum == 0 ? 'Ground Floor' : 'Floor $floorNum';
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: widget.roomCubit),
+                    BlocProvider.value(value: widget.dashboardCubit),
+                  ],
+                  child: RoomManagementPage(
+                    hostel: hostel!,
+                    floorName: normalizedFloorName,
+                  ),
+                ),
+              ),
+            );
+          }
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
@@ -288,7 +307,8 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                     ownerId: ownerId,
                     floorName: floorName,
                     roomCount: _roomCount,
-                    bedsPerRoom: _bedsPerRoom,
+                    bedsPerRoom: 2,
+                    roomType: 'NON-AC', // Default, user can change later in the next screen
                   );
                 },
           child: Container(

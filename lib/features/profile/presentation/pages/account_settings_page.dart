@@ -10,7 +10,6 @@ import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
-import '../../../communities/presentation/pages/association_selection_page.dart';
 
 class AccountSettingsPage extends StatefulWidget {
   const AccountSettingsPage({super.key});
@@ -52,7 +51,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickAndUploadImage() async {
     final result = await FilePicker.pickFiles(
       type: FileType.image,
       allowMultiple: false,
@@ -151,16 +150,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                               onTap: () => _showEditSheet('Address', _addressController, isLongText: true),
                             ),
                           ]),
-                          SizedBox(height: 24.h),
-                          _buildSectionLabel('ASSOCIATION NETWORK'),
-                          _buildEditableBlock([
-                            _EditableRow(
-                              label: 'My Association',
-                              value: profile?.associationId != null ? 'Connected' : 'Not Connected',
-                              icon: Icons.account_balance_rounded,
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssociationSelectionPage())),
-                            ),
-                          ]),
                           SizedBox(height: 32.h),
                           _buildDeleteAccountButton(context),
                         ],
@@ -204,11 +193,74 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Widget _buildAnimatedHeader(dynamic profile) {
-    return _AnimatedHeader(
-      profile: profile,
-      firstName: _firstNameController.text,
-      lastName: _lastNameController.text,
-      phone: _phoneController.text,
+    final name = '${_firstNameController.text} ${_lastNameController.text}';
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutQuart,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: 0.9 + (0.1 * value),
+          child: Opacity(
+            opacity: value,
+            child: Column(
+              children: [
+                SizedBox(height: 20.h),
+                Stack(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(4.r),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: CustomAvatar(
+                        imageUrl: ApiConstants.getImageUrl(profile?.avatar),
+                        name: name,
+                        size: 100.0,
+                        isCircle: true,
+                        fontSize: 38.sp,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: _pickAndUploadImage,
+                        child: Container(
+                          padding: EdgeInsets.all(8.r),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryBlue,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18.sp),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  name,
+                  style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                ),
+                Text(
+                  '+91 ${_phoneController.text}',
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.greyText),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -302,31 +354,31 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     );
   }
 
-  void _confirmDelete(BuildContext context) {
-    final authCubit = context.read<AuthCubit>();
-    final profileCubit = context.read<ProfileCubit>();
-    final navigator = Navigator.of(context);
-
-    showDialog(
+  void _confirmDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
         title: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w900)),
-        content: const Text('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.'),
+        content: const Text('This action is permanent and all your data will be lost forever. Confirm?'),
         actions: [
-          TextButton(onPressed: () => navigator.pop(), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           TextButton(
-            onPressed: () async {
-              await profileCubit.deleteAccount();
-              authCubit.logout();
-              navigator.popUntil((route) => route.isFirst);
-            },
+            onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete Permanently', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
+    if (confirmed == true && mounted) {
+      context.read<ProfileCubit>().deleteAccount().then((_) {
+        if (mounted) {
+          context.read<AuthCubit>().logout();
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
+    }
   }
 
   void _showEditSheet(String title, TextEditingController controller, {TextInputType inputType = TextInputType.text, bool isLongText = false}) {
@@ -385,111 +437,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 }
 
-class _AnimatedHeader extends StatefulWidget {
-  final dynamic profile;
-  final String firstName;
-  final String lastName;
-  final String phone;
-
-  const _AnimatedHeader({required this.profile, required this.firstName, required this.lastName, required this.phone});
-
-  @override
-  State<_AnimatedHeader> createState() => _AnimatedHeaderState();
-}
-
-class _AnimatedHeaderState extends State<_AnimatedHeader> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart);
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final name = '${widget.firstName} ${widget.lastName}';
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _animation.value,
-          child: Column(
-            children: [
-              SizedBox(height: 20.h),
-              Stack(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(4.r),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: CustomAvatar(
-                      imageUrl: ApiConstants.getImageUrl(widget.profile?.avatar),
-                      name: name,
-                      size: 100.0,
-                      isCircle: true,
-                      fontSize: 38.sp,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: GestureDetector(
-                      onTap: () {
-                         final parentState = context.findAncestorStateOfType<_AccountSettingsPageState>();
-                         parentState?._pickImage();
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(8.r),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryBlue,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18.sp),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                name,
-                style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
-              ),
-              Text(
-                '+91 ${widget.phone}',
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.greyText),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
 class _EditableRow extends StatefulWidget {
   final String label;
   final String value;
@@ -509,56 +456,78 @@ class _EditableRow extends StatefulWidget {
   State<_EditableRow> createState() => _EditableRowState();
 }
 
-class _EditableRowState extends State<_EditableRow> {
+class _EditableRowState extends State<_EditableRow> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTapDown: widget.isLocked ? null : (_) => _controller.forward(),
+      onTapUp: widget.isLocked ? null : (_) => _controller.reverse(),
+      onTapCancel: widget.isLocked ? null : () => _controller.reverse(),
       onTap: widget.isLocked ? null : widget.onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.r),
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12.r),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10.r),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(widget.icon, color: AppColors.primaryBlue, size: 20.sp),
               ),
-              child: Icon(widget.icon, color: AppColors.primaryBlue, size: 20.sp),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.label,
-                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppColors.greyText.withValues(alpha: 0.6), letterSpacing: 0.5),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    widget.value.isEmpty ? 'Not set' : widget.value,
-                    style: TextStyle(
-                      fontSize: 15.sp, 
-                      fontWeight: FontWeight.w700, 
-                      color: widget.isLocked ? AppColors.darkText.withValues(alpha: 0.5) : AppColors.darkText
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.label,
+                      style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppColors.greyText.withValues(alpha: 0.6), letterSpacing: 0.5),
                     ),
-                  ),
-                  if (widget.isLocked)
-                    Padding(
-                      padding: EdgeInsets.only(top: 2.h),
-                      child: Text('Cannot be changed', style: TextStyle(fontSize: 10.sp, color: Colors.orange.shade700, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 2.h),
+                    Text(
+                      widget.value.isEmpty ? 'Not set' : widget.value,
+                      style: TextStyle(
+                        fontSize: 15.sp, 
+                        fontWeight: FontWeight.w700, 
+                        color: widget.isLocked ? AppColors.darkText.withValues(alpha: 0.5) : AppColors.darkText
+                      ),
                     ),
-                ],
+                    if (widget.isLocked)
+                      Padding(
+                        padding: EdgeInsets.only(top: 2.h),
+                        child: Text('Cannot be changed', style: TextStyle(fontSize: 10.sp, color: Colors.orange.shade700, fontWeight: FontWeight.bold)),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            Icon(
-              widget.isLocked ? Icons.lock_outline_rounded : Icons.edit_rounded,
-              color: AppColors.darkText.withValues(alpha: 0.45),
-              size: 16.sp,
-            ),
-          ],
+              Icon(
+                widget.isLocked ? Icons.lock_outline_rounded : Icons.edit_rounded,
+                color: AppColors.greyText.withValues(alpha: 0.3),
+                size: 16.sp,
+              ),
+            ],
+          ),
         ),
       ),
     );

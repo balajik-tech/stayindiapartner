@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:stayindia_owner/core/location/location_service.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
@@ -83,36 +82,33 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     HapticFeedback.mediumImpact();
     
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) throw 'Location services are disabled.';
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) throw 'Location permissions are denied';
-      }
+      final locationResult = await LocationService().getCurrentLocation();
       
-      if (permission == LocationPermission.deniedForever) throw 'Location permissions are permanently denied';
-
-      final position = await Geolocator.getCurrentPosition();
-      final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-      
-      if (placemarks.isNotEmpty) {
-        final p = placemarks.first;
-        setState(() {
-          _lat = position.latitude;
-          _lng = position.longitude;
-          _stateController.text = p.administrativeArea ?? "";
-          _districtController.text = p.subAdministrativeArea ?? "";
-          _villageController.text = p.locality ?? p.subLocality ?? "";
-          _areaController.text = "${p.street ?? ""}, ${p.subLocality ?? ""}".trim();
-          _pincodeController.text = p.postalCode ?? "";
-          _addressController.text = "${p.street}, ${p.subLocality}, ${p.locality}, ${p.administrativeArea}".trim();
-        });
-        HapticFeedback.heavyImpact();
-      }
+      setState(() {
+        _lat = locationResult.latitude;
+        _lng = locationResult.longitude;
+        _stateController.text = locationResult.administrativeArea ?? "";
+        _districtController.text = locationResult.subAdministrativeArea ?? "";
+        _villageController.text = locationResult.locality ?? locationResult.subLocality ?? "";
+        _areaController.text = "${locationResult.street ?? ""}, ${locationResult.subLocality ?? ""}".trim();
+        _pincodeController.text = locationResult.pincode ?? "";
+        _addressController.text = "${locationResult.street ?? ''}, ${locationResult.subLocality ?? ''}, ${locationResult.locality ?? ''}, ${locationResult.administrativeArea ?? ''}".trim();
+      });
+      HapticFeedback.heavyImpact();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) {
+        String message = 'Error: $e';
+        if (e.toString().contains('Location services are disabled')) {
+          message = 'Location services are disabled. Please enable them.';
+        } else if (e.toString().contains('denied')) {
+          message = 'Location permissions denied.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
     } finally {
       if (mounted) setState(() => _isFetchingLocation = false);
     }

@@ -25,12 +25,6 @@ import 'domain/repositories/settings_repository.dart';
 import 'domain/repositories/document_repository.dart';
 import 'domain/repositories/review_repository.dart';
 
-import 'domain/usecases/hostel_usecases.dart';
-import 'domain/usecases/room_usecases.dart';
-import 'domain/usecases/food_menu_usecases.dart';
-import 'domain/usecases/settings_usecases.dart';
-import 'domain/usecases/document_usecases.dart';
-
 import 'presentation/cubit/hostel_cubit.dart';
 import 'presentation/cubit/room_cubit.dart';
 import 'presentation/cubit/food_menu_cubit.dart';
@@ -39,7 +33,6 @@ import 'package:stayindia_owner/features/profile/data/repositories/review_reposi
 import 'package:stayindia_owner/features/auth/presentation/cubit/document_cubit.dart';
 
 void registerProfileFeature(GetIt sl) {
-  
   sl.registerFactory(() => ProfileCubit(
         getProfileUseCase: sl(),
         updateProfileUseCase: sl(),
@@ -47,93 +40,19 @@ void registerProfileFeature(GetIt sl) {
         deleteOwnerAccountUseCase: sl(),
       ));
   
-  sl.registerFactory(() => HostelCubit(
-        getHostelsUseCase: sl(),
-        createHostelUseCase: sl(),
-        updateHostelUseCase: sl(),
-        deleteHostelUseCase: sl(),
-        uploadHostelImagesUseCase: sl(),
-        updateHostelLocationUseCase: sl(),
-      ));
-      
-  sl.registerFactory(() => RoomCubit(
-        getOccupancyUseCase: sl(),
-        getFloorWiseRoomsUseCase: sl(),
-        getRoomsUseCase: sl(),
-        getFloorsUseCase: sl(),
-        getRoomsByFloorUseCase: sl(),
-        getFreeBedsUseCase: sl(),
-        createRoomUseCase: sl(),
-        updateRoomUseCase: sl(),
-        deleteRoomUseCase: sl(),
-        getBedDetailUseCase: sl(),
-        getBedHistoryUseCase: sl(),
-        bulkCreateRoomsUseCase: sl(),
-      ));
-      
-  sl.registerFactory(() => FoodMenuCubit(
-        getFoodMenuUseCase: sl(),
-        saveFoodMenuUseCase: sl(),
-      ));
-      
-  sl.registerFactory(() => SettingsCubit(
-        getHostelSettingsUseCase: sl(),
-        updateHostelProfileUseCase: sl(),
-        updateHostelAmenitiesUseCase: sl(),
-        updateHostelHouseRulesUseCase: sl(),
-        updateHostelNotificationsUseCase: sl(),
-        updateHostelRoomConfigUseCase: sl(),
-        uploadHostelSettingsImagesUseCase: sl(),
-      ));
-      
-  sl.registerFactory(() => DocumentCubit(
-        getDocumentsUseCase: sl(),
-        uploadDocumentUseCase: sl(),
-        deleteDocumentUseCase: sl(),
-      ));
+  sl.registerFactory(() => HostelCubit(hostelRepository: sl()));
+  sl.registerFactory(() => RoomCubit(roomRepository: sl()));
+  sl.registerFactory(() => FoodMenuCubit(foodMenuRepository: sl()));
+  sl.registerFactory(() => SettingsCubit(settingsRepository: sl()));
+  sl.registerFactory(() => DocumentCubit(documentRepository: sl()));
 
-  
+  // ── Use-cases ──────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => UploadAvatarUseCase(sl()));
   sl.registerLazySingleton(() => DeleteOwnerAccountUseCase(sl()));
 
-  sl.registerLazySingleton(() => GetHostelsUseCase(sl()));
-  sl.registerLazySingleton(() => CreateHostelUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateHostelUseCase(sl()));
-  sl.registerLazySingleton(() => DeleteHostelUseCase(sl()));
-  sl.registerLazySingleton(() => UploadHostelImagesUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateHostelLocationUseCase(sl()));
-
-  sl.registerLazySingleton(() => GetOccupancyUseCase(sl()));
-  sl.registerLazySingleton(() => GetFloorWiseRoomsUseCase(sl()));
-  sl.registerLazySingleton(() => GetRoomsUseCase(sl()));
-  sl.registerLazySingleton(() => GetFloorsUseCase(sl()));
-  sl.registerLazySingleton(() => GetRoomsByFloorUseCase(sl()));
-  sl.registerLazySingleton(() => GetFreeBedsUseCase(sl()));
-  sl.registerLazySingleton(() => CreateRoomUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateRoomUseCase(sl()));
-  sl.registerLazySingleton(() => DeleteRoomUseCase(sl()));
-  sl.registerLazySingleton(() => GetBedDetailUseCase(sl()));
-  sl.registerLazySingleton(() => GetBedHistoryUseCase(sl()));
-  sl.registerLazySingleton(() => BulkCreateRoomsUseCase(sl()));
-
-  sl.registerLazySingleton(() => GetFoodMenuUseCase(sl()));
-  sl.registerLazySingleton(() => SaveFoodMenuUseCase(sl()));
-
-  sl.registerLazySingleton(() => GetHostelSettingsUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateHostelProfileUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateHostelAmenitiesUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateHostelHouseRulesUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateHostelNotificationsUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateHostelRoomConfigUseCase(sl()));
-  sl.registerLazySingleton(() => UploadHostelSettingsImagesUseCase(sl()));
-
-  sl.registerLazySingleton(() => GetDocumentsUseCase(sl()));
-  sl.registerLazySingleton(() => UploadDocumentUseCase(sl()));
-  sl.registerLazySingleton(() => DeleteDocumentUseCase(sl()));
-
-  
+  // ── Repository ─────────────────────────────────────────────────────────────
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(remoteDataSource: sl()),
   );
@@ -156,7 +75,7 @@ void registerProfileFeature(GetIt sl) {
     () => ReviewRepositoryImpl(remoteDataSource: sl()),
   );
 
-  
+  // ── Data sources ────────────────────────────────────────────────────────────
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(dio: sl()),
   );

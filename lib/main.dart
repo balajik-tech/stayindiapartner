@@ -43,7 +43,7 @@ void main() async {
   );
   
   FlutterError.onError = (details) {
-    
+    // Skip logging parentDataDirty assertion errors in debug mode
     final errorString = details.exception.toString();
     if (!errorString.contains('parentDataDirty')) {
       AppLogger.error('FLUTTER FRAMEWORK ERROR: ${details.exception}', details.exception, details.stack);

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
@@ -10,6 +9,8 @@ import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
 import '../widgets/booking_card.dart';
 import 'package:stayindia_owner/features/bookings/domain/booking.dart';
 import 'package:stayindia_owner/core/constants/ui_constants.dart';
+import 'package:stayindia_owner/core/widgets/pattern_background.dart';
+import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 
 class _BookingsPageWithScroll extends StatefulWidget {
   const _BookingsPageWithScroll();
@@ -36,8 +37,6 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
     super.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return BlocListener<BookingsCubit, BookingsState>(
@@ -46,7 +45,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.successMessage!),
-              backgroundColor: const Color(0xFF12B76A),
+              backgroundColor: AppColors.success,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
             ),
@@ -56,7 +55,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
-              backgroundColor: Colors.red.shade600,
+              backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
             ),
@@ -105,159 +104,136 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
   }
 
   Widget _buildPowerfulHeader(BuildContext context, BookingsState state) {
-    if (_isSearching) {
-      return Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 20.h, 12.w, 10.h),
-        child: Row(
-          children: [
-            Expanded(
+    return Container(
+      padding: EdgeInsets.fromLTRB(8.w, 12.h, 16.w, 24.h),
+      decoration: BoxDecoration(
+        color: AppColors.primaryBlue,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bookings',
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    Text(
+                      'Manage stays and residents',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildHeaderAction(Icons.search_rounded, () => setState(() => _isSearching = !_isSearching)),
+                  _buildHeaderAction(Icons.filter_list_rounded, () => _showFilterSheet(context)),
+                  _buildHeaderAction(Icons.refresh_rounded, () => context.read<BookingsCubit>().fetchBookings()),
+                ],
+              ),
+            ],
+          ),
+          if (_isSearching) ...[
+            SizedBox(height: 16.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
               child: Container(
-                height: 44.h,
+                height: 48.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FB),
-                  borderRadius: BorderRadius.circular(12.r),
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14.r),
                 ),
                 child: TextField(
                   controller: _searchController,
                   autofocus: true,
                   onChanged: (value) => context.read<BookingsCubit>().searchBookings(value),
+                  style: TextStyle(color: Colors.white, fontSize: 14.sp),
                   decoration: InputDecoration(
                     hintText: 'Search by name, phone, room...',
-                    hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
-                    prefixIcon: Icon(Icons.search_rounded, color: AppColors.greyText, size: 20.sp),
+                    hintStyle: TextStyle(fontSize: 14.sp, color: Colors.white.withValues(alpha: 0.3)),
+                    prefixIcon: Icon(Icons.search_rounded, color: Colors.white.withValues(alpha: 0.5), size: 20.sp),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   ),
                 ),
               ),
             ),
-            SizedBox(width: 8.w),
-            _buildHeaderAction(Icons.close_rounded, () {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-              context.read<BookingsCubit>().searchBookings('');
-            }),
           ],
-        ),
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 20.h, 12.w, 10.h),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () {
-              MainNavigationPage.scaffoldKey.currentState?.openDrawer();
-            },
-            child: Container(
-              padding: EdgeInsets.all(8.r),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FB),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Icon(Icons.menu_rounded, color: AppColors.darkText, size: 24.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Bookings',
-                  style: TextStyle(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.darkText,
-                    letterSpacing: -1,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'Manage residents',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: AppColors.greyText,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeaderAction(Icons.search_rounded, () {
-                setState(() => _isSearching = true);
-              }),
-              _buildHeaderAction(Icons.filter_list_rounded, () => _showFilterSheet(context)),
-              _buildHeaderAction(Icons.refresh_rounded, () => context.read<BookingsCubit>().fetchBookings()),
-            ],
-          ),
         ],
       ),
     );
   }
 
   Widget _buildHeaderAction(IconData icon, VoidCallback onTap) {
-    return Container(
-      margin: EdgeInsets.only(left: 8.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FB),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: IconButton(
-        onPressed: onTap,
-        icon: Icon(icon, color: AppColors.darkText, size: 22.sp),
-        visualDensity: VisualDensity.compact,
+    return BouncingWrapper(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(10.r),
+        margin: EdgeInsets.only(left: 8.w),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Icon(icon, color: Colors.white, size: 22.sp),
       ),
     );
   }
 
   Widget _buildSegmentedTabs(BookingsState state) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      padding: EdgeInsets.all(4.w),
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+      padding: EdgeInsets.all(5.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F4F7),
-        borderRadius: BorderRadius.circular(14.r),
+        color: AppColors.backgroundSecondary,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.border),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10.r),
+          color: AppColors.primaryBlue,
+          borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              color: AppColors.primaryBlue.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        labelColor: AppColors.darkText,
-        unselectedLabelColor: AppColors.greyText,
+        labelColor: Colors.white,
+        unselectedLabelColor: AppColors.textSecondary,
         labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
         unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         tabs: [
-          _buildTabItem('Requests', state.requests.length),
-          _buildTabItem('Active', state.checkIns.length),
+          _buildTabItem('Requests', state.requests.length, 0),
+          _buildTabItem('Active', state.checkIns.length, 1),
           const Tab(text: 'History'),
         ],
       ),
     );
   }
 
-  Tab _buildTabItem(String label, int count) {
+  Tab _buildTabItem(String label, int count, int index) {
+    bool isSelected = _tabController.index == index;
     return Tab(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -268,7 +244,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: count > 5 ? Colors.red.shade50 : AppColors.primaryBlue.withValues(alpha: 0.1),
+                color: isSelected ? Colors.white.withValues(alpha: 0.2) : AppColors.primaryBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Text(
@@ -276,7 +252,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w900,
-                  color: count > 5 ? Colors.red.shade700 : AppColors.primaryBlue,
+                  color: isSelected ? Colors.white : AppColors.primaryBlue,
                 ),
               ),
             ),
@@ -319,7 +295,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
             }
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue)),
             );
           },
         ),
@@ -338,17 +314,17 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(24.w),
+            padding: EdgeInsets.all(32.r),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
+              color: AppColors.backgroundSecondary,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.inbox_rounded, size: 64.sp, color: AppColors.greyText.withValues(alpha: 0.2)),
+            child: Icon(Icons.inbox_rounded, size: 64.sp, color: AppColors.textSecondary.withValues(alpha: 0.1)),
           ),
           SizedBox(height: 24.h),
           Text(
             title,
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           SizedBox(height: 8.h),
           Padding(
@@ -356,7 +332,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
             child: Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -376,17 +352,10 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.backgroundPrimary,
             borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
-              ),
-            ],
           ),
-          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 32.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,7 +365,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                   width: 40.w,
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: AppColors.border,
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
@@ -410,7 +379,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                     style: TextStyle(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.darkText,
+                      color: AppColors.textPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -423,8 +392,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                       cubit.changeFilter(kycStatus: '', roomType: '');
                       Navigator.pop(context);
                     },
-                    style: TextButton.styleFrom(foregroundColor: AppColors.primaryBlue),
-                    child: Text('Reset', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
+                    child: Text('Reset', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.accentOrange)),
                   ),
                 ],
               ),
@@ -453,20 +421,9 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                     );
                     Navigator.pop(context);
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Apply Filters',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
-                  ),
+                  child: const Text('Apply Filters'),
                 ),
               ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom + 8.h),
             ],
           ),
         ),
@@ -488,14 +445,14 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,
-            color: AppColors.greyText,
+            color: AppColors.textSecondary,
             letterSpacing: 0.5,
           ),
         ),
         SizedBox(height: 12.h),
         Wrap(
-          spacing: 10.w,
-          runSpacing: 10.h,
+          spacing: 12.w,
+          runSpacing: 12.h,
           children: options.map((opt) {
             final isSelected = selectedValue == opt;
             return InkWell(
@@ -503,13 +460,13 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
               borderRadius: BorderRadius.circular(12.r),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.08) : Colors.white,
+                  color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.05) : Colors.transparent,
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
-                    color: isSelected ? AppColors.primaryBlue : Colors.grey.shade200,
-                    width: isSelected ? 1.5 : 1,
+                    color: isSelected ? AppColors.primaryBlue : AppColors.border,
+                    width: isSelected ? 2 : 1,
                   ),
                 ),
                 child: Text(
@@ -517,7 +474,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? AppColors.primaryBlue : AppColors.darkText,
+                    color: isSelected ? AppColors.primaryBlue : AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -534,10 +491,12 @@ class BookingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: _BookingsPageWithScroll(),
+    return Scaffold(
+      backgroundColor: AppColors.scaffoldBackground,
+      body: PatternBackground(
+        child: SafeArea(
+          child: _BookingsPageWithScroll(),
+        ),
       ),
     );
   }

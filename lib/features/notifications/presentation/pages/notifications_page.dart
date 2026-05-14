@@ -7,7 +7,6 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/notifications/domain/entities/notification_entity.dart';
 import 'package:stayindia_owner/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
-import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -121,7 +120,6 @@ class NotificationsView extends StatelessWidget {
           SizedBox(height: 8.h),
           Text(
             'We\'ll notify you when something important happens.',
-            textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 13.sp,
               color: AppColors.greyText.withValues(alpha: 0.6),
@@ -141,107 +139,82 @@ class _NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSOS = notification.type == 'SOS_ALERT';
     
-    return GestureDetector(
-      onTap: () {
-        switch (notification.type) {
-          case 'BOOKING':
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const MainNavigationPage(initialIndex: 1)),
-              (route) => false,
-            );
-            break;
-          case 'ANNOUNCEMENT':
-          case 'NOTICE':
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const MainNavigationPage(initialIndex: 3)),
-              (route) => false,
-            );
-            break;
-          case 'SOS_ALERT':
-            break;
-          default:
-            break;
-        }
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(
-            color: isSOS ? Colors.red.withValues(alpha: 0.3) : Colors.transparent,
-            width: isSOS ? 1.5 : 0,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
+        ],
+        border: Border.all(
+          color: isSOS ? Colors.red.withValues(alpha: 0.3) : Colors.transparent,
+          width: isSOS ? 1.5 : 0,
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.r),
-          child: IntrinsicHeight(
-            child: Row(
-              children: [
-                Container(
-                  width: 6.w,
-                  color: isSOS ? AppColors.sosRed : (notification.isRead ? Colors.transparent : AppColors.primaryBlue),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.w),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildIcon(isSOS),
-                        SizedBox(width: 16.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      notification.title,
-                                      style: GoogleFonts.outfit(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 15.sp,
-                                        color: isSOS ? AppColors.sosRed : AppColors.darkText,
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    _formatDate(notification.createdAt),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              Container(
+                width: 6.w,
+                color: isSOS ? AppColors.sosRed : (notification.isRead ? Colors.transparent : AppColors.primaryBlue),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildIcon(isSOS),
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    notification.title,
                                     style: GoogleFonts.outfit(
-                                      fontSize: 11.sp,
-                                      color: AppColors.greyText.withValues(alpha: 0.6),
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 15.sp,
+                                      color: isSOS ? AppColors.sosRed : AppColors.darkText,
                                     ),
                                   ),
-                                ],
-                              ),
-                              SizedBox(height: 4.h),
-                              Text(
-                                notification.message,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 13.sp,
-                                  color: AppColors.greyText,
-                                  height: 1.4,
                                 ),
+                                Text(
+                                  _formatDate(notification.createdAt),
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 11.sp,
+                                    color: AppColors.greyText.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              notification.message,
+                              style: GoogleFonts.outfit(
+                                fontSize: 13.sp,
+                                color: AppColors.greyText,
+                                height: 1.4,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

@@ -49,9 +49,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String pushToken,
     required String platform,
     String? deviceId,
-  }) => _remote.updateDeviceToken(
-    pushToken: pushToken,
-    platform: platform,
-    deviceId: deviceId,
-  );
+  }) =>
+      _remote.updateDeviceToken(
+        pushToken: pushToken,
+        platform: platform,
+        deviceId: deviceId,
+      );
+
+  @override
+  Future<OwnerEntity> acceptPolicy({String version = '1.0'}) =>
+      _remote.acceptPolicy(version: version);
 }

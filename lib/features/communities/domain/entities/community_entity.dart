@@ -8,6 +8,9 @@ class CommunityDetailsEntity extends Equatable {
   final int memberCount;
   final String? status;
   final String? level;
+  final String? stateId;
+  final String? districtId;
+  final String? wardId;
 
   const CommunityDetailsEntity({
     required this.id,
@@ -17,10 +20,24 @@ class CommunityDetailsEntity extends Equatable {
     required this.memberCount,
     this.status,
     this.level,
+    this.stateId,
+    this.districtId,
+    this.wardId,
   });
 
   @override
-  List<Object?> get props => [id, name, description, image, memberCount, status, level];
+  List<Object?> get props => [
+        id,
+        name,
+        description,
+        image,
+        memberCount,
+        status,
+        level,
+        stateId,
+        districtId,
+        wardId
+      ];
 }
 
 class CommunityMessageEntity extends Equatable {
@@ -96,4 +113,105 @@ class OwnerDiscussionEntity extends Equatable {
 
   @override
   List<Object?> get props => [id, title, description, type, createdAt, authorName];
+}
+
+class SocialPostEntity extends Equatable {
+  final String id;
+  final String userId;
+  final String userName;
+  final String? userAvatar;
+  final String? userRole;
+  final String content;
+  final String type;
+  final int likesCount;
+  final int commentsCount;
+  final bool isLiked;
+  final DateTime createdAt;
+  final String? visibility;
+  final Map<String, dynamic>? poll;
+  final int? userVote;
+  final String? imageUrl;
+  final String? videoUrl;
+  final Map<String, dynamic>? location;
+
+  const SocialPostEntity({
+    required this.id,
+    required this.userId,
+    required this.userName,
+    this.userAvatar,
+    this.userRole,
+    required this.content,
+    required this.type,
+    required this.likesCount,
+    required this.commentsCount,
+    required this.isLiked,
+    required this.createdAt,
+    this.visibility,
+    this.poll,
+    this.userVote,
+    this.imageUrl,
+    this.videoUrl,
+    this.location,
+  });
+
+  SocialPostEntity copyWith({
+    String? id,
+    String? userId,
+    String? userName,
+    String? userAvatar,
+    String? userRole,
+    String? content,
+    String? type,
+    int? likesCount,
+    int? commentsCount,
+    bool? isLiked,
+    DateTime? createdAt,
+    String? visibility,
+    Map<String, dynamic>? poll,
+    int? userVote,
+    String? imageUrl,
+    String? videoUrl,
+    Map<String, dynamic>? location,
+  }) {
+    return SocialPostEntity(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      userName: userName ?? this.userName,
+      userAvatar: userAvatar ?? this.userAvatar,
+      userRole: userRole ?? this.userRole,
+      content: content ?? this.content,
+      type: type ?? this.type,
+      likesCount: likesCount ?? this.likesCount,
+      commentsCount: commentsCount ?? this.commentsCount,
+      isLiked: isLiked ?? this.isLiked,
+      createdAt: createdAt ?? this.createdAt,
+      visibility: visibility ?? this.visibility,
+      poll: poll ?? this.poll,
+      userVote: userVote ?? this.userVote,
+      imageUrl: imageUrl ?? this.imageUrl,
+      videoUrl: videoUrl ?? this.videoUrl,
+      location: location ?? this.location,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        userId,
+        userName,
+        userAvatar,
+        userRole,
+        content,
+        type,
+        likesCount,
+        commentsCount,
+        isLiked,
+        createdAt,
+        visibility,
+        poll,
+        userVote,
+        imageUrl,
+        videoUrl,
+        location,
+      ];
 }

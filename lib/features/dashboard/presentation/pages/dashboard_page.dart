@@ -11,8 +11,8 @@ import '../widgets/floor_accordion.dart';
 import '../widgets/room_card.dart';
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart' as entity;
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/core/widgets/pattern_background.dart';
 import 'package:flutter/services.dart';
-import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/notifications/presentation/pages/notifications_page.dart';
 
 
@@ -35,72 +35,69 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: BlocListener<HostelCubit, HostelState>(
-          listenWhen: (prev, curr) => 
-            prev is HostelLoaded && curr is HostelLoaded && 
-            prev.selectedHostelIndex != curr.selectedHostelIndex,
-          listener: (context, state) {
-            _refreshData();
-          },
-          child: RefreshIndicator(
-            onRefresh: () async => _refreshData(),
-            color: AppColors.primaryBlue,
-            displacement: 40,
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-              slivers: [
-                // 1. Header
-                const SliverToBoxAdapter(child: _UnifiedHeader()),
-                
-                // 2. Stat Cards
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    child: const SummaryCardsSection(),
-                  ),
-                ),
-
-                // 3. Floor Filter Chips
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: BlocBuilder<DashboardCubit, DashboardState>(
-                      buildWhen: (prev, curr) => 
-                        prev.runtimeType != curr.runtimeType ||
-                        prev.selectedFloorIndex != curr.selectedFloorIndex || 
-                        (prev is DashboardLoaded && curr is DashboardLoaded && prev.data.occupancy != curr.data.occupancy),
-                      builder: (context, state) {
-                        List<String> floors = ['All Floors'];
-                        if (state is DashboardLoaded) {
-                          floors.addAll(state.data.occupancy.floors.map((e) => e.floorName));
-                        }
-                        return FloorFilter(
-                          floors: floors,
-                          selectedIndex: state.selectedFloorIndex + 1,
-                          onSelected: (index) => context.read<DashboardCubit>().selectFloor(index - 1),
-                        );
-                      },
+      backgroundColor: AppColors.scaffoldBackground,
+      body: PatternBackground(
+        child: SafeArea(
+          child: BlocListener<HostelCubit, HostelState>(
+            listenWhen: (prev, curr) => 
+              prev is HostelLoaded && curr is HostelLoaded && 
+              prev.selectedHostelIndex != curr.selectedHostelIndex,
+            listener: (context, state) {
+              _refreshData();
+            },
+            child: RefreshIndicator(
+              onRefresh: () async => _refreshData(),
+              color: AppColors.primaryBlue,
+              displacement: 40,
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                slivers: [
+                  const SliverToBoxAdapter(child: _UnifiedHeader()),
+                  
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 8.h, bottom: 2.h),
+                      child: const SummaryCardsSection(),
                     ),
                   ),
-                ),
 
-                // 4. Search Bar (Restored)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: const _SearchBarWidget(),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.zero,
+                      child: BlocBuilder<DashboardCubit, DashboardState>(
+                        buildWhen: (prev, curr) => 
+                          prev.runtimeType != curr.runtimeType ||
+                          prev.selectedFloorIndex != curr.selectedFloorIndex || 
+                          (prev is DashboardLoaded && curr is DashboardLoaded && prev.data.occupancy != curr.data.occupancy),
+                        builder: (context, state) {
+                          List<String> floors = ['All Floors'];
+                          if (state is DashboardLoaded) {
+                            floors.addAll(state.data.occupancy.floors.map((e) => e.floorName));
+                          }
+                          return FloorFilter(
+                            floors: floors,
+                            selectedIndex: state.selectedFloorIndex + 1,
+                            onSelected: (index) => context.read<DashboardCubit>().selectFloor(index - 1),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
-                
-                SliverToBoxAdapter(child: SizedBox(height: 20.h)),
 
-                // 5. Floor Sections
-                const _FloorListSection(),
-                
-                SliverToBoxAdapter(child: SizedBox(height: 100.h)),
-              ],
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: const _SearchBarWidget(),
+                    ),
+                  ),
+                  
+                  SliverToBoxAdapter(child: SizedBox(height: 4.h)),
+
+                  const _FloorListSection(),
+                  
+                  SliverToBoxAdapter(child: SizedBox(height: 100.h)),
+                ],
+              ),
             ),
           ),
         ),
@@ -116,89 +113,42 @@ class _UnifiedHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HostelCubit, HostelState>(
       builder: (context, state) {
-        String hostelName = '...';
-        String hostelType = '';
-        
-        if (state is HostelLoaded && state.hostels.isNotEmpty) {
-          final hostel = state.hostels[state.selectedHostelIndex];
-          hostelName = hostel.name;
-          hostelType = hostel.propertyTag ?? hostel.hostelType.replaceAll('_', ' ');
-        }
-
 
         return Container(
           width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(bottom: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
-          ),
-          padding: EdgeInsets.fromLTRB(12.w, 12.h, 16.w, 12.h),
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+          color: AppColors.backgroundPrimary,
           child: Row(
             children: [
-              // 1. Menu Icon
-              IconButton(
-                onPressed: () => MainNavigationPage.scaffoldKey.currentState?.openDrawer(),
-                icon: Icon(Icons.menu_rounded, color: const Color(0xFF1E293B), size: 24.sp),
-              ),
-              SizedBox(width: 4.w),
-              
-              // 2. Hostel Icon
-              Container(
-                width: 36.w,
-                height: 36.w,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF7ED),
-                  borderRadius: BorderRadius.circular(10.r),
+              BouncingWrapper(
+                onTap: () => _showSwitchHostelSheet(context),
+                child: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+                  ),
+                  child: Icon(Icons.apartment_rounded, color: AppColors.accentOrange, size: 18.sp),
                 ),
-                child: Icon(Icons.apartment_rounded, color: Colors.orange, size: 20.sp),
               ),
+              
               SizedBox(width: 12.w),
               
-              // 3. Hostel Name & Type
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => _showSwitchHostelSheet(context),
-                  behavior: HitTestBehavior.opaque,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              hostelName,
-                              style: TextStyle(
-                                color: const Color(0xFF1E293B),
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF64748B), size: 16.sp),
-                        ],
-                      ),
-                      Text(
-                        hostelType.toUpperCase(),
-                        style: TextStyle(
-                          color: const Color(0xFF94A3B8),
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
+              GestureDetector(
+                onTap: () => _showSwitchHostelSheet(context),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.more_horiz_rounded, color: AppColors.textSecondary, size: 16.sp),
+                    Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSecondary, size: 14.sp),
+                  ],
                 ),
               ),
 
-              
-              // 4. Notifications
-              GestureDetector(
+              const Spacer(),
+
+              BouncingWrapper(
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.push(
@@ -206,31 +156,33 @@ class _UnifiedHeader extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => const NotificationsPage()),
                   );
                 },
-                child: Stack(
-                  children: [
-                    Container(
-                      width: 38.w,
-                      height: 38.w,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.notifications_none_rounded, color: const Color(0xFF1E293B), size: 20.sp),
-                    ),
-                    Positioned(
-                      right: 8.w,
-                      top: 8.h,
-                      child: Container(
-                        width: 8.w,
-                        height: 8.w,
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 1.5),
+                child: Container(
+                  width: 38.w,
+                  height: 38.w,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(Icons.notifications_none_rounded, color: const Color(0xFF0F172A), size: 20.sp),
+                      Positioned(
+                        right: 10.w,
+                        top: 10.h,
+                        child: Container(
+                          width: 6.w,
+                          height: 6.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.accentOrange,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -251,10 +203,10 @@ class _UnifiedHeader extends StatelessWidget {
           if (state is! HostelLoaded) return const SizedBox.shrink();
           
           return Container(
-            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+              color: AppColors.backgroundPrimary,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -262,26 +214,26 @@ class _UnifiedHeader extends StatelessWidget {
               children: [
                 Center(
                   child: Container(
-                    width: 32.w,
-                    height: 3.h,
+                    width: 40.w,
+                    height: 4.h,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE2E8F0),
-                      borderRadius: BorderRadius.circular(1.5.r),
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
                 ),
-                SizedBox(height: 20.h),
+                SizedBox(height: 24.h),
                 Text(
                   'Switch Property',
                   style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1E293B),
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
                 ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 0.5.sh),
+                  constraints: BoxConstraints(maxHeight: 0.6.sh),
                   child: ListView.builder(
                     shrinkWrap: true,
                     padding: EdgeInsets.zero,
@@ -289,44 +241,52 @@ class _UnifiedHeader extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final hostel = state.hostels[index];
                       final isSelected = index == state.selectedHostelIndex;
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 8.h),
-                        decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFF1F5F9) : Colors.white,
-                          border: Border.all(
-                            color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
-                          ),
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: ListTile(
-                          onTap: () {
-                            context.read<HostelCubit>().selectHostel(index);
-                            Navigator.pop(context);
-                          },
-                          dense: true,
-                          leading: Container(
-                            padding: EdgeInsets.all(8.r),
-                            decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
-                              shape: BoxShape.circle,
+                      return BouncingWrapper(
+                        onTap: () {
+                          context.read<HostelCubit>().selectHostel(index);
+                          Navigator.pop(context);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: EdgeInsets.only(bottom: 12.h),
+                          padding: EdgeInsets.all(16.r),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.05) : Colors.transparent,
+                            border: Border.all(
+                              color: isSelected ? AppColors.primaryBlue : AppColors.border,
+                              width: isSelected ? 2 : 1,
                             ),
-                            child: Icon(
-                              Icons.apartment_rounded, 
-                              color: isSelected ? Colors.white : const Color(0xFF64748B),
-                              size: 18.sp,
-                            ),
+                            borderRadius: BorderRadius.circular(16.r),
                           ),
-                          title: Text(
-                            hostel.name,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF1E293B),
-                            ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(10.r),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.1) : AppColors.backgroundSecondary,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.apartment_rounded, 
+                                  color: isSelected ? AppColors.primaryBlue : AppColors.textSecondary,
+                                  size: 22.sp,
+                                ),
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: Text(
+                                  hostel.name,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                    color: isSelected ? AppColors.primaryBlue : AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              if (isSelected)
+                                Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 24.sp),
+                            ],
                           ),
-                          trailing: isSelected 
-                              ? Icon(Icons.check_circle_rounded, color: const Color(0xFF2563EB), size: 20.sp) 
-                              : null,
                         ),
                       );
                     },
@@ -383,16 +343,16 @@ class _FloorListSection extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.apartment_rounded, size: 80.sp, color: Colors.grey.shade300),
+                    Icon(Icons.apartment_rounded, size: 80.sp, color: AppColors.textSecondary.withValues(alpha: 0.2)),
                     SizedBox(height: 24.h),
                     Text(
                       'No Hostels Added',
-                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                     ),
                     SizedBox(height: 8.h),
                     Text(
                       'Add a hostel to start managing it here.',
-                      style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                      style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -456,7 +416,6 @@ class _FloorListSection extends StatelessWidget {
                     if (!matchesMetric) return false;
                   }
 
-                  // 2. Search Filter
                   if (query.isEmpty) return true;
                   final roomNum = room.roomNumber.toLowerCase();
                   final hasMatchingTenant = room.beds.any((bed) => 
@@ -505,8 +464,32 @@ class _FloorListSection extends StatelessWidget {
 }
 
 
-class _SearchBarWidget extends StatelessWidget {
+class _SearchBarWidget extends StatefulWidget {
   const _SearchBarWidget();
+
+  @override
+  State<_SearchBarWidget> createState() => _SearchBarWidgetState();
+}
+
+class _SearchBarWidgetState extends State<_SearchBarWidget> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -515,33 +498,79 @@ class _SearchBarWidget extends StatelessWidget {
         return Row(
           children: [
             Expanded(
-              child: Container(
-                height: 48.h,
-                padding: EdgeInsets.symmetric(horizontal: 12.w),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search_rounded, color: const Color(0xFF64748B), size: 18.sp),
-                    Expanded(
-                      child: TextField(
-                        onChanged: (value) => context.read<DashboardCubit>().updateSearchQuery(value),
-                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w500),
-                        decoration: InputDecoration(
-                          hintText: 'Search room, tenant...',
-                          hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 13.sp),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10.w),
+              child: AnimatedScale(
+                scale: _isFocused ? 1.01 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  height: 56.h,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: _isFocused ? Colors.white : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(18.r),
+                    border: Border.all(
+                      color: _isFocused ? AppColors.primaryBlue : AppColors.border.withValues(alpha: 0.5),
+                      width: _isFocused ? 1.8 : 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0F172A).withValues(alpha: _isFocused ? 0.08 : 0.04),
+                        blurRadius: _isFocused ? 16 : 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        child: Icon(
+                          Icons.search_rounded, 
+                          color: _isFocused ? AppColors.primaryBlue : AppColors.textSecondary.withValues(alpha: 0.7), 
+                          size: 24.sp
                         ),
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: TextField(
+                          focusNode: _focusNode,
+                          onChanged: (value) => context.read<DashboardCubit>().updateSearchQuery(value),
+                          style: TextStyle(
+                            fontSize: 15.sp, 
+                            fontWeight: FontWeight.w700, 
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.3,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Search room, tenant...',
+                            hintStyle: TextStyle(
+                              color: AppColors.textSecondary.withValues(alpha: 0.5), 
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            filled: false,
+                            fillColor: Colors.transparent,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
+                          ),
+                        ),
+                      ),
+                      if (state.searchQuery.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            context.read<DashboardCubit>().updateSearchQuery('');
+                            _focusNode.unfocus();
+                          },
+                          child: Icon(Icons.close_rounded, color: AppColors.textSecondary, size: 20.sp),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            SizedBox(width: 10.w),
+            SizedBox(width: 12.w),
             _ViewModeToggle(
               isGridView: state.isGridView,
               onChanged: (isGrid) => context.read<DashboardCubit>().toggleViewType(isGrid),
@@ -562,25 +591,25 @@ class _ViewModeToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 96.w,
-      height: 44.h,
-      padding: EdgeInsets.all(4.r),
+      width: 100.w,
+      height: 48.h,
+      padding: EdgeInsets.all(5.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(21.r),
+        color: const Color(0xFFE2E8F0),
+        borderRadius: BorderRadius.circular(24.r),
       ),
       child: Stack(
         children: [
           AnimatedAlign(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.elasticOut,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutBack,
             alignment: isGridView ? Alignment.centerLeft : Alignment.centerRight,
             child: Container(
-              width: 42.w,
+              width: 44.w,
               height: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(18.r),
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(20.r),
               ),
             ),
           ),
@@ -597,8 +626,8 @@ class _ViewModeToggle extends StatelessWidget {
                     color: Colors.transparent,
                     child: Icon(
                       Icons.grid_view_rounded,
-                      size: 19.sp,
-                      color: isGridView ? Colors.white : const Color(0xFF64748B),
+                      size: 20.sp,
+                      color: isGridView ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -615,7 +644,7 @@ class _ViewModeToggle extends StatelessWidget {
                     child: Icon(
                       Icons.list_rounded,
                       size: 24.sp,
-                      color: !isGridView ? Colors.white : const Color(0xFF64748B),
+                      color: !isGridView ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -627,3 +656,4 @@ class _ViewModeToggle extends StatelessWidget {
     );
   }
 }
+

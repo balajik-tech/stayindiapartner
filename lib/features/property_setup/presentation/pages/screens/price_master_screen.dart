@@ -2,18 +2,59 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 
-class PriceMasterScreen extends StatelessWidget {
+class PriceMasterScreen extends StatefulWidget {
   const PriceMasterScreen({super.key});
 
   @override
+  State<PriceMasterScreen> createState() => _PriceMasterScreenState();
+}
+
+class _PriceMasterScreenState extends State<PriceMasterScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncMasters();
+    });
+  }
+
+  void _syncMasters() {
+    final roomState = context.read<RoomCubit>().state;
+    if (roomState is RoomLoaded) {
+      final masters = roomState.rooms.where((r) => r.isMaster).toList();
+      if (masters.isNotEmpty) {
+        context.read<PropertySetupCubit>().updatePricingFromMasters();
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PropertySetupCubit, PropertySetupState>(
-      builder: (context, state) {
-        return SingleChildScrollView(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<RoomCubit, RoomState>(
+          listener: (context, state) {
+            if (state is RoomLoaded) {
+              final masters = state.rooms.where((r) => r.isMaster).toList();
+              if (masters.isNotEmpty) {
+                context.read<PropertySetupCubit>().updatePricingFromMasters();
+              }
+            }
+          },
+        ),
+      ],
+      child: Builder(
+        builder: (context) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => _syncMasters());
+          
+          return BlocBuilder<PropertySetupCubit, PropertySetupState>(
+            builder: (context, state) {
+          return SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
           physics: const BouncingScrollPhysics(),
           child: Column(
@@ -32,23 +73,23 @@ class PriceMasterScreen extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFF7ED),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(color: const Color(0xFFFFE4C4)),
-                          boxShadow: [
-                            BoxShadow(color: const Color(0xFFFF7A00).withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.auto_fix_high_rounded, color: const Color(0xFFFF7A00), size: 16.sp),
-                            SizedBox(width: 6.w),
-                            Text(
-                              'BULK EDIT',
-                              style: TextStyle(color: const Color(0xFFFF7A00), fontSize: 10.sp, fontWeight: FontWeight.w900),
-                            ),
-                          ],
-                        ),
+                        color: const Color(0xFF2C5990).withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(color: const Color(0xFF2C5990).withValues(alpha: 0.3)),
+                        boxShadow: [
+                          BoxShadow(color: const Color(0xFF2C5990).withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.auto_fix_high_rounded, color: const Color(0xFF2C5990), size: 16.sp),
+                          SizedBox(width: 6.w),
+                          Text(
+                            'BULK EDIT',
+                            style: TextStyle(color: const Color(0xFF2C5990), fontSize: 10.sp, fontWeight: FontWeight.w900),
+                          ),
+                        ],
+                      ),
                       ),
                     ),
                 ],
@@ -60,7 +101,7 @@ class PriceMasterScreen extends StatelessWidget {
               else ...[
                 _buildPricingSection(context, state, 'AC', Icons.ac_unit_rounded, const Color(0xFFE0F2FE), const Color(0xFF0EA5E9)),
                 SizedBox(height: 24.h),
-                _buildPricingSection(context, state, 'Non-AC', Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
+                _buildPricingSection(context, state, 'NON-AC', Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
                 
                 SizedBox(height: 32.h),
                 _buildSyncInfo(context, state),
@@ -69,7 +110,10 @@ class PriceMasterScreen extends StatelessWidget {
             ],
           ),
         );
-      }
+      },
+    );
+        },
+      ),
     );
   }
 
@@ -82,7 +126,7 @@ class PriceMasterScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFF2C5990),
             letterSpacing: -0.5,
           ),
         ),
@@ -210,47 +254,27 @@ class PriceMasterScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF7ED),
+                  color: const Color(0xFF2C5990).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
                   'PER BED',
-                  style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: const Color(0xFFFF7A00)),
+                  style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2C5990)),
                 ),
               ),
             ],
           ),
           SizedBox(height: 20.h),
-          _PremiumPriceInput(
-            label: 'Monthly Rent',
-            initialValue: rent > 0 ? rent.toInt().toString() : '',
-            hint: 'e.g. 8500',
-            onChanged: (val) {
-              final price = double.tryParse(val) ?? 0.0;
-              context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'rent', price);
-            },
-          ),
-          SizedBox(height: 16.h),
-          _PremiumPriceInput(
-            label: 'Security Deposit',
-            initialValue: deposit > 0 ? deposit.toInt().toString() : '',
-            hint: 'e.g. 5000',
-            onChanged: (val) {
-              final price = double.tryParse(val) ?? 0.0;
-              context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'deposit', price);
-            },
-          ),
-          SizedBox(height: 16.h),
           Row(
             children: [
               Expanded(
                 child: _PremiumPriceInput(
-                  label: 'Maintenance',
-                  initialValue: maintenance > 0 ? maintenance.toInt().toString() : '',
-                  hint: '500',
+                  label: 'Monthly Rent',
+                  initialValue: rent > 0 ? rent.toInt().toString() : '',
+                  hint: 'e.g. 8500',
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'maintenance', price);
+                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'rent', price);
                   },
                 ),
               ),
@@ -259,10 +283,38 @@ class PriceMasterScreen extends StatelessWidget {
                 child: _PremiumPriceInput(
                   label: 'Daily Rent',
                   initialValue: dailyRent > 0 ? dailyRent.toInt().toString() : '',
-                  hint: '500',
+                  hint: 'e.g. 500',
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
                     context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'dailyRent', price);
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            children: [
+              Expanded(
+                child: _PremiumPriceInput(
+                  label: 'Security Deposit',
+                  initialValue: deposit > 0 ? deposit.toInt().toString() : '',
+                  hint: 'e.g. 5000',
+                  onChanged: (val) {
+                    final price = double.tryParse(val) ?? 0.0;
+                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'deposit', price);
+                  },
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _PremiumPriceInput(
+                  label: 'Maintenance',
+                  initialValue: maintenance > 0 ? maintenance.toInt().toString() : '',
+                  hint: 'e.g. 500',
+                  onChanged: (val) {
+                    final price = double.tryParse(val) ?? 0.0;
+                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'maintenance', price);
                   },
                 ),
               ),
@@ -353,7 +405,7 @@ class PriceMasterScreen extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF7A00),
+                backgroundColor: const Color(0xFF2C5990),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 elevation: 0,
               ),
@@ -405,23 +457,27 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
               color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(14.r),
               border: Border.all(
-                color: _isFocused ? const Color(0xFFFF7A00) : const Color(0xFFE2E8F0),
-                width: _isFocused ? 2 : 1.5,
+                color: _isFocused ? const Color(0xFFF98125) : const Color(0xFFE2E8F0),
+                width: 1.5,
               ),
             ),
             child: Row(
               children: [
-                Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFFF7A00) : const Color(0xFF94A3B8))),
+                Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: TextFormField(
+                    key: ValueKey(widget.initialValue),
                     initialValue: widget.initialValue,
                     onChanged: widget.onChanged,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: widget.hint,
                       hintStyle: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 14.sp, fontWeight: FontWeight.w600),
+                      filled: false,
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
@@ -461,7 +517,10 @@ class _DialogTextField extends StatelessWidget {
           labelText: label,
           labelStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w700),
           hintText: hint,
+          filled: false,
           border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
         ),
         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF0F172A)),
       ),
@@ -486,6 +545,11 @@ class _PremiumCard extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 24,
             offset: const Offset(0, 12),
+          ),
+          BoxShadow(
+            color: const Color(0xFF2C5990).withValues(alpha: 0.02),
+            blurRadius: 40,
+            offset: const Offset(0, 20),
           ),
         ],
       ),

@@ -18,7 +18,6 @@ class RevenueHistoryPage extends StatefulWidget {
 class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
   String _selectedType = 'ALL';
   String? _selectedHostelId;
-  DateTimeRange? _selectedDateRange;
 
   @override
   void initState() {
@@ -34,37 +33,7 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
     context.read<RevenueHistoryCubit>().fetchRevenueHistory(
           hostelId: _selectedHostelId,
           type: _selectedType == 'ALL' ? null : _selectedType,
-          startDate: _selectedDateRange?.start,
-          endDate: _selectedDateRange?.end,
         );
-  }
-
-  Future<void> _selectDateRange() async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2023),
-      lastDate: DateTime.now().add(const Duration(days: 1)),
-      initialDateRange: _selectedDateRange,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primaryBlue,
-              onPrimary: Colors.white,
-              onSurface: AppColors.darkText,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != _selectedDateRange) {
-      setState(() {
-        _selectedDateRange = picked;
-      });
-      _fetchData();
-    }
   }
 
   @override
@@ -118,89 +87,25 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
   Widget _buildFilters() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
-      ),
-      child: Column(
+      color: Colors.white,
+      child: Row(
         children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _FilterChip(
-                  label: 'All',
-                  isSelected: _selectedType == 'ALL',
-                  onSelected: () => _updateType('ALL'),
-                ),
-                SizedBox(width: 8.w),
-                _FilterChip(
-                  label: 'Rent',
-                  isSelected: _selectedType == 'RENT',
-                  onSelected: () => _updateType('RENT'),
-                ),
-                SizedBox(width: 8.w),
-                _FilterChip(
-                  label: 'Maintenance',
-                  isSelected: _selectedType == 'MAINTENANCE',
-                  onSelected: () => _updateType('MAINTENANCE'),
-                ),
-                SizedBox(width: 8.w),
-                _FilterChip(
-                  label: 'Deposit',
-                  isSelected: _selectedType == 'DEPOSIT',
-                  onSelected: () => _updateType('DEPOSIT'),
-                ),
-              ],
-            ),
+          _FilterChip(
+            label: 'All',
+            isSelected: _selectedType == 'ALL',
+            onSelected: () => _updateType('ALL'),
           ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: _selectDateRange,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.calendar_today_rounded, size: 16.sp, color: AppColors.primaryBlue),
-                        SizedBox(width: 8.w),
-                        Text(
-                          _selectedDateRange == null
-                              ? 'Select Date Range'
-                              : '${DateFormat('dd MMM').format(_selectedDateRange!.start)} - ${DateFormat('dd MMM').format(_selectedDateRange!.end)}',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.darkText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              if (_selectedDateRange != null) ...[
-                SizedBox(width: 12.w),
-                IconButton(
-                  onPressed: () {
-                    setState(() => _selectedDateRange = null);
-                    _fetchData();
-                  },
-                  icon: const Icon(Icons.close_rounded, color: Colors.red),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.red.withValues(alpha: 0.1),
-                    padding: EdgeInsets.all(8.w),
-                  ),
-                ),
-              ],
-            ],
+          SizedBox(width: 8.w),
+          _FilterChip(
+            label: 'Rent',
+            isSelected: _selectedType == 'RENT',
+            onSelected: () => _updateType('RENT'),
+          ),
+          SizedBox(width: 8.w),
+          _FilterChip(
+            label: 'Maintenance',
+            isSelected: _selectedType == 'MAINTENANCE',
+            onSelected: () => _updateType('MAINTENANCE'),
           ),
         ],
       ),
@@ -290,25 +195,15 @@ class _RevenueItemCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${item.total.toInt()}',
+                '₹${item.total.toInt()}',
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: AppColors.primaryBlue),
               ),
             ],
           ),
           SizedBox(height: 4.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                item.hostelName,
-                style: TextStyle(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
-              ),
-              if (item.totalPaid > item.total)
-                Text(
-                  'Total Paid: ${item.totalPaid.toInt()}',
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.greyText, fontWeight: FontWeight.w400, fontStyle: FontStyle.italic),
-                ),
-            ],
+          Text(
+            item.hostelName,
+            style: TextStyle(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
           ),
           SizedBox(height: 12.h),
           Divider(color: Colors.grey.shade100, height: 1),
@@ -322,10 +217,6 @@ class _RevenueItemCard extends StatelessWidget {
                   _AmountRow(label: 'Rent', amount: item.rent),
                   SizedBox(height: 4.h),
                   _AmountRow(label: 'Maintenance', amount: item.maintenance),
-                  if (item.deposit > 0) ...[
-                    SizedBox(height: 4.h),
-                    _AmountRow(label: 'Deposit', amount: item.deposit, isSecondary: true),
-                  ],
                 ],
               ),
               Column(
@@ -352,24 +243,16 @@ class _RevenueItemCard extends StatelessWidget {
 class _AmountRow extends StatelessWidget {
   final String label;
   final double amount;
-  final bool isSecondary;
 
-  const _AmountRow({required this.label, required this.amount, this.isSecondary = false});
+  const _AmountRow({required this.label, required this.amount});
 
   @override
   Widget build(BuildContext context) {
     if (amount <= 0) return const SizedBox.shrink();
     return Row(
       children: [
-        Text('$label: ', style: TextStyle(fontSize: 12.sp, color: isSecondary ? AppColors.greyText : AppColors.greyText)),
-        Text(
-          '${amount.toInt()}', 
-          style: TextStyle(
-            fontSize: 12.sp, 
-            fontWeight: isSecondary ? FontWeight.w500 : FontWeight.bold, 
-            color: isSecondary ? AppColors.greyText : AppColors.darkText
-          )
-        ),
+        Text('$label: ', style: TextStyle(fontSize: 12.sp, color: AppColors.greyText)),
+        Text('₹${amount.toInt()}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.darkText)),
       ],
     );
   }

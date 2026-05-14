@@ -13,7 +13,7 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import '../cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/complete_profile_usecase.dart';
 import '../widgets/auth_widgets.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'registration_hostel_details_page.dart';
 
 
 class RegistrationPersonalPage extends StatefulWidget {
@@ -24,7 +24,10 @@ class RegistrationPersonalPage extends StatefulWidget {
 }
 
 class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> with SingleTickerProviderStateMixin {
-  final _fullNameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _addressController = TextEditingController();
   File? _selectedImage;
 
   late final AnimationController _animController;
@@ -43,7 +46,10 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
 
   @override
   void dispose() {
-    _fullNameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
     _animController.dispose();
     super.dispose();
   }
@@ -63,19 +69,18 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
   }
 
   void _onContinue(BuildContext context) async {
-    final fullName = _fullNameController.text.trim();
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final email = _emailController.text.trim();
+    final address = _addressController.text.trim();
 
-    if (fullName.isEmpty) {
+    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || address.isEmpty) {
       HapticFeedback.vibrate();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your full name')),
+        const SnackBar(content: Text('Please fill all required fields')),
       );
       return;
     }
-
-    final nameParts = fullName.split(' ');
-    final firstName = nameParts.first;
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
     final authCubit = context.read<AuthCubit>();
     String phone = '';
@@ -92,9 +97,9 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
     authCubit.completeProfile(ProfileParams(
       firstName: firstName,
       lastName: lastName,
-      email: '', 
+      email: email,
       phone: phone,
-      address: '', 
+      address: address,
       avatarPath: _selectedImage?.path,
     ));
   }
@@ -104,7 +109,12 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthProfileCompleted) {
-          context.read<HostelCubit>().getHostels();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const RegistrationHostelDetailsPage(),
+            ),
+          );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -132,7 +142,11 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 12.h),
+                        const AuthStepProgress(
+                          currentStep: 1,
+                          totalSteps: 3,
+                          stepLabels: ['Personal', 'Property', 'Setup'],
+                        ),
                         SizedBox(height: 32.h),
                         _buildHeader(),
                         SizedBox(height: 32.h),
@@ -192,7 +206,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Complete Your Profile',
+          'Lets get to know you',
           style: GoogleFonts.outfit(
             fontSize: 28.sp,
             fontWeight: FontWeight.w800,
@@ -202,7 +216,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
         ),
         SizedBox(height: 8.h),
         Text(
-          'Just a few details to get your dashboard ready.',
+          'This helps us personalize your dashboard and verify your identity.',
           style: GoogleFonts.outfit(
             fontSize: 15.sp,
             color: AppColors.greyText.withValues(alpha: 0.8),
@@ -294,10 +308,38 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
   Widget _buildFormSection() {
     return Column(
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: AuthTextField(
+                label: 'First Name',
+                controller: _firstNameController,
+                hintText: 'e.g. Rahul',
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: AuthTextField(
+                label: 'Last Name',
+                controller: _lastNameController,
+                hintText: 'e.g. Sharma',
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 24.h),
         AuthTextField(
-          label: 'Full Name',
-          controller: _fullNameController,
-          hintText: 'e.g. Rahul Sharma',
+          label: 'Email Address',
+          controller: _emailController,
+          hintText: 'name@example.com',
+          keyboardType: TextInputType.emailAddress,
+        ),
+        SizedBox(height: 24.h),
+        AuthTextField(
+          label: 'Full Residential Address',
+          controller: _addressController,
+          hintText: 'Street, House No, Landmark',
+          maxLines: 3,
         ),
       ],
     );

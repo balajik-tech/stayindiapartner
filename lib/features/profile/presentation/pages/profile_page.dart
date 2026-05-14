@@ -1,186 +1,326 @@
 import 'package:flutter/material.dart';
-import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/core/constants/ui_constants.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
+import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:stayindia_owner/features/finance/presentation/pages/financial_dashboard_page.dart';
+import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
+import 'package:stayindia_owner/features/stock_management/presentation/pages/stock_dashboard_page.dart';
+import 'package:stayindia_owner/features/stock_management/presentation/cubit/stock_cubit.dart';
+import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
+import 'package:stayindia_owner/injection_container.dart';
 import 'account_settings_page.dart';
-import 'my_hostels_page.dart';
-import 'subscription_page.dart';
 import 'help_support_page.dart';
+import 'subscription_page.dart';
 import 'hostel_profile_page.dart';
 import 'amenities_page.dart';
 import 'house_rules_page.dart';
-import 'floor_management_page.dart';
 import 'food_menu_page.dart';
+import 'refer_friend_page.dart';
+import 'announcements_page.dart';
+import 'reports_dashboard_page.dart';
+import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_conditions_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    final profileCubit = context.read<ProfileCubit>();
+    if (profileCubit.state is ProfileInitial) {
+      profileCubit.loadProfile();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA), 
-      body: Column(
-        children: [
-          _AnimatedPremiumHeader(),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                final authCubit = context.read<AuthCubit>();
-                final hostelCubit = context.read<HostelCubit>();
-                final profileCubit = context.read<ProfileCubit>();
-                await authCubit.restoreSession();
-                await hostelCubit.getHostels();
-                await profileCubit.loadProfile();
-              },
-              color: AppColors.primaryBlue,
-              edgeOffset: 20,
-              child: ListView(
-                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 100.h),
-                children: [
-                  _buildSectionLabel('PERSONAL MANAGEMENT'),
-                  _PremiumSectionBlock(
-                    backgroundColor: const Color(0xFFFFFFFF),
-                    children: [
-                      _PremiumTile(
+      backgroundColor: Colors.white,
+      body: BlocBuilder<ProfileCubit, ProfileState>(
+        builder: (context, state) {
+          final profile = state is ProfileLoaded ? state.profile : 
+                        (state is ProfileUpdateSuccess ? state.profile : null);
+          final name = profile?.fullName ?? 'Owner';
+          final phone = profile != null ? '+91 ${profile.phone}' : 'Stay India Member';
+
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _buildProfileHeader(context, name, phone, profile?.avatar)),
+              SliverToBoxAdapter(child: _buildQuickActions(context)),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _buildSectionLabel('PERSONAL MANAGEMENT'),
+                    _buildSectionBlock([
+                      _ProfileTile(
                         icon: Icons.person_rounded,
                         title: 'Account Settings',
                         subtitle: 'Name, phone, email & identity',
-                        onTap: () async {
-                          await Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage()));
-                          if (context.mounted) context.read<AuthCubit>().restoreSession();
-                        },
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
                       ),
-                      BlocBuilder<HostelCubit, HostelState>(
-                        builder: (context, state) {
-                          final count = state is HostelLoaded ? state.hostels.length : 0;
-                          return _PremiumTile(
-                            icon: Icons.apartment_rounded,
-                            title: 'My Hostels',
-                            subtitle: '$count ${count == 1 ? 'property' : 'properties'} active',
-                            isHighlighted: true,
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyHostelsPage())),
-                          );
-                        },
-                      ),
-                      _PremiumTile(
+                      _ProfileTile(
                         icon: Icons.credit_card_rounded,
                         title: 'Subscription',
-                        subtitle: 'Premium Plan  Pro Member',
+                        subtitle: 'Premium Plan • Pro Member',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionPage())),
                       ),
-                      _PremiumTile(
+                      _ProfileTile(
                         icon: Icons.card_membership_rounded,
                         title: 'Digital Certificate',
                         subtitle: 'Official Association Membership',
-                        onTap: () {
-                           
-                        },
+                        onTap: () {},
                       ),
-                    ],
-                  ),
+                    ]),
 
-                  SizedBox(height: 32.h),
-                  _buildSectionLabel('HOSTEL CONFIGURATION'),
-                  _PremiumSectionBlock(
-                    backgroundColor: const Color(0xFFFFFFFF),
-                    children: [
-                      _PremiumTile(
+                    SizedBox(height: 32.h),
+                    _buildSectionLabel('HOSTEL CONFIGURATION'),
+                    _buildSectionBlock([
+                      _ProfileTile(
                         icon: Icons.business_rounded,
                         title: 'Hostel Profile',
                         subtitle: 'Address, location & contact info',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HostelProfilePage())),
                       ),
-                      _PremiumTile(
+                      _ProfileTile(
                         icon: Icons.wifi_rounded,
                         title: 'Amenities',
                         subtitle: 'WiFi, AC, Laundry & more',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AmenitiesPage())),
                       ),
-                      _PremiumTile(
+                      _ProfileTile(
                         icon: Icons.rule_rounded,
                         title: 'House Rules',
                         subtitle: 'Timings & visitor policies',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HouseRulesPage())),
                       ),
-                      BlocBuilder<HostelCubit, HostelState>(
-                        builder: (context, state) {
-                          if (state is HostelLoaded && state.hostels.isNotEmpty) {
-                            final currentHostel = state.hostels[state.selectedHostelIndex];
-                            return _PremiumTile(
-                              icon: Icons.layers_rounded,
-                              title: 'Floor Management',
-                              subtitle: 'Manage floors, rooms & beds',
-                              isHighlighted: true,
-                              onTap: () {
-                                final dashboardCubit = context.read<DashboardCubit>();
-                                dashboardCubit.fetchDashboardData(currentHostel.id);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BlocProvider.value(
-                                      value: dashboardCubit,
-                                      child: FloorManagementPage(hostel: currentHostel),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
-                      _PremiumTile(
+                      _ProfileTile(
                         icon: Icons.restaurant_rounded,
                         title: 'Food Menu',
                         subtitle: 'Manage daily meals',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FoodMenuPage())),
                       ),
-                    ],
-                  ),
+                    ]),
 
-                  SizedBox(height: 32.h),
-                  _buildSectionLabel('SUPPORT & SYSTEM'),
-                  _PremiumSectionBlock(
-                    backgroundColor: const Color(0xFFFFFFFF),
-                    children: [
-                      _PremiumTile(
+                    SizedBox(height: 32.h),
+                    _buildSectionLabel('BUSINESS MANAGEMENT'),
+                    _buildSectionBlock([
+                      _ProfileTile(
+                        icon: Icons.insights_rounded,
+                        title: 'Financial Insights',
+                        subtitle: 'Revenue, occupancy & analytics',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlocProvider(
+                              create: (context) => sl<FinanceCubit>(),
+                              child: const FinancialDashboardPage(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      _ProfileTile(
+                        icon: Icons.inventory_2_rounded,
+                        title: 'Stock Management',
+                        subtitle: 'Inventory tracking & alerts',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlocProvider(
+                              create: (context) => sl<StockCubit>(),
+                              child: const StockDashboardPage(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      _ProfileTile(
+                        icon: Icons.people_alt_rounded,
+                        title: 'Staff Management',
+                        subtitle: 'Roles, attendance & salaries',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
+                      ),
+                    ]),
+
+                    SizedBox(height: 32.h),
+                    _buildSectionLabel('SUPPORT & LEGAL'),
+                    _buildSectionBlock([
+                      _ProfileTile(
+                        icon: Icons.verified_user_rounded,
+                        title: 'Privacy & Policy',
+                        subtitle: 'Data usage & terms of service',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TermsAndConditionsPage(readOnly: true),
+                          ),
+                        ),
+                      ),
+                      _ProfileTile(
                         icon: Icons.help_center_rounded,
                         title: 'Help & Support',
-                        subtitle: 'FAQs, chat & contact support',
+                        subtitle: 'FAQs, chat & documentation',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportPage())),
                       ),
-                    ],
+                      _ProfileTile(
+                        icon: Icons.chat_bubble_rounded,
+                        title: 'Feedback',
+                        subtitle: 'Tell us how to improve',
+                        onTap: () {},
+                      ),
+                    ]),
+
+                    SizedBox(height: 32.h),
+                    _buildSectionLabel('TOOLS & REPORTS'),
+                    _buildSectionBlock([
+                      _ProfileTile(
+                        icon: Icons.card_giftcard_rounded,
+                        title: 'Refer a Friend',
+                        subtitle: 'Earn rewards for inviting owners',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReferFriendPage())),
+                      ),
+                      _ProfileTile(
+                        icon: Icons.star_rate_rounded,
+                        title: 'Rate Us',
+                        subtitle: 'Love Stay India? Let us know!',
+                        onTap: () {},
+                      ),
+                      _ProfileTile(
+                        icon: Icons.system_update_rounded,
+                        title: 'Update App',
+                        subtitle: 'Check for latest features & fixes',
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('App is up to date! (v1.0.4)')),
+                          );
+                        },
+                      ),
+                      _ProfileTile(
+                        icon: Icons.campaign_rounded,
+                        title: 'Send Announcements',
+                        subtitle: 'Broadcast to all tenants instantly',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SendAnnouncementsPage())),
+                      ),
+                      _ProfileTile(
+                        icon: Icons.analytics_rounded,
+                        title: 'My Reports',
+                        subtitle: 'Detailed business & financial exports',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportsDashboardPage())),
+                      ),
+                    ]),
+
+                    SizedBox(height: 32.h),
+                    _buildSectionLabel('APPLICATION'),
+                    _buildSectionBlock([
+                      _ProfileTile(
+                        icon: Icons.share_rounded,
+                        title: 'Share App',
+                        subtitle: 'Invite other owners to Stay India',
+                        onTap: () {},
+                      ),
+                      _ProfileTile(
+                        icon: Icons.logout_rounded,
+                        title: 'Logout',
+                        subtitle: 'Sign out from this device',
+                        titleColor: AppColors.error,
+                        onTap: () => _handleLogout(context),
+                      ),
+                    ]),
+                    
+                    SizedBox(height: 140.h),
+                  ]),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(BuildContext context, String name, String phone, String? avatar) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(20.w, 54.h, 20.w, 12.h),
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFF98125), width: 1.5),
+            ),
+            child: CustomAvatar(
+              imageUrl: ApiConstants.getImageUrl(avatar),
+              name: name,
+              size: 52.0,
+              isCircle: true,
+              fontSize: 18.sp,
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1A1A1A),
+                    letterSpacing: -0.4,
                   ),
-                  
-                  SizedBox(height: 40.h),
-                  _SystemActionButton(
-                    label: 'Logout from Account',
-                    icon: Icons.logout_rounded,
-                    color: const Color(0xFFE03131),
-                    onTap: () => _handleLogout(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  phone,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: const Color(0xFF6B7280),
+                    fontWeight: FontWeight.w500,
                   ),
-                  SizedBox(height: 16.h),
-                  _SystemActionButton(
-                    label: 'Delete Account Permanently',
-                    icon: Icons.delete_forever_rounded,
-                    color: Colors.grey.shade600,
-                    isOutline: true,
-                    onTap: () => _handleDeleteAccount(context),
-                  ),
-                  
-                  UIConstants.bottomPaddingBox(context),
-                ],
+                ),
+              ],
+            ),
+          ),
+          BouncingWrapper(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFF2C599D), width: 1.2),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Text(
+                'Edit Profile',
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF2C599D),
+                ),
               ),
             ),
           ),
@@ -189,210 +329,79 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionLabel(String label) {
-    return Padding(
-      padding: EdgeInsets.only(left: 12.w, bottom: 12.h),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w800,
-          color: AppColors.greyText.withValues(alpha: 0.5),
-          letterSpacing: 1.5,
-        ),
-      ),
-    );
-  }
-
-  void _handleLogout(BuildContext context) async {
-    final confirm = await _showConfirmDialog(context, 'Logout', 'Are you sure you want to logout?');
-    if (confirm == true && context.mounted) context.read<AuthCubit>().logout();
-  }
-
-  void _handleDeleteAccount(BuildContext context) async {
-    final confirm = await _showConfirmDialog(context, 'Delete Account', 'This is permanent and cannot be undone. Confirm?', isDestructive: true);
-    if (confirm == true && context.mounted) context.read<AuthCubit>().deleteAccount();
-  }
-
-  Future<bool?> _showConfirmDialog(BuildContext context, String title, String content, {bool isDestructive = false}) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
-        content: Text(content),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: isDestructive ? Colors.red : AppColors.primaryBlue),
-            child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+  Widget _buildQuickActions(BuildContext context) {
+    return Container(
+      height: 120.h,
+      padding: EdgeInsets.only(top: 24.h),
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        children: [
+          _QuickActionCard(
+            icon: Icons.insights_rounded,
+            label: 'Insights',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BlocProvider(
+                  create: (context) => sl<FinanceCubit>(),
+                  child: const FinancialDashboardPage(),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          _QuickActionCard(
+            icon: Icons.inventory_2_rounded,
+            label: 'Stock',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BlocProvider(
+                  create: (context) => sl<StockCubit>(),
+                  child: const StockDashboardPage(),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          _QuickActionCard(
+            icon: Icons.people_alt_rounded,
+            label: 'Staff',
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
           ),
         ],
       ),
     );
   }
-}
 
-class _AnimatedPremiumHeader extends StatefulWidget {
-  @override
-  State<_AnimatedPremiumHeader> createState() => _AnimatedPremiumHeaderState();
-}
-
-class _AnimatedPremiumHeaderState extends State<_AnimatedPremiumHeader> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart);
-    
-    
-    final profileCubit = context.read<ProfileCubit>();
-    if (profileCubit.state is ProfileInitial) {
-      profileCubit.loadProfile();
-    }
-    
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ProfileCubit, ProfileState>(
-      buildWhen: (previous, current) => previous != current,
-      builder: (context, state) {
-        final profile = state is ProfileLoaded ? state.profile : null;
-        final name = profile?.fullName ?? 'Owner';
-        final phone = profile != null ? '+91 ${profile.phone}' : 'Stay India Member';
-
-        return AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            return Opacity(
-              opacity: _animation.value,
-              child: child,
-            );
-          },
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(24.w, 64.h, 24.w, 48.h),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF14193F), Color(0xFF1A2151), Color(0xFF3359AD)],
-                      stops: [0.0, 0.4, 1.0],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1A2151).withValues(alpha: 0.25),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              MainNavigationPage.scaffoldKey.currentState?.openDrawer();
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(8.r),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              child: Icon(Icons.menu_rounded, color: Colors.white, size: 24.sp),
-                            ),
-                          ),
-                          const SizedBox.shrink(), 
-                        ],
-                      ),
-                      SizedBox(height: 8.h),
-                      Container(
-                        padding: EdgeInsets.all(4.r),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2),
-                        ),
-                        child: CustomAvatar(
-                          imageUrl: ApiConstants.getImageUrl(profile?.avatar),
-                          name: name,
-                          size: 96.0,
-                          isCircle: true,
-                          fontSize: 36.sp,
-                        ),
-                      ),
-                      SizedBox(height: 20.h),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 26.sp,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: -0.8,
-                            ),
-                          ),
-                          if (profile?.isVerifiedOwner ?? true) ...[ 
-                            SizedBox(width: 8.w),
-                            const Icon(Icons.verified, color: Colors.blue, size: 24),
-                          ],
-                        ],
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        phone,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-        );
-      },
+  Widget _buildSectionLabel(String label) {
+    return Padding(
+      padding: EdgeInsets.only(left: 8.w, bottom: 12.h),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textSecondary.withValues(alpha: 0.5),
+          letterSpacing: 1.2,
+        ),
+      ),
     );
   }
-}
 
-class _PremiumSectionBlock extends StatelessWidget {
-  final List<Widget> children;
-  final Color backgroundColor;
-
-  const _PremiumSectionBlock({required this.children, required this.backgroundColor});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildSectionBlock(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(24.r),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -404,8 +413,8 @@ class _PremiumSectionBlock extends StatelessWidget {
               entry.value,
               if (!isLast)
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Divider(height: 1, color: Colors.grey.shade100),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
                 ),
             ],
           );
@@ -413,167 +422,131 @@ class _PremiumSectionBlock extends StatelessWidget {
       ),
     );
   }
+
+  void _handleLogout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        title: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.w900)),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true && context.mounted) context.read<AuthCubit>().logout();
+  }
+
+
 }
 
-class _PremiumTile extends StatefulWidget {
+class _ProfileTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final bool isHighlighted;
   final VoidCallback onTap;
+  final Color? titleColor;
 
-  const _PremiumTile({
+  const _ProfileTile({
     required this.icon,
     required this.title,
     required this.subtitle,
-    this.isHighlighted = false,
     required this.onTap,
+    this.titleColor,
   });
 
   @override
-  State<_PremiumTile> createState() => _PremiumTileState();
-}
-
-class _PremiumTileState extends State<_PremiumTile> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) {
-        HapticFeedback.selectionClick();
-        _controller.forward();
-      },
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
-      onTap: widget.onTap,
-      behavior: HitTestBehavior.opaque,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
-          decoration: widget.isHighlighted 
-            ? BoxDecoration(
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.1), width: 1.5),
-                color: AppColors.primaryBlue.withValues(alpha: 0.02),
-              )
-            : null,
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(10.r),
-                decoration: BoxDecoration(
-                  color: widget.isHighlighted 
-                      ? AppColors.primaryBlue 
-                      : AppColors.primaryBlue.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                child: Icon(
-                  widget.icon, 
-                  color: widget.isHighlighted ? Colors.white : AppColors.primaryBlue, 
-                  size: 22.sp
-                ),
+    return BouncingWrapper(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        color: Colors.transparent,
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundSecondary,
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.darkText,
-                        letterSpacing: -0.3,
-                      ),
+              child: Icon(icon, color: AppColors.primaryBlue, size: 20.sp),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: titleColor ?? AppColors.textPrimary,
                     ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      widget.subtitle,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        color: AppColors.greyText.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w500,
-                      ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppColors.textSecondary.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: AppColors.greyText.withValues(alpha: 0.2),
-                size: 14.sp,
-              ),
-            ],
-          ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: AppColors.border, size: 20.sp),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SystemActionButton extends StatelessWidget {
-  final String label;
+class _QuickActionCard extends StatelessWidget {
   final IconData icon;
-  final Color color;
-  final bool isOutline;
+  final String label;
   final VoidCallback onTap;
 
-  const _SystemActionButton({
-    required this.label,
-    required this.icon,
-    required this.color,
-    this.isOutline = false,
-    required this.onTap,
-  });
+  const _QuickActionCard({required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        onTap();
-      },
+    return BouncingWrapper(
+      onTap: onTap,
       child: Container(
-        width: double.infinity,
+        width: 100.w,
         padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
-          color: isOutline ? Colors.white : color.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: isOutline ? Colors.grey.shade200 : color.withValues(alpha: 0.1)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
           children: [
-            Icon(icon, color: color, size: 20.sp),
-            SizedBox(width: 10.w),
+            Icon(icon, color: AppColors.accentOrange, size: 24.sp),
+            SizedBox(height: 8.h),
             Text(
               label,
               style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w800,
-                color: color,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textSecondary,
               ),
             ),
           ],

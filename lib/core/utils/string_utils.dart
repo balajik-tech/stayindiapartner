@@ -47,4 +47,19 @@ class StringUtils {
         return type;
     }
   }
+
+  static String mapCapacityToSharing(int capacity) {
+    switch (capacity) {
+      case 1:
+        return 'SINGLE';
+      case 2:
+        return 'DOUBLE';
+      case 3:
+        return 'TRIPLE';
+      case 4:
+        return 'QUADRUPLE';
+      case 5:
+        return 'QUINTUPLE';
+    }
+  }
 }

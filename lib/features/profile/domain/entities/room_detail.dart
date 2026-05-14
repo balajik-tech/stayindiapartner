@@ -13,6 +13,7 @@ class RoomDetail {
   final bool isActive;
   final bool isMaster;
   final int capacity;
+  final List<String> features;
   final List<BedInfo> beds;
 
   RoomDetail({
@@ -30,6 +31,7 @@ class RoomDetail {
     required this.isActive,
     required this.isMaster,
     required this.capacity,
+    this.features = const [],
     this.beds = const [],
   });
 }

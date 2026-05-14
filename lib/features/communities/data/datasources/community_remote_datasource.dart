@@ -49,6 +49,7 @@ abstract class CommunityRemoteDataSource {
     required String level,
     String? parentId,
     String? description,
+    String? imagePath,
   });
   Future<void> updateOwnerCommunity({
     required String communityId,
@@ -64,6 +65,22 @@ abstract class CommunityRemoteDataSource {
     required String description,
     String severity = 'HIGH',
   });
+
+  
+  Future<List<SocialPostModel>> getSocialFeed({int limit = 20, int skip = 0});
+  Future<SocialPostModel> createSocialPost({
+    String? communityId, 
+    required String content, 
+    String type = 'POST',
+    String? imagePath,
+    List<String>? pollOptions,
+    Map<String, dynamic>? location,
+  });
+  Future<void> togglePostLike(String postId);
+  Future<List<Map<String, dynamic>>> getPostComments(String postId, {int limit = 20, int skip = 0});
+  Future<void> addPostComment(String postId, String text);
+  Future<void> votePoll(String postId, int optionIndex);
+  Future<void> deleteSocialPost(String postId);
 }
 
 class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
@@ -386,16 +403,35 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     required String level,
     String? parentId,
     String? description,
+    String? imagePath,
   }) async {
     AppLogger.info('Creating association: $name, level: $level');
+    
+    dynamic data;
+    final Map<String, dynamic> payload = {
+      'name': name,
+      'level': level,
+      'parentId': parentId,
+      'description': description,
+    }..removeWhere((key, value) => value == null);
+
+    if (imagePath != null) {
+      data = FormData.fromMap({
+        ...payload,
+        'image': await MultipartFile.fromFile(imagePath),
+      });
+    } else {
+      data = payload;
+    }
+
     final response = await _dio.post(
       ApiConstants.associations,
-      data: {
-        'name': name,
-        'level': level,
-        'parentId': parentId,
-        'description': description,
-      },
+      data: data,
+      options: Options(
+        headers: {
+          if (imagePath != null) 'x-upload-folder': 'communities',
+        },
+      ),
     );
     
     if (response.statusCode != 201 && response.statusCode != 200) {
@@ -480,6 +516,125 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw Exception('Failed to broadcast SOS');
+    }
+  }
+
+  @override
+  Future<List<SocialPostModel>> getSocialFeed({int limit = 20, int skip = 0}) async {
+    AppLogger.info('Fetching social feed (limit: $limit, skip: $skip)');
+    final response = await _dio.get(
+      '${ApiConstants.socialPosts}/feed',
+      queryParameters: {'limit': limit, 'skip': skip},
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data['data'] ?? [];
+      return data.map((p) => SocialPostModel.fromJson(p as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Failed to fetch social feed');
+  }
+
+  @override
+  Future<SocialPostModel> createSocialPost({
+    String? communityId, 
+    required String content, 
+    String type = 'POST',
+    String? imagePath,
+    List<String>? pollOptions,
+    Map<String, dynamic>? location,
+  }) async {
+    AppLogger.info('Creating social post (type: $type)');
+    
+    dynamic data;
+    final Map<String, dynamic> payload = {
+      if (communityId != null) 'communityId': communityId,
+      'content': content,
+      'type': type,
+      if (pollOptions != null && pollOptions.isNotEmpty) 
+        'poll': {
+          'options': pollOptions.map((o) => {'text': o}).toList(),
+          'expiresAt': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
+        },
+      if (location != null) 'location': location,
+    };
+
+    if (imagePath != null) {
+      data = FormData.fromMap({
+        ...payload,
+        'image': await MultipartFile.fromFile(imagePath),
+      });
+    } else {
+      data = payload;
+    }
+
+    final response = await _dio.post(
+      ApiConstants.socialPosts,
+      data: data,
+      options: Options(
+        headers: {
+          if (imagePath != null) 'x-upload-folder': 'social/posts',
+        },
+      ),
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      final resData = response.data?['data'] ?? response.data;
+      return SocialPostModel.fromJson(resData as Map<String, dynamic>);
+    }
+    throw Exception('Failed to create post');
+  }
+
+  @override
+  Future<void> togglePostLike(String postId) async {
+    AppLogger.info('Toggling like for post: $postId');
+    final response = await _dio.post('${ApiConstants.socialPosts}/$postId/like');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to toggle like');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getPostComments(String postId, {int limit = 20, int skip = 0}) async {
+    AppLogger.info('Fetching comments for post: $postId');
+    final response = await _dio.get(
+      '${ApiConstants.socialPosts}/$postId/comments',
+      queryParameters: {'limit': limit, 'skip': skip},
+    );
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+    }
+    throw Exception('Failed to fetch comments');
+  }
+
+  @override
+  Future<void> addPostComment(String postId, String text) async {
+    AppLogger.info('Adding comment to post: $postId');
+    final response = await _dio.post(
+      '${ApiConstants.socialPosts}/$postId/comment',
+      data: {'text': text},
+    );
+    if (response.statusCode != 201 && response.statusCode != 200) {
+      throw Exception('Failed to add comment');
+    }
+  }
+
+  @override
+  Future<void> votePoll(String postId, int optionIndex) async {
+    AppLogger.info('Voting on poll: $postId, option: $optionIndex');
+    final response = await _dio.post(
+      '${ApiConstants.socialPosts}/$postId/vote',
+      data: {'optionIndex': optionIndex},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to record vote');
+    }
+  }
+
+  @override
+  Future<void> deleteSocialPost(String postId) async {
+    AppLogger.info('Deleting social post: $postId');
+    final response = await _dio.delete('${ApiConstants.socialPosts}/$postId');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete post');
     }
   }
 }

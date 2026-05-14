@@ -1,0 +1,432 @@
+Resolving dependencies...
+Downloading packages...
+  _flutterfire_internals 1.3.69 (1.3.70 available)
+  async 2.13.0 (2.13.1 available)
+  bloc 8.1.4 (9.2.1 available)
+  connectivity_plus 6.1.5 (7.1.1 available)
+  cupertino_icons 1.0.8 (1.0.9 available)
+  firebase_core 4.7.0 (4.8.0 available)
+  firebase_core_platform_interface 6.0.3 (7.0.0 available)
+  firebase_core_web 3.6.0 (3.6.1 available)
+  firebase_messaging 16.2.0 (16.2.1 available)
+  firebase_messaging_platform_interface 4.7.9 (4.7.10 available)
+  firebase_messaging_web 4.1.5 (4.1.6 available)
+  flutter_bloc 8.1.6 (9.1.1 available)
+  flutter_secure_storage 9.2.4 (10.2.0 available)
+  flutter_secure_storage_linux 1.2.3 (3.0.0 available)
+  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+  flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+  flutter_secure_storage_web 1.2.1 (2.1.1 available)
+  flutter_secure_storage_windows 3.1.2 (4.2.1 available)
+  flutter_svg 2.2.4 (2.3.0 available)
+  geocoding_android 4.0.1 (5.0.1 available)
+  geocoding_platform_interface 3.2.0 (5.0.0 available)
+  get_it 8.3.0 (9.2.1 available)
+  google_fonts 6.3.3 (8.1.0 available)
+  hooks 1.0.2 (1.0.3 available)
+  hydrated_bloc 9.1.5 (11.0.0 available)
+  image_picker 1.2.1 (1.2.2 available)
+  image_picker_android 0.8.13+16 (0.8.13+17 available)
+  js 0.6.7 (0.7.2 available)
+  latlong2 0.9.1 (0.10.1 available)
+  matcher 0.12.19 (0.12.20 available)
+  meta 1.17.0 (1.18.2 available)
+  native_toolchain_c 0.17.5 (0.18.0 available)
+  package_info_plus 9.0.1 (10.1.0 available)
+  package_info_plus_platform_interface 3.2.1 (4.1.0 available)
+  path_provider_android 2.2.22 (2.3.1 available)
+  socket_io_client 2.0.3+1 (3.1.4 available)
+  socket_io_common 2.0.3 (3.1.1 available)
+  sqflite 2.4.2 (2.4.2+1 available)
+  sqflite_common 2.5.6 (2.5.7 available)
+  synchronized 3.4.0 (3.4.0+1 available)
+  test_api 0.7.10 (0.7.12 available)
+  url_launcher_web 2.4.2 (2.4.3 available)
+  vector_graphics 1.1.20 (1.2.1 available)
+  vector_graphics_compiler 1.2.0 (1.2.2 available)
+  vector_math 2.2.0 (2.3.0 available)
+  vm_service 15.0.2 (15.2.0 available)
+  win32 5.15.0 (6.2.0 available)
+  xml 6.6.1 (7.0.1 available)
+Got dependencies!
+48 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing Stay India Owner...                                   
+
+   info • Use the null-aware marker '?' rather than a null check via an 'if' • lib/features/communities/data/datasources/community_remote_datasource.dart:549:7 • use_null_aware_elements
+   info • Use the null-aware marker '?' rather than a null check via an 'if' • lib/features/communities/data/datasources/community_remote_datasource.dart:557:7 • use_null_aware_elements
+  error • Expected a method, getter, setter or operator declaration • lib/features/communities/presentation/pages/association_intro_page.dart:941:1 • expected_executable
+  error • The named parameter 'level' isn't defined • lib/features/communities/presentation/pages/community_discovery_hub_page.dart:146:21 • undefined_named_parameter
+  error • The named parameter 'allStates' isn't defined • lib/features/communities/presentation/pages/community_discovery_hub_page.dart:147:21 • undefined_named_parameter
+warning • The value of the local variable 'isOccupied' isn't used • lib/features/dashboard/presentation/widgets/bed_card.dart:30:16 • unused_local_variable
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/profile/presentation/pages/account_settings_page.dart:375:7 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/features/profile/presentation/pages/account_settings_page.dart:377:11 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/features/profile/presentation/pages/account_settings_page.dart:378:24 • use_build_context_synchronously
+warning • The value of the field '_summary' isn't used • lib/features/profile/presentation/pages/reports_dashboard_page.dart:29:24 • unused_field
+   info • Statements in an if should be enclosed in a block • lib/features/profile/presentation/pages/reports_dashboard_page.dart:146:26 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/profile/presentation/pages/reports_dashboard_page.dart:146:52 • curly_braces_in_flow_control_structures
+  error • The method 'mapCapacityToSharing' isn't defined for the type 'StringUtils' • lib/features/profile/presentation/pages/room_management_page.dart:1315:36 • undefined_method
+  error • The method 'mapCapacityToSharing' isn't defined for the type 'StringUtils' • lib/features/profile/presentation/pages/room_management_page.dart:1346:40 • undefined_method
+  error • Too many positional arguments: 0 expected, but 1 found • lib/features/profile/presentation/pages/room_pricing_page.dart:47:71 • extra_positional_arguments
+  error • Too many positional arguments: 0 expected, but 1 found • lib/features/profile/presentation/pages/room_pricing_page.dart:72:83 • extra_positional_arguments
+  error • The argument type 'List<String>' can't be assigned to the parameter type 'String'.  • lib/features/profile/presentation/pages/room_pricing_page.dart:80:71 • argument_type_not_assignable
+warning • The value of the local variable 'floorName' isn't used • lib/features/profile/presentation/widgets/add_floor_sheet.dart:243:17 • unused_local_variable
+  error • The named parameter 'roomType' isn't defined • lib/features/profile/presentation/widgets/add_floor_sheet.dart:311:21 • undefined_named_parameter
+  error • The named parameter 'createHostelUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:43:28 • missing_required_argument
+  error • The named parameter 'deleteHostelUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:43:28 • missing_required_argument
+  error • The named parameter 'getHostelsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:43:28 • missing_required_argument
+  error • The named parameter 'updateHostelLocationUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:43:28 • missing_required_argument
+  error • The named parameter 'updateHostelUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:43:28 • missing_required_argument
+  error • The named parameter 'uploadHostelImagesUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:43:28 • missing_required_argument
+  error • The named parameter 'hostelRepository' isn't defined • lib/features/profile/profile_injections.dart:43:40 • undefined_named_parameter
+  error • The named parameter 'bulkCreateRoomsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'createRoomUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'deleteRoomUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'getBedDetailUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'getBedHistoryUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'getFloorWiseRoomsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'getFloorsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'getFreeBedsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'getOccupancyUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'getRoomsByFloorUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'getRoomsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'updateRoomUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:44:28 • missing_required_argument
+  error • The named parameter 'roomRepository' isn't defined • lib/features/profile/profile_injections.dart:44:38 • undefined_named_parameter
+  error • The named parameter 'getFoodMenuUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:45:28 • missing_required_argument
+  error • The named parameter 'saveFoodMenuUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:45:28 • missing_required_argument
+  error • The named parameter 'foodMenuRepository' isn't defined • lib/features/profile/profile_injections.dart:45:42 • undefined_named_parameter
+  error • The named parameter 'getHostelSettingsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:46:28 • missing_required_argument
+  error • The named parameter 'updateHostelAmenitiesUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:46:28 • missing_required_argument
+  error • The named parameter 'updateHostelHouseRulesUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:46:28 • missing_required_argument
+  error • The named parameter 'updateHostelNotificationsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:46:28 • missing_required_argument
+  error • The named parameter 'updateHostelProfileUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:46:28 • missing_required_argument
+  error • The named parameter 'updateHostelRoomConfigUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:46:28 • missing_required_argument
+  error • The named parameter 'uploadHostelSettingsImagesUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:46:28 • missing_required_argument
+  error • The named parameter 'settingsRepository' isn't defined • lib/features/profile/profile_injections.dart:46:42 • undefined_named_parameter
+  error • The named parameter 'deleteDocumentUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:47:28 • missing_required_argument
+  error • The named parameter 'getDocumentsUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:47:28 • missing_required_argument
+  error • The named parameter 'uploadDocumentUseCase' is required, but there's no corresponding argument • lib/features/profile/profile_injections.dart:47:28 • missing_required_argument
+  error • The named parameter 'documentRepository' isn't defined • lib/features/profile/profile_injections.dart:47:42 • undefined_named_parameter
+   info • The argument type 'int?' isn't related to 'String' • lib/features/property_setup/data/repositories/property_setup_repository_impl.dart:114:109 • collection_methods_unrelated_type
+   info • Don't invoke 'print' in production code • lib/features/property_setup/data/repositories/property_setup_repository_impl.dart:117:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/property_setup/data/repositories/property_setup_repository_impl.dart:126:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/property_setup/data/repositories/property_setup_repository_impl.dart:127:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/property_setup/data/repositories/property_setup_repository_impl.dart:128:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/property_setup/data/repositories/property_setup_repository_impl.dart:129:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/property_setup/data/repositories/property_setup_repository_impl.dart:130:7 • avoid_print
+   info • Empty catch block • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:125:17 • empty_catches
+   info • Empty catch block • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:164:17 • empty_catches
+  error • The method 'cropImage' isn't defined for the type 'ImageUtils' • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:173:42 • undefined_method
+  error • The method 'cropImage' isn't defined for the type 'ImageUtils' • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:186:29 • undefined_method
+   info • Empty catch block • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:221:17 • empty_catches
+  error • The named parameter 'fireSafety' isn't defined • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:483:9 • undefined_named_parameter
+  error • The named parameter 'policeNoc' isn't defined • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:484:9 • undefined_named_parameter
+  error • The named parameter 'shopsEstablishment' isn't defined • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:485:9 • undefined_named_parameter
+  error • The named parameter 'gstRegistration' isn't defined • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:486:9 • undefined_named_parameter
+  error • The named parameter 'healthSanitation' isn't defined • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:487:9 • undefined_named_parameter
+  error • The named parameter 'utilityBill' isn't defined • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:488:9 • undefined_named_parameter
+  error • The named parameter 'pollutionNoc' isn't defined • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:489:9 • undefined_named_parameter
+  error • The named parameter 'residentVerification' isn't defined • lib/features/property_setup/presentation/cubit/property_setup_cubit.dart:490:9 • undefined_named_parameter
+   info • The private field _selectedPaymentMode could be 'final' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:31:10 • prefer_final_fields
+warning • The value of the field '_selectedPaymentMode' isn't used • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:31:10 • unused_field
+warning • The value of the field '_matchedExistingItem' isn't used • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:34:14 • unused_field
+warning • The value of the field '_paymentModes' isn't used • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:38:22 • unused_field
+warning • The declaration '_onItemSearch' isn't referenced • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:55:8 • unused_element
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:60:27 • argument_type_not_assignable
+warning • The '!' will have no effect because the receiver can't be null • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:60:34 • unnecessary_non_null_assertion
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:61:29 • argument_type_not_assignable
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:61:42 • invalid_null_aware_operator
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:62:29 • argument_type_not_assignable
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:62:41 • invalid_null_aware_operator
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:63:29 • argument_type_not_assignable
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:63:41 • invalid_null_aware_operator
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:64:29 • argument_type_not_assignable
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:64:43 • invalid_null_aware_operator
+  error • Too many positional arguments: 1 expected, but 2 found • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:67:54 • extra_positional_arguments
+  error • The returned type 'Map<dynamic, dynamic>' isn't returnable from a 'String' function, as required by the closure's context • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:69:21 • return_of_invalid_type_from_closure
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:74:35 • argument_type_not_assignable
+warning • The '!' will have no effect because the receiver can't be null • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:74:46 • unnecessary_non_null_assertion
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:75:31 • argument_type_not_assignable
+warning • The '!' will have no effect because the receiver can't be null • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:75:38 • unnecessary_non_null_assertion
+  error • Too many positional arguments: 1 expected, but 2 found • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:76:96 • extra_positional_arguments
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:77:43 • argument_type_not_assignable
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:78:41 • argument_type_not_assignable
+warning • The '!' will have no effect because the receiver can't be null • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:78:48 • unnecessary_non_null_assertion
+  error • The method '_buildLabel' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:142:17 • undefined_method
+  error • The method '_buildLabel' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:157:27 • undefined_method
+  error • The method '_buildDropdown' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:158:27 • undefined_method
+  error • The method '_buildLabel' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:167:27 • undefined_method
+  error • The method '_buildDropdown' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:168:27 • undefined_method
+  error • The method '_buildLabel' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:182:27 • undefined_method
+  error • The method '_buildTextField' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:183:27 • undefined_method
+  error • The method '_buildLabel' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:192:27 • undefined_method
+  error • The method '_buildTextField' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:193:27 • undefined_method
+  error • The method '_buildLabel' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:201:17 • undefined_method
+  error • The method '_buildTextField' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:202:17 • undefined_method
+  error • The method '_buildLabel' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:205:17 • undefined_method
+  error • The method '_buildPaymentModeSelector' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:206:17 • undefined_method
+  error • The method '_buildLabel' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:209:17 • undefined_method
+  error • The method '_buildTextField' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:210:17 • undefined_method
+  error • The method '_buildSubmitButton' isn't defined for the type '_QuickAddTransactionPageState' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:213:17 • undefined_method
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:261:37 • argument_type_not_assignable
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:273:34 • argument_type_not_assignable
+  error • The returned type 'Map<dynamic, dynamic>' isn't returnable from a 'String' function, as required by the closure's context • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:274:33 • return_of_invalid_type_from_closure
+  error • Too many positional arguments: 1 expected, but 2 found • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:277:64 • extra_positional_arguments
+warning • The value of the local variable 'searchController' isn't used • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:347:11 • unused_local_variable
+warning • The value of the local variable 'filteredItems' isn't used • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:357:19 • unused_local_variable
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:358:33 • argument_type_not_assignable
+warning • The '!' will have no effect because the receiver can't be null • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:358:40 • unnecessary_non_null_assertion
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:359:35 • argument_type_not_assignable
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:359:48 • invalid_null_aware_operator
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:360:35 • argument_type_not_assignable
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:360:47 • invalid_null_aware_operator
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:361:35 • argument_type_not_assignable
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:361:47 • invalid_null_aware_operator
+  error • The argument type 'String' can't be assigned to the parameter type 'int'.  • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:362:35 • argument_type_not_assignable
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:362:49 • invalid_null_aware_operator
+  error • Too many positional arguments: 1 expected, but 2 found • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:370:60 • extra_positional_arguments
+  error • Expected to find ';' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:393:29 • expected_token
+  error • Expected to find ')' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:394:21 • expected_token
+  error • Expected to find ']' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:394:21 • expected_token
+  error • Expected to find '}' • lib/features/stock_management/presentation/pages/quick_add_transaction_page.dart:394:21 • expected_token
+  error • Too many positional arguments: 1 expected, but 2 found • lib/features/stock_management/presentation/pages/stock_detail_page.dart:123:70 • extra_positional_arguments
+  error • Too many positional arguments: 1 expected, but 2 found • lib/features/stock_management/presentation/pages/stock_detail_page.dart:126:72 • extra_positional_arguments
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/entities/hostel.dart' • lib/features/tenants/presentation/pages/add_tenant_page.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/entities/room_detail.dart' • lib/features/tenants/presentation/pages/add_tenant_page.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/profile/cubit/hostel_cubit.dart' • lib/features/tenants/presentation/pages/add_tenant_page.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/profile/cubit/hostel_state.dart' • lib/features/tenants/presentation/pages/add_tenant_page.dart:8:8 • uri_does_not_exist
+  error • The name 'HostelCubit' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/pages/add_tenant_page.dart:34:38 • non_type_as_type_argument
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/pages/add_tenant_page.dart:35:30 • type_test_with_undefined_name
+  error • The name 'HostelLoaded' isn't a type, so it can't be used in an 'as' expression • lib/features/tenants/presentation/pages/add_tenant_page.dart:36:45 • cast_to_non_type
+  error • The name 'HostelCubit' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/pages/add_tenant_page.dart:126:32 • non_type_as_type_argument
+  error • The name 'HostelState' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/pages/add_tenant_page.dart:126:45 • non_type_as_type_argument
+  error • The name 'Hostel' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/pages/add_tenant_page.dart:128:22 • non_type_as_type_argument
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/pages/add_tenant_page.dart:129:36 • type_test_with_undefined_name
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/features/tenants/presentation/pages/add_tenant_page.dart:130:41 • unchecked_use_of_nullable_value
+  error • Undefined class 'Hostel' • lib/features/tenants/presentation/pages/add_tenant_page.dart:135:21 • undefined_class
+  error • The name 'RoomDetail' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/pages/add_tenant_page.dart:138:26 • non_type_as_type_argument
+  error • Undefined class 'RoomDetail' • lib/features/tenants/presentation/pages/add_tenant_page.dart:139:21 • undefined_class
+  error • The name 'Hostel' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/pages/add_tenant_page.dart:176:42 • non_type_as_type_argument
+  error • The argument type 'Object' can't be assigned to the parameter type 'Hostel'.  • lib/features/tenants/presentation/pages/add_tenant_page.dart:180:65 • argument_type_not_assignable
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/features/tenants/presentation/pages/add_tenant_page.dart:181:49 • unchecked_use_of_nullable_value
+  error • The name 'RoomDetail' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/pages/add_tenant_page.dart:210:55 • non_type_as_type_argument
+  error • The argument type 'Object' can't be assigned to the parameter type 'RoomDetail'.  • lib/features/tenants/presentation/pages/add_tenant_page.dart:214:110 • argument_type_not_assignable
+  error • The property 'roomTypename' can't be unconditionally accessed because the receiver can be 'null' • lib/features/tenants/presentation/pages/add_tenant_page.dart:216:55 • unchecked_use_of_nullable_value
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/notices/cubit/notice_cubit.dart' • lib/features/tenants/presentation/widgets/notices_tab_view.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/profile/cubit/hostel_cubit.dart' • lib/features/tenants/presentation/widgets/notices_tab_view.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/profile/cubit/hostel_state.dart' • lib/features/tenants/presentation/widgets/notices_tab_view.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/entities/notice.dart' • lib/features/tenants/presentation/widgets/notices_tab_view.dart:8:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/common_widgets/shimmer_loading.dart' • lib/features/tenants/presentation/widgets/notices_tab_view.dart:9:8 • uri_does_not_exist
+  error • The name 'NoticeCubit' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/widgets/notices_tab_view.dart:21:24 • non_type_as_type_argument
+  error • The name 'NoticeState' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/widgets/notices_tab_view.dart:21:37 • non_type_as_type_argument
+  error • The name 'NoticeLoading' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/widgets/notices_tab_view.dart:23:22 • type_test_with_undefined_name
+  error • The name 'TenantCardSkeleton' isn't a class • lib/features/tenants/presentation/widgets/notices_tab_view.dart:27:52 • creation_with_non_type
+warning • Dead code • lib/features/tenants/presentation/widgets/notices_tab_view.dart:29:16 • dead_code
+  error • The name 'NoticeLoadError' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/widgets/notices_tab_view.dart:29:29 • type_test_with_undefined_name
+  error • The property 'message' can't be unconditionally accessed because the receiver can be 'null' • lib/features/tenants/presentation/widgets/notices_tab_view.dart:30:43 • unchecked_use_of_nullable_value
+  error • The name 'NoticesLoaded' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/widgets/notices_tab_view.dart:31:29 • type_test_with_undefined_name
+  error • The property 'notices' can't be unconditionally accessed because the receiver can be 'null' • lib/features/tenants/presentation/widgets/notices_tab_view.dart:32:33 • unchecked_use_of_nullable_value
+  error • The name 'HostelCubit' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/widgets/notices_tab_view.dart:35:48 • non_type_as_type_argument
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/widgets/notices_tab_view.dart:36:34 • type_test_with_undefined_name
+  error • The name 'NoticeCubit' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/widgets/notices_tab_view.dart:38:30 • non_type_as_type_argument
+  error • The argument type 'num' can't be assigned to the parameter type 'int?'.  • lib/features/tenants/presentation/widgets/notices_tab_view.dart:44:26 • argument_type_not_assignable
+  error • The name 'NoticeSubmitting' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/widgets/notices_tab_view.dart:71:29 • type_test_with_undefined_name
+  error • The name 'NoticeUpdating' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/widgets/notices_tab_view.dart:71:58 • type_test_with_undefined_name
+  error • The name 'NoticeSuccess' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/widgets/notices_tab_view.dart:71:85 • type_test_with_undefined_name
+  error • The name 'NoticeUpdateSuccess' isn't defined, so it can't be used in an 'is' expression • lib/features/tenants/presentation/widgets/notices_tab_view.dart:71:111 • type_test_with_undefined_name
+  error • The name 'TenantCardSkeleton' isn't a class • lib/features/tenants/presentation/widgets/notices_tab_view.dart:75:52 • creation_with_non_type
+warning • Dead code • lib/features/tenants/presentation/widgets/notices_tab_view.dart:78:9 • dead_code
+  error • The name 'Notice' isn't a type, so it can't be used as a type argument • lib/features/tenants/presentation/widgets/notices_tab_view.dart:99:32 • non_type_as_type_argument
+  error • Undefined class 'Notice' • lib/features/tenants/presentation/widgets/notices_tab_view.dart:151:27 • undefined_class
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/hostel_repository.dart' • lib/injection_container.dart:8:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/room_repository.dart' • lib/injection_container.dart:9:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/food_menu_repository.dart' • lib/injection_container.dart:10:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/settings_repository.dart' • lib/injection_container.dart:11:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/complaints_repository.dart' • lib/injection_container.dart:12:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/notice_repository.dart' • lib/injection_container.dart:13:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/payment_repository.dart' • lib/injection_container.dart:14:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/maintenance_repository.dart' • lib/injection_container.dart:15:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/staff_repository.dart' • lib/injection_container.dart:16:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/domain/repositories/document_repository.dart' • lib/injection_container.dart:17:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/hostel_remote_data_source.dart' • lib/injection_container.dart:24:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/room_remote_data_source.dart' • lib/injection_container.dart:25:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/food_menu_remote_data_source.dart' • lib/injection_container.dart:26:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/settings_remote_data_source.dart' • lib/injection_container.dart:27:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/complaints_remote_data_source.dart' • lib/injection_container.dart:28:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/notice_remote_data_source.dart' • lib/injection_container.dart:29:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/payment_remote_data_source.dart' • lib/injection_container.dart:30:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/maintenance_remote_data_source.dart' • lib/injection_container.dart:31:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/staff_remote_data_source.dart' • lib/injection_container.dart:32:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/document_remote_data_source.dart' • lib/injection_container.dart:33:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/data_sources/user_remote_data_source.dart' • lib/injection_container.dart:34:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/hostel_repository_impl.dart' • lib/injection_container.dart:36:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/room_repository_impl.dart' • lib/injection_container.dart:37:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/food_menu_repository_impl.dart' • lib/injection_container.dart:38:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/settings_repository_impl.dart' • lib/injection_container.dart:39:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/complaints_repository_impl.dart' • lib/injection_container.dart:40:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/notice_repository_impl.dart' • lib/injection_container.dart:41:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/payment_repository_impl.dart' • lib/injection_container.dart:42:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/maintenance_repository_impl.dart' • lib/injection_container.dart:43:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/staff_repository_impl.dart' • lib/injection_container.dart:44:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/data/repositories/document_repository_impl.dart' • lib/injection_container.dart:45:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/profile/cubit/hostel_cubit.dart' • lib/injection_container.dart:50:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/profile/cubit/room_cubit.dart' • lib/injection_container.dart:51:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/profile/cubit/food_menu_cubit.dart' • lib/injection_container.dart:52:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/profile/cubit/settings_cubit.dart' • lib/injection_container.dart:53:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/notices/cubit/notice_cubit.dart' • lib/injection_container.dart:54:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/payments/cubit/payment_cubit.dart' • lib/injection_container.dart:55:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/maintenance/cubit/maintenance_cubit.dart' • lib/injection_container.dart:56:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'package:stayindia_owner/presentation/staff/cubit/staff_cubit.dart' • lib/injection_container.dart:57:8 • uri_does_not_exist
+  error • The function 'HostelCubit' isn't defined • lib/injection_container.dart:71:28 • undefined_function
+  error • The function 'RoomCubit' isn't defined • lib/injection_container.dart:72:28 • undefined_function
+  error • The function 'FoodMenuCubit' isn't defined • lib/injection_container.dart:73:28 • undefined_function
+  error • The function 'SettingsCubit' isn't defined • lib/injection_container.dart:74:28 • undefined_function
+  error • The function 'NoticeCubit' isn't defined • lib/injection_container.dart:75:28 • undefined_function
+  error • The function 'PaymentCubit' isn't defined • lib/injection_container.dart:76:28 • undefined_function
+  error • The function 'MaintenanceCubit' isn't defined • lib/injection_container.dart:77:28 • undefined_function
+  error • The function 'StaffCubit' isn't defined • lib/injection_container.dart:78:28 • undefined_function
+  error • The named parameter 'deleteDocumentUseCase' is required, but there's no corresponding argument • lib/injection_container.dart:79:28 • missing_required_argument
+  error • The named parameter 'getDocumentsUseCase' is required, but there's no corresponding argument • lib/injection_container.dart:79:28 • missing_required_argument
+  error • The named parameter 'uploadDocumentUseCase' is required, but there's no corresponding argument • lib/injection_container.dart:79:28 • missing_required_argument
+  error • The named parameter 'documentRepository' isn't defined • lib/injection_container.dart:79:42 • undefined_named_parameter
+  error • The name 'HostelRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:84:28 • non_type_as_type_argument
+  error • The function 'HostelRepositoryImpl' isn't defined • lib/injection_container.dart:85:11 • undefined_function
+  error • The name 'RoomRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:87:28 • non_type_as_type_argument
+  error • The function 'RoomRepositoryImpl' isn't defined • lib/injection_container.dart:88:11 • undefined_function
+  error • The name 'FoodMenuRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:90:28 • non_type_as_type_argument
+  error • The function 'FoodMenuRepositoryImpl' isn't defined • lib/injection_container.dart:91:11 • undefined_function
+  error • The name 'SettingsRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:93:28 • non_type_as_type_argument
+  error • The function 'SettingsRepositoryImpl' isn't defined • lib/injection_container.dart:94:11 • undefined_function
+  error • The name 'ComplaintsRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:96:28 • non_type_as_type_argument
+  error • The function 'ComplaintsRepositoryImpl' isn't defined • lib/injection_container.dart:97:11 • undefined_function
+  error • The name 'NoticeRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:99:28 • non_type_as_type_argument
+  error • The function 'NoticeRepositoryImpl' isn't defined • lib/injection_container.dart:100:11 • undefined_function
+  error • The name 'PaymentRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:102:28 • non_type_as_type_argument
+  error • The function 'PaymentRepositoryImpl' isn't defined • lib/injection_container.dart:103:11 • undefined_function
+  error • The name 'MaintenanceRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:105:28 • non_type_as_type_argument
+  error • The function 'MaintenanceRepositoryImpl' isn't defined • lib/injection_container.dart:106:11 • undefined_function
+  error • The name 'StaffRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:108:28 • non_type_as_type_argument
+  error • The function 'StaffRepositoryImpl' isn't defined • lib/injection_container.dart:109:11 • undefined_function
+  error • The name 'DocumentRepository' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:111:28 • non_type_as_type_argument
+  error • The function 'DocumentRepositoryImpl' isn't defined • lib/injection_container.dart:112:11 • undefined_function
+  error • The name 'HostelRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:116:28 • non_type_as_type_argument
+  error • The function 'HostelRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:117:11 • undefined_function
+  error • The name 'RoomRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:119:28 • non_type_as_type_argument
+  error • The function 'RoomRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:120:11 • undefined_function
+  error • The name 'FoodMenuRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:122:28 • non_type_as_type_argument
+  error • The function 'FoodMenuRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:123:11 • undefined_function
+  error • The name 'SettingsRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:125:28 • non_type_as_type_argument
+  error • The function 'SettingsRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:126:11 • undefined_function
+  error • The name 'ComplaintsRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:128:28 • non_type_as_type_argument
+  error • The function 'ComplaintsRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:129:11 • undefined_function
+  error • The name 'NoticeRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:131:28 • non_type_as_type_argument
+  error • The function 'NoticeRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:132:11 • undefined_function
+  error • The name 'PaymentRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:134:28 • non_type_as_type_argument
+  error • The function 'PaymentRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:135:11 • undefined_function
+  error • The name 'MaintenanceRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:137:28 • non_type_as_type_argument
+  error • The function 'MaintenanceRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:138:11 • undefined_function
+  error • The name 'StaffRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:140:28 • non_type_as_type_argument
+  error • The function 'StaffRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:141:11 • undefined_function
+  error • The name 'DocumentRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:143:28 • non_type_as_type_argument
+  error • The function 'DocumentRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:144:11 • undefined_function
+  error • The name 'UserRemoteDataSource' isn't a type, so it can't be used as a type argument • lib/injection_container.dart:146:28 • non_type_as_type_argument
+  error • The function 'UserRemoteDataSourceImpl' isn't defined • lib/injection_container.dart:147:11 • undefined_function
+  error • Target of URI doesn't exist: 'dashboard/pages/dashboard_page.dart' • lib/presentation/main_navigation_page.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'bookings/pages/bookings_page.dart' • lib/presentation/main_navigation_page.dart:8:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'tenants/pages/tenants_page.dart' • lib/presentation/main_navigation_page.dart:9:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'profile/pages/profile_page.dart' • lib/presentation/main_navigation_page.dart:10:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'bookings/bloc/bookings_bloc.dart' • lib/presentation/main_navigation_page.dart:11:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'bookings/bloc/bookings_state.dart' • lib/presentation/main_navigation_page.dart:12:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'profile/widgets/add_hostel_sheet.dart' • lib/presentation/main_navigation_page.dart:13:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'profile/cubit/hostel_cubit.dart' • lib/presentation/main_navigation_page.dart:14:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'profile/cubit/hostel_state.dart' • lib/presentation/main_navigation_page.dart:15:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'dashboard/bloc/dashboard_bloc.dart' • lib/presentation/main_navigation_page.dart:16:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'dashboard/bloc/dashboard_event.dart' • lib/presentation/main_navigation_page.dart:17:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'community/pages/communities_hub_page.dart' • lib/presentation/main_navigation_page.dart:18:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'notices/cubit/notice_cubit.dart' • lib/presentation/main_navigation_page.dart:19:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'tenants/bloc/tenants_bloc.dart' • lib/presentation/main_navigation_page.dart:20:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'tenants/bloc/tenants_event.dart' • lib/presentation/main_navigation_page.dart:21:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'maintenance/cubit/maintenance_cubit.dart' • lib/presentation/main_navigation_page.dart:22:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'staff/cubit/staff_cubit.dart' • lib/presentation/main_navigation_page.dart:23:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'bookings/bloc/bookings_event.dart' • lib/presentation/main_navigation_page.dart:24:8 • uri_does_not_exist
+  error • The method 'DashboardPage' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:53:7 • undefined_method
+  error • The method 'BookingsPage' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:54:7 • undefined_method
+  error • The method 'CommunitiesHubPage' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:55:7 • undefined_method
+  error • The method 'TenantsPage' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:60:7 • undefined_method
+  error • The name 'ProfilePage' isn't a class • lib/presentation/main_navigation_page.dart:61:13 • creation_with_non_type
+  error • The name 'DashboardBloc' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:118:20 • non_type_as_type_argument
+  error • The method 'FetchDashboardData' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:118:41 • undefined_method
+  error • The name 'HostelCubit' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:146:22 • non_type_as_type_argument
+  error • The name 'HostelState' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:146:35 • non_type_as_type_argument
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:148:30 • type_test_with_undefined_name
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:148:58 • type_test_with_undefined_name
+warning • Dead code • lib/presentation/main_navigation_page.dart:148:72 • dead_code
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:149:43 • unchecked_use_of_nullable_value
+  error • The property 'selectedHostelIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:149:60 • unchecked_use_of_nullable_value
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:150:42 • unchecked_use_of_nullable_value
+  error • The property 'selectedHostelIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:150:58 • unchecked_use_of_nullable_value
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:154:26 • type_test_with_undefined_name
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:154:48 • unchecked_use_of_nullable_value
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:155:38 • unchecked_use_of_nullable_value
+  error • The property 'selectedHostelIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:155:52 • unchecked_use_of_nullable_value
+  error • The name 'DashboardBloc' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:160:28 • non_type_as_type_argument
+  error • The method 'FetchDashboardData' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:160:49 • undefined_method
+  error • The name 'BookingsBloc' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:161:28 • non_type_as_type_argument
+  error • The method 'FetchBookings' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:161:48 • undefined_method
+  error • The name 'TenantsBloc' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:162:28 • non_type_as_type_argument
+  error • The name 'FetchTenants' isn't a class • lib/presentation/main_navigation_page.dart:162:53 • creation_with_non_type
+  error • The name 'MaintenanceCubit' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:163:28 • non_type_as_type_argument
+  error • The name 'NoticeCubit' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:164:28 • non_type_as_type_argument
+  error • The name 'StaffCubit' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:165:28 • non_type_as_type_argument
+  error • The name 'HostelCubit' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:170:26 • non_type_as_type_argument
+  error • The name 'HostelState' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:170:39 • non_type_as_type_argument
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:172:28 • type_test_with_undefined_name
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:172:56 • type_test_with_undefined_name
+warning • Dead code • lib/presentation/main_navigation_page.dart:172:70 • dead_code
+  error • The property 'selectedHostelIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:173:27 • unchecked_use_of_nullable_value
+  error • The property 'selectedHostelIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:173:58 • unchecked_use_of_nullable_value
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:174:27 • unchecked_use_of_nullable_value
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:174:53 • unchecked_use_of_nullable_value
+  error • The name 'HostelInitial' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:177:30 • type_test_with_undefined_name
+warning • Dead code • lib/presentation/main_navigation_page.dart:177:44 • dead_code
+  error • The name 'HostelLoading' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:177:62 • type_test_with_undefined_name
+warning • Dead code • lib/presentation/main_navigation_page.dart:184:11 • dead_code
+  error • The name 'HostelError' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:184:30 • type_test_with_undefined_name
+  error • The property 'message' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:193:48 • unchecked_use_of_nullable_value
+  error • The name 'HostelCubit' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:196:53 • non_type_as_type_argument
+  error • The name 'HostelLoaded' isn't defined, so it can't be used in an 'is' expression • lib/presentation/main_navigation_page.dart:205:30 • type_test_with_undefined_name
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:206:29 • unchecked_use_of_nullable_value
+  error • The name 'AddHostelSheet' isn't a class • lib/presentation/main_navigation_page.dart:227:59 • creation_with_non_type
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:240:42 • unchecked_use_of_nullable_value
+  error • The property 'selectedHostelIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:240:62 • unchecked_use_of_nullable_value
+  error • The property 'hostels' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:241:44 • unchecked_use_of_nullable_value
+  error • The property 'selectedHostelIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:241:64 • unchecked_use_of_nullable_value
+  error • The name 'BookingsBloc' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:244:33 • non_type_as_type_argument
+  error • The name 'BookingsState' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:244:47 • non_type_as_type_argument
+  error • The property 'status' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:246:27 • unchecked_use_of_nullable_value
+  error • Undefined name 'BookingsStatus' • lib/presentation/main_navigation_page.dart:246:37 • undefined_identifier
+  error • The property 'successMessage' can't be unconditionally accessed because the receiver can be 'null' • lib/presentation/main_navigation_page.dart:247:27 • unchecked_use_of_nullable_value
+  error • The name 'DashboardBloc' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:248:32 • non_type_as_type_argument
+  error • The method 'FetchDashboardData' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:248:53 • undefined_method
+  error • The name 'DashboardBloc' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:296:24 • non_type_as_type_argument
+  error • The method 'FetchDashboardData' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:296:45 • undefined_method
+  error • The name 'DashboardBloc' isn't a type, so it can't be used as a type argument • lib/presentation/main_navigation_page.dart:337:24 • non_type_as_type_argument
+  error • The method 'FetchDashboardData' isn't defined for the type '_MainNavigationPageState' • lib/presentation/main_navigation_page.dart:337:45 • undefined_method
+  error • Target of URI doesn't exist: '../../../domain/entities/tenant.dart' • lib/presentation/tenants/bloc/tenants_state.dart:2:8 • uri_does_not_exist
+  error • The name 'Tenant' isn't a type, so it can't be used as a type argument • lib/presentation/tenants/bloc/tenants_state.dart:11:14 • non_type_as_type_argument
+  error • The name 'status' is already defined • lib/presentation/tenants/bloc/tenants_state.dart:15:23 • duplicate_definition
+  error • The name 'Tenant' isn't a type, so it can't be used as a type argument • lib/presentation/tenants/bloc/tenants_state.dart:16:14 • non_type_as_type_argument
+  error • The name 'tenants' is already defined • lib/presentation/tenants/bloc/tenants_state.dart:16:22 • duplicate_definition
+  error • The name 'errorMessage' is already defined • lib/presentation/tenants/bloc/tenants_state.dart:17:17 • duplicate_definition
+  error • All final variables must be initialized, but 'errorMessage', 'status', and 1 others aren't • lib/presentation/tenants/bloc/tenants_state.dart:19:9 • final_not_initialized_constructor
+  error • The name 'Tenant' isn't a type, so it can't be used as a type argument • lib/presentation/tenants/bloc/tenants_state.dart:29:10 • non_type_as_type_argument
+warning • Dead code • lib/presentation/tenants/bloc/tenants_state.dart:41:5 • dead_code
+warning • Unused import: 'package:flutter/material.dart' • test/features/communities/presentation/widgets/comments_sheet_test.dart:1:8 • unused_import
+warning • Unused import: 'package:flutter_test/flutter_test.dart' • test/features/communities/presentation/widgets/comments_sheet_test.dart:2:8 • unused_import
+warning • Unused import: 'package:get_it/get_it.dart' • test/features/communities/presentation/widgets/comments_sheet_test.dart:3:8 • unused_import
+warning • Unused import: 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart' • test/features/communities/presentation/widgets/comments_sheet_test.dart:4:8 • unused_import
+warning • Unused import: 'package:stayindia_owner/features/communities/domain/repositories/community_repository.dart' • test/features/communities/presentation/widgets/comments_sheet_test.dart:5:8 • unused_import
+warning • Unused import: 'package:stayindia_owner/features/communities/domain/usecases/community_usecases.dart' • test/features/communities/presentation/widgets/comments_sheet_test.dart:6:8 • unused_import
+warning • Unused import: 'package:stayindia_owner/features/communities/presentation/widgets/comments_sheet.dart' • test/features/communities/presentation/widgets/comments_sheet_test.dart:7:8 • unused_import
+warning • Unused import: 'package:flutter_screenutil/flutter_screenutil.dart' • test/features/communities/presentation/widgets/comments_sheet_test.dart:8:8 • unused_import
+

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
@@ -9,9 +10,7 @@ import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:stayindia_owner/features/finance/presentation/pages/financial_dashboard_page.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
-import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/injection_container.dart';
-import 'package:flutter/services.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -19,23 +18,22 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: 0.85.sw,
-      backgroundColor: const Color(0xFFF6F7F9),
+      width: 0.88.sw,
+      backgroundColor: const Color(0xFFF8F9FA),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       child: Column(
         children: [
-          _buildPremiumHeader(context),
+          _buildGradientHeader(context),
           Expanded(
             child: ListView(
-              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 40.h),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
               physics: const BouncingScrollPhysics(),
               children: [
                 _buildSectionLabel('PROPERTY'),
-                _buildInteractiveMenuItem(
-                  context,
-                  icon: Icons.apartment_rounded,
-                  title: 'Switch Property',
-                  isHighlighted: true,
+                _buildPremiumMenuItem(
+                  context, 
+                  Icons.swap_horiz_rounded, 
+                  'Switch Property',
                   onTap: () {
                     Navigator.pop(context);
                     _showSwitchHostelSheet(context);
@@ -43,10 +41,10 @@ class AppDrawer extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 _buildSectionLabel('MANAGEMENT'),
-                _buildInteractiveMenuItem(
-                  context,
-                  icon: Icons.people_alt_rounded,
-                  title: 'Staff Management',
+                _buildPremiumMenuItem(
+                  context, 
+                  Icons.people_alt_rounded, 
+                  'Staff Management',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -55,11 +53,10 @@ class AppDrawer extends StatelessWidget {
                     );
                   },
                 ),
-                _buildInteractiveMenuItem(
-                  context,
-                  icon: Icons.insights_rounded,
-                  title: 'Financial Insights',
-                  isElevated: true,
+                _buildPremiumMenuItem(
+                  context, 
+                  Icons.insights_rounded, 
+                  'Financial Insights',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -73,18 +70,18 @@ class AppDrawer extends StatelessWidget {
                     );
                   },
                 ),
-                _buildInteractiveMenuItem(context, icon: Icons.verified_user_rounded, title: 'Privacy & Policy'),
-                _buildInteractiveMenuItem(context, icon: Icons.help_rounded, title: 'Help & Support'),
-                _buildInteractiveMenuItem(context, icon: Icons.chat_bubble_rounded, title: 'Feedback'),
+                _buildPremiumMenuItem(context, Icons.verified_user_rounded, 'Privacy & Policy'),
+                _buildPremiumMenuItem(context, Icons.help_rounded, 'Help & Support'),
+                _buildPremiumMenuItem(context, Icons.chat_bubble_rounded, 'Feedback'),
                 
-                SizedBox(height: 24.h),
+                SizedBox(height: 32.h),
                 _buildSectionLabel('APPLICATION'),
-                _buildInteractiveMenuItem(context, icon: Icons.share_rounded, title: 'Share App'),
-                _buildInteractiveMenuItem(context, icon: Icons.menu_book_rounded, title: 'User Manual'),
-                _buildInteractiveMenuItem(context, icon: Icons.info_outline_rounded, title: 'Version 1.0.0'),
+                _buildPremiumMenuItem(context, Icons.share_rounded, 'Share App'),
+                _buildPremiumMenuItem(context, Icons.menu_book_rounded, 'User Manual'),
+                _buildPremiumMenuItem(context, Icons.info_outline_rounded, 'Version 1.0.0'),
                 
                 SizedBox(height: 40.h),
-                _buildPremiumLogout(context),
+                _buildLogoutButton(context),
               ],
             ),
           ),
@@ -93,10 +90,12 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildPremiumHeader(BuildContext context) {
+  Widget _buildGradientHeader(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
+      buildWhen: (previous, current) => previous != current,
       builder: (context, authState) {
         return BlocBuilder<HostelCubit, HostelState>(
+          buildWhen: (previous, current) => previous != current,
           builder: (context, hostelState) {
             String name = 'Owner';
             String phone = '';
@@ -113,113 +112,65 @@ class AppDrawer extends StatelessWidget {
             }
 
             return Container(
+              padding: EdgeInsets.fromLTRB(20.w, 44.h, 20.w, 24.h), // Reduced vertical
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+                color: const Color(0xFF0F172A), // Professional slate instead of gradient
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)), // Reduced from 32
               ),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 32.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(4.r),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: const Color(0xFFFF7A00).withValues(alpha: 0.5), width: 2),
-                              boxShadow: [
-                                BoxShadow(color: const Color(0xFFFF7A00).withValues(alpha: 0.2), blurRadius: 10, spreadRadius: 2)
-                              ],
-                            ),
-                            child: CustomAvatar(
-                              imageUrl: imageUrl,
-                              name: name,
-                              size: 56.0,
-                              isCircle: true,
-                              fontSize: 22.sp,
-                            ),
-                          ),
-                          BouncingWrapper(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              padding: EdgeInsets.all(8.r),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.close_rounded, size: 20.sp, color: Colors.white),
-                            ),
-                          ),
-                        ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: EdgeInsets.all(6.r),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.close_rounded, size: 18.sp, color: Colors.white),
                       ),
-                      SizedBox(height: 20.h),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  name,
-                                  style: TextStyle(
-                                    fontSize: 20.sp,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                                SizedBox(height: 4.h),
-                                Text(
-                                  phone,
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      CustomAvatar(
+                        imageUrl: imageUrl,
+                        name: name,
+                        size: 52.0, // Reduced from 72
+                        isCircle: true,
+                        fontSize: 20.sp,
+                      ),
+                      SizedBox(width: 14.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 16.sp, // Reduced from 22
+                                fontWeight: FontWeight.w700, // Reduced from 900
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF7A00),
-                              borderRadius: BorderRadius.circular(12.r),
+                            SizedBox(height: 1.h),
+                            Text(
+                              phone,
+                              style: TextStyle(
+                                fontSize: 12.sp, // Reduced from 15
+                                color: Colors.white.withValues(alpha: 0.5),
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.edit_rounded, size: 12.sp, color: Colors.white),
-                                SizedBox(width: 4.w),
-                                Text(
-                                  'Edit',
-                                  style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.w900),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
             );
           },
@@ -230,125 +181,96 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildSectionLabel(String label) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
+      padding: EdgeInsets.only(left: 4.w, bottom: 12.h), // Reduced
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w900,
+          fontSize: 11.sp, // Reduced from 13
+          fontWeight: FontWeight.w700,
           color: const Color(0xFF94A3B8),
-          letterSpacing: 1.2,
+          letterSpacing: 0.5,
         ),
       ),
     );
   }
 
-  Widget _buildInteractiveMenuItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    bool isHighlighted = false,
-    bool isElevated = false,
-    VoidCallback? onTap,
-  }) {
-    return BouncingWrapper(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        if (onTap != null) {
-          onTap();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$title is coming soon!')),
-          );
-        }
-      },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 12.h),
-        padding: EdgeInsets.all(16.r),
-        decoration: BoxDecoration(
-          color: isHighlighted ? const Color(0xFFFFF7ED) : Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: isHighlighted ? const Color(0xFFFFE4C4) : const Color(0xFFF1F5F9),
-            width: 1,
-          ),
-          boxShadow: isElevated
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  )
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  )
-                ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.r),
-              decoration: BoxDecoration(
-                color: isHighlighted ? const Color(0xFFFF7A00).withValues(alpha: 0.1) : const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Icon(
-                icon,
-                color: isHighlighted ? const Color(0xFFFF7A00) : const Color(0xFF64748B),
-                size: 20.sp,
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1E293B),
+  Widget _buildPremiumMenuItem(BuildContext context, IconData icon, String title, {VoidCallback? onTap}) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8.h), // Reduced from 12
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10.r), // Reduced from 20
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap ?? () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$title is coming soon!')),
+            );
+          },
+          borderRadius: BorderRadius.circular(10.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h), // Reduced vertical
+            child: Row(
+              children: [
+                Icon(icon, color: const Color(0xFF64748B), size: 18.sp), // Reduced size
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14.sp, // Reduced from 16
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
                 ),
-              ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: const Color(0xFFCBD5E1),
+                  size: 10.sp,
+                ),
+              ],
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: const Color(0xFFCBD5E1),
-              size: 20.sp,
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPremiumLogout(BuildContext context) {
-    return BouncingWrapper(
-      onTap: () => _handleLogout(context),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16.h),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFEF2F2),
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFFEE2E2)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.logout_rounded, color: const Color(0xFFEF4444), size: 20.sp),
-            SizedBox(width: 12.w),
-            Text(
-              'Sign Out',
-              style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w900,
-                color: const Color(0xFFEF4444),
-                letterSpacing: 0.5,
-              ),
+  Widget _buildLogoutButton(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 12.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF2F2),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: const Color(0xFFFEE2E2)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _handleLogout(context),
+          borderRadius: BorderRadius.circular(10.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h), // Reduced from 18
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.logout_rounded, color: const Color(0xFFEF4444), size: 18.sp),
+                SizedBox(width: 8.w),
+                Text(
+                  'Logout',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFEF4444),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -358,22 +280,18 @@ class AppDrawer extends StatelessWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('Sign Out', style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
-        content: Text('Are you sure you want to sign out of your account?', style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.w500)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w700)),
+            child: const Text('Cancel'),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-              elevation: 0,
-            ),
-            child: const Text('Sign Out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -390,14 +308,15 @@ class AppDrawer extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => BlocBuilder<HostelCubit, HostelState>(
+        buildWhen: (previous, current) => previous != current,
         builder: (context, state) {
           if (state is! HostelLoaded) return const SizedBox.shrink();
           
           return Container(
-            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
+            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h), // Reduced
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)), // Reduced from 32
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -405,25 +324,24 @@ class AppDrawer extends StatelessWidget {
               children: [
                 Center(
                   child: Container(
-                    width: 40.w,
-                    height: 4.h,
+                    width: 32.w,
+                    height: 3.h,
                     decoration: BoxDecoration(
                       color: const Color(0xFFE2E8F0),
-                      borderRadius: BorderRadius.circular(2.r),
+                      borderRadius: BorderRadius.circular(1.5.r),
                     ),
                   ),
                 ),
-                SizedBox(height: 24.h),
+                SizedBox(height: 20.h),
                 Text(
                   'Switch Property',
                   style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF0F172A),
-                    letterSpacing: -0.5,
+                    fontSize: 16.sp, // Reduced from 20
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
                   ),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 12.h),
                 ConstrainedBox(
                   constraints: BoxConstraints(maxHeight: 0.5.sh),
                   child: ListView.builder(
@@ -434,62 +352,51 @@ class AppDrawer extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final hostel = state.hostels[index];
                       final isSelected = index == state.selectedHostelIndex;
-                      return BouncingWrapper(
-                        onTap: () {
-                          context.read<HostelCubit>().selectHostel(index);
-                          Navigator.pop(context);
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: EdgeInsets.only(bottom: 12.h),
-                          padding: EdgeInsets.all(16.r),
-                          decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFFFFF7ED) : Colors.white,
-                            border: Border.all(
-                              color: isSelected ? const Color(0xFFFF7A00) : const Color(0xFFE2E8F0),
-                              width: isSelected ? 2 : 1,
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 8.h),
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFFF1F5F9) : Colors.white,
+                          border: Border.all(
+                            color: isSelected ? AppColors.primaryBlue : const Color(0xFFE2E8F0),
+                          ),
+                          borderRadius: BorderRadius.circular(10.r), // Reduced from 16
+                        ),
+                        child: ListTile(
+                          onTap: () {
+                            context.read<HostelCubit>().selectHostel(index);
+                            Navigator.pop(context);
+                          },
+                          dense: true,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                          leading: Container(
+                            padding: EdgeInsets.all(8.r),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.primaryBlue : const Color(0xFFF1F5F9),
+                              shape: BoxShape.circle,
                             ),
-                            borderRadius: BorderRadius.circular(16.r),
+                            child: Icon(
+                              Icons.apartment_rounded, 
+                              color: isSelected ? Colors.white : const Color(0xFF64748B),
+                              size: 18.sp,
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(10.r),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? const Color(0xFFFF7A00).withValues(alpha: 0.1) : const Color(0xFFF8FAFC),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.apartment_rounded, 
-                                  color: isSelected ? const Color(0xFFFF7A00) : const Color(0xFF64748B),
-                                  size: 20.sp,
-                                ),
-                              ),
-                              SizedBox(width: 16.w),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      hostel.name,
-                                      style: TextStyle(
-                                        fontSize: 15.sp,
-                                        fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-                                        color: isSelected ? const Color(0xFFFF7A00) : const Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (isSelected)
-                                Icon(Icons.check_circle_rounded, color: const Color(0xFFFF7A00), size: 22.sp),
-                            ],
+                          title: Text(
+                            hostel.name,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected ? AppColors.primaryBlue : AppColors.darkText,
+                            ),
                           ),
+                          trailing: isSelected 
+                              ? Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 20.sp) 
+                              : null,
                         ),
                       );
                     },
                   ),
                 ),
+                SizedBox(height: 12.h),
               ],
             ),
           );

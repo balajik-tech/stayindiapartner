@@ -73,4 +73,20 @@ abstract class CommunityRepository {
     required String description,
     String severity = 'HIGH',
   });
+
+  // Social Feed Methods
+  Future<List<SocialPostEntity>> getSocialFeed({int limit = 20, int skip = 0});
+  Future<SocialPostEntity> createSocialPost({
+    String? communityId, 
+    required String content, 
+    String type = 'POST',
+    String? imagePath,
+    List<String>? pollOptions,
+    Map<String, dynamic>? location,
+  });
+  Future<void> togglePostLike(String postId);
+  Future<List<Map<String, dynamic>>> getPostComments(String postId, {int limit = 20, int skip = 0});
+  Future<void> addPostComment(String postId, String text);
+  Future<void> votePoll(String postId, int optionIndex);
+  Future<void> deleteSocialPost(String postId);
 }

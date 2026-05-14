@@ -40,6 +40,7 @@ abstract class AuthRemoteDataSource {
     required String platform,
     String? deviceId,
   });
+  Future<OwnerModel> acceptPolicy({String version = '1.0'});
 }
 
 
@@ -262,6 +263,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (response.statusCode != 200) {
       throw ServerException(message: 'Failed to update device token');
     }
+  }
+
+  @override
+  Future<OwnerModel> acceptPolicy({String version = '1.0'}) async {
+    AppLogger.info('Accepting policy: $version');
+    final response = await _dio.post(
+      ApiConstants.userAcceptPolicy,
+      data: {'version': version},
+    );
+    if (response.statusCode == 200) {
+      final ownerJson = _extractOwnerJson(response.data);
+      return OwnerModel.fromJson(ownerJson);
+    }
+    throw ServerException(
+      message: 'Failed to accept policy.',
+      statusCode: response.statusCode,
+    );
   }
 
   

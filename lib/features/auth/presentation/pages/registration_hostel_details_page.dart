@@ -14,15 +14,17 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import '../widgets/auth_widgets.dart';
 import 'registration_hostel_images_page.dart';
 
-
 class RegistrationHostelDetailsPage extends StatefulWidget {
   const RegistrationHostelDetailsPage({super.key});
 
   @override
-  State<RegistrationHostelDetailsPage> createState() => _RegistrationHostelDetailsPageState();
+  State<RegistrationHostelDetailsPage> createState() =>
+      _RegistrationHostelDetailsPageState();
 }
 
-class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetailsPage> with SingleTickerProviderStateMixin {
+class _RegistrationHostelDetailsPageState
+    extends State<RegistrationHostelDetailsPage>
+    with SingleTickerProviderStateMixin {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _areaController = TextEditingController();
@@ -36,7 +38,7 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
   String _pincode = '';
   String _village = '';
   late final LocationCubit _locationCubit;
-  
+
   late final AnimationController _animController;
   late final Animation<double> _fadeAnimation;
 
@@ -48,7 +50,10 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _fadeAnimation = CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic);
+    _fadeAnimation = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutCubic,
+    );
     _animController.forward();
   }
 
@@ -61,8 +66,7 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
     _stateController.dispose();
     _floorsController.dispose();
     _animController.dispose();
-    
-    
+
     _locationCubit.close();
     super.dispose();
   }
@@ -76,7 +80,7 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
       _stateController.text = state.state;
       _district = state.district;
       _pincode = state.pincode;
-      _village = state.city; 
+      _village = state.city; // Using city as village if not specified
     });
   }
 
@@ -92,7 +96,9 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
         SnackBar(
           content: const Text('Please fill all required fields'),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.r),
+          ),
           backgroundColor: Colors.red.shade400,
         ),
       );
@@ -108,20 +114,20 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
     }
 
     context.read<HostelCubit>().createHostel(
-          name: _nameController.text,
-          address: _addressController.text,
-          city: _cityController.text,
-          stateName: _stateController.text,
-          area: _areaController.text,
-          district: _district,
-          pincode: _pincode,
-          village: _village.isNotEmpty ? _village : _cityController.text,
-          floors: int.tryParse(_floorsController.text) ?? 1,
-          hostelType: _selectedHostelType,
-          propertyTag: _selectedPropertyTag,
-          lat: lat,
-          lng: lng,
-        );
+      name: _nameController.text,
+      address: _addressController.text,
+      city: _cityController.text,
+      stateName: _stateController.text,
+      area: _areaController.text,
+      district: _district,
+      pincode: _pincode,
+      village: _village.isNotEmpty ? _village : _cityController.text,
+      floors: int.tryParse(_floorsController.text) ?? 1,
+      hostelType: _selectedHostelType,
+      propertyTag: _selectedPropertyTag,
+      lat: lat,
+      lng: lng,
+    );
   }
 
   @override
@@ -143,7 +149,8 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RegistrationHostelImagesPage(hostelId: hostelId),
+                        builder: (context) =>
+                            RegistrationHostelImagesPage(hostelId: hostelId),
                       ),
                     );
                   }
@@ -153,7 +160,9 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
                       content: Text(state.message, style: GoogleFonts.outfit()),
                       backgroundColor: Colors.red.shade400,
                       behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                     ),
                   );
                 }
@@ -169,7 +178,9 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
                       content: Text(state.message, style: GoogleFonts.outfit()),
                       backgroundColor: Colors.red.shade400,
                       behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                     ),
                   );
                 }
@@ -182,7 +193,10 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 8.h,
+                    ),
                     child: FadeTransition(
                       opacity: _fadeAnimation,
                       child: Column(
@@ -239,11 +253,19 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 14),
+              const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.black,
+                size: 14,
+              ),
               SizedBox(width: 6.w),
               Text(
                 'Back',
-                style: GoogleFonts.outfit(color: Colors.black, fontSize: 14.sp, fontWeight: FontWeight.w600),
+                style: GoogleFonts.outfit(
+                  color: Colors.black,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -310,14 +332,20 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
         final isFetched = state is LocationFetched;
 
         return BouncingWrapper(
-          onTap: isFetching ? null : () => _locationCubit.fetchCurrentLocation(),
+          onTap: isFetching
+              ? null
+              : () => _locationCubit.fetchCurrentLocation(),
           child: Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: isFetched ? Colors.green.shade50 : AppColors.primaryBlue.withValues(alpha: 0.05),
+              color: isFetched
+                  ? Colors.green.shade50
+                  : AppColors.primaryBlue.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
-                color: isFetched ? Colors.green.shade200 : AppColors.primaryBlue.withValues(alpha: 0.1),
+                color: isFetched
+                    ? Colors.green.shade200
+                    : AppColors.primaryBlue.withValues(alpha: 0.1),
               ),
             ),
             child: Row(
@@ -325,17 +353,27 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
                 Container(
                   padding: EdgeInsets.all(12.w),
                   decoration: BoxDecoration(
-                    color: isFetched ? Colors.green.shade100 : AppColors.primaryBlue.withValues(alpha: 0.1),
+                    color: isFetched
+                        ? Colors.green.shade100
+                        : AppColors.primaryBlue.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: isFetching
                       ? SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue))
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryBlue,
+                          ),
+                        )
                       : Icon(
-                          isFetched ? Icons.check_circle_rounded : Icons.my_location_rounded,
-                          color: isFetched ? Colors.green.shade700 : AppColors.primaryBlue,
+                          isFetched
+                              ? Icons.check_circle_rounded
+                              : Icons.my_location_rounded,
+                          color: isFetched
+                              ? Colors.green.shade700
+                              : AppColors.primaryBlue,
                           size: 24.sp,
                         ),
                 ),
@@ -349,21 +387,31 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w800,
-                          color: isFetched ? Colors.green.shade900 : AppColors.darkText,
+                          color: isFetched
+                              ? Colors.green.shade900
+                              : AppColors.darkText,
                         ),
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        isFetched ? 'Tap to re-detect' : 'Auto-fill address using GPS',
+                        isFetched
+                            ? 'Tap to re-detect'
+                            : 'Auto-fill address using GPS',
                         style: TextStyle(
                           fontSize: 13.sp,
-                          color: isFetched ? Colors.green.shade700 : AppColors.greyText,
+                          color: isFetched
+                              ? Colors.green.shade700
+                              : AppColors.greyText,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade400, size: 14),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.grey.shade400,
+                  size: 14,
+                ),
               ],
             ),
           ),
@@ -452,7 +500,10 @@ class _RegistrationHostelDetailsPageState extends State<RegistrationHostelDetail
                   DropdownMenuItem(value: 'PG', child: Text('PG')),
                   DropdownMenuItem(value: 'BOYS', child: Text('Boys Hostel')),
                   DropdownMenuItem(value: 'GIRLS', child: Text('Girls Hostel')),
-                  DropdownMenuItem(value: 'CO_LIVING', child: Text('Co-Living')),
+                  DropdownMenuItem(
+                    value: 'CO_LIVING',
+                    child: Text('Co-Living'),
+                  ),
                 ],
                 onChanged: (val) => setState(() => _selectedPropertyTag = val!),
               ),
