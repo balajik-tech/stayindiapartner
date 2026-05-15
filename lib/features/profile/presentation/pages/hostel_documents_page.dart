@@ -129,10 +129,17 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
 
   Widget _buildDocumentCard(dynamic doc) {
     String title = doc.licenseType.toString().replaceAll('_', ' ').toUpperCase();
-    if (doc.licenseType == 'fssai') title = 'FSSAI License';
+    if (doc.licenseType == 'fssai') title = 'Food License (FSSAI)';
+    if (doc.licenseType == 'hostel_license') title = 'Hostel / PG License';
     if (doc.licenseType == 'trade_license') title = 'Trade License';
     if (doc.licenseType == 'fire_safety') title = 'Fire Safety Certificate';
     if (doc.licenseType == 'police_noc') title = 'Police NOC';
+    if (doc.licenseType == 'shops_establishment') title = 'Shops & Establishment';
+    if (doc.licenseType == 'gst_registration') title = 'GST Registration';
+    if (doc.licenseType == 'health_sanitation') title = 'Health & Sanitation NOC';
+    if (doc.licenseType == 'commercial_utility') title = 'Commercial Utility Bill';
+    if (doc.licenseType == 'pollution_noc') title = 'Pollution Control NOC';
+    if (doc.licenseType == 'resident_verification') title = 'Resident Verification';
 
     return Container(
       padding: EdgeInsets.all(16.w),

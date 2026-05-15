@@ -156,26 +156,46 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
     String? districtId,
     String? wardId,
     String? localityId,
+    String? rules,
+    String? executiveRole,
+    String? fullName,
+    String? phoneNumber,
+    String? govtCertificatePath,
+    String? associationCertificatePath,
   }) async {
     final s = state;
+    List<CommunityDetailsEntity> joined = [];
+    List<CommunityDetailsEntity> available = [];
     if (s is OwnerCommunityLoaded) {
-      emit(s.copyWith(isCreating: true));
-      try {
-        await _create(
-          name: name,
-          description: description,
-          imagePath: imagePath,
-          coverImagePath: coverImagePath,
-          level: level,
-          stateId: stateId,
-          districtId: districtId,
-          wardId: wardId,
-          localityId: localityId,
-        );
-        await loadCommunities();
-      } catch (e) {
-        emit(OwnerCommunityError(message: ErrorHelper.toFriendlyMessage(e)));
-      }
+      joined = s.joinedCommunities;
+      available = s.availableCommunities;
+    }
+    emit(OwnerCommunityLoaded(
+      joinedCommunities: joined,
+      availableCommunities: available,
+      isCreating: true,
+    ));
+    try {
+      await _create(
+        name: name,
+        description: description,
+        imagePath: imagePath,
+        coverImagePath: coverImagePath,
+        level: level,
+        stateId: stateId,
+        districtId: districtId,
+        wardId: wardId,
+        localityId: localityId,
+        rules: rules,
+        executiveRole: executiveRole,
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+        govtCertificatePath: govtCertificatePath,
+        associationCertificatePath: associationCertificatePath,
+      );
+      await loadCommunities();
+    } catch (e) {
+      emit(OwnerCommunityError(message: ErrorHelper.toFriendlyMessage(e)));
     }
   }
 }

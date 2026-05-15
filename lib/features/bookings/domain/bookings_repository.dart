@@ -1,7 +1,7 @@
 import 'booking.dart';
 
 abstract class BookingsRepository {
-  Future<List<Booking>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType});
+  Future<List<Booking>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId});
   Future<List<PendingBooking>> getPendingBookings({int page = 1, int limit = 10});
   Future<List<PendingBooking>> getConfirmedBookings({int page = 1, int limit = 10});
   Future<ScanBookingResponse> scanBooking(String token, {String? hostelId});

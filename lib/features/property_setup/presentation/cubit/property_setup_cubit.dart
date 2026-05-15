@@ -1,12 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:stayindia_owner/core/utils/image_utils.dart';
+import 'package:image_cropper/image_cropper.dart' as cropper;
 import '../../domain/usecases/setup_property_usecase.dart';
 import 'property_setup_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
+import 'package:stayindia_owner/core/utils/logger.dart';
 
 class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   final SetupPropertyUseCase setupPropertyUseCase;
@@ -65,10 +67,16 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     
     
     if (state.currentStep == 1) {
+      if (state.roomCategories.isEmpty) {
+        addRoomCategory();
+      }
+    }
+
+    if (state.currentStep == 2) {
       autoGenerateRooms();
     }
     
-    if (state.currentStep < 3) {
+    if (state.currentStep < 4) {
       emit(state.copyWith(currentStep: targetStep));
     }
   }
@@ -95,8 +103,8 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     emit(state.copyWith(address: address, lat: lat, lng: lng));
   }
 
-  void updateAddress(String address) {
-    emit(state.copyWith(address: address));
+  void updateDetailedAddress(String address) {
+    emit(state.copyWith(detailedAddress: address));
   }
 
   Future<void> updateCoordinates(double lat, double lng) async {
@@ -123,7 +131,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
         ));
       }
     } catch (e) {
-      
+      AppLogger.error('Error fetching address: $e');
     }
   }
 
@@ -143,26 +151,31 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     emit(state.copyWith(pincode: pincode));
   }
 
-  Future<void> pickImages() async {
+  Future<void> pickCategoryImage(String category, {ImageSource source = ImageSource.gallery}) async {
     try {
-      final List<XFile> pickedFiles = await _picker.pickMultiImage();
-      if (pickedFiles.isNotEmpty) {
-        final currentImages = List<String>.from(state.images);
-        
-        for (var file in pickedFiles) {
-          final croppedPath = await _cropImage(file.path);
-          if (croppedPath != null) {
-            currentImages.add(croppedPath);
-          } else {
-            
-            currentImages.add(file.path);
-          }
+      final XFile? pickedFile = await _picker.pickImage(source: source);
+      if (pickedFile != null) {
+        final croppedPath = await _cropImage(pickedFile.path);
+        if (croppedPath != null) {
+          final currentMap = Map<String, List<String>>.from(state.categorizedImages);
+          final currentImages = List<String>.from(currentMap[category] ?? []);
+          currentImages.add(croppedPath);
+          currentMap[category] = currentImages;
+          emit(state.copyWith(categorizedImages: currentMap));
         }
-        
-        emit(state.copyWith(images: currentImages));
       }
     } catch (e) {
-      
+      AppLogger.error('Error picking category image: $e');
+    }
+  }
+
+  void removeCategoryImage(String category, int index) {
+    final currentMap = Map<String, List<String>>.from(state.categorizedImages);
+    final currentImages = List<String>.from(currentMap[category] ?? []);
+    if (index >= 0 && index < currentImages.length) {
+      currentImages.removeAt(index);
+      currentMap[category] = currentImages;
+      emit(state.copyWith(categorizedImages: currentMap));
     }
   }
 
@@ -180,8 +193,41 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   }
 
   Future<String?> _cropImage(String path) async {
-    // TODO: Implement image cropping logic
-    return path;
+    try {
+      final croppedFile = await cropper.ImageCropper().cropImage(
+        sourcePath: path,
+        uiSettings: [
+          cropper.AndroidUiSettings(
+            toolbarTitle: 'Crop Image',
+            toolbarColor: const Color(0xFF1E3A8A),
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: cropper.CropAspectRatioPreset.original,
+            lockAspectRatio: false,
+            aspectRatioPresets: [
+              cropper.CropAspectRatioPreset.square,
+              cropper.CropAspectRatioPreset.ratio3x2,
+              cropper.CropAspectRatioPreset.original,
+              cropper.CropAspectRatioPreset.ratio4x3,
+              cropper.CropAspectRatioPreset.ratio16x9
+            ],
+          ),
+          cropper.IOSUiSettings(
+            title: 'Crop Image',
+            aspectRatioPresets: [
+              cropper.CropAspectRatioPreset.square,
+              cropper.CropAspectRatioPreset.ratio3x2,
+              cropper.CropAspectRatioPreset.original,
+              cropper.CropAspectRatioPreset.ratio4x3,
+              cropper.CropAspectRatioPreset.ratio16x9
+            ],
+          ),
+        ],
+      );
+      return croppedFile?.path;
+    } catch (e) {
+      AppLogger.error('Error cropping image: $e');
+      return null;
+    }
   }
 
   void removeImage(int index) {
@@ -214,7 +260,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
         if (type == 'resident') emit(state.copyWith(residentVerification: path));
       }
     } catch (e) {
-      
+      AppLogger.error('Error picking license: $e');
     }
   }
 
@@ -269,26 +315,32 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
         }
 
         
-        newRooms.add({
-          'roomNumber': roomNumber,
-          'floor': floor,
-          'sharingType': state.sharingType,
-          'roomType': state.roomType,
-          'features': {
-            'isAC': state.roomType == 'AC',
-            'hasGeyser': false,
-            'hasBalcony': false,
-            'hasAttachedWashroom': false,
-          },
-          'beds': List.generate(state.sharingType, (index) => {
-            'bedNumber': String.fromCharCode(65 + index), 
-            'status': 'FREE',
-          }),
-        });
+        newRooms.add(_createNewRoom(roomNumber, floor, 2, 'Non-AC', 'Medium'));
       }
     }
     
     emit(state.copyWith(rooms: newRooms));
+  }
+
+  Map<String, dynamic> _createNewRoom(String roomNumber, String floor, int sharing, String type, String size) {
+    final isAC = state.selectedAmenities.contains('ac');
+    return {
+      'roomNumber': roomNumber,
+      'floor': floor,
+      'sharingType': sharing,
+      'roomType': isAC ? 'AC' : 'Non-AC',
+      'roomSize': size,
+      'features': {
+        'isAC': isAC,
+        'hasGeyser': state.selectedAmenities.contains('geyser'),
+        'hasBalcony': state.selectedAmenities.contains('balcony'),
+        'hasAttachedWashroom': state.selectedAmenities.contains('washroom'),
+      },
+      'beds': List.generate(sharing, (index) => {
+        'bedNumber': String.fromCharCode(65 + index), 
+        'status': 'FREE',
+      }),
+    };
   }
 
   void addFloorLocally({required String floorName, required int roomCount}) {
@@ -320,6 +372,9 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     }
     
     room['features'] = features;
+
+    _autoAssignCategory(room);
+
     rooms[index] = room;
     
     emit(state.copyWith(rooms: rooms));
@@ -334,9 +389,29 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       'bedNumber': String.fromCharCode(65 + i),
       'status': 'FREE',
     });
+
+    _autoAssignCategory(room);
+
     rooms[index] = room;
     
     emit(state.copyWith(rooms: rooms));
+  }
+
+  void _autoAssignCategory(Map<String, dynamic> room) {
+    final isAC = room['features']?['isAC'] == true;
+    final sharing = room['sharingType'] ?? 2;
+    
+    final matchingCategory = state.roomCategories.firstWhere(
+      (cat) => cat['sharingType'] == sharing && cat['isAC'] == isAC,
+      orElse: () => {},
+    );
+
+    if (matchingCategory.isNotEmpty) {
+      room['categoryId'] = matchingCategory['id'];
+      room['roomSize'] = matchingCategory['roomSize'];
+    } else {
+      room['categoryId'] = null;
+    }
   }
 
   void cloneRoomSettings(int sourceIndex) {
@@ -398,6 +473,17 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     emit(state.copyWith(masterPricing: pricing));
   }
 
+  bool get isStepValid {
+    if (state.currentStep == 0) {
+      return state.hostelType.isNotEmpty && 
+             state.buildingName.trim().isNotEmpty && 
+             state.lat != null && 
+             state.lng != null;
+    }
+    // For other steps, we can add more specific logic if needed
+    return true;
+  }
+
   bool get isValidToFinish {
     
     if (state.buildingName.trim().isEmpty) {
@@ -417,34 +503,33 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       return false;
     }
 
-    
-    final Set<String> categoriesMissingPrice = {};
-    for (final room in state.rooms) {
-      final features = room['features'] as Map<String, dynamic>? ?? {};
-      final isAC = features['isAC'] ?? false;
-      final type = isAC ? 'AC' : 'Non-AC';
-      
-      final sharing = (room['sharingType'] ?? 2).toString();
-      final pricing = state.masterPricing[type] ?? {};
-      final config = pricing[sharing];
-      
-      double rent = 0.0;
-      double deposit = 0.0;
-      
-      if (config is Map) {
-        rent = double.tryParse(config['rent']?.toString() ?? '0.0') ?? 0.0;
-        deposit = double.tryParse(config['deposit']?.toString() ?? '0.0') ?? 0.0;
+    // Validate pricing for each defined category
+    final List<String> missingPricing = [];
+    for (int i = 0; i < state.roomCategories.length; i++) {
+      final cat = state.roomCategories[i];
+      final sharing = cat['sharingType'] ?? 2;
+      final type = (cat['isAC'] == true) ? 'AC' : 'Non-AC';
+      final label = 'Category ${i + 1} ($sharing Sharing - $type)';
+
+      final monthlyRent = cat['monthlyRent']?.toString().trim() ?? '';
+      final securityDeposit = cat['securityDeposit']?.toString().trim() ?? '';
+
+      final List<String> missing = [];
+      if (monthlyRent.isEmpty || (double.tryParse(monthlyRent) ?? 0) <= 0) {
+        missing.add('Monthly Rent');
       }
-      
-      
-      if (config == null || rent <= 0 || deposit < 0) {
-        categoriesMissingPrice.add('$sharing Sharing $type');
+      if (securityDeposit.isEmpty) {
+        missing.add('Security Deposit');
+      }
+
+      if (missing.isNotEmpty) {
+        missingPricing.add('$label: ${missing.join(", ")}');
       }
     }
 
-    if (categoriesMissingPrice.isNotEmpty) {
+    if (missingPricing.isNotEmpty) {
       emit(state.copyWith(
-        validationMessage: 'Missing or invalid pricing for: ${categoriesMissingPrice.join(", ")}'
+        validationMessage: 'Missing pricing for:\n${missingPricing.join("\n")}',
       ));
       return false;
     }
@@ -457,13 +542,45 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     if (state.isSaving) return;
     emit(state.copyWith(isSaving: true, error: null));
     try {
+      final roomsWithPricing = state.rooms.map((room) {
+        final r = Map<String, dynamic>.from(room);
+        final catId = r['categoryId'];
+        Map<String, dynamic> cat = state.roomCategories.firstWhere((c) => c['id'] == catId, orElse: () => {});
+        
+        if (cat.isEmpty && state.roomCategories.isNotEmpty) {
+          final isAC = (r['features'] as Map?)?['isAC'] == true;
+          final sharing = r['sharingType'] ?? 2;
+          cat = state.roomCategories.firstWhere(
+            (c) => c['sharingType'] == sharing && c['isAC'] == isAC, 
+            orElse: () => {}
+          );
+          if (cat.isEmpty) {
+            cat = state.roomCategories.first;
+          }
+        }
+
+        if (cat.isNotEmpty) {
+          r['rent'] = double.tryParse(cat['monthlyRent']?.toString() ?? '0') ?? 0.0;
+          r['deposit'] = double.tryParse(cat['securityDeposit']?.toString() ?? '0') ?? 0.0;
+          r['maintenance'] = double.tryParse(cat['maintenance']?.toString() ?? '0') ?? 0.0;
+          r['dailyRent'] = double.tryParse(cat['dailyRent']?.toString() ?? '0') ?? 0.0;
+        }
+        return r;
+      }).toList();
+
+      final allImages = [
+        ...state.images,
+        ...state.categorizedImages.values.expand((e) => e),
+      ];
+
       final hostel = await setupPropertyUseCase.execute(
         hostelId: state.hostelId,
         name: state.buildingName,
         address: state.address,
         floors: state.selectedFloors.length,
         amenities: state.selectedAmenities,
-        rooms: state.rooms,
+        rooms: roomsWithPricing,
+        roomCategories: state.roomCategories,
         masterPricing: state.masterPricing,
         lat: state.lat,
         lng: state.lng,
@@ -471,12 +588,21 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
         city: state.city,
         state: state.state,
         hostelType: state.hostelType,
-        images: state.images,
+        images: allImages,
+        pincode: state.pincode,
         foodLicense: state.foodLicense,
         hostelLicense: state.hostelLicense,
         tradeLicense: state.tradeLicense,
+        fireSafety: state.fireSafety,
+        policeNoc: state.policeNoc,
+        shopsEstablishment: state.shopsEstablishment,
+        gstRegistration: state.gstRegistration,
+        healthSanitation: state.healthSanitation,
+        utilityBill: state.utilityBill,
+        pollutionNoc: state.pollutionNoc,
+        residentVerification: state.residentVerification,
       );
-      emit(state.copyWith(isSaving: false, currentStep: 4, hostelId: hostel.id)); 
+      emit(state.copyWith(isSaving: false, currentStep: 5, hostelId: hostel.id));
     } catch (e) {
       emit(state.copyWith(isSaving: false, error: e.toString()));
     }
@@ -530,7 +656,23 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     } else {
       amenities.add(amenity);
     }
-    emit(state.copyWith(selectedAmenities: amenities));
+
+    final updatedRooms = state.rooms.map((room) {
+      final r = Map<String, dynamic>.from(room);
+      final features = Map<String, dynamic>.from(r['features'] ?? {});
+      if (amenity == 'AC / Cooler') {
+        features['isAC'] = amenities.contains('AC / Cooler');
+        r['roomType'] = amenities.contains('AC / Cooler') ? 'AC' : 'Non-AC';
+      } else if (amenity == 'Attached Balcony') {
+        features['hasBalcony'] = amenities.contains('Attached Balcony');
+      } else if (amenity == 'Geyser (Hot Water)') {
+        features['hasGeyser'] = amenities.contains('Geyser (Hot Water)');
+      }
+      r['features'] = features;
+      return r;
+    }).toList();
+
+    emit(state.copyWith(selectedAmenities: amenities, rooms: updatedRooms));
   }
 
   void removeRoomMaster(int index) {
@@ -545,6 +687,85 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     final masters = List<Map<String, dynamic>>.from(state.roomMasters);
     masters.add(master);
     emit(state.copyWith(roomMasters: masters));
+  }
+
+  void addRoomCategory() {
+    final categories = List<Map<String, dynamic>>.from(state.roomCategories);
+    categories.add({
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'sharingType': 2,
+      'isAC': false,
+      'roomSize': '',
+      'roomCount': 0,
+      'monthlyRent': '',
+      'dailyRent': '',
+      'securityDeposit': '',
+      'maintenance': '',
+      'dailyRentThresholdDays': '',
+    });
+    emit(state.copyWith(roomCategories: categories));
+  }
+
+  void updateRoomCategory(int index, Map<String, dynamic> data) {
+    final categories = List<Map<String, dynamic>>.from(state.roomCategories);
+    if (index >= 0 && index < categories.length) {
+      categories[index] = {...categories[index], ...data};
+      emit(state.copyWith(roomCategories: categories));
+    }
+  }
+
+  void removeRoomCategory(int index) {
+    final categories = List<Map<String, dynamic>>.from(state.roomCategories);
+    if (index >= 0 && index < categories.length) {
+      categories.removeAt(index);
+      emit(state.copyWith(roomCategories: categories));
+    }
+  }
+
+  int get assignedCategoryRooms {
+    return state.roomCategories.fold<int>(0, (sum, cat) => sum + (cat['roomCount'] as int? ?? 0));
+  }
+
+  Map<String, dynamic>? getCategoryPricing(String? categoryId) {
+    if (categoryId == null) return null;
+    final category = state.roomCategories.firstWhere((cat) => cat['id'] == categoryId, orElse: () => {});
+    if (category.isEmpty) return null;
+
+    final type = (category['isAC'] == true) ? 'AC' : 'Non-AC';
+    final sharing = (category['sharingType'] ?? 2).toString();
+    
+    final pricing = state.masterPricing[type] ?? {};
+    final config = pricing[sharing];
+    
+    if (config is Map<String, dynamic>) return config;
+    return null;
+  }
+
+  void assignCategoryToRoom(int roomIndex, String categoryId) {
+    final categories = state.roomCategories;
+    final category = categories.firstWhere((c) => c['id'] == categoryId, orElse: () => {});
+    if (category.isEmpty) return;
+
+    final rooms = List<Map<String, dynamic>>.from(state.rooms.map((r) => Map<String, dynamic>.from(r)));
+    final room = Map<String, dynamic>.from(rooms[roomIndex]);
+
+    room['categoryId'] = categoryId;
+    room['sharingType'] = category['sharingType'];
+    room['roomType'] = (category['isAC'] as bool) ? 'AC' : 'Non-AC';
+    room['roomSize'] = category['roomSize'];
+    
+    final features = Map<String, dynamic>.from(room['features'] ?? {});
+    features['isAC'] = category['isAC'];
+    room['features'] = features;
+
+    
+    room['beds'] = List.generate(category['sharingType'] as int, (i) => {
+      'bedNumber': String.fromCharCode(65 + i),
+      'status': 'FREE',
+    });
+
+    rooms[roomIndex] = room;
+    emit(state.copyWith(rooms: rooms));
   }
 
   @override

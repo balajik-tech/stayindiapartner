@@ -80,22 +80,18 @@ class SubscriptionPage extends StatelessWidget {
   }
 
   Widget _buildCurrentPlanCard(int usage, int limit, String plan) {
-    int totalPrice = usage * 2;
-    double progress = limit > 0 ? (usage / limit).clamp(0.0, 1.0) : 0.0;
-    Color progressColor = progress > 0.9 ? Colors.red : (progress > 0.7 ? Colors.orange : AppColors.primaryBlue);
-
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.primaryBlue.withValues(alpha: 0.3),
+          color: const Color(0xFF10B981).withValues(alpha: 0.3),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlue.withValues(alpha: 0.05),
+            color: const Color(0xFF10B981).withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -110,28 +106,28 @@ class SubscriptionPage extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
-                  '${(plan == 'free' && totalPrice > 0) ? 'PRO' : plan.toUpperCase()} Plan',
+                  'FREE TIER',
                   style: TextStyle(
-                    color: AppColors.primaryBlue,
+                    color: const Color(0xFF10B981),
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               Icon(
-                Icons.account_balance_wallet_outlined,
-                color: AppColors.primaryBlue,
+                Icons.check_circle_outline_rounded,
+                color: const Color(0xFF10B981),
                 size: 24.sp,
               ),
             ],
           ),
           SizedBox(height: 16.h),
           Text(
-            'Usage-Based Plan',
+            'Completely Free Plan',
             style: TextStyle(
               fontSize: 22.sp,
               fontWeight: FontWeight.bold,
@@ -143,11 +139,11 @@ class SubscriptionPage extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: '$totalPrice',
+                  text: '₹0',
                   style: TextStyle(
                     fontSize: 36.sp,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primaryBlue,
+                    color: const Color(0xFF10B981),
                   ),
                 ),
                 TextSpan(
@@ -174,7 +170,7 @@ class SubscriptionPage extends StatelessWidget {
                     style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    '$usage / $limit beds',
+                    '$usage beds (Unlimited)',
                     style: TextStyle(fontSize: 14.sp, color: AppColors.darkText, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -183,27 +179,26 @@ class SubscriptionPage extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4.r),
                 child: LinearProgressIndicator(
-                  value: progress,
+                  value: 1.0,
                   minHeight: 8.h,
                   backgroundColor: AppColors.greyText.withValues(alpha: 0.1),
-                  valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
                 ),
               ),
-              if (progress >= 0.9)
-                Padding(
-                  padding: EdgeInsets.only(top: 8.h),
-                  child: Text(
-                    'Capacity almost full! Upgrade to add more.',
-                    style: TextStyle(color: Colors.red, fontSize: 12.sp, fontWeight: FontWeight.w500),
-                  ),
+              Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: Text(
+                  'Active & fully unrestricted. Enjoy Stay India for free!',
+                  style: TextStyle(color: const Color(0xFF10B981), fontSize: 12.sp, fontWeight: FontWeight.w500),
                 ),
+              ),
             ],
           ),
 
           SizedBox(height: 24.h),
-          _buildFeatureRow('Unlimited properties'),
-          _buildFeatureRow('Prepaid capacity control'),
-          _buildFeatureRow('Billed based on total bed count'),
+          _buildFeatureRow('100% Free Forever'),
+          _buildFeatureRow('Unlimited properties & beds'),
+          _buildFeatureRow('Full SaaS Platform Access'),
           _buildFeatureRow('Priority 24/7 support'),
         ],
       ),
@@ -232,7 +227,6 @@ class SubscriptionPage extends StatelessWidget {
 
   Widget _buildHostelBillingRow(Hostel hostel) {
     int beds = hostel.totalBeds ?? 0;
-    int price = beds * 2;
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
@@ -249,7 +243,7 @@ class SubscriptionPage extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(Icons.business, color: AppColors.primaryBlue, size: 20.sp),
+            child: Icon(Icons.business, color: const Color(0xFF10B981), size: 20.sp),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -265,18 +259,18 @@ class SubscriptionPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$beds beds @ 2/bed',
+                  '$beds beds @ Free',
                   style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
                 ),
               ],
             ),
           ),
           Text(
-            '$price',
+            '₹0',
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: AppColors.darkText,
+              color: const Color(0xFF10B981),
             ),
           ),
         ],

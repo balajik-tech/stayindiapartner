@@ -17,6 +17,11 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthCubit>().state;
+    final owner = authState is AuthAuthenticated ? authState.owner : null;
+    final bool hasStaffPerm = owner?.hasPermission('staff') ?? true;
+    final bool hasReportsPerm = owner?.hasPermission('reports') ?? true;
+
     return Drawer(
       width: 0.88.sw,
       backgroundColor: const Color(0xFFF8F9FA),
@@ -35,41 +40,59 @@ class AppDrawer extends StatelessWidget {
                   Icons.swap_horiz_rounded, 
                   'Switch Property',
                   onTap: () {
+                    final authState = context.read<AuthCubit>().state;
+                    if (authState is AuthAuthenticated && authState.owner.role != 'owner') {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: Staff members cannot switch properties.')));
+                      return;
+                    }
                     Navigator.pop(context);
                     _showSwitchHostelSheet(context);
                   },
                 ),
                 SizedBox(height: 24.h),
-                _buildSectionLabel('MANAGEMENT'),
-                _buildPremiumMenuItem(
-                  context, 
-                  Icons.people_alt_rounded, 
-                  'Staff Management',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const StaffManagementPage()),
-                    );
-                  },
-                ),
-                _buildPremiumMenuItem(
-                  context, 
-                  Icons.insights_rounded, 
-                  'Financial Insights',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BlocProvider(
-                          create: (context) => sl<FinanceCubit>(),
-                          child: const FinancialDashboardPage(),
+                if (hasStaffPerm || hasReportsPerm)
+                  _buildSectionLabel('MANAGEMENT'),
+                if (hasStaffPerm)
+                  _buildPremiumMenuItem(
+                    context, 
+                    Icons.people_alt_rounded, 
+                    'Staff Management',
+                    onTap: () {
+                      final authState = context.read<AuthCubit>().state;
+                      if (authState is AuthAuthenticated && !authState.owner.hasPermission('staff')) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to manage staff.')));
+                        return;
+                      }
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const StaffManagementPage()),
+                      );
+                    },
+                  ),
+                if (hasReportsPerm)
+                  _buildPremiumMenuItem(
+                    context, 
+                    Icons.insights_rounded, 
+                    'Financial Insights',
+                    onTap: () {
+                      final authState = context.read<AuthCubit>().state;
+                      if (authState is AuthAuthenticated && !authState.owner.hasPermission('reports')) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to view financials.')));
+                        return;
+                      }
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BlocProvider(
+                            create: (context) => sl<FinanceCubit>(),
+                            child: const FinancialDashboardPage(),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
                 _buildPremiumMenuItem(context, Icons.verified_user_rounded, 'Privacy & Policy'),
                 _buildPremiumMenuItem(context, Icons.help_rounded, 'Help & Support'),
                 _buildPremiumMenuItem(context, Icons.chat_bubble_rounded, 'Feedback'),

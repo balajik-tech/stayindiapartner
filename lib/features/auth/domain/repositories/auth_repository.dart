@@ -1,8 +1,5 @@
 import '../entities/owner_entity.dart';
 
-
-
-
 abstract class AuthRepository {
   
   Future<String?> requestOtp(String phone);
@@ -26,4 +23,5 @@ abstract class AuthRepository {
     String? deviceId,
   });
   Future<OwnerEntity> acceptPolicy({String version = '1.0'});
+  Future<OwnerEntity> staffLogin(String phone, String password);
 }

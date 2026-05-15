@@ -38,7 +38,10 @@ class PropertySetupState extends Equatable {
   final String? utilityBill;
   final String? pollutionNoc;
   final String? residentVerification;
+  final String detailedAddress;
+  final Map<String, List<String>> categorizedImages;
   final List<Map<String, dynamic>> roomMasters;
+  final List<Map<String, dynamic>> roomCategories;
 
   const PropertySetupState({
     this.currentStep = 0,
@@ -50,7 +53,7 @@ class PropertySetupState extends Equatable {
     this.city = '',
     this.state = '',
     this.pincode = '',
-    this.hostelType = 'Co-ed',
+    this.hostelType = '',
     this.gstNumber = '',
     this.images = const [],
     this.selectedFloors = const [],
@@ -89,7 +92,18 @@ class PropertySetupState extends Equatable {
     this.utilityBill,
     this.pollutionNoc,
     this.residentVerification,
+    this.detailedAddress = '',
+    this.categorizedImages = const {
+      'Exterior': [],
+      'Reception': [],
+      'Rooms': [],
+      'Dining': [],
+      'Kitchen': [],
+      'Bathrooms': [],
+      'Balcony': [],
+    },
     this.roomMasters = const [],
+    this.roomCategories = const [],
   });
 
   PropertySetupState copyWith({
@@ -130,7 +144,10 @@ class PropertySetupState extends Equatable {
     String? utilityBill,
     String? pollutionNoc,
     String? residentVerification,
+    String? detailedAddress,
+    Map<String, List<String>>? categorizedImages,
     List<Map<String, dynamic>>? roomMasters,
+    List<Map<String, dynamic>>? roomCategories,
   }) {
     return PropertySetupState(
       currentStep: currentStep ?? this.currentStep,
@@ -170,7 +187,10 @@ class PropertySetupState extends Equatable {
       utilityBill: utilityBill ?? this.utilityBill,
       pollutionNoc: pollutionNoc ?? this.pollutionNoc,
       residentVerification: residentVerification ?? this.residentVerification,
+      detailedAddress: detailedAddress ?? this.detailedAddress,
+      categorizedImages: categorizedImages ?? this.categorizedImages,
       roomMasters: roomMasters ?? this.roomMasters,
+      roomCategories: roomCategories ?? this.roomCategories,
     );
   }
 
@@ -210,7 +230,10 @@ class PropertySetupState extends Equatable {
       'utilityBill': utilityBill,
       'pollutionNoc': pollutionNoc,
       'residentVerification': residentVerification,
+      'detailedAddress': detailedAddress,
+      'categorizedImages': categorizedImages,
       'roomMasters': roomMasters,
+      'roomCategories': roomCategories,
     };
   }
 
@@ -225,7 +248,7 @@ class PropertySetupState extends Equatable {
       city: json['city'] ?? '',
       state: json['state'] ?? '',
       pincode: json['pincode'] ?? '',
-      hostelType: json['hostelType'] ?? 'Co-ed',
+      hostelType: json['hostelType'] ?? '',
       gstNumber: json['gstNumber'] ?? '',
       images: List<String>.from(json['images'] ?? []),
       selectedFloors: List<String>.from(json['selectedFloors'] ?? []),
@@ -250,7 +273,14 @@ class PropertySetupState extends Equatable {
       utilityBill: json['utilityBill'],
       pollutionNoc: json['pollutionNoc'],
       residentVerification: json['residentVerification'],
+      detailedAddress: json['detailedAddress'] ?? '',
+      categorizedImages: Map<String, List<String>>.from(
+        (json['categorizedImages'] ?? {}).map(
+          (k, v) => MapEntry(k, List<String>.from(v)),
+        ),
+      ),
       roomMasters: List<Map<String, dynamic>>.from(json['roomMasters'] ?? []),
+      roomCategories: List<Map<String, dynamic>>.from(json['roomCategories'] ?? []),
     );
   }
 
@@ -292,6 +322,9 @@ class PropertySetupState extends Equatable {
         utilityBill,
         pollutionNoc,
         residentVerification,
+        detailedAddress,
+        categorizedImages,
         roomMasters,
+        roomCategories,
       ];
 }

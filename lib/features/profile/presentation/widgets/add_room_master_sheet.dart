@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
@@ -52,7 +53,6 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
   late TextEditingController _maintenanceController;
   late String _selectedType;
   late String _selectedSharingType;
-  late List<int> _selectedFloors;
 
   static const Map<String, String> _sharingTypeMap = {
     'SINGLE': 'Single Sharing',
@@ -92,14 +92,6 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
     _selectedType = (room?.roomType == 'NON-AC') ? 'NON-AC' : 'AC';
     _selectedSharingType = _sharingTypeMap[room?.sharingType] ?? _sharingTypes.first;
     
-    if (room != null && room.floors.isNotEmpty) {
-      _selectedFloors = List<int>.from(room.floors);
-    } else if (room != null) {
-      _selectedFloors = [room.floor];
-    } else {
-      _selectedFloors = [];
-    }
-
     _rentController.addListener(_onRentChanged);
   }
 
@@ -149,20 +141,23 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLabel('Room Type Name *'),
-                  _buildTextField(_nameController, hint: 'e.g. AC Double Sharing'),
-                  SizedBox(height: 20.h),
-                  
                   Row(
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildLabel('Sharing Type *'),
+                            _buildLabel('sharing_type_req'.tr()),
                             _buildDropdown(
                               value: _selectedSharingType,
                               items: _sharingTypes,
+                              displayLabels: {
+                                'Single Sharing': 'sharing_single'.tr(),
+                                '2 Sharing': 'sharing_double'.tr(),
+                                '3 Sharing': 'sharing_triple'.tr(),
+                                '4 Sharing': 'sharing_quad'.tr(),
+                                '5 Sharing': 'sharing_count'.tr(namedArgs: {'count': '5'}),
+                              },
                               onChanged: (val) => setState(() => _selectedSharingType = val!),
                             ),
                           ],
@@ -173,10 +168,14 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildLabel('Room Type *'),
+                            _buildLabel('room_type_req'.tr()),
                             _buildDropdown(
                               value: _selectedType,
                               items: _roomTypes,
+                              displayLabels: {
+                                'AC': 'amenity_ac'.tr(),
+                                'NON-AC': 'amenity_non_ac'.tr(),
+                              },
                               onChanged: (val) => setState(() => _selectedType = val!),
                             ),
                           ],
@@ -185,79 +184,15 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                     ],
                   ),
                   SizedBox(height: 24.h),
-
-                  _buildLabel('Select Floors *'),
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: AppColors.roomCardBorder),
-                    ),
-                    child: Wrap(
-                      spacing: 12.w,
-                      runSpacing: 12.h,
-                      children: List.generate(widget.totalFloors + 1, (index) {
-                        final isSelected = _selectedFloors.contains(index);
-                        return InkWell(
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                _selectedFloors.remove(index);
-                              } else {
-                                _selectedFloors.add(index);
-                              }
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                            decoration: BoxDecoration(
-                              color: isSelected ? AppColors.primaryBlue : Colors.white,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: isSelected ? AppColors.primaryBlue : AppColors.roomCardBorder,
-                              ),
-                              boxShadow: isSelected ? [
-                                BoxShadow(
-                                  color: AppColors.primaryBlue.withValues(alpha: 0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                )
-                              ] : null,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (isSelected) ...[
-                                  Icon(Icons.check_circle, color: Colors.white, size: 16.sp),
-                                  SizedBox(width: 6.w),
-                                ],
-                                Text(
-                                  index == 0 ? 'Ground' : '$index${_getOrdinal(index)} Floor',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                    color: isSelected ? Colors.white : AppColors.darkText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                  SizedBox(height: 24.h),
                   
-                  _buildLabel('Financial Details'),
+                  _buildLabel('financial_details'.tr()),
                   SizedBox(height: 12.h),
                   Row(
                     children: [
                       Expanded(
                         child: _buildTextField(
                           _rentController,
-                          label: 'Monthly Rent',
+                          label: 'monthly_rent'.tr(),
                           hint: '0',
                           keyboardType: TextInputType.number,
                         ),
@@ -266,7 +201,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                       Expanded(
                         child: _buildTextField(
                           _dailyRentController,
-                          label: 'Daily Rent',
+                          label: 'daily_rent'.tr(),
                           hint: '0',
                           keyboardType: TextInputType.number,
                         ),
@@ -279,7 +214,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                       Expanded(
                         child: _buildTextField(
                           _depositController,
-                          label: 'Deposit',
+                          label: 'deposit'.tr(),
                           hint: '0',
                           keyboardType: TextInputType.number,
                         ),
@@ -288,7 +223,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                       Expanded(
                         child: _buildTextField(
                           _maintenanceController,
-                          label: 'Maintenance',
+                          label: 'maintenance'.tr(),
                           hint: '0',
                           keyboardType: TextInputType.number,
                         ),
@@ -315,7 +250,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            isEditing ? 'Edit Room Master' : 'Add Room Master',
+            isEditing ? 'edit_room_master'.tr() : 'add_room_master'.tr(),
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
@@ -429,26 +364,6 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
         onPressed: _isSaving
             ? null
             : () async {
-                if (_nameController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter a room type name'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                if (_selectedFloors.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please select at least one floor'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
                 setState(() => _isSaving = true);
 
                 try {
@@ -463,12 +378,14 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                   final mappedSharingType =
                       sharingTypeMap[_selectedSharingType] ?? _selectedSharingType;
 
+                  final generatedRoomTypename = '$_selectedSharingType $_selectedType';
+
                   if (!isEditing) {
                     final roomState = context.read<RoomCubit>().state;
                     if (roomState is RoomLoaded) {
                       final exists = roomState.rooms.any((room) =>
                           room.isMaster &&
-                          room.roomTypename == _nameController.text.trim());
+                          room.roomTypename == generatedRoomTypename);
 
                       if (exists) {
                         if (mounted) {
@@ -476,7 +393,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content:
-                                  Text('Room master with this name already exists.'),
+                                  Text('Room master with this type already exists.'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -487,9 +404,9 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                   }
 
                   await widget.onSave({
-                    'roomTypename': _nameController.text.trim(),
-                    'floors': List<int>.from(_selectedFloors),
-                    'floor': _selectedFloors.first,
+                    'roomTypename': generatedRoomTypename,
+                    'floors': const [0],
+                    'floor': 0,
                     'sharingType': mappedSharingType,
                     'roomType': _selectedType,
                     'rent': double.tryParse(_rentController.text) ?? 0,
@@ -533,7 +450,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                 ),
               )
             : Text(
-                isEditing ? 'Update Room Master' : 'Add Room Master',
+                isEditing ? 'edit_room_master'.tr() : 'add_room_master'.tr(),
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -543,13 +460,4 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
     );
   }
 
-  String _getOrdinal(int n) {
-    if (n >= 11 && n <= 13) return 'th';
-    switch (n % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
-    }
-  }
 }

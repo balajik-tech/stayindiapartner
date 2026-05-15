@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/widgets/bed_card.dart';
 
 class RoomConfigScreen extends StatefulWidget {
   const RoomConfigScreen({super.key});
@@ -34,7 +35,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildSectionHeader('Room Config', 'Customize features for each room.'),
+                  _buildSectionHeader('Room Master', 'Customize features for each room.'),
                   BouncingWrapper(
                     onTap: () {
                       HapticFeedback.mediumImpact();
@@ -43,20 +44,20 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF7ED),
+                        color: const Color(0xFFEDF2F7),
                         borderRadius: BorderRadius.circular(20.r),
-                        border: Border.all(color: const Color(0xFFFFE4C4)),
+                        border: Border.all(color: const Color(0xFF2B5797).withValues(alpha: 0.3)),
                         boxShadow: [
-                          BoxShadow(color: const Color(0xFFFF7A00).withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))
+                          BoxShadow(color: const Color(0xFF2B5797).withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))
                         ],
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.copy_all_rounded, color: const Color(0xFFFF7A00), size: 16.sp),
+                          Icon(Icons.copy_all_rounded, color: const Color(0xFF2B5797), size: 16.sp),
                           SizedBox(width: 6.w),
                           Text(
                             'CLONE FIRST',
-                            style: TextStyle(color: const Color(0xFFFF7A00), fontSize: 10.sp, fontWeight: FontWeight.w900),
+                            style: TextStyle(color: const Color(0xFF2B5797), fontSize: 10.sp, fontWeight: FontWeight.w900),
                           ),
                         ],
                       ),
@@ -94,7 +95,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFF2B5797),
             letterSpacing: -0.5,
           ),
         ),
@@ -140,47 +141,15 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
   }
 
   Widget _buildRoomCard(BuildContext context, int index, Map<String, dynamic> room) {
+    final state = context.watch<PropertySetupCubit>().state;
+    final categories = state.roomCategories;
     final features = room['features'] as Map<String, dynamic>? ?? {};
 
     return _PremiumCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 36.w,
-                    height: 36.w,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Icon(Icons.door_front_door_rounded, size: 18.sp, color: const Color(0xFF64748B)),
-                  ),
-                  SizedBox(width: 12.w),
-                  Text(
-                    'Room ${room['roomNumber']}',
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)),
-                  ),
-                ],
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: Text(
-                  'FLOOR ${room['floor']}',
-                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8)),
-                ),
-              ),
-            ],
-          ),
+          _buildRoomHeader(context, index, room, categories),
           SizedBox(height: 20.h),
           Text(
             'SHARING TYPE',
@@ -230,36 +199,56 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           ),
           SizedBox(height: 12.h),
           Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
+            spacing: 10.w,
+            runSpacing: 10.h,
             children: (room['beds'] as List).map((bed) {
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF7ED),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: const Color(0xFFFFE4C4)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.single_bed_rounded, size: 16.sp, color: const Color(0xFFFF7A00)),
-                    SizedBox(width: 6.w),
-                    Text(
-                      'Bed ${bed['bedNumber']}',
-                      style: TextStyle(
-                        color: const Color(0xFFFF7A00),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
+              return BedCard(
+                bedNumber: bed['bedNumber']?.toString() ?? '1',
+                status: 'FREE',
+                onTap: () {},
               );
             }).toList(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRoomHeader(BuildContext context, int index, Map<String, dynamic> room, List<Map<String, dynamic>> categories) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(Icons.door_front_door_rounded, size: 18.sp, color: const Color(0xFF64748B)),
+            ),
+            SizedBox(width: 12.w),
+            Text(
+              'Room ${room['roomNumber']}',
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)),
+            ),
+          ],
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Text(
+            'FLOOR ${room['floor']}',
+            style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8)),
+          ),
+        ),
+      ],
     );
   }
 
@@ -271,7 +260,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
-        children: [1, 2, 3, 4].map((s) {
+        children: [1, 2, 3, 4, 5].map((s) {
           final isSelected = selected == s;
           return Expanded(
             child: GestureDetector(
@@ -296,10 +285,10 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                       : null,
                 ),
                 child: Text(
-                  s == 1 ? 'Single' : (s == 2 ? 'Double' : (s == 3 ? 'Triple' : 'Quad')),
+                  s == 1 ? 'Single' : (s == 2 ? 'Double' : (s == 3 ? 'Triple' : (s == 4 ? 'Quad' : 'Penta'))),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: isSelected ? const Color(0xFFFF7A00) : const Color(0xFF64748B),
+                    color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF64748B),
                     fontWeight: FontWeight.w800,
                     fontSize: 12.sp,
                   ),
@@ -324,23 +313,23 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
             duration: const Duration(milliseconds: 200),
             padding: EdgeInsets.all(12.r),
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFFFF7ED) : const Color(0xFFF8FAFC),
+              color: isSelected ? const Color(0xFFEDF2F7) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
-                color: isSelected ? const Color(0xFFFF7A00) : const Color(0xFFE2E8F0),
+                color: isSelected ? const Color(0xFF2B5797) : const Color(0xFFE2E8F0),
                 width: isSelected ? 2 : 1.5,
               ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: const Color(0xFFFF7A00).withValues(alpha: 0.1),
+                        color: const Color(0xFF2B5797).withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       )
                     ]
                   : null,
             ),
-            child: Icon(icon, color: isSelected ? const Color(0xFFFF7A00) : const Color(0xFF94A3B8), size: 24.sp),
+            child: Icon(icon, color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF94A3B8), size: 24.sp),
           ),
           SizedBox(height: 8.h),
           Text(
@@ -383,7 +372,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF7A00),
+                backgroundColor: const Color(0xFF2B5797),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 elevation: 0,
               ),

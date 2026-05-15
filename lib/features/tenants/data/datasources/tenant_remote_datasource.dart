@@ -7,8 +7,9 @@ abstract class TenantRemoteDataSource {
   Future<List<TenantModel>> getTenants({
     String status = 'CHECKED_IN',
     int page = 1,
-    int limit = 100,
+    int limit = 10,
     String? search,
+    String? hostelId,
   });
 
   Future<TenantDetailModel> getTenantDetail(String tenantId, String hostelId);
@@ -36,8 +37,9 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
   Future<List<TenantModel>> getTenants({
     String status = 'CHECKED_IN',
     int page = 1,
-    int limit = 100,
+    int limit = 10,
     String? search,
+    String? hostelId,
   }) async {
     AppLogger.info('Fetching tenants list | Status: $status, Search: $search');
     final response = await _dio.get(
@@ -47,6 +49,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
         'page': page,
         'limit': limit,
         if (search?.isNotEmpty == true) 'search': search,
+        if (hostelId?.isNotEmpty == true) 'hostelId': hostelId,
       },
     );
 

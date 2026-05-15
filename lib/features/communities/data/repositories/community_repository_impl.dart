@@ -91,6 +91,12 @@ class CommunityRepositoryImpl implements CommunityRepository {
     String? districtId,
     String? wardId,
     String? localityId,
+    String? rules,
+    String? executiveRole,
+    String? fullName,
+    String? phoneNumber,
+    String? govtCertificatePath,
+    String? associationCertificatePath,
   }) =>
       remote.createOwnerCommunity(
         name: name,
@@ -102,6 +108,12 @@ class CommunityRepositoryImpl implements CommunityRepository {
         districtId: districtId,
         wardId: wardId,
         localityId: localityId,
+        rules: rules,
+        executiveRole: executiveRole,
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+        govtCertificatePath: govtCertificatePath,
+        associationCertificatePath: associationCertificatePath,
       );
 
   @override
@@ -131,12 +143,14 @@ class CommunityRepositoryImpl implements CommunityRepository {
     required String communityId,
     String? name,
     String? description,
+    String? rules,
     String? imagePath,
     String? coverImagePath,
   }) => remote.updateOwnerCommunity(
     communityId: communityId,
     name: name,
     description: description,
+    rules: rules,
     imagePath: imagePath,
     coverImagePath: coverImagePath,
   );

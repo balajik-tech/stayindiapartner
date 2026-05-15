@@ -11,6 +11,9 @@ class GlobalActionSheet extends StatelessWidget {
     required VoidCallback onAddFloor,
     required VoidCallback onAddRoom,
     required VoidCallback onAddTenant,
+    required VoidCallback onRoomMaster,
+    required VoidCallback onGuestRequests,
+    bool isMultiSelect = false,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -21,6 +24,9 @@ class GlobalActionSheet extends StatelessWidget {
         onAddFloor: onAddFloor,
         onAddRoom: onAddRoom,
         onAddTenant: onAddTenant,
+        onRoomMaster: onRoomMaster,
+        onGuestRequests: onGuestRequests,
+        isMultiSelect: isMultiSelect,
       ),
     );
   }
@@ -36,6 +42,9 @@ class GlobalActionSheetContent extends StatelessWidget {
   final VoidCallback onAddFloor;
   final VoidCallback onAddRoom;
   final VoidCallback onAddTenant;
+  final VoidCallback onRoomMaster;
+  final VoidCallback onGuestRequests;
+  final bool isMultiSelect;
 
   const GlobalActionSheetContent({
     super.key,
@@ -43,25 +52,24 @@ class GlobalActionSheetContent extends StatelessWidget {
     required this.onAddFloor,
     required this.onAddRoom,
     required this.onAddTenant,
+    required this.onRoomMaster,
+    required this.onGuestRequests,
+    this.isMultiSelect = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 40.h),
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 40.h),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32.r),
           topRight: Radius.circular(32.r),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 30,
             offset: const Offset(0, -10),
           ),
@@ -75,15 +83,15 @@ class GlobalActionSheetContent extends StatelessWidget {
             width: 40.w,
             height: 4.h,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: const Color(0xFFE2E8F0),
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
-          SizedBox(height: 32.h),
+          SizedBox(height: 24.h),
           
           _buildActionItem(
             context,
-            icon: Icons.add_business_rounded,
+            icon: Icons.store_rounded,
             title: 'New Property',
             subtitle: 'Onboard your new hostel/PG',
             onTap: () {
@@ -91,39 +99,52 @@ class GlobalActionSheetContent extends StatelessWidget {
               onNewProperty();
             },
           ),
-          SizedBox(height: 16.h),
-          _buildActionItem(
-            context,
-            icon: Icons.layers_rounded,
-            title: 'Add New Floor',
-            subtitle: 'Expand your existing building',
-            onTap: () {
-              Navigator.pop(context);
-              onAddFloor();
-            },
-          ),
-          SizedBox(height: 16.h),
-          _buildActionItem(
-            context,
-            icon: Icons.meeting_room_rounded,
-            title: 'Add Room(s)',
-            subtitle: 'Increase capacity instantly',
-            onTap: () {
-              Navigator.pop(context);
-              onAddRoom();
-            },
-          ),
-          SizedBox(height: 16.h),
-          _buildActionItem(
-            context,
-            icon: Icons.person_add_rounded,
-            title: 'Add Tenant',
-            subtitle: 'Quick tenant check-in flow',
-            onTap: () {
-              Navigator.pop(context);
-              onAddTenant();
-            },
-          ),
+          if (!isMultiSelect) ...[
+            SizedBox(height: 12.h),
+            _buildActionItem(
+              context,
+              icon: Icons.layers_rounded,
+              title: 'Add New Floor and Rooms',
+              subtitle: 'Expand your existing building',
+              onTap: () {
+                Navigator.pop(context);
+                onAddFloor();
+              },
+            ),
+            SizedBox(height: 12.h),
+            _buildActionItem(
+              context,
+              icon: Icons.person_add_rounded,
+              title: 'Add Tenant',
+              subtitle: 'Quick tenant check-in flow',
+              onTap: () {
+                Navigator.pop(context);
+                onAddTenant();
+              },
+            ),
+            SizedBox(height: 12.h),
+            _buildActionItem(
+              context,
+              icon: Icons.door_front_door_rounded,
+              title: 'Room Master',
+              subtitle: 'Manage room types and pricing',
+              onTap: () {
+                Navigator.pop(context);
+                onRoomMaster();
+              },
+            ),
+            SizedBox(height: 12.h),
+            _buildActionItem(
+              context,
+              icon: Icons.group_add_rounded,
+              title: 'Guest Requests',
+              subtitle: 'Manage temporary guest stay requests',
+              onTap: () {
+                Navigator.pop(context);
+                onGuestRequests();
+              },
+            ),
+          ],
         ],
       ),
     );
@@ -142,21 +163,21 @@ class GlobalActionSheetContent extends StatelessWidget {
         onTap();
       },
       child: Container(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(24.r),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
         ),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(12.r),
+              padding: EdgeInsets.all(10.r),
               decoration: BoxDecoration(
-                color: const Color(0xFFFF7000).withValues(alpha: 0.15),
+                color: const Color(0xFFFF7000).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: const Color(0xFFFF7000), size: 24.sp),
+              child: Icon(icon, color: const Color(0xFFFF7000), size: 22.sp),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -166,8 +187,8 @@ class GlobalActionSheetContent extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
+                      color: const Color(0xFF1E293B),
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -175,15 +196,15 @@ class GlobalActionSheetContent extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 12.sp,
+                      color: const Color(0xFF64748B),
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withValues(alpha: 0.2), size: 14.sp),
+            Icon(Icons.chevron_right_rounded, color: const Color(0xFFCBD5E1), size: 20.sp),
           ],
         ),
       ),

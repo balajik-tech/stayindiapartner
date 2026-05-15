@@ -290,7 +290,7 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           Text(
-            'To create a transparent, standardized, and profitable ecosystem for the student housing and co-living industry in India.',
+            'To create a transparent, standardized, and profitable ecosystem for the accommodation and co-living industry in India.',
             style: GoogleFonts.dmSans(
               fontSize: 14.sp,
               color: AppColors.greyText,

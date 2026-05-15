@@ -27,11 +27,12 @@ class BookingsCubit extends Cubit<BookingsState> {
     required this.getOccupancyUseCase,
   }) : super(const BookingsState());
 
-  Future<void> fetchBookings({String? kycStatus, String? roomType}) async {
+  Future<void> fetchBookings({String? kycStatus, String? roomType, String? hostelId}) async {
     if (isClosed) return;
     
     final newKycStatus = kycStatus == null ? state.kycStatus : (kycStatus.isEmpty ? null : kycStatus);
     final newRoomType = roomType == null ? state.roomType : (roomType.isEmpty ? null : roomType);
+    final newHostelId = hostelId ?? state.hostelId;
 
     emit(state.copyWith(
       status: BookingsStatus.loading,
@@ -42,12 +43,14 @@ class BookingsCubit extends Cubit<BookingsState> {
       successMessage: null,
       kycStatus: kycStatus == null ? state.kycStatus : (kycStatus.isEmpty ? null : kycStatus),
       roomType: roomType == null ? state.roomType : (roomType.isEmpty ? null : roomType),
+      hostelId: newHostelId,
     ));
     try {
       final bookings = await getBookingsUseCase.execute(
         page: 1,
         kycStatus: newKycStatus,
         roomType: newRoomType,
+        hostelId: newHostelId,
       );
       if (isClosed) return;
       emit(state.copyWith(
@@ -76,6 +79,7 @@ class BookingsCubit extends Cubit<BookingsState> {
         page: nextPage,
         kycStatus: state.kycStatus,
         roomType: state.roomType,
+        hostelId: state.hostelId,
       );
       if (isClosed) return;
       emit(state.copyWith(
@@ -120,7 +124,11 @@ class BookingsCubit extends Cubit<BookingsState> {
   }
 
   Future<void> manualCheckin(String accessCode, {String? hostelId}) async {
-    emit(state.copyWith(status: BookingsStatus.loading));
+    emit(state.copyWith(
+      status: BookingsStatus.loading,
+      errorMessage: null,
+      successMessage: null,
+    ));
     try {
       final response = await scanBookingUseCase.execute(accessCode, hostelId: hostelId, isManual: true);
       emit(state.copyWith(
@@ -136,7 +144,11 @@ class BookingsCubit extends Cubit<BookingsState> {
   }
 
   Future<void> fetchOccupancy(String hostelId) async {
-    emit(state.copyWith(status: BookingsStatus.loading));
+    emit(state.copyWith(
+      status: BookingsStatus.loading,
+      errorMessage: null,
+      successMessage: null,
+    ));
     try {
       final summary = await getOccupancyUseCase(hostelId);
       emit(state.copyWith(
@@ -159,7 +171,11 @@ class BookingsCubit extends Cubit<BookingsState> {
     List<Map<String, String>>? documents,
   }) async {
     if (isClosed) return;
-    emit(state.copyWith(status: BookingsStatus.loading));
+    emit(state.copyWith(
+      status: BookingsStatus.loading,
+      errorMessage: null,
+      successMessage: null,
+    ));
     try {
       await finalizeCheckinUseCase.execute(
         bookingId: bookingId,

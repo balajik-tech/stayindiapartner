@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'core/theme/app_theme.dart';
 import 'features/navigation/presentation/pages/main_navigation_page.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
@@ -24,6 +25,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'core/theme/theme_cubit.dart';
 
 
 import 'core/services/notification_service.dart';
@@ -33,6 +35,7 @@ import 'injection_container.dart' as di;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: await getApplicationDocumentsDirectory(),
@@ -99,7 +102,20 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   
-  runApp(const StayIndiaOwnerApp());
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [
+        Locale('en'),
+        Locale('hi'),
+        Locale('te'),
+        Locale('ta'),
+        Locale('kn'),
+      ],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: const StayIndiaOwnerApp(),
+    ),
+  );
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -134,29 +150,38 @@ class StayIndiaOwnerApp extends StatelessWidget {
         BlocProvider(create: (context) => di.sl<CommunityCubit>()),
         BlocProvider(create: (context) => di.sl<OwnerCommunityCubit>()),
         BlocProvider(create: (context) => di.sl<AssociationCubit>()),
+        BlocProvider(create: (context) => di.sl<ThemeCubit>()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(390, 844),
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {
-          return BlocListener<AuthCubit, AuthState>(
-            listener: (context, state) {
-              if (state is AuthUnauthenticated) {
-                
-                navigatorKey.currentState?.popUntil((route) => route.isFirst);
-              }
+          return BlocBuilder<ThemeCubit, ThemeMode>(
+            builder: (context, themeMode) {
+              return BlocListener<AuthCubit, AuthState>(
+                listener: (context, state) {
+                  if (state is AuthUnauthenticated) {
+                    navigatorKey.currentState?.popUntil((route) => route.isFirst);
+                  }
+                },
+                child: MaterialApp(
+                  navigatorKey: navigatorKey,
+                  title: 'Stay India Owner',
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.lightTheme,
+                  darkTheme: AppTheme.darkTheme,
+                  themeMode: themeMode,
+                  localizationsDelegates: context.localizationDelegates,
+                  supportedLocales: context.supportedLocales,
+                  locale: context.locale,
+                  home: AuthGate(
+                    dashboard: const MainNavigationPage(),
+                    registration: const RegistrationPersonalPage(),
+                  ),
+                ),
+              );
             },
-            child: MaterialApp(
-              navigatorKey: navigatorKey,
-              title: 'Stay India Owner',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme,
-              home: const AuthGate(
-                dashboard: MainNavigationPage(),
-                registration: RegistrationPersonalPage(),
-              ),
-            ),
           );
         },
       ),

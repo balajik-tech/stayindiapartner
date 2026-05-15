@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/communities/domain/repositories/community_repository.dart';
+import 'package:stayindia_owner/features/communities/domain/usecases/community_usecases.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,7 +55,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
         body: _isLoading
@@ -75,7 +76,6 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                             labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
                             tabs: const [
                               Tab(text: "News"),
-                              Tab(text: "Issues"),
                               Tab(text: "About"),
                             ],
                           ),
@@ -85,7 +85,6 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                     body: TabBarView(
                       children: [
                         _buildNewsTab(),
-                        _buildIssuesTab(),
                         _buildAboutTab(),
                       ],
                     ),
@@ -157,59 +156,12 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     );
   }
 
-  Widget _buildIssuesTab() {
-    return ListView.builder(
-      padding: EdgeInsets.all(16.w),
-      itemCount: 2,
-      itemBuilder: (context, index) => Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.roomCardBorder),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildMiniTag("LEGAL ISSUE", Colors.red),
-                Text("24 Votes", style: TextStyle(fontSize: 12.sp, color: AppColors.greyText)),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Text("Water connection notice from BBMP", style: GoogleFonts.outfit(fontSize: 16.sp, fontWeight: FontWeight.bold)),
-            SizedBox(height: 12.h),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.thumb_up_outlined, size: 16),
-                    label: const Text("Agree"),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.thumb_down_outlined, size: 16),
-                    label: const Text("Disagree"),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildAboutTab() {
     final members = _info?['members'] as List? ?? [];
     final description = _info?['description'] ?? 'No description provided.';
+    final rules = _info?['rules'];
     final currentUserId = context.read<AuthCubit>().currentOwner?.id;
     final isAdmin = (_info?['admins'] as List?)?.any((id) => id.toString() == currentUserId) ?? false;
 
@@ -225,6 +177,26 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           description,
           style: GoogleFonts.outfit(fontSize: 14.sp, color: AppColors.greyText, height: 1.5),
         ),
+        if (rules != null && rules.isNotEmpty) ...[
+          SizedBox(height: 24.h),
+          Text(
+            "Community Rules",
+            style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+          ),
+          SizedBox(height: 12.h),
+          Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Text(
+              rules,
+              style: GoogleFonts.outfit(fontSize: 14.sp, color: Colors.orange.shade900, height: 1.5),
+            ),
+          ),
+        ],
         SizedBox(height: 32.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -343,6 +315,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
   void _showEditCommunityDialog() {
     final nameController = TextEditingController(text: _info?['name']);
     final descController = TextEditingController(text: _info?['description']);
+    final rulesController = TextEditingController(text: _info?['rules']);
     String? localImagePath;
     String? localCoverPath;
 
@@ -373,6 +346,17 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               _buildFieldLabel("Description"),
               TextField(
                 controller: descController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  fillColor: AppColors.backgroundGrey,
+                  filled: true,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              _buildFieldLabel("Community Rules"),
+              TextField(
+                controller: rulesController,
                 maxLines: 3,
                 decoration: InputDecoration(
                   fillColor: AppColors.backgroundGrey,
@@ -415,10 +399,11 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                     Navigator.pop(context);
                     final messenger = ScaffoldMessenger.of(context);
                     try {
-                      await sl<CommunityRepository>().updateOwnerCommunity(
+                      await sl<UpdateOwnerCommunityUseCase>().call(
                         communityId: widget.communityId,
                         name: nameController.text,
                         description: descController.text,
+                        rules: rulesController.text,
                         imagePath: localImagePath,
                         coverImagePath: localCoverPath,
                       );
@@ -530,9 +515,9 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
         if (_info != null)
           Builder(builder: (context) {
             final currentUserId = context.read<AuthCubit>().currentOwner?.id;
-            final isAdmin = (_info!['admins'] as List?)?.any((id) => id.toString() == currentUserId) ?? false;
+            final isOwner = _info!['owner']?.toString() == currentUserId;
             
-            if (!isAdmin) return const SizedBox.shrink();
+            if (!isOwner) return const SizedBox.shrink();
             
             return Padding(
               padding: EdgeInsets.only(right: 8.w),
@@ -593,10 +578,17 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                     ),
                   ),
                   Text(
-                    "Verified National Network",
+                    _info?['status']?.toString().toUpperCase() == 'PENDING'
+                      ? 'Verification Pending ⏳'
+                      : 'Verified National Network',
                     style: GoogleFonts.outfit(
                       fontSize: 14.sp,
-                      color: Colors.white70,
+                      color: _info?['status']?.toString().toUpperCase() == 'PENDING'
+                        ? Colors.orange.shade300
+                        : Colors.white70,
+                      fontWeight: _info?['status']?.toString().toUpperCase() == 'PENDING'
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     ),
                   ),
                 ],

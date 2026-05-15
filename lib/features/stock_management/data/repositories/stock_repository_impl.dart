@@ -16,7 +16,23 @@ class StockRepositoryImpl implements StockRepository {
 
   @override
   Future<StockItem> createStockItem(StockItem stockItem) {
-    return remoteDataSource.createStockItem(stockItem as StockItemModel);
+    final model = stockItem is StockItemModel 
+        ? stockItem 
+        : StockItemModel(
+            id: stockItem.id,
+            propertyId: stockItem.propertyId,
+            name: stockItem.name,
+            nameTelugu: stockItem.nameTelugu,
+            category: stockItem.category,
+            unit: stockItem.unit,
+            currentQuantity: stockItem.currentQuantity,
+            minimumThreshold: stockItem.minimumThreshold,
+            pricePerUnit: stockItem.pricePerUnit,
+            createdBy: stockItem.createdBy,
+            createdAt: stockItem.createdAt,
+            updatedAt: stockItem.updatedAt,
+          );
+    return remoteDataSource.createStockItem(model);
   }
 
   @override

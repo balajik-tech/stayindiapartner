@@ -388,7 +388,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                     children: [
                       Text(template.category.toUpperCase(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: template.color, letterSpacing: 1)),
                       BouncingWrapper(
-                        onTap: () => _sendDirectly(template.title, template.description),
+                        onTap: () => _confirmAndSend(template.title, template.description),
                         child: Icon(Icons.send_rounded, color: AppColors.primaryBlue, size: 20.sp),
                       ),
                     ],
@@ -451,6 +451,40 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
     );
   }
 
+  void _confirmAndSend(String title, String content, {VoidCallback? onConfirmed}) {
+    if (title.trim().isEmpty || content.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please provide both subject and message.'), backgroundColor: Colors.red));
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        title: Text("Confirm Broadcast", style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 18.sp)),
+        content: Text("Are you sure you want to send this announcement to all residents of the selected property?", style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text("Cancel", style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.bold)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (onConfirmed != null) onConfirmed();
+              _sendDirectly(title, content);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+            ),
+            child: const Text("Send", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _sendDirectly(String title, String content) {
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
@@ -464,6 +498,11 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
         ).then((_) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Announcement Sent!'), backgroundColor: Colors.green));
+          
+          // Clear text fields after successful send
+          _titleController.clear();
+          _messageController.clear();
+          
           _loadHistory();
         });
       } else {
@@ -530,8 +569,9 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
         titleController: _titleController,
         messageController: _messageController,
         onSend: (title, content) {
-          _sendDirectly(title, content);
-          Navigator.pop(context);
+          _confirmAndSend(title, content, onConfirmed: () {
+            Navigator.pop(context);
+          });
         },
       ),
     );

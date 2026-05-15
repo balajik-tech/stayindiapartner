@@ -3,25 +3,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
+import '../../domain/entities/staff.dart';
 import '../cubit/staff_cubit.dart';
 
 class AddStaffSheet extends StatefulWidget {
   final String hostelId;
+  final Staff? staff;
   final VoidCallback onAdded;
 
   const AddStaffSheet({
     super.key,
     required this.hostelId,
+    this.staff,
     required this.onAdded,
   });
 
   static void show(BuildContext context,
-      {required String hostelId, required VoidCallback onAdded}) {
+      {required String hostelId, Staff? staff, required VoidCallback onAdded}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => AddStaffSheet(hostelId: hostelId, onAdded: onAdded),
+      builder: (context) => AddStaffSheet(hostelId: hostelId, staff: staff, onAdded: onAdded),
     );
   }
 
@@ -34,26 +37,45 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   String _selectedRole = 'Warden';
+  bool _obscurePassword = true;
 
   final List<String> _roles = [
-    'Warden',
     'Manager',
-    'Care Taker',
+    'Warden',
     'Security',
     'Cook',
     'Cleaning Staff',
   ];
 
   final Map<String, String> _roleMap = {
-    'Warden': 'WARDEN',
     'Manager': 'MANAGER',
-    'Care Taker': 'CARE_TAKER',
+    'Warden': 'WARDEN',
     'Security': 'SECURITY',
     'Cook': 'COOK',
     'Cleaning Staff': 'CLEANING_STAFF',
   };
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.staff != null) {
+      _nameController.text = widget.staff!.name;
+      _phoneController.text = widget.staff!.phone;
+      _emailController.text = widget.staff!.email ?? '';
+      final reverseRoleMap = {
+        'MANAGER': 'Manager',
+        'WARDEN': 'Warden',
+        'SECURITY': 'Security',
+        'COOK': 'Cook',
+        'CLEANING_STAFF': 'Cleaning Staff',
+      };
+      _selectedRole = reverseRoleMap[widget.staff!.role] ?? widget.staff!.role;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +112,7 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Add New Staff',
+                        widget.staff != null ? 'Edit Staff Details' : 'Add New Staff',
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.w900,
@@ -100,7 +122,9 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Enter staff details to grant them access to management tools.',
+                        widget.staff != null
+                            ? 'Update staff information and designated role.'
+                            : 'Enter staff details to grant them access to management tools.',
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.greyText,
@@ -134,6 +158,35 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
                         hint: 'example@stayindia.in',
                         icon: Icons.email_rounded,
                         keyboardType: TextInputType.emailAddress,
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildTextField(
+                        controller: _passwordController,
+                        label: widget.staff != null ? 'New Password (Optional)' : 'Password',
+                        hint: widget.staff != null ? 'Leave blank to keep unchanged' : 'Minimum 6 characters',
+                        icon: Icons.lock_rounded,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                            color: AppColors.greyText,
+                          ),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                        validator: (v) => widget.staff == null
+                            ? (v == null || v.length < 6 ? 'Password must be at least 6 characters' : null)
+                            : (v != null && v.isNotEmpty && v.length < 6 ? 'Password must be at least 6 characters' : null),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildTextField(
+                        controller: _confirmPasswordController,
+                        label: 'Confirm Password',
+                        hint: 'Re-enter password',
+                        icon: Icons.lock_outline_rounded,
+                        obscureText: _obscurePassword,
+                        validator: (v) => v != _passwordController.text
+                            ? 'Passwords do not match'
+                            : null,
                       ),
                       SizedBox(height: 32.h),
                       Text(
@@ -177,6 +230,8 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
     required String hint,
     required IconData icon,
     TextInputType? keyboardType,
+    bool obscureText = false,
+    Widget? suffixIcon,
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -200,6 +255,7 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
           child: TextFormField(
             controller: controller,
             keyboardType: keyboardType,
+            obscureText: obscureText,
             validator: validator,
             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
             decoration: InputDecoration(
@@ -209,6 +265,7 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
                 fontSize: 15.sp,
               ),
               prefixIcon: Icon(icon, color: AppColors.primaryBlue, size: 22.sp),
+              suffixIcon: suffixIcon,
               border: InputBorder.none,
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -279,7 +336,7 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
             child: isLoading
                 ? const CircularProgressIndicator(color: Colors.white)
                 : Text(
-                    'Create Staff Account',
+                    widget.staff != null ? 'Save Changes' : 'Create Staff Account',
                     style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w900,
@@ -294,13 +351,27 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
 
   void _handleSubmit() {
     if (_formKey.currentState?.validate() == true) {
-      context.read<StaffCubit>().createStaff(
-            hostelId: widget.hostelId,
-            name: _nameController.text,
-            phone: _phoneController.text,
-            email: _emailController.text,
-            role: _roleMap[_selectedRole] ?? _selectedRole,
-          );
+      if (widget.staff != null) {
+        final data = <String, dynamic>{
+          'name': _nameController.text,
+          'phone': _phoneController.text,
+          'email': _emailController.text,
+          'role': _roleMap[_selectedRole] ?? _selectedRole,
+        };
+        if (_passwordController.text.isNotEmpty) {
+          data['password'] = _passwordController.text;
+        }
+        context.read<StaffCubit>().updateStaff(widget.staff!.id, data);
+      } else {
+        context.read<StaffCubit>().createStaff(
+              hostelId: widget.hostelId,
+              name: _nameController.text,
+              phone: _phoneController.text,
+              email: _emailController.text,
+              password: _passwordController.text,
+              role: _roleMap[_selectedRole] ?? _selectedRole,
+            );
+      }
     }
   }
 }

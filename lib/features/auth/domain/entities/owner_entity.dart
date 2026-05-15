@@ -14,6 +14,8 @@ class OwnerEntity extends Equatable {
   final bool hasAcceptedPolicy;
   final String role;
   final String? verificationBadge;
+  final String? staffPropertyId;
+  final List<String> permissions;
 
   const OwnerEntity({
     required this.id,
@@ -27,19 +29,22 @@ class OwnerEntity extends Equatable {
     this.hasAcceptedPolicy = false,
     this.role = 'owner',
     this.verificationBadge,
+    this.staffPropertyId,
+    this.permissions = const [],
   });
 
   bool get isNewOwner => !isProfileComplete;
   bool get isPremium => plan != 'free';
-  bool get isCook => role == 'cook';
-  bool get isWarden => role == 'warden';
   bool get isManager => role == 'manager';
-  bool get isAnyStaff => ['cook', 'warden', 'manager'].contains(role);
+  bool get isWarden => role == 'warden';
+  bool get isSecurity => role == 'security';
+  bool get isCook => role == 'cook';
+  bool get isCleaningStaff => role == 'cleaning_staff';
+  bool get isAnyStaff => ['manager', 'warden', 'security', 'cook', 'cleaning_staff'].contains(role);
 
   bool hasPermission(String permission) {
-    // Basic implementation, can be extended based on actual permission logic
-    if (role == 'owner') return true;
-    return false; 
+    if (role == 'owner' || role == 'manager') return true;
+    return permissions.contains(permission);
   }
 
   OwnerEntity copyWith({
@@ -54,6 +59,8 @@ class OwnerEntity extends Equatable {
     bool? hasAcceptedPolicy,
     String? role,
     String? verificationBadge,
+    String? staffPropertyId,
+    List<String>? permissions,
   }) {
     return OwnerEntity(
       id: id ?? this.id,
@@ -67,6 +74,8 @@ class OwnerEntity extends Equatable {
       hasAcceptedPolicy: hasAcceptedPolicy ?? this.hasAcceptedPolicy,
       role: role ?? this.role,
       verificationBadge: verificationBadge ?? this.verificationBadge,
+      staffPropertyId: staffPropertyId ?? this.staffPropertyId,
+      permissions: permissions ?? this.permissions,
     );
   }
 
@@ -83,5 +92,7 @@ class OwnerEntity extends Equatable {
         hasAcceptedPolicy,
         role,
         verificationBadge,
+        staffPropertyId,
+        permissions,
       ];
 }

@@ -8,8 +8,8 @@ class BookingsRepositoryImpl implements BookingsRepository {
   BookingsRepositoryImpl({required this.remote});
 
   @override
-  Future<List<Booking>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType}) {
-    return remote.getOwnerBookings(page: page, limit: limit, kycStatus: kycStatus, roomType: roomType);
+  Future<List<Booking>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId}) {
+    return remote.getOwnerBookings(page: page, limit: limit, kycStatus: kycStatus, roomType: roomType, hostelId: hostelId);
   }
 
   @override

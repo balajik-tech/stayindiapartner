@@ -12,6 +12,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:stayindia_owner/core/utils/image_compressor.dart';
+import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
 
 class TenantsChatPage extends StatelessWidget {
   final String hostelId;
@@ -19,6 +20,7 @@ class TenantsChatPage extends StatelessWidget {
   final String? communityIcon;
   final String? communityDescription;
   final bool isOwnerChat;
+  final String? status;
 
   const TenantsChatPage({
     super.key,
@@ -27,6 +29,7 @@ class TenantsChatPage extends StatelessWidget {
     this.communityIcon,
     this.communityDescription,
     this.isOwnerChat = false,
+    this.status,
   });
 
   @override
@@ -125,134 +128,173 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   @override
   Widget build(BuildContext context) {
     final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+    final isPending = page.status?.toUpperCase() == 'PENDING';
     
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: _buildAppBar(context, page),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<CommunityCubit, CommunityState>(
-              builder: (context, state) {
-                if (state is CommunityLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is CommunityLoaded) {
-                  final messages = state.messages;
-                  
-                  
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (_scrollController.hasClients) {
-                      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-                    }
-                  });
-
-                  if (messages.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.chat_bubble_outline_rounded, size: 64.sp, color: Colors.grey.shade300),
-                          SizedBox(height: 16.h),
-                          Text(
-                            'No messages yet',
-                            style: GoogleFonts.outfit(fontSize: 16.sp, color: AppColors.greyText),
-                          ),
-                        ],
+      body: isPending
+          ? Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.w),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(24.w),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        shape: BoxShape.circle,
                       ),
-                    );
-                  }
+                      child: Icon(Icons.pending_actions_rounded, size: 64.sp, color: Colors.orange.shade700),
+                    ),
+                    SizedBox(height: 24.h),
+                    Text(
+                      'Verification Pending',
+                      style: GoogleFonts.outfit(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.darkText,
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+                    Text(
+                      'Your community is currently under review by our executive team. Once verified, chat and media sharing features will be instantly enabled.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 15.sp,
+                        color: AppColors.greyText,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Column(
+              children: [
+                Expanded(
+                  child: BlocBuilder<CommunityCubit, CommunityState>(
+                    builder: (context, state) {
+                      if (state is CommunityLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (state is CommunityLoaded) {
+                        final messages = state.messages;
+                        
+                        
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (_scrollController.hasClients) {
+                            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                          }
+                        });
 
-                  
-                  final itemCount = messages.length + 1; 
-                  return ListView.builder(
-                    controller: _scrollController,
-                    padding: EdgeInsets.all(20.w),
-                    itemCount: itemCount,
-                    itemBuilder: (context, index) {
-                      
-                      if (index == 0) {
-                        if (state.isLoadingMoreMessages) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 12),
-                            child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
-                          );
-                        }
-                        if (!state.hasMoreMessages) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Center(
-                              child: Text(
-                                ' Beginning of conversation',
-                                style: GoogleFonts.outfit(fontSize: 12.sp, color: AppColors.greyText),
-                              ),
+                        if (messages.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.chat_bubble_outline_rounded, size: 64.sp, color: Colors.grey.shade300),
+                                SizedBox(height: 16.h),
+                                Text(
+                                  'No messages yet',
+                                  style: GoogleFonts.outfit(fontSize: 16.sp, color: AppColors.greyText),
+                                ),
+                              ],
                             ),
                           );
                         }
-                        return const SizedBox.shrink();
+
+                        
+                        final itemCount = messages.length + 1; 
+                        return ListView.builder(
+                          controller: _scrollController,
+                          padding: EdgeInsets.all(20.w),
+                          itemCount: itemCount,
+                          itemBuilder: (context, index) {
+                            
+                            if (index == 0) {
+                              if (state.isLoadingMoreMessages) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 12),
+                                  child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+                                );
+                              }
+                              if (!state.hasMoreMessages) {
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8),
+                                  child: Center(
+                                    child: Text(
+                                      ' Beginning of conversation',
+                                      style: GoogleFonts.outfit(fontSize: 12.sp, color: AppColors.greyText),
+                                    ),
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            }
+
+                            final message = messages[index - 1]; 
+                            
+                            final owner = context.read<AuthCubit>().currentOwner;
+                            final currentOwnerId = owner?.id;
+
+                            final isMe = (currentOwnerId != null && 
+                                         message.senderId.isNotEmpty && 
+                                         message.senderId == currentOwnerId);
+                            
+                            final updatedMessage = CommunityMessageEntity(
+                              id: message.id,
+                              senderId: message.senderId,
+                              senderName: message.senderName,
+                              senderAvatar: message.senderAvatar,
+                              text: message.text,
+                              imageUrl: message.imageUrl,
+                              roomId: message.roomId,
+                              createdAt: message.createdAt,
+                              type: message.type,
+                              isSystem: message.isSystem,
+                              isMe: isMe,
+                            );
+
+                            return ChatMessageBubble(message: updatedMessage);
+                          },
+                        );
                       }
-
-                      final message = messages[index - 1]; 
-                      
-                      final owner = context.read<AuthCubit>().currentOwner;
-                      final currentOwnerId = owner?.id;
-
-                      final isMe = (currentOwnerId != null && 
-                                   message.senderId.isNotEmpty && 
-                                   message.senderId == currentOwnerId);
-                      
-                      final updatedMessage = CommunityMessageEntity(
-                        id: message.id,
-                        senderId: message.senderId,
-                        senderName: message.senderName,
-                        senderAvatar: message.senderAvatar,
-                        text: message.text,
-                        imageUrl: message.imageUrl,
-                        roomId: message.roomId,
-                        createdAt: message.createdAt,
-                        type: message.type,
-                        isSystem: message.isSystem,
-                        isMe: isMe,
-                      );
-
-                      return ChatMessageBubble(message: updatedMessage);
+                      if (state is CommunityError) {
+                        return Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32.w),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.error_outline_rounded, size: 48.sp, color: Colors.red.shade300),
+                                SizedBox(height: 16.h),
+                                Text(
+                                  state.message,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.outfit(color: AppColors.greyText),
+                                ),
+                                SizedBox(height: 24.h),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+                                    context.read<CommunityCubit>().loadCommunityData(page.hostelId);
+                                  },
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
                     },
-                  );
-                }
-                if (state is CommunityError) {
-                  return Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32.w),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.error_outline_rounded, size: 48.sp, color: Colors.red.shade300),
-                          SizedBox(height: 16.h),
-                          Text(
-                            state.message,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.outfit(color: AppColors.greyText),
-                          ),
-                          SizedBox(height: 24.h),
-                          ElevatedButton(
-                            onPressed: () {
-                              final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
-                              context.read<CommunityCubit>().loadCommunityData(page.hostelId);
-                            },
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
+                  ),
+                ),
+                _buildInputSection(page),
+              ],
             ),
-          ),
-          _buildInputSection(page),
-        ],
-      ),
     );
   }
 
@@ -286,20 +328,65 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: Text(
-              page.communityName ?? 'Tenants Community',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.outfit(
-                color: AppColors.darkText,
-                fontWeight: FontWeight.w800,
-                fontSize: 16.sp,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  page.communityName ?? 'Tenants Community',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.outfit(
+                    color: AppColors.darkText,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16.sp,
+                  ),
+                ),
+                if (page.isOwnerChat)
+                  Padding(
+                    padding: EdgeInsets.only(top: 2.h),
+                    child: Text(
+                      page.status?.toUpperCase() == 'PENDING' 
+                        ? 'Verification Pending ⏳' 
+                        : 'Verified National Network',
+                      style: GoogleFonts.outfit(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: page.status?.toUpperCase() == 'PENDING' 
+                          ? Colors.orange.shade700 
+                          : AppColors.primaryBlue,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
       ),
-      actions: const [],
+      actions: [
+        if (page.isOwnerChat)
+          Padding(
+            padding: EdgeInsets.only(right: 8.w),
+            child: BouncingWrapper(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CommunityDetailPage(communityId: page.hostelId),
+                  ),
+                );
+              },
+              child: Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.info_outline_rounded, color: AppColors.primaryBlue, size: 22.sp),
+              ),
+            ),
+          ),
+      ],
     );
   }
 

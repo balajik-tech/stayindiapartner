@@ -74,7 +74,12 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
         if (data is List) {
-          return data.map((e) => int.tryParse(e.toString()) ?? 0).toList();
+          return data.map((e) {
+            if (e is Map) {
+              return int.tryParse(e['floor']?.toString() ?? '0') ?? 0;
+            }
+            return int.tryParse(e.toString()) ?? 0;
+          }).toSet().toList();
         }
         return [];
       } else {

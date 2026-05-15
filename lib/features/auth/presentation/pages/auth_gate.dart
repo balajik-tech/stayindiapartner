@@ -1,18 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import '../cubit/auth_cubit.dart';
 import 'login_page.dart';
-
-
-
-
-
-
-
-
 
 class AuthGate extends StatelessWidget {
   final Widget dashboard;

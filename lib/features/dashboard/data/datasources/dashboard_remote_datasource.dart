@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/features/dashboard/data/models/occupancy_model.dart';
@@ -12,6 +13,7 @@ abstract class DashboardRemoteDataSource {
   Future<DailyOperationsModel> getDailyOperations(String hostelId);
   Future<RentDueDetailsModel> getRentDueDetails(String hostelId);
   Future<OccupancyStatusModel> getOccupancyStatus(String hostelId);
+  Future<List<dynamic>> getBulkDashboardData(String hostelIds);
 }
 
 class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
@@ -71,5 +73,40 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     }
     
     throw Exception('Failed to load occupancy status: ${response.statusCode}');
+  }
+
+  @override
+  Future<List<dynamic>> getBulkDashboardData(String hostelIds) async {
+    try {
+      AppLogger.info('Fetching bulk dashboard data for hostels: $hostelIds');
+      final response = await _dio.get(
+        ApiConstants.dashboardBulkData,
+        queryParameters: {'hostelIds': hostelIds},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data is List) {
+          return data;
+        }
+        return [];
+      }
+
+      throw Exception('failed_to_load_dashboard_data'.tr());
+    } on DioException catch (e) {
+      AppLogger.error('Dio error in getBulkDashboardData: ${e.message}');
+      String errorMessage = 'network_error_occurred'.tr();
+      if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'connection_timed_out'.tr();
+      } else if (e.response?.statusCode == 404) {
+        errorMessage = 'endpoint_not_found'.tr();
+      } else if (e.response?.statusCode == 500) {
+        errorMessage = 'server_side_error'.tr();
+      }
+      throw Exception(errorMessage);
+    } catch (e) {
+      AppLogger.error('Unexpected error in getBulkDashboardData: $e');
+      throw Exception('unexpected_error_occurred'.tr());
+    }
   }
 }

@@ -80,7 +80,8 @@ class StockCubit extends Cubit<StockState> {
       final updatedItem = await repository.addStock(id, quantity, pricePerUnit, totalCost, paymentMode, entryDate, note);
       final updatedItems = state.items.map((i) => i.id == id ? updatedItem : i).toList();
       emit(StockActionSuccess('Stock added successfully', items: updatedItems, summary: state.summary));
-      loadStocks(propertyId);
+      await loadStocks(propertyId);
+      await loadItemDetail(id);
     } catch (e) {
       emit(StockError(e.toString(), items: state.items, summary: state.summary));
     }
@@ -92,7 +93,8 @@ class StockCubit extends Cubit<StockState> {
       final updatedItem = await repository.consumeStock(id, quantity, note);
       final updatedItems = state.items.map((i) => i.id == id ? updatedItem : i).toList();
       emit(StockActionSuccess('Stock consumed successfully', items: updatedItems, summary: state.summary));
-      loadStocks(propertyId);
+      await loadStocks(propertyId);
+      await loadItemDetail(id);
     } catch (e) {
       emit(StockError(e.toString(), items: state.items, summary: state.summary));
     }

@@ -16,6 +16,7 @@ class BookingsState extends Equatable {
   final String? searchQuery; 
   final String? kycStatus;
   final String? roomType;
+  final String? hostelId;
   
   
   final int page;
@@ -33,6 +34,7 @@ class BookingsState extends Equatable {
     this.searchQuery,
     this.kycStatus,
     this.roomType,
+    this.hostelId,
     this.page = 1,
     this.hasMore = true,
     this.isLoadMore = false,
@@ -71,6 +73,7 @@ class BookingsState extends Equatable {
     Object? searchQuery = _keep,
     Object? kycStatus = _keep,
     Object? roomType = _keep,
+    Object? hostelId = _keep,
     OccupancyModel? occupancy,
     int? page,
     bool? hasMore,
@@ -86,6 +89,7 @@ class BookingsState extends Equatable {
       searchQuery: searchQuery == _keep ? this.searchQuery : searchQuery as String?,
       kycStatus: kycStatus == _keep ? this.kycStatus : kycStatus as String?,
       roomType: roomType == _keep ? this.roomType : roomType as String?,
+      hostelId: hostelId == _keep ? this.hostelId : hostelId as String?,
       occupancy: occupancy ?? this.occupancy,
       page: page ?? this.page,
       hasMore: hasMore ?? this.hasMore,
@@ -104,6 +108,7 @@ class BookingsState extends Equatable {
         searchQuery,
         kycStatus,
         roomType,
+        hostelId,
         occupancy,
         page,
         hasMore,

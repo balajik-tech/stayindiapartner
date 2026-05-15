@@ -3,15 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/owner_community_cubit.dart';
+import 'package:stayindia_owner/features/communities/presentation/cubit/social_feed_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
-import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
-import 'package:stayindia_owner/features/communities/presentation/pages/association_selection_page.dart';
+import 'package:stayindia_owner/features/communities/presentation/pages/explore_communities_page.dart';
+import 'package:stayindia_owner/features/communities/presentation/widgets/comments_sheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stayindia_owner/core/utils/logger.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
+
   const OwnersCommunityPage({super.key});
 
   @override
@@ -19,1002 +27,1103 @@ class OwnersCommunityPage extends StatefulWidget {
 }
 
 class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _postController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  String? _selectedImagePath;
+  bool _isPoll = false;
+  final List<TextEditingController> _pollOptionControllers = [
+    TextEditingController(),
+    TextEditingController(),
+  ];
+
+  Set<String> _readPostIds = {};
+
+  Future<void> _loadReadPostIds() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final List<String>? stored = prefs.getStringList('owner_community_read_post_ids');
+      if (stored != null) {
+        setState(() {
+          _readPostIds = stored.toSet();
+        });
+      }
+    } catch (e) {
+      AppLogger.error('Error loading read posts: $e');
+    }
+  }
+
+  void _markPostAsRead(String postId) async {
+    if (!_readPostIds.contains(postId)) {
+      setState(() {
+        _readPostIds.add(postId);
+      });
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setStringList('owner_community_read_post_ids', _readPostIds.toList());
+      } catch (e) {
+        AppLogger.error('Error saving read posts: $e');
+      }
+    }
+  }
+
+  void _markAllPostsAsRead(List<SocialPostEntity> posts) async {
+    final allPostIds = posts.map((p) => p.id).toList();
+    setState(() {
+      _readPostIds.addAll(allPostIds);
+    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('owner_community_read_post_ids', _readPostIds.toList());
+    } catch (e) {
+      AppLogger.error('Error saving read posts: $e');
+    }
+  }
+
+  int _getUnreadPostsCount(List<SocialPostEntity> posts) {
+    return posts.where((post) => !_readPostIds.contains(post.id)).length;
+  }
 
   @override
   void initState() {
     super.initState();
+    _loadReadPostIds();
     context.read<OwnerCommunityCubit>().loadCommunities();
-    _searchController.addListener(() {
-      setState(() {});
+    context.read<SocialFeedCubit>().loadFeed();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+        context.read<SocialFeedCubit>().loadMoreFeed();
+      }
     });
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _scrollController.dispose();
+    _postController.dispose();
+    for (var c in _pollOptionControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: ImageSource.gallery);
+    if (file != null) {
+      setState(() {
+        _selectedImagePath = file.path;
+        _isPoll = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AssociationSelectionPage()),
-          ),
-          backgroundColor: AppColors.primaryBlue,
-          icon: const Icon(Icons.explore_rounded, color: Colors.white),
-          label: Text(
-            'Join Association',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-          ),
-        ),
-        body: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
-          builder: (context, state) {
-            if (state is OwnerCommunityLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is OwnerCommunityLoaded) {
-              return FadeInWrapper(
-                child: NestedScrollView(
-                  headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                    _buildSliverAppBar(),
-                  ],
-                  body: Column(
-                    children: [
-                      if (state.pendingRequests.isNotEmpty)
-                        _PendingRequestsSection(requests: state.pendingRequests),
-                      Expanded(
-                        child: TabBarView(
-                          children: [
-                            _buildJoinedTab(state.joinedCommunities),
-                            _buildDiscoverTab(state.availableCommunities),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            if (state is OwnerCommunityError) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline_rounded, size: 48.sp, color: Colors.red.shade300),
-                      SizedBox(height: 16.h),
-                      Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.greyText),
-                      ),
-                      SizedBox(height: 24.h),
-                      ElevatedButton(
-                        onPressed: () => context.read<OwnerCommunityCubit>().loadCommunities(),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            context.read<OwnerCommunityCubit>().loadCommunities();
+            await context.read<SocialFeedCubit>().loadFeed(isRefresh: true);
           },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSliverAppBar() {
-    return SliverAppBar(
-      expandedHeight: 200.h,
-      floating: false,
-      pinned: true,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20),
-        onPressed: () => Navigator.pop(context),
-      ),
-      actions: [
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.search_rounded, color: AppColors.greyText, size: 22.sp),
-          tooltip: 'Search',
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.notifications_none_rounded, color: AppColors.greyText, size: 22.sp),
-          tooltip: 'Notifications',
-        ),
-      ],
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(50.h),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
-          ),
-          child: TabBar(
-            indicatorColor: AppColors.primaryBlue,
-            indicatorWeight: 3,
-            labelColor: AppColors.primaryBlue,
-            unselectedLabelColor: AppColors.greyText,
-            labelStyle: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
-            unselectedLabelStyle: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
-            tabs: const [
-              Tab(text: 'My Communities'),
-              Tab(text: 'Discover'),
-            ],
-          ),
-        ),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          color: Colors.white,
-          padding: EdgeInsets.fromLTRB(24.w, 105.h, 24.w, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 28.sp),
-                  SizedBox(width: 12.w),
-                  Text(
-                    'Owners Community',
-                    style: TextStyle(
-                      color: AppColors.darkText,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 26.sp,
-                      letterSpacing: -0.5,
-                    ),
+          color: AppColors.primaryBlue,
+          child: BlocBuilder<SocialFeedCubit, SocialFeedState>(
+            builder: (context, state) {
+              return CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _buildHeader(),
                   ),
+                  SliverToBoxAdapter(
+                    child: _buildExploreSection(),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildCreatePostBox(),
+                  ),
+                  ..._buildFeedSlivers(state),
                 ],
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'Connect, share & grow with other owners',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: AppColors.greyText.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildJoinedTab(List<CommunityDetailsEntity> joinedCommunities) {
-    if (joinedCommunities.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return ListView(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 80.h),
-      children: [
-        _buildTopCommunitiesSection(joinedCommunities),
-        SizedBox(height: 24.h),
-        ...joinedCommunities.map((community) => _buildCommunityFeedCard(community)),
-      ],
-    );
-  }
-
-  Widget _buildTopCommunitiesSection(List<CommunityDetailsEntity> communities) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Your communities',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.darkText,
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AssociationSelectionPage()),
-                ),
-                icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primaryBlue),
-                label: Text(
-                  'Join/Create',
-                  style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.w700, fontSize: 14.sp),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 16.h),
-        SizedBox(
-          height: 110.h,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: communities.length,
-            separatorBuilder: (context, index) => SizedBox(width: 12.w),
-            itemBuilder: (context, index) {
-              final community = communities[index];
-              return _buildCommunityStoryTile(community);
+              );
             },
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildCommunityStoryTile(CommunityDetailsEntity community) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TenantsChatPage(
-              hostelId: community.id,
-              communityName: community.name,
-              communityIcon: community.image,
-              communityDescription: community.description,
-              isOwnerChat: true,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        width: 110.w,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22.r),
-          border: Border.all(color: Colors.grey.shade200),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 14,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        padding: EdgeInsets.all(12.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16.r),
-                image: community.image != null
-                    ? DecorationImage(
-                        image: CachedNetworkImageProvider(community.image!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: community.image == null
-                  ? Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 24.sp)
-                  : null,
-            ),
-            SizedBox(height: 10.h),
-            Text(
-              community.name,
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCommunityFeedCard(CommunityDetailsEntity community) {
-    return BouncingWrapper(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TenantsChatPage(
-              hostelId: community.id,
-              communityName: community.name,
-              communityIcon: community.image,
-              communityDescription: community.description,
-              isOwnerChat: true,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.all(18.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24.r),
-          border: Border.all(color: Colors.grey.shade100),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 46.w,
-                  height: 46.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16.r),
-                    image: community.image != null
-                        ? DecorationImage(
-                            image: CachedNetworkImageProvider(community.image!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  child: community.image == null
-                      ? Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 24.sp)
-                      : null,
-                ),
-                SizedBox(width: 14.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              community.name,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.darkText,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryBlue.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Text(
-                              'COMMUNITY',
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primaryBlue,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 6.h),
-                      Text(
-                        community.description ?? 'Connect with fellow owners and share updates.',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: AppColors.greyText.withValues(alpha: 0.85),
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16.h),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.person_outline_rounded, color: AppColors.primaryBlue, size: 16.sp),
-                SizedBox(width: 6.w),
-                Text(
-                  '${community.memberCount} members',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: AppColors.greyText,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                  child: Text(
-                    'Open',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDiscoverTab(List<CommunityDetailsEntity> communities) {
-    final filteredCommunities = communities.where((c) {
-      final query = _searchController.text.toLowerCase();
-      return c.name.toLowerCase().contains(query) || 
-             (c.description?.toLowerCase().contains(query) ?? false);
-    }).toList();
-
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search communities...',
-                hintStyle: TextStyle(
-                  color: AppColors.greyText.withValues(alpha: 0.5),
-                  fontSize: 14.sp,
-                ),
-                prefixIcon: Icon(Icons.search_rounded, color: AppColors.greyText, size: 20.sp),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(Icons.close_rounded, size: 18.sp, color: AppColors.greyText),
-                        onPressed: () => _searchController.clear(),
-                      )
-                    : null,
-              ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: filteredCommunities.isEmpty
-              ? _buildDiscoverEmptyState(communities.isEmpty)
-              : ListView.builder(
-                  padding: EdgeInsets.all(24.w),
-                  itemCount: filteredCommunities.length,
-                  itemBuilder: (context, index) {
-                    return _AvailableCommunityItem(community: filteredCommunities[index]);
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDiscoverEmptyState(bool isTotalEmpty) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isTotalEmpty ? Icons.explore_off_rounded : Icons.search_off_rounded,
-            size: 64.sp,
-            color: Colors.grey.shade200,
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            isTotalEmpty ? 'No new communities to join' : 'No results found',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.greyText,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            isTotalEmpty 
-              ? 'You are already in all active communities.'
-              : 'Try searching with a different keyword.',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.greyText.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 40.h),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.file(
-            File('/Users/koushiksoftwaresolutions/.gemini/antigravity/brain/2b806fb1-9265-4248-9f98-b19af01fbcf5/community_empty_state_illustration_1777380448859.png'),
-            height: 160.h, 
-          ),
-          SizedBox(height: 24.h),
-          Text(
-            'No communities yet',
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.darkText,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Join your local PG association to connect with other owners and access legal support.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.greyText.withValues(alpha: 0.7),
-              height: 1.4,
-            ),
-          ),
-          SizedBox(height: 32.h),
-          ElevatedButton(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AssociationSelectionPage())),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlue,
-              minimumSize: Size(double.infinity, 54.h),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-              elevation: 0,
-            ),
-            child: Text(
-              'Join Association',
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.white),
-            ),
-          ),
-          const Spacer(),
-        ],
-      ),
-    );
-  }
-}
-
-class _JoinCommunitySheet extends StatefulWidget {
-  const _JoinCommunitySheet();
-
-  @override
-  State<_JoinCommunitySheet> createState() => _JoinCommunitySheetState();
-}
-
-class _JoinCommunitySheetState extends State<_JoinCommunitySheet> {
-  final _searchController = TextEditingController();
-  String _searchQuery = '';
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-      ),
-      child: Column(
-        children: [
-          _buildHeader(),
-          _buildSearchBar(),
-          Expanded(child: _buildList()),
-        ],
       ),
     );
   }
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.all(24.w),
+      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 16.h),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Available Communities',
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.darkText,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Stay India',
+                style: TextStyle(
+                  fontSize: 32.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.darkText,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              Text(
+                'PG Owners Community',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  color: AppColors.greyText.withValues(alpha: 0.8),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-          const Spacer(),
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close_rounded),
+          Row(
+            children: [
+              _buildNotificationAction(),
+              SizedBox(width: 12.w),
+              BouncingWrapper(
+                onTap: () {
+                  String hostelId = '';
+                  final hostelState = context.read<HostelCubit>().state;
+                  if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+                    hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TenantsChatPage(
+                        hostelId: hostelId,
+                        communityName: 'Tenants Community',
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.people_rounded, color: AppColors.primaryBlue, size: 28.sp),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildExploreSection() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (val) => setState(() => _searchQuery = val),
-        decoration: InputDecoration(
-          hintText: 'Search communities...',
-          prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade400),
-          filled: true,
-          fillColor: Colors.grey.shade50,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
-          contentPadding: EdgeInsets.symmetric(vertical: 16.h),
-        ),
-      ),
-    );
-  }
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+      child: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
+        builder: (context, state) {
+          final communities = state is OwnerCommunityLoaded ? state.joinedCommunities : <CommunityDetailsEntity>[];
 
-  Widget _buildList() {
-    return BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
-      builder: (context, state) {
-        if (state is OwnerCommunityLoaded) {
-          final communities = state.availableCommunities.where((c) => 
-            c.name.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
-
-          if (communities.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          return ListView.builder(
-            padding: EdgeInsets.all(24.w),
-            itemCount: communities.length,
-            itemBuilder: (context, index) {
-              final community = communities[index];
-              return _AvailableCommunityItem(community: community);
-            },
+          return SizedBox(
+            height: 95.h,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ExploreCommunitiesPage()),
+                    );
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 60.w,
+                        height: 60.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.primaryBlue, width: 2),
+                          color: Colors.white,
+                        ),
+                        child: Icon(Icons.add, color: AppColors.primaryBlue, size: 30.sp),
+                      ),
+                      SizedBox(height: 6.h),
+                      Text(
+                        'Explore',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 20.w),
+                ...communities.map((c) {
+                  return Padding(
+                    padding: EdgeInsets.only(right: 20.w),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => TenantsChatPage(
+                              hostelId: c.id,
+                              communityName: c.name,
+                              communityIcon: c.image,
+                              isOwnerChat: true,
+                              status: c.status,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 60.w,
+                            height: 60.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.shade200, width: 2),
+                            ),
+                            child: CircleAvatar(
+                              radius: 28.w,
+                              backgroundImage: c.image != null ? CachedNetworkImageProvider(c.image!) : null,
+                              backgroundColor: AppColors.accentOrange.withValues(alpha: 0.1),
+                              child: c.image == null ? Icon(Icons.groups, color: AppColors.accentOrange, size: 28.sp) : null,
+                            ),
+                          ),
+                          SizedBox(height: 6.h),
+                          SizedBox(
+                            width: 65.w,
+                            child: Text(
+                              c.name,
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.darkText,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
           );
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off_rounded, size: 64.sp, color: Colors.grey.shade200),
-          SizedBox(height: 16.h),
-          Text(
-            _searchQuery.isEmpty ? 'No communities available' : 'No communities found',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.greyText),
-          ),
-        ],
+        },
       ),
     );
   }
-}
 
-class _AvailableCommunityItem extends StatelessWidget {
-  final CommunityDetailsEntity community;
-
-  const _AvailableCommunityItem({required this.community});
-
-  @override
-  Widget build(BuildContext context) {
-    final isPending = community.status == 'PENDING';
+  Widget _buildCreatePostBox() {
+    final validPollOptions = _pollOptionControllers.map((c) => c.text.trim()).where((t) => t.isNotEmpty).toList();
 
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(16.w),
+      margin: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48.w,
-            height: 48.w,
-            decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(14.r),
-              image: community.image != null
-                  ? DecorationImage(
-                      image: CachedNetworkImageProvider(community.image!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: community.image == null
-                ? Icon(Icons.groups_3_rounded, color: AppColors.primaryBlue, size: 24.sp)
-                : null,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CommunityDetailPage(communityId: community.id),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 22.r,
+                backgroundColor: Colors.grey.shade100,
+                child: Icon(Icons.person, color: Colors.grey.shade400, size: 28.sp),
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: TextField(
+                  controller: _postController,
+                  maxLength: 200,
+                  maxLines: 4,
+                  minLines: 1,
+                  decoration: InputDecoration(
+                    hintText: _isPoll ? 'Ask a question...' : 'Share your thoughts...',
+                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16.sp, fontWeight: FontWeight.w500),
+                    border: InputBorder.none,
+                    counterText: '',
                   ),
-                );
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                  onChanged: (val) => setState(() {}),
+                ),
+              ),
+            ],
+          ),
+          if (_selectedImagePath != null) ...[
+            SizedBox(height: 12.h),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16.r),
+                  child: Image.file(
+                    File(_selectedImagePath!),
+                    width: double.infinity,
+                    height: 180.h,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8.h,
+                  right: 8.w,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.close, color: Colors.white, size: 20.sp),
+                      onPressed: () {
+                        setState(() {
+                          _selectedImagePath = null;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (_isPoll) ...[
+            SizedBox(height: 12.h),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Poll Options', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText)),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isPoll = false;
+                        });
+                      },
+                      child: Text('Cancel Poll', style: TextStyle(fontSize: 12.sp, color: Colors.red)),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                ...List.generate(_pollOptionControllers.length, (index) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 42.h,
+                            padding: EdgeInsets.symmetric(horizontal: 12.w),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: TextField(
+                              controller: _pollOptionControllers[index],
+                              decoration: InputDecoration(
+                                hintText: 'Option ${index + 1}',
+                                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
+                                border: InputBorder.none,
+                              ),
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ),
+                        if (_pollOptionControllers.length > 2) ...[
+                          SizedBox(width: 8.w),
+                          IconButton(
+                            icon: Icon(Icons.close, size: 20.sp, color: Colors.grey),
+                            onPressed: () {
+                              setState(() {
+                                _pollOptionControllers[index].dispose();
+                                _pollOptionControllers.removeAt(index);
+                              });
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                }),
+                if (_pollOptionControllers.length < 4)
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _pollOptionControllers.add(TextEditingController());
+                      });
+                    },
+                    icon: Icon(Icons.add, size: 18.sp, color: AppColors.primaryBlue),
+                    label: Text('Add Option', style: TextStyle(fontSize: 13.sp, color: AppColors.primaryBlue, fontWeight: FontWeight.w700)),
+                  ),
+              ],
+            ),
+          ],
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: _isPoll ? null : _pickImage,
+                    icon: Icon(Icons.image_outlined, color: _isPoll ? Colors.grey.shade300 : AppColors.primaryBlue, size: 24.sp),
+                  ),
+                  IconButton(
+                    onPressed: _selectedImagePath != null ? null : () {
+                      setState(() {
+                        _isPoll = true;
+                      });
+                    },
+                    icon: Icon(Icons.poll_outlined, color: _selectedImagePath != null ? Colors.grey.shade300 : AppColors.primaryBlue, size: 24.sp),
+                  ),
+                ],
+              ),
+              Row(
                 children: [
                   Text(
-                    community.name,
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+                    '${_postController.text.length}/200',
+                    style: TextStyle(color: Colors.grey.shade400, fontSize: 13.sp, fontWeight: FontWeight.w600),
                   ),
-                  Text(
-                    '${community.memberCount} members',
-                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w500, color: AppColors.greyText),
+                  SizedBox(width: 16.w),
+                  BlocBuilder<SocialFeedCubit, SocialFeedState>(
+                    builder: (context, state) {
+                      final isCreating = state is SocialFeedLoaded && state.isCreatingPost;
+                      final canPost = _postController.text.trim().isNotEmpty &&
+                          (!_isPoll || validPollOptions.length >= 2);
+
+                      return ElevatedButton(
+                        onPressed: (!canPost || isCreating) ? null : () {
+                          context.read<SocialFeedCubit>().createPost(
+                            content: _postController.text.trim(),
+                            imagePath: _selectedImagePath,
+                            type: _isPoll ? 'POLL' : 'POST',
+                            pollOptions: _isPoll ? validPollOptions : null,
+                          );
+                          _postController.clear();
+                          _selectedImagePath = null;
+                          _isPoll = false;
+                          for (var c in _pollOptionControllers) {
+                            c.clear();
+                          }
+                          setState(() {});
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryBlue,
+                          disabledBackgroundColor: AppColors.primaryBlue.withValues(alpha: 0.3),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+                          padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 12.h),
+                          elevation: 0,
+                        ),
+                        child: isCreating
+                            ? SizedBox(
+                                width: 16.w,
+                                height: 16.w,
+                                child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : Text(
+                                'Post',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.sp),
+                              ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildFeedSlivers(SocialFeedState state) {
+    if (state is SocialFeedLoading) {
+      return [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 40.h),
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      ];
+    }
+    if (state is SocialFeedLoaded) {
+      if (state.posts.isEmpty) {
+        return [
+          SliverToBoxAdapter(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 60.h, horizontal: 32.w),
+                child: Column(
+                  children: [
+                    Icon(Icons.feed_outlined, size: 64.sp, color: Colors.grey.shade300),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'No posts yet',
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Be the first one to share your thoughts with the community!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ];
+      }
+      return [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 20.h),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final post = state.posts[index];
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    _markPostAsRead(post.id);
+                  }
+                });
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 16.h),
+                  child: _PostCard(post: post),
+                );
+              },
+              childCount: state.posts.length,
+            ),
+          ),
+        ),
+        if (state.isFetchingMore)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
+        SliverToBoxAdapter(child: SizedBox(height: 100.h)),
+      ];
+    }
+    if (state is SocialFeedError) {
+      return [
+        SliverToBoxAdapter(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.w),
+              child: Column(
+                children: [
+                  Icon(Icons.error_outline_rounded, size: 48.sp, color: Colors.red.shade300),
+                  SizedBox(height: 16.h),
+                  Text(state.message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.greyText)),
+                  SizedBox(height: 16.h),
+                  ElevatedButton(
+                    onPressed: () => context.read<SocialFeedCubit>().loadFeed(),
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: isPending ? null : () {
-              context.read<OwnerCommunityCubit>().joinCommunity(community.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Join request sent!')),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isPending ? Colors.grey.shade100 : AppColors.primaryBlue,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-              elevation: 0,
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-            ),
-            child: Text(
-              isPending ? 'Requested' : 'Join', 
-              style: TextStyle(
-                fontWeight: FontWeight.w700, 
-                color: isPending ? AppColors.greyText : Colors.white
+        ),
+      ];
+    }
+    return [const SliverToBoxAdapter(child: SizedBox.shrink())];
+  }
+
+  Widget _buildNotificationAction() {
+    return BlocBuilder<SocialFeedCubit, SocialFeedState>(
+      builder: (context, state) {
+        final posts = state is SocialFeedLoaded ? state.posts : <SocialPostEntity>[];
+        final unreadCount = _getUnreadPostsCount(posts);
+
+        return BouncingWrapper(
+          onTap: () => _showNotificationCenterSheet(posts),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.notifications_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 28.sp,
+                ),
               ),
-            ),
+              if (unreadCount > 0)
+                Positioned(
+                  top: -2.h,
+                  right: -2.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                    decoration: const BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: 20.r,
+                      minHeight: 20.r,
+                    ),
+                    child: Center(
+                      child: Text(
+                        unreadCount > 99 ? '99+' : '$unreadCount',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  void _showNotificationCenterSheet(List<SocialPostEntity> posts) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
       ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final unreadCount = _getUnreadPostsCount(posts);
+            return Container(
+              padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 40.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Feed Updates',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      if (unreadCount > 0)
+                        TextButton(
+                          onPressed: () {
+                            _markAllPostsAsRead(posts);
+                            setModalState(() {});
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('All posts marked as read!'),
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Mark all read',
+                            style: TextStyle(
+                              color: AppColors.primaryBlue,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+                  Container(
+                    padding: EdgeInsets.all(16.r),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          unreadCount > 0 
+                              ? Icons.mark_chat_unread_rounded
+                              : Icons.mark_chat_read_rounded,
+                          color: unreadCount > 0 ? AppColors.accentOrange : Colors.green,
+                          size: 24.sp,
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                unreadCount > 0 
+                                    ? 'You have $unreadCount new posts'
+                                    : 'You are all caught up!',
+                                style: GoogleFonts.dmSans(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                unreadCount > 0
+                                    ? 'Scroll through the community feed to read new updates instantly.'
+                                    : 'No new unread community announcements at this time.',
+                                style: GoogleFonts.dmSans(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryBlue,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Close',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
 
-class _PendingRequestsSection extends StatelessWidget {
-  final List<Map<String, dynamic>> requests;
+class _PostCard extends StatelessWidget {
+  final SocialPostEntity post;
 
-  const _PendingRequestsSection({required this.requests});
+  const _PostCard({required this.post});
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inDays > 365) return '${(diff.inDays / 365).floor()}y ago';
+    if (diff.inDays > 30) return '${(diff.inDays / 30).floor()}m ago';
+    if (diff.inDays > 0) return '${diff.inDays}d ago';
+    if (diff.inHours > 0) return '${diff.inHours}h ago';
+    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
+    return 'Just now';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final pollOptionsList = post.poll?['options'] as List<dynamic>? ?? [];
+    int totalVotes = 0;
+    for (var opt in pollOptionsList) {
+      if (opt is Map) {
+        totalVotes += ((opt['votesCount'] ?? opt['votes'] ?? 0) as num).toInt();
+      }
+    }
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withValues(alpha: 0.03),
-        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Text(
-                    'NEW',
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.orange.shade900,
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20.r,
+                backgroundImage: post.userAvatar != null ? CachedNetworkImageProvider(post.userAvatar!) : null,
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+                child: post.userAvatar == null
+                    ? Icon(Icons.person, color: AppColors.primaryBlue, size: 24.sp)
+                    : null,
+              ),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          post.userName.isNotEmpty ? post.userName : 'Unknown User',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text('·', style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.w800)),
+                        SizedBox(width: 8.w),
+                        Text(
+                          post.visibility != null && post.visibility!.toUpperCase() == 'GLOBAL'
+                              ? 'Global'
+                              : 'Community',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryBlue,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      _formatTimeAgo(post.createdAt),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey.shade400,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 8.w),
-                Text(
-                  'Join Requests',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.darkText,
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            post.content,
+            style: TextStyle(
+              fontSize: 15.sp,
+              color: AppColors.darkText,
+              height: 1.4,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 12.h),
-          SizedBox(
-            height: 80.h,
-            child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              scrollDirection: Axis.horizontal,
-              itemCount: requests.length,
-              itemBuilder: (context, index) {
-                final community = requests[index];
-                final communityId = community['communityId'];
-                final communityName = community['communityName'];
-                final userRequests = community['requests'] as List;
-
-                return Row(
-                  children: userRequests.map((req) {
-                    return Container(
-                      margin: EdgeInsets.only(right: 12.w),
-                      padding: EdgeInsets.all(8.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: Colors.grey.shade100),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 18.r,
-                            backgroundImage: req['profileImage'] != null
-                                ? CachedNetworkImageProvider(req['profileImage'])
-                                : null,
-                            child: req['profileImage'] == null
-                                ? const Icon(Icons.person, size: 20)
-                                : null,
-                          ),
-                          SizedBox(width: 10.w),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                req['name'],
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                'to $communityName',
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  color: AppColors.greyText,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: 12.w),
-                          Row(
-                            children: [
-                              _ActionBtn(
-                                icon: Icons.check_rounded,
-                                color: Colors.green,
-                                onTap: () => context.read<OwnerCommunityCubit>().handleJoinRequest(
-                                      communityId,
-                                      req['userId'],
-                                      'ACCEPT',
-                                    ),
-                              ),
-                              SizedBox(width: 8.w),
-                              _ActionBtn(
-                                icon: Icons.close_rounded,
-                                color: Colors.red,
-                                onTap: () => context.read<OwnerCommunityCubit>().handleJoinRequest(
-                                      communityId,
-                                      req['userId'],
-                                      'REJECT',
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
+          if (post.imageUrl != null && post.imageUrl!.isNotEmpty) ...[
+            SizedBox(height: 16.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16.r),
+              child: CachedNetworkImage(
+                imageUrl: post.imageUrl!,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  height: 180.h,
+                  color: Colors.grey.shade100,
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  height: 180.h,
+                  color: Colors.grey.shade100,
+                  child: Icon(Icons.broken_image_rounded, size: 32.sp, color: Colors.grey.shade400),
+                ),
+              ),
             ),
+          ],
+          if (pollOptionsList.isNotEmpty) ...[
+            SizedBox(height: 16.h),
+            ...List.generate(pollOptionsList.length, (i) {
+              final opt = pollOptionsList[i];
+              if (opt is Map) {
+                final text = opt['text']?.toString() ?? '';
+                final count = ((opt['votesCount'] ?? opt['votes'] ?? 0) as num).toInt();
+                final pct = totalVotes > 0 ? (count / totalVotes) : 0.0;
+                final isMyVote = post.userVote == i;
+
+                return BouncingWrapper(
+                  onTap: post.userVote != null
+                      ? null
+                      : () {
+                          context.read<SocialFeedCubit>().votePoll(post.id, i);
+                        },
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: 8.h),
+                    height: 44.h,
+                    decoration: BoxDecoration(
+                      color: isMyVote ? AppColors.primaryBlue.withValues(alpha: 0.08) : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: isMyVote ? AppColors.primaryBlue : Colors.grey.shade200,
+                        width: isMyVote ? 2 : 1,
+                      ),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Container(
+                              width: constraints.maxWidth * pct,
+                              decoration: BoxDecoration(
+                                color: isMyVote ? AppColors.primaryBlue.withValues(alpha: 0.15) : Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                            );
+                          },
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16.w),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      if (isMyVote) ...[
+                                        Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 18.sp),
+                                        SizedBox(width: 8.w),
+                                      ],
+                                      Expanded(
+                                        child: Text(
+                                          text,
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: isMyVote ? FontWeight.w800 : FontWeight.w600,
+                                            color: AppColors.darkText,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '${(pct * 100).round()}% ($count)',
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.greyText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
+          ],
+          SizedBox(height: 16.h),
+          Divider(color: Colors.grey.shade100, height: 1),
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              BouncingWrapper(
+                onTap: () {
+                  context.read<SocialFeedCubit>().toggleLike(post.id);
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      post.isLiked ? Icons.thumb_up_alt_rounded : Icons.thumb_up_off_alt_rounded,
+                      color: post.isLiked ? AppColors.primaryBlue : Colors.grey.shade400,
+                      size: 20.sp,
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      '${post.likesCount}',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: post.isLiked ? FontWeight.w800 : FontWeight.w600,
+                        color: post.isLiked ? AppColors.primaryBlue : Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              BouncingWrapper(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => CommentsSheet(post: post),
+                  );
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      color: Colors.grey.shade400,
+                      size: 20.sp,
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      '${post.commentsCount} Replies',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ActionBtn extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionBtn({required this.icon, required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return BouncingWrapper(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(6.w),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: color, size: 16.sp),
-      ),
-    );
-  }
-}
-
-class FadeInWrapper extends StatefulWidget {
-  final Widget child;
-  const FadeInWrapper({super.key, required this.child});
-
-  @override
-  State<FadeInWrapper> createState() => _FadeInWrapperState();
-}
-
-class _FadeInWrapperState extends State<FadeInWrapper> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _animation.value,
-          child: child,
-        );
-      },
-      child: widget.child,
     );
   }
 }

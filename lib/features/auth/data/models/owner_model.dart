@@ -1,8 +1,5 @@
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
 
-
-
-
 class OwnerModel extends OwnerEntity {
   const OwnerModel({
     required super.id,
@@ -16,6 +13,8 @@ class OwnerModel extends OwnerEntity {
     super.hasAcceptedPolicy,
     super.role,
     super.verificationBadge,
+    super.staffPropertyId,
+    super.permissions,
   });
 
   factory OwnerModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +36,9 @@ class OwnerModel extends OwnerEntity {
         ? bedLimitRaw
         : int.tryParse(bedLimitRaw?.toString() ?? '') ?? 10;
 
+    final permissionsRaw = json['permissions'] as List? ?? [];
+    final permissionsList = permissionsRaw.map((e) => e.toString()).toList();
+
     return OwnerModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
       name: name,
@@ -48,8 +50,10 @@ class OwnerModel extends OwnerEntity {
       bedLimit: bedLimit,
       plan: subscription['plan']?.toString() ?? 'free',
       hasAcceptedPolicy: json['hasAcceptedPolicy'] == true,
-      role: json['role']?.toString() ?? 'owner',
+      role: json['role']?.toString().toLowerCase() ?? 'owner',
       verificationBadge: json['verificationBadge']?.toString(),
+      staffPropertyId: json['propertyId']?.toString(),
+      permissions: permissionsList,
     );
   }
 
@@ -65,6 +69,8 @@ class OwnerModel extends OwnerEntity {
         'hasAcceptedPolicy': hasAcceptedPolicy,
         'role': role,
         if (verificationBadge != null) 'verificationBadge': verificationBadge,
+        if (staffPropertyId != null) 'propertyId': staffPropertyId,
+        'permissions': permissions,
       };
 
   
@@ -80,5 +86,7 @@ class OwnerModel extends OwnerEntity {
         hasAcceptedPolicy: entity.hasAcceptedPolicy,
         role: entity.role,
         verificationBadge: entity.verificationBadge,
+        staffPropertyId: entity.staffPropertyId,
+        permissions: entity.permissions,
       );
 }

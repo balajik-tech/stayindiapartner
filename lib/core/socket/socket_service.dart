@@ -25,13 +25,19 @@ class SocketService {
   SocketService({required this.baseUrl});
 
   void connect() {
+    AppLogger.debug(' Socket: Attempting to connect to $baseUrl');
+    
     _socket = io.io(baseUrl, io.OptionBuilder()
+      .setPath('/socket.io/') // Explicitly set path
       .enableAutoConnect()
       .enableReconnection()
       .setReconnectionDelay(2000)
       .setReconnectionAttempts(20)
       .setTransports(['websocket', 'polling']) 
       .build());
+
+    // Explicitly connect to the default namespace
+    _socket!.connect();
 
     _socket!.onConnect((_) {
       AppLogger.info(' Socket: Connected to server');

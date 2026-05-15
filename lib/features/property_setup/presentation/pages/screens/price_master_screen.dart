@@ -101,7 +101,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               else ...[
                 _buildPricingSection(context, state, 'AC', Icons.ac_unit_rounded, const Color(0xFFE0F2FE), const Color(0xFF0EA5E9)),
                 SizedBox(height: 24.h),
-                _buildPricingSection(context, state, 'NON-AC', Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
+                _buildPricingSection(context, state, 'Non-AC', Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
                 
                 SizedBox(height: 32.h),
                 _buildSyncInfo(context, state),
@@ -126,7 +126,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF2C5990),
+            color: const Color(0xFF2B5797),
             letterSpacing: -0.5,
           ),
         ),
@@ -173,16 +173,14 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
   }
 
   Widget _buildPricingSection(BuildContext context, PropertySetupState state, String type, IconData icon, Color bgColor, Color iconColor) {
-    final roomsOfType = state.rooms.where((r) {
-      final features = r['features'] as Map<String, dynamic>? ?? {};
-      final isAC = features['isAC'] ?? false;
+    final categoriesOfType = state.roomCategories.where((cat) {
+      final isAC = cat['isAC'] == true;
       return type == 'AC' ? isAC : !isAC;
     }).toList();
-    
-    if (roomsOfType.isEmpty) return const SizedBox.shrink();
 
-    final uniqueSharingTypes = roomsOfType.map((r) => (r['sharingType'] ?? 2) as int).toSet().toList();
-    uniqueSharingTypes.sort();
+    if (categoriesOfType.isEmpty) return const SizedBox.shrink();
+
+    final displayLabel = type == 'AC' ? 'AC' : 'NON-AC';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,33 +197,22 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
             ),
             SizedBox(width: 12.w),
             Text(
-              '$type ROOMS',
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: 0.5),
+              '$displayLabel ROOMS',
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF334155), letterSpacing: 0.5),
             ),
           ],
         ),
         SizedBox(height: 16.h),
-        ...uniqueSharingTypes.map((sharing) => _buildPricingCard(context, state, type, sharing)),
+        ...categoriesOfType.map((cat) {
+          final catIndex = state.roomCategories.indexOf(cat);
+          return _buildPricingCard(context, state, cat, catIndex);
+        }),
       ],
     );
   }
 
-  Widget _buildPricingCard(BuildContext context, PropertySetupState state, String type, int sharing) {
-    final sharingStr = sharing.toString();
-    final pricing = state.masterPricing[type] ?? {};
-    final config = pricing[sharingStr];
-    
-    double rent = 0.0;
-    double deposit = 0.0;
-    double maintenance = 0.0;
-    double dailyRent = 0.0;
-
-    if (config is Map) {
-      rent = (config['rent'] ?? 0.0).toDouble();
-      deposit = (config['deposit'] ?? 0.0).toDouble();
-      maintenance = (config['maintenance'] ?? 0.0).toDouble();
-      dailyRent = (config['dailyRent'] ?? 0.0).toDouble();
-    }
+  Widget _buildPricingCard(BuildContext context, PropertySetupState state, Map<String, dynamic> category, int catIndex) {
+    final sharing = category['sharingType'] ?? 2;
 
     return _PremiumCard(
       child: Column(
@@ -247,19 +234,19 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                   SizedBox(width: 12.w),
                   Text(
                     '$sharing Sharing',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)),
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF334155)),
                   ),
                 ],
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2C5990).withValues(alpha: 0.08),
+                  color: const Color(0xFF2B5797).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
                   'PER BED',
-                  style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2C5990)),
+                  style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
                 ),
               ),
             ],
@@ -270,11 +257,10 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               Expanded(
                 child: _PremiumPriceInput(
                   label: 'Monthly Rent',
-                  initialValue: rent > 0 ? rent.toInt().toString() : '',
+                  initialValue: category['monthlyRent']?.toString() ?? '',
                   hint: 'e.g. 8500',
                   onChanged: (val) {
-                    final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'rent', price);
+                    context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'monthlyRent': val});
                   },
                 ),
               ),
@@ -282,11 +268,10 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               Expanded(
                 child: _PremiumPriceInput(
                   label: 'Daily Rent',
-                  initialValue: dailyRent > 0 ? dailyRent.toInt().toString() : '',
+                  initialValue: category['dailyRent']?.toString() ?? '',
                   hint: 'e.g. 500',
                   onChanged: (val) {
-                    final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'dailyRent', price);
+                    context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'dailyRent': val});
                   },
                 ),
               ),
@@ -298,11 +283,10 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               Expanded(
                 child: _PremiumPriceInput(
                   label: 'Security Deposit',
-                  initialValue: deposit > 0 ? deposit.toInt().toString() : '',
+                  initialValue: category['securityDeposit']?.toString() ?? '',
                   hint: 'e.g. 5000',
                   onChanged: (val) {
-                    final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'deposit', price);
+                    context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'securityDeposit': val});
                   },
                 ),
               ),
@@ -310,15 +294,24 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               Expanded(
                 child: _PremiumPriceInput(
                   label: 'Maintenance',
-                  initialValue: maintenance > 0 ? maintenance.toInt().toString() : '',
+                  initialValue: category['maintenance']?.toString() ?? '',
                   hint: 'e.g. 500',
                   onChanged: (val) {
-                    final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'maintenance', price);
+                    context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'maintenance': val});
                   },
                 ),
               ),
             ],
+          ),
+          SizedBox(height: 16.h),
+          _PremiumPriceInput(
+            label: 'Daily Rent Applies Up To (Days)',
+            initialValue: category['dailyRentThresholdDays']?.toString() ?? '',
+            hint: 'e.g. 10',
+            suffix: 'days',
+            onChanged: (val) {
+              context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'dailyRentThresholdDays': val});
+            },
           ),
         ],
       ),
@@ -362,7 +355,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('Apply to All Rooms', style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
+        title: Text('Apply to All Rooms', style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF334155))),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -405,7 +398,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2C5990),
+                backgroundColor: const Color(0xFF2B5797),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 elevation: 0,
               ),
@@ -422,6 +415,7 @@ class _PremiumPriceInput extends StatefulWidget {
   final String label;
   final String initialValue;
   final String hint;
+  final String? suffix;
   final Function(String) onChanged;
 
   const _PremiumPriceInput({
@@ -429,6 +423,7 @@ class _PremiumPriceInput extends StatefulWidget {
     required this.initialValue,
     required this.hint,
     required this.onChanged,
+    this.suffix,
   });
 
   @override
@@ -440,6 +435,7 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
 
   @override
   Widget build(BuildContext context) {
+    final hasSuffix = widget.suffix != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -463,11 +459,12 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
             ),
             child: Row(
               children: [
-                Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
-                SizedBox(width: 8.w),
+                if (!hasSuffix) ...[
+                  Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
+                  SizedBox(width: 8.w),
+                ],
                 Expanded(
                   child: TextFormField(
-                    key: ValueKey(widget.initialValue),
                     initialValue: widget.initialValue,
                     onChanged: widget.onChanged,
                     keyboardType: TextInputType.number,
@@ -481,9 +478,13 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: const Color(0xFF0F172A)),
+                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
                   ),
                 ),
+                if (hasSuffix) ...[
+                  SizedBox(width: 4.w),
+                  Text(widget.suffix!, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
+                ],
               ],
             ),
           ),
@@ -522,7 +523,7 @@ class _DialogTextField extends StatelessWidget {
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
         ),
-        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF0F172A)),
+        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
       ),
     );
   }

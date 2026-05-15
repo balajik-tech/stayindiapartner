@@ -1,9 +1,7 @@
 class StringUtils {
   static String formatRoomNumber(String rNum, [dynamic floor]) {
-    // 1. Remove "Room " prefix if it exists
     String formatted = rNum.replaceAll(RegExp(r'^Room\s*', caseSensitive: false), '').trim();
     
-    // 2. Handle Ground Floor prefixing
     bool isGroundFloor = false;
     if (floor != null) {
       if (floor is num && floor == 0) {
@@ -17,8 +15,6 @@ class StringUtils {
     }
     
     if (isGroundFloor) {
-      // If it's something like "001", make it "G01"
-      // The user wants G01, G02... not 001, 002
       if (formatted.startsWith('0')) {
         formatted = 'G${formatted.substring(1)}';
       } else if (!formatted.startsWith('G')) {

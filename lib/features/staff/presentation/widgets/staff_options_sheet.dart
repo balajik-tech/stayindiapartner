@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import '../../domain/entities/staff.dart';
 import '../cubit/staff_cubit.dart';
+import 'add_staff_sheet.dart';
 
 class StaffOptionsSheet extends StatelessWidget {
   final Staff staff;
@@ -88,17 +89,12 @@ class StaffOptionsSheet extends StatelessWidget {
             color: AppColors.darkText,
             onTap: () {
               Navigator.pop(context);
-              
-            },
-          ),
-          _buildOption(
-            context,
-            icon: Icons.history_rounded,
-            label: 'View Activity Log',
-            color: AppColors.darkText,
-            onTap: () {
-              Navigator.pop(context);
-              
+              AddStaffSheet.show(
+                context,
+                hostelId: staff.hostelId,
+                staff: staff,
+                onAdded: onUpdated,
+              );
             },
           ),
           _buildOption(

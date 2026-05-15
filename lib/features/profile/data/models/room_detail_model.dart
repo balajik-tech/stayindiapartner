@@ -26,7 +26,9 @@ class RoomDetailModel extends RoomDetail {
     return RoomDetailModel(
       id: json['_id'] ?? json['roomId'] ?? '',
       hostelId: json['hostel'] is Map ? json['hostel']['_id'] ?? '' : json['hostel'] ?? '',
-      roomTypename: StringUtils.formatRoomNumber(json['roomTypename']?.toString() ?? '', (json['floor'] as num?)?.toInt() ?? 0),
+      roomTypename: (json['isMaster'] == true)
+          ? (json['roomTypename']?.toString() ?? '')
+          : StringUtils.formatRoomNumber(json['roomTypename']?.toString() ?? '', (json['floor'] as num?)?.toInt() ?? 0),
       floor: (json['floor'] as num?)?.toInt() ?? 0,
       floors: json['floors'] is List
           ? (json['floors'] as List).map((e) => (e as num).toInt()).toList()

@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'screens/building_identity_screen.dart';
 import 'screens/floor_config_screen.dart';
+import 'screens/room_category_screen.dart';
 import 'screens/room_config_screen.dart';
 import 'screens/price_master_screen.dart';
 import 'screens/setup_success_screen.dart';
@@ -37,24 +39,36 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
 
   @override
   Widget build(BuildContext context) {
-    final int totalSteps = 4;
+    const int totalSteps = 5;
 
-    return BlocProvider(
-      create: (context) {
-        final cubit = di.sl<PropertySetupCubit>();
-        if (widget.existingHostel != null) {
-          cubit.prefillFromHostel(widget.existingHostel!);
-        } else {
-          cubit.resetState();
-        }
-        if (widget.initialStep > 0) {
-          cubit.setStep(widget.initialStep);
-        }
-        return cubit;
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            final cubit = di.sl<PropertySetupCubit>();
+            if (widget.existingHostel != null) {
+              cubit.prefillFromHostel(widget.existingHostel!);
+            } else {
+              cubit.resetState();
+            }
+            if (widget.initialStep > 0) {
+              cubit.setStep(widget.initialStep);
+            }
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (context) => di.sl<RoomCubit>()..getRooms(isMaster: true),
+        ),
+      ],
       child: BlocListener<PropertySetupCubit, PropertySetupState>(
-        listenWhen: (previous, current) => previous.currentStep != current.currentStep,
+        listenWhen: (previous, current) => previous.currentStep != current.currentStep || previous.error != current.error,
         listener: (context, state) {
+          if (state.error != null && state.error!.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error!), backgroundColor: Colors.redAccent),
+            );
+          }
           if (state.currentStep < totalSteps + 1) {
             _pageController.animateToPage(
               state.currentStep,
@@ -75,12 +89,13 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                     child: PageView(
                       controller: _pageController,
                       physics: const NeverScrollableScrollPhysics(),
-                      children: const [
-                        BuildingIdentityScreen(),
-                        FloorConfigScreen(),
-                        RoomConfigScreen(),
-                        PriceMasterScreen(),
-                        SetupSuccessScreen(),
+                      children: [
+                        const BuildingIdentityScreen(),
+                        const FloorConfigScreen(),
+                        const RoomCategoryScreen(),
+                        const RoomConfigScreen(),
+                        const PriceMasterScreen(),
+                        const SetupSuccessScreen(),
                       ],
                     ),
                   ),
@@ -116,12 +131,14 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
               child: Row(
                 children: [
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close_rounded, color: const Color(0xFF0F172A), size: 28.sp),
+                    icon: Icon(Icons.close_rounded, color: const Color(0xFF0F172A), size: 24.sp),
+                    constraints: const BoxConstraints(),
+                    padding: EdgeInsets.zero,
                   ),
                   Expanded(
                     child: BlocBuilder<PropertySetupCubit, PropertySetupState>(
@@ -132,7 +149,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                               'Setup Property',
                               style: TextStyle(
                                 color: const Color(0xFF0F172A),
-                                fontSize: 18.sp,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.5,
                               ),
@@ -142,7 +159,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                                 'Step ${state.currentStep + 1} of $totalSteps',
                                 style: TextStyle(
                                   color: const Color(0xFF64748B),
-                                  fontSize: 12.sp,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -151,7 +168,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                       },
                     ),
                   ),
-                  SizedBox(width: 48.w), // Spacer for center alignment
+                  SizedBox(width: 24.w),
                 ],
               ),
             ),
@@ -201,10 +218,10 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
         final isValid = context.read<PropertySetupCubit>().isValidToFinish;
 
         return Container(
-          padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
@@ -218,25 +235,26 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
               if (state.currentStep > 0)
                 Container(
                   margin: EdgeInsets.only(right: 16.w),
-                  child: TextButton(
+                  child: OutlinedButton(
                     onPressed: () => context.read<PropertySetupCubit>().previousStep(),
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFF2B5797), width: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 16.h),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                     ),
                     child: Text(
                       'Back',
                       style: TextStyle(
-                        color: const Color(0xFF64748B),
+                        color: const Color(0xFF2B5797),
                         fontSize: 16.sp,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
                 ),
               Expanded(
                 child: _PremiumButton(
-                  onPressed: state.isSaving
+                  onPressed: (state.isSaving || !context.read<PropertySetupCubit>().isStepValid)
                       ? null
                       : () {
                           if (isLastStep) {
@@ -244,9 +262,35 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                               context.read<PropertySetupCubit>().saveProperty();
                             } else {
                               final message = context.read<PropertySetupCubit>().state.validationMessage ?? 'Please complete all fields and pricing';
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+                                  title: Row(
+                                    children: [
+                                      const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                                      SizedBox(width: 8.w),
+                                      Text('Incomplete Setup', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900)),
+                                    ],
+                                  ),
+                                  content: Text(message, style: TextStyle(fontSize: 14.sp, height: 1.6, color: const Color(0xFF475569))),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: Text('Got it', style: TextStyle(color: const Color(0xFF2B5797), fontWeight: FontWeight.w800)),
+                                    ),
+                                  ],
+                                ),
                               );
+                            }
+                          } else if (state.currentStep == 0) {
+                            final buildingName = context.read<PropertySetupCubit>().state.buildingName;
+                            if (buildingName.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please enter property name')),
+                              );
+                            } else {
+                              context.read<PropertySetupCubit>().nextStep();
                             }
                           } else if (state.currentStep == 1) {
                             final totalRooms = context.read<PropertySetupCubit>().totalRooms;
@@ -254,6 +298,17 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Please add at least 1 room to proceed'),
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              );
+                            } else {
+                              context.read<PropertySetupCubit>().nextStep();
+                            }
+                          } else if (state.currentStep == 2) {
+                            if (state.roomCategories.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please add at least 1 room type to proceed'),
                                   backgroundColor: Colors.redAccent,
                                 ),
                               );
@@ -322,19 +377,18 @@ class _PremiumButtonState extends State<_PremiumButton> with SingleTickerProvide
       onTap: widget.onPressed,
       child: ScaleTransition(
         scale: _scale,
-        child: Container(
-          height: 56.h,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 48.h,
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFF7A00), Color(0xFFFF5C00)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-            borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
+            color: widget.onPressed == null 
+                ? const Color(0xFFCBD5E1)
+                : const Color(0xFF2B5797),
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: widget.onPressed == null ? null : [
               BoxShadow(
-                color: const Color(0xFFFF7A00).withValues(alpha: 0.3),
+                color: const Color(0xFF2B5797).withValues(alpha: 0.2),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),

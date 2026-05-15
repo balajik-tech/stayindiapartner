@@ -5,6 +5,7 @@ import 'package:stayindia_owner/features/profile/data/models/room_detail_model.d
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
 import 'package:stayindia_owner/features/property_setup/domain/repositories/property_setup_repository.dart';
+import 'package:stayindia_owner/core/utils/logger.dart';
 
 class PropertySetupRepositoryImpl implements PropertySetupRepository {
   final HostelRemoteDataSource hostelRemoteDataSource;
@@ -25,6 +26,7 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
     required int floors,
     required List<String> amenities,
     required List<Map<String, dynamic>> rooms,
+    List<Map<String, dynamic>>? roomCategories,
     required Map<String, dynamic> masterPricing,
     double? lat,
     double? lng,
@@ -33,9 +35,24 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
     required String state,
     required String hostelType,
     required List<String> images,
+    String? pincode,
+    String? contactNumber,
+    String? contactEmail,
+    String? description,
+    String? propertyTag,
+    String? district,
+    String? village,
     String? foodLicense,
     String? hostelLicense,
     String? tradeLicense,
+    String? fireSafety,
+    String? policeNoc,
+    String? shopsEstablishment,
+    String? gstRegistration,
+    String? healthSanitation,
+    String? utilityBill,
+    String? pollutionNoc,
+    String? residentVerification,
   }) async {
     // Map UI labels to backend values
     String normalizedHostelType = hostelType.toLowerCase();
@@ -61,6 +78,12 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
         area: area,
         city: city,
         state: state,
+        pincode: pincode,
+        contactNumber: contactNumber,
+        description: description,
+        propertyTag: propertyTag,
+        district: district,
+        village: village,
       );
       createdHostel = await hostelRemoteDataSource.updateHostel(hostelModel);
     } else {
@@ -75,6 +98,12 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
         area: area,
         city: city,
         state: state,
+        pincode: pincode,
+        contactNumber: contactNumber,
+        description: description,
+        propertyTag: propertyTag,
+        district: district,
+        village: village,
       );
 
       createdHostel = await hostelRemoteDataSource.createHostel(hostelModel);
@@ -87,12 +116,30 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
       }
     }
 
-    if (foodLicense != null || hostelLicense != null || tradeLicense != null) {
+    if (foodLicense != null ||
+        hostelLicense != null ||
+        tradeLicense != null ||
+        fireSafety != null ||
+        policeNoc != null ||
+        shopsEstablishment != null ||
+        gstRegistration != null ||
+        healthSanitation != null ||
+        utilityBill != null ||
+        pollutionNoc != null ||
+        residentVerification != null) {
       createdHostel = await hostelRemoteDataSource.uploadHostelLicenses(
         createdHostel.id,
         foodLicense: foodLicense,
         hostelLicense: hostelLicense,
         tradeLicense: tradeLicense,
+        fireSafety: fireSafety,
+        policeNoc: policeNoc,
+        shopsEstablishment: shopsEstablishment,
+        gstRegistration: gstRegistration,
+        healthSanitation: healthSanitation,
+        utilityBill: utilityBill,
+        pollutionNoc: pollutionNoc,
+        residentVerification: residentVerification,
       );
     }
 
@@ -111,23 +158,30 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
       
       // FIX 4: Safe pricing lookup with fallback and logging
       final typePricing = masterPricing[type] as Map<String, dynamic>? ?? {};
-      final config = (typePricing[sharing] ?? typePricing[int.tryParse(sharing)?.toString()] ?? typePricing[int.tryParse(sharing)]) as Map<String, dynamic>?;
+      final config = typePricing[sharing] as Map<String, dynamic>?;
       
       if (config == null) {
-        print("ERROR: Missing pricing for type=$type sharing=$sharing");
+        AppLogger.error("Missing pricing for type=$type sharing=$sharing");
       }
 
-      final rent = (config?['rent'] ?? 0.0).toDouble();
-      final deposit = (config?['deposit'] ?? 0.0).toDouble();
-      final maintenance = (config?['maintenance'] ?? 0.0).toDouble();
-      final dailyRent = (config?['dailyRent'] ?? 0.0).toDouble();
+      final rent = ((double.tryParse(roomData['rent']?.toString() ?? '0') ?? 0.0) > 0)
+          ? (double.tryParse(roomData['rent']?.toString() ?? '0') ?? 0.0)
+          : (config?['rent'] ?? 0.0).toDouble();
+
+      final deposit = ((double.tryParse(roomData['deposit']?.toString() ?? '0') ?? 0.0) > 0)
+          ? (double.tryParse(roomData['deposit']?.toString() ?? '0') ?? 0.0)
+          : (config?['deposit'] ?? 0.0).toDouble();
+
+      final maintenance = ((double.tryParse(roomData['maintenance']?.toString() ?? '0') ?? 0.0) > 0)
+          ? (double.tryParse(roomData['maintenance']?.toString() ?? '0') ?? 0.0)
+          : (config?['maintenance'] ?? 0.0).toDouble();
+
+      final dailyRent = ((double.tryParse(roomData['dailyRent']?.toString() ?? '0') ?? 0.0) > 0)
+          ? (double.tryParse(roomData['dailyRent']?.toString() ?? '0') ?? 0.0)
+          : (config?['dailyRent'] ?? 0.0).toDouble();
       
       // TEMP DEBUG LOGGING
-      print("FINAL_SAVE:");
-      print("Room: ${roomData['roomNumber']}");
-      print("Type: $type");
-      print("Sharing: $sharing");
-      print("Pricing: $config");
+      AppLogger.debug("FINAL_SAVE:\nRoom: ${roomData['roomNumber']}\nType: $type\nSharing: $sharing\nPricing: $config");
 
       // Handle floor logic correctly for G, 1, 2, etc.
       int floorNum = 1;
@@ -167,6 +221,34 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
           status: 'FREE',
         )).toList(),
       ));
+    }
+
+    if (roomCategories != null) {
+      for (var cat in roomCategories) {
+        final isAC = cat['isAC'] == true;
+        final sharing = (cat['sharingType'] ?? 2).toString();
+        final rent = double.tryParse(cat['monthlyRent']?.toString() ?? '0') ?? 0.0;
+        final deposit = double.tryParse(cat['securityDeposit']?.toString() ?? '0') ?? 0.0;
+        final maintenance = double.tryParse(cat['maintenance']?.toString() ?? '0') ?? 0.0;
+        final dailyRent = double.tryParse(cat['dailyRent']?.toString() ?? '0') ?? 0.0;
+
+        roomModels.add(RoomDetailModel(
+          id: '',
+          hostelId: createdHostel.id,
+          roomTypename: cat['name']?.toString().isNotEmpty == true ? cat['name'].toString() : '$sharing Sharing ${isAC ? "AC" : "Non-AC"}',
+          floor: 0,
+          sharingType: sharing == '1' ? 'SINGLE' : sharing == '2' ? 'DOUBLE' : sharing == '3' ? 'TRIPLE' : sharing == '4' ? 'QUADRUPLE' : sharing == '5' ? 'QUINTUPLE' : 'DORMITORY',
+          roomType: isAC ? 'AC' : 'NON-AC',
+          rent: rent,
+          deposit: deposit,
+          maintenance: maintenance,
+          dailyRent: dailyRent,
+          isActive: true,
+          isMaster: true,
+          capacity: int.tryParse(sharing) ?? 2,
+          beds: [],
+        ));
+      }
     }
 
     if (roomModels.isNotEmpty) {

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
-import 'package:intl/intl.dart';
 import '../cubit/stock_cubit.dart';
 import '../cubit/stock_state.dart';
 import '../../domain/entities/stock_item.dart';
+import '../../core/stock_constants.dart';
 import 'add_stock_item_page.dart';
 import 'stock_detail_page.dart';
 
@@ -48,7 +49,7 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
             return Center(child: Text('Error: ${state.message}'));
           }
 
-          if (state is StockLoaded) {
+          if (state is StockLoaded || state is StockItemDetailLoaded || state is StockActionSuccess) {
             return RefreshIndicator(
               onRefresh: () async => _loadStocks(),
               color: const Color(0xFF2C5990),
@@ -100,9 +101,13 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
           final hostelState = context.read<HostelCubit>().state;
           if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
              final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+             final stockCubit = context.read<StockCubit>();
              Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AddStockItemPage(propertyId: hostelId)),
+              MaterialPageRoute(builder: (context) => BlocProvider.value(
+                value: stockCubit,
+                child: AddStockItemPage(propertyId: hostelId),
+              )),
             );
           }
         },
@@ -160,7 +165,7 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
         ),
         _buildMetricCard(
           title: 'Recent Usage',
-          value: '4 items', 
+          value: '${summary['recentUsageCount'] ?? 0} items', 
           icon: Icons.history_rounded,
           color: const Color(0xFF6366F1),
         ),
@@ -220,9 +225,13 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
 
     return BouncingWrapper(
       onTap: () {
+        final stockCubit = context.read<StockCubit>();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => StockDetailPage(item: item)),
+          MaterialPageRoute(builder: (context) => BlocProvider.value(
+            value: stockCubit,
+            child: StockDetailPage(item: item),
+          )),
         );
       },
       child: Container(
@@ -258,7 +267,7 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.name,
+                    StockConstants.getLocalizedNameForEntity(item, context.locale.languageCode),
                     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1A1A1A)),
                   ),
                   Text(

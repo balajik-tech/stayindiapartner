@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
 import 'package:stayindia_owner/injection_container.dart';
@@ -65,67 +66,7 @@ class _RoomMasterViewState extends State<_RoomMasterView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.darkText),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Room Master',
-          style: TextStyle(
-            color: AppColors.darkText,
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(60.h),
-          child: Column(
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                height: 48.h,
-                padding: EdgeInsets.all(4.w),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F4F7),
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  indicator: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  labelColor: AppColors.darkText,
-                  unselectedLabelColor: const Color(0xFF667085),
-                  labelStyle: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  tabs: const [
-                    Tab(text: 'All'),
-                    Tab(text: 'AC'),
-                    Tab(text: 'Non-AC'),
-                  ],
-                ),
-              ),
-              const Divider(height: 1, color: AppColors.roomCardBorder),
-            ],
-          ),
-        ),
-      ),
+      backgroundColor: const Color(0xFFFBFBFE),
       body: BlocConsumer<RoomCubit, RoomState>(
         listener: (context, state) {
           if (state is RoomOperationSuccess) {
@@ -143,19 +84,25 @@ class _RoomMasterViewState extends State<_RoomMasterView>
           }
         },
         builder: (context, state) {
-          if (state is RoomLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is RoomError) {
-            return Center(child: Text('Error: ${state.message}'));
-          }
-          final rooms = state is RoomLoaded ? state.rooms : <RoomDetail>[];
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _RoomListBuilder(rooms: rooms, filter: 'All'),
-              _RoomListBuilder(rooms: rooms, filter: 'AC'),
-              _RoomListBuilder(rooms: rooms, filter: 'Non-AC'),
+          return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            slivers: [
+              _buildPremiumHeader(context),
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h),
+                sliver: state is RoomLoading
+                    ? const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+                    : SliverFillRemaining(
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'All'),
+                            _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'AC'),
+                            _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'Non-AC'),
+                          ],
+                        ),
+                      ),
+              ),
             ],
           );
         },
@@ -202,6 +149,94 @@ class _RoomMasterViewState extends State<_RoomMasterView>
       ),
     );
   }
+
+  Widget _buildPremiumHeader(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: EdgeInsets.fromLTRB(12.w, 54.h, 24.w, 32.h),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1E3A8A), Color(0xFF2C5EBD)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1E3A8A).withValues(alpha: 0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'room_master'.tr(),
+                        style: TextStyle(
+                          fontSize: 26.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -1.0,
+                        ),
+                      ),
+                      Text(
+                        'room_master_sub'.tr(),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 12.w),
+              height: 50.h,
+              padding: EdgeInsets.all(4.r),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                indicator: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                labelColor: const Color(0xFF1E3A8A),
+                unselectedLabelColor: Colors.white.withValues(alpha: 0.8),
+                labelStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                tabs: [
+                  Tab(text: 'all'.tr()),
+                  Tab(text: 'amenity_ac'.tr()),
+                  Tab(text: 'amenity_non_ac'.tr()),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _RoomListBuilder extends StatelessWidget {
@@ -222,7 +257,7 @@ class _RoomListBuilder extends StatelessWidget {
     if (filtered.isEmpty) {
       return Center(
         child: Text(
-          'No rooms found',
+          'no_rooms_found'.tr(),
           style: TextStyle(fontSize: 16.sp, color: AppColors.greyText),
         ),
       );
@@ -261,7 +296,7 @@ class _RoomMasterCard extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              room.roomTypename,
+                              _getLocalizedRoomTypename(room.roomTypename),
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
@@ -276,7 +311,7 @@ class _RoomMasterCard extends StatelessWidget {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        '${room.sharingType}    ${room.floors.isEmpty ? 'Floor ${room.floor}' : 'Floors: ${room.floors.join(', ')}'}',
+                        _getLocalizedSharingType(room.sharingType),
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: const Color(0xFF667085),
@@ -321,15 +356,15 @@ class _RoomMasterCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                 _FinanceItem(label: 'Rent', value: room.rent.toStringAsFixed(0)),
+                 _FinanceItem(label: 'rent'.tr(), value: room.rent.toStringAsFixed(0)),
                  if (room.dailyRent > 0) ...[
                    SizedBox(width: 24.w),
-                   _FinanceItem(label: 'Daily', value: room.dailyRent.toStringAsFixed(0)),
+                   _FinanceItem(label: 'daily'.tr(), value: room.dailyRent.toStringAsFixed(0)),
                  ],
                  SizedBox(width: 24.w),
-                 _FinanceItem(label: 'Deposit', value: room.deposit.toStringAsFixed(0)),
+                 _FinanceItem(label: 'deposit'.tr(), value: room.deposit.toStringAsFixed(0)),
                  SizedBox(width: 24.w),
-                 _FinanceItem(label: 'Maint.', value: room.maintenance.toStringAsFixed(0)),
+                 _FinanceItem(label: 'maintenance_short'.tr(), value: room.maintenance.toStringAsFixed(0)),
               ],
             ),
             SizedBox(height: 20.h),
@@ -338,7 +373,7 @@ class _RoomMasterCard extends StatelessWidget {
                 Expanded(
                   child: _ActionButton(
                     icon: Icons.edit_outlined,
-                    label: 'Edit',
+                    label: 'btn_edit'.tr(),
                     color: const Color(0xFFF5F8FF),
                     textColor: AppColors.primaryBlue,
                     borderColor: const Color(0xFFD1E0FF),
@@ -384,7 +419,7 @@ class _RoomMasterCard extends StatelessWidget {
                 Expanded(
                   child: _ActionButton(
                     icon: Icons.delete_outline,
-                    label: 'Delete',
+                    label: 'btn_delete'.tr(),
                     color: const Color(0xFFFFF1F0),
                     textColor: const Color(0xFFF04438),
                     borderColor: const Color(0xFFFEE4E2),
@@ -415,23 +450,49 @@ class _RoomMasterCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Room'),
-        content: Text('Are you sure you want to delete "${room.roomTypename}"?'),
+        title: Text('delete_room'.tr()),
+        content: Text('delete_room_confirm'.tr(namedArgs: {'room': _getLocalizedRoomTypename(room.roomTypename)})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text('btn_cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               context.read<RoomCubit>().deleteRoom(room.id, isMaster: true);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('btn_delete'.tr(), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
+  }
+
+  String _getLocalizedSharingType(String sharing) {
+    switch (sharing.toUpperCase()) {
+      case 'SINGLE': return 'sharing_single'.tr();
+      case 'DOUBLE': return 'sharing_double'.tr();
+      case 'TRIPLE': return 'sharing_triple'.tr();
+      case 'QUADRUPLE': return 'sharing_quad'.tr();
+      case 'QUINTUPLE': return 'sharing_count'.tr(namedArgs: {'count': '5'});
+      default: return sharing;
+    }
+  }
+
+  String _getLocalizedRoomTypename(String name) {
+    String res = name;
+    res = res.replaceAll('Single Sharing', 'sharing_single'.tr());
+    res = res.replaceAll('2 Sharing', 'sharing_double'.tr());
+    res = res.replaceAll('3 Sharing', 'sharing_triple'.tr());
+    res = res.replaceAll('4 Sharing', 'sharing_quad'.tr());
+    res = res.replaceAll('5 Sharing', 'sharing_count'.tr(namedArgs: {'count': '5'}));
+    if (res.contains('NON-AC')) {
+      res = res.replaceAll('NON-AC', 'amenity_non_ac'.tr());
+    } else if (res.contains('AC')) {
+      res = res.replaceAll('AC', 'amenity_ac'.tr());
+    }
+    return res;
   }
 }
 
@@ -457,7 +518,7 @@ class _TypeBadge extends StatelessWidget {
           ),
           SizedBox(width: 6.w),
           Text(
-            isAc ? 'AC' : 'Non-AC',
+            isAc ? 'amenity_ac'.tr() : 'amenity_non_ac'.tr(),
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,

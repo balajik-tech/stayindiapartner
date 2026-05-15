@@ -41,6 +41,7 @@ abstract class AuthRemoteDataSource {
     String? deviceId,
   });
   Future<OwnerModel> acceptPolicy({String version = '1.0'});
+  Future<OwnerModel> staffLogin(String phone, String password);
 }
 
 
@@ -280,6 +281,54 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       message: 'Failed to accept policy.',
       statusCode: response.statusCode,
     );
+  }
+
+  @override
+  Future<OwnerModel> staffLogin(String phone, String password) async {
+    final sanitized = _sanitizePhone(phone);
+    AppLogger.info('Logging in staff: $sanitized');
+
+    final response = await _dio.post(
+      ApiConstants.staffLogin,
+      data: {'phone': sanitized, 'password': password},
+    );
+
+    if (response.statusCode != 200) {
+      final message =
+          (response.data is Map && response.data['message'] != null)
+              ? response.data['message'].toString()
+              : 'Staff login failed.';
+      throw AuthException(message: message);
+    }
+
+    final raw = response.data is Map && response.data.containsKey('data')
+        ? response.data['data'] as Map<String, dynamic>
+        : response.data as Map<String, dynamic>;
+
+    final token = raw['token'] as String? ?? raw['accessToken'] as String?;
+    if (token != null && token.isNotEmpty) {
+      await _tokenStorage.saveToken(token);
+      await _tokenStorage.savePhone(sanitized);
+      AppLogger.success('Staff token saved securely.');
+    }
+
+    final userJson = raw['user'] is Map
+        ? raw['user'] as Map<String, dynamic>
+        : <String, dynamic>{};
+
+    OwnerModel owner;
+    if (userJson.isNotEmpty) {
+      owner = OwnerModel.fromJson(
+        userJson['phone'] == null || (userJson['phone'] as String).isEmpty
+            ? {...userJson, 'phone': sanitized}
+            : userJson,
+      );
+    } else {
+      owner = await getCurrentOwner();
+    }
+
+    AppLogger.success('Staff login verified.');
+    return owner;
   }
 
   

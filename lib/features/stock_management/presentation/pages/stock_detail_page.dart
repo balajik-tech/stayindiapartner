@@ -120,10 +120,10 @@ class _StockDetailPageState extends State<StockDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      StockConstants.getLocalizedNameForEntity(item, context.locale.languageCode),
+                      StockConstants.getLocalizedNameForEntity(item, 'en'),
                       style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1A1A1A)),
                     ),
-                    if (StockConstants.getLocalizedNameForEntity(item, context.locale.languageCode).toLowerCase() != item.name.toLowerCase())
+                    if (StockConstants.getLocalizedNameForEntity(item, 'en').toLowerCase() != item.name.toLowerCase())
                       Text(
                         item.name,
                         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.blueGrey),

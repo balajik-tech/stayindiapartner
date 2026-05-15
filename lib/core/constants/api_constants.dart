@@ -1,12 +1,13 @@
 import 'dart:io';
 
 class ApiConstants {
-  static const String _localUrl = 'http://localhost:5050/api/v1';
   static const String _androidUrl = 'http://10.0.2.2:5050/api/v1';
+
+  static const String _prodUrl = 'https://api.koushiksoftwaresolutions.online/api/v1';
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: _localUrl,
+    defaultValue: _prodUrl,
   );
 
   static String get effectiveBaseUrl {
@@ -16,7 +17,7 @@ class ApiConstants {
     try {
       if (Platform.isAndroid) return _androidUrl;
     } catch (_) {}
-    return _localUrl;
+    return _prodUrl;
   }
 
   static const String requestOtp = '/auth/request-otp';
@@ -52,6 +53,7 @@ class ApiConstants {
   static const String dashboardDailyOps = '/dashboard/daily-operations';
   static const String dashboardOccupancy = '/dashboard/occupancy';
   static const String dashboardRentDue = '/dashboard/rent-due';
+  static const String dashboardBulkData = '/dashboard/bulk-data';
   static const String propertyOccupancyStatus = '/property';
 
   static const String foodMenu = '/food-menu';

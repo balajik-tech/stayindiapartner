@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 
@@ -27,27 +28,36 @@ class BedCard extends StatelessWidget {
     Color textColor;
 
     final upperStatus = status.toUpperCase();
-    final bool isOccupied = upperStatus == 'OCCUPIED' || upperStatus == 'AWAY';
+    final bool isAway = upperStatus == 'AWAY';
     final bool isBooked = upperStatus == 'BOOKED';
     final bool isNotice = upperStatus == 'NOTICE';
     final bool isFree = upperStatus == 'FREE';
 
     if (isFree) {
-      bgColor = const Color(0xFFE6F9EF);
-      borderColor = const Color(0xFF22C55E);
-      textColor = const Color(0xFF15803D);
+      // Matches "Free Beds" summary card: sky blue #87CEEB
+      bgColor = const Color(0xFFD6EEF8);
+      borderColor = const Color(0xFF87CEEB);
+      textColor = const Color(0xFF1A6F8A);
     } else if (isNotice) {
-      bgColor = const Color(0xFFFEF9C3);
-      borderColor = const Color(0xFFEAB308);
-      textColor = const Color(0xFFA16207);
+      // Matches "Notice" summary card: amber #FFB300
+      bgColor = const Color(0xFFFFF3CD);
+      borderColor = const Color(0xFFFFB300);
+      textColor = const Color(0xFF7A5800);
     } else if (isBooked) {
+      // Matches "Reservation" summary card: purple #9C27B0
       bgColor = const Color(0xFFF3E8FF);
-      borderColor = const Color(0xFF9333EA);
-      textColor = const Color(0xFF7E22CE);
+      borderColor = const Color(0xFF9C27B0);
+      textColor = const Color(0xFF6A0080);
+    } else if (isAway) {
+      // Matches "Away" summary card: pink #E91E63
+      bgColor = const Color(0xFFFFE4EE);
+      borderColor = const Color(0xFFE91E63);
+      textColor = const Color(0xFF9C0040);
     } else {
-      bgColor = const Color(0xFFFFF1E6);
-      borderColor = const Color(0xFFF97316);
-      textColor = const Color(0xFFC2410C);
+      // Occupied — matches "Occupied" summary card: orange #FF8600
+      bgColor = const Color(0xFFFFEDD5);
+      borderColor = const Color(0xFFFF8600);
+      textColor = const Color(0xFF8B4000);
     }
 
     String bedLabel = bedNumber;
@@ -62,82 +72,170 @@ class BedCard extends StatelessWidget {
       bedLabel = bedNumber;
     }
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: 68.w,
-      height: 76.h,
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: borderColor,
-          width: 1.5,
-        ),
-        boxShadow: isSelected ? [
-          BoxShadow(
-            color: borderColor.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          )
-        ] : null,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18.r),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (tenantAvatar != null || tenantName != null)
-                    CustomAvatar(
-                      imageUrl: tenantAvatar,
-                      name: tenantName ?? 'T',
-                      size: 22.r,
-                      fontSize: 9.sp,
-                    )
-                  else
-                    Icon(
-                      Icons.bed_rounded,
-                      size: 18.sp,
-                      color: textColor.withValues(alpha: 0.8),
+    return Semantics(
+      label: '${'bed'.tr()} $bedNumber, ${'status'.tr()}: $status${tenantName != null ? ', ${'tenant'.tr()}: $tenantName' : ''}',
+      button: true,
+      onTap: onTap,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 56.w,
+                  height: 80.h,
+                  child: CustomPaint(
+                    foregroundPainter: _DottedBorderPainter(
+                      color: borderColor,
+                      strokeWidth: 1.8,
+                      dashWidth: 4,
+                      dashSpace: 3,
+                      borderRadius: 18.r,
                     ),
-                  
-                  SizedBox(height: 4.h),
-                  
-                  Text(
-                    bedLabel,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w900,
-                      color: textColor,
-                      height: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(18.r),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: borderColor.withValues(alpha: 0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (tenantAvatar != null || tenantName != null)
+                              CustomAvatar(
+                                imageUrl: tenantAvatar,
+                                name: tenantName ?? 'T',
+                                size: 22.r,
+                                fontSize: 9.sp,
+                              )
+                            else
+                              Icon(
+                                Icons.bed_rounded,
+                                size: 20.sp,
+                                color: textColor.withValues(alpha: 0.8),
+                              ),
+                            SizedBox(height: 4.h),
+                             FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  bedLabel,
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color: textColor,
+                                    height: 1,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-
-                  SizedBox(height: 2.h),
-                  
-                  Text(
-                    isFree ? 'FREE' : (tenantName?.split(' ')[0] ?? upperStatus),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 7.5.sp,
-                      fontWeight: FontWeight.w700,
-                      color: textColor.withValues(alpha: 0.8),
-                      letterSpacing: 0.1,
+                ),
+                if (isAway || isNotice)
+                  Positioned(
+                    top: -6.h,
+                    right: 4.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: borderColor,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        isAway ? 'AWAY' : 'NOTICE',
+                        style: TextStyle(
+                          fontSize: 7.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
                   ),
-                ],
+              ],
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              isFree ? 'Available' : (tenantName?.split(' ')[0] ?? upperStatus),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+                letterSpacing: 0.1,
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
+}
+
+class _DottedBorderPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double dashWidth;
+  final double dashSpace;
+  final double borderRadius;
+
+  _DottedBorderPainter({
+    required this.color,
+    required this.strokeWidth,
+    required this.dashWidth,
+    required this.dashSpace,
+    required this.borderRadius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(strokeWidth / 2, strokeWidth / 2, size.width - strokeWidth, size.height - strokeWidth),
+      Radius.circular(borderRadius),
+    );
+
+    final path = Path()..addRRect(rrect);
+    final metrics = path.computeMetrics();
+
+    for (final metric in metrics) {
+      double distance = 0;
+      while (distance < metric.length) {
+        final remaining = metric.length - distance;
+        final currentDash = dashWidth < remaining ? dashWidth : remaining;
+        canvas.drawPath(metric.extractPath(distance, distance + currentDash), paint);
+        distance += currentDash + dashSpace;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DottedBorderPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.strokeWidth != strokeWidth ||
+      oldDelegate.dashWidth != dashWidth ||
+      oldDelegate.dashSpace != dashSpace ||
+      oldDelegate.borderRadius != borderRadius;
 }

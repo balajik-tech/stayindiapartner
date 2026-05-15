@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import '../cubit/bookings_cubit.dart';
 import '../cubit/bookings_state.dart';
@@ -11,6 +12,7 @@ import 'package:stayindia_owner/features/bookings/domain/booking.dart';
 import 'package:stayindia_owner/core/constants/ui_constants.dart';
 import 'package:stayindia_owner/core/widgets/pattern_background.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 
 class _BookingsPageWithScroll extends StatefulWidget {
   const _BookingsPageWithScroll();
@@ -90,8 +92,8 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildTabContent(context, state, state.requests, 'No pending requests', 'New booking requests will appear here'),
-                    _buildTabContent(context, state, state.checkIns, 'No active residents', 'Manage your current residents here'),
+                    _buildTabContent(context, state, state.requests, 'no_pending_requests'.tr(), 'new_booking_requests_here'.tr()),
+                    _buildTabContent(context, state, state.checkIns, 'no_active_residents'.tr(), 'manage_residents_subtitle'.tr()),
                     _buildHistoryTab(context, state),
                   ],
                 ),
@@ -120,7 +122,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Bookings',
+                      'bookings_title'.tr(),
                       style: TextStyle(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w900,
@@ -129,7 +131,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                       ),
                     ),
                     Text(
-                      'Manage stays and residents',
+                      'bookings_subtitle'.tr(),
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.white.withValues(alpha: 0.5),
@@ -144,7 +146,10 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                 children: [
                   _buildHeaderAction(Icons.search_rounded, () => setState(() => _isSearching = !_isSearching)),
                   _buildHeaderAction(Icons.filter_list_rounded, () => _showFilterSheet(context)),
-                  _buildHeaderAction(Icons.refresh_rounded, () => context.read<BookingsCubit>().fetchBookings()),
+                  _buildHeaderAction(Icons.refresh_rounded, () {
+                    final hostelId = context.read<HostelCubit>().state.selectedHostelId;
+                    context.read<BookingsCubit>().fetchBookings(hostelId: hostelId);
+                  }),
                 ],
               ),
             ],
@@ -224,9 +229,9 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         tabs: [
-          _buildTabItem('Requests', state.requests.length, 0),
-          _buildTabItem('Active', state.checkIns.length, 1),
-          const Tab(text: 'History'),
+          _buildTabItem('tab_requests'.tr(), state.requests.length, 0),
+          _buildTabItem('tab_active'.tr(), state.checkIns.length, 1),
+          Tab(text: 'tab_history'.tr()),
         ],
       ),
     );
@@ -263,6 +268,8 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
   }
 
   Widget _buildTabContent(BuildContext context, BookingsState state, List<Booking> items, String emptyTitle, String emptySubtitle) {
+    final hostelId = context.read<HostelCubit>().state.selectedHostelId;
+    
     if (state.status == BookingsStatus.loading && state.bookings.isEmpty) {
       return ListView.builder(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -276,7 +283,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
     }
 
     return RefreshIndicator(
-      onRefresh: () => context.read<BookingsCubit>().fetchBookings(),
+      onRefresh: () => context.read<BookingsCubit>().fetchBookings(hostelId: hostelId),
       color: AppColors.primaryBlue,
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
@@ -305,7 +312,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
 
   Widget _buildHistoryTab(BuildContext context, BookingsState state) {
     final historyBookings = state.bookings.where((b) => [BookingStatus.cancelled, BookingStatus.checkedOut].contains(b.status)).toList();
-    return _buildTabContent(context, state, historyBookings, 'No history found', 'Completed stays will appear here');
+    return _buildTabContent(context, state, historyBookings, 'no_history_found'.tr(), 'history_empty_subtitle'.tr());
   }
 
   Widget _buildEmptyState(String title, String subtitle) {
@@ -375,7 +382,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Filter Bookings',
+                    'filter_bookings'.tr(),
                     style: TextStyle(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w900,
@@ -392,20 +399,20 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                       cubit.changeFilter(kycStatus: '', roomType: '');
                       Navigator.pop(context);
                     },
-                    child: Text('Reset', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.accentOrange)),
+                    child: Text('reset'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.accentOrange)),
                   ),
                 ],
               ),
               SizedBox(height: 24.h),
               _buildFilterSection(
-                'KYC Status',
-                ['Verified', 'Pending'],
+                'kyc_status'.tr(),
+                ['verified'.tr(), 'pending'.tr()],
                 tempKycStatus,
                 (val) => setSheetState(() => tempKycStatus = val),
               ),
               SizedBox(height: 24.h),
               _buildFilterSection(
-                'Room Type',
+                'room_type'.tr(),
                 ['1 Sharing', '2 Sharing', '3 Sharing'],
                 tempRoomType,
                 (val) => setSheetState(() => tempRoomType = val),
@@ -421,7 +428,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                     );
                     Navigator.pop(context);
                   },
-                  child: const Text('Apply Filters'),
+                  child: Text('apply_filters'.tr()),
                 ),
               ),
             ],

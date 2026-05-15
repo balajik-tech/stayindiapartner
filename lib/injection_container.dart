@@ -21,6 +21,7 @@ import 'package:stayindia_owner/features/guest/guest_injections.dart';
 import 'package:stayindia_owner/features/notifications/notification_injections.dart';
 import 'package:stayindia_owner/features/property_setup/property_setup_injections.dart';
 import 'package:stayindia_owner/features/offers/offers_injections.dart';
+import 'package:stayindia_owner/core/theme/theme_cubit.dart';
 
 
 
@@ -36,10 +37,10 @@ final sl = GetIt.instance;
 Future<void> init() async {
   registerAuthFeature(sl);
   registerDashboardFeature(sl);
+  registerProfileFeature(sl);
   registerBookingsFeature(sl);
   registerCommunityFeature(sl);
   registerTenantsFeature(sl);
-  registerProfileFeature(sl);
   registerNoticeFeature(sl);
   registerPaymentFeature(sl);
   registerMaintenanceFeature(sl);
@@ -50,6 +51,7 @@ Future<void> init() async {
   registerNotificationFeature(sl);
   registerPropertySetupFeature(sl);
   registerOffersFeature(sl);
+  sl.registerLazySingleton(() => ThemeCubit());
 
   sl.registerFactory(() => LocationCubit(sl()));
   sl.registerLazySingleton(() => LocationService());
@@ -59,9 +61,13 @@ Future<void> init() async {
       ));
 
   sl.registerLazySingleton<SocketService>(() {
-    final socketBaseUrl = ApiConstants.baseUrl.endsWith('/api') 
-        ? ApiConstants.baseUrl.substring(0, ApiConstants.baseUrl.length - 4) 
-        : ApiConstants.baseUrl;
+    String socketBaseUrl = ApiConstants.effectiveBaseUrl;
+    if (socketBaseUrl.contains('/api')) {
+      socketBaseUrl = socketBaseUrl.split('/api')[0];
+    }
+    if (socketBaseUrl.endsWith('/')) {
+      socketBaseUrl = socketBaseUrl.substring(0, socketBaseUrl.length - 1);
+    }
     return SocketService(baseUrl: socketBaseUrl)..connect();
   });
 
@@ -76,9 +82,10 @@ Future<void> init() async {
   sl.registerLazySingleton(() {
     final dio = Dio(
       BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        baseUrl: ApiConstants.effectiveBaseUrl,
+        connectTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 60),
+        sendTimeout: const Duration(seconds: 60),
       ),
     );
     

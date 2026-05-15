@@ -225,7 +225,13 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             selectedBed,
                             (b) => _addTenantCubit.selectBed(selectedHostel!, selectedFloor!, floors, selectedRoom!, rooms, b!, beds),
                             isLoading: isLoading,
-                            itemLabel: (b) => 'Bed $b',
+                            itemLabel: (b) {
+                              final num = int.tryParse(b);
+                              if (num != null && num > 0 && num <= 26) {
+                                return 'Bed ${String.fromCharCode(64 + num)}';
+                              }
+                              return 'Bed $b';
+                            },
                           ),
 
                           SizedBox(height: 32.h),

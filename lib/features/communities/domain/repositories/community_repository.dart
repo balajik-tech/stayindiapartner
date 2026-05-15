@@ -45,6 +45,12 @@ abstract class CommunityRepository {
     String? districtId,
     String? wardId,
     String? localityId,
+    String? rules,
+    String? executiveRole,
+    String? fullName,
+    String? phoneNumber,
+    String? govtCertificatePath,
+    String? associationCertificatePath,
   });
 
   
@@ -60,6 +66,7 @@ abstract class CommunityRepository {
     required String communityId,
     String? name,
     String? description,
+    String? rules,
     String? imagePath,
     String? coverImagePath,
   });

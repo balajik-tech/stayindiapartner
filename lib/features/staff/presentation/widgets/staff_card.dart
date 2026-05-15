@@ -127,16 +127,6 @@ class StaffCard extends StatelessWidget {
                     SizedBox(width: 12.w),
                     _buildActionButton(
                       context,
-                      icon: Icons.message_rounded,
-                      label: 'Chat',
-                      color: AppColors.primaryBlue,
-                      onTap: () {
-                        
-                      },
-                    ),
-                    SizedBox(width: 12.w),
-                    _buildActionButton(
-                      context,
                       icon: Icons.settings_rounded,
                       label: 'Manage',
                       color: AppColors.greyText,

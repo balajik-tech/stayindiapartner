@@ -59,4 +59,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<OwnerEntity> acceptPolicy({String version = '1.0'}) =>
       _remote.acceptPolicy(version: version);
+
+  @override
+  Future<OwnerEntity> staffLogin(String phone, String password) =>
+      _remote.staffLogin(phone, password);
 }

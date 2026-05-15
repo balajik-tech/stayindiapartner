@@ -16,15 +16,8 @@ import 'package:stayindia_owner/core/utils/error_helper.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/features/auth/domain/repositories/auth_repository.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
-import 'package:stayindia_owner/injection_container.dart' as di;
 
 part 'auth_state.dart';
-
-
-
-
-
-
 
 class AuthCubit extends Cubit<AuthState> {
   final RequestOtpUseCase _requestOtp;
@@ -36,6 +29,7 @@ class AuthCubit extends Cubit<AuthState> {
   final DeleteAccountUseCase _deleteAccount;
 
   final AuthRepository _repository;
+  final NotificationService _notificationService;
 
   AuthCubit({
     required RequestOtpUseCase requestOtpUseCase,
@@ -46,20 +40,21 @@ class AuthCubit extends Cubit<AuthState> {
     required HasActiveSessionUseCase hasActiveSessionUseCase,
     required DeleteAccountUseCase deleteAccountUseCase,
     required AuthRepository repository,
-  })  : _requestOtp = requestOtpUseCase,
-        _verifyOtp = verifyOtpUseCase,
-        _getCurrentOwner = getCurrentOwnerUseCase,
-        _completeProfile = completeProfileUseCase,
-        _logout = logoutUseCase,
-        _hasActiveSession = hasActiveSessionUseCase,
-        _deleteAccount = deleteAccountUseCase,
-        _repository = repository,
-        super(AuthInitial());
+    required NotificationService notificationService,
+  }) : _requestOtp = requestOtpUseCase,
+       _verifyOtp = verifyOtpUseCase,
+       _getCurrentOwner = getCurrentOwnerUseCase,
+       _completeProfile = completeProfileUseCase,
+       _logout = logoutUseCase,
+       _hasActiveSession = hasActiveSessionUseCase,
+       _deleteAccount = deleteAccountUseCase,
+       _repository = repository,
+       _notificationService = notificationService,
+       super(AuthInitial());
 
   Future<void> _syncDeviceToken() async {
     try {
-      final notificationService = di.sl<NotificationService>();
-      final token = await notificationService.getToken();
+      final token = await _notificationService.getToken();
       if (token != null) {
         await _repository.updateDeviceToken(
           pushToken: token,
@@ -72,10 +67,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  
-
-  
-  
   Future<void> restoreSession() async {
     final hasSession = await _hasActiveSession();
     if (!hasSession) {
@@ -95,18 +86,21 @@ class AuthCubit extends Cubit<AuthState> {
         await _logout();
         emit(AuthUnauthenticated());
       } else {
-        emit(AuthSessionRestoreError(
-          message: 'Connection error. Please check your network.',
-        ));
+        emit(
+          AuthSessionRestoreError(
+            message: 'Connection error. Please check your network.',
+          ),
+        );
       }
     } catch (e) {
-      emit(AuthSessionRestoreError(
-        message: 'Could not restore your session. Please try again.',
-      ));
+      emit(
+        AuthSessionRestoreError(
+          message: 'Could not restore your session. Please try again.',
+        ),
+      );
     }
   }
 
-  
   Future<void> sendOtp(String phone) async {
     emit(AuthLoading());
     try {
@@ -119,8 +113,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  
-  
   Future<void> resendOtp(String phone) async {
     emit(AuthLoading());
     try {
@@ -132,16 +124,14 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  
   Future<void> verifyOtp(String phone, String otp) async {
     emit(AuthLoading());
     try {
       final result = await _verifyOtp(phone, otp);
-      AppLogger.info('AuthCubit: OTP verified for ${result.owner.id}. isNewUser: ${result.isNewUser}, isProfileComplete: ${result.owner.isProfileComplete}');
-      emit(AuthAuthenticated(
-        owner: result.owner,
-        isNewUser: result.isNewUser,
-      ));
+      AppLogger.info(
+        'AuthCubit: OTP verified for ${result.owner.id}. isNewUser: ${result.isNewUser}, isProfileComplete: ${result.owner.isProfileComplete}',
+      );
+      emit(AuthAuthenticated(owner: result.owner, isNewUser: result.isNewUser));
       _syncDeviceToken();
       AppLogger.info(
         'OTP verified. Owner: ${result.owner.id}, isNewUser: ${result.isNewUser}',
@@ -152,13 +142,14 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  
   Future<void> completeProfile(ProfileParams params) async {
     emit(AuthLoading());
     try {
       ProfileParams finalParams = params;
       if (params.avatarPath != null) {
-        final compressed = await ImageUtils.compressImage(File(params.avatarPath!));
+        final compressed = await ImageUtils.compressImage(
+          File(params.avatarPath!),
+        );
         if (compressed != null) {
           finalParams = ProfileParams(
             firstName: params.firstName,
@@ -179,19 +170,16 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  
   Future<void> logout() async {
     try {
       await _logout();
     } catch (_) {
-      
     } finally {
       emit(AuthUnauthenticated());
       AppLogger.info('Owner logged out.');
     }
   }
 
-  
   Future<void> deleteAccount() async {
     emit(AuthLoading());
     try {
@@ -203,7 +191,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  
   Future<void> refreshProfile() async {
     try {
       final owner = await _getCurrentOwner();
@@ -211,7 +198,6 @@ class AuthCubit extends Cubit<AuthState> {
       AppLogger.info('Profile refreshed for owner: ${owner.id}');
     } catch (e) {
       AppLogger.error('refreshProfile failed', e);
-      // Don't emit error to avoid interrupting current state if just refreshing
     }
   }
 
@@ -222,6 +208,19 @@ class AuthCubit extends Cubit<AuthState> {
       AppLogger.success('Policy accepted successfully');
     } catch (e) {
       AppLogger.error('acceptPolicy failed', e);
+      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> staffLogin(String phone, String password) async {
+    emit(AuthLoading());
+    try {
+      final owner = await _repository.staffLogin(phone, password);
+      emit(AuthAuthenticated(owner: owner, isNewUser: false));
+      _syncDeviceToken();
+      AppLogger.info('Staff logged in successfully. Owner/Staff: ${owner.id}');
+    } catch (e) {
+      AppLogger.error('staffLogin failed', e);
       emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
     }
   }

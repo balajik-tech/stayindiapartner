@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 
 class FloorFilter extends StatelessWidget {
@@ -32,36 +31,18 @@ class FloorFilter extends StatelessWidget {
               onTap: () => onSelected(index),
               scaleFactor: 0.97,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF2C5990) : Colors.white,
+                  color: isSelected ? const Color(0xFF2C599D) : Colors.white,
                   borderRadius: BorderRadius.circular(24.r),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: const Color(0xFF2C5990).withValues(alpha: 0.15),
-                      blurRadius: 24,
-                      offset: const Offset(4, 10),
-                    ),
-                    BoxShadow(
-                      color: const Color(0xFF2C5990).withValues(alpha: 0.08),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ] : [
-                    // Embedded/Flat feel for secondary chips
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: isSelected ? null : Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Text(
                   floors[index],
                   style: TextStyle(
-                    color: isSelected ? Colors.white : AppColors.textPrimary,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    fontSize: 13.sp,
+                    color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                    fontSize: 14.sp,
                   ),
                 ),
               ),

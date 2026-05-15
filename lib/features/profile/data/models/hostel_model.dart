@@ -63,6 +63,7 @@ class HostelModel extends Hostel {
 
   Map<String, dynamic> toJson() {
     return {
+      '_id': id,
       'name': name,
       'address': address,
       'area': area ?? '',

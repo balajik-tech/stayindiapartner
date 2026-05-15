@@ -420,7 +420,7 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                         itemBuilder: (context, index) {
                           final item = filteredItems[index];
                           return ListTile(
-                            title: Text(item['name']!),
+                            title: Text(StockConstants.getLocalizedName(item, langCode)),
                             onTap: () {
                               _nameController.text = item['name']!;
                               _onItemSearch(item['name']!);
@@ -463,7 +463,7 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
 
   Widget _buildDropdown(String value, List<String> items, void Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       onChanged: onChanged,
       decoration: InputDecoration(

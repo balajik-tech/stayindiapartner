@@ -26,7 +26,6 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
   String? _selectedReportType; // 'payments', 'tenants', 'bookings'
   bool _isGenerating = false;
   List<dynamic> _previewData = [];
-  Map<String, dynamic> _summary = {};
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +142,11 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
         );
         if (picked != null) {
           setState(() {
-            if (isStart) _startDate = picked; else _endDate = picked;
+            if (isStart) {
+              _startDate = picked;
+            } else {
+              _endDate = picked;
+            }
           });
           if (_selectedReportType != null) _fetchPreview();
         }
@@ -352,7 +355,6 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
       if (response.statusCode == 200) {
         setState(() {
           _previewData = response.data['data']['data'] ?? [];
-          _summary = response.data['data']['summary'] ?? {};
         });
       }
     } catch (e) {

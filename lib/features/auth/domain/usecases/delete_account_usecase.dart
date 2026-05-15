@@ -1,6 +1,5 @@
 import '../repositories/auth_repository.dart';
 
-
 class DeleteAccountUseCase {
   final AuthRepository repository;
 

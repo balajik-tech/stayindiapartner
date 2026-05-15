@@ -6,6 +6,7 @@ abstract class TenantRepository {
     int page = 1,
     int limit = 100, 
     String? search,
+    String? hostelId,
   });
 
   Future<TenantDetailEntity> getTenantDetail(String tenantId, String hostelId);

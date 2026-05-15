@@ -6,6 +6,7 @@ import 'domain/usecases/community_usecases.dart';
 import 'presentation/cubit/community_cubit.dart';
 import 'presentation/cubit/owner_community_cubit.dart';
 import 'presentation/cubit/association_cubit.dart';
+import 'presentation/cubit/social_feed_cubit.dart';
 
 void registerCommunityFeature(GetIt sl) {
   
@@ -43,6 +44,17 @@ void registerCommunityFeature(GetIt sl) {
     ),
   );
 
+  sl.registerFactory(
+    () => SocialFeedCubit(
+      getSocialFeedUseCase: sl(),
+      createSocialPostUseCase: sl(),
+      togglePostLikeUseCase: sl(),
+      addPostCommentUseCase: sl(),
+      votePollUseCase: sl(),
+      deleteSocialPostUseCase: sl(),
+    ),
+  );
+
   
   sl.registerLazySingleton(() => GetCommunityDetailsUseCase(sl()));
   sl.registerLazySingleton(() => GetCommunityMessagesUseCase(sl()));
@@ -59,6 +71,7 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetPendingJoinRequestsUseCase(sl()));
   sl.registerLazySingleton(() => HandleJoinRequestUseCase(sl()));
   sl.registerLazySingleton(() => GetCommunityInfoUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateOwnerCommunityUseCase(sl()));
   sl.registerLazySingleton(() => GetAssociationsUseCase(sl()));
   sl.registerLazySingleton(() => JoinAssociationUseCase(sl()));
   sl.registerLazySingleton(() => CreateAssociationUseCase(sl()));

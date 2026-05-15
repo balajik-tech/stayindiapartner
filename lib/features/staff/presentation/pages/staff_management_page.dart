@@ -156,17 +156,6 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
               ),
             ),
           ),
-          SizedBox(width: 12.w),
-          Container(
-            height: 52.h,
-            width: 52.h,
-            decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            child: Icon(Icons.tune_rounded,
-                color: AppColors.primaryBlue, size: 22.sp),
-          ),
         ],
       ),
     );

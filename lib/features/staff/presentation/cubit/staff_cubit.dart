@@ -41,6 +41,7 @@ class StaffCubit extends Cubit<StaffState> {
     required String name,
     required String phone,
     String? email,
+    String? password,
     required String role,
     Map<String, dynamic>? permissions,
   }) async {
@@ -54,6 +55,7 @@ class StaffCubit extends Cubit<StaffState> {
         name: name,
         phone: phone,
         email: email,
+        password: password,
         role: role,
         permissions: permissions,
       );

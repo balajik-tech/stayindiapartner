@@ -48,4 +48,43 @@ class AppTheme {
       ),
     );
   }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      primaryColor: AppColors.primaryBlue,
+      scaffoldBackgroundColor: const Color(0xFF0F172A),
+      brightness: Brightness.dark,
+      useMaterial3: true,
+      textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).copyWith(
+        titleLarge: GoogleFonts.outfit(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+        bodyLarge: GoogleFonts.outfit(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: Colors.white,
+        ),
+        bodyMedium: GoogleFonts.outfit(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: Colors.white70,
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF1E293B),
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Color(0xFF1E293B),
+        selectedItemColor: AppColors.primaryBlue,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        elevation: 10,
+      ),
+    );
+  }
 }

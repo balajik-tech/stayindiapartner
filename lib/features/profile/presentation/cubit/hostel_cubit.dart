@@ -3,6 +3,7 @@ import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/usecases/hostel_usecases.dart';
 import 'package:stayindia_owner/core/utils/error_handler.dart';
 import 'hostel_state.dart';
+import '../../data/models/hostel_model.dart';
 
 class HostelCubit extends HydratedCubit<HostelState> {
   final GetHostelsUseCase _getHostels;
@@ -42,9 +43,16 @@ class HostelCubit extends HydratedCubit<HostelState> {
     try {
       final hostels = await _getHostels();
       if (isClosed) return;
+      
+      List<int> indices = state is HostelLoaded ? (state as HostelLoaded).selectedHostelIndices : [0];
+      // Filter out invalid indices
+      indices = indices.where((i) => i < hostels.length).toList();
+      if (indices.isEmpty && hostels.isNotEmpty) indices = [0];
+
       emit(HostelLoaded(
         hostels: hostels,
         selectedHostelIndex: currentIndex < hostels.length ? currentIndex : 0,
+        selectedHostelIndices: indices,
         lastFetched: DateTime.now(),
       ));
     } catch (e) {
@@ -59,6 +67,30 @@ class HostelCubit extends HydratedCubit<HostelState> {
         emit(HostelLoaded(
           hostels: loadedState.hostels,
           selectedHostelIndex: index,
+          selectedHostelIndices: [index], // Default to just one when using single select
+          lastFetched: loadedState.lastFetched,
+        ));
+      }
+    }
+  }
+
+  void toggleHostelSelection(int index) {
+    if (state is HostelLoaded) {
+      final loadedState = state as HostelLoaded;
+      if (index >= 0 && index < loadedState.hostels.length) {
+        List<int> newIndices = List.from(loadedState.selectedHostelIndices);
+        if (newIndices.contains(index)) {
+          if (newIndices.length > 1) {
+            newIndices.remove(index);
+          }
+        } else {
+          newIndices.add(index);
+        }
+        
+        emit(HostelLoaded(
+          hostels: loadedState.hostels,
+          selectedHostelIndex: newIndices.first,
+          selectedHostelIndices: newIndices,
           lastFetched: loadedState.lastFetched,
         ));
       }
@@ -180,6 +212,22 @@ class HostelCubit extends HydratedCubit<HostelState> {
       final lastFetchedStr = json['lastFetched'] as String?;
       final lastFetched = lastFetchedStr != null ? DateTime.parse(lastFetchedStr) : null;
       
+      final hostelsJson = json['hostels'] as List<dynamic>?;
+      final hostels = hostelsJson?.map((e) => HostelModel.fromJson(e)).toList();
+      
+      if (hostels != null && hostels.isNotEmpty) {
+        final selectedHostelIndex = json['selectedHostelIndex'] as int? ?? 0;
+        final selectedHostelIndices = (json['selectedHostelIndices'] as List<dynamic>?)
+            ?.map((e) => e as int)
+            .toList() ?? [0];
+
+        return HostelLoaded(
+          hostels: hostels,
+          selectedHostelIndex: selectedHostelIndex < hostels.length ? selectedHostelIndex : 0,
+          selectedHostelIndices: selectedHostelIndices.where((i) => i < hostels.length).toList(),
+          lastFetched: lastFetched,
+        );
+      }
       
       return HostelInitial(lastFetched: lastFetched);
     } catch (_) {
@@ -189,6 +237,14 @@ class HostelCubit extends HydratedCubit<HostelState> {
 
   @override
   Map<String, dynamic>? toJson(HostelState state) {
+    if (state is HostelLoaded) {
+      return {
+        'lastFetched': state.lastFetched?.toIso8601String(),
+        'hostels': state.hostels.map((e) => (e as HostelModel).toJson()).toList(),
+        'selectedHostelIndex': state.selectedHostelIndex,
+        'selectedHostelIndices': state.selectedHostelIndices,
+      };
+    }
     return state.toJson();
   }
 }

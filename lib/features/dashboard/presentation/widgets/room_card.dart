@@ -78,106 +78,198 @@ class _RoomCardState extends State<RoomCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Room Header
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.room.floorName?.toUpperCase() ?? 'GROUND FLOOR',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF94A3B8),
-                        letterSpacing: 0.5,
+          if (widget.isGridView) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.room.floorName?.toUpperCase() ?? 'GROUND FLOOR',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF94A3B8),
+                          letterSpacing: 0.5,
+                        ),
                       ),
+                      SizedBox(height: 2.h),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              widget.roomNumber,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w900,
+                                color: const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 4.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                            child: Text(
+                              widget.roomType?.toUpperCase() ?? 'AC',
+                              style: TextStyle(
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 4.w),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    StringUtils.formatSharingType(widget.sharingType),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF64748B),
                     ),
-                    SizedBox(height: 2.h),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            widget.roomNumber,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w900,
-                              color: const Color(0xFF0F172A),
+                  ),
+                ),
+              ],
+            ),
+            if ((widget.rent != null && widget.rent! > 0) || (widget.dailyRent != null && widget.dailyRent! > 0)) ...[
+              SizedBox(height: 8.h),
+              Text(
+                widget.rent != null && widget.rent! > 0
+                    ? '₹${widget.rent!.toInt()}/mo'
+                    : '₹${widget.dailyRent!.toInt()}/day',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ] else ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.room.floorName?.toUpperCase() ?? 'GROUND FLOOR',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF94A3B8),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              widget.roomNumber,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w900,
+                                color: const Color(0xFF0F172A),
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(4.r),
-                          ),
-                          child: Text(
-                            widget.roomType?.toUpperCase() ?? 'AC',
-                            style: TextStyle(
-                              fontSize: 8.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF64748B),
+                          SizedBox(width: 4.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                            child: Text(
+                              widget.roomType?.toUpperCase() ?? 'AC',
+                              style: TextStyle(
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF64748B),
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 4.w),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (widget.rent != null && widget.rent! > 0) ...[
+                      Text(
+                        '₹${widget.rent!.toInt()}/mo',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0F172A),
                         ),
-                      ],
+                      ),
+                      SizedBox(width: 8.w),
+                    ] else if (widget.dailyRent != null && widget.dailyRent! > 0) ...[
+                      Text(
+                        '₹${widget.dailyRent!.toInt()}/day',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                    ],
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Text(
+                        StringUtils.formatSharingType(widget.sharingType),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              SizedBox(width: 4.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Text(
-                      StringUtils.formatSharingType(widget.sharingType),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF64748B),
-                      ),
-                    ),
-                  ),
-                  if (widget.rent != null && widget.rent! > 0) ...[
-                    SizedBox(height: 6.h),
-                    Text(
-                      '₹${widget.rent!.toInt()}/mo',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
-                      ),
-                    ),
-                  ] else if (widget.dailyRent != null && widget.dailyRent! > 0) ...[
-                    SizedBox(height: 6.h),
-                    Text(
-                      '₹${widget.dailyRent!.toInt()}/day',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
           
           Padding(
             padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -185,13 +277,11 @@ class _RoomCardState extends State<RoomCard> {
           ),
           
           // Beds Grid
-          Center(
-            child: Wrap(
-              spacing: 8.w,
-              runSpacing: 8.h,
-              alignment: WrapAlignment.start,
-              children: widget.beds.map((bed) => _buildBedItem(context, bed)).toList(),
-            ),
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 8.h,
+            alignment: WrapAlignment.start,
+            children: widget.beds.map((bed) => _buildBedItem(context, bed)).toList(),
           ),
         ],
       ),
@@ -201,12 +291,18 @@ class _RoomCardState extends State<RoomCard> {
   Widget _buildBedItem(BuildContext context, entity.BedInfo bed) {
     return BedCard(
       bedNumber: bed.bedNumber,
-      status: bed.status,
+      status: bed.isAway ? 'AWAY' : bed.status,
       tenantName: bed.tenantName,
       tenantAvatar: bed.tenantAvatar,
       isSelected: widget.isPreAllocated && bed.bedNumber == widget.preAllocatedBedNumber,
       onTap: () {
         final bedStatus = _mapStatus(bed.status);
+        
+        if (widget.onBedTap != null && bedStatus == BedStatus.free) {
+          widget.onBedTap!(widget.roomNumber, bed.bedNumber);
+          return;
+        }
+
         final hId = widget.hostelId ?? _getHostelId(context);
         BedDetailsSheet.show(
           context,
@@ -236,6 +332,8 @@ class _RoomCardState extends State<RoomCard> {
         return BedStatus.free;
       case 'NOTICE':
         return BedStatus.notice;
+      case 'AWAY':
+        return BedStatus.away;
       default:
         return BedStatus.occupied;
     }

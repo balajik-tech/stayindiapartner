@@ -8,14 +8,16 @@ class GetTenantsUseCase {
   Future<List<TenantEntity>> call({
     String status = 'CHECKED_IN',
     int page = 1,
-    int limit = 100,
+    int limit = 10,
     String? search,
+    String? hostelId,
   }) {
     return repository.getTenants(
       status: status,
       page: page,
       limit: limit,
       search: search,
+      hostelId: hostelId,
     );
   }
 }

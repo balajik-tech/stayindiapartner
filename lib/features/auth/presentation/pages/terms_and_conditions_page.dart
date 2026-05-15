@@ -5,10 +5,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 
 class TermsAndConditionsPage extends StatefulWidget {
   final bool readOnly;
-  const TermsAndConditionsPage({super.key, this.readOnly = false});
+  /// If provided, called after policy is successfully accepted instead of
+  /// the default Navigator.pop behaviour. Use this when the page is pushed
+  /// with pushAndRemoveUntil and there is no page to pop back to.
+  final VoidCallback? onAccepted;
+
+  const TermsAndConditionsPage({
+    super.key,
+    this.readOnly = false,
+    this.onAccepted,
+  });
 
   @override
   State<TermsAndConditionsPage> createState() => _TermsAndConditionsPageState();
@@ -31,7 +41,18 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            Navigator.pop(context);
+            if (widget.onAccepted != null) {
+              widget.onAccepted!();
+            } else if (widget.readOnly) {
+              Navigator.pop(context);
+            } else {
+              // Shown post-registration: navigate to dashboard, clearing all routes.
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const MainNavigationPage()),
+                (route) => false,
+              );
+            }
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

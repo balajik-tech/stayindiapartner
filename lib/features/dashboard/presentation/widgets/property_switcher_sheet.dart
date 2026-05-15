@@ -93,16 +93,16 @@ class PropertySwitcherSheet extends StatelessWidget {
                     separatorBuilder: (context, index) => SizedBox(height: 12.h),
                     itemBuilder: (context, index) {
                       final hostel = state.hostels[index];
-                      final isSelected = state.selectedHostelIndex == index;
+                      final isSelected = state.selectedHostelIndices.contains(index);
 
                       return BouncingWrapper(
                         onTap: () {
                           if (onPropertySelected != null) {
                             onPropertySelected!(index);
+                            Navigator.pop(context);
                           } else {
-                            context.read<HostelCubit>().selectHostel(index);
+                            context.read<HostelCubit>().toggleHostelSelection(index);
                           }
-                          Navigator.pop(context);
                         },
                         child: Container(
                           padding: EdgeInsets.all(12.r),

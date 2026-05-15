@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_state.dart';
@@ -8,6 +9,7 @@ import 'package:stayindia_owner/features/tenants/presentation/widgets/tenant_car
 import 'package:stayindia_owner/features/tenants/presentation/widgets/maintenance_tab_view.dart';
 import 'package:stayindia_owner/features/tenants/presentation/widgets/notices_tab_view.dart';
 import 'package:stayindia_owner/features/notices/presentation/pages/give_notice_page.dart';
+import 'package:stayindia_owner/features/notices/presentation/cubit/notice_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/pages/add_tenant_page.dart';
 import 'package:stayindia_owner/features/tenants/presentation/widgets/past_tenants_sheet.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
@@ -44,9 +46,8 @@ class _TenantsPageState extends State<TenantsPage> {
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
       if (_selectedTabIndex == 0) {
-        final hostelState = context.read<HostelCubit>().state;
-        if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-          final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+        final hostelId = context.read<HostelCubit>().state.selectedHostelId;
+        if (hostelId != null) {
           context.read<TenantCubit>().loadMoreTenants(hostelId);
         }
       }
@@ -54,10 +55,10 @@ class _TenantsPageState extends State<TenantsPage> {
   }
 
   void _loadData() {
-    final hostelState = context.read<HostelCubit>().state;
-    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-      final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+    final hostelId = context.read<HostelCubit>().state.selectedHostelId;
+    if (hostelId != null) {
       context.read<TenantCubit>().loadTenants(hostelId);
+      context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
     }
   }
 
@@ -115,43 +116,45 @@ class _TenantsPageState extends State<TenantsPage> {
           ),
         ),
       ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: 16.h),
-        child: _buildFAB(context),
-      ),
+      floatingActionButton: _buildFAB(context) != null
+          ? Padding(
+              padding: EdgeInsets.only(bottom: 90.h),
+              child: _buildFAB(context),
+            )
+          : null,
     );
   }
 
   Widget _buildAppHeader() {
     return SliverToBoxAdapter(
       child: Container(
-        padding: EdgeInsets.fromLTRB(8.w, 12.h, 20.w, 24.h),
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
         decoration: BoxDecoration(
           color: AppColors.primaryBlue,
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
         ),
         child: Row(
           children: [
-            SizedBox(width: 20.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Tenants',
+                    'tenants_title'.tr(),
                     style: TextStyle(
-                      fontSize: 22.sp,
+                      fontSize: 26.sp,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
-                      letterSpacing: -0.5,
+                      letterSpacing: -1.0,
                     ),
                   ),
+                  SizedBox(height: 4.h),
                   Text(
-                    'Manage property residents',
+                    'tenants_subtitle'.tr(),
                     style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -160,12 +163,13 @@ class _TenantsPageState extends State<TenantsPage> {
             BouncingWrapper(
               onTap: () => _loadData(),
               child: Container(
-                padding: EdgeInsets.all(10.r),
+                padding: EdgeInsets.all(12.r),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12.r),
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                 ),
-                child: Icon(Icons.refresh_rounded, size: 22.sp, color: Colors.white),
+                child: Icon(Icons.refresh_rounded, size: 24.sp, color: Colors.white),
               ),
             ),
           ],
@@ -184,9 +188,9 @@ class _TenantsPageState extends State<TenantsPage> {
       ),
       child: Row(
         children: [
-          _buildTabItem(0, 'Tenants', Icons.group_rounded),
-          _buildTabItem(1, 'Services', Icons.build_rounded),
-          _buildTabItem(2, 'Notices', Icons.notification_important_rounded),
+          _buildTabItem(0, 'tab_tenants'.tr(), Icons.group_rounded),
+          _buildTabItem(1, 'tab_services'.tr(), Icons.build_rounded),
+          _buildTabItem(2, 'tab_notices'.tr(), Icons.notification_important_rounded),
         ],
       ),
     );
@@ -271,7 +275,7 @@ class _TenantsPageState extends State<TenantsPage> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: 'Search residents...',
+                      hintText: 'search_residents'.tr(),
                       hintStyle: TextStyle(
                         color: AppColors.textSecondary.withValues(alpha: 0.4), 
                         fontSize: 14.sp, 
@@ -368,7 +372,7 @@ class _TenantsPageState extends State<TenantsPage> {
             return SliverFillRemaining(
               child: _buildEmptyState(
                 icon: Icons.people_outline_rounded,
-                title: 'No residents found',
+                title: 'no_residents_found'.tr(),
                 message: state.message ?? 'Start by adding your first tenant to this property.',
               ),
             );
@@ -442,55 +446,49 @@ class _TenantsPageState extends State<TenantsPage> {
 
   Widget? _buildFAB(BuildContext context) {
     if (_selectedTabIndex == 0) {
-      return BouncingWrapper(
-        onTap: () {
+      return FloatingActionButton.extended(
+        onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddTenantPage()),
           );
         },
-        child: FloatingActionButton.extended(
-          onPressed: null, // Managed by BouncingWrapper
-          backgroundColor: AppColors.accentOrange,
-          elevation: 8,
-          icon: Icon(Icons.add, color: Colors.white, size: 24.sp),
-          label: Text(
-            'Add Tenant',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w800,
-            ),
+        backgroundColor: AppColors.primaryBlue,
+        elevation: 8,
+        icon: Icon(Icons.add, color: Colors.white, size: 20.sp),
+        label: Text(
+          'add_tenant'.tr(),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
         ),
       );
     } else if (_selectedTabIndex == 2) {
-      return BouncingWrapper(
-        onTap: () {
+      return FloatingActionButton.extended(
+        onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const GiveNoticePage()),
           );
         },
-        child: FloatingActionButton.extended(
-          onPressed: null, // Managed by BouncingWrapper
-          backgroundColor: AppColors.accentOrange,
-          elevation: 8,
-          icon: Icon(Icons.assignment_late_rounded, color: Colors.white, size: 22.sp),
-          label: Text(
-            'Give Notice',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w800,
-            ),
+        backgroundColor: AppColors.primaryBlue,
+        elevation: 8,
+        icon: Icon(Icons.assignment_late_rounded, color: Colors.white, size: 20.sp),
+        label: Text(
+          'move_out_notice'.tr(),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
         ),
       );
     }

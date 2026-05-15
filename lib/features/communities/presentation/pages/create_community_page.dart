@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart' as cropper;
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bouncing_wrapper.dart';
 import '../cubit/owner_community_cubit.dart';
@@ -33,10 +34,26 @@ class CreateCommunityPage extends StatefulWidget {
 class _CreateCommunityPageState extends State<CreateCommunityPage> {
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
+  final _rulesController = TextEditingController();
+  final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
   File? _profileImage;
   File? _coverImage;
+  File? _govtCertificate;
+  File? _associationCertificate;
+  String? _selectedRole;
   final _picker = ImagePicker();
-  bool _isPublic = true;
+
+  final List<String> _executiveRoles = [
+    'President',
+    'Vice President',
+    'General Secretary',
+    'Joint Secretary',
+    'Chief Financial Officer / Treasurer',
+    'Chief Legal Advisor',
+    'Technical & Compliance Head',
+    'Public Relations Officer',
+  ];
 
   Future<void> _pickImage(bool isCover) async {
     final pickedFile = await _picker.pickImage(
@@ -44,11 +61,50 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       imageQuality: 70,
     );
     if (pickedFile != null) {
+      final croppedFile = await cropper.ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        aspectRatio: isCover ? const cropper.CropAspectRatio(ratioX: 16, ratioY: 9) : const cropper.CropAspectRatio(ratioX: 1, ratioY: 1),
+        uiSettings: [
+          cropper.AndroidUiSettings(
+            toolbarTitle: isCover ? 'Crop Cover Photo' : 'Crop Profile Photo',
+            toolbarColor: AppColors.primaryBlue,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: isCover ? cropper.CropAspectRatioPreset.ratio16x9 : cropper.CropAspectRatioPreset.square,
+            lockAspectRatio: true,
+            cropStyle: isCover ? cropper.CropStyle.rectangle : cropper.CropStyle.circle,
+          ),
+          cropper.IOSUiSettings(
+            title: isCover ? 'Crop Cover Photo' : 'Crop Profile Photo',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+            cropStyle: isCover ? cropper.CropStyle.rectangle : cropper.CropStyle.circle,
+          ),
+        ],
+      );
+
+      if (croppedFile != null) {
+        setState(() {
+          if (isCover) {
+            _coverImage = File(croppedFile.path);
+          } else {
+            _profileImage = File(croppedFile.path);
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> _pickCertificate(bool isGovt) async {
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+    if (pickedFile != null) {
       setState(() {
-        if (isCover) {
-          _coverImage = File(pickedFile.path);
+        if (isGovt) {
+          _govtCertificate = File(pickedFile.path);
         } else {
-          _profileImage = File(pickedFile.path);
+          _associationCertificate = File(pickedFile.path);
         }
       });
     }
@@ -85,10 +141,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLocationSummary(),
-                          SizedBox(height: 24.h),
                           _buildForm(),
-                          SizedBox(height: 24.h),
-                          _buildPrivacyToggle(),
                         ],
                       ),
                     ),
@@ -246,6 +299,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
   Widget _buildForm() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildTextField(
           controller: _nameController,
@@ -259,9 +313,144 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           label: 'Description',
           hint: 'What is this community for?',
           icon: Icons.description_rounded,
-          maxLines: 4,
+          maxLines: 3,
+        ),
+        SizedBox(height: 20.h),
+        _buildTextField(
+          controller: _rulesController,
+          label: 'Community Rules',
+          hint: 'Enter guidelines and rules for members',
+          icon: Icons.rule_rounded,
+          maxLines: 3,
+        ),
+        SizedBox(height: 28.h),
+        Text(
+          'Executive Committee Verification',
+          style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          'Select your official role and provide verification documents. Created communities are verified by admins.',
+          style: GoogleFonts.outfit(fontSize: 13.sp, color: AppColors.greyText, height: 1.4),
+        ),
+        SizedBox(height: 20.h),
+        Text(
+          'Designated Role',
+          style: GoogleFonts.outfit(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
+        ),
+        SizedBox(height: 8.h),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedRole,
+              hint: Text('Select Executive Role', style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 14.sp)),
+              isExpanded: true,
+              icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey.shade400),
+              dropdownColor: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              items: _executiveRoles.map((role) => DropdownMenuItem(
+                value: role,
+                child: Text(role, style: GoogleFonts.outfit(fontSize: 15.sp, fontWeight: FontWeight.w500, color: AppColors.darkText)),
+              )).toList(),
+              onChanged: (val) => setState(() => _selectedRole = val),
+            ),
+          ),
+        ),
+        SizedBox(height: 20.h),
+        _buildTextField(
+          controller: _fullNameController,
+          label: 'Full Name',
+          hint: 'Enter your official full name',
+          icon: Icons.person_rounded,
+        ),
+        SizedBox(height: 20.h),
+        _buildTextField(
+          controller: _phoneController,
+          label: 'Phone Number',
+          hint: 'Enter 10-digit mobile number',
+          icon: Icons.phone_rounded,
+        ),
+        SizedBox(height: 24.h),
+        Text(
+          'Verification Certificates',
+          style: GoogleFonts.outfit(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            Expanded(
+              child: _buildCertificateUploadCard(
+                title: 'Govt Certificate',
+                file: _govtCertificate,
+                onTap: () => _pickCertificate(true),
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: _buildCertificateUploadCard(
+                title: 'Association Cert',
+                file: _associationCertificate,
+                onTap: () => _pickCertificate(false),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCertificateUploadCard({
+    required String title,
+    required File? file,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 120.h,
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: file != null ? AppColors.primaryBlue.withValues(alpha: 0.05) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: file != null ? AppColors.primaryBlue.withValues(alpha: 0.3) : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              file != null ? Icons.check_circle_rounded : Icons.upload_file_rounded,
+              color: file != null ? Colors.green : Colors.grey.shade400,
+              size: 28.sp,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: file != null ? AppColors.primaryBlue : AppColors.darkText,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              file != null ? 'Uploaded' : 'Tap to upload',
+              style: GoogleFonts.outfit(
+                fontSize: 10.sp,
+                color: file != null ? Colors.green : AppColors.greyText,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -302,46 +491,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     );
   }
 
-  Widget _buildPrivacyToggle() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            _isPublic ? Icons.public_rounded : Icons.lock_rounded,
-            color: _isPublic ? Colors.green : Colors.orange,
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _isPublic ? 'Public Community' : 'Private Community',
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.w800, fontSize: 15.sp),
-                ),
-                Text(
-                  _isPublic ? 'Anyone can discover and join.' : 'Only invited members can join.',
-                  style: GoogleFonts.outfit(fontSize: 12.sp, color: AppColors.greyText),
-                ),
-              ],
-            ),
-          ),
-          Switch.adaptive(
-            value: _isPublic,
-            onChanged: (val) => setState(() => _isPublic = val),
-            activeTrackColor: AppColors.primaryBlue.withValues(alpha: 0.5),
-            activeThumbColor: AppColors.primaryBlue,
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildBottomAction() {
     return BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
@@ -387,6 +537,26 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a community name')));
       return;
     }
+    if (_selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select an executive role')));
+      return;
+    }
+    if (_fullNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter your full name')));
+      return;
+    }
+    if (_phoneController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter your phone number')));
+      return;
+    }
+    if (_govtCertificate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please upload government certificate')));
+      return;
+    }
+    if (_associationCertificate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please upload association certificate')));
+      return;
+    }
 
     context.read<OwnerCommunityCubit>().createCommunity(
       _nameController.text,
@@ -398,6 +568,12 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       localityId: widget.localityId,
       imagePath: _profileImage?.path,
       coverImagePath: _coverImage?.path,
+      rules: _rulesController.text.isNotEmpty ? _rulesController.text : null,
+      executiveRole: _selectedRole,
+      fullName: _fullNameController.text,
+      phoneNumber: _phoneController.text,
+      govtCertificatePath: _govtCertificate?.path,
+      associationCertificatePath: _associationCertificate?.path,
     );
   }
 }

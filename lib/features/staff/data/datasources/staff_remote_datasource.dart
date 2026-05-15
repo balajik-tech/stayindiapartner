@@ -10,6 +10,7 @@ abstract class StaffRemoteDataSource {
     required String name,
     required String phone,
     String? email,
+    String? password,
     required String role,
     Map<String, dynamic>? permissions,
   });
@@ -69,6 +70,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
     required String name,
     required String phone,
     String? email,
+    String? password,
     required String role,
     Map<String, dynamic>? permissions,
   }) async {
@@ -79,6 +81,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'phone': phone,
         'role': role,
         if (email?.isNotEmpty == true) 'email': email,
+        if (password?.isNotEmpty == true) 'password': password,
         if (permissions != null && permissions.isNotEmpty)
           'permissions': permissions,
       };

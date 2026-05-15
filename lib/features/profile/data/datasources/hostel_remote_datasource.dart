@@ -13,7 +13,20 @@ abstract class HostelRemoteDataSource {
   Future<HostelModel> updateHostel(HostelModel hostel);
   Future<void> deleteHostel(String id);
   Future<HostelModel> uploadHostelImages(String id, List<String> filePaths);
-  Future<HostelModel> uploadHostelLicenses(String id, {String? foodLicense, String? hostelLicense, String? tradeLicense});
+  Future<HostelModel> uploadHostelLicenses(
+    String id, {
+    String? foodLicense,
+    String? hostelLicense,
+    String? tradeLicense,
+    String? fireSafety,
+    String? policeNoc,
+    String? shopsEstablishment,
+    String? gstRegistration,
+    String? healthSanitation,
+    String? utilityBill,
+    String? pollutionNoc,
+    String? residentVerification,
+  });
   Future<void> updateHostelLocation(String id, double lat, double lng);
 }
 
@@ -153,32 +166,71 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
   }
 
   @override
-  Future<HostelModel> uploadHostelLicenses(String id, {String? foodLicense, String? hostelLicense, String? tradeLicense}) async {
+  Future<HostelModel> uploadHostelLicenses(
+    String id, {
+    String? foodLicense,
+    String? hostelLicense,
+    String? tradeLicense,
+    String? fireSafety,
+    String? policeNoc,
+    String? shopsEstablishment,
+    String? gstRegistration,
+    String? healthSanitation,
+    String? utilityBill,
+    String? pollutionNoc,
+    String? residentVerification,
+  }) async {
     try {
       final formData = FormData();
       
       if (foodLicense != null && foodLicense.isNotEmpty && !foodLicense.startsWith('http')) {
-        formData.files.add(MapEntry(
-          'foodLicense',
-          await MultipartFile.fromFile(foodLicense),
-        ));
+        formData.files.add(MapEntry('foodLicense', await MultipartFile.fromFile(foodLicense)));
       }
-      
       if (hostelLicense != null && hostelLicense.isNotEmpty && !hostelLicense.startsWith('http')) {
-        formData.files.add(MapEntry(
-          'hostelLicense',
-          await MultipartFile.fromFile(hostelLicense),
-        ));
+        formData.files.add(MapEntry('hostelLicense', await MultipartFile.fromFile(hostelLicense)));
       }
-      
       if (tradeLicense != null && tradeLicense.isNotEmpty && !tradeLicense.startsWith('http')) {
-        formData.files.add(MapEntry(
-          'tradeLicense',
-          await MultipartFile.fromFile(tradeLicense),
-        ));
+        formData.files.add(MapEntry('tradeLicense', await MultipartFile.fromFile(tradeLicense)));
+      }
+      if (fireSafety != null && fireSafety.isNotEmpty && !fireSafety.startsWith('http')) {
+        formData.files.add(MapEntry('fireSafety', await MultipartFile.fromFile(fireSafety)));
+      }
+      if (policeNoc != null && policeNoc.isNotEmpty && !policeNoc.startsWith('http')) {
+        formData.files.add(MapEntry('policeNoc', await MultipartFile.fromFile(policeNoc)));
+      }
+      if (shopsEstablishment != null && shopsEstablishment.isNotEmpty && !shopsEstablishment.startsWith('http')) {
+        formData.files.add(MapEntry('shopsEstablishment', await MultipartFile.fromFile(shopsEstablishment)));
+      }
+      if (gstRegistration != null && gstRegistration.isNotEmpty && !gstRegistration.startsWith('http')) {
+        formData.files.add(MapEntry('gstRegistration', await MultipartFile.fromFile(gstRegistration)));
+      }
+      if (healthSanitation != null && healthSanitation.isNotEmpty && !healthSanitation.startsWith('http')) {
+        formData.files.add(MapEntry('healthSanitation', await MultipartFile.fromFile(healthSanitation)));
+      }
+      if (utilityBill != null && utilityBill.isNotEmpty && !utilityBill.startsWith('http')) {
+        formData.files.add(MapEntry('utilityBill', await MultipartFile.fromFile(utilityBill)));
+      }
+      if (pollutionNoc != null && pollutionNoc.isNotEmpty && !pollutionNoc.startsWith('http')) {
+        formData.files.add(MapEntry('pollutionNoc', await MultipartFile.fromFile(pollutionNoc)));
+      }
+      if (residentVerification != null && residentVerification.isNotEmpty && !residentVerification.startsWith('http')) {
+        formData.files.add(MapEntry('residentVerification', await MultipartFile.fromFile(residentVerification)));
       }
 
-      if (formData.files.isEmpty) return throw Exception('No license files to upload');
+      if (formData.files.isEmpty) {
+        return HostelModel(
+          id: id,
+          name: '',
+          address: '',
+          floors: 1,
+          hostelType: 'men',
+          lat: 0,
+          lng: 0,
+          area: '',
+          city: '',
+          state: '',
+        );
+      }
 
       final response = await dio.post(
         '${ApiConstants.hostels}/$id/licenses',

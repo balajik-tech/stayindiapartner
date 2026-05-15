@@ -99,6 +99,12 @@ class CreateOwnerCommunityUseCase {
     String? districtId,
     String? wardId,
     String? localityId,
+    String? rules,
+    String? executiveRole,
+    String? fullName,
+    String? phoneNumber,
+    String? govtCertificatePath,
+    String? associationCertificatePath,
   }) async {
     return repository.createOwnerCommunity(
       name: name,
@@ -110,6 +116,12 @@ class CreateOwnerCommunityUseCase {
       districtId: districtId,
       wardId: wardId,
       localityId: localityId,
+      rules: rules,
+      executiveRole: executiveRole,
+      fullName: fullName,
+      phoneNumber: phoneNumber,
+      govtCertificatePath: govtCertificatePath,
+      associationCertificatePath: associationCertificatePath,
     );
   }
 }
@@ -138,6 +150,26 @@ class GetCommunityInfoUseCase {
   final CommunityRepository repository;
   GetCommunityInfoUseCase(this.repository);
   Future<Map<String, dynamic>> call(String communityId) => repository.getCommunityInfo(communityId);
+}
+
+class UpdateOwnerCommunityUseCase {
+  final CommunityRepository repository;
+  UpdateOwnerCommunityUseCase(this.repository);
+  Future<void> call({
+    required String communityId,
+    String? name,
+    String? description,
+    String? rules,
+    String? imagePath,
+    String? coverImagePath,
+  }) => repository.updateOwnerCommunity(
+    communityId: communityId,
+    name: name,
+    description: description,
+    rules: rules,
+    imagePath: imagePath,
+    coverImagePath: coverImagePath,
+  );
 }
 
 class GetAssociationsUseCase {

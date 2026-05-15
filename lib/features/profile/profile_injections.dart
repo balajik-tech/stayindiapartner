@@ -3,6 +3,11 @@ import 'package:stayindia_owner/features/profile/data/datasources/profile_remote
 import 'package:stayindia_owner/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:stayindia_owner/features/profile/domain/repositories/profile_repository.dart';
 import 'package:stayindia_owner/features/profile/domain/usecases/profile_usecases.dart';
+import 'package:stayindia_owner/features/profile/domain/usecases/hostel_usecases.dart';
+import 'package:stayindia_owner/features/profile/domain/usecases/room_usecases.dart';
+import 'package:stayindia_owner/features/profile/domain/usecases/food_menu_usecases.dart';
+import 'package:stayindia_owner/features/profile/domain/usecases/settings_usecases.dart';
+import 'package:stayindia_owner/features/profile/domain/usecases/document_usecases.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 
 import 'data/datasources/hostel_remote_datasource.dart';
@@ -90,6 +95,46 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => UploadAvatarUseCase(sl()));
   sl.registerLazySingleton(() => DeleteOwnerAccountUseCase(sl()));
+
+  // Hostel Use-cases
+  sl.registerLazySingleton(() => GetHostelsUseCase(sl()));
+  sl.registerLazySingleton(() => CreateHostelUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateHostelUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteHostelUseCase(sl()));
+  sl.registerLazySingleton(() => UploadHostelImagesUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateHostelLocationUseCase(sl()));
+
+  // Room Use-cases
+  sl.registerLazySingleton(() => GetOccupancyUseCase(sl()));
+  sl.registerLazySingleton(() => GetFloorWiseRoomsUseCase(sl()));
+  sl.registerLazySingleton(() => GetRoomsUseCase(sl()));
+  sl.registerLazySingleton(() => GetFloorsUseCase(sl()));
+  sl.registerLazySingleton(() => GetRoomsByFloorUseCase(sl()));
+  sl.registerLazySingleton(() => GetFreeBedsUseCase(sl()));
+  sl.registerLazySingleton(() => CreateRoomUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateRoomUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteRoomUseCase(sl()));
+  sl.registerLazySingleton(() => GetBedDetailUseCase(sl()));
+  sl.registerLazySingleton(() => GetBedHistoryUseCase(sl()));
+  sl.registerLazySingleton(() => BulkCreateRoomsUseCase(sl()));
+
+  // Food Menu Use-cases
+  sl.registerLazySingleton(() => GetFoodMenuUseCase(sl()));
+  sl.registerLazySingleton(() => SaveFoodMenuUseCase(sl()));
+
+  // Settings Use-cases
+  sl.registerLazySingleton(() => GetHostelSettingsUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateHostelProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateHostelAmenitiesUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateHostelHouseRulesUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateHostelNotificationsUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateHostelRoomConfigUseCase(sl()));
+  sl.registerLazySingleton(() => UploadHostelSettingsImagesUseCase(sl()));
+
+  // Document Use-cases
+  sl.registerLazySingleton(() => GetDocumentsUseCase(sl()));
+  sl.registerLazySingleton(() => UploadDocumentUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteDocumentUseCase(sl()));
 
   // ── Repository ─────────────────────────────────────────────────────────────
   sl.registerLazySingleton<ProfileRepository>(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
@@ -44,121 +45,149 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthCubit>().state;
+    final owner = authState is AuthAuthenticated ? authState.owner : null;
+    final role = owner?.role.toLowerCase() ?? 'owner';
+    final bool isStaff = role != 'owner' && role != 'manager';
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           final profile = state is ProfileLoaded ? state.profile : 
                         (state is ProfileUpdateSuccess ? state.profile : null);
-          final name = profile?.fullName ?? 'Owner';
-          final phone = profile != null ? '+91 ${profile.phone}' : 'Stay India Member';
+          final name = profile?.fullName ?? owner?.name ?? 'Owner';
+          final phone = profile != null ? '+91 ${profile.phone}' : (owner != null ? '+91 ${owner.phone}' : 'Stay India Member');
 
           return CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(child: _buildProfileHeader(context, name, phone, profile?.avatar)),
-              SliverToBoxAdapter(child: _buildQuickActions(context)),
+              SliverToBoxAdapter(child: _buildQuickActions(context, role, owner)),
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    _buildSectionLabel('PERSONAL MANAGEMENT'),
-                    _buildSectionBlock([
-                      _ProfileTile(
-                        icon: Icons.person_rounded,
-                        title: 'Account Settings',
-                        subtitle: 'Name, phone, email & identity',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.credit_card_rounded,
-                        title: 'Subscription',
-                        subtitle: 'Premium Plan • Pro Member',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionPage())),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.card_membership_rounded,
-                        title: 'Digital Certificate',
-                        subtitle: 'Official Association Membership',
-                        onTap: () {},
-                      ),
-                    ]),
+                    if (!isStaff) ...[
+                      _buildSectionLabel('personal_management'.tr()),
+                      _buildSectionBlock([
+                        _ProfileTile(
+                          icon: Icons.person_rounded,
+                          title: 'account_settings'.tr(),
+                          subtitle: 'account_settings_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.credit_card_rounded,
+                          title: 'subscription'.tr(),
+                          subtitle: 'subscription_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.card_membership_rounded,
+                          title: 'digital_certificate'.tr(),
+                          subtitle: 'digital_certificate_sub'.tr(),
+                          onTap: () {},
+                        ),
+                      ]),
+                      SizedBox(height: 32.h),
+                    ] else ...[
+                      _buildSectionLabel('personal_management'.tr()),
+                      _buildSectionBlock([
+                        _ProfileTile(
+                          icon: Icons.person_rounded,
+                          title: 'account_settings'.tr(),
+                          subtitle: 'account_settings_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
+                        ),
+                      ]),
+                      SizedBox(height: 32.h),
+                    ],
 
-                    SizedBox(height: 32.h),
-                    _buildSectionLabel('HOSTEL CONFIGURATION'),
-                    _buildSectionBlock([
-                      _ProfileTile(
-                        icon: Icons.business_rounded,
-                        title: 'Hostel Profile',
-                        subtitle: 'Address, location & contact info',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HostelProfilePage())),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.wifi_rounded,
-                        title: 'Amenities',
-                        subtitle: 'WiFi, AC, Laundry & more',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AmenitiesPage())),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.rule_rounded,
-                        title: 'House Rules',
-                        subtitle: 'Timings & visitor policies',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HouseRulesPage())),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.restaurant_rounded,
-                        title: 'Food Menu',
-                        subtitle: 'Manage daily meals',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FoodMenuPage())),
-                      ),
-                    ]),
+                    if (!isStaff) ...[
+                      _buildSectionLabel('hostel_configuration'.tr()),
+                      _buildSectionBlock([
+                        _ProfileTile(
+                          icon: Icons.business_rounded,
+                          title: 'hostel_profile'.tr(),
+                          subtitle: 'hostel_profile_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HostelProfilePage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.wifi_rounded,
+                          title: 'amenities'.tr(),
+                          subtitle: 'amenities_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AmenitiesPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.rule_rounded,
+                          title: 'house_rules'.tr(),
+                          subtitle: 'house_rules_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HouseRulesPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.restaurant_rounded,
+                          title: 'food_menu'.tr(),
+                          subtitle: 'food_menu_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FoodMenuPage())),
+                        ),
+                      ]),
+                      SizedBox(height: 32.h),
+                    ],
 
-                    SizedBox(height: 32.h),
-                    _buildSectionLabel('BUSINESS MANAGEMENT'),
-                    _buildSectionBlock([
-                      _ProfileTile(
-                        icon: Icons.insights_rounded,
-                        title: 'Financial Insights',
-                        subtitle: 'Revenue, occupancy & analytics',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BlocProvider(
-                              create: (context) => sl<FinanceCubit>(),
-                              child: const FinancialDashboardPage(),
+                    if (!isStaff) ...[
+                      _buildSectionLabel('business_management'.tr()),
+                      _buildSectionBlock([
+                        _ProfileTile(
+                          icon: Icons.insights_rounded,
+                          title: 'financial_insights'.tr(),
+                          subtitle: 'financial_insights_sub'.tr(),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (context) => sl<FinanceCubit>(),
+                                child: const FinancialDashboardPage(),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.inventory_2_rounded,
-                        title: 'Stock Management',
-                        subtitle: 'Inventory tracking & alerts',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BlocProvider(
-                              create: (context) => sl<StockCubit>(),
-                              child: const StockDashboardPage(),
+                        _ProfileTile(
+                          icon: Icons.inventory_2_rounded,
+                          title: 'stock_management'.tr(),
+                          subtitle: 'stock_management_sub'.tr(),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (context) => sl<StockCubit>(),
+                                child: const StockDashboardPage(),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.people_alt_rounded,
-                        title: 'Staff Management',
-                        subtitle: 'Roles, attendance & salaries',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
-                      ),
-                    ]),
+                        _ProfileTile(
+                          icon: Icons.people_alt_rounded,
+                          title: 'staff_management'.tr(),
+                          subtitle: 'staff_management_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
+                        ),
+                      ]),
+                      SizedBox(height: 32.h),
+                    ],
 
-                    SizedBox(height: 32.h),
-                    _buildSectionLabel('SUPPORT & LEGAL'),
+                    _buildSectionLabel('support_legal'.tr()),
                     _buildSectionBlock([
+                      _ProfileTile(
+                        icon: Icons.language_rounded,
+                        title: 'change_language'.tr(),
+                        subtitle: 'language_sub'.tr(),
+                        onTap: () => _showLanguagePicker(context),
+                      ),
                       _ProfileTile(
                         icon: Icons.verified_user_rounded,
-                        title: 'Privacy & Policy',
-                        subtitle: 'Data usage & terms of service',
+                        title: 'privacy_policy'.tr(),
+                        subtitle: 'privacy_policy_sub'.tr(),
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -166,72 +195,78 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-                      _ProfileTile(
-                        icon: Icons.help_center_rounded,
-                        title: 'Help & Support',
-                        subtitle: 'FAQs, chat & documentation',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportPage())),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.chat_bubble_rounded,
-                        title: 'Feedback',
-                        subtitle: 'Tell us how to improve',
-                        onTap: () {},
-                      ),
+                      if (!isStaff) ...[
+                        _ProfileTile(
+                          icon: Icons.help_center_rounded,
+                          title: 'help_support'.tr(),
+                          subtitle: 'help_support_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.chat_bubble_rounded,
+                          title: 'feedback'.tr(),
+                          subtitle: 'feedback_sub'.tr(),
+                          onTap: () {},
+                        ),
+                      ],
                     ]),
 
                     SizedBox(height: 32.h),
-                    _buildSectionLabel('TOOLS & REPORTS'),
-                    _buildSectionBlock([
-                      _ProfileTile(
-                        icon: Icons.card_giftcard_rounded,
-                        title: 'Refer a Friend',
-                        subtitle: 'Earn rewards for inviting owners',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReferFriendPage())),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.star_rate_rounded,
-                        title: 'Rate Us',
-                        subtitle: 'Love Stay India? Let us know!',
-                        onTap: () {},
-                      ),
-                      _ProfileTile(
-                        icon: Icons.system_update_rounded,
-                        title: 'Update App',
-                        subtitle: 'Check for latest features & fixes',
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('App is up to date! (v1.0.4)')),
-                          );
-                        },
-                      ),
-                      _ProfileTile(
-                        icon: Icons.campaign_rounded,
-                        title: 'Send Announcements',
-                        subtitle: 'Broadcast to all tenants instantly',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SendAnnouncementsPage())),
-                      ),
-                      _ProfileTile(
-                        icon: Icons.analytics_rounded,
-                        title: 'My Reports',
-                        subtitle: 'Detailed business & financial exports',
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportsDashboardPage())),
-                      ),
-                    ]),
 
-                    SizedBox(height: 32.h),
-                    _buildSectionLabel('APPLICATION'),
+                    if (!isStaff) ...[
+                      _buildSectionLabel('tools_reports'.tr()),
+                      _buildSectionBlock([
+                        _ProfileTile(
+                          icon: Icons.card_giftcard_rounded,
+                          title: 'refer_friend'.tr(),
+                          subtitle: 'refer_friend_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReferFriendPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.star_rate_rounded,
+                          title: 'rate_us'.tr(),
+                          subtitle: 'rate_us_sub'.tr(),
+                          onTap: () {},
+                        ),
+                        _ProfileTile(
+                          icon: Icons.system_update_rounded,
+                          title: 'update_app'.tr(),
+                          subtitle: 'update_app_sub'.tr(),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('App is up to date! (v1.0.4)')),
+                            );
+                          },
+                        ),
+                        _ProfileTile(
+                          icon: Icons.campaign_rounded,
+                          title: 'send_announcements'.tr(),
+                          subtitle: 'send_announcements_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SendAnnouncementsPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.analytics_rounded,
+                          title: 'my_reports'.tr(),
+                          subtitle: 'my_reports_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportsDashboardPage())),
+                        ),
+                      ]),
+                      SizedBox(height: 32.h),
+                    ],
+
+                    _buildSectionLabel('application'.tr()),
                     _buildSectionBlock([
-                      _ProfileTile(
-                        icon: Icons.share_rounded,
-                        title: 'Share App',
-                        subtitle: 'Invite other owners to Stay India',
-                        onTap: () {},
-                      ),
+                      if (!isStaff)
+                        _ProfileTile(
+                          icon: Icons.share_rounded,
+                          title: 'share_app'.tr(),
+                          subtitle: 'share_app_sub'.tr(),
+                          onTap: () {},
+                        ),
                       _ProfileTile(
                         icon: Icons.logout_rounded,
-                        title: 'Logout',
-                        subtitle: 'Sign out from this device',
+                        title: 'logout'.tr(),
+                        subtitle: 'logout_sub'.tr(),
                         titleColor: AppColors.error,
                         onTap: () => _handleLogout(context),
                       ),
@@ -315,7 +350,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
-                'Edit Profile',
+                'edit_profile'.tr(),
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
@@ -329,7 +364,15 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
+  Widget _buildQuickActions(BuildContext context, String role, dynamic owner) {
+    final bool hasInsights = owner?.hasPermission('reports') ?? true;
+    final bool hasStock = owner?.hasPermission('stock') ?? true;
+    final bool hasStaff = owner?.hasPermission('staff') ?? true;
+
+    if (!hasInsights && !hasStock && !hasStaff) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       height: 120.h,
       padding: EdgeInsets.only(top: 24.h),
@@ -338,39 +381,42 @@ class _ProfilePageState extends State<ProfilePage> {
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         children: [
-          _QuickActionCard(
-            icon: Icons.insights_rounded,
-            label: 'Insights',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => BlocProvider(
-                  create: (context) => sl<FinanceCubit>(),
-                  child: const FinancialDashboardPage(),
+          if (hasInsights)
+            _QuickActionCard(
+              icon: Icons.insights_rounded,
+              label: 'insights_quick'.tr(),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => sl<FinanceCubit>(),
+                    child: const FinancialDashboardPage(),
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 12.w),
-          _QuickActionCard(
-            icon: Icons.inventory_2_rounded,
-            label: 'Stock',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => BlocProvider(
-                  create: (context) => sl<StockCubit>(),
-                  child: const StockDashboardPage(),
+          if (hasInsights && (hasStock || hasStaff)) SizedBox(width: 12.w),
+          if (hasStock)
+            _QuickActionCard(
+              icon: Icons.inventory_2_rounded,
+              label: 'stock_quick'.tr(),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => sl<StockCubit>(),
+                    child: const StockDashboardPage(),
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 12.w),
-          _QuickActionCard(
-            icon: Icons.people_alt_rounded,
-            label: 'Staff',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
-          ),
+          if (hasStock && hasStaff) SizedBox(width: 12.w),
+          if (hasStaff)
+            _QuickActionCard(
+              icon: Icons.people_alt_rounded,
+              label: 'staff_quick'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
+            ),
         ],
       ),
     );
@@ -423,6 +469,119 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  void _showLanguagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24.r))),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        final currentLocale = context.locale.languageCode;
+        final languages = [
+          {'code': 'en', 'name': 'English', 'native': 'English'},
+          {'code': 'hi', 'name': 'Hindi', 'native': 'हिन्दी'},
+          {'code': 'te', 'name': 'Telugu', 'native': 'తెలుగు'},
+          {'code': 'ta', 'name': 'Tamil', 'native': 'தமிழ்'},
+          {'code': 'kn', 'name': 'Kannada', 'native': 'ಕನ್ನಡ'},
+        ];
+
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 32.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                  Text(
+                    'change_language'.tr(),
+                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'language_sub'.tr(),
+                    style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  ),
+                  SizedBox(height: 20.h),
+                  ...languages.map((lang) {
+                    final isSelected = currentLocale == lang['code'];
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 8.h),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.08) : Colors.white,
+                        border: Border.all(color: isSelected ? AppColors.primaryBlue : AppColors.border.withValues(alpha: 0.5)),
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      child: ListTile(
+                        onTap: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+                              title: Text('change_language_confirm_title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
+                              content: Text('change_language_confirm_msg'.tr(namedArgs: {'language': lang['native']!})),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogContext, false),
+                                  child: Text('cancel'.tr()),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogContext, true),
+                                  style: TextButton.styleFrom(foregroundColor: AppColors.primaryBlue),
+                                  child: Text('confirm'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true && context.mounted) {
+                            final newLocale = Locale(lang['code']!);
+                            final nav = Navigator.of(context);
+                            await context.setLocale(newLocale);
+                            nav.pop();
+                          }
+                        },
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                        leading: Container(
+                          padding: EdgeInsets.all(8.r),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.primaryBlue : AppColors.backgroundSecondary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.language_rounded, color: isSelected ? Colors.white : AppColors.primaryBlue, size: 20.sp),
+                        ),
+                        title: Text(
+                          lang['name']!,
+                          style: TextStyle(fontSize: 15.sp, fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600, color: isSelected ? AppColors.primaryBlue : AppColors.textPrimary),
+                        ),
+                        subtitle: Text(
+                          lang['native']!,
+                          style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary.withValues(alpha: 0.7)),
+                        ),
+                        trailing: isSelected ? Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 22.sp) : null,
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _handleLogout(BuildContext context) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -442,8 +601,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
     if (confirm == true && context.mounted) context.read<AuthCubit>().logout();
   }
-
-
 }
 
 class _ProfileTile extends StatelessWidget {

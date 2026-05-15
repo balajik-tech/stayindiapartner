@@ -23,6 +23,7 @@ class StaffRepositoryImpl implements StaffRepository {
     required String name,
     required String phone,
     String? email,
+    String? password,
     required String role,
     Map<String, dynamic>? permissions,
   }) {
@@ -31,6 +32,7 @@ class StaffRepositoryImpl implements StaffRepository {
       name: name,
       phone: phone,
       email: email,
+      password: password,
       role: role,
       permissions: permissions,
     );

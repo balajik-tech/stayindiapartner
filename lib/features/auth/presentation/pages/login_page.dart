@@ -21,6 +21,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final FocusNode _phoneFocusNode = FocusNode();
   bool _isFocused = false;
 
+  bool _isStaffLogin = false;
+  final _passwordController = TextEditingController();
+  final FocusNode _passwordFocusNode = FocusNode();
+  bool _isPasswordFocused = false;
+  bool _obscurePassword = true;
+
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -30,6 +36,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     super.initState();
     _phoneFocusNode.addListener(() {
       setState(() => _isFocused = _phoneFocusNode.hasFocus);
+    });
+    _passwordFocusNode.addListener(() {
+      setState(() => _isPasswordFocused = _passwordFocusNode.hasFocus);
     });
 
     _entranceController = AnimationController(
@@ -57,6 +66,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   void dispose() {
     _phoneController.dispose();
     _phoneFocusNode.dispose();
+    _passwordController.dispose();
+    _passwordFocusNode.dispose();
     _entranceController.dispose();
     super.dispose();
   }
@@ -74,6 +85,20 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       return;
     }
     context.read<AuthCubit>().sendOtp(phone);
+  }
+
+  void _onStaffLogin(BuildContext context) {
+    final phone = _cleanPhone;
+    final password = _passwordController.text.trim();
+    if (phone.length < 10) {
+      _showSnackBar(context, 'Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    if (password.isEmpty) {
+      _showSnackBar(context, 'Please enter your staff password.');
+      return;
+    }
+    context.read<AuthCubit>().staffLogin(phone, password);
   }
 
   void _showSnackBar(BuildContext context, String message) {
@@ -245,6 +270,82 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             ),
                             SizedBox(height: 48.h),
 
+                            Container(
+                              height: 48.h,
+                              padding: EdgeInsets.all(4.r),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundGrey.withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(24.r),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => setState(() => _isStaffLogin = false),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 250),
+                                        curve: Curves.easeInOut,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: !_isStaffLogin ? AppColors.primaryBlue : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(20.r),
+                                          boxShadow: !_isStaffLogin
+                                              ? [
+                                                  BoxShadow(
+                                                    color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                        child: Text(
+                                          'Owner Login',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: !_isStaffLogin ? Colors.white : AppColors.greyText,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => setState(() => _isStaffLogin = true),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 250),
+                                        curve: Curves.easeInOut,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: _isStaffLogin ? AppColors.primaryBlue : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(20.r),
+                                          boxShadow: _isStaffLogin
+                                              ? [
+                                                  BoxShadow(
+                                                    color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                        child: Text(
+                                          'Staff Login',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: _isStaffLogin ? Colors.white : AppColors.greyText,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 32.h),
+
                             
                             Text(
                               'MOBILE NUMBER',
@@ -340,18 +441,94 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                         ),
                                         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                                       ),
-                                      onSubmitted: (_) => _onSendOtp(context),
+                                      onSubmitted: (_) => _isStaffLogin ? _onStaffLogin(context) : _onSendOtp(context),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+
+                            if (_isStaffLogin) ...[
+                              SizedBox(height: 24.h),
+                              Text(
+                                'PASSWORD',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.greyText.withValues(alpha: 0.6),
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              SizedBox(height: 14.h),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOutQuart,
+                                decoration: BoxDecoration(
+                                  color: _isPasswordFocused ? Colors.white : AppColors.backgroundGrey.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(22.r),
+                                  border: Border.all(
+                                    color: _isPasswordFocused ? AppColors.primaryBlue : Colors.grey.shade200,
+                                    width: _isPasswordFocused ? 2 : 1,
+                                  ),
+                                  boxShadow: [
+                                    if (_isPasswordFocused)
+                                      BoxShadow(
+                                        color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                                        blurRadius: 15,
+                                        spreadRadius: 2,
+                                      ),
+                                  ],
+                                ),
+                                child: TextField(
+                                  controller: _passwordController,
+                                  focusNode: _passwordFocusNode,
+                                  obscureText: _obscurePassword,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.darkText,
+                                    letterSpacing: 1.0,
+                                  ),
+                                  textAlignVertical: TextAlignVertical.center,
+                                  decoration: InputDecoration(
+                                    hintText: '••••••••',
+                                    hintStyle: GoogleFonts.outfit(
+                                      color: Colors.grey.shade400,
+                                      fontSize: 18.sp,
+                                      letterSpacing: 2.0,
+                                    ),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                                    prefixIcon: Padding(
+                                      padding: EdgeInsets.only(left: 4.w, right: 12.w),
+                                      child: Icon(
+                                        Icons.lock_rounded,
+                                        color: _isPasswordFocused ? AppColors.primaryBlue : AppColors.greyText,
+                                        size: 22,
+                                      ),
+                                    ),
+                                    prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                                        color: AppColors.greyText,
+                                        size: 20,
+                                      ),
+                                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                    ),
+                                  ),
+                                  onSubmitted: (_) => _onStaffLogin(context),
+                                ),
+                              ),
+                            ],
+
                             SizedBox(height: 36.h),
 
                             AuthPrimaryButton(
-                              label: isLoading ? 'SENDING...' : 'SEND OTP',
+                              label: isLoading ? 'LOGGING IN...' : (_isStaffLogin ? 'LOGIN AS STAFF' : 'SEND OTP'),
                               isLoading: isLoading,
-                              onPressed: () => _onSendOtp(context),
+                              onPressed: () => _isStaffLogin ? _onStaffLogin(context) : _onSendOtp(context),
                             ),
 
                             SizedBox(height: 48.h),

@@ -288,5 +288,12 @@
   "select_district": "Select District",
   "select_ward": "Select Ward",
   "available_communities": "Available Communities",
-  "no_communities_found": "No communities found"
+  "no_communities_found": "No communities found",
+  "refer_title": "Invite your owner friends",
+  "refer_desc": "Help other PG owners professionalize their business and earn rewards for every successful referral.",
+  "your_referral_code": "YOUR REFERRAL CODE",
+  "copy": "COPY",
+  "code_copied": "Code copied to clipboard!",
+  "share_whatsapp": "Share via WhatsApp",
+  "share_referral_link": "Share Referral Link"
 }

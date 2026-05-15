@@ -39,6 +39,12 @@ abstract class CommunityRemoteDataSource {
     String? districtId,
     String? wardId,
     String? localityId,
+    String? rules,
+    String? executiveRole,
+    String? fullName,
+    String? phoneNumber,
+    String? govtCertificatePath,
+    String? associationCertificatePath,
   });
 
   
@@ -55,6 +61,7 @@ abstract class CommunityRemoteDataSource {
     required String communityId,
     String? name,
     String? description,
+    String? rules,
     String? imagePath,
     String? coverImagePath,
   });
@@ -327,6 +334,12 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     String? districtId,
     String? wardId,
     String? localityId,
+    String? rules,
+    String? executiveRole,
+    String? fullName,
+    String? phoneNumber,
+    String? govtCertificatePath,
+    String? associationCertificatePath,
   }) async {
     AppLogger.info('Creating owner community: $name at level: $level');
     
@@ -339,13 +352,19 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
       'districtId': districtId,
       'wardId': wardId,
       'localityId': localityId,
+      'rules': rules,
+      'executiveRole': executiveRole,
+      'fullName': fullName,
+      'phoneNumber': phoneNumber,
     }..removeWhere((key, value) => value == null);
 
-    if (imagePath != null || coverImagePath != null) {
+    if (imagePath != null || coverImagePath != null || govtCertificatePath != null || associationCertificatePath != null) {
       data = FormData.fromMap({
         ...payload,
         if (imagePath != null) 'image': await MultipartFile.fromFile(imagePath),
         if (coverImagePath != null) 'coverImage': await MultipartFile.fromFile(coverImagePath),
+        if (govtCertificatePath != null) 'govtCertificate': await MultipartFile.fromFile(govtCertificatePath),
+        if (associationCertificatePath != null) 'associationCertificate': await MultipartFile.fromFile(associationCertificatePath),
       });
     } else {
       data = payload;
@@ -356,7 +375,8 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
       data: data,
       options: Options(
         headers: {
-          if (imagePath != null || coverImagePath != null) 'x-upload-folder': 'communities',
+          if (imagePath != null || coverImagePath != null || govtCertificatePath != null || associationCertificatePath != null)
+            'x-upload-folder': 'communities',
         },
       ),
     );
@@ -444,6 +464,7 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     required String communityId,
     String? name,
     String? description,
+    String? rules,
     String? imagePath,
     String? coverImagePath,
   }) async {
@@ -453,6 +474,7 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     final Map<String, dynamic> payload = {
       'name': name,
       'description': description,
+      'rules': rules,
     }..removeWhere((key, value) => value == null);
 
     if (imagePath != null || coverImagePath != null) {
@@ -546,7 +568,7 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     
     dynamic data;
     final Map<String, dynamic> payload = {
-      if (communityId != null) 'communityId': communityId,
+      'communityId': ?communityId,
       'content': content,
       'type': type,
       if (pollOptions != null && pollOptions.isNotEmpty) 
@@ -554,7 +576,7 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
           'options': pollOptions.map((o) => {'text': o}).toList(),
           'expiresAt': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
         },
-      if (location != null) 'location': location,
+      'location': ?location,
     };
 
     if (imagePath != null) {

@@ -7,6 +7,7 @@ import 'package:stayindia_owner/features/notices/presentation/cubit/notice_cubit
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/notices/domain/entities/notice.dart';
+import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
 class NoticesTabView extends StatefulWidget {
   const NoticesTabView({super.key});
@@ -17,11 +18,25 @@ class NoticesTabView extends StatefulWidget {
 
 class _NoticesTabViewState extends State<NoticesTabView> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final hostelState = context.read<HostelCubit>().state;
+      if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+        final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+        context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<NoticeCubit, NoticeState>(
       builder: (context, state) {
-        if (state is NoticeLoading) {
+        if (state is NoticeInitial || state is NoticeLoading) {
           return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
             itemCount: 8,
             itemBuilder: (context, index) => const TenantCardSkeleton(),
@@ -30,46 +45,50 @@ class _NoticesTabViewState extends State<NoticesTabView> {
           return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
         } else if (state is NoticesLoaded) {
           final notices = state.notices;
-          return RefreshIndicator(
-            onRefresh: () async {
-              final hostelState = context.read<HostelCubit>().state;
-              if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-                context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
-              }
-            },
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-              itemCount: notices.isEmpty ? 1 : 4 + notices.length,
-              itemBuilder: (context, index) {
-                if (notices.isEmpty) return _buildEmptyState();
-                
-                if (index == 0) return _buildSummaryBox(notices);
-                if (index == 1) return SizedBox(height: 24.h);
-                if (index == 2) {
-                  return Text(
-                    'Upcoming',
+          final announcements = state.announcements;
+          final hasData = notices.isNotEmpty || announcements.isNotEmpty;
+          
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!hasData) _buildEmptyState(),
+                if (notices.isNotEmpty) ...[
+                  _buildSummaryBox(notices),
+                  SizedBox(height: 24.h),
+                  Text(
+                    'Upcoming Vacancies',
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
                       color: AppColors.darkText,
                     ),
-                  );
-                }
-                if (index == 3) return SizedBox(height: 16.h);
-                
-                final noticeIndex = index - 4;
-                if (noticeIndex < notices.length) {
-                  return _buildNoticeCard(notices[noticeIndex]);
-                }
-                
-                return SizedBox(height: 80.h);
-              },
+                  ),
+                  SizedBox(height: 16.h),
+                  ...notices.map((n) => _buildNoticeCard(n)),
+                ],
+                if (announcements.isNotEmpty) ...[
+                  if (notices.isNotEmpty) SizedBox(height: 32.h),
+                  Text(
+                    'General Notices',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkText,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  ...announcements.map((a) => _buildAnnouncementCard(a)),
+                ],
+                SizedBox(height: 80.h),
+              ],
             ),
           );
         } else if (state is NoticeSubmitting || state is NoticeUpdating || state is NoticeSuccess || state is NoticeUpdateSuccess) {
           return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
             itemCount: 8,
             itemBuilder: (context, index) => const TenantCardSkeleton(),
@@ -279,6 +298,58 @@ class _NoticesTabViewState extends State<NoticesTabView> {
           Text(label, style: TextStyle(fontSize: 10.sp, color: AppColors.greyText)),
           SizedBox(height: 4.h),
           Text(formattedDate, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnnouncementCard(AnnouncementEntity announcement) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.roomCardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Text(
+                  'General Notice',
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+              ),
+              Text(
+                DateFormat('MMM dd, yyyy').format(announcement.createdAt),
+                style: TextStyle(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(announcement.title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+          SizedBox(height: 6.h),
+          Text(announcement.content, style: TextStyle(fontSize: 13.sp, color: AppColors.greyText, height: 1.4)),
         ],
       ),
     );

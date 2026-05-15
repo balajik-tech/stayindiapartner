@@ -4,7 +4,7 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import '../../models/booking_model.dart';
 
 abstract class BookingsRemoteDataSource {
-  Future<List<BookingModel>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType});
+  Future<List<BookingModel>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId});
   Future<List<PendingBookingModel>> getPendingBookings({int page = 1, int limit = 10});
   Future<List<PendingBookingModel>> getConfirmedBookings({int page = 1, int limit = 10});
   Future<ScanBookingResponseModel> scanBooking(String token, {String? hostelId});
@@ -39,7 +39,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   BookingsRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<List<BookingModel>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType}) async {
+  Future<List<BookingModel>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId}) async {
     try {
       final queryParams = <String, dynamic>{
         'page': page,
@@ -47,6 +47,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
       };
       if (kycStatus != null) queryParams['kycStatus'] = kycStatus;
       if (roomType != null) queryParams['sharingType'] = roomType;
+      if (hostelId != null) queryParams['hostelId'] = hostelId;
       final response = await dio.get(
         ApiConstants.ownerBookings,
         queryParameters: queryParams,

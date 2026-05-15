@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/profile_entity.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 
@@ -24,6 +26,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
+
+  ProfileEntity? _currentProfile;
 
   @override
   void initState() {
@@ -43,6 +47,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
   void _populateControllers(ProfileState state) {
     if (state is ProfileLoaded) {
+      _currentProfile = state.profile;
       _firstNameController.text = state.profile.firstName;
       _lastNameController.text = state.profile.lastName;
       _phoneController.text = state.profile.phone;
@@ -52,14 +57,40 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Future<void> _pickAndUploadImage() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
     );
 
-    if (result != null && result.files.single.path != null) {
-      if (mounted) {
-        context.read<ProfileCubit>().uploadProfileImage(File(result.files.single.path!));
+    if (pickedFile != null && mounted) {
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        compressQuality: 80,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Profile Photo',
+            toolbarColor: AppColors.primaryBlue,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: true,
+            cropStyle: CropStyle.circle,
+            aspectRatioPresets: [
+              CropAspectRatioPreset.square,
+            ],
+          ),
+          IOSUiSettings(
+            title: 'Crop Profile Photo',
+            cropStyle: CropStyle.circle,
+            aspectRatioPresets: [
+              CropAspectRatioPreset.square,
+            ],
+            aspectRatioLockEnabled: true,
+          ),
+        ],
+      );
+
+      if (croppedFile != null && mounted) {
+        context.read<ProfileCubit>().uploadProfileImage(File(croppedFile.path));
       }
     }
   }
@@ -80,6 +111,9 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       listener: (context, state) {
         if (state is ProfileLoaded) _populateControllers(state);
         if (state is ProfileUpdateSuccess) {
+          setState(() {
+            _currentProfile = state.profile;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message), backgroundColor: Colors.green),
           );
@@ -100,7 +134,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               return const DetailsSkeleton();
             }
 
-            final profile = state is ProfileLoaded ? state.profile : null;
+            if (state is ProfileLoaded) {
+              _currentProfile = state.profile;
+            }
+
+            final profile = _currentProfile;
 
             return Stack(
               children: [
@@ -341,7 +379,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   Widget _buildDeleteAccountButton(BuildContext context) {
     return Center(
       child: TextButton(
-        onPressed: () => _confirmDelete(context),
+        onPressed: _confirmDelete,
         child: Text(
           'Delete My Account',
           style: TextStyle(
@@ -354,7 +392,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     );
   }
 
-  void _confirmDelete(BuildContext context) async {
+  void _confirmDelete() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(

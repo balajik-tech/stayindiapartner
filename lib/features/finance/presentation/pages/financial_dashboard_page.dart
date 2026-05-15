@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'revenue_history_page.dart';
 import '../cubit/revenue_history_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 
 class FinancialDashboardPage extends StatefulWidget {
   const FinancialDashboardPage({super.key});
@@ -42,7 +43,6 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFE),
-      appBar: _buildAppBar(),
       body: BlocBuilder<FinanceCubit, FinanceState>(
         builder: (context, state) {
           if (state.status == FinanceStatus.loading && state.stats == null) {
@@ -52,33 +52,37 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
           return RefreshIndicator(
             onRefresh: () async => _loadData(),
             color: AppColors.primaryBlue,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 32.h),
+            child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  SizedBox(height: 24.h),
-                  _buildMetricGrid(state),
-                  SizedBox(height: 32.h),
-                  _buildChartSection(
-                    title: 'Revenue Trends',
-                    subtitle: 'Daily earnings overview',
-                    child: RevenueChart(trends: state.revenueTrends),
+              slivers: [
+                _buildPremiumHeader(state),
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 40.h),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _buildHeader(),
+                      SizedBox(height: 24.h),
+                      _buildMetricGrid(state),
+                      SizedBox(height: 32.h),
+                      _buildChartSection(
+                        title: 'Revenue Trends',
+                        subtitle: 'Daily earnings overview',
+                        child: RevenueChart(trends: state.revenueTrends),
+                      ),
+                      SizedBox(height: 24.h),
+                      _buildChartSection(
+                        title: 'Occupancy vs Capacity',
+                        subtitle: 'Beds distribution',
+                        child: OccupancyRevenueChart(
+                          occupied: state.stats?.occupiedBeds ?? 0,
+                          total: state.stats?.totalBeds ?? 0,
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                    ]),
                   ),
-                  SizedBox(height: 24.h),
-                  _buildChartSection(
-                    title: 'Occupancy vs Capacity',
-                    subtitle: 'Beds distribution',
-                    child: OccupancyRevenueChart(
-                      occupied: state.stats?.occupiedBeds ?? 0,
-                      total: state.stats?.totalBeds ?? 0,
-                    ),
-                  ),
-                  SizedBox(height: 24.h),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
@@ -86,73 +90,101 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      centerTitle: false,
-      title: Text(
-        'Financials',
-        style: TextStyle(
-          color: AppColors.darkText,
-          fontSize: 24.sp,
-          fontWeight: FontWeight.w900,
-          letterSpacing: -0.8,
+  Widget _buildPremiumHeader(FinanceState state) {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: EdgeInsets.fromLTRB(24.w, 54.h, 24.w, 40.h),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Financial Insights',
+                        style: TextStyle(
+                          fontSize: 26.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -1.0,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Revenue, occupancy & growth analytics',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildExportButton(state),
+              ],
+            ),
+          ],
         ),
       ),
-      actions: [
-        _buildExportButton(),
-        SizedBox(width: 16.w),
-      ],
     );
   }
 
-  Widget _buildExportButton() {
-    return BlocBuilder<FinanceCubit, FinanceState>(
-      builder: (context, state) {
-        final hasData = state.stats != null;
-        return InkWell(
-          onTap: !hasData ? null : () async {
-            final hostelState = context.read<HostelCubit>().state;
-            String hostelName = 'All Properties';
-            if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-              hostelName = hostelState.hostels[hostelState.selectedHostelIndex].name;
-            }
+  Widget _buildExportButton(FinanceState state) {
+    final hasData = state.stats != null;
+    return BouncingWrapper(
+      onTap: !hasData ? null : () async {
+        final hostelState = context.read<HostelCubit>().state;
+        String hostelName = 'All Properties';
+        if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+          hostelName = hostelState.hostels[hostelState.selectedHostelIndex].name;
+        }
 
-            await PdfExportService.exportFinancialReport(
-              hostelName: hostelName,
-              stats: state.stats!,
-              trends: state.revenueTrends,
-            );
-          },
-          borderRadius: BorderRadius.circular(12.r),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: hasData ? AppColors.primaryBlue.withValues(alpha: 0.1) : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.ios_share_rounded,
-                  color: hasData ? AppColors.primaryBlue : Colors.grey,
-                  size: 18.sp,
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  'Export',
-                  style: TextStyle(
-                    color: hasData ? AppColors.primaryBlue : Colors.grey,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        await PdfExportService.exportFinancialReport(
+          hostelName: hostelName,
+          stats: state.stats!,
+          trends: state.revenueTrends,
         );
       },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.ios_share_rounded, color: Colors.white, size: 20.sp),
+            SizedBox(width: 8.w),
+            Text(
+              'Export',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

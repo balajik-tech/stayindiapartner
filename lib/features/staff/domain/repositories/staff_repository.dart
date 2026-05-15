@@ -8,6 +8,7 @@ abstract class StaffRepository {
     required String name,
     required String phone,
     String? email,
+    String? password,
     required String role,
     Map<String, dynamic>? permissions,
   });

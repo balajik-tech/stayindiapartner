@@ -76,7 +76,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               ),
               BlocListener<PropertySetupCubit, PropertySetupState>(
                 listener: (context, state) {
-                  if (state.currentStep == 4) {
+                  if (state.currentStep == 5) {
                     context.read<DashboardCubit>().fetchDashboardData(widget.hostel.id);
                     Navigator.pushAndRemoveUntil(
                       context,

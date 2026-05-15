@@ -18,7 +18,7 @@ class TenantCubit extends Cubit<TenantState> {
     if (isClosed) return;
     emit(TenantLoading());
     try {
-      final tenants = await _getTenants(search: search, status: status, page: 1, limit: 10);
+      final tenants = await _getTenants(search: search, status: status, page: 1, limit: 10, hostelId: hostelId);
       if (isClosed) return;
       if (tenants.isEmpty) {
         emit(TenantEmpty(message: status == 'CHECKED_OUT' ? 'No history found' : 'No active tenants found'));
@@ -45,7 +45,7 @@ class TenantCubit extends Cubit<TenantState> {
     emit(currentState.copyWith(isLoadMore: true));
     try {
       final nextPage = currentState.page + 1;
-      final newTenants = await _getTenants(search: search, status: status, page: nextPage, limit: 10);
+      final newTenants = await _getTenants(search: search, status: status, page: nextPage, limit: 10, hostelId: hostelId);
       if (isClosed) return;
 
       emit(currentState.copyWith(

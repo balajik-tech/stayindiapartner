@@ -10,6 +10,8 @@ abstract class HostelState extends Equatable {
     return DateTime.now().difference(lastFetched!).inMinutes >= 5; 
   }
 
+  String? get selectedHostelId => null;
+
   @override
   List<Object?> get props => [lastFetched];
 
@@ -36,20 +38,32 @@ class HostelLoading extends HostelState {
 class HostelLoaded extends HostelState {
   final List<Hostel> hostels;
   final int selectedHostelIndex;
+  final List<int> selectedHostelIndices;
   
   const HostelLoaded({
     required this.hostels, 
     this.selectedHostelIndex = 0,
+    this.selectedHostelIndices = const [0],
     super.lastFetched,
   });
 
   @override
-  List<Object?> get props => [hostels, selectedHostelIndex, lastFetched];
+  String? get selectedHostelId {
+    if (hostels.isEmpty) return null;
+    if (selectedHostelIndex >= 0 && selectedHostelIndex < hostels.length) {
+      return hostels[selectedHostelIndex].id;
+    }
+    return hostels.first.id;
+  }
+
+  @override
+  List<Object?> get props => [hostels, selectedHostelIndex, selectedHostelIndices, lastFetched];
 
   @override
   Map<String, dynamic> toJson() {
     return {
       'selectedHostelIndex': selectedHostelIndex,
+      'selectedHostelIndices': selectedHostelIndices,
       'lastFetched': lastFetched?.toIso8601String(),
     };
   }

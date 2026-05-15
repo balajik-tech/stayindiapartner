@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_conditions_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import '../cubit/document_cubit.dart';
@@ -138,11 +140,28 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
                 if (widget.isFromProfile) {
                   Navigator.pop(context);
                 } else {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainNavigationPage()),
-                    (route) => false,
-                  );
+                  // Check if the owner has already accepted the policy.
+                  // If not, show the policy screen before going to the dashboard.
+                  final authState = context.read<AuthCubit>().state;
+                  final hasAcceptedPolicy = authState is AuthAuthenticated
+                      ? authState.owner.hasAcceptedPolicy
+                      : false;
+
+                  if (!hasAcceptedPolicy) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TermsAndConditionsPage(),
+                      ),
+                      (route) => false,
+                    );
+                  } else {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainNavigationPage()),
+                      (route) => false,
+                    );
+                  }
                 }
               } else if (state is DocumentError) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -277,10 +296,17 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
           label: 'License Type *',
           value: _selectedLicenseType,
           items: const [
-            DropdownMenuItem(value: 'fssai', child: Text('FSSAI License')),
+            DropdownMenuItem(value: 'fssai', child: Text('Food License (FSSAI)')),
+            DropdownMenuItem(value: 'hostel_license', child: Text('Hostel / PG License')),
             DropdownMenuItem(value: 'trade_license', child: Text('Trade License')),
             DropdownMenuItem(value: 'fire_safety', child: Text('Fire Safety Certificate')),
             DropdownMenuItem(value: 'police_noc', child: Text('Police NOC')),
+            DropdownMenuItem(value: 'shops_establishment', child: Text('Shops & Establishment')),
+            DropdownMenuItem(value: 'gst_registration', child: Text('GST Registration')),
+            DropdownMenuItem(value: 'health_sanitation', child: Text('Health & Sanitation NOC')),
+            DropdownMenuItem(value: 'commercial_utility', child: Text('Commercial Utility Bill')),
+            DropdownMenuItem(value: 'pollution_noc', child: Text('Pollution Control NOC')),
+            DropdownMenuItem(value: 'resident_verification', child: Text('Resident Verification')),
           ],
           onChanged: (val) => setState(() => _selectedLicenseType = val),
         ),

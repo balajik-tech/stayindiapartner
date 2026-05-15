@@ -11,13 +11,15 @@ class TenantRepositoryImpl implements TenantRepository {
   Future<List<TenantEntity>> getTenants({
     String status = 'CHECKED_IN',
     int page = 1,
-    int limit = 100,
+    int limit = 10,
     String? search,
+    String? hostelId,
   }) => remote.getTenants(
         status: status,
         page: page,
         limit: limit,
         search: search,
+        hostelId: hostelId,
       );
 
   @override
