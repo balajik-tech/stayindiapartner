@@ -66,7 +66,6 @@ class CommunityCubit extends Cubit<CommunityState> {
         
         
         if (!currentMessages.any((m) => m.id == newMessage.id)) {
-          // Remove optimistic message if it exists
           final updatedMessages = currentMessages.where((m) => 
             !(m.id.startsWith('temp_') && m.text == newMessage.text)
           ).toList();
@@ -210,7 +209,6 @@ class CommunityCubit extends Cubit<CommunityState> {
       isMe: true,
     );
 
-    // Optimistically add to state
     if (state is CommunityLoaded) {
       final s = state as CommunityLoaded;
       final updatedMessages = [...s.messages, optimisticMessage];
@@ -222,7 +220,6 @@ class CommunityCubit extends Cubit<CommunityState> {
       await _sendMessage(hostelId, text);
     } catch (e) {
       AppLogger.error('sendMessage failed', e);
-      // Rollback on error
       if (state is CommunityLoaded) {
         final s = state as CommunityLoaded;
         final rolledBack = s.messages.where((m) => m.id != tempId).toList();
@@ -239,14 +236,13 @@ class CommunityCubit extends Cubit<CommunityState> {
       senderId: senderId ?? '',
       senderName: senderName ?? 'You',
       senderAvatar: senderAvatar,
-      imageUrl: imagePath, // Local path for instant preview
+      imageUrl: imagePath,
       roomId: hostelId,
       createdAt: DateTime.now(),
       type: 'IMAGE',
       isMe: true,
     );
 
-    // Optimistically add to state
     if (state is CommunityLoaded) {
       final s = state as CommunityLoaded;
       final updatedMessages = [...s.messages, optimisticMessage];
@@ -258,7 +254,6 @@ class CommunityCubit extends Cubit<CommunityState> {
       await _sendImage(hostelId, imagePath);
     } catch (e) {
       AppLogger.error('sendImageMessage failed', e);
-      // Rollback on error
       if (state is CommunityLoaded) {
         final s = state as CommunityLoaded;
         final rolledBack = s.messages.where((m) => m.id != tempId).toList();

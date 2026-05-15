@@ -253,7 +253,6 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                     return;
                   }
 
-                  // Get current hostel
                   final hostelState = context.read<HostelCubit>().state;
                   Hostel? hostel;
                   if (hostelState is HostelLoaded) {
@@ -261,7 +260,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   }
 
                   if (hostel != null) {
-                    Navigator.pop(context); // Close sheet
+                    Navigator.pop(context);
                     
                     Navigator.push(
                       context,

@@ -9,9 +9,6 @@ import 'package:stayindia_owner/features/navigation/presentation/pages/main_navi
 
 class TermsAndConditionsPage extends StatefulWidget {
   final bool readOnly;
-  /// If provided, called after policy is successfully accepted instead of
-  /// the default Navigator.pop behaviour. Use this when the page is pushed
-  /// with pushAndRemoveUntil and there is no page to pop back to.
   final VoidCallback? onAccepted;
 
   const TermsAndConditionsPage({
@@ -46,7 +43,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
             } else if (widget.readOnly) {
               Navigator.pop(context);
             } else {
-              // Shown post-registration: navigate to dashboard, clearing all routes.
+
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const MainNavigationPage()),

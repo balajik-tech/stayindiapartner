@@ -32,8 +32,8 @@ class FloorManagementPage extends StatelessWidget {
           'Floor Management',
           style: TextStyle(
             color: AppColors.darkText,
-            fontSize: 15.sp, // Reduced from 18
-            fontWeight: FontWeight.w700, // Reduced from 900
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w700,
           ),
         ),
         bottom: PreferredSize(
@@ -50,7 +50,7 @@ class FloorManagementPage extends StatelessWidget {
           if (state is DashboardLoaded) {
             final floors = state.data.occupancy.floors;
             return ListView.builder(
-              padding: EdgeInsets.all(16.r), // Reduced from 20
+              padding: EdgeInsets.all(16.r),
               itemCount: floors.length,
               itemBuilder: (context, index) {
                 final floor = floors[index];
@@ -81,7 +81,7 @@ class FloorManagementPage extends StatelessWidget {
 
   Widget _buildBottomAction(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h), // Reduced padding
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
@@ -91,10 +91,10 @@ class FloorManagementPage extends StatelessWidget {
           _showAddFloorDialog(context);
         },
         child: Container(
-          height: 48.h, // Reduced from 54
+          height: 48.h,
           decoration: BoxDecoration(
             color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(10.r), // Reduced from 16
+            borderRadius: BorderRadius.circular(10.r),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -135,11 +135,11 @@ class _FloorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h), // Reduced from 16
-      padding: EdgeInsets.all(14.r), // Reduced from 20
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10.r), // Reduced from 24
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: const Color(0xFFF1F5F9)),
       ),
       child: Column(
@@ -147,7 +147,7 @@ class _FloorCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8.r), // Reduced from 10
+                padding: EdgeInsets.all(8.r),
                 decoration: BoxDecoration(
                   color: AppColors.primaryBlue.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8.r),
@@ -163,15 +163,15 @@ class _FloorCard extends StatelessWidget {
                       floor.floorName,
                       style: TextStyle(
                         color: AppColors.darkText,
-                        fontSize: 14.sp, // Reduced from 16
-                        fontWeight: FontWeight.w700, // Reduced from 800
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     Text(
                       '${floor.rooms.length} Rooms • ${floor.bedInfo}',
                       style: TextStyle(
                         color: AppColors.greyText,
-                        fontSize: 11.sp, // Reduced from 12
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w400,
                       ),
                     ),

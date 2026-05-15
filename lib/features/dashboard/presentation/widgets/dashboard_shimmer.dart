@@ -12,7 +12,7 @@ class DashboardShimmer extends StatelessWidget {
       highlightColor: Colors.grey[100]!,
       child: CustomScrollView(
         slivers: [
-          // Header Shimmer
+
           SliverToBoxAdapter(
             child: Container(
               height: 60.h,
@@ -24,7 +24,7 @@ class DashboardShimmer extends StatelessWidget {
             ),
           ),
           
-          // Stats row Shimmer
+
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -43,7 +43,7 @@ class DashboardShimmer extends StatelessWidget {
             ),
           ),
 
-          // Secondary Stats Shimmer
+
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -62,7 +62,7 @@ class DashboardShimmer extends StatelessWidget {
             ),
           ),
 
-          // Floor Filter Shimmer
+
           SliverToBoxAdapter(
             child: Container(
               height: 45.h,
@@ -83,7 +83,6 @@ class DashboardShimmer extends StatelessWidget {
             ),
           ),
 
-          // List Shimmer
           SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             sliver: SliverList(

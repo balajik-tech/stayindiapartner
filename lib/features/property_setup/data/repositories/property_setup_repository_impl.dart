@@ -54,7 +54,6 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
     String? pollutionNoc,
     String? residentVerification,
   }) async {
-    // Map UI labels to backend values
     String normalizedHostelType = hostelType.toLowerCase();
     if (hostelType == 'Boys') {
       normalizedHostelType = 'men';
@@ -149,14 +148,10 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
       final features = roomData['features'] as Map<String, dynamic>? ?? {};
       final isAC = features['isAC'] == true;
       
-      // FIX 1: Room Type source of truth is features['isAC']
-      // Ignore stale roomData['roomType']
       String type = isAC ? 'AC' : 'NON-AC';
       
-      // FIX 2: Normalize sharingType as String for consistent lookup
       final sharing = (roomData['sharingType'] ?? 2).toString();
       
-      // FIX 4: Safe pricing lookup with fallback and logging
       final typePricing = masterPricing[type] as Map<String, dynamic>? ?? {};
       final config = typePricing[sharing] as Map<String, dynamic>?;
       
@@ -180,10 +175,8 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
           ? (double.tryParse(roomData['dailyRent']?.toString() ?? '0') ?? 0.0)
           : (config?['dailyRent'] ?? 0.0).toDouble();
       
-      // TEMP DEBUG LOGGING
       AppLogger.debug("FINAL_SAVE:\nRoom: ${roomData['roomNumber']}\nType: $type\nSharing: $sharing\nPricing: $config");
 
-      // Handle floor logic correctly for G, 1, 2, etc.
       int floorNum = 1;
       final roomNo = roomData['roomNumber']?.toString() ?? '';
       if (roomNo.startsWith('G') || roomNo.startsWith('0')) {
@@ -252,7 +245,6 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
     }
 
     if (roomModels.isNotEmpty) {
-      // FIX 5: Use bulkUpsertRooms to avoid duplicates
       await roomRemoteDataSource.bulkUpsertRooms(roomModels, ownerId);
     }
 

@@ -9,7 +9,6 @@ import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_c
 import 'package:stayindia_owner/features/tenants/presentation/cubit/complaints_cubit.dart';
 
 void registerTenantsFeature(GetIt sl) {
-  // ── Cubits ─────────────────────────────────────────────────────────────────
   sl.registerFactory(() => TenantCubit(getTenantsUseCase: sl()));
   sl.registerFactory(() => TenantDetailCubit(getTenantDetailUseCase: sl()));
   sl.registerFactory(() => AddTenantCubit(
@@ -23,19 +22,16 @@ void registerTenantsFeature(GetIt sl) {
         updateStatusUseCase: sl(),
       ));
 
-  // ── Use-cases ──────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetTenantsUseCase(sl()));
   sl.registerLazySingleton(() => GetTenantDetailUseCase(sl()));
   sl.registerLazySingleton(() => AddTenantUseCase(sl()));
   sl.registerLazySingleton(() => GetComplaintsUseCase(sl()));
   sl.registerLazySingleton(() => UpdateComplaintStatusUseCase(sl()));
 
-  // ── Repository ─────────────────────────────────────────────────────────────
   sl.registerLazySingleton<TenantRepository>(
     () => TenantRepositoryImpl(remote: sl()),
   );
 
-  // ── Data source ────────────────────────────────────────────────────────────
   sl.registerLazySingleton<TenantRemoteDataSource>(
     () => TenantRemoteDataSourceImpl(dio: sl()),
   );

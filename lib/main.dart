@@ -5,10 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'core/theme/app_theme.dart';
-import 'features/navigation/presentation/pages/main_navigation_page.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
-import 'features/auth/presentation/pages/registration_personal_page.dart';
-import 'features/auth/presentation/pages/auth_gate.dart';
+import 'features/auth/presentation/pages/splash_screen.dart';
 import 'features/profile/presentation/cubit/hostel_cubit.dart';
 import 'features/bookings/cubit/bookings_cubit.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
@@ -46,7 +44,7 @@ void main() async {
   );
   
   FlutterError.onError = (details) {
-    // Skip logging parentDataDirty assertion errors in debug mode
+
     final errorString = details.exception.toString();
     if (!errorString.contains('parentDataDirty')) {
       AppLogger.error('FLUTTER FRAMEWORK ERROR: ${details.exception}', details.exception, details.stack);
@@ -175,10 +173,7 @@ class StayIndiaOwnerApp extends StatelessWidget {
                   localizationsDelegates: context.localizationDelegates,
                   supportedLocales: context.supportedLocales,
                   locale: context.locale,
-                  home: AuthGate(
-                    dashboard: const MainNavigationPage(),
-                    registration: const RegistrationPersonalPage(),
-                  ),
+                  home: const SplashScreen(),
                 ),
               );
             },

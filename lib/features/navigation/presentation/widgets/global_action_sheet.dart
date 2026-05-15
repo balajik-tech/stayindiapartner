@@ -78,7 +78,6 @@ class GlobalActionSheetContent extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
           Container(
             width: 40.w,
             height: 4.h,

@@ -27,8 +27,7 @@ class UnifiedHeader extends StatelessWidget {
             
             if (index < state.hostels.length) {
               selectedHostelName = state.hostels[index].name;
-              // 10/10 RESPONSIVE TRUNCATION: 
-              // Smartly truncate based on word boundaries if possible, else fixed length.
+
               if (selectedHostelName.length > 12) {
                 selectedHostelName = "${selectedHostelName.substring(0, 9).trim()}...";
               }
@@ -42,7 +41,7 @@ class UnifiedHeader extends StatelessWidget {
           color: Colors.white,
           child: Row(
             children: [
-              // SI Partner Logo
+
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
                 decoration: BoxDecoration(
@@ -76,7 +75,7 @@ class UnifiedHeader extends StatelessWidget {
               
               SizedBox(width: 16.w),
               
-              // Property Switcher
+
               Semantics(
                 label: 'switch_property'.tr(),
                 hint: '${'current_property'.tr()}: $selectedHostelName',
@@ -119,7 +118,7 @@ class UnifiedHeader extends StatelessWidget {
 
               const Spacer(),
 
-              // Notification Button
+
               Semantics(
                 label: 'notifications'.tr(),
                 button: true,

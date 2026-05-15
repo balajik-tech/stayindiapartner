@@ -295,5 +295,13 @@
   "copy": "COPY",
   "code_copied": "Code copied to clipboard!",
   "share_whatsapp": "Share via WhatsApp",
-  "share_referral_link": "Share Referral Link"
+  "share_referral_link": "Share Referral Link",
+  "add_property_first": "Add property first",
+  "start_by_adding_property_desc": "You need to add at least one property to start managing it.",
+  "access_denied": "Access Denied",
+  "no_active_residents": "No active residents",
+  "manage_residents_subtitle": "Active residents of this property will appear here",
+  "no_history_found": "No history found",
+  "history_empty_subtitle": "Past bookings and check-outs will be listed here",
+  "no_residents_desc": "Start by adding your first tenant to this property."
 }

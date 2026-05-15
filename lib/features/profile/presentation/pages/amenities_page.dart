@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
@@ -126,6 +127,29 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
     );
   }
 
+  IconData _getAmenityIcon(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('wifi')) return Icons.wifi_rounded;
+    if (n.contains('ac') || n.contains('air cond')) return Icons.ac_unit_rounded;
+    if (n.contains('laundry') || n.contains('washing')) return Icons.local_laundry_service_rounded;
+    if (n.contains('tv') || n.contains('television')) return Icons.tv_rounded;
+    if (n.contains('gym') || n.contains('fitness')) return Icons.fitness_center_rounded;
+    if (n.contains('backup') || n.contains('power')) return Icons.power_rounded;
+    if (n.contains('security')) return Icons.security_rounded;
+    if (n.contains('cctv') || n.contains('camera')) return Icons.videocam_rounded;
+    if (n.contains('food') || n.contains('meal')) return Icons.restaurant_rounded;
+    if (n.contains('parking')) return Icons.local_parking_rounded;
+    if (n.contains('elevator') || n.contains('lift')) return Icons.elevator_rounded;
+    if (n.contains('water')) return Icons.water_drop_rounded;
+    if (n.contains('cleaning') || n.contains('housekeeping')) return Icons.cleaning_services_rounded;
+    if (n.contains('induction') || n.contains('stove')) return Icons.microwave_rounded;
+    if (n.contains('fridge') || n.contains('refrigerator')) return Icons.kitchen_rounded;
+    if (n.contains('geyser') || n.contains('hot water')) return Icons.hot_tub_rounded;
+    if (n.contains('cupboard') || n.contains('wardrobe')) return Icons.inventory_2_rounded;
+    if (n.contains('study') || n.contains('desk')) return Icons.desk_rounded;
+    return Icons.check_circle_outline_rounded;
+  }
+
   Widget _buildAmenitiesList() {
     if (_amenities.isEmpty) {
       return const SizedBox.shrink();
@@ -133,8 +157,15 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.8)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: ListView.separated(
         shrinkWrap: true,
@@ -142,6 +173,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
         itemCount: _amenities.length + 1,
         separatorBuilder: (context, index) => Divider(
           height: 1,
+          indent: 64.w,
           color: AppColors.roomCardBorder.withValues(alpha: 0.5),
         ),
         itemBuilder: (context, index) {
@@ -150,54 +182,76 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
               onTap: _showAddCustomAmenityDialog,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 20.w,
-                vertical: 12.h,
+                vertical: 14.h,
               ),
               leading: Container(
-                padding: EdgeInsets.all(8.w),
+                padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
                   color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.add,
+                  Icons.add_rounded,
                   color: AppColors.primaryBlue,
-                  size: 20.sp,
+                  size: 22.sp,
                 ),
               ),
               title: Text(
                 'Add Custom Amenity',
                 style: TextStyle(
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.primaryBlue,
+                  letterSpacing: -0.3,
                 ),
               ),
             );
           }
           final amenity = _amenities[index];
+          final bool isActive = amenity['isActive'];
+          final String name = amenity['name'];
+
           return ListTile(
             contentPadding: EdgeInsets.symmetric(
               horizontal: 20.w,
-              vertical: 4.h,
+              vertical: 8.h,
+            ),
+            leading: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: isActive 
+                    ? AppColors.primaryBlue.withValues(alpha: 0.08) 
+                    : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(
+                _getAmenityIcon(name),
+                color: isActive ? AppColors.primaryBlue : const Color(0xFF94A3B8),
+                size: 22.sp,
+              ),
             ),
             title: Text(
-              amenity['name'],
+              name,
               style: TextStyle(
                 fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.darkText,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                color: isActive ? AppColors.darkText : const Color(0xFF64748B),
+                letterSpacing: -0.2,
               ),
             ),
             trailing: Transform.scale(
-              scale: 0.9,
+              scale: 0.85,
               child: Switch(
-                value: amenity['isActive'],
+                value: isActive,
                 onChanged: (value) {
+                  HapticFeedback.lightImpact();
                   setState(() => amenity['isActive'] = value);
                 },
                 activeThumbColor: Colors.white,
                 activeTrackColor: AppColors.primaryBlue,
-                inactiveTrackColor: const Color(0xFFEAECF0),
+                inactiveTrackColor: const Color(0xFFE2E8F0),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
           );

@@ -52,33 +52,45 @@ class FloorListSection extends StatelessWidget {
         }
 
         if (state is DashboardError) {
-          if (state.message.contains('no_dashboard_data_found') || state.message.contains('not allowed') || state.message.contains('No hostels')) {
-            return SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
+          final bool isNoHostels = state.message.contains('no_dashboard_data_found') || 
+                                 state.message.contains('not allowed') || 
+                                 state.message.contains('No hostels');
+          
+          final bool isForbidden = state.message.toLowerCase().contains('forbidden') || 
+                                 state.message.toLowerCase().contains('not allowed');
+
+          return SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.w),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.apartment_rounded, size: 80.sp, color: AppColors.textSecondary.withValues(alpha: 0.2)),
+                    Icon(
+                      isForbidden ? Icons.lock_person_rounded : Icons.apartment_rounded, 
+                      size: 80.sp, 
+                      color: AppColors.textSecondary.withValues(alpha: 0.2)
+                    ),
                     SizedBox(height: 24.h),
                     Text(
-                      'no_hostels_added'.tr(),
-                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                      isNoHostels ? 'add_property_first'.tr() : 'Something went wrong',
+                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'add_hostel_prompt'.tr(),
-                      style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+                      isNoHostels 
+                        ? 'start_by_adding_property_desc'.tr()
+                        : (isForbidden 
+                            ? 'You don\'t have permission for this property or your session is stale. Please refresh or re-select the property.' 
+                            : state.message),
+                      style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-            );
-          }
-          return SliverFillRemaining(
-            hasScrollBody: false,
-            child: Center(child: Text(state.message, style: const TextStyle(color: Colors.red))),
+            ),
           );
         }
 
@@ -88,21 +100,25 @@ class FloorListSection extends StatelessWidget {
             return SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.apartment_rounded, size: 80.sp, color: AppColors.textSecondary.withValues(alpha: 0.2)),
-                    SizedBox(height: 24.h),
-                    Text(
-                      'no_hostels_added'.tr(),
-                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      'add_hostel_prompt'.tr(),
-                      style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
-                    ),
-                  ],
+                child: Padding(
+                  padding: EdgeInsets.all(32.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_business_rounded, size: 80.sp, color: AppColors.textSecondary.withValues(alpha: 0.2)),
+                      SizedBox(height: 24.h),
+                      Text(
+                        'add_property_first'.tr(),
+                        style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'start_by_adding_property_desc'.tr(),
+                        style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

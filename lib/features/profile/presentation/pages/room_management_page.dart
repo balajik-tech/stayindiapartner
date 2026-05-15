@@ -357,7 +357,6 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                 );
               } else {
                 if (room is entity.Room) {
-                  // Check if we have local edits for this existing room
                   final RoomDetail currentDraft = _modifiedRooms[room.id] ?? RoomDetail(
                     id: room.id,
                     hostelId: widget.hostel.id,
@@ -380,7 +379,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     draftRoom: currentDraft,
                     hostel: widget.hostel,
                     floorName: widget.floorName,
-                    isDraftMode: true, // Use draft mode to avoid immediate API calls
+                    isDraftMode: true,
                     onDraftUpdate: (updatedRoom) {
                       setState(() {
                         _modifiedRooms[room.id] = updatedRoom;
@@ -460,7 +459,6 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
   void _proceedToPricing() {
     final List<RoomDetail> allRooms = [];
     
-    // 1. Get existing rooms from last known data
     if (_lastData != null) {
       for (var floor in _lastData!.occupancy.floors) {
         for (var r in floor.rooms) {
@@ -484,10 +482,8 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
       }
     }
     
-    // 2. Add draft rooms
     if (_draftRooms != null) {
       for (var dr in _draftRooms!) {
-        // Avoid adding duplicate room numbers if they already existed (safety check)
         if (!allRooms.any((r) => r.roomTypename == dr.roomTypename)) {
           allRooms.add(dr);
         }
@@ -578,7 +574,6 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                   }),
                 });
               } else if (widget.isDraftMode) {
-                // For draft mode (initial setup but through RoomManagementPage)
                 final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
                 final newRoom = RoomDetail(
                   id: 'draft_${DateTime.now().millisecondsSinceEpoch}',
@@ -601,7 +596,6 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                   _draftRooms!.add(newRoom);
                 });
               } else {
-                // Production mode - Add to draft list instead of calling API immediately
                 final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
                 final newRoom = RoomDetail(
                   id: 'draft_${DateTime.now().millisecondsSinceEpoch}',
@@ -722,14 +716,13 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
         currentRooms.addAll(floor.rooms);
       }
       
-      // Always include newly added draft rooms for numbering calculation
       if (!widget.isSetupMode && !widget.isDraftMode && _draftRooms != null) {
         currentRooms.addAll(_draftRooms!);
       }
   
       if (currentRooms.isEmpty) {
         _showAddRoomDialog(context);
-        break; // Stop loop if we need manual input for the first room
+        break;
       }
   
       final dynamic lastRoom = currentRooms.last;
@@ -791,7 +784,6 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
             _draftRooms!.add(newRoom);
           });
         } else {
-          // Adding new room to an existing floor - use draft list to avoid immediate API call
           final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
           final newRoom = RoomDetail(
             id: 'draft_${DateTime.now().millisecondsSinceEpoch}_$i',
@@ -815,7 +807,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
           });
         }
       } else {
-        break; // Pattern mismatch, stop bulk add
+        break;
       }
     }
     
@@ -920,7 +912,6 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
     if (rooms.length < 2) return;
     final source = rooms[0];
     
-    // Convert source to a draft state if it was an entity.Room
     final sourceFeatures = List<String>.from(source.features);
     final sourceRoomType = source.roomType ?? 'NON-AC';
     final sourceSharing = source.sharingType;
@@ -983,11 +974,9 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
               onPressed: () async {
                 final List<RoomDetail> allRooms = [];
                 
-                // 1. Get ALL existing rooms and apply modifications
                 if (_lastData != null) {
                   for (var floor in _lastData!.occupancy.floors) {
                     for (var r in floor.rooms) {
-                      // If we have local edits, use them, otherwise use the original room data
                       if (_modifiedRooms.containsKey(r.id)) {
                         allRooms.add(_modifiedRooms[r.id]!);
                       } else {
@@ -1012,10 +1001,8 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                   }
                 }
 
-                // 2. Add new draft rooms (the ones added via "ADD" button)
                 if (_draftRooms != null) {
                   for (var dr in _draftRooms!) {
-                    // Avoid adding duplicate room numbers if they already existed
                     if (!allRooms.any((r) => r.roomTypename == dr.roomTypename)) {
                       allRooms.add(dr);
                     }
@@ -1039,9 +1026,6 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     ),
                   ),
                 ).then((_) {
-                  // Clear local changes when returning? 
-                  // Usually, we want to keep them if the user just clicked back.
-                  // But if they finished setup, the page should ideally have been popped and dashboard refreshed.
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -1330,7 +1314,6 @@ class _RoomManageCardState extends State<_RoomManageCard> {
 
       final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
       
-      // Ensure we are in updating state when the call starts
       if (!mounted) return;
       if (!_isUpdating) setState(() => _isUpdating = true);
       

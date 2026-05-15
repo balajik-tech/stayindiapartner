@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import '../cubit/auth_cubit.dart';
 import 'login_page.dart';
 
@@ -17,43 +18,53 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthCubit, AuthState>(
-      buildWhen: (previous, current) =>
-          current is! AuthLoading &&
-          current is! AuthError &&
-          current is! AuthOtpSent, 
-      builder: (context, state) {
-        if (state is AuthInitial || state is AuthSessionRestoring) {
-          return const _SplashScreen();
-        }
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthAuthenticated || state is AuthProfileCompleted) {
 
-        if (state is AuthAuthenticated) {
-          if (state.requiresRegistration) {
-            return registration;
-          }
-          return dashboard;
+          context.read<HostelCubit>().getHostels(forceRefresh: true);
         }
-
-        if (state is AuthUnauthenticated || state is AuthOtpSent) {
-          return const LoginPage();
-        }
-
-        if (state is AuthSessionRestoreError) {
-          return _SessionErrorScreen(
-            message: state.message,
-            onRetry: () => context.read<AuthCubit>().restoreSession(),
-            onLogin: () => context.read<AuthCubit>().logout(),
-          );
-        }
-
-        
-        return const LoginPage();
       },
+      child: BlocBuilder<AuthCubit, AuthState>(
+        buildWhen: (previous, current) =>
+            current is! AuthLoading &&
+            current is! AuthError &&
+            current is! AuthOtpSent,
+        builder: (context, state) {
+          if (state is AuthInitial || state is AuthSessionRestoring) {
+            return const _SplashScreen();
+          }
+
+          if (state is AuthAuthenticated || state is AuthProfileCompleted) {
+            final bool requiresRegistration = state is AuthAuthenticated ? state.requiresRegistration : false;
+            
+            if (requiresRegistration) {
+              return registration;
+            }
+            return dashboard;
+          }
+
+          if (state is AuthUnauthenticated || state is AuthOtpSent) {
+
+            context.read<HostelCubit>().reset();
+            return const LoginPage();
+          }
+
+          if (state is AuthSessionRestoreError) {
+            return _SessionErrorScreen(
+              message: state.message,
+              onRetry: () => context.read<AuthCubit>().restoreSession(),
+              onLogin: () => context.read<AuthCubit>().logout(),
+            );
+          }
+
+          
+          return const LoginPage();
+        },
+      ),
     );
   }
 }
-
-
 
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();

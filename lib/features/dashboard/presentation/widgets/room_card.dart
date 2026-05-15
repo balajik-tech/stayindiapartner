@@ -77,7 +77,7 @@ class _RoomCardState extends State<RoomCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Room Header
+
           if (widget.isGridView) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -276,7 +276,7 @@ class _RoomCardState extends State<RoomCard> {
             child: Divider(color: const Color(0xFFF1F5F9), thickness: 1.5),
           ),
           
-          // Beds Grid
+
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
@@ -311,7 +311,7 @@ class _RoomCardState extends State<RoomCard> {
             bedNumber: "${widget.roomNumber}-${bed.bedNumber}",
             tenantName: bed.tenantName,
             profileImage: bed.tenantAvatar,
-            joiningDate: "01 May 2024", // Mock data for demonstration
+            joiningDate: "01 May 2024",
             vacatingDate: bedStatus == BedStatus.notice ? "31 May 2024" : null,
             tenantId: bed.tenantId,
             hostelId: hId,

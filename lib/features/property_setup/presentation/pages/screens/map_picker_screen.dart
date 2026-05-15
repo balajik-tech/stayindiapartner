@@ -22,7 +22,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedLocation = widget.initialLocation ?? const LatLng(12.9716, 77.5946); // Default to Bangalore
+    _selectedLocation = widget.initialLocation ?? const LatLng(12.9716, 77.5946);
     _getAddress(_selectedLocation);
   }
 

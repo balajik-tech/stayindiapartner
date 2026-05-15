@@ -254,25 +254,11 @@ class AuthLogoBadge extends StatelessWidget {
               filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
               child: Container(
                 alignment: Alignment.center,
-                child: Container(
-                  width: 54.w,
-                  height: 54.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primaryBlue.withValues(alpha: 0.2),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.business_rounded,
-                    color: AppColors.primaryBlue,
-                    size: 30.w,
-                  ),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: 70.w,
+                  height: 70.w,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),

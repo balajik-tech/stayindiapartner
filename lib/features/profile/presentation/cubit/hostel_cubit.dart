@@ -45,7 +45,6 @@ class HostelCubit extends HydratedCubit<HostelState> {
       if (isClosed) return;
       
       List<int> indices = state is HostelLoaded ? (state as HostelLoaded).selectedHostelIndices : [0];
-      // Filter out invalid indices
       indices = indices.where((i) => i < hostels.length).toList();
       if (indices.isEmpty && hostels.isNotEmpty) indices = [0];
 
@@ -67,7 +66,7 @@ class HostelCubit extends HydratedCubit<HostelState> {
         emit(HostelLoaded(
           hostels: loadedState.hostels,
           selectedHostelIndex: index,
-          selectedHostelIndices: [index], // Default to just one when using single select
+          selectedHostelIndices: [index],
           lastFetched: loadedState.lastFetched,
         ));
       }
@@ -95,6 +94,10 @@ class HostelCubit extends HydratedCubit<HostelState> {
         ));
       }
     }
+  }
+
+  void reset() {
+    emit(const HostelInitial());
   }
 
   Future<void> createHostel({

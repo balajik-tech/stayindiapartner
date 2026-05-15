@@ -21,7 +21,6 @@ class FloorConfigScreen extends StatelessWidget {
               _buildSectionHeader('Floor Configuration', 'Define the total floors and rooms in your property.'),
               SizedBox(height: 12.h),
               
-              // Total Floors Card
               _PremiumCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

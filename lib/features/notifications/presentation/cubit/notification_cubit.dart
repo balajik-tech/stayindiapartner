@@ -44,7 +44,7 @@ class NotificationCubit extends Cubit<NotificationState> {
       await repository.markAllAsRead();
       fetchNotifications();
     } catch (e) {
-      // Silently fail as per existing logic, but maybe log it?
+      // ignore: empty_catches
     }
   }
 }

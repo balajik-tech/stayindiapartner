@@ -30,11 +30,8 @@ class AppColors {
 
   static const Color sosRed = Color(0xFFE53935);
   static const Color sosRedLight = Color(0xFFFFEBEE);
-  
   static const Color glassWhite = Color(0x33FFFFFF);
   static const Color glassBorder = Color(0x1A000000);
-
-  // Added missing colors
   static const Color success = Color(0xFF4CAF50);
   static const Color error = Color(0xFFE53935);
   static const Color border = Color(0xFFE2E8F0);

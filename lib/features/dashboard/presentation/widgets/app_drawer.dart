@@ -135,10 +135,10 @@ class AppDrawer extends StatelessWidget {
             }
 
             return Container(
-              padding: EdgeInsets.fromLTRB(20.w, 44.h, 20.w, 24.h), // Reduced vertical
+              padding: EdgeInsets.fromLTRB(20.w, 44.h, 20.w, 24.h),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A), // Professional slate instead of gradient
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)), // Reduced from 32
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,7 +162,7 @@ class AppDrawer extends StatelessWidget {
                       CustomAvatar(
                         imageUrl: imageUrl,
                         name: name,
-                        size: 52.0, // Reduced from 72
+                        size: 52.0,
                         isCircle: true,
                         fontSize: 20.sp,
                       ),
@@ -174,8 +174,8 @@ class AppDrawer extends StatelessWidget {
                             Text(
                               name,
                               style: TextStyle(
-                                fontSize: 16.sp, // Reduced from 22
-                                fontWeight: FontWeight.w700, // Reduced from 900
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.white,
                               ),
                             ),
@@ -183,7 +183,7 @@ class AppDrawer extends StatelessWidget {
                             Text(
                               phone,
                               style: TextStyle(
-                                fontSize: 12.sp, // Reduced from 15
+                                fontSize: 12.sp,
                                 color: Colors.white.withValues(alpha: 0.5),
                                 fontWeight: FontWeight.w400,
                               ),
@@ -204,11 +204,11 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildSectionLabel(String label) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w, bottom: 12.h), // Reduced
+      padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11.sp, // Reduced from 13
+          fontSize: 11.sp,
           fontWeight: FontWeight.w700,
           color: const Color(0xFF94A3B8),
           letterSpacing: 0.5,
@@ -219,10 +219,10 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildPremiumMenuItem(BuildContext context, IconData icon, String title, {VoidCallback? onTap}) {
     return Container(
-      margin: EdgeInsets.only(bottom: 8.h), // Reduced from 12
+      margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10.r), // Reduced from 20
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: const Color(0xFFF1F5F9)),
       ),
       child: Material(
@@ -235,16 +235,16 @@ class AppDrawer extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(10.r),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h), // Reduced vertical
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             child: Row(
               children: [
-                Icon(icon, color: const Color(0xFF64748B), size: 18.sp), // Reduced size
+                Icon(icon, color: const Color(0xFF64748B), size: 18.sp),
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: 14.sp, // Reduced from 16
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1E293B),
                     ),
@@ -277,7 +277,7 @@ class AppDrawer extends StatelessWidget {
           onTap: () => _handleLogout(context),
           borderRadius: BorderRadius.circular(10.r),
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.h), // Reduced from 18
+            padding: EdgeInsets.symmetric(vertical: 12.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -336,10 +336,10 @@ class AppDrawer extends StatelessWidget {
           if (state is! HostelLoaded) return const SizedBox.shrink();
           
           return Container(
-            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h), // Reduced
+            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)), // Reduced from 32
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -359,7 +359,7 @@ class AppDrawer extends StatelessWidget {
                 Text(
                   'Switch Property',
                   style: TextStyle(
-                    fontSize: 16.sp, // Reduced from 20
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.darkText,
                   ),
@@ -382,7 +382,7 @@ class AppDrawer extends StatelessWidget {
                           border: Border.all(
                             color: isSelected ? AppColors.primaryBlue : const Color(0xFFE2E8F0),
                           ),
-                          borderRadius: BorderRadius.circular(10.r), // Reduced from 16
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
                         child: ListTile(
                           onTap: () {

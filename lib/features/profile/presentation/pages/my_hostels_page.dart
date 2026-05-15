@@ -88,7 +88,6 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
           return const SizedBox.shrink();
         },
       ),
-      // FAB Removed as per requirements (moved to Dashboard)
     );
   }
 

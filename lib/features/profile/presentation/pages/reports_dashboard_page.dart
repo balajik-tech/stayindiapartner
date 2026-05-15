@@ -23,7 +23,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
   DateTime _endDate = DateTime.now();
   String? _selectedHostelId;
-  String? _selectedReportType; // 'payments', 'tenants', 'bookings'
+  String? _selectedReportType;
   bool _isGenerating = false;
   List<dynamic> _previewData = [];
 

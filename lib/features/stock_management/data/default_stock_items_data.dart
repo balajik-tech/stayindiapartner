@@ -6,7 +6,6 @@ class StaticStockItem {
 }
 
 const List<StaticStockItem> defaultMasterStockItems = [
-  // Grocery / Food
   StaticStockItem("Basmati Rice", "Grocery", "kg"),
   StaticStockItem("Sona Masoori Rice", "Grocery", "kg"),
   StaticStockItem("Brown Rice", "Grocery", "kg"),
@@ -73,7 +72,6 @@ const List<StaticStockItem> defaultMasterStockItems = [
   StaticStockItem("Red Onions Medium", "Grocery", "kg"),
   StaticStockItem("Potatoes Regular", "Grocery", "kg"),
 
-  // Cleaning
   StaticStockItem("Phenyl White Concentrated", "Cleaning", "liters"),
   StaticStockItem("Phenyl Herbal Green", "Cleaning", "liters"),
   StaticStockItem("Bleaching Powder Pack", "Cleaning", "packets"),
@@ -123,7 +121,6 @@ const List<StaticStockItem> defaultMasterStockItems = [
   StaticStockItem("Pitambari Shining Powder Brass Copper", "Cleaning", "packets"),
   StaticStockItem("Liquid Degreaser Heavy Duty Commercial", "Cleaning", "liters"),
 
-  // Utilities
   StaticStockItem("LED Bulb B22 9W Cool White", "Utilities", "pieces"),
   StaticStockItem("LED Bulb B22 12W Cool White", "Utilities", "pieces"),
   StaticStockItem("LED Tube Light Batten 20W 4ft", "Utilities", "pieces"),
@@ -174,7 +171,6 @@ const List<StaticStockItem> defaultMasterStockItems = [
   StaticStockItem("Fevicol SH Synthetic Resin Adhesive 500g", "Utilities", "pieces"),
   StaticStockItem("Clear Silicone Sealant Waterproof Tube", "Utilities", "pieces"),
 
-  // Misc / Maintenance
   StaticStockItem("A4 Copier Paper Ream 70 GSM 500 Sheets", "Misc", "packets"),
   StaticStockItem("Ballpoint Pens Blue Medium Point Box of 10", "Misc", "packets"),
   StaticStockItem("Permanent Marker Pen Bullet Tip Black", "Misc", "pieces"),

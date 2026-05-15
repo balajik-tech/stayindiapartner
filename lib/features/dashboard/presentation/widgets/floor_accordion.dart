@@ -105,10 +105,7 @@ class _FloorAccordionState extends State<FloorAccordion> {
                   ? LayoutBuilder(
                       builder: (context, constraints) {
                         final double width = constraints.maxWidth;
-                        // 10/10 RESPONSIVE LOGIC:
-                        // < 600: 2 columns (Phones)
-                        // 600 - 900: 3 columns (Small Tablets / Landscape)
-                        // > 900: 4 columns (Large Tablets)
+
                         int crossAxisCount = 2;
                         if (width > 900) {
                           crossAxisCount = 4;

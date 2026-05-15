@@ -197,16 +197,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const AuthLogoBadge(),
-                                SizedBox(height: 24.h),
-                                Text(
-                                  'STAY INDIA',
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 24.sp,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 4.0,
-                                  ),
-                                ),
+                                SizedBox(height: 12.h),
                               ],
                             ),
                           ),

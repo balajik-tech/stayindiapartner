@@ -1,6 +1,6 @@
 
 class ApiConstants {
-  static const String _androidUrl = 'https://api.koushiksoftwaresolutions.online/api/v1'; // Changed to prod URL for deployed testing
+  static const String _androidUrl = 'https://api.koushiksoftwaresolutions.online/api/v1';
 
   static const String _prodUrl = 'https://api.koushiksoftwaresolutions.online/api/v1';
 

@@ -80,7 +80,7 @@ class _RegistrationHostelDetailsPageState
       _stateController.text = state.state;
       _district = state.district;
       _pincode = state.pincode;
-      _village = state.city; // Using city as village if not specified
+      _village = state.city;
     });
   }
 

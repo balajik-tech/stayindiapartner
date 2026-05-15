@@ -46,10 +46,10 @@ class SummaryCard extends StatelessWidget {
         onTap: onTap,
         scaleFactor: 0.97,
         child: Container(
-          width: 74.w,
-          height: 54.h,
-          padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 5.h),
-          margin: EdgeInsets.only(right: 7.w, bottom: 4.h, top: 2.h),
+          width: 86.w,
+          height: 68.h,
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          margin: EdgeInsets.only(right: 10.w, bottom: 4.h, top: 2.h),
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(11.r),
@@ -64,8 +64,8 @@ class SummaryCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, color: contentColor, size: 16.sp),
-              SizedBox(width: 5.w),
+              Icon(icon, color: contentColor, size: 20.sp),
+              SizedBox(width: 6.w),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -77,18 +77,18 @@ class SummaryCard extends StatelessWidget {
                       child: Text(
                         count,
                         style: TextStyle(
-                          fontSize: 19.sp,
+                          fontSize: 26.sp,
                           fontWeight: FontWeight.w900,
                           color: contentColor,
                           height: 1.0,
                         ),
                       ),
                     ),
-                    SizedBox(height: 1.h),
+                    SizedBox(height: 2.h),
                     Text(
                       label,
                       style: TextStyle(
-                        fontSize: 9.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w900,
                         color: contentColor.withValues(alpha: isLightBackground ? 0.75 : 0.95),
                         height: 1.0,
@@ -127,7 +127,7 @@ class SummaryCardsSection extends StatelessWidget {
         final ops = data?.dailyOperations;
 
         return SizedBox(
-          height: 64.h,
+          height: 80.h,
           child: ListView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -156,9 +156,9 @@ class SummaryCardsSection extends StatelessWidget {
       onTap: () {},
       scaleFactor: 0.97,
       child: Container(
-        width: 96.w,
-        height: 56.h,
-        margin: EdgeInsets.only(right: 7.w, bottom: 4.h, top: 2.h),
+        width: 110.w,
+        height: 68.h,
+        margin: EdgeInsets.only(right: 10.w, bottom: 4.h, top: 2.h),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: Colors.black,
@@ -173,7 +173,7 @@ class SummaryCardsSection extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Header: Live Attendance
+
             Container(
               padding: EdgeInsets.symmetric(vertical: 3.h, horizontal: 7.w),
               decoration: BoxDecoration(
@@ -185,23 +185,28 @@ class SummaryCardsSection extends StatelessWidget {
                 children: [
                   const _BlinkingDot(),
                   SizedBox(width: 4.w),
-                  Text(
-                    'live_attendance'.tr().toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 6.5.sp,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'live_attendance'.tr().toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            // Content Row
+
             Expanded(
               child: Row(
                 children: [
-                  // Left Half: In PG
+
                   Expanded(
                     child: Semantics(
                       label: '${'presence_in'.tr()}: $inCount',
@@ -213,13 +218,13 @@ class SummaryCardsSection extends StatelessWidget {
                             Icon(
                               Icons.login_rounded,
                               color: Colors.white,
-                              size: 11.sp,
+                              size: 14.sp,
                             ),
-                            SizedBox(height: 1.h),
+                            SizedBox(height: 2.h),
                             Text(
                               inCount,
                               style: TextStyle(
-                                fontSize: 15.sp,
+                                fontSize: 22.sp,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
                                 height: 1.0,
@@ -228,7 +233,7 @@ class SummaryCardsSection extends StatelessWidget {
                             Text(
                               'presence_in'.tr().toUpperCase(),
                               style: TextStyle(
-                                fontSize: 7.sp,
+                                fontSize: 10.sp,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white.withValues(alpha: 0.9),
                               ),
@@ -238,7 +243,7 @@ class SummaryCardsSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Right Half: Out PG
+
                   Expanded(
                     child: Semantics(
                       label: '${'presence_out'.tr()}: $outCount',
@@ -250,13 +255,13 @@ class SummaryCardsSection extends StatelessWidget {
                             Icon(
                               Icons.logout_rounded,
                               color: Colors.white,
-                              size: 11.sp,
+                              size: 14.sp,
                             ),
-                            SizedBox(height: 1.h),
+                            SizedBox(height: 2.h),
                             Text(
                               outCount,
                               style: TextStyle(
-                                fontSize: 15.sp,
+                                fontSize: 22.sp,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
                                 height: 1.0,
@@ -265,7 +270,7 @@ class SummaryCardsSection extends StatelessWidget {
                             Text(
                               'presence_out'.tr().toUpperCase(),
                               style: TextStyle(
-                                fontSize: 7.sp,
+                                fontSize: 10.sp,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white.withValues(alpha: 0.9),
                               ),

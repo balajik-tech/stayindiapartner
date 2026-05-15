@@ -212,14 +212,14 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
   }
 
   Widget _buildStockItemCard(StockItem item) {
-    Color statusColor = const Color(0xFF10B981); // Green
+    Color statusColor = const Color(0xFF10B981);
     String statusText = 'Safe';
     
     if (item.currentQuantity <= 0) {
-      statusColor = const Color(0xFFEF4444); // Red
+      statusColor = const Color(0xFFEF4444);
       statusText = 'Critical';
     } else if (item.currentQuantity <= item.minimumThreshold) {
-      statusColor = const Color(0xFFF98125); // Orange
+      statusColor = const Color(0xFFF98125);
       statusText = 'Low Stock';
     }
 

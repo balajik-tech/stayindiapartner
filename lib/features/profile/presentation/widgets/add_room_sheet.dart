@@ -269,13 +269,13 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                       _buildFeatureIcon(
                         icon: Icons.hot_tub_rounded,
                         label: 'Geyser',
-                        isSelected: true, // Mocked for UI parity
+                        isSelected: true,
                         onTap: () {},
                       ),
                       _buildFeatureIcon(
                         icon: Icons.wc_rounded,
                         label: 'Attached',
-                        isSelected: true, // Mocked for UI parity
+                        isSelected: true,
                         onTap: () {},
                       ),
                     ],

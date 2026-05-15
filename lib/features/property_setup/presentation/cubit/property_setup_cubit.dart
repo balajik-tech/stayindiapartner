@@ -9,6 +9,7 @@ import 'property_setup_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
+import 'package:stayindia_owner/core/services/quality_checker_service.dart';
 
 class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   final SetupPropertyUseCase setupPropertyUseCase;
@@ -56,6 +57,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       rooms: mappedRooms.isNotEmpty ? mappedRooms : state.rooms,
       currentStep: mappedRooms.isNotEmpty ? 3 : 0, 
     ));
+    syncRoomCategories();
   }
 
   void updateGstNumber(String gst) {
@@ -76,7 +78,11 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       autoGenerateRooms();
     }
     
-    if (state.currentStep < 4) {
+    if (state.currentStep == 3) {
+      syncRoomCategories();
+    }
+    
+    if (state.currentStep < 5) {
       emit(state.copyWith(currentStep: targetStep));
     }
   }
@@ -155,17 +161,27 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     try {
       final XFile? pickedFile = await _picker.pickImage(source: source);
       if (pickedFile != null) {
+        emit(state.copyWith(isSaving: true));
+        final qualityError = await QualityCheckerService.checkImageQuality(pickedFile.path);
+        emit(state.copyWith(isSaving: false));
+
+        if (qualityError != null) {
+          emit(state.copyWith(error: qualityError));
+          return;
+        }
+
         final croppedPath = await _cropImage(pickedFile.path);
         if (croppedPath != null) {
           final currentMap = Map<String, List<String>>.from(state.categorizedImages);
           final currentImages = List<String>.from(currentMap[category] ?? []);
           currentImages.add(croppedPath);
           currentMap[category] = currentImages;
-          emit(state.copyWith(categorizedImages: currentMap));
+          emit(state.copyWith(categorizedImages: currentMap, error: null));
         }
       }
     } catch (e) {
       AppLogger.error('Error picking category image: $e');
+      emit(state.copyWith(isSaving: false));
     }
   }
 
@@ -480,7 +496,6 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
              state.lat != null && 
              state.lng != null;
     }
-    // For other steps, we can add more specific logic if needed
     return true;
   }
 
@@ -503,7 +518,6 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       return false;
     }
 
-    // Validate pricing for each defined category
     final List<String> missingPricing = [];
     for (int i = 0; i < state.roomCategories.length; i++) {
       final cat = state.roomCategories[i];
@@ -605,6 +619,66 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       emit(state.copyWith(isSaving: false, currentStep: 5, hostelId: hostel.id));
     } catch (e) {
       emit(state.copyWith(isSaving: false, error: e.toString()));
+    }
+  }
+
+  void syncRoomCategories() {
+    final List<Map<String, dynamic>> rooms = List<Map<String, dynamic>>.from(state.rooms.map((r) => Map<String, dynamic>.from(r)));
+    final List<Map<String, dynamic>> categories = List<Map<String, dynamic>>.from(state.roomCategories.map((c) => Map<String, dynamic>.from(c)));
+    bool changed = false;
+
+    for (int i = 0; i < rooms.length; i++) {
+      final room = rooms[i];
+      final features = room['features'] as Map<String, dynamic>? ?? {};
+      final isAC = features['isAC'] == true;
+      final sharing = room['sharingType'] ?? 2;
+
+      
+      int existingCatIndex = categories.indexWhere(
+        (cat) => cat['sharingType'] == sharing && cat['isAC'] == isAC
+      );
+
+      if (existingCatIndex == -1) {
+        
+        final newCatId = 'cat_${DateTime.now().millisecondsSinceEpoch}_$i';
+        final newCat = {
+          'id': newCatId,
+          'sharingType': sharing,
+          'isAC': isAC,
+          'roomSize': room['roomSize'] ?? 'Medium',
+          'roomCount': 0,
+          'monthlyRent': '',
+          'dailyRent': '',
+          'securityDeposit': '',
+          'maintenance': '',
+          'dailyRentThresholdDays': '10',
+        };
+        categories.add(newCat);
+        existingCatIndex = categories.length - 1;
+        changed = true;
+      }
+
+      
+      if (room['categoryId'] != categories[existingCatIndex]['id']) {
+        rooms[i]['categoryId'] = categories[existingCatIndex]['id'];
+        changed = true;
+      }
+    }
+
+    
+    for (var cat in categories) {
+      final count = rooms.where((r) => r['categoryId'] == cat['id']).length;
+      if (cat['roomCount'] != count) {
+        cat['roomCount'] = count;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      emit(state.copyWith(
+        roomCategories: categories,
+        rooms: rooms,
+      ));
     }
   }
 

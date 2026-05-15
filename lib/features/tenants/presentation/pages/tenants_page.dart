@@ -351,61 +351,80 @@ class _TenantsPageState extends State<TenantsPage> {
     }
 
     return [
-      BlocBuilder<TenantCubit, TenantState>(
-        builder: (context, state) {
-          if (state is TenantLoading) {
-            return SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => const TenantCardSkeleton(),
-                  childCount: 5,
-                ),
-              ),
-            );
-          }
-
-          if (state is TenantError) {
+      BlocBuilder<HostelCubit, HostelState>(
+        builder: (context, hostelState) {
+          if (hostelState is HostelLoaded && hostelState.hostels.isEmpty) {
             return SliverFillRemaining(
               child: _buildEmptyState(
-                icon: Icons.error_outline_rounded,
-                title: 'Something went wrong',
-                message: state.message,
+                icon: Icons.add_business_rounded,
+                title: 'add_property_first'.tr(),
+                message: 'start_by_adding_property_desc'.tr(),
               ),
             );
           }
 
-          if (state is TenantEmpty) {
-            return SliverFillRemaining(
-              child: _buildEmptyState(
-                icon: Icons.people_outline_rounded,
-                title: 'no_residents_found'.tr(),
-                message: state.message ?? 'Start by adding your first tenant to this property.',
-              ),
-            );
-          }
+          return BlocBuilder<TenantCubit, TenantState>(
+            builder: (context, state) {
+              if (state is TenantLoading) {
+                return SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => const TenantCardSkeleton(),
+                      childCount: 5,
+                    ),
+                  ),
+                );
+              }
 
-          if (state is TenantLoaded) {
-            return SliverPadding(
-              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 140.h),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    if (index < state.tenants.length) {
-                      return TenantCard(tenant: state.tenants[index]);
-                    }
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue)),
-                    );
-                  },
-                  childCount: state.tenants.length + (state.isLoadMore ? 1 : 0),
-                ),
-              ),
-            );
-          }
+              if (state is TenantError) {
+                final bool isForbidden = state.message.toLowerCase().contains('not allowed') || 
+                                       state.message.toLowerCase().contains('forbidden');
+                
+                return SliverFillRemaining(
+                  child: _buildEmptyState(
+                    icon: isForbidden ? Icons.lock_person_rounded : Icons.error_outline_rounded,
+                    title: isForbidden ? 'access_denied'.tr() : 'Something went wrong',
+                    message: isForbidden 
+                      ? 'You don\'t have permission for this property or your session is stale. Please try refreshing or re-selecting the property.'
+                      : state.message,
+                  ),
+                );
+              }
 
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
+              if (state is TenantEmpty || state is TenantInitial) {
+                return SliverFillRemaining(
+                  child: _buildEmptyState(
+                    icon: Icons.people_outline_rounded,
+                    title: 'no_residents_found'.tr(),
+                    message: (state is TenantEmpty ? state.message : null) ?? 'no_residents_desc'.tr(),
+                  ),
+                );
+              }
+
+              if (state is TenantLoaded) {
+                return SliverPadding(
+                  padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 140.h),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index < state.tenants.length) {
+                          return TenantCard(tenant: state.tenants[index]);
+                        }
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue)),
+                        );
+                      },
+                      childCount: state.tenants.length + (state.isLoadMore ? 1 : 0),
+                    ),
+                  ),
+                );
+              }
+
+              return const SliverToBoxAdapter(child: SizedBox.shrink());
+            },
+          );
         },
       ),
     ];

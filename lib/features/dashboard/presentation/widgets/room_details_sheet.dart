@@ -68,7 +68,6 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
           ),
           SizedBox(height: 16.h),
           
-          // Room Header
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
@@ -128,7 +127,6 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
           
           SizedBox(height: 16.h),
           
-          // Features
           if (widget.room.features.isNotEmpty) ...[
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -141,7 +139,6 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
             SizedBox(height: 16.h),
           ],
 
-          // Rent Info
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Container(
@@ -163,7 +160,6 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
 
           SizedBox(height: 20.h),
 
-          // Bed Selector
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
@@ -203,7 +199,6 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
 
           SizedBox(height: 24.h),
 
-          // Bed Action Area
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: AnimatedSwitcher(

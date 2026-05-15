@@ -186,41 +186,41 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
 
   IconData _getStateIcon(String name) {
     final lower = name.toLowerCase();
-    if (lower.contains('andaman')) return Icons.account_balance_rounded; // Cellular Jail
-    if (lower.contains('andhra')) return Icons.temple_hindu_rounded; // Tirupati
-    if (lower.contains('arunachal')) return Icons.forest_rounded; // Tribal/hornbill
-    if (lower.contains('assam')) return Icons.eco_rounded; // Rhino/Tea
-    if (lower.contains('bihar')) return Icons.park_rounded; // Bodhi tree
-    if (lower.contains('chandigarh')) return Icons.pan_tool_rounded; // Open Hand
-    if (lower.contains('chhattisgarh')) return Icons.water_drop_rounded; // Waterfall
-    if (lower.contains('delhi')) return Icons.account_balance_wallet_rounded; // India Gate
-    if (lower.contains('goa')) return Icons.beach_access_rounded; // Beach
-    if (lower.contains('gujarat')) return Icons.pets_rounded; // Lion / Statue
-    if (lower.contains('haryana')) return Icons.grass_rounded; // Wheat sheaf
-    if (lower.contains('himachal')) return Icons.landscape_rounded; // Snow mountain
-    if (lower.contains('jammu') || lower.contains('kashmir')) return Icons.sailing_rounded; // Shikara
-    if (lower.contains('jharkhand')) return Icons.waves_rounded; // Waterfall / drum
-    if (lower.contains('karnataka')) return Icons.castle_rounded; // Mysore Palace
-    if (lower.contains('kerala')) return Icons.houseboat_rounded; // Houseboat
-    if (lower.contains('ladakh')) return Icons.filter_hdr_rounded; // Stupa / mountain
-    if (lower.contains('lakshadweep')) return Icons.beach_access_rounded; // Palm / island
-    if (lower.contains('madhya')) return Icons.museum_rounded; // Sanchi stupa
-    if (lower.contains('maharashtra')) return Icons.door_sliding_rounded; // Gateway of India
-    if (lower.contains('manipur')) return Icons.nature_people_rounded; // Sangai deer
-    if (lower.contains('meghalaya')) return Icons.water_drop_rounded; // Living root bridge
-    if (lower.contains('mizoram')) return Icons.forest_rounded; // Bamboo
-    if (lower.contains('nagaland')) return Icons.flutter_dash_rounded; // Hornbill
-    if (lower.contains('odisha')) return Icons.settings_rounded; // Konark wheel
-    if (lower.contains('puducherry')) return Icons.wb_sunny_rounded; // Lighthouse
-    if (lower.contains('punjab')) return Icons.wb_twilight_rounded; // Golden Temple
-    if (lower.contains('rajasthan')) return Icons.fort_rounded; // Amber Fort / camel
-    if (lower.contains('sikkim')) return Icons.terrain_rounded; // Kanchenjunga
-    if (lower.contains('tamil')) return Icons.church_rounded; // Gopuram
-    if (lower.contains('telangana')) return Icons.location_city_rounded; // Charminar
-    if (lower.contains('tripura')) return Icons.water_rounded; // Water palace
-    if (lower.contains('uttar pradesh')) return Icons.mosque_rounded; // Taj Mahal
-    if (lower.contains('uttarakhand')) return Icons.filter_hdr_rounded; // Kedarnath
-    if (lower.contains('west bengal')) return Icons.architecture_rounded; // Howrah Bridge
+    if (lower.contains('andaman')) return Icons.account_balance_rounded;
+    if (lower.contains('andhra')) return Icons.temple_hindu_rounded;
+    if (lower.contains('arunachal')) return Icons.forest_rounded;
+    if (lower.contains('assam')) return Icons.eco_rounded;
+    if (lower.contains('bihar')) return Icons.park_rounded;
+    if (lower.contains('chandigarh')) return Icons.pan_tool_rounded;
+    if (lower.contains('chhattisgarh')) return Icons.water_drop_rounded;
+    if (lower.contains('delhi')) return Icons.account_balance_wallet_rounded;
+    if (lower.contains('goa')) return Icons.beach_access_rounded;
+    if (lower.contains('gujarat')) return Icons.pets_rounded;
+    if (lower.contains('haryana')) return Icons.grass_rounded;
+    if (lower.contains('himachal')) return Icons.landscape_rounded;
+    if (lower.contains('jammu') || lower.contains('kashmir')) return Icons.sailing_rounded;
+    if (lower.contains('jharkhand')) return Icons.waves_rounded;
+    if (lower.contains('karnataka')) return Icons.castle_rounded;
+    if (lower.contains('kerala')) return Icons.houseboat_rounded;
+    if (lower.contains('ladakh')) return Icons.filter_hdr_rounded;
+    if (lower.contains('lakshadweep')) return Icons.beach_access_rounded;
+    if (lower.contains('madhya')) return Icons.museum_rounded;
+    if (lower.contains('maharashtra')) return Icons.door_sliding_rounded;
+    if (lower.contains('manipur')) return Icons.nature_people_rounded;
+    if (lower.contains('meghalaya')) return Icons.water_drop_rounded;
+    if (lower.contains('mizoram')) return Icons.forest_rounded;
+    if (lower.contains('nagaland')) return Icons.flutter_dash_rounded;
+    if (lower.contains('odisha')) return Icons.settings_rounded;
+    if (lower.contains('puducherry')) return Icons.wb_sunny_rounded;
+    if (lower.contains('punjab')) return Icons.wb_twilight_rounded;
+    if (lower.contains('rajasthan')) return Icons.fort_rounded;
+    if (lower.contains('sikkim')) return Icons.terrain_rounded;
+    if (lower.contains('tamil')) return Icons.church_rounded;
+    if (lower.contains('telangana')) return Icons.location_city_rounded;
+    if (lower.contains('tripura')) return Icons.water_rounded;
+    if (lower.contains('uttar pradesh')) return Icons.mosque_rounded;
+    if (lower.contains('uttarakhand')) return Icons.filter_hdr_rounded;
+    if (lower.contains('west bengal')) return Icons.architecture_rounded;
     return Icons.location_on_rounded;
   }
 

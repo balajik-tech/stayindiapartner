@@ -61,13 +61,7 @@ Future<void> init() async {
       ));
 
   sl.registerLazySingleton<SocketService>(() {
-    String socketBaseUrl = ApiConstants.effectiveBaseUrl;
-    if (socketBaseUrl.contains('/api')) {
-      socketBaseUrl = socketBaseUrl.split('/api')[0];
-    }
-    if (socketBaseUrl.endsWith('/')) {
-      socketBaseUrl = socketBaseUrl.substring(0, socketBaseUrl.length - 1);
-    }
+    final String socketBaseUrl = Uri.parse(ApiConstants.effectiveBaseUrl).origin;
     return SocketService(baseUrl: socketBaseUrl)..connect();
   });
 
@@ -75,7 +69,7 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => const FlutterSecureStorage(
         aOptions: AndroidOptions(
-          encryptedSharedPreferences: true,
+          encryptedSharedPreferences: false,
         ),
       ));
 
@@ -117,8 +111,7 @@ Future<void> init() async {
                             e.requestOptions.path.contains('/users/');
           
           if (e.response?.statusCode == 401) {
-            // Only trigger global logout for non-auth requests.
-            // Auth requests (like /auth/me) should be handled by the AuthCubit.
+
             if (!isAuthPath) {
               AppLogger.warning('Session expired (401) on ${e.requestOptions.path}. Logging out...');
               sl<AuthCubit>().logout();

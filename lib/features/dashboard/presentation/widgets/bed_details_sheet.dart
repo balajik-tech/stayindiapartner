@@ -58,7 +58,7 @@ class BedDetailsSheet extends StatelessWidget {
     );
   }
 
-  // Matches summary card solid colors exactly
+
   Color get _statusColor {
     switch (state.status) {
       case BedStatus.free:     return const Color(0xFF87CEEB);
@@ -79,7 +79,7 @@ class BedDetailsSheet extends StatelessWidget {
     }
   }
 
-  // Matches textColor from BedCard for perfect contrast over _statusBgColor
+
   Color get _statusTextColor {
     switch (state.status) {
       case BedStatus.free:     return const Color(0xFF1A6F8A);
@@ -391,7 +391,7 @@ class BedDetailsSheet extends StatelessWidget {
   }
 }
 
-// ── Scanner Sheet ────────────────────────────────────────────────────────────
+
 
 class _ScannerSheet extends StatefulWidget {
   const _ScannerSheet();

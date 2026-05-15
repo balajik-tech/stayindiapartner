@@ -9,12 +9,17 @@ class TokenStorage {
       : _storage = storage ??
             const FlutterSecureStorage(
               aOptions: AndroidOptions(
-                encryptedSharedPreferences: true,
+                encryptedSharedPreferences: false,
               ),
             );
 
   Future<void> saveToken(String token) async {
-    await _storage.write(key: _tokenKey, value: token);
+    try {
+      await _storage.write(key: _tokenKey, value: token);
+    } catch (e) {
+      await _storage.deleteAll();
+      await _storage.write(key: _tokenKey, value: token);
+    }
   }
 
   Future<String?> getToken() async {
@@ -27,7 +32,12 @@ class TokenStorage {
   }
 
   Future<void> savePhone(String phone) async {
-    await _storage.write(key: _phoneKey, value: phone);
+    try {
+      await _storage.write(key: _phoneKey, value: phone);
+    } catch (e) {
+      await _storage.deleteAll();
+      await _storage.write(key: _phoneKey, value: phone);
+    }
   }
 
   Future<String?> getPhone() async {

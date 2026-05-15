@@ -499,7 +499,6 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Announcement Sent!'), backgroundColor: Colors.green));
           
-          // Clear text fields after successful send
           _titleController.clear();
           _messageController.clear();
           

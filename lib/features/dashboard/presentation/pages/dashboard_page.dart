@@ -50,7 +50,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _refreshData());
     
-    // Listen for real-time dashboard refresh events
+
     try {
       final socketService = sl<SocketService>();
       _refreshSubscription = socketService.dashboardRefreshStream.listen((data) {
@@ -88,7 +88,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     final hostelState = hostelCubit.state;
     
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-      // 10/10 RECOVERY: If IDs are empty due to the previous serialization bug, force a fresh fetch.
+
       final hasEmptyIds = hostelState.hostels.any((h) => h.id.isEmpty);
       if (hasEmptyIds) {
         hostelCubit.getHostels(forceRefresh: true);

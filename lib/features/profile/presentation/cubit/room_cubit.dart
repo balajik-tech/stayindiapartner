@@ -260,12 +260,10 @@ class RoomCubit extends Cubit<RoomState> {
     if (state is RoomLoading) return;
     emit(RoomLoading());
     try {
-      // Extract floor number from name (e.g. "3rd Floor" -> 3)
       final floorNumber = int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
       
       final List<RoomDetail> rooms = [];
       for (int i = 1; i <= roomCount; i++) {
-        // Construct room number: FloorNumber * 100 + i (e.g. 3rd floor, room 1 -> 301)
         final roomNo = (floorNumber * 100) + i;
         
         rooms.add(RoomDetail(
@@ -274,10 +272,10 @@ class RoomCubit extends Cubit<RoomState> {
           roomTypename: roomNo.toString(),
           floor: floorNumber,
           sharingType: _mapCapacityToSharing(bedsPerRoom),
-          roomType: 'NON-AC', // Default
-          rent: 0, // Placeholder
-          deposit: 0, // Placeholder
-          maintenance: 0, // Placeholder
+          roomType: 'NON-AC',
+          rent: 0,
+          deposit: 0,
+          maintenance: 0,
           isActive: true,
           isMaster: false,
           capacity: bedsPerRoom,

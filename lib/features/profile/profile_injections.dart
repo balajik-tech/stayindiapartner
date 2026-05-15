@@ -90,13 +90,11 @@ void registerProfileFeature(GetIt sl) {
         deleteDocumentUseCase: sl(),
       ));
 
-  // ── Use-cases ──────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => UploadAvatarUseCase(sl()));
   sl.registerLazySingleton(() => DeleteOwnerAccountUseCase(sl()));
 
-  // Hostel Use-cases
   sl.registerLazySingleton(() => GetHostelsUseCase(sl()));
   sl.registerLazySingleton(() => CreateHostelUseCase(sl()));
   sl.registerLazySingleton(() => UpdateHostelUseCase(sl()));
@@ -104,7 +102,6 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => UploadHostelImagesUseCase(sl()));
   sl.registerLazySingleton(() => UpdateHostelLocationUseCase(sl()));
 
-  // Room Use-cases
   sl.registerLazySingleton(() => GetOccupancyUseCase(sl()));
   sl.registerLazySingleton(() => GetFloorWiseRoomsUseCase(sl()));
   sl.registerLazySingleton(() => GetRoomsUseCase(sl()));
@@ -118,11 +115,9 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetBedHistoryUseCase(sl()));
   sl.registerLazySingleton(() => BulkCreateRoomsUseCase(sl()));
 
-  // Food Menu Use-cases
   sl.registerLazySingleton(() => GetFoodMenuUseCase(sl()));
   sl.registerLazySingleton(() => SaveFoodMenuUseCase(sl()));
 
-  // Settings Use-cases
   sl.registerLazySingleton(() => GetHostelSettingsUseCase(sl()));
   sl.registerLazySingleton(() => UpdateHostelProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateHostelAmenitiesUseCase(sl()));
@@ -131,12 +126,10 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => UpdateHostelRoomConfigUseCase(sl()));
   sl.registerLazySingleton(() => UploadHostelSettingsImagesUseCase(sl()));
 
-  // Document Use-cases
   sl.registerLazySingleton(() => GetDocumentsUseCase(sl()));
   sl.registerLazySingleton(() => UploadDocumentUseCase(sl()));
   sl.registerLazySingleton(() => DeleteDocumentUseCase(sl()));
 
-  // ── Repository ─────────────────────────────────────────────────────────────
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(remoteDataSource: sl()),
   );
@@ -159,7 +152,6 @@ void registerProfileFeature(GetIt sl) {
     () => ReviewRepositoryImpl(remoteDataSource: sl()),
   );
 
-  // ── Data sources ────────────────────────────────────────────────────────────
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(dio: sl()),
   );

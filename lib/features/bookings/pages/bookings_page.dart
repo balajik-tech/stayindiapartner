@@ -103,23 +103,41 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
           context.read<BookingsCubit>().clearScannedBooking();
         }
       },
-      child: BlocBuilder<BookingsCubit, BookingsState>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              _buildPowerfulHeader(context, state),
-              _buildSegmentedTabs(state),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildTabContent(context, state, state.requests, 'no_pending_requests'.tr(), 'new_booking_requests_here'.tr()),
-                    _buildTabContent(context, state, state.checkIns, 'no_active_residents'.tr(), 'manage_residents_subtitle'.tr()),
-                    _buildHistoryTab(context, state),
-                  ],
+      child: BlocBuilder<HostelCubit, HostelState>(
+        builder: (context, hostelState) {
+          if (hostelState is HostelLoaded && hostelState.hostels.isEmpty) {
+            return Column(
+              children: [
+                _buildPowerfulHeader(context, const BookingsState()),
+                Expanded(
+                  child: _buildEmptyState(
+                    'add_property_first'.tr(), 
+                    'start_by_adding_property_desc'.tr()
+                  ),
                 ),
-              ),
-            ],
+              ],
+            );
+          }
+
+          return BlocBuilder<BookingsCubit, BookingsState>(
+            builder: (context, state) {
+              return Column(
+                children: [
+                  _buildPowerfulHeader(context, state),
+                  _buildSegmentedTabs(state),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildTabContent(context, state, state.requests, 'no_pending_requests'.tr(), 'new_booking_requests_here'.tr()),
+                        _buildTabContent(context, state, state.checkIns, 'no_active_residents'.tr(), 'manage_residents_subtitle'.tr()),
+                        _buildHistoryTab(context, state),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),

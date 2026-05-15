@@ -78,7 +78,6 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   Future<void> loadFeed({bool isRefresh = false}) async {
     final s = state;
     if (s is SocialFeedLoaded && isRefresh) {
-      // Keep existing posts while refreshing without showing loading spinner
     } else {
       emit(SocialFeedLoading());
     }

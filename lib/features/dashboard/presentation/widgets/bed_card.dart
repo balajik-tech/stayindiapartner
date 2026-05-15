@@ -35,27 +35,27 @@ class BedCard extends StatelessWidget {
     final bool isFree = upperStatus == 'FREE';
 
     if (isFree) {
-      // Matches "Free Beds" summary card: sky blue #87CEEB
+
       bgColor = const Color(0xFFD6EEF8);
       borderColor = const Color(0xFF87CEEB);
       textColor = const Color(0xFF1A6F8A);
     } else if (isNotice) {
-      // Matches "Notice" summary card: amber #FFB300
+
       bgColor = const Color(0xFFFFF3CD);
       borderColor = const Color(0xFFFFB300);
       textColor = const Color(0xFF7A5800);
     } else if (isBooked) {
-      // Matches "Reservation" summary card: purple #9C27B0
+
       bgColor = const Color(0xFFF3E8FF);
       borderColor = const Color(0xFF9C27B0);
       textColor = const Color(0xFF6A0080);
     } else if (isAway) {
-      // Matches "Away" summary card: pink #E91E63
+
       bgColor = const Color(0xFFFFE4EE);
       borderColor = const Color(0xFFE91E63);
       textColor = const Color(0xFF9C0040);
     } else {
-      // Occupied — matches "Occupied" summary card: orange #FF8600
+
       bgColor = const Color(0xFFFFEDD5);
       borderColor = const Color(0xFFFF8600);
       textColor = const Color(0xFF8B4000);
@@ -92,7 +92,7 @@ class BedCard extends StatelessWidget {
                   child: CustomPaint(
                     foregroundPainter: _DottedBorderPainter(
                       color: borderColor,
-                      strokeWidth: 1.8,
+                      strokeWidth: 3.0,
                       dashWidth: 4,
                       dashSpace: 3,
                       borderRadius: 18.r,

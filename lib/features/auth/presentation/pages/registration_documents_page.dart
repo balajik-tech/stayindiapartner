@@ -140,8 +140,7 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
                 if (widget.isFromProfile) {
                   Navigator.pop(context);
                 } else {
-                  // Check if the owner has already accepted the policy.
-                  // If not, show the policy screen before going to the dashboard.
+
                   final authState = context.read<AuthCubit>().state;
                   final hasAcceptedPolicy = authState is AuthAuthenticated
                       ? authState.owner.hasAcceptedPolicy

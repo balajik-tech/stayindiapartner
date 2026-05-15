@@ -30,14 +30,14 @@ class SocketService {
     AppLogger.debug(' Socket: Attempting to connect to $baseUrl');
     
     _socket = io.io(baseUrl, io.OptionBuilder()
-      .setTransports(['websocket']) // Force websocket to prevent polling timeouts
+      .setTransports(['websocket'])
       .enableAutoConnect()
       .enableReconnection()
       .setReconnectionDelay(2000)
       .setReconnectionAttempts(20)
       .build());
 
-    // Explicitly connect to the default namespace
+
     _socket!.connect();
 
     _socket!.onConnect((_) {
@@ -108,11 +108,6 @@ class SocketService {
   void joinCommunity(String hostelId, String userId, {String role = 'OWNER'}) {
     if (hostelId.isEmpty) {
       AppLogger.warning(' Socket: Attempted to join room with empty hostelId. Ignoring.');
-      return;
-    }
-
-    if (_lastRoomId == hostelId) {
-      AppLogger.debug(' Socket: Already in room $hostelId. Skipping redundant join.');
       return;
     }
 

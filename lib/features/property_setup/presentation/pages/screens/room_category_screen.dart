@@ -123,7 +123,6 @@ class RoomCategoryScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 16.h),
-          // -- Room Type --
           Row(
             children: [
               Expanded(
@@ -149,7 +148,6 @@ class RoomCategoryScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 20.h),
-          // -- Divider + Pricing Header --
           Row(
             children: [
               Expanded(child: Divider(color: const Color(0xFFE2E8F0), thickness: 1)),
@@ -164,7 +162,6 @@ class RoomCategoryScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 16.h),
-          // -- Monthly Rent & Security Deposit --
           Row(
             children: [
               Expanded(
@@ -191,7 +188,6 @@ class RoomCategoryScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
-          // -- Daily Rent & Maintenance --
           Row(
             children: [
               Expanded(
@@ -218,7 +214,6 @@ class RoomCategoryScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
-          // -- Daily Rent Threshold --
           _buildTextField(
             label: 'Daily Rent Applies Up To (Days)',
             hint: 'e.g. 10',

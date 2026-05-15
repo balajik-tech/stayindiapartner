@@ -62,8 +62,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   List<Widget> _getPages() {
-    // We add a ValueKey with the current locale to force a full rebuild of the pages
-    // when the language is changed. This ensures all translations are updated instantly.
     final localeKey = ValueKey('locale_${context.locale.languageCode}');
     
     return [
@@ -184,8 +182,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
     _currentHostelId = hostelId;
     final authState = context.read<AuthCubit>().state;
-    if (authState is AuthAuthenticated) {
-      sl<SocketService>().joinCommunity(hostelId, authState.owner.id);
+    if (authState is AuthAuthenticated || authState is AuthProfileCompleted) {
+      final owner = authState is AuthAuthenticated ? authState.owner : (authState as AuthProfileCompleted).owner;
+      sl<SocketService>().joinCommunity(hostelId, owner.id);
     }
   }
 
@@ -281,8 +280,8 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                 currentIndex: _currentIndex,
                 onTap: (index) {
                   final authState = context.read<AuthCubit>().state;
-                  if (authState is AuthAuthenticated) {
-                    final owner = authState.owner;
+                  if (authState is AuthAuthenticated || authState is AuthProfileCompleted) {
+                    final owner = authState is AuthAuthenticated ? authState.owner : (authState as AuthProfileCompleted).owner;
                     if (index == 0 && !owner.hasPermission('dashboard')) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to view Dashboard.')));
                       return;
@@ -310,8 +309,35 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             );
           }
 
+          if (hostelState is HostelError) {
+            return Scaffold(
+              body: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        hostelState.message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => context.read<HostelCubit>().getHostels(forceRefresh: true),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+
           return const Scaffold(
-            body: Center(child: Text('Something went wrong. Please restart.')),
+            body: Center(child: Text('Initializing...')),
           );
         },
       ),
@@ -324,8 +350,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       onTap: () {
         HapticFeedback.heavyImpact();
         final authState = context.read<AuthCubit>().state;
-        if (authState is AuthAuthenticated) {
-          final role = authState.owner.role;
+        if (authState is AuthAuthenticated || authState is AuthProfileCompleted) {
+          final owner = authState is AuthAuthenticated ? authState.owner : (authState as AuthProfileCompleted).owner;
+          final role = owner.role;
           if (role != 'owner' && role != 'manager') {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: Only Owner or Manager can perform quick actions.')));
             return;
@@ -366,7 +393,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             }
           },
           onAddRoom: () {
-            // Merged into onAddFloor in the UI
           },
           onAddTenant: () {
             Navigator.push(
@@ -442,7 +468,9 @@ class _PremiumNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthCubit>().state;
-    final owner = authState is AuthAuthenticated ? authState.owner : null;
+    final owner = authState is AuthAuthenticated 
+        ? authState.owner 
+        : (authState is AuthProfileCompleted ? authState.owner : null);
     final bool hasBookings = owner?.hasPermission('bookings') ?? true;
     final bool hasCommunity = owner?.role == 'owner' || owner?.role == 'manager';
     final bool hasTenants = owner?.hasPermission('tenants') ?? true;
@@ -591,12 +619,12 @@ class _FloatingCommunityButton extends StatelessWidget {
     return BouncingWrapper(
       onTap: onTap,
       child: Container(
-        color: Colors.transparent, // Ensure the whole area is hit-testable
+        color: Colors.transparent,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 65.w, // Slightly decreased circle size to look better with smaller icon
+              width: 65.w,
               height: 65.w,
               decoration: BoxDecoration(
                 color: const Color(0xFF2C599D),

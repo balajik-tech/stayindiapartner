@@ -60,9 +60,22 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
         prev.area != curr.area ||
         prev.city != curr.city ||
         prev.state != curr.state ||
-        prev.pincode != curr.pincode,
+        prev.pincode != curr.pincode ||
+        prev.error != curr.error ||
+        prev.isSaving != curr.isSaving,
       listener: (context, state) {
-        // Sync controllers if state changes from outside (e.g. prefill or geocoding)
+        if (state.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error!),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        if (state.isSaving) {
+        }
+
         if (_nameController.text != state.buildingName) _nameController.text = state.buildingName;
         if (_gstController.text != state.gstNumber) _gstController.text = state.gstNumber;
         if (_addressController.text != state.detailedAddress) _addressController.text = state.detailedAddress;
@@ -73,22 +86,23 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
       },
       child: BlocBuilder<PropertySetupCubit, PropertySetupState>(
         builder: (context, state) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 40.h),
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Basic Details Header
-                Text(
-                  'Basic Details',
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF1E3A8A),
-                    letterSpacing: -0.5,
-                  ),
-                ),
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 40.h),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Basic Details',
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E3A8A),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
                 SizedBox(height: 8.h),
                 Text(
                   'Start by giving your property a name and identifying its type.',
@@ -96,7 +110,6 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                 ),
                 SizedBox(height: 24.h),
 
-                // Basic Details Card
                 _buildSectionCard([
                   _buildHostelTypeToggle(context, state),
                   SizedBox(height: 24.h),
@@ -121,7 +134,6 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
 
                 SizedBox(height: 32.h),
 
-                // Location Details Header
                 Text(
                   'Location Details',
                   style: TextStyle(
@@ -138,7 +150,6 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                 ),
                 SizedBox(height: 24.h),
 
-                // Location Details Card
                 _buildSectionCard([
                   _buildTextField(
                     context,
@@ -231,7 +242,6 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
 
                 SizedBox(height: 32.h),
 
-                // Property Images
                 Text(
                   'Property Images',
                   style: TextStyle(
@@ -251,7 +261,6 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
 
                 SizedBox(height: 32.h),
 
-                // Compliance Documents
                 Text(
                   'Compliance Documents',
                   style: TextStyle(
@@ -340,8 +349,43 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                 ]),
               ],
             ),
-          );
-        },
+          ),
+          _buildLoadingOverlay(state),
+        ],
+      );
+    },
+  ),
+);
+  }
+
+  Widget _buildLoadingOverlay(PropertySetupState state) {
+    if (!state.isSaving) return const SizedBox.shrink();
+    return Container(
+      color: Colors.black.withValues(alpha: 0.3),
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(24.r),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: Color(0xFF1E3A8A)),
+              SizedBox(height: 16.h),
+              Text(
+                'Analyzing Image Quality...',
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                'Ensuring photos are clear and bright',
+                style: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B)),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
