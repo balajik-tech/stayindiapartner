@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 class BedCard extends StatelessWidget {
   final String bedNumber;
@@ -117,26 +118,27 @@ class BedCard extends StatelessWidget {
                           children: [
                             if (tenantAvatar != null || tenantName != null)
                               CustomAvatar(
-                                imageUrl: tenantAvatar,
+                                imageUrl: ApiConstants.getImageUrl(tenantAvatar),
                                 name: tenantName ?? 'T',
-                                size: 22.r,
-                                fontSize: 9.sp,
+                                size: 32.r,
+                                fontSize: 14.sp,
+                                isCircle: true,
                               )
                             else
                               Icon(
                                 Icons.bed_rounded,
-                                size: 20.sp,
+                                size: 24.sp,
                                 color: textColor.withValues(alpha: 0.8),
                               ),
-                            SizedBox(height: 4.h),
+                            SizedBox(height: 6.h),
                              FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   bedLabel,
                                   style: TextStyle(
-                                    fontSize: 18.sp,
+                                    fontSize: 12.sp,
                                     fontWeight: FontWeight.w900,
-                                    color: textColor,
+                                    color: textColor.withValues(alpha: 0.6),
                                     height: 1,
                                   ),
                                 ),

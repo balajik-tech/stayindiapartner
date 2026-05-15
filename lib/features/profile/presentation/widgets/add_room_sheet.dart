@@ -259,7 +259,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                       ),
                       _buildFeatureIcon(
                         icon: Icons.mode_fan_off_rounded,
-                        label: 'Non-AC',
+                        label: 'NON-AC',
                         isSelected: _selectedType == 'NON-AC',
                         onTap: () {
                           setState(() => _selectedType = 'NON-AC');

@@ -38,7 +38,12 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFE),
       appBar: _buildAppBar(),
-      body: Column(
+      body: BlocListener<HostelCubit, HostelState>(
+        listenWhen: (prev, curr) => 
+          (prev is! HostelLoaded && curr is HostelLoaded) || 
+          (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+        listener: (context, state) => _refreshData(),
+        child: Column(
         children: [
           _buildControlBar(),
           Expanded(
@@ -87,9 +92,10 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
           ),
         ],
       ),
-      floatingActionButton: _buildAddButton(),
-    );
-  }
+    ),
+    floatingActionButton: _buildAddButton(),
+  );
+}
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(

@@ -151,7 +151,7 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
       
       // FIX 1: Room Type source of truth is features['isAC']
       // Ignore stale roomData['roomType']
-      String type = isAC ? 'AC' : 'Non-AC';
+      String type = isAC ? 'AC' : 'NON-AC';
       
       // FIX 2: Normalize sharingType as String for consistent lookup
       final sharing = (roomData['sharingType'] ?? 2).toString();
@@ -235,7 +235,7 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
         roomModels.add(RoomDetailModel(
           id: '',
           hostelId: createdHostel.id,
-          roomTypename: cat['name']?.toString().isNotEmpty == true ? cat['name'].toString() : '$sharing Sharing ${isAC ? "AC" : "Non-AC"}',
+          roomTypename: cat['name']?.toString().isNotEmpty == true ? cat['name'].toString() : '$sharing Sharing ${isAC ? "AC" : "NON-AC"}',
           floor: 0,
           sharingType: sharing == '1' ? 'SINGLE' : sharing == '2' ? 'DOUBLE' : sharing == '3' ? 'TRIPLE' : sharing == '4' ? 'QUADRUPLE' : sharing == '5' ? 'QUINTUPLE' : 'DORMITORY',
           roomType: isAC ? 'AC' : 'NON-AC',

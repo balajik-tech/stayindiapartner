@@ -315,7 +315,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
         }
 
         
-        newRooms.add(_createNewRoom(roomNumber, floor, 2, 'Non-AC', 'Medium'));
+        newRooms.add(_createNewRoom(roomNumber, floor, 2, 'NON-AC', 'Medium'));
       }
     }
     
@@ -328,7 +328,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       'roomNumber': roomNumber,
       'floor': floor,
       'sharingType': sharing,
-      'roomType': isAC ? 'AC' : 'Non-AC',
+      'roomType': isAC ? 'AC' : 'NON-AC',
       'roomSize': size,
       'features': {
         'isAC': isAC,
@@ -368,7 +368,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     features[feature] = value;
     
     if (feature == 'isAC') {
-      room['roomType'] = value ? 'AC' : 'Non-AC';
+      room['roomType'] = value ? 'AC' : 'NON-AC';
     }
     
     room['features'] = features;
@@ -428,7 +428,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       
       newRoom['features'] = Map<String, dynamic>.from(sourceFeatures);
       newRoom['sharingType'] = sourceSharing;
-      newRoom['roomType'] = isAC ? 'AC' : 'Non-AC'; 
+      newRoom['roomType'] = isAC ? 'AC' : 'NON-AC'; 
       newRoom['beds'] = List.generate(sourceSharing, (idx) => {
         'bedNumber': String.fromCharCode(65 + idx),
         'status': 'FREE',
@@ -453,7 +453,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   void applyPricingToAllRooms(String field, double value) {
     final pricing = Map<String, dynamic>.from(state.masterPricing);
     
-    final roomTypes = ['AC', 'Non-AC'];
+    final roomTypes = ['AC', 'NON-AC'];
     final sharingTypes = ['1', '2', '3', '4', '5'];
     
     for (var type in roomTypes) {
@@ -508,7 +508,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     for (int i = 0; i < state.roomCategories.length; i++) {
       final cat = state.roomCategories[i];
       final sharing = cat['sharingType'] ?? 2;
-      final type = (cat['isAC'] == true) ? 'AC' : 'Non-AC';
+      final type = (cat['isAC'] == true) ? 'AC' : 'NON-AC';
       final label = 'Category ${i + 1} ($sharing Sharing - $type)';
 
       final monthlyRent = cat['monthlyRent']?.toString().trim() ?? '';
@@ -623,7 +623,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     final updatedRooms = rooms.map((room) {
       final features = room['features'] as Map<String, dynamic>? ?? {};
       final isAC = features['isAC'] ?? false;
-      final type = isAC ? 'AC' : 'Non-AC';
+      final type = isAC ? 'AC' : 'NON-AC';
       final sharing = (room['sharingType'] ?? 2).toString();
       
       final pricing = state.masterPricing[type] ?? {};
@@ -662,7 +662,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       final features = Map<String, dynamic>.from(r['features'] ?? {});
       if (amenity == 'AC / Cooler') {
         features['isAC'] = amenities.contains('AC / Cooler');
-        r['roomType'] = amenities.contains('AC / Cooler') ? 'AC' : 'Non-AC';
+        r['roomType'] = amenities.contains('AC / Cooler') ? 'AC' : 'NON-AC';
       } else if (amenity == 'Attached Balcony') {
         features['hasBalcony'] = amenities.contains('Attached Balcony');
       } else if (amenity == 'Geyser (Hot Water)') {
@@ -731,7 +731,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     final category = state.roomCategories.firstWhere((cat) => cat['id'] == categoryId, orElse: () => {});
     if (category.isEmpty) return null;
 
-    final type = (category['isAC'] == true) ? 'AC' : 'Non-AC';
+    final type = (category['isAC'] == true) ? 'AC' : 'NON-AC';
     final sharing = (category['sharingType'] ?? 2).toString();
     
     final pricing = state.masterPricing[type] ?? {};
@@ -751,7 +751,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
 
     room['categoryId'] = categoryId;
     room['sharingType'] = category['sharingType'];
-    room['roomType'] = (category['isAC'] as bool) ? 'AC' : 'Non-AC';
+    room['roomType'] = (category['isAC'] as bool) ? 'AC' : 'NON-AC';
     room['roomSize'] = category['roomSize'];
     
     final features = Map<String, dynamic>.from(room['features'] ?? {});

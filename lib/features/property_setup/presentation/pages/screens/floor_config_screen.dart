@@ -36,28 +36,7 @@ class FloorConfigScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 16.h),
 
-              // Default Amenities Card
-              _PremiumCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Default Room Amenities',
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      'Applied to all generated rooms.',
-                      style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w500, color: const Color(0xFF64748B)),
-                    ),
-                    SizedBox(height: 12.h),
-                    _buildAmenitiesChips(context, state),
-                  ],
-                ),
-              ),
-              
               if (state.selectedFloors.isNotEmpty) ...[
                 SizedBox(height: 12.h),
                 Row(
@@ -228,79 +207,7 @@ class FloorConfigScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAmenitiesChips(BuildContext context, PropertySetupState state) {
-    final amenities = [
-      {'id': 'Car Parking', 'name': 'Car Parking', 'icon': Icons.directions_car_rounded},
-      {'id': 'Two Wheeler Parking', 'name': 'Two Wheeler Parking', 'icon': Icons.two_wheeler_rounded},
-      {'id': 'Lift', 'name': 'Lift', 'icon': Icons.elevator_rounded},
-      {'id': 'Study Table & Chair', 'name': 'Study Table & Chair', 'icon': Icons.chair_alt_rounded},
-      {'id': 'Single/Sharing Rooms', 'name': 'Single/Sharing Rooms', 'icon': Icons.room_preferences_rounded},
-      {'id': 'AC / Cooler', 'name': 'AC / Cooler', 'icon': Icons.ac_unit_rounded},
-      {'id': 'TV', 'name': 'TV', 'icon': Icons.tv_rounded},
-      {'id': 'High-Speed Wi-Fi', 'name': 'High-Speed Wi-Fi', 'icon': Icons.wifi_rounded},
-      {'id': 'Washing Machine', 'name': 'Washing Machine', 'icon': Icons.local_laundry_service_rounded},
-      {'id': 'Purified Drinking Water (RO)', 'name': 'Purified Drinking Water (RO)', 'icon': Icons.water_drop_rounded},
-      {'id': 'Geyser (Hot Water)', 'name': 'Geyser (Hot Water)', 'icon': Icons.hot_tub_rounded},
-      {'id': 'Power Backup (Generator)', 'name': 'Power Backup (Generator)', 'icon': Icons.power_rounded},
-      {'id': 'CCTV Security', 'name': 'CCTV Security', 'icon': Icons.videocam_rounded},
-      {'id': 'Individual Lockers / Wardrobes', 'name': 'Individual Lockers / Wardrobes', 'icon': Icons.lock_rounded},
-      {'id': 'Daily Housekeeping', 'name': 'Daily Housekeeping', 'icon': Icons.cleaning_services_rounded},
-      {'id': '3 Tier Food Service', 'name': '3 Tier Food Service', 'icon': Icons.restaurant_rounded},
-      {'id': 'Kitchen (Self-Cooking Area)', 'name': 'Kitchen (Self-Cooking Area)', 'icon': Icons.kitchen_rounded},
-      {'id': 'Gym / Fitness Center', 'name': 'Gym / Fitness Center', 'icon': Icons.fitness_center_rounded},
-      {'id': 'Professional Common Lounge / Lobby', 'name': 'Professional Common Lounge / Lobby', 'icon': Icons.weekend_rounded},
-      {'id': 'Biometric / Smart Card Access', 'name': 'Biometric / Smart Card Access', 'icon': Icons.fingerprint_rounded},
-      {'id': 'Attached Balcony', 'name': 'Attached Balcony', 'icon': Icons.balcony_rounded},
-      {'id': 'Shoe Racks / Storage Area', 'name': 'Shoe Racks / Storage Area', 'icon': Icons.shelves},
-      {'id': 'First Aid / Emergency Kit', 'name': 'First Aid / Emergency Kit', 'icon': Icons.medical_services_rounded},
-      {'id': 'Fire Safety (Extinguishers)', 'name': 'Fire Safety (Extinguishers)', 'icon': Icons.fire_extinguisher_rounded},
-      {'id': 'Guest Waiting Area', 'name': 'Guest Waiting Area', 'icon': Icons.event_seat_rounded},
-    ];
 
-    return Wrap(
-      spacing: 8.w,
-      runSpacing: 8.h,
-      children: amenities.map((amenity) {
-        final isSelected = state.selectedAmenities.contains(amenity['id']);
-        return GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            context.read<PropertySetupCubit>().toggleAmenity(amenity['id'] as String);
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFEDF2F7) : Colors.white,
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(
-                color: isSelected ? const Color(0xFF2B5797) : const Color(0xFFE2E8F0),
-                width: 1.2,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  amenity['icon'] as IconData,
-                  size: 16.sp,
-                  color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF64748B),
-                ),
-                SizedBox(width: 6.w),
-                Text(
-                  amenity['name'] as String,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
 
   Widget _buildFloorRoomItem(BuildContext context, String floor, int currentCount) {
     return Container(

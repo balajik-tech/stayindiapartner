@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 
 enum BedStatus { free, occupied, notice, away, booked }
@@ -134,13 +136,12 @@ class BedDetailsSheet extends StatelessWidget {
       padding: EdgeInsets.only(top: 24.h),
       child: Row(
         children: [
-          Container(
-            padding: EdgeInsets.all(8.r),
-            decoration: BoxDecoration(
-              color: _statusBgColor,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(Icons.apartment_rounded, color: _statusTextColor, size: 24.sp),
+          CustomAvatar(
+            imageUrl: ApiConstants.getImageUrl(state.profileImage),
+            name: state.tenantName ?? '?',
+            size: 44.r,
+            isCircle: false,
+            borderRadius: 12.r,
           ),
           SizedBox(width: 12.w),
           Expanded(

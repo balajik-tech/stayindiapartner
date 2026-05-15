@@ -66,8 +66,12 @@ class CommunityCubit extends Cubit<CommunityState> {
         
         
         if (!currentMessages.any((m) => m.id == newMessage.id)) {
-          _messagesCache[roomId] = [...currentMessages, newMessage];
+          // Remove optimistic message if it exists
+          final updatedMessages = currentMessages.where((m) => 
+            !(m.id.startsWith('temp_') && m.text == newMessage.text)
+          ).toList();
           
+          _messagesCache[roomId] = [...updatedMessages, newMessage];
           
           if (roomId == _activeHostelId && state is CommunityLoaded) {
             emit((state as CommunityLoaded).copyWith(messages: _messagesCache[roomId]));
@@ -192,19 +196,75 @@ class CommunityCubit extends Cubit<CommunityState> {
     
   }
 
-  Future<void> sendMessage(String hostelId, String text) async {
+  Future<void> sendMessage(String hostelId, String text, {String? senderId, String? senderName, String? senderAvatar}) async {
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
+    final optimisticMessage = CommunityMessageEntity(
+      id: tempId,
+      senderId: senderId ?? '',
+      senderName: senderName ?? 'You',
+      senderAvatar: senderAvatar,
+      text: text,
+      roomId: hostelId,
+      createdAt: DateTime.now(),
+      type: 'TEXT',
+      isMe: true,
+    );
+
+    // Optimistically add to state
+    if (state is CommunityLoaded) {
+      final s = state as CommunityLoaded;
+      final updatedMessages = [...s.messages, optimisticMessage];
+      _messagesCache[hostelId] = updatedMessages;
+      emit(s.copyWith(messages: updatedMessages));
+    }
+
     try {
       await _sendMessage(hostelId, text);
     } catch (e) {
       AppLogger.error('sendMessage failed', e);
+      // Rollback on error
+      if (state is CommunityLoaded) {
+        final s = state as CommunityLoaded;
+        final rolledBack = s.messages.where((m) => m.id != tempId).toList();
+        _messagesCache[hostelId] = rolledBack;
+        emit(s.copyWith(messages: rolledBack));
+      }
     }
   }
 
-  Future<void> sendImageMessage(String hostelId, String imagePath) async {
+  Future<void> sendImageMessage(String hostelId, String imagePath, {String? senderId, String? senderName, String? senderAvatar}) async {
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
+    final optimisticMessage = CommunityMessageEntity(
+      id: tempId,
+      senderId: senderId ?? '',
+      senderName: senderName ?? 'You',
+      senderAvatar: senderAvatar,
+      imageUrl: imagePath, // Local path for instant preview
+      roomId: hostelId,
+      createdAt: DateTime.now(),
+      type: 'IMAGE',
+      isMe: true,
+    );
+
+    // Optimistically add to state
+    if (state is CommunityLoaded) {
+      final s = state as CommunityLoaded;
+      final updatedMessages = [...s.messages, optimisticMessage];
+      _messagesCache[hostelId] = updatedMessages;
+      emit(s.copyWith(messages: updatedMessages));
+    }
+
     try {
       await _sendImage(hostelId, imagePath);
     } catch (e) {
       AppLogger.error('sendImageMessage failed', e);
+      // Rollback on error
+      if (state is CommunityLoaded) {
+        final s = state as CommunityLoaded;
+        final rolledBack = s.messages.where((m) => m.id != tempId).toList();
+        _messagesCache[hostelId] = rolledBack;
+        emit(s.copyWith(messages: rolledBack));
+      }
     }
   }
 

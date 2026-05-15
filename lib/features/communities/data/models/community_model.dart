@@ -72,6 +72,8 @@ class CommunityMessageModel extends CommunityMessageEntity {
       senderName: json['senderName']?.toString() ?? 
                    senderData?['name']?.toString() ?? 
                    userData?['name']?.toString() ?? 
+                   senderData?['firstName']?.toString() ??
+                   userData?['firstName']?.toString() ??
                    authorData?['name']?.toString() ?? 'Unknown',
       senderAvatar: json['senderAvatar']?.toString() ?? 
                      senderData?['avatar']?.toString() ?? 
@@ -159,15 +161,19 @@ class SocialPostModel extends SocialPostEntity {
   });
 
   factory SocialPostModel.fromJson(Map<String, dynamic> json) {
-    final userData = json['user'] is Map ? json['user'] as Map<String, dynamic> : null;
+    final userField = json['userId'];
+    final userData = userField is Map ? userField as Map<String, dynamic> : 
+                     (json['user'] is Map ? json['user'] as Map<String, dynamic> : null);
     final authorData = json['author'] is Map ? json['author'] as Map<String, dynamic> : null;
     
     return SocialPostModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      userId: (json['userId'] ?? userData?['_id'] ?? authorData?['_id'] ?? '').toString(),
-      userName: json['userName']?.toString() ?? 
-                userData?['name']?.toString() ?? 
-                authorData?['name']?.toString() ?? 'Unknown',
+      userId: (userData?['_id'] ?? userData?['id'] ?? (userField is String ? userField : '')).toString(),
+      userName: (json['userName']?.toString().isNotEmpty == true) ? json['userName'] :
+                (userData?['name']?.toString().isNotEmpty == true) ? userData!['name'] :
+                (userData?['firstName']?.toString().isNotEmpty == true) ? 
+                  '${userData!['firstName']}${userData['lastName'] != null ? ' ${userData['lastName']}' : ''}' :
+                (authorData?['name']?.toString().isNotEmpty == true) ? authorData!['name'] : 'Unknown',
       userAvatar: json['userAvatar']?.toString() ?? 
                   userData?['avatar']?.toString() ?? 
                   authorData?['avatar']?.toString(),

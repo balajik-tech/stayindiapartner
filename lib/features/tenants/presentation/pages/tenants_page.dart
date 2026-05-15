@@ -34,6 +34,7 @@ class _TenantsPageState extends State<TenantsPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
   @override
@@ -68,7 +69,12 @@ class _TenantsPageState extends State<TenantsPage> {
       backgroundColor: AppColors.scaffoldBackground,
       body: PatternBackground(
         child: SafeArea(
-          child: BlocListener<TenantCubit, TenantState>(
+          child: BlocListener<HostelCubit, HostelState>(
+            listenWhen: (prev, curr) => 
+              (prev is! HostelLoaded && curr is HostelLoaded) || 
+              (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+            listener: (context, state) => _loadData(),
+            child: BlocListener<TenantCubit, TenantState>(
             listener: (context, state) {
               if (state is TenantLoaded && state.errorMessage != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -116,6 +122,7 @@ class _TenantsPageState extends State<TenantsPage> {
           ),
         ),
       ),
+    ),
       floatingActionButton: _buildFAB(context) != null
           ? Padding(
               padding: EdgeInsets.only(bottom: 90.h),

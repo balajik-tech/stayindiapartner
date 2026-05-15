@@ -54,7 +54,7 @@ class SocialPostCard extends StatelessWidget {
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
       leading: CircleAvatar(
         radius: 20.r,
-        backgroundImage: post.userAvatar != null ? NetworkImage(post.userAvatar!) : null,
+        backgroundImage: post.userAvatar != null ? CachedNetworkImageProvider(ApiConstants.getImageUrl(post.userAvatar!)!) : null,
         child: post.userAvatar == null ? Icon(Icons.person, size: 24.sp, color: Colors.grey[400]) : null,
       ),
       title: Row(

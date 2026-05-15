@@ -10,12 +10,14 @@ class SocketService {
   final _typingController = StreamController<String>.broadcast();
   final _stopTypingController = StreamController<String>.broadcast();
   final _bookingController = StreamController<Map<String, dynamic>>.broadcast();
+  final _noticeController = StreamController<Map<String, dynamic>>.broadcast();
   final _dashboardRefreshController = StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
   Stream<String> get typingStream => _typingController.stream;
   Stream<String> get stopTypingStream => _stopTypingController.stream;
   Stream<Map<String, dynamic>> get bookingStream => _bookingController.stream;
+  Stream<Map<String, dynamic>> get noticeStream => _noticeController.stream;
   Stream<Map<String, dynamic>> get dashboardRefreshStream => _dashboardRefreshController.stream;
 
   String? _lastRoomId;
@@ -28,12 +30,11 @@ class SocketService {
     AppLogger.debug(' Socket: Attempting to connect to $baseUrl');
     
     _socket = io.io(baseUrl, io.OptionBuilder()
-      .setPath('/socket.io/') // Explicitly set path
+      .setTransports(['websocket']) // Force websocket to prevent polling timeouts
       .enableAutoConnect()
       .enableReconnection()
       .setReconnectionDelay(2000)
       .setReconnectionAttempts(20)
-      .setTransports(['websocket', 'polling']) 
       .build());
 
     // Explicitly connect to the default namespace
@@ -75,6 +76,11 @@ class SocketService {
     _socket!.on('new_booking', (data) {
       AppLogger.info(' Received new_booking notification: $data');
       _bookingController.add(Map<String, dynamic>.from(data));
+    });
+
+    _socket!.on('new_notice', (data) {
+      AppLogger.info(' Received new_notice notification: $data');
+      _noticeController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('dashboard_refresh', (data) {
@@ -159,6 +165,7 @@ class SocketService {
     _typingController.close();
     _stopTypingController.close();
     _bookingController.close();
+    _noticeController.close();
     _dashboardRefreshController.close();
     disconnect();
   }

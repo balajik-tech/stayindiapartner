@@ -303,7 +303,7 @@ class _RoomConfigurationView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Text(
-        isAc ? 'AC' : 'Non-AC',
+        isAc ? 'AC' : 'NON-AC',
         style: TextStyle(
           fontSize: 12.sp,
           fontWeight: FontWeight.w600,

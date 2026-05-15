@@ -30,12 +30,14 @@ class DashboardCubit extends Cubit<DashboardState> {
     final currentSearch = state.searchQuery;
     final currentView = state.isGridView;
 
-    emit(DashboardLoading(
-      selectedFloorIndex: currentIndex,
-      searchQuery: currentSearch,
-      isGridView: currentView,
-      selectedMetric: state.selectedMetric,
-    ));
+    if (state is! DashboardLoaded) {
+      emit(DashboardLoading(
+        selectedFloorIndex: currentIndex,
+        searchQuery: currentSearch,
+        isGridView: currentView,
+        selectedMetric: state.selectedMetric,
+      ));
+    }
     
     try {
       final data = await _getDashboardData(hostelId);

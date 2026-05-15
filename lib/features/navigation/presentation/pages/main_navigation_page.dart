@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/pages/property_setup_stepper_page.dart';
@@ -29,6 +30,7 @@ import 'package:stayindia_owner/features/profile/presentation/pages/profile_page
 import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
 import 'package:stayindia_owner/features/maintenance/presentation/cubit/maintenance_cubit.dart';
+import 'package:stayindia_owner/features/payments/presentation/cubit/payment_cubit.dart';
 import 'package:stayindia_owner/features/staff/presentation/cubit/staff_cubit.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
@@ -48,6 +50,7 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   late int _currentIndex;
   StreamSubscription? _bookingSubscription;
+  StreamSubscription? _noticeSubscription;
   String? _currentHostelId;
 
   @override
@@ -55,6 +58,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _bookingSubscription = sl<SocketService>().bookingStream.listen(_onNewBooking);
+    _noticeSubscription = sl<SocketService>().noticeStream.listen(_onNewNotice);
   }
 
   List<Widget> _getPages() {
@@ -74,6 +78,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   void dispose() {
     _bookingSubscription?.cancel();
+    _noticeSubscription?.cancel();
     super.dispose();
   }
 
@@ -119,6 +124,57 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     }
   }
 
+  void _onNewNotice(Map<String, dynamic> data) {
+    if (!mounted) return;
+
+    final tenantName = data['tenantName'] ?? 'A resident';
+    final vacatingDate = data['vacatingDate'] != null 
+        ? DateFormat('dd MMM yyyy').format(DateTime.parse(data['vacatingDate']))
+        : 'soon';
+
+    sl<NotificationService>().showNotification(
+      id: DateTime.now().millisecond,
+      title: 'Tenant Vacating Notice 📅',
+      body: '$tenantName has raised a notice. Vacating on $vacatingDate.',
+      payload: jsonEncode({'type': 'NOTICE'}),
+    );
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$tenantName raised a notice for $vacatingDate'),
+        backgroundColor: Colors.amber.shade800,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(16.w),
+        action: SnackBarAction(
+          label: 'view'.tr().toUpperCase(),
+          textColor: Colors.white,
+          onPressed: () => setState(() => _currentIndex = 3),
+        ),
+      ),
+    );
+
+    _syncAllData();
+  }
+
+  void _syncAllData() {
+    final hostelState = context.read<HostelCubit>().state;
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      final selectedIds = hostelState.selectedHostelIndices
+          .where((i) => i < hostelState.hostels.length)
+          .map((i) => hostelState.hostels[i].id)
+          .join(',');
+
+      if (selectedIds.isNotEmpty) {
+        context.read<DashboardCubit>().fetchDashboardData(selectedIds);
+        context.read<BookingsCubit>().fetchBookings(hostelId: selectedIds);
+        context.read<TenantCubit>().loadTenants(selectedIds);
+        context.read<FinanceCubit>().loadDashboard(hostelId: selectedIds);
+        context.read<PaymentCubit>().loadPayments(selectedIds);
+      }
+    }
+  }
+
   void _setupSocket(String hostelId) {
     if (hostelId.isEmpty) return;
 
@@ -149,14 +205,32 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         ),
         BlocListener<BookingsCubit, BookingsState>(
           listener: (context, state) {
-            if (state.status == BookingsStatus.success && 
-               (state.successMessage?.contains('successfully') ?? false)) {
-              final hostelState = context.read<HostelCubit>().state;
-              if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-                context.read<DashboardCubit>().fetchDashboardData(hostelId);
+            if (state.status == BookingsStatus.success && state.successMessage != null) {
+              _syncAllData();
+              if (state.successMessage!.contains('finalized')) {
                 setState(() => _currentIndex = 0);
               }
+            }
+          },
+        ),
+        BlocListener<PaymentCubit, PaymentState>(
+          listener: (context, state) {
+            if (state is PaymentSuccess && state.shouldRefresh) {
+              _syncAllData();
+            }
+          },
+        ),
+        BlocListener<MaintenanceCubit, MaintenanceState>(
+          listener: (context, state) {
+            if (state is MaintenanceSuccess) {
+              _syncAllData();
+            }
+          },
+        ),
+        BlocListener<NoticeCubit, NoticeState>(
+          listener: (context, state) {
+            if (state is NoticeSuccess || state is NoticeUpdateSuccess) {
+              _syncAllData();
             }
           },
         ),

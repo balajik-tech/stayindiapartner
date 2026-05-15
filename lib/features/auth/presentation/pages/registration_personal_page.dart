@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/services/token_storage.dart';
@@ -14,7 +16,6 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import '../cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/complete_profile_usecase.dart';
 import '../widgets/auth_widgets.dart';
-import 'registration_hostel_details_page.dart';
 
 
 class RegistrationPersonalPage extends StatefulWidget {
@@ -28,7 +29,13 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _addressController = TextEditingController();
+  
+  final _stateController = TextEditingController();
+  final _districtController = TextEditingController();
+  final _pincodeController = TextEditingController();
+  final _streetController = TextEditingController();
+
+  bool _isFetchingLocation = false;
   File? _selectedImage;
 
   late final AnimationController _animController;
@@ -50,22 +57,25 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
-    _addressController.dispose();
+    _stateController.dispose();
+    _districtController.dispose();
+    _pincodeController.dispose();
+    _streetController.dispose();
     _animController.dispose();
     super.dispose();
   }
 
   Future<void> _pickImage() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
     );
 
-    if (result != null && result.files.single.path != null) {
+    if (pickedFile != null) {
       HapticFeedback.mediumImpact();
       
       final croppedFile = await ImageCropper().cropImage(
-        sourcePath: result.files.single.path!,
+        sourcePath: pickedFile.path,
         compressQuality: 80,
         uiSettings: [
           AndroidUiSettings(
@@ -97,9 +107,15 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
     final email = _emailController.text.trim();
-    final address = _addressController.text.trim();
+    
+    final stateStr = _stateController.text.trim();
+    final district = _districtController.text.trim();
+    final pincode = _pincodeController.text.trim();
+    final street = _streetController.text.trim();
 
-    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || address.isEmpty) {
+    final address = "$street, $district, $stateStr - $pincode";
+
+    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || stateStr.isEmpty || district.isEmpty || pincode.isEmpty || street.isEmpty) {
       HapticFeedback.vibrate();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields')),
@@ -133,14 +149,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
   Widget build(BuildContext context) {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is AuthProfileCompleted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const RegistrationHostelDetailsPage(),
-            ),
-          );
-        } else if (state is AuthError) {
+        if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message, style: GoogleFonts.outfit()),
@@ -360,14 +369,129 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
           keyboardType: TextInputType.emailAddress,
         ),
         SizedBox(height: 24.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Residential Address',
+              style: GoogleFonts.outfit(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryBlue,
+              ),
+            ),
+            GestureDetector(
+              onTap: _isFetchingLocation ? null : _fetchLocation,
+              child: Row(
+                children: [
+                  if (_isFetchingLocation)
+                    SizedBox(width: 12.sp, height: 12.sp, child: const CircularProgressIndicator(strokeWidth: 2))
+                  else
+                    Icon(Icons.my_location_rounded, size: 14.sp, color: AppColors.primaryBlue),
+                  SizedBox(width: 4.w),
+                  Text(
+                    _isFetchingLocation ? 'Fetching...' : 'Fetch Location',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
         AuthTextField(
-          label: 'Full Residential Address',
-          controller: _addressController,
-          hintText: 'Street, House No, Landmark',
-          maxLines: 3,
+          label: 'Street Address',
+          controller: _streetController,
+          hintText: 'House No, Building, Street Area',
+          maxLines: 2,
+        ),
+        SizedBox(height: 16.h),
+        Row(
+          children: [
+            Expanded(
+              child: AuthTextField(
+                label: 'District/City',
+                controller: _districtController,
+                hintText: 'e.g. Bangalore',
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: AuthTextField(
+                label: 'State',
+                controller: _stateController,
+                hintText: 'e.g. Karnataka',
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 16.h),
+        AuthTextField(
+          label: 'Pincode',
+          controller: _pincodeController,
+          hintText: 'e.g. 560001',
+          keyboardType: TextInputType.number,
         ),
       ],
     );
+  }
+
+  Future<void> _fetchLocation() async {
+    setState(() => _isFetchingLocation = true);
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Location services are disabled.');
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Location permissions are denied');
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception('Location permissions are permanently denied');
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)
+      );
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude, 
+        position.longitude
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        
+        setState(() {
+          _streetController.text = "${place.name ?? ''} ${place.subLocality ?? ''}".trim();
+          _districtController.text = place.locality ?? place.subAdministrativeArea ?? '';
+          _stateController.text = place.administrativeArea ?? '';
+          _pincodeController.text = place.postalCode ?? '';
+        });
+        
+        HapticFeedback.lightImpact();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch location: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isFetchingLocation = false);
+      }
+    }
   }
 
   Widget _buildStickyButton() {

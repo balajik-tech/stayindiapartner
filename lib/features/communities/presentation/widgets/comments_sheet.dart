@@ -205,7 +205,9 @@ class CommentsSheetState extends State<CommentsSheet> {
 
   Widget _buildCommentItem(Map<String, dynamic> comment) {
     final userData = comment['userId'] is Map ? comment['userId'] : {};
-    final userName = userData['name']?.toString() ?? 'User';
+    final userName = (userData['name']?.toString().isNotEmpty == true) ? userData['name'] :
+                     (userData['firstName']?.toString().isNotEmpty == true) ? 
+                        '${userData['firstName']}${userData['lastName'] != null ? ' ${userData['lastName']}' : ''}' : 'User';
     final userAvatar = userData['avatar']?.toString();
 
     return Padding(

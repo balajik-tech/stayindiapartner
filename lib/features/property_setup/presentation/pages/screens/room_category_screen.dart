@@ -141,7 +141,7 @@ class RoomCategoryScreen extends StatelessWidget {
                   value: category['isAC'],
                   items: const [
                     DropdownMenuItem(value: true, child: Text('AC')),
-                    DropdownMenuItem(value: false, child: Text('Non-AC')),
+                    DropdownMenuItem(value: false, child: Text('NON-AC')),
                   ],
                   onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'isAC': val}),
                 ),
@@ -239,7 +239,7 @@ class RoomCategoryScreen extends StatelessWidget {
         Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
         SizedBox(height: 6.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(12.r),
@@ -275,7 +275,7 @@ class RoomCategoryScreen extends StatelessWidget {
         Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
         SizedBox(height: 6.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(12.r),

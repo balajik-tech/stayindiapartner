@@ -86,7 +86,15 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
       final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
-      context.read<CommunityCubit>().sendMessage(page.hostelId, text);
+      final owner = context.read<AuthCubit>().currentOwner;
+      
+      context.read<CommunityCubit>().sendMessage(
+        page.hostelId, 
+        text,
+        senderId: owner?.id,
+        senderName: owner?.name,
+        senderAvatar: owner?.avatar,
+      );
       _controller.clear();
       _scrollToBottom();
     }
@@ -109,7 +117,6 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
     final image = await picker.pickImage(source: ImageSource.gallery);
     
     if (image != null) {
-      
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Compressing and sending image...')),
@@ -119,7 +126,15 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
       if (compressedFile != null) {
         if (!mounted) return;
         final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
-        context.read<CommunityCubit>().sendImageMessage(page.hostelId, compressedFile.path);
+        final owner = context.read<AuthCubit>().currentOwner;
+        
+        context.read<CommunityCubit>().sendImageMessage(
+          page.hostelId, 
+          compressedFile.path,
+          senderId: owner?.id,
+          senderName: owner?.name,
+          senderAvatar: owner?.avatar,
+        );
         _scrollToBottom();
       }
     }

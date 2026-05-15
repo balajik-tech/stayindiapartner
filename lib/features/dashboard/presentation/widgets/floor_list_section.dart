@@ -52,6 +52,30 @@ class FloorListSection extends StatelessWidget {
         }
 
         if (state is DashboardError) {
+          if (state.message.contains('no_dashboard_data_found') || state.message.contains('not allowed') || state.message.contains('No hostels')) {
+            return SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.apartment_rounded, size: 80.sp, color: AppColors.textSecondary.withValues(alpha: 0.2)),
+                    SizedBox(height: 24.h),
+                    Text(
+                      'no_hostels_added'.tr(),
+                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'add_hostel_prompt'.tr(),
+                      style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
           return SliverFillRemaining(
             hasScrollBody: false,
             child: Center(child: Text(state.message, style: const TextStyle(color: Colors.red))),

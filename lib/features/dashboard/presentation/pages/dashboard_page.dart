@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -16,6 +19,8 @@ import '../widgets/floor_list_section.dart';
 import '../widgets/dashboard_shimmer.dart';
 import '../widgets/staff_dashboard_view.dart';
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
+import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
+import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
 
 class DashboardPage extends StatefulWidget {
   final String? hostelId;
@@ -35,11 +40,47 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
+  StreamSubscription? _refreshSubscription;
+  StreamSubscription? _bookingSubscription;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _refreshData());
+    
+    // Listen for real-time dashboard refresh events
+    try {
+      final socketService = sl<SocketService>();
+      _refreshSubscription = socketService.dashboardRefreshStream.listen((data) {
+        if (mounted) {
+          _refreshData();
+        }
+      });
+      _bookingSubscription = socketService.bookingStream.listen((data) {
+        if (mounted) {
+          _refreshData();
+        }
+      });
+    } catch (e) {
+      debugPrint("SocketService not found or error subscribing: $e");
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshData();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _refreshSubscription?.cancel();
+    _bookingSubscription?.cancel();
+    super.dispose();
   }
 
   void _refreshData() {
@@ -85,13 +126,27 @@ class _DashboardPageState extends State<DashboardPage> {
       backgroundColor: AppColors.scaffoldBackground,
       body: PatternBackground(
         child: SafeArea(
-          child: BlocListener<HostelCubit, HostelState>(
-            listenWhen: (prev, curr) => 
-              prev is HostelLoaded && curr is HostelLoaded && 
-              (prev.selectedHostelIndex != curr.selectedHostelIndex || prev.selectedHostelIndices != curr.selectedHostelIndices),
-            listener: (context, state) {
-              _refreshData();
-            },
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<HostelCubit, HostelState>(
+                listenWhen: (prev, curr) => 
+                  (prev is! HostelLoaded && curr is HostelLoaded) || 
+                  (prev is HostelLoaded && curr is HostelLoaded && 
+                   (prev.selectedHostelIndex != curr.selectedHostelIndex || 
+                    prev.selectedHostelIndices != curr.selectedHostelIndices)),
+                listener: (context, state) {
+                  _refreshData();
+                },
+              ),
+              BlocListener<BookingsCubit, BookingsState>(
+                listenWhen: (prev, curr) => 
+                  prev.status != BookingsStatus.success && curr.status == BookingsStatus.success && 
+                  curr.successMessage != null,
+                listener: (context, state) {
+                  _refreshData();
+                },
+              ),
+            ],
             child: RefreshIndicator(
               onRefresh: () async => _refreshData(),
               color: AppColors.primaryBlue,

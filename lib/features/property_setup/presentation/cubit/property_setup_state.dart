@@ -63,14 +63,14 @@ class PropertySetupState extends Equatable {
     this.roomStartRange = '',
     this.roomEndRange = '',
     this.sharingType = 2,
-    this.roomType = 'Non-AC',
+    this.roomType = 'NON-AC',
     this.masterPricing = const {
       'AC': {
         '2': {'rent': 0.0, 'deposit': 0.0},
         '3': {'rent': 0.0, 'deposit': 0.0},
         '4': {'rent': 0.0, 'deposit': 0.0},
       },
-      'Non-AC': {
+      'NON-AC': {
         '2': {'rent': 0.0, 'deposit': 0.0},
         '3': {'rent': 0.0, 'deposit': 0.0},
         '4': {'rent': 0.0, 'deposit': 0.0},
@@ -258,7 +258,7 @@ class PropertySetupState extends Equatable {
       roomStartRange: json['roomStartRange'] ?? '',
       roomEndRange: json['roomEndRange'] ?? '',
       sharingType: json['sharingType'] ?? 2,
-      roomType: json['roomType'] ?? 'Non-AC',
+      roomType: json['roomType'] ?? 'NON-AC',
       masterPricing: Map<String, dynamic>.from(json['masterPricing'] ?? {}),
       rooms: List<Map<String, dynamic>>.from(json['rooms'] ?? []),
       hostelId: json['hostelId'],

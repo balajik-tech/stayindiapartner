@@ -100,7 +100,12 @@ class _RentPaymentsPageState extends State<RentPaymentsPage> {
           ),
         ],
       ),
-      body: BlocListener<PaymentCubit, PaymentState>(
+      body: BlocListener<HostelCubit, HostelState>(
+        listenWhen: (prev, curr) => 
+          (prev is! HostelLoaded && curr is HostelLoaded) || 
+          (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+        listener: (context, state) => _loadData(),
+        child: BlocListener<PaymentCubit, PaymentState>(
         listener: (context, state) {
           if (state is PaymentSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -136,6 +141,7 @@ class _RentPaymentsPageState extends State<RentPaymentsPage> {
             },
           ),
         ),
+      ),
       ),
     );
   }

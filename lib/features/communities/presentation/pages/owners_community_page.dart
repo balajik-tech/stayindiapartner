@@ -16,7 +16,9 @@ import 'package:stayindia_owner/features/communities/presentation/pages/explore_
 import 'package:stayindia_owner/features/communities/presentation/widgets/comments_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
 
@@ -352,10 +354,20 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 22.r,
-                backgroundColor: Colors.grey.shade100,
-                child: Icon(Icons.person, color: Colors.grey.shade400, size: 28.sp),
+              BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, authState) {
+                  final owner = authState is AuthAuthenticated ? authState.owner : null;
+                  return CircleAvatar(
+                    radius: 22.r,
+                    backgroundImage: (owner?.avatar != null && owner!.avatar!.isNotEmpty) 
+                        ? CachedNetworkImageProvider(ApiConstants.getImageUrl(owner.avatar)!) 
+                        : null,
+                    backgroundColor: Colors.grey.shade100,
+                    child: (owner?.avatar == null || owner!.avatar!.isEmpty)
+                        ? Icon(Icons.person, color: Colors.grey.shade400, size: 28.sp)
+                        : null,
+                  );
+                },
               ),
               SizedBox(width: 16.w),
               Expanded(
@@ -892,9 +904,10 @@ class _PostCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 20.r,
-                backgroundImage: post.userAvatar != null ? CachedNetworkImageProvider(post.userAvatar!) : null,
+                backgroundImage: (post.userAvatar != null && post.userAvatar!.isNotEmpty) 
+                    ? CachedNetworkImageProvider(ApiConstants.getImageUrl(post.userAvatar!)!) : null,
                 backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
-                child: post.userAvatar == null
+                child: (post.userAvatar == null || post.userAvatar!.isEmpty)
                     ? Icon(Icons.person, color: AppColors.primaryBlue, size: 24.sp)
                     : null,
               ),
@@ -957,7 +970,7 @@ class _PostCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(16.r),
               child: CachedNetworkImage(
-                imageUrl: post.imageUrl!,
+                imageUrl: ApiConstants.getImageUrl(post.imageUrl!) ?? '',
                 width: double.infinity,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(

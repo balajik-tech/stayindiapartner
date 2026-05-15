@@ -13,6 +13,7 @@ import 'package:stayindia_owner/core/constants/ui_constants.dart';
 import 'package:stayindia_owner/core/widgets/pattern_background.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 
 class _BookingsPageWithScroll extends StatefulWidget {
   const _BookingsPageWithScroll();
@@ -30,6 +31,21 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshData());
+  }
+
+  void _refreshData() {
+    final hostelCubit = context.read<HostelCubit>();
+    final hostelState = hostelCubit.state;
+    
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      final selectedId = hostelState.selectedHostelId;
+      if (selectedId != null) {
+        context.read<BookingsCubit>().fetchBookings(hostelId: selectedId);
+      }
+    } else {
+      hostelCubit.getHostels();
+    }
   }
 
   @override
@@ -41,7 +57,12 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BookingsCubit, BookingsState>(
+    return BlocListener<HostelCubit, HostelState>(
+      listenWhen: (prev, curr) => 
+        (prev is! HostelLoaded && curr is HostelLoaded) || 
+        (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+      listener: (context, state) => _refreshData(),
+      child: BlocListener<BookingsCubit, BookingsState>(
       listener: (context, state) {
         if (state.successMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -102,8 +123,9 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildPowerfulHeader(BuildContext context, BookingsState state) {
     return Container(

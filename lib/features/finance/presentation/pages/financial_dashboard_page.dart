@@ -43,7 +43,12 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFE),
-      body: BlocBuilder<FinanceCubit, FinanceState>(
+      body: BlocListener<HostelCubit, HostelState>(
+        listenWhen: (prev, curr) => 
+          (prev is! HostelLoaded && curr is HostelLoaded) || 
+          (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+        listener: (context, state) => _loadData(),
+        child: BlocBuilder<FinanceCubit, FinanceState>(
         builder: (context, state) {
           if (state.status == FinanceStatus.loading && state.stats == null) {
             return const Center(child: CircularProgressIndicator());
@@ -87,8 +92,9 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildPremiumHeader(FinanceState state) {
     return SliverToBoxAdapter(

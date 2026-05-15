@@ -17,6 +17,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   late LatLng _selectedLocation;
   final MapController _mapController = MapController();
   String _currentAddress = "Loading address...";
+  bool _isLoadingLocation = false;
 
   @override
   void initState() {
@@ -196,11 +197,20 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             right: 20.w,
             child: FloatingActionButton(
               mini: true,
-              onPressed: _getCurrentLocation,
+              onPressed: _isLoadingLocation ? null : _getCurrentLocation,
               backgroundColor: Colors.white,
               foregroundColor: const Color(0xFF1E3A8A),
               elevation: 4,
-              child: const Icon(Icons.my_location_rounded),
+              child: _isLoadingLocation 
+                  ? SizedBox(
+                      width: 18.sp, 
+                      height: 18.sp, 
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2.5, 
+                        color: Color(0xFF1E3A8A),
+                      ),
+                    )
+                  : const Icon(Icons.my_location_rounded),
             ),
           ),
         ],
@@ -209,6 +219,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    setState(() => _isLoadingLocation = true);
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -255,6 +266,10 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error fetching location: $e')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingLocation = false);
       }
     }
   }

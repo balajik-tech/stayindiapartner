@@ -274,7 +274,7 @@ class RoomCubit extends Cubit<RoomState> {
           roomTypename: roomNo.toString(),
           floor: floorNumber,
           sharingType: _mapCapacityToSharing(bedsPerRoom),
-          roomType: 'NON_AC', // Default
+          roomType: 'NON-AC', // Default
           rent: 0, // Placeholder
           deposit: 0, // Placeholder
           maintenance: 0, // Placeholder

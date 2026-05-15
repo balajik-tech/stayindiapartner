@@ -101,7 +101,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               else ...[
                 _buildPricingSection(context, state, 'AC', Icons.ac_unit_rounded, const Color(0xFFE0F2FE), const Color(0xFF0EA5E9)),
                 SizedBox(height: 24.h),
-                _buildPricingSection(context, state, 'Non-AC', Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
+                _buildPricingSection(context, state, 'NON-AC', Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
                 
                 SizedBox(height: 32.h),
                 _buildSyncInfo(context, state),

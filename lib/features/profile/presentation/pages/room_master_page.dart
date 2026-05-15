@@ -98,7 +98,7 @@ class _RoomMasterViewState extends State<_RoomMasterView>
                           children: [
                             _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'All'),
                             _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'AC'),
-                            _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'Non-AC'),
+                            _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'NON-AC'),
                           ],
                         ),
                       ),

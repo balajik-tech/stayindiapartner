@@ -5,7 +5,6 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
-import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stayindia_owner/features/profile/presentation/pages/room_management_page.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
@@ -236,53 +235,8 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
   }
 
   Widget _buildAddButton() {
-    return BlocConsumer<RoomCubit, RoomState>(
+    return BlocBuilder<RoomCubit, RoomState>(
       bloc: widget.roomCubit,
-      listener: (context, state) {
-        if (state is RoomOperationSuccess) {
-          Navigator.pop(context); // Close sheet
-          
-          // Refresh dashboard
-          widget.dashboardCubit.fetchDashboardData(widget.hostelId);
-          
-          // Get current hostel
-          final hostelState = context.read<HostelCubit>().state;
-          Hostel? hostel;
-          if (hostelState is HostelLoaded) {
-            hostel = hostelState.hostels[hostelState.selectedHostelIndex];
-          }
-
-          if (hostel != null) {
-            final floorInput = _floorNameController.text.trim();
-            final floorNum = int.tryParse(floorInput.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-            final normalizedFloorName = floorNum == 0 ? 'Ground Floor' : 'Floor $floorNum';
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MultiBlocProvider(
-                  providers: [
-                    BlocProvider.value(value: widget.roomCubit),
-                    BlocProvider.value(value: widget.dashboardCubit),
-                  ],
-                  child: RoomManagementPage(
-                    hostel: hostel!,
-                    floorName: normalizedFloorName,
-                  ),
-                ),
-              ),
-            );
-          }
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
-        } else if (state is RoomError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.redAccent),
-          );
-        }
-      },
       builder: (context, state) {
         final isLoading = state is RoomLoading;
 
@@ -299,15 +253,34 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                     return;
                   }
 
-                  final ownerId = context.read<AuthCubit>().currentOwner?.id ?? '';
+                  // Get current hostel
+                  final hostelState = context.read<HostelCubit>().state;
+                  Hostel? hostel;
+                  if (hostelState is HostelLoaded) {
+                    hostel = hostelState.hostels[hostelState.selectedHostelIndex];
+                  }
 
-                  widget.roomCubit.addFloor(
-                    hostelId: widget.hostelId,
-                    ownerId: ownerId,
-                    floorName: floorName,
-                    roomCount: _roomCount,
-                    bedsPerRoom: 2,
-                  );
+                  if (hostel != null) {
+                    Navigator.pop(context); // Close sheet
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MultiBlocProvider(
+                          providers: [
+                            BlocProvider.value(value: widget.roomCubit),
+                            BlocProvider.value(value: widget.dashboardCubit),
+                          ],
+                          child: RoomManagementPage(
+                            hostel: hostel!,
+                            floorName: floorName,
+                            isDraftMode: true,
+                            draftRoomCount: _roomCount,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
                 },
           child: Container(
             width: double.infinity,
