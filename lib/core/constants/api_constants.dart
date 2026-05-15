@@ -1,7 +1,6 @@
-import 'dart:io';
 
 class ApiConstants {
-  static const String _androidUrl = 'http://10.0.2.2:5050/api/v1';
+  static const String _androidUrl = 'https://api.koushiksoftwaresolutions.online/api/v1'; // Changed to prod URL for deployed testing
 
   static const String _prodUrl = 'https://api.koushiksoftwaresolutions.online/api/v1';
 
@@ -14,9 +13,6 @@ class ApiConstants {
     const fromEnv = String.fromEnvironment('API_BASE_URL');
     if (fromEnv.isNotEmpty) return fromEnv;
 
-    try {
-      if (Platform.isAndroid) return _androidUrl;
-    } catch (_) {}
     return _prodUrl;
   }
 
