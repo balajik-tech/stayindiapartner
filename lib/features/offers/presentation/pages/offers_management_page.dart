@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
@@ -65,7 +66,7 @@ class _OffersManagementViewState extends State<OffersManagementView> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Manage Offers',
+          StringUtils.translate('manage_offers', context: context),
           style: GoogleFonts.outfit(
             color: AppColors.darkText,
             fontWeight: FontWeight.w800,
@@ -78,7 +79,7 @@ class _OffersManagementViewState extends State<OffersManagementView> {
         onPressed: () => _showOfferForm(context),
         icon: const Icon(Icons.add_rounded, color: Colors.white),
         label: Text(
-          'Create Offer',
+          StringUtils.translate('create_offer', context: context),
           style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 14.sp, color: Colors.white),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -179,7 +180,7 @@ class _OffersManagementViewState extends State<OffersManagementView> {
         },
         style: GoogleFonts.outfit(fontSize: 14.sp),
         decoration: InputDecoration(
-          hintText: 'Search offers, codes, promos...',
+          hintText: StringUtils.translate('search_offers_hint', context: context),
           hintStyle: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 14.sp),
           prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20.sp),
           suffixIcon: _searchQuery.isNotEmpty
@@ -213,7 +214,7 @@ class _OffersManagementViewState extends State<OffersManagementView> {
           Icon(Icons.local_offer_rounded, size: 64.sp, color: Colors.grey.shade300),
           SizedBox(height: 16.h),
           Text(
-            'No offers created yet',
+            StringUtils.translate('no_offers_yet', context: context),
             style: GoogleFonts.outfit(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
@@ -222,7 +223,7 @@ class _OffersManagementViewState extends State<OffersManagementView> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Tap "Create Offer" to publish special coupons & promotions.',
+            StringUtils.translate('create_offer_desc', context: context),
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 13.sp,
@@ -406,28 +407,36 @@ class _OfferCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today_rounded, size: 12.sp, color: Colors.grey.shade600),
-                      SizedBox(width: 6.w),
-                      Text(
-                        'Ends ${offer.endDate != null ? DateFormat('dd MMM yyyy').format(offer.endDate!) : "Never"}',
-                        style: GoogleFonts.outfit(fontSize: 11.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
-                      ),
-                      if (offer.hostelName != null) ...[
-                        SizedBox(width: 12.w),
-                        Icon(Icons.apartment_rounded, size: 12.sp, color: Colors.grey.shade600),
-                        SizedBox(width: 4.w),
-                        ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 80.w),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today_rounded, size: 12.sp, color: Colors.grey.shade600),
+                        SizedBox(width: 6.w),
+                        Flexible(
                           child: Text(
-                            offer.hostelName!,
-                            overflow: TextOverflow.ellipsis,
+                            StringUtils.translate(
+                              'ends_label',
+                              context: context,
+                              namedArgs: {'date': offer.endDate != null ? DateFormat('dd MMM yyyy').format(offer.endDate!) : StringUtils.translate('never', context: context)},
+                            ),
                             style: GoogleFonts.outfit(fontSize: 11.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        if (offer.hostelName != null) ...[
+                          SizedBox(width: 8.w),
+                          Icon(Icons.apartment_rounded, size: 12.sp, color: Colors.grey.shade600),
+                          SizedBox(width: 4.w),
+                          Flexible(
+                            child: Text(
+                              offer.hostelName!,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.outfit(fontSize: 11.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                   Row(
                     children: [
@@ -464,16 +473,16 @@ class _OfferCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text('Delete Offer', style: GoogleFonts.outfit(fontWeight: FontWeight.w800)),
-        content: Text('Are you sure you want to permanently delete this offer? This cannot be undone.', style: GoogleFonts.outfit()),
+        title: Text(StringUtils.translate('delete_offer_title', context: context), style: GoogleFonts.outfit(fontWeight: FontWeight.w800)),
+        content: Text(StringUtils.translate('delete_offer_confirm', context: context), style: GoogleFonts.outfit()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: GoogleFonts.outfit(color: Colors.grey)),
+            child: Text(StringUtils.translate('cancel', context: context), style: GoogleFonts.outfit(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: GoogleFonts.outfit(color: Colors.red, fontWeight: FontWeight.w700)),
+            child: Text(StringUtils.translate('delete', context: context), style: GoogleFonts.outfit(color: Colors.red, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -566,14 +575,14 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
               ),
               SizedBox(height: 24.h),
               Text(
-                widget.offer == null ? 'Create Special Offer' : 'Edit Offer Details',
+                StringUtils.translate(widget.offer == null ? 'create_offer' : 'edit_offer_details', context: context),
                 style: GoogleFonts.outfit(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
               ),
               SizedBox(height: 20.h),
               TextFormField(
                 controller: _titleController,
                 style: GoogleFonts.outfit(fontSize: 14.sp),
-                decoration: _buildInputDecoration('Offer Title (e.g. 10% Winter Booking Discount)'),
+                decoration: _buildInputDecoration(StringUtils.translate('offer_title_hint', context: context)),
                 validator: (val) => val == null || val.trim().isEmpty ? 'Please enter a title' : null,
               ),
               SizedBox(height: 14.h),
@@ -581,7 +590,7 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
                 controller: _descController,
                 maxLines: 3,
                 style: GoogleFonts.outfit(fontSize: 14.sp),
-                decoration: _buildInputDecoration('Offer Description (Full T&C and values description)'),
+                decoration: _buildInputDecoration(StringUtils.translate('offer_desc_hint', context: context)),
                 validator: (val) => val == null || val.trim().isEmpty ? 'Please enter a description' : null,
               ),
               SizedBox(height: 14.h),
@@ -592,20 +601,20 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
                       controller: _codeController,
                       style: GoogleFonts.outfit(fontSize: 14.sp),
                       textCapitalization: TextCapitalization.characters,
-                      decoration: _buildInputDecoration('Promo Code (e.g. SAVE20)'),
+                      decoration: _buildInputDecoration(StringUtils.translate('promo_code_hint', context: context)),
                     ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _selectedType,
-                      decoration: _buildInputDecoration('Offer Type'),
+                      decoration: _buildInputDecoration(StringUtils.translate('offer_type', context: context)),
                       style: GoogleFonts.outfit(fontSize: 14.sp, color: Colors.black),
-                      items: const [
-                        DropdownMenuItem(value: 'PROMOTIONAL', child: Text('Promotional')),
-                        DropdownMenuItem(value: 'PERCENTAGE', child: Text('Percentage')),
-                        DropdownMenuItem(value: 'FLAT', child: Text('Flat Price')),
-                        DropdownMenuItem(value: 'REFERRAL', child: Text('Referral')),
+                      items: [
+                        DropdownMenuItem(value: 'PROMOTIONAL', child: Text(StringUtils.translate('offer_type_promotional', context: context))),
+                        DropdownMenuItem(value: 'PERCENTAGE', child: Text(StringUtils.translate('offer_type_percentage', context: context))),
+                        DropdownMenuItem(value: 'FLAT', child: Text(StringUtils.translate('offer_type_flat', context: context))),
+                        DropdownMenuItem(value: 'REFERRAL', child: Text(StringUtils.translate('offer_type_referral', context: context))),
                       ],
                       onChanged: (val) {
                         if (val != null) setState(() => _selectedType = val);
@@ -622,18 +631,33 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: _buildInputDecoration(
-                    _selectedType == 'PERCENTAGE' ? 'Discount Percentage (%)' : 'Flat Discount Amount (₹)',
+                    _selectedType == 'PERCENTAGE' ? StringUtils.translate('discount_percentage', context: context) : StringUtils.translate('flat_discount_amount', context: context),
                   ),
                 ),
               ],
               SizedBox(height: 14.h),
               DropdownButtonFormField<String?>(
+                isExpanded: true,
                 initialValue: _selectedHostelId,
-                decoration: _buildInputDecoration('Applicable Property (Keep empty for all properties)'),
+                decoration: _buildInputDecoration(StringUtils.translate('applicable_property_hint', context: context)),
                 style: GoogleFonts.outfit(fontSize: 14.sp, color: Colors.black),
                 items: [
-                  const DropdownMenuItem(value: null, child: Text('Global (All Properties)')),
-                  ...hostels.map((h) => DropdownMenuItem(value: h.id, child: Text(h.name))),
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text(
+                      StringUtils.translate('global_all_properties', context: context),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  ...hostels.map((h) => DropdownMenuItem(
+                    value: h.id,
+                    child: Text(
+                      h.name,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  )),
                 ],
                 onChanged: (val) => setState(() => _selectedHostelId = val),
               ),
@@ -654,7 +678,11 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Starts: ${DateFormat('dd MMM yyyy').format(_startDate)}',
+                                StringUtils.translate(
+                                  'starts_label',
+                                  context: context,
+                                  namedArgs: {'date': DateFormat('dd MMM yyyy').format(_startDate)},
+                                ),
                                 style: GoogleFonts.outfit(fontSize: 12.sp, fontWeight: FontWeight.w600),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -682,7 +710,13 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
                           children: [
                             Expanded(
                               child: Text(
-                                _endDate != null ? 'Ends: ${DateFormat('dd MMM yyyy').format(_endDate!)}' : 'Ends: Never',
+                                _endDate != null
+                                    ? StringUtils.translate(
+                                        'ends_label',
+                                        context: context,
+                                        namedArgs: {'date': DateFormat('dd MMM yyyy').format(_endDate!)},
+                                      )
+                                    : StringUtils.translate('ends_never', context: context),
                                 style: GoogleFonts.outfit(fontSize: 12.sp, fontWeight: FontWeight.w600),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -701,7 +735,13 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Make Offer Active Immediately', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+                  Expanded(
+                    child: Text(
+                      StringUtils.translate('make_active_immediately', context: context),
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14.sp),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
                   Switch.adaptive(
                     value: _isActive,
                     activeThumbColor: const Color(0xFF10B981),
@@ -752,7 +792,7 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                   ),
                   child: Text(
-                    widget.offer == null ? 'Publish Offer' : 'Save Changes',
+                    StringUtils.translate(widget.offer == null ? 'publish_offer' : 'save_changes', context: context),
                     style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16.sp, color: Colors.white),
                   ),
                 ),

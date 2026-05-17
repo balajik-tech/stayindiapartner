@@ -4,6 +4,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import '../../domain/entities/staff.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:stayindia_owner/core/widgets/responsive_widgets.dart';
 
 class StaffCard extends StatelessWidget {
   final Staff staff;
@@ -73,7 +74,10 @@ class StaffCard extends StatelessWidget {
                             ],
                           ),
                           SizedBox(height: 4.h),
-                          Row(
+                          Wrap(
+                            spacing: 8.w,
+                            runSpacing: 4.h,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -91,12 +95,6 @@ class StaffCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 8.w),
-                              Text(
-                                '',
-                                style: TextStyle(color: AppColors.greyText.withValues(alpha: 0.5)),
-                              ),
-                              SizedBox(width: 8.w),
                               Text(
                                 staff.phone,
                                 style: TextStyle(
@@ -115,17 +113,18 @@ class StaffCard extends StatelessWidget {
                 SizedBox(height: 16.h),
                 const Divider(height: 1),
                 SizedBox(height: 16.h),
-                Row(
+                AdaptiveActionRow(
+                  spacing: 12.w,
+                  runSpacing: 8.h,
                   children: [
-                    _buildActionButton(
+                    _buildActionButtonWithoutExpanded(
                       context,
                       icon: Icons.call_rounded,
                       label: 'Call',
                       color: const Color(0xFF099268),
                       onTap: () => _launchCaller(staff.phone),
                     ),
-                    SizedBox(width: 12.w),
-                    _buildActionButton(
+                    _buildActionButtonWithoutExpanded(
                       context,
                       icon: Icons.settings_rounded,
                       label: 'Manage',
@@ -175,39 +174,42 @@ class StaffCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton(
+  Widget _buildActionButtonWithoutExpanded(
     BuildContext context, {
     required IconData icon,
     required String label,
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 10.h),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: color.withValues(alpha: 0.1)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16.sp, color: color),
-              SizedBox(width: 6.w),
-              Text(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16.sp, color: color),
+            SizedBox(width: 6.w),
+            Flexible(
+              child: Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w800,
                   color: color,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

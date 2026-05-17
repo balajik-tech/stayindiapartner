@@ -8,12 +8,14 @@ class RentDueDetailsModel extends RentDueDetails {
 
   factory RentDueDetailsModel.fromJson(Map<String, dynamic> json) {
     return RentDueDetailsModel(
-      overdue: (json['overdue'] as List)
-          .map((e) => RentPaymentModel.fromJson(e))
-          .toList(),
-      upcoming: (json['upcoming'] as List)
-          .map((e) => RentPaymentModel.fromJson(e))
-          .toList(),
+      overdue: (json['overdue'] as List?)
+              ?.map((e) => RentPaymentModel.fromJson(e))
+              .toList() ??
+          [],
+      upcoming: (json['upcoming'] as List?)
+              ?.map((e) => RentPaymentModel.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 }
@@ -30,7 +32,12 @@ class RentPaymentModel extends RentPayment {
   });
 
   factory RentPaymentModel.fromJson(Map<String, dynamic> json) {
-    final tenant = json['tenant'] ?? {};
+    final tenantObj = json['tenant'];
+    final Map<String, dynamic> tenant = (tenantObj is Map<String, dynamic>)
+        ? tenantObj
+        : (tenantObj is Map)
+            ? Map<String, dynamic>.from(tenantObj)
+            : {};
     return RentPaymentModel(
       id: json['_id'] ?? '',
       tenantName: '${tenant['firstName'] ?? ''} ${tenant['lastName'] ?? ''}'.trim(),

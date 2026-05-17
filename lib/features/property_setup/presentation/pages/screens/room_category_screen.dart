@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -28,7 +29,7 @@ class RoomCategoryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Room Types',
+                        'room_master'.tr(),
                         style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w900,
@@ -38,7 +39,7 @@ class RoomCategoryScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        'Group your rooms by sharing and type.',
+                        'room_master_sub'.tr(),
                         style: TextStyle(
                           fontSize: 13.sp,
                           color: const Color(0xFF64748B),
@@ -79,10 +80,10 @@ class RoomCategoryScreen extends StatelessWidget {
         children: [
           Icon(Icons.category_rounded, size: 64.sp, color: const Color(0xFFCBD5E1)),
           SizedBox(height: 16.h),
-          Text(
-            'No Room Types Defined',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: const Color(0xFF475569)),
-          ),
+            Text(
+              'no_room_master_defined'.tr(),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: const Color(0xFF475569)),
+            ),
           SizedBox(height: 24.h),
           _buildAddButton(context, 0),
         ],
@@ -111,7 +112,7 @@ class RoomCategoryScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Category ${index + 1}',
+                'category_count'.tr(namedArgs: {'count': (index + 1).toString()}),
                 style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
               ),
               IconButton(
@@ -127,20 +128,20 @@ class RoomCategoryScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildDropdown<int>(
-                  label: 'Sharing',
+                  label: 'sharing_type_label'.tr(),
                   value: category['sharingType'],
-                  items: [1, 2, 3, 4, 5].map((e) => DropdownMenuItem(value: e, child: Text('$e Sharing'))).toList(),
+                  items: [1, 2, 3, 4, 5].map((e) => DropdownMenuItem(value: e, child: Text('$e ${'sharing'.tr()}'))).toList(),
                   onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'sharingType': val}),
                 ),
               ),
               SizedBox(width: 12.w),
               Expanded(
                 child: _buildDropdown<bool>(
-                  label: 'Type',
+                  label: 'room_type_label'.tr(),
                   value: category['isAC'],
-                  items: const [
-                    DropdownMenuItem(value: true, child: Text('AC')),
-                    DropdownMenuItem(value: false, child: Text('NON-AC')),
+                  items: [
+                    DropdownMenuItem(value: true, child: Text('room_type_ac'.tr())),
+                    DropdownMenuItem(value: false, child: Text('room_type_non_ac'.tr())),
                   ],
                   onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'isAC': val}),
                 ),
@@ -154,7 +155,7 @@ class RoomCategoryScreen extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.w),
                 child: Text(
-                  'PRICING',
+                  'pricing_master'.tr().toUpperCase(),
                   style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 1),
                 ),
               ),
@@ -166,7 +167,7 @@ class RoomCategoryScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildTextField(
-                  label: 'Monthly Rent',
+                  label: 'monthly_rent'.tr(),
                   hint: 'e.g. 8500',
                   prefix: '₹',
                   initialValue: category['monthlyRent'] ?? '',
@@ -177,7 +178,7 @@ class RoomCategoryScreen extends StatelessWidget {
               SizedBox(width: 12.w),
               Expanded(
                 child: _buildTextField(
-                  label: 'Security Deposit',
+                  label: 'deposit'.tr(),
                   hint: 'e.g. 5000',
                   prefix: '₹',
                   initialValue: category['securityDeposit'] ?? '',
@@ -192,7 +193,7 @@ class RoomCategoryScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildTextField(
-                  label: 'Daily Rent',
+                  label: 'daily_rent'.tr(),
                   hint: 'e.g. 500',
                   prefix: '₹',
                   initialValue: category['dailyRent'] ?? '',
@@ -203,7 +204,7 @@ class RoomCategoryScreen extends StatelessWidget {
               SizedBox(width: 12.w),
               Expanded(
                 child: _buildTextField(
-                  label: 'Maintenance',
+                  label: 'maintenance'.tr(),
                   hint: 'e.g. 500',
                   prefix: '₹',
                   initialValue: category['maintenance'] ?? '',
@@ -215,7 +216,7 @@ class RoomCategoryScreen extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
           _buildTextField(
-            label: 'Daily Rent Applies Up To (Days)',
+            label: 'daily_rent_limit_label'.tr(),
             hint: 'e.g. 10',
             suffix: 'days',
             initialValue: category['dailyRentThresholdDays'] ?? '',
@@ -234,10 +235,10 @@ class RoomCategoryScreen extends StatelessWidget {
         Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
         SizedBox(height: 6.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(16.r),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: DropdownButtonHideUnderline(
@@ -246,8 +247,8 @@ class RoomCategoryScreen extends StatelessWidget {
               items: items,
               onChanged: onChanged,
               isExpanded: true,
-              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
-              icon: Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF2B5797), size: 20.sp),
+              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
+              icon: Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF2B5797), size: 24.sp),
             ),
           ),
         ),
@@ -270,10 +271,10 @@ class RoomCategoryScreen extends StatelessWidget {
         Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
         SizedBox(height: 6.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(16.r),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Row(
@@ -281,7 +282,7 @@ class RoomCategoryScreen extends StatelessWidget {
               if (prefix != null)
                 Text(
                   prefix,
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: const Color(0xFF64748B)),
+                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: const Color(0xFF64748B)),
                 ),
               if (prefix != null) SizedBox(width: 4.w),
               Expanded(
@@ -291,17 +292,17 @@ class RoomCategoryScreen extends StatelessWidget {
                   keyboardType: keyboardType,
                   decoration: InputDecoration(
                     hintText: hint,
-                    hintStyle: TextStyle(fontSize: 13.sp, color: const Color(0xFFCBD5E1)),
+                    hintStyle: TextStyle(fontSize: 15.sp, color: const Color(0xFFCBD5E1)),
                     border: InputBorder.none,
                     isDense: true,
                   ),
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
+                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
                 ),
               ),
               if (suffix != null)
                 Text(
                   suffix,
-                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8)),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8)),
                 ),
             ],
           ),
@@ -333,7 +334,7 @@ class RoomCategoryScreen extends StatelessWidget {
             Icon(Icons.add_circle_outline_rounded, color: const Color(0xFF2B5797), size: 20.sp),
             SizedBox(width: 8.w),
             Text(
-              'ADD ROOM TYPE',
+              'add_room_master'.tr().toUpperCase(),
               style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797), letterSpacing: 0.5),
             ),
           ],

@@ -4,7 +4,6 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 
 class AddNotePage extends StatelessWidget {
   const AddNotePage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

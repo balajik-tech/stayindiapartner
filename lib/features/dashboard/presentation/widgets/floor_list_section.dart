@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
@@ -16,6 +17,47 @@ class FloorListSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hostelState = context.watch<HostelCubit>().state;
+    if (hostelState is HostelLoaded && hostelState.hostels.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(32.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.add_business_rounded,
+                  size: 80.sp,
+                  color: AppColors.textSecondary.withValues(alpha: 0.2),
+                ),
+                SizedBox(height: 24.h),
+                Text(
+                  'add_property_first'.tr(),
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  'start_by_adding_property_desc'.tr(),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return BlocBuilder<DashboardCubit, DashboardState>(
       buildWhen: (prev, curr) {
         if (prev is DashboardLoading && curr is DashboardLoaded) return true;
@@ -192,29 +234,44 @@ class FloorListSection extends StatelessWidget {
                 return Padding(
                   padding: EdgeInsets.only(bottom: 16.h),
                   child: FloorAccordion(
-                    title: floor.floorName,
-                    bedInfo: floor.bedInfo,
+                    title: StringUtils.translate(
+                        floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                        context: context,
+                        namedArgs: {'n': '${floor.floorNum ?? 0}'},
+                    ),
+                    bedInfo: StringUtils.translate(
+                        'beds_free_count',
+                        context: context,
+                        namedArgs: {
+                            'free': '${floor.freeBeds ?? 0}', 
+                            'total': '${floor.totalBeds ?? 0}'
+                        },
+                    ),
                     isInitialExpanded: index == 0 || query.isNotEmpty,
                     isGridView: state.isGridView,
-                    rooms: filteredRooms.map<Widget>((room) => RoomCard(
-                      id: room.id,
-                      roomNumber: room.roomNumber,
-                      sharingType: room.sharingType,
-                      occupancy: room.occupancy,
-                      isGridView: state.isGridView,
-                      rent: room.rent,
-                      dailyRent: room.dailyRent,
-                      beds: room.beds.map((b) => entity.BedInfo(
-                        bedNumber: b.bedNumber, 
-                        status: b.status,
-                        tenantName: b.tenantName,
-                        tenantAvatar: b.tenantAvatar,
-                        tenantId: b.tenantId,
-                        isAway: b.isAway,
-                      )).toList(),
-                      roomType: room.roomType,
-                      room: room,
-                    )).toList(),
+                    itemCount: filteredRooms.length,
+                    itemBuilder: (context, roomIndex) {
+                      final room = filteredRooms[roomIndex];
+                      return RoomCard(
+                        id: room.id,
+                        roomNumber: room.roomNumber,
+                        sharingType: room.sharingType,
+                        occupancy: room.occupancy,
+                        isGridView: state.isGridView,
+                        rent: room.rent,
+                        dailyRent: room.dailyRent,
+                        beds: room.beds.map((b) => entity.BedInfo(
+                          bedNumber: b.bedNumber, 
+                          status: b.status,
+                          tenantName: b.tenantName,
+                          tenantAvatar: b.tenantAvatar,
+                          tenantId: b.tenantId,
+                          isAway: b.isAway,
+                        )).toList(),
+                        roomType: room.roomType,
+                        room: room,
+                      );
+                    },
                   ),
                 );
               },

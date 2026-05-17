@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/features/communities/presentation/cubit/association_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/association_hierarchy_page.dart';
+import 'package:easy_localization/easy_localization.dart';
 
-class CommunityDiscoveryHubPage extends StatelessWidget {
+class CommunityDiscoveryHubPage extends StatefulWidget {
   final List<Map<String, dynamic>> allStates;
   final VoidCallback? onBack;
 
@@ -14,6 +18,46 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
     required this.allStates,
     this.onBack,
   });
+
+  @override
+  State<CommunityDiscoveryHubPage> createState() => _CommunityDiscoveryHubPageState();
+}
+
+class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isSearching = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      if (query.length < 2) {
+        setState(() {
+          _searchResults = [];
+          _isSearching = false;
+        });
+        return;
+      }
+
+      setState(() => _isSearching = true);
+      final results = await context.read<AssociationCubit>().searchAssociations(query);
+      if (mounted) {
+        setState(() {
+          _searchResults = results;
+          _isSearching = false;
+        });
+      }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +76,15 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildGrowthPotentialSection(),
-                  _buildEmpoweringSection(),
-                  _buildVisionSection(),
-                  _buildFeaturesSection(),
+                  _buildSearchSection(context),
+                  if (_searchResults.isNotEmpty || _isSearching)
+                    _buildSearchResults(context)
+                  else ...[
+                    _buildGrowthPotentialSection(context),
+                    _buildEmpoweringSection(context),
+                    _buildVisionSection(context),
+                    _buildFeaturesSection(context),
+                  ],
                   SizedBox(height: 40.h),
                 ],
               ),
@@ -48,26 +97,20 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 480.h,
+      expandedHeight: 440.h,
       pinned: true,
       elevation: 0,
       backgroundColor: AppColors.primaryBlue,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
         onPressed: () {
-          if (onBack != null) {
-            onBack!();
+          if (widget.onBack != null) {
+            widget.onBack!();
           } else {
             Navigator.pop(context);
           }
         },
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.more_horiz_rounded, color: Colors.white),
-          onPressed: () {},
-        ),
-      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
           padding: EdgeInsets.fromLTRB(24.w, 100.h, 24.w, 24.h),
@@ -75,9 +118,9 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Explore Communities\nby State',
+                'explore_communities_title'.tr(),
                 style: GoogleFonts.dmSans(
-                  fontSize: 32.sp,
+                  fontSize: 28.sp,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
                   height: 1.1,
@@ -85,15 +128,15 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Select your state to join local owner\ncommunities',
+                'select_state_desc'.tr(),
                 style: GoogleFonts.dmSans(
-                  fontSize: 15.sp,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                   color: Colors.white.withValues(alpha: 0.8),
                   height: 1.4,
                 ),
               ),
-              SizedBox(height: 32.h),
+              SizedBox(height: 24.h),
               _buildStatesGrid(context),
             ],
           ),
@@ -103,18 +146,7 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
   }
 
   Widget _buildStatesGrid(BuildContext context) {
-    final Map<String, IconData> stateIconsMap = {
-      'Andaman and Nicobar Islands': Icons.location_on_rounded,
-      'Andhra Pradesh': Icons.account_balance_rounded,
-      'Arunachal Pradesh': Icons.location_on_rounded,
-      'Assam': Icons.landscape_rounded,
-      'Bihar': Icons.map_rounded,
-      'Chandigarh': Icons.location_on_rounded,
-      'Chhattisgarh': Icons.location_on_rounded,
-      'Dadra and Nagar Haveli and Daman and Diu': Icons.location_on_rounded,
-    };
-
-    final displayStates = allStates.take(8).toList();
+    final displayStates = widget.allStates.take(8).toList();
 
     return GridView.builder(
       shrinkWrap: true,
@@ -131,11 +163,10 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
         if (index < displayStates.length) {
           final state = displayStates[index];
           final String name = state['name'] ?? 'Unknown';
-          final IconData icon = stateIconsMap[name] ?? Icons.location_on_rounded;
 
           return _StateDiscoveryCard(
             name: name,
-            icon: icon,
+            icon: Icons.location_on_rounded,
             onTap: () {
               Navigator.push(
                 context,
@@ -150,7 +181,7 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
           );
         } else {
           return _StateDiscoveryCard(
-            name: 'More',
+            name: 'more'.tr(),
             icon: Icons.add_rounded,
             isMore: true,
             onTap: () {},
@@ -160,7 +191,132 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGrowthPotentialSection() {
+  Widget _buildSearchSection(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'quick_search_label'.tr(),
+            style: GoogleFonts.dmSans(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'quick_search_desc'.tr(),
+            style: GoogleFonts.dmSans(fontSize: 13.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+          ),
+          SizedBox(height: 16.h),
+          Container(
+            height: 56.h,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: Colors.grey.shade100),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+              ],
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
+              style: GoogleFonts.dmSans(fontSize: 15.sp, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                hintText: 'search_location_hint'.tr(),
+                hintStyle: GoogleFonts.dmSans(color: Colors.grey[400], fontSize: 14.sp),
+                prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryBlue, size: 22.sp),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.close_rounded, color: Colors.grey[400], size: 18.sp),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchResults = []);
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 16.h),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchResults(BuildContext context) {
+    if (_isSearching) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 40.h),
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+      itemCount: _searchResults.length,
+      separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade100),
+      itemBuilder: (context, index) {
+        final item = _searchResults[index];
+        return ListTile(
+          onTap: () => _handleLocationSelection(item),
+          contentPadding: EdgeInsets.symmetric(vertical: 8.h),
+          leading: Container(
+            padding: EdgeInsets.all(10.r),
+            decoration: BoxDecoration(
+              color: AppColors.primaryBlue.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(
+              item['level'] == 'DISTRICT' ? Icons.location_city_rounded : Icons.location_on_rounded,
+              color: AppColors.primaryBlue,
+              size: 20.sp,
+            ),
+          ),
+          title: Text(
+            item['name'] ?? '',
+            style: GoogleFonts.dmSans(fontWeight: FontWeight.w700, color: AppColors.darkText, fontSize: 15.sp),
+          ),
+          subtitle: Text(
+            item['displayPath'] ?? '',
+            style: GoogleFonts.dmSans(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+          ),
+          trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: Colors.grey.shade300),
+        );
+      },
+    );
+  }
+
+  void _handleLocationSelection(Map<String, dynamic> item) {
+    final String? stateName = item['state'];
+    if (stateName == null) return;
+
+    final state = widget.allStates.firstWhere(
+      (s) => s['name'].toString().toLowerCase() == stateName.toLowerCase(),
+      orElse: () => {},
+    );
+
+    if (state.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AssociationHierarchyPage(
+            parentId: state['_id'] ?? state['id'],
+            parentName: state['name'],
+            initialLevel: item['level'],
+            initialDistrictId: item['level'] == 'DISTRICT' ? item['id'] : item['districtId'],
+            initialDistrictName: item['level'] == 'DISTRICT' ? item['name'] : item['district'],
+            initialWardId: item['level'] == 'WARD' ? item['id'] : null,
+            initialWardName: item['level'] == 'WARD' ? item['name'] : null,
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildGrowthPotentialSection(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(24.r),
       child: Column(
@@ -178,22 +334,22 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
               ),
               SizedBox(width: 12.w),
               Text(
-                'Our Growth Potential',
+                'our_growth_potential'.tr(),
                 style: GoogleFonts.dmSans(
-                  fontSize: 22.sp,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.darkText,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 32.h),
+          SizedBox(height: 24.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem('28', 'states'),
-              _buildStatItem('500+', 'cities'),
-              _buildStatItem('10K+', 'associations'),
+              _buildStatItem(context, '28', 'states_label'.tr()),
+              _buildStatItem(context, '500+', 'cities_label'.tr()),
+              _buildStatItem(context, '10K+', 'associations_label'.tr()),
             ],
           ),
         ],
@@ -201,14 +357,14 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
+  Widget _buildStatItem(BuildContext context, String value, String label) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           value,
           style: GoogleFonts.dmSans(
-            fontSize: 32.sp,
+            fontSize: 28.sp,
             fontWeight: FontWeight.w900,
             color: AppColors.accentOrange,
           ),
@@ -225,24 +381,24 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
     );
   }
 
-  Widget _buildEmpoweringSection() {
+  Widget _buildEmpoweringSection(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Empowering PG Owners Across\nIndia',
+            'empowering_owners_title'.tr(),
             style: GoogleFonts.dmSans(
-              fontSize: 24.sp,
+              fontSize: 22.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.darkText,
               height: 1.2,
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Text(
-            'Join the largest network of professional accommodation providers and experience the power of unity.',
+            'empowering_owners_desc'.tr(),
             style: GoogleFonts.dmSans(
               fontSize: 14.sp,
               color: AppColors.greyText,
@@ -255,13 +411,13 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
     );
   }
 
-  Widget _buildVisionSection() {
+  Widget _buildVisionSection(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(24.r),
-      padding: EdgeInsets.all(24.r),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
@@ -279,7 +435,7 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
               Icon(Icons.visibility_outlined, color: AppColors.accentOrange, size: 20.sp),
               SizedBox(width: 12.w),
               Text(
-                'Our Vision',
+                'our_vision'.tr(),
                 style: GoogleFonts.dmSans(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
@@ -288,9 +444,9 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Text(
-            'To create a transparent, standardized, and profitable ecosystem for the accommodation and co-living industry in India.',
+            'vision_desc'.tr(),
             style: GoogleFonts.dmSans(
               fontSize: 14.sp,
               color: AppColors.greyText,
@@ -303,17 +459,28 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFeaturesSection() {
-    final features = [
-      {'title': 'Unified National Digital Platform', 'icon': Icons.hub_outlined},
-      {'title': 'Local Leadership & Team Support', 'icon': Icons.face_retouching_natural_outlined},
-      {'title': 'Legal & Regulatory Support', 'icon': Icons.gavel_rounded},
-      {'title': 'Safety & Security Network', 'icon': Icons.security_rounded},
-      {'title': 'Verified Tenant Database', 'icon': Icons.verified_user_outlined},
-      {'title': 'Issue Resolution Hub', 'icon': Icons.forum_outlined},
-      {'title': 'Professional Staffing Solutions', 'icon': Icons.work_outline_rounded},
-      {'title': 'Strict Blacklist & Fraud Alert', 'icon': Icons.block_flipped},
-      {'title': '24/7 Digital Management App', 'icon': Icons.app_registration_rounded},
+  Widget _buildFeaturesSection(BuildContext context) {
+    final List<Map<String, dynamic>> features = [
+      {
+        'title': 'feature_unified_national'.tr(),
+        'icon': Icons.hub_outlined
+      },
+      {
+        'title': 'feature_local_leadership'.tr(),
+        'icon': Icons.face_retouching_natural_outlined
+      },
+      {
+        'title': 'feature_legal_support'.tr(),
+        'icon': Icons.gavel_rounded
+      },
+      {
+        'title': 'feature_safety_network'.tr(),
+        'icon': Icons.security_rounded
+      },
+      {
+        'title': 'feature_verified_tenant'.tr(),
+        'icon': Icons.verified_user_outlined
+      },
     ];
 
     return Padding(
@@ -322,7 +489,7 @@ class CommunityDiscoveryHubPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Key Features & Benefits',
+            'features_benefits_title'.tr(),
             style: GoogleFonts.dmSans(
               fontSize: 20.sp,
               fontWeight: FontWeight.w800,

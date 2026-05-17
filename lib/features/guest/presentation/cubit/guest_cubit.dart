@@ -1,3 +1,4 @@
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/guest_repository.dart';
 import 'guest_state.dart';
@@ -13,7 +14,7 @@ class GuestCubit extends Cubit<GuestState> {
       final requests = await repository.getHostelGuestRequests(hostelId);
       emit(GuestSuccess(requests));
     } catch (e) {
-      emit(GuestError(e.toString()));
+      emit(GuestError(GlobalErrorMapper.map(e).message));
     }
   }
 
@@ -25,7 +26,7 @@ class GuestCubit extends Cubit<GuestState> {
 
       await loadHostelRequests(hostelId);
     } catch (e) {
-      emit(GuestError(e.toString()));
+      emit(GuestError(GlobalErrorMapper.map(e).message));
     }
   }
 }

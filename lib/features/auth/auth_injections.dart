@@ -14,11 +14,7 @@ import 'domain/usecases/has_active_session_usecase.dart';
 import 'domain/usecases/delete_account_usecase.dart';
 import 'presentation/cubit/auth_cubit.dart';
 
-
-
-
 void registerAuthFeature(GetIt sl) {
-  
   sl.registerLazySingleton<AuthCubit>(
     () => AuthCubit(
       requestOtpUseCase: sl(),
@@ -30,6 +26,7 @@ void registerAuthFeature(GetIt sl) {
       deleteAccountUseCase: sl(),
       repository: sl(),
       notificationService: sl(),
+      cacheService: sl(),
     ),
   );
 

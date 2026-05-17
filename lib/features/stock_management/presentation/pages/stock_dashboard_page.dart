@@ -11,6 +11,7 @@ import '../../domain/entities/stock_item.dart';
 import '../../core/stock_constants.dart';
 import 'add_stock_item_page.dart';
 import 'stock_detail_page.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class StockDashboardPage extends StatefulWidget {
   const StockDashboardPage({super.key});
@@ -20,207 +21,253 @@ class StockDashboardPage extends StatefulWidget {
 }
 
 class _StockDashboardPageState extends State<StockDashboardPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedCategory = 'All';
+  final List<String> _categories = ['All', 'Grocery', 'Vegetables', 'Cleaning', 'Other'];
+
   @override
   void initState() {
     super.initState();
     _loadStocks();
   }
 
-  void _loadStocks() {
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _loadStocks({String? search, String? category}) {
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
       final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-      context.read<StockCubit>().loadStocks(hostelId);
+      context.read<StockCubit>().loadStocks(
+            hostelId,
+            search: search ?? (_searchController.text.isEmpty ? null : _searchController.text),
+            category: (category ?? _selectedCategory) == 'All' ? null : (category ?? _selectedCategory),
+          );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFE),
-      appBar: _buildAppBar(),
+      backgroundColor: const Color(0xFFF8FAFC),
       body: BlocBuilder<StockCubit, StockState>(
         builder: (context, state) {
-          if (state is StockLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is StockError) {
-            return Center(child: Text('Error: ${state.message}'));
-          }
-
-          if (state is StockLoaded || state is StockItemDetailLoaded || state is StockActionSuccess) {
-            return RefreshIndicator(
-              onRefresh: () async => _loadStocks(),
-              color: const Color(0xFF2C5990),
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 80.h),
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSummaryGrid(state.summary),
-                    SizedBox(height: 32.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Inventory Items',
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w900,
-                            color: const Color(0xFF1A1A1A),
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        _buildFilterButton(),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
-                    if (state.items.isEmpty)
-                      _buildEmptyState()
-                    else
-                      ListView.builder(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: state.items.length,
-                        itemBuilder: (context, index) => _buildStockItemCard(state.items[index]),
-                      ),
-                  ],
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              _buildSliverAppBar(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (state is! StockError) _buildSummaryCards(state.summary),
+                      SizedBox(height: 24.h),
+                      _buildSearchAndFilter(),
+                      SizedBox(height: 16.h),
+                      _buildCategoryChips(),
+                      SizedBox(height: 12.h),
+                    ],
+                  ),
                 ),
               ),
-            );
-          }
-
-          return const SizedBox.shrink();
+              if (state is StockLoading)
+                const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+              else if (state is StockError)
+                SliverFillRemaining(child: Center(child: Text('Error: ${state.message}')))
+              else if (state.items.isEmpty)
+                SliverFillRemaining(child: _buildEmptyState())
+              else
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildStockItemCard(state.items[index]),
+                      childCount: state.items.length,
+                    ),
+                  ),
+                ),
+            ],
+          );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          final hostelState = context.read<HostelCubit>().state;
-          if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-             final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-             final stockCubit = context.read<StockCubit>();
-             Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BlocProvider.value(
-                value: stockCubit,
-                child: AddStockItemPage(propertyId: hostelId),
-              )),
-            );
-          }
-        },
-        backgroundColor: const Color(0xFF2C5990),
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: Text('Add Item', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.sp)),
-      ),
+      floatingActionButton: _buildFAB(),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.white,
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      expandedHeight: 120.h,
+      floating: false,
+      pinned: true,
       elevation: 0,
-      centerTitle: false,
-      title: Text(
-        'Stock Management',
-        style: TextStyle(
-          color: const Color(0xFF1A1A1A),
-          fontSize: 22.sp,
-          fontWeight: FontWeight.w900,
-          letterSpacing: -0.8,
+      backgroundColor: const Color(0xFF2C5990),
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: EdgeInsets.only(left: 20.w, bottom: 16.h),
+        title: Text(
+          StringUtils.translate('stock_management', context: context),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
+        background: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2C5990), Color(0xFF1E3A8A)],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSummaryGrid(Map<String, dynamic> summary) {
-    final currencyFormat = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12.h,
-      crossAxisSpacing: 12.w,
-      childAspectRatio: 1.4,
+  Widget _buildSummaryCards(Map<String, dynamic> summary) {
+    return Row(
       children: [
-        _buildMetricCard(
-          title: 'Total Items',
-          value: summary['totalItems'].toString(),
-          icon: Icons.inventory_2_rounded,
-          color: const Color(0xFF2C5990),
+        Expanded(
+          child: _buildCompactMetricCard(
+            StringUtils.translate('total_value', context: context),
+            NumberFormat.currency(symbol: '₹', decimalDigits: 0).format(summary['totalValue'] ?? 0),
+            Icons.account_balance_wallet_rounded,
+            const Color(0xFF10B981),
+          ),
         ),
-        _buildMetricCard(
-          title: 'Low Stock',
-          value: summary['lowStockCount'].toString(),
-          icon: Icons.warning_amber_rounded,
-          color: const Color(0xFFF98125),
-        ),
-        _buildMetricCard(
-          title: 'Total Value',
-          value: currencyFormat.format(summary['totalValue']),
-          icon: Icons.account_balance_wallet_rounded,
-          color: const Color(0xFF10B981),
-        ),
-        _buildMetricCard(
-          title: 'Recent Usage',
-          value: '${summary['recentUsageCount'] ?? 0} items', 
-          icon: Icons.history_rounded,
-          color: const Color(0xFF6366F1),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: _buildCompactMetricCard(
+            StringUtils.translate('low_stock', context: context),
+            (summary['lowStockCount'] ?? 0).toString(),
+            Icons.warning_amber_rounded,
+            const Color(0xFFF59E0B),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildMetricCard({required String title, required String value, required IconData icon, required Color color}) {
+  Widget _buildCompactMetricCard(String title, String value, IconData icon, Color color) {
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(8.r),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10.r)),
-            child: Icon(icon, color: color, size: 20.sp),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 18.sp),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF111827)),
-              ),
-              Text(
-                title,
-                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: const Color(0xFF6B7280)),
-              ),
-            ],
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(value, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B))),
+                Text(title, style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w600)),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilter() {
+    return Container(
+      height: 54.h,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (val) => _loadStocks(search: val),
+        decoration: InputDecoration(
+          hintText: StringUtils.translate('search_stock_hint', context: context),
+          hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 14.sp),
+          prefixIcon: Icon(Icons.search_rounded, color: const Color(0xFF64748B), size: 22.sp),
+          suffixIcon: _searchController.text.isNotEmpty 
+            ? IconButton(
+                icon: Icon(Icons.close_rounded, size: 20.sp),
+                onPressed: () {
+                  _searchController.clear();
+                  _loadStocks(search: '');
+                  setState(() {});
+                },
+              ) 
+            : null,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: 16.h),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: _categories.map((cat) {
+          final isSelected = _selectedCategory == cat;
+          return Padding(
+            padding: EdgeInsets.only(right: 8.w),
+            child: ChoiceChip(
+              label: Text(StringUtils.translate(cat.toLowerCase(), context: context)),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() => _selectedCategory = cat);
+                  _loadStocks(category: cat);
+                }
+              },
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : const Color(0xFF64748B),
+                fontWeight: FontWeight.bold,
+                fontSize: 13.sp,
+              ),
+              selectedColor: const Color(0xFF2C5990),
+              backgroundColor: Colors.white,
+              elevation: 0,
+              pressElevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                side: BorderSide(color: isSelected ? Colors.transparent : const Color(0xFFE2E8F0)),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
   Widget _buildStockItemCard(StockItem item) {
     Color statusColor = const Color(0xFF10B981);
-    String statusText = 'Safe';
+    String statusText = StringUtils.translate('in_stock', context: context);
     
     if (item.currentQuantity <= 0) {
       statusColor = const Color(0xFFEF4444);
-      statusText = 'Critical';
+      statusText = StringUtils.translate('out_of_stock', context: context);
     } else if (item.currentQuantity <= item.minimumThreshold) {
-      statusColor = const Color(0xFFF98125);
-      statusText = 'Low Stock';
+      statusColor = const Color(0xFFF59E0B);
+      statusText = StringUtils.translate('low_stock', context: context);
     }
 
     return BouncingWrapper(
@@ -239,8 +286,7 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(color: const Color(0xFFF1F5F9)),
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
           ],
@@ -248,16 +294,19 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
         child: Row(
           children: [
             Container(
-              width: 48.w,
-              height: 48.w,
+              width: 54.w,
+              height: 54.w,
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(12.r),
+                color: statusColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(16.r),
               ),
               child: Center(
-                child: Text(
-                  item.name[0].toUpperCase(),
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2C5990)),
+                child: Icon(
+                  item.category == 'Vegetables' ? Icons.eco_rounded : 
+                  item.category == 'Cleaning' ? Icons.clean_hands_rounded : 
+                  Icons.inventory_2_rounded,
+                  color: statusColor,
+                  size: 26.sp,
                 ),
               ),
             ),
@@ -268,11 +317,19 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                 children: [
                   Text(
                     StockConstants.getLocalizedNameForEntity(item, context.locale.languageCode),
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1A1A1A)),
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
                   ),
-                  Text(
-                    item.category,
-                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: const Color(0xFF6B7280)),
+                  SizedBox(height: 2.h),
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(6.r)),
+                        child: Text(item.category, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text('₹${item.pricePerUnit}/${item.unit}', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                    ],
                   ),
                 ],
               ),
@@ -280,21 +337,24 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  '${item.currentQuantity} ${item.unit}',
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: const Color(0xFF111827)),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: item.currentQuantity.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), ''),
+                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
+                      ),
+                      TextSpan(
+                        text: ' ${item.unit}',
+                        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(height: 4.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: statusColor),
-                  ),
+                Text(
+                  statusText,
+                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: statusColor),
                 ),
               ],
             ),
@@ -304,40 +364,59 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
     );
   }
 
-  Widget _buildFilterButton() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.filter_list_rounded, size: 16.sp, color: const Color(0xFF4B5563)),
-          SizedBox(width: 6.w),
-          Text(
-            'Filters',
-            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: const Color(0xFF4B5563)),
-          ),
-        ],
-      ),
+  Widget _buildFAB() {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        final hostelState = context.read<HostelCubit>().state;
+        if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+           final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+           final stockCubit = context.read<StockCubit>();
+           Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => BlocProvider.value(
+              value: stockCubit,
+              child: AddStockItemPage(propertyId: hostelId),
+            )),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                StringUtils.translate('add_property_first', context: context),
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+          );
+        }
+      },
+      backgroundColor: const Color(0xFF2C5990),
+      icon: const Icon(Icons.add_rounded, color: Colors.white),
+      label: Text(StringUtils.translate('new_item', context: context), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14.sp)),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
     );
   }
 
   Widget _buildEmptyState() {
     return Center(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: 60.h),
-          Icon(Icons.inventory_2_outlined, size: 64.sp, color: const Color(0xFFCBD5E1)),
+          Icon(Icons.search_off_rounded, size: 80.sp, color: const Color(0xFFCBD5E1)),
           SizedBox(height: 16.h),
           Text(
-            'No items found',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: const Color(0xFF64748B)),
+            StringUtils.translate('no_matching_items', context: context),
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF475569)),
           ),
+          SizedBox(height: 8.h),
           Text(
-            'Add your first stock item to start tracking.',
-            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF94A3B8)),
+            StringUtils.translate('adjust_search_filters', context: context),
+            style: TextStyle(fontSize: 14.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w500),
           ),
         ],
       ),

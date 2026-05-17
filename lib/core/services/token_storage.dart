@@ -54,6 +54,10 @@ class TokenStorage {
     await _storage.delete(key: _phoneKey);
   }
 
+  Future<void> clearAll() async {
+    await _storage.deleteAll();
+  }
+
   Future<bool> hasToken() async {
     final token = await getToken();
     return token != null && token.isNotEmpty;

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart' as entity;
 import 'package:stayindia_owner/features/dashboard/domain/entities/dashboard_entity.dart';
@@ -20,6 +21,7 @@ import 'package:stayindia_owner/features/property_setup/presentation/cubit/prope
 class RoomManagementPage extends StatefulWidget {
   final Hostel hostel;
   final String floorName;
+  final int? floorNum;
   final bool isSetupMode;
   final bool isDraftMode;
   final int? draftRoomCount;
@@ -28,6 +30,7 @@ class RoomManagementPage extends StatefulWidget {
     super.key,
     required this.hostel,
     required this.floorName,
+    this.floorNum,
     this.isSetupMode = false,
     this.isDraftMode = false,
     this.draftRoomCount,
@@ -40,6 +43,15 @@ class RoomManagementPage extends StatefulWidget {
 class _RoomManagementPageState extends State<RoomManagementPage> {
   DashboardData? _lastData;
   Timer? _refreshTimer;
+
+  int get _resolvedFloorNum {
+    if (widget.floorNum != null) return widget.floorNum!;
+    final nameUpper = widget.floorName.toUpperCase();
+    if (nameUpper == 'GROUND_FLOOR' || nameUpper == 'GROUND FLOOR' || nameUpper == 'G' || nameUpper == '0') {
+      return 0;
+    }
+    return int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+  }
 
   void _requestRefresh() {
     _refreshTimer?.cancel();
@@ -68,7 +80,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
   }
 
   void _initDraftRooms() {
-    final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    final floorNum = _resolvedFloorNum;
     _draftRooms = List.generate(widget.draftRoomCount!, (index) {
       final roomNo = (floorNum * 100) + (index + 1);
       return RoomDetail(
@@ -122,7 +134,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
         title: Column(
           children: [
             Text(
-              widget.isSetupMode ? 'Setup Property' : 'Room Config',
+              widget.isSetupMode ? 'setup_property'.tr() : 'room_config'.tr(),
               style: TextStyle(
                 color: const Color(0xFF2C5990),
                 fontSize: 16.sp,
@@ -131,7 +143,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
             ),
             if (widget.isSetupMode)
               Text(
-                'Step 3 of 4',
+                'step_3_of_4'.tr(),
                 style: TextStyle(
                   color: const Color(0xFF64748B),
                   fontSize: 11.sp,
@@ -184,11 +196,14 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                       if (state is DashboardLoading) {
                         return const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue));
                       }
-                      return const Center(child: Text('No data available'));
+                      return Center(child: Text('no_data_available'.tr()));
                     }
 
                     final floor = currentData.occupancy.floors.cast<entity.FloorData>().firstWhere(
                       (f) {
+                        if (widget.floorNum != null && f.floorNum != null) {
+                          return f.floorNum == widget.floorNum;
+                        }
                         final fName = f.floorName.toLowerCase();
                         final targetName = widget.floorName.toLowerCase();
                         return fName == targetName ||
@@ -224,7 +239,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
             ),
             SizedBox(height: 24.h),
             Text(
-              'No rooms found',
+              'no_rooms_found'.tr(),
               style: TextStyle(color: const Color(0xFF1E293B), fontSize: 18.sp, fontWeight: FontWeight.w900),
             ),
             if (!widget.isSetupMode) ...[
@@ -238,7 +253,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
-                    'Refresh Data',
+                    'refresh_data'.tr(),
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.sp),
                   ),
                 ),
@@ -263,7 +278,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _buildSectionHeader('Room Config', 'Customize features for each room.'),
+                child: _buildSectionHeader('room_config'.tr(), 'room_config_desc'.tr()),
               ),
               SizedBox(width: 8.w),
               Wrap(
@@ -293,7 +308,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                           Icon(Icons.add_circle_outline_rounded, color: const Color(0xFFF98125), size: 14.sp),
                           SizedBox(width: 4.w),
                           Text(
-                            'ADD',
+                            'btn_add'.tr(),
                             style: TextStyle(color: const Color(0xFFF98125), fontSize: 10.sp, fontWeight: FontWeight.w900),
                           ),
                         ],
@@ -361,7 +376,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     id: room.id,
                     hostelId: widget.hostel.id,
                     roomTypename: room.roomNumber,
-                    floor: int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
+                    floor: _resolvedFloorNum,
                     sharingType: room.sharingType,
                     roomType: room.roomType ?? 'NON-AC',
                     rent: room.rent ?? 0,
@@ -379,6 +394,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     draftRoom: currentDraft,
                     hostel: widget.hostel,
                     floorName: widget.floorName,
+                    floorNum: widget.floorNum,
                     isDraftMode: true,
                     onDraftUpdate: (updatedRoom) {
                       setState(() {
@@ -395,6 +411,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     roomIndex: index,
                     hostel: widget.hostel,
                     floorName: widget.floorName,
+                    floorNum: widget.floorNum,
                     isDraftMode: true,
                     onSaveComplete: _requestRefresh,
                     onDraftUpdate: (updatedRoom) {
@@ -433,7 +450,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                 side: const BorderSide(color: Color(0xFF2C5990), width: 1.5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
               ),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF2C5990), fontWeight: FontWeight.w800)),
+              child: Text('cancel'.tr(), style: const TextStyle(color: Color(0xFF2C5990), fontWeight: FontWeight.w800)),
             ),
           ),
           SizedBox(width: 16.w),
@@ -448,7 +465,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                 elevation: 4,
                 shadowColor: const Color(0xFF2C5990).withValues(alpha: 0.3),
               ),
-              child: const Text('Set Pricing', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+              child: Text('set_pricing'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
             ),
           ),
         ],
@@ -466,7 +483,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
             id: r.id,
             hostelId: widget.hostel.id,
             roomTypename: r.roomNumber,
-            floor: int.tryParse(floor.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
+            floor: floor.floorNum ?? 0,
             sharingType: r.sharingType,
             roomType: r.roomType ?? 'NON-AC',
             rent: r.rent ?? 0,
@@ -516,12 +533,12 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('Add Room to ${widget.floorName}', style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
+        title: Text('add_room_to_floor'.tr(namedArgs: {'floor': widget.floorName}), style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Room Number', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
+            Text('room_number'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
             SizedBox(height: 8.h),
             Container(
               decoration: BoxDecoration(
@@ -548,7 +565,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.w700)),
+            child: Text('cancel'.tr(), style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -574,7 +591,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                   }),
                 });
               } else if (widget.isDraftMode) {
-                final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+                final floorNum = _resolvedFloorNum;
                 final newRoom = RoomDetail(
                   id: 'draft_${DateTime.now().millisecondsSinceEpoch}',
                   hostelId: widget.hostel.id,
@@ -596,7 +613,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                   _draftRooms!.add(newRoom);
                 });
               } else {
-                final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+                final floorNum = _resolvedFloorNum;
                 final newRoom = RoomDetail(
                   id: 'draft_${DateTime.now().millisecondsSinceEpoch}',
                   hostelId: widget.hostel.id,
@@ -627,7 +644,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
               backgroundColor: const Color(0xFF2C5990),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
             ),
-            child: const Text('Add Room', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+            child: Text('add_room'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -646,11 +663,11 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text('Bulk Add Rooms', style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
+        title: Text('bulk_add_rooms'.tr(), style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('How many rooms would you like to add sequentially?', style: TextStyle(color: const Color(0xFF64748B))),
+            Text('how_many_rooms_sequential'.tr(), style: TextStyle(color: const Color(0xFF64748B))),
             SizedBox(height: 16.h),
             Container(
               decoration: BoxDecoration(
@@ -662,7 +679,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                 controller: controller,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Number of Rooms',
+                  labelText: 'number_of_rooms'.tr(),
                   labelStyle: TextStyle(color: const Color(0xFF64748B), fontSize: 12.sp),
                   prefixIcon: Icon(Icons.numbers_rounded, color: const Color(0xFF94A3B8), size: 20.sp),
                   filled: false,
@@ -675,7 +692,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('cancel'.tr())),
           ValueListenableBuilder<int>(
             valueListenable: countNotifier,
             builder: (context, count, _) {
@@ -688,7 +705,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                   backgroundColor: const Color(0xFF2C5990),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 ),
-                child: Text('Add $count Rooms', style: TextStyle(color: Colors.white)),
+                child: Text('add_x_rooms'.tr(namedArgs: {'count': count.toString()}), style: TextStyle(color: Colors.white)),
               );
             },
           ),
@@ -762,7 +779,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
             }),
           });
         } else if (widget.isDraftMode) {
-          final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          final floorNum = _resolvedFloorNum;
           final newRoom = RoomDetail(
             id: 'draft_${DateTime.now().millisecondsSinceEpoch}_$i',
             hostelId: widget.hostel.id,
@@ -784,7 +801,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
             _draftRooms!.add(newRoom);
           });
         } else {
-          final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          final floorNum = _resolvedFloorNum;
           final newRoom = RoomDetail(
             id: 'draft_${DateTime.now().millisecondsSinceEpoch}_$i',
             hostelId: widget.hostel.id,
@@ -920,7 +937,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
     setState(() {
       for (int i = 1; i < rooms.length; i++) {
         final target = rooms[i];
-        final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        final floorNum = _resolvedFloorNum;
         
         _modifiedRooms[target.id] = RoomDetail(
           id: target.id,
@@ -984,7 +1001,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                           id: r.id,
                           hostelId: widget.hostel.id,
                           roomTypename: r.roomNumber,
-                          floor: int.tryParse(floor.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
+                          floor: floor.floorNum ?? 0,
                           sharingType: r.sharingType,
                           roomType: r.roomType ?? 'NON-AC',
                           rent: r.rent ?? 0,
@@ -1049,6 +1066,7 @@ class _RoomManageCard extends StatefulWidget {
   final int? roomIndex;
   final Hostel hostel;
   final String floorName;
+  final int? floorNum;
   final bool isSetupMode;
   final bool isDraftMode;
   final RoomDetail? draftRoom;
@@ -1060,6 +1078,7 @@ class _RoomManageCard extends StatefulWidget {
     this.roomIndex,
     required this.hostel,
     required this.floorName,
+    this.floorNum,
     this.isSetupMode = false,
     this.isDraftMode = false,
     this.draftRoom,
@@ -1079,6 +1098,15 @@ class _RoomManageCardState extends State<_RoomManageCard> {
   late List<String> _localFeatures;
   late String _localRoomType;
   bool _isUpdating = false;
+
+  int get _resolvedFloorNum {
+    if (widget.floorNum != null) return widget.floorNum!;
+    final nameUpper = widget.floorName.toUpperCase();
+    if (nameUpper == 'GROUND_FLOOR' || nameUpper == 'GROUND FLOOR' || nameUpper == 'G' || nameUpper == '0') {
+      return 0;
+    }
+    return int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+  }
 
   @override
   void initState() {
@@ -1312,7 +1340,7 @@ class _RoomManageCardState extends State<_RoomManageCard> {
         return;
       }
 
-      final floorNum = int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      final floorNum = _resolvedFloorNum;
       
       if (!mounted) return;
       if (!_isUpdating) setState(() => _isUpdating = true);

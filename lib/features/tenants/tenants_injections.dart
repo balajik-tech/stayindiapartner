@@ -23,6 +23,7 @@ void registerTenantsFeature(GetIt sl) {
       ));
 
   sl.registerLazySingleton(() => GetTenantsUseCase(sl()));
+  sl.registerLazySingleton(() => GetTenantsForHostelUseCase(sl()));
   sl.registerLazySingleton(() => GetTenantDetailUseCase(sl()));
   sl.registerLazySingleton(() => AddTenantUseCase(sl()));
   sl.registerLazySingleton(() => GetComplaintsUseCase(sl()));

@@ -8,6 +8,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class DigitalCertificatePage extends StatefulWidget {
   const DigitalCertificatePage({super.key});
@@ -77,7 +78,7 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Digital Certificate',
+          StringUtils.translate('digital_certificate', context: context),
           style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w800),
         ),
         backgroundColor: Colors.white,
@@ -97,7 +98,7 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                 Padding(
                   padding: EdgeInsets.all(20.w),
                   child: Text(
-                    'Select a property to apply for association membership and digital certificate.',
+                    StringUtils.translate('digital_certificate_instruction', context: context),
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.grey.shade600,
@@ -130,15 +131,16 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
   }
 
   Widget _buildHostelCard(dynamic hostel, dynamic cert) {
-    String statusText = 'Not Applied';
+    String statusText = StringUtils.translate('not_applied', context: context);
     Color statusColor = Colors.grey;
     bool canApply = true;
 
     if (cert != null) {
-      statusText = cert['status'];
-      canApply = statusText == 'REJECTED';
-      statusColor = statusText == 'APPROVED' ? Colors.green : 
-                   statusText == 'PENDING' ? Colors.orange : Colors.red;
+      final String rawStatus = cert['status'] ?? 'PENDING';
+      statusText = StringUtils.translate(rawStatus.toLowerCase(), context: context);
+      canApply = rawStatus == 'REJECTED';
+      statusColor = rawStatus == 'APPROVED' ? Colors.green : 
+                   rawStatus == 'PENDING' ? Colors.orange : Colors.red;
     }
 
     return Container(
@@ -217,7 +219,7 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                   child: _isLoading 
                     ? SizedBox(width: 16.w, height: 16.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : Text(
-                        'Apply Now',
+                        StringUtils.translate('apply_now', context: context),
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13.sp),
                       ),
                 ),
@@ -240,7 +242,7 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                       Icon(Icons.verified_rounded, color: Colors.green, size: 20.sp),
                       SizedBox(width: 8.w),
                       Text(
-                        'Certification Secured',
+                        StringUtils.translate('certification_secured', context: context),
                         style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: Colors.green),
                       ),
                       const Spacer(),
@@ -259,9 +261,9 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildMetricTile('Trust Level', _getTrustLevelLabel(cert['trustLevel']), 
+                      _buildMetricTile(StringUtils.translate('trust_level', context: context), _getTrustLevelLabel(cert['trustLevel']), 
                         cert['trustLevel'] == 'GOLDEN' ? Colors.orange : Colors.blue),
-                      _buildMetricTile('Audit Score', '${cert['auditScore']}/5.0', Colors.blue),
+                      _buildMetricTile(StringUtils.translate('audit_score', context: context), '${cert['auditScore']}/5.0', Colors.blue),
                     ],
                   ),
                 ],
@@ -291,8 +293,8 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
   }
 
   String _getTrustLevelLabel(String? level) {
-    if (level == 'GOLDEN') return 'Golden PG';
-    if (level == 'VERIFIED') return 'Stay India Verified';
-    return 'Standard Registry';
+    if (level == 'GOLDEN') return StringUtils.translate('golden_pg', context: context);
+    if (level == 'VERIFIED') return StringUtils.translate('stay_india_verified', context: context);
+    return StringUtils.translate('standard_registry', context: context);
   }
 }

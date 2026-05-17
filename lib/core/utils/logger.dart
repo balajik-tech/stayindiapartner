@@ -12,6 +12,17 @@ class AppLogger {
     ),
   );
 
+  static final Map<String, dynamic> _crashContext = {};
+
+  /// Enriches crash reports with user or system metadata
+  static void setContext(String key, dynamic value) {
+    _crashContext[key] = value;
+  }
+
+  static void clearCustomContext() {
+    _crashContext.clear();
+  }
+
   static void error(String message, [dynamic error, StackTrace? stackTrace]) {
     _logger.e(message, error: error, stackTrace: stackTrace);
   }

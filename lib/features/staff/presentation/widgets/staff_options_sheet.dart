@@ -5,6 +5,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import '../../domain/entities/staff.dart';
 import '../cubit/staff_cubit.dart';
 import 'add_staff_sheet.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class StaffOptionsSheet extends StatelessWidget {
   final Staff staff;
@@ -69,7 +70,7 @@ class StaffOptionsSheet extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      staff.role,
+                      StringUtils.translate(staff.role.toLowerCase().replaceAll(' ', '_'), context: context),
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: AppColors.greyText,
@@ -85,7 +86,7 @@ class StaffOptionsSheet extends StatelessWidget {
           _buildOption(
             context,
             icon: Icons.edit_rounded,
-            label: 'Edit Details',
+            label: StringUtils.translate('edit_details_option', context: context),
             color: AppColors.darkText,
             onTap: () {
               Navigator.pop(context);
@@ -100,7 +101,7 @@ class StaffOptionsSheet extends StatelessWidget {
           _buildOption(
             context,
             icon: staff.isActive ? Icons.block_rounded : Icons.check_circle_outline_rounded,
-            label: staff.isActive ? 'Deactivate Account' : 'Activate Account',
+            label: staff.isActive ? StringUtils.translate('deactivate_account_option', context: context) : StringUtils.translate('activate_account_option', context: context),
             color: staff.isActive ? const Color(0xFFF04438) : const Color(0xFF099268),
             onTap: () {
               context.read<StaffCubit>().updateStaff(staff.id, {'isActive': !staff.isActive});

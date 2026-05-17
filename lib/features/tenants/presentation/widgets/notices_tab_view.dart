@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/notices/presentation/cubit/notice_cubit.dart';
@@ -17,6 +18,8 @@ class NoticesTabView extends StatefulWidget {
 }
 
 class _NoticesTabViewState extends State<NoticesTabView> {
+  String? _lastLoadedHostelId;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +27,7 @@ class _NoticesTabViewState extends State<NoticesTabView> {
       final hostelState = context.read<HostelCubit>().state;
       if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
         final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+        _lastLoadedHostelId = hostelId;
         context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
       }
     });
@@ -31,71 +35,133 @@ class _NoticesTabViewState extends State<NoticesTabView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NoticeCubit, NoticeState>(
-      builder: (context, state) {
-        if (state is NoticeInitial || state is NoticeLoading) {
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-            itemCount: 8,
-            itemBuilder: (context, index) => const TenantCardSkeleton(),
-          );
-        } else if (state is NoticeLoadError) {
-          return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
-        } else if (state is NoticesLoaded) {
-          final notices = state.notices;
-          final announcements = state.announcements;
-          final hasData = notices.isNotEmpty || announcements.isNotEmpty;
-          
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (!hasData) _buildEmptyState(),
-                if (notices.isNotEmpty) ...[
-                  _buildSummaryBox(notices),
-                  SizedBox(height: 24.h),
-                  Text(
-                    'Upcoming Vacancies',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkText,
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  ...notices.map((n) => _buildNoticeCard(n)),
-                ],
-                if (announcements.isNotEmpty) ...[
-                  if (notices.isNotEmpty) SizedBox(height: 32.h),
-                  Text(
-                    'General Notices',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkText,
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  ...announcements.map((a) => _buildAnnouncementCard(a)),
-                ],
-                SizedBox(height: 80.h),
-              ],
-            ),
-          );
-        } else if (state is NoticeSubmitting || state is NoticeUpdating || state is NoticeSuccess || state is NoticeUpdateSuccess) {
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-            itemCount: 8,
-            itemBuilder: (context, index) => const TenantCardSkeleton(),
-          );
+    return BlocConsumer<HostelCubit, HostelState>(
+      listener: (context, hostelState) {
+        if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+          final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+          if (hostelId != _lastLoadedHostelId) {
+            _lastLoadedHostelId = hostelId;
+            context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
+          }
         }
-        return const SizedBox.shrink();
       },
+      builder: (context, hostelState) {
+        final hasNoProperty = hostelState is HostelLoaded && hostelState.hostels.isEmpty;
+        if (hasNoProperty) {
+          return _buildNoPropertyPlaceholder();
+        }
+
+        return BlocBuilder<NoticeCubit, NoticeState>(
+          builder: (context, state) {
+            if (state is NoticeInitial || state is NoticeLoading) {
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                itemCount: 8,
+                itemBuilder: (context, index) => const TenantCardSkeleton(),
+              );
+            } else if (state is NoticeLoadError) {
+              return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+            } else if (state is NoticesLoaded) {
+              final notices = state.notices;
+              final announcements = state.announcements;
+              final hasData = notices.isNotEmpty || announcements.isNotEmpty;
+              
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!hasData) _buildEmptyState(),
+                    if (notices.isNotEmpty) ...[
+                      _buildSummaryBox(notices),
+                      SizedBox(height: 24.h),
+                      Text(
+                        'upcoming_vacancies'.tr(),
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkText,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      ...notices.map((n) => _buildNoticeCard(n)),
+                    ],
+                    if (announcements.isNotEmpty) ...[
+                      if (notices.isNotEmpty) SizedBox(height: 32.h),
+                      Text(
+                        'general_notices'.tr(),
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkText,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      ...announcements.map((a) => _buildAnnouncementCard(a)),
+                    ],
+                    SizedBox(height: 80.h),
+                  ],
+                ),
+              );
+            } else if (state is NoticeSubmitting || state is NoticeUpdating || state is NoticeSuccess || state is NoticeUpdateSuccess) {
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                itemCount: 8,
+                itemBuilder: (context, index) => const TenantCardSkeleton(),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildNoPropertyPlaceholder() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 48.h),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(24.r),
+              decoration: BoxDecoration(
+                color: AppColors.primaryBlue.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add_business_rounded,
+                size: 64.sp,
+                color: AppColors.primaryBlue.withValues(alpha: 0.5),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              'add_property_first'.tr(),
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.darkText,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              'start_by_adding_property_desc'.tr(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: AppColors.greyText,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -107,7 +173,7 @@ class _NoticesTabViewState extends State<NoticesTabView> {
           Icon(Icons.event_note_outlined, size: 64.sp, color: Colors.grey[300]),
           SizedBox(height: 16.h),
           Text(
-            'No notices found',
+            'no_notices_found'.tr(),
             style: TextStyle(fontSize: 16.sp, color: AppColors.greyText),
           ),
         ],
@@ -151,12 +217,12 @@ class _NoticesTabViewState extends State<NoticesTabView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Upcoming Vacancies',
+                  'upcoming_vacancies'.tr(),
                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: const Color(0xFFB54708)),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '${notices.length} beds will be free soon. Next vacancy in ${daysToNext >= 0 ? daysToNext : '---'} days.',
+                  'beds_free_soon'.tr(namedArgs: {'count': notices.length.toString(), 'days': daysToNext >= 0 ? daysToNext.toString() : '---'}),
                   style: TextStyle(fontSize: 13.sp, color: const Color(0xFFB54708).withValues(alpha: 0.8)),
                 ),
               ],
@@ -212,7 +278,7 @@ class _NoticesTabViewState extends State<NoticesTabView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            notice.tenantName ?? 'Unknown Tenant',
+                            notice.tenantName ?? 'unknown_tenant'.tr(),
                             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -239,7 +305,7 @@ class _NoticesTabViewState extends State<NoticesTabView> {
                     border: Border.all(color: daysLeft <= 7 ? const Color(0xFFFECDCA) : AppColors.roomCardBorder),
                   ),
                   child: Text(
-                    '$daysLeft days left',
+                    'days_left_label'.tr(namedArgs: {'count': daysLeft.toString()}),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
@@ -258,9 +324,9 @@ class _NoticesTabViewState extends State<NoticesTabView> {
             ),
             child: Row(
               children: [
-                _buildDateColumn('Notice Given', notice.noticeDate ?? notice.createdAt ?? ''),
+                _buildDateColumn('notice_given'.tr(), notice.noticeDate ?? notice.createdAt ?? ''),
                 Container(width: 1, height: 30, color: Colors.grey[200]),
-                _buildDateColumn('Vacating On', notice.vacatingDate),
+                _buildDateColumn('vacating_on'.tr(), notice.vacatingDate),
               ],
             ),
           ),
@@ -332,7 +398,7 @@ class _NoticesTabViewState extends State<NoticesTabView> {
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  'General Notice',
+                  'general_notice'.tr(),
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
@@ -356,14 +422,3 @@ class _NoticesTabViewState extends State<NoticesTabView> {
   }
 }
 
-class DateFormat {
-  final String pattern;
-  DateFormat(this.pattern);
-  String format(DateTime dateTime) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    String day = dateTime.day.toString().padLeft(2, '0');
-    String month = months[dateTime.month - 1];
-    String year = dateTime.year.toString();
-    return "$day $month, $year";
-  }
-}

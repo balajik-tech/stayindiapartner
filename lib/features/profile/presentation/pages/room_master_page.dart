@@ -11,6 +11,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.d
 import 'package:stayindia_owner/features/profile/presentation/widgets/add_room_master_sheet.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class RoomMasterPage extends StatelessWidget {
   const RoomMasterPage({super.key});
@@ -113,13 +114,13 @@ class _RoomMasterViewState extends State<_RoomMasterView>
           final ownerId = context.read<AuthCubit>().currentOwner?.id ?? '';
           if (ownerId.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Owner session expired. Please login again.')),
+              SnackBar(content: Text('owner_session_expired'.tr())),
             );
             return;
           }
           if (hostelId.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No hostel found. Please complete your hostel profile first.')),
+              SnackBar(content: Text('no_hostel_found_profile'.tr())),
             );
             return;
           }
@@ -226,9 +227,9 @@ class _RoomMasterViewState extends State<_RoomMasterView>
                 unselectedLabelColor: Colors.white.withValues(alpha: 0.8),
                 labelStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
                 tabs: [
-                  Tab(text: 'all'.tr()),
-                  Tab(text: 'amenity_ac'.tr()),
-                  Tab(text: 'amenity_non_ac'.tr()),
+                  Tab(text: StringUtils.translate('all', context: context)),
+                  Tab(text: StringUtils.translate('amenity_ac', context: context)),
+                  Tab(text: StringUtils.translate('amenity_non_ac', context: context)),
                 ],
               ),
             ),
@@ -296,7 +297,7 @@ class _RoomMasterCard extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              _getLocalizedRoomTypename(room.roomTypename),
+                              _getLocalizedRoomTypename(context, room.roomTypename),
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
@@ -311,7 +312,7 @@ class _RoomMasterCard extends StatelessWidget {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        _getLocalizedSharingType(room.sharingType),
+                        _getLocalizedSharingType(context, room.sharingType),
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: const Color(0xFF667085),
@@ -356,15 +357,15 @@ class _RoomMasterCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                 _FinanceItem(label: 'rent'.tr(), value: room.rent.toStringAsFixed(0)),
+                 _FinanceItem(label: StringUtils.translate('rent', context: context), value: room.rent.toStringAsFixed(0)),
                  if (room.dailyRent > 0) ...[
                    SizedBox(width: 24.w),
-                   _FinanceItem(label: 'daily'.tr(), value: room.dailyRent.toStringAsFixed(0)),
+                   _FinanceItem(label: StringUtils.translate('daily', context: context), value: room.dailyRent.toStringAsFixed(0)),
                  ],
                  SizedBox(width: 24.w),
-                 _FinanceItem(label: 'deposit'.tr(), value: room.deposit.toStringAsFixed(0)),
+                 _FinanceItem(label: StringUtils.translate('deposit', context: context), value: room.deposit.toStringAsFixed(0)),
                  SizedBox(width: 24.w),
-                 _FinanceItem(label: 'maintenance_short'.tr(), value: room.maintenance.toStringAsFixed(0)),
+                 _FinanceItem(label: StringUtils.translate('maintenance_short', context: context), value: room.maintenance.toStringAsFixed(0)),
               ],
             ),
             SizedBox(height: 20.h),
@@ -373,7 +374,7 @@ class _RoomMasterCard extends StatelessWidget {
                 Expanded(
                   child: _ActionButton(
                     icon: Icons.edit_outlined,
-                    label: 'btn_edit'.tr(),
+                    label: StringUtils.translate('btn_edit', context: context),
                     color: const Color(0xFFF5F8FF),
                     textColor: AppColors.primaryBlue,
                     borderColor: const Color(0xFFD1E0FF),
@@ -419,7 +420,7 @@ class _RoomMasterCard extends StatelessWidget {
                 Expanded(
                   child: _ActionButton(
                     icon: Icons.delete_outline,
-                    label: 'btn_delete'.tr(),
+                    label: StringUtils.translate('btn_delete', context: context),
                     color: const Color(0xFFFFF1F0),
                     textColor: const Color(0xFFF04438),
                     borderColor: const Color(0xFFFEE4E2),
@@ -450,47 +451,47 @@ class _RoomMasterCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('delete_room'.tr()),
-        content: Text('delete_room_confirm'.tr(namedArgs: {'room': _getLocalizedRoomTypename(room.roomTypename)})),
+        title: Text(StringUtils.translate('delete_room', context: context)),
+        content: Text(StringUtils.translate('delete_room_confirm', namedArgs: {'room': _getLocalizedRoomTypename(context, room.roomTypename)}, context: context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('btn_cancel'.tr()),
+            child: Text(StringUtils.translate('btn_cancel', context: context)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               context.read<RoomCubit>().deleteRoom(room.id, isMaster: true);
             },
-            child: Text('btn_delete'.tr(), style: const TextStyle(color: Colors.red)),
+            child: Text(StringUtils.translate('btn_delete', context: context), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
 
-  String _getLocalizedSharingType(String sharing) {
+  String _getLocalizedSharingType(BuildContext context, String sharing) {
     switch (sharing.toUpperCase()) {
-      case 'SINGLE': return 'sharing_single'.tr();
-      case 'DOUBLE': return 'sharing_double'.tr();
-      case 'TRIPLE': return 'sharing_triple'.tr();
-      case 'QUADRUPLE': return 'sharing_quad'.tr();
-      case 'QUINTUPLE': return 'sharing_count'.tr(namedArgs: {'count': '5'});
+      case 'SINGLE': return StringUtils.translate('sharing_single', context: context);
+      case 'DOUBLE': return StringUtils.translate('sharing_double', context: context);
+      case 'TRIPLE': return StringUtils.translate('sharing_triple', context: context);
+      case 'QUADRUPLE': return StringUtils.translate('sharing_quad', context: context);
+      case 'QUINTUPLE': return StringUtils.translate('sharing_count', namedArgs: {'count': '5'}, context: context);
       default: return sharing;
     }
   }
 
-  String _getLocalizedRoomTypename(String name) {
+  String _getLocalizedRoomTypename(BuildContext context, String name) {
     String res = name;
-    res = res.replaceAll('Single Sharing', 'sharing_single'.tr());
-    res = res.replaceAll('2 Sharing', 'sharing_double'.tr());
-    res = res.replaceAll('3 Sharing', 'sharing_triple'.tr());
-    res = res.replaceAll('4 Sharing', 'sharing_quad'.tr());
-    res = res.replaceAll('5 Sharing', 'sharing_count'.tr(namedArgs: {'count': '5'}));
+    res = res.replaceAll('Single Sharing', StringUtils.translate('sharing_single', context: context));
+    res = res.replaceAll('2 Sharing', StringUtils.translate('sharing_double', context: context));
+    res = res.replaceAll('3 Sharing', StringUtils.translate('sharing_triple', context: context));
+    res = res.replaceAll('4 Sharing', StringUtils.translate('sharing_quad', context: context));
+    res = res.replaceAll('5 Sharing', StringUtils.translate('sharing_count', namedArgs: {'count': '5'}, context: context));
     if (res.contains('NON-AC')) {
-      res = res.replaceAll('NON-AC', 'amenity_non_ac'.tr());
+      res = res.replaceAll('NON-AC', StringUtils.translate('amenity_non_ac', context: context));
     } else if (res.contains('AC')) {
-      res = res.replaceAll('AC', 'amenity_ac'.tr());
+      res = res.replaceAll('AC', StringUtils.translate('amenity_ac', context: context));
     }
     return res;
   }
@@ -518,7 +519,7 @@ class _TypeBadge extends StatelessWidget {
           ),
           SizedBox(width: 6.w),
           Text(
-            isAc ? 'amenity_ac'.tr() : 'amenity_non_ac'.tr(),
+            isAc ? StringUtils.translate('amenity_ac', context: context) : StringUtils.translate('amenity_non_ac', context: context),
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,

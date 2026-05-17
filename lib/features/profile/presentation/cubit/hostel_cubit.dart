@@ -1,4 +1,6 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/usecases/hostel_usecases.dart';
 import 'package:stayindia_owner/core/utils/error_handler.dart';
@@ -249,5 +251,17 @@ class HostelCubit extends HydratedCubit<HostelState> {
       };
     }
     return state.toJson();
+  }
+
+  @override
+  String get id {
+    try {
+      final authCubit = GetIt.instance<AuthCubit>();
+      final ownerId = authCubit.currentOwner?.id;
+      if (ownerId != null && ownerId.isNotEmpty) {
+        return '_$ownerId';
+      }
+    } catch (_) {}
+    return '';
   }
 }

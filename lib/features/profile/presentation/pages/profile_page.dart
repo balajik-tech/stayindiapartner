@@ -25,6 +25,9 @@ import 'refer_friend_page.dart';
 import 'announcements_page.dart';
 import 'reports_dashboard_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_conditions_page.dart';
+import 'digital_certificate_page.dart';
+import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -87,7 +90,15 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.card_membership_rounded,
                           title: 'digital_certificate'.tr(),
                           subtitle: 'digital_certificate_sub'.tr(),
-                          onTap: () {},
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (context) => sl<HostelCubit>()..getHostels(),
+                                child: const DigitalCertificatePage(),
+                              ),
+                            ),
+                          ),
                         ),
                       ]),
                       SizedBox(height: 32.h),
@@ -249,6 +260,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           title: 'my_reports'.tr(),
                           subtitle: 'my_reports_sub'.tr(),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportsDashboardPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.local_offer_rounded,
+                          title: 'hostel_offers'.tr(),
+                          subtitle: 'hostel_offers_sub'.tr(),
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const OffersManagementPage())),
                         ),
                       ]),
                       SizedBox(height: 32.h),
@@ -587,14 +604,14 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.w900)),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text('logout_confirm_title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
+        content: Text('logout_confirm_msg'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('cancel'.tr())),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text('logout'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -679,9 +696,10 @@ class _QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BouncingWrapper(
       onTap: onTap,
+      scaleFactor: 0.96,
       child: Container(
         width: 100.w,
-        padding: EdgeInsets.symmetric(vertical: 16.h),
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
@@ -695,15 +713,22 @@ class _QuickActionCard extends StatelessWidget {
           ],
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: AppColors.accentOrange, size: 24.sp),
-            SizedBox(height: 8.h),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
+            SizedBox(height: 6.h),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
             ),
           ],

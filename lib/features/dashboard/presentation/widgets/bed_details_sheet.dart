@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
+import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
+import 'package:stayindia_owner/features/bookings/widgets/qr_scanner_screen.dart';
 
 
 enum BedStatus { free, occupied, notice, away, booked }
@@ -24,6 +30,7 @@ class BedState {
   final List<String>? amenities;
   final String? hostelName;
   final String? hostelAddress;
+  final String? awayReturnDate;
 
   BedState({
     required this.status,
@@ -41,6 +48,7 @@ class BedState {
     this.amenities,
     this.hostelName,
     this.hostelAddress,
+    this.awayReturnDate,
   });
 }
 
@@ -50,14 +58,28 @@ class BedDetailsSheet extends StatelessWidget {
   const BedDetailsSheet({super.key, required this.state});
 
   static void show(BuildContext context, BedState state) {
+    final bookingsCubit = context.read<BookingsCubit>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => BedDetailsSheet(state: state),
+      builder: (context) => BlocProvider.value(
+        value: bookingsCubit,
+        child: BedDetailsSheet(state: state),
+      ),
     );
   }
 
+  String _formatReturnDate(String? rawDate) {
+    if (rawDate == null || rawDate.isEmpty) return 'no_return_date'.tr() == 'no_return_date' ? 'No Return Date Set' : 'no_return_date'.tr();
+    try {
+      final parsed = DateTime.tryParse(rawDate);
+      if (parsed != null) {
+        return DateFormat('dd MMM yyyy').format(parsed);
+      }
+    } catch (_) {}
+    return rawDate;
+  }
 
   Color get _statusColor {
     switch (state.status) {
@@ -95,39 +117,78 @@ class BedDetailsSheet extends StatelessWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double horizontalPadding = screenWidth < 360 ? 16.w : 36.w;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(40.r)),
-      ),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 12.h),
-              Container(
-                width: 50.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(2.r),
+    return BlocConsumer<BookingsCubit, BookingsState>(
+      listener: (context, bookingsState) {
+        if (bookingsState.status == BookingsStatus.success && bookingsState.successMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(bookingsState.successMessage!),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        } else if (bookingsState.status == BookingsStatus.failure && bookingsState.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(bookingsState.errorMessage!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      builder: (context, bookingsState) {
+        final isLoading = bookingsState.status == BookingsStatus.loading;
+
+        return Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(40.r)),
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(height: 12.h),
+                      Container(
+                        width: 50.w,
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE2E8F0),
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                      _buildPassHeader(context),
+                      _buildBrandingSection(context),
+                      _buildQRSection(context),
+                      SizedBox(height: 32.h),
+                      _buildActionRow(context),
+                      SizedBox(height: 32.h),
+                      _buildDoneButton(context),
+                      SizedBox(height: 20.h),
+                    ],
+                  ),
                 ),
               ),
-              _buildPassHeader(context),
-              _buildBrandingSection(),
-              _buildQRSection(context),
-              SizedBox(height: 32.h),
-              _buildActionRow(context),
-              SizedBox(height: 32.h),
-              _buildDoneButton(context),
-              SizedBox(height: 20.h),
-            ],
-          ),
-        ),
-      ),
+            ),
+            if (isLoading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -149,11 +210,11 @@ class BedDetailsSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "BED ${state.bedNumber}".toUpperCase(),
+                  "${'bed'.tr()} ${state.bedNumber}".toUpperCase(),
                   style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: -0.5),
                 ),
                 Text(
-                  state.tenantName ?? "AVAILABLE",
+                  state.tenantName ?? 'available'.tr(),
                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF94A3B8)),
                 ),
               ],
@@ -167,7 +228,7 @@ class BedDetailsSheet extends StatelessWidget {
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4))],
             ),
             child: Text(
-              "ACCESS PASS",
+              'access_pass'.tr(),
               style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
             ),
           ),
@@ -176,15 +237,32 @@ class BedDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildBrandingSection() {
+  Widget _buildBrandingSection(BuildContext context) {
+    String? name = state.hostelName;
+    String? address = state.hostelAddress;
+
+    if (name == null || address == null) {
+      final hostelState = context.read<HostelCubit>().state;
+      if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+        final hostel = hostelState.hostels[hostelState.selectedHostelIndex];
+        name ??= hostel.name;
+        address ??= hostel.address;
+      }
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 32.h),
       child: Column(
         children: [
           Text(
-            (state.hostelName ?? "STAY INDIA").toUpperCase(),
+            (name ?? 'app_name'.tr()).toUpperCase(),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: 1.5),
+            style: TextStyle(
+              fontSize: 24.sp, 
+              fontWeight: FontWeight.w900, 
+              color: const Color(0xFF0F172A), 
+              letterSpacing: 1.5
+            ),
           ),
           SizedBox(height: 8.h),
           Row(
@@ -192,13 +270,17 @@ class BedDetailsSheet extends StatelessWidget {
             children: [
               Icon(Icons.location_on_rounded, color: const Color(0xFFCBD5E1), size: 14.sp),
               SizedBox(width: 4.w),
-              Expanded(
+              Flexible(
                 child: Text(
-                  state.hostelAddress ?? "BANGALORE, INDIA",
+                  address ?? 'india'.tr(),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: const Color(0xFF94A3B8)),
+                  style: TextStyle(
+                    fontSize: 12.sp, 
+                    fontWeight: FontWeight.w600, 
+                    color: const Color(0xFF94A3B8)
+                  ),
                 ),
               ),
             ],
@@ -240,8 +322,32 @@ class BedDetailsSheet extends StatelessWidget {
                   ),
                   SizedBox(height: 24.h),
                   Text(
-                    "SCAN TO CHECK-IN",
+                    'scan_to_checkin'.tr(),
                     style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: statusTextColor, letterSpacing: 1.2),
+                  ),
+                ],
+              )
+            else if (state.status == BedStatus.away)
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 130.r,
+                    height: 130.r,
+                    decoration: BoxDecoration(color: statusBgColor, shape: BoxShape.circle),
+                    child: Center(child: Icon(Icons.directions_walk_rounded, color: statusTextColor, size: 60.sp)),
+                  ),
+                  SizedBox(height: 20.h),
+                  Text(
+                    'AWAY'.toUpperCase(),
+                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: statusTextColor),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    state.awayReturnDate != null
+                        ? "${'returning_on'.tr() == 'returning_on' ? 'Returning On' : 'returning_on'.tr()}: ${_formatReturnDate(state.awayReturnDate)}"
+                        : ('no_return_date'.tr() == 'no_return_date' ? 'No Return Date Set' : 'no_return_date'.tr()),
+                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)),
                   ),
                 ],
               )
@@ -257,8 +363,6 @@ class BedDetailsSheet extends StatelessWidget {
                     eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F172A)),
                     dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Color(0xFF0F172A)),
                   ),
-                  SizedBox(height: 8.h),
-                  _buildGenerateNewBtn(),
                 ],
               ),
             ..._buildCornerAccents(statusColor),
@@ -292,43 +396,67 @@ class BedDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildGenerateNewBtn() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.refresh_rounded, size: 14.sp, color: const Color(0xFF94A3B8)),
-          SizedBox(width: 6.w),
-          Text("GENERATE NEW", style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
+  Widget _buildActionRow(BuildContext context) {
+    final bool isOccupied = state.status != BedStatus.free;
+    
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildActionPillItem('rent'.tr(), "₹${state.rent?.toInt() ?? 0}", _statusTextColor, _statusBgColor),
+        if (isOccupied)
+          _buildActionPillIcon(
+            Icons.exit_to_app_rounded, 
+            'checkout'.tr(), 
+            iconColor: Colors.red,
+            onTap: () => _confirmCheckout(context),
+          )
+        else
+          _buildActionPillIcon(
+            Icons.qr_code_scanner_rounded, 
+            'scan'.tr(), 
+            iconColor: const Color(0xFFFF8600), 
+            onTap: () => _openScanner(context)
+          ),
+        _buildActionPillIcon(Icons.qr_code_rounded, 'qr'.tr(), iconColor: const Color(0xFF2563EB)),
+      ],
+    );
+  }
+
+  void _confirmCheckout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('confirm_checkout'.tr() == 'confirm_checkout' ? 'Confirm Check-out' : 'confirm_checkout'.tr()),
+        content: Text('checkout_confirm_msg'.tr(
+          namedArgs: {'tenant': state.tenantName ?? ('this_tenant'.tr() == 'this_tenant' ? 'this tenant' : 'this_tenant'.tr())},
+        )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('cancel'.tr() == 'cancel' ? 'Cancel' : 'cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<BookingsCubit>().checkoutBooking(state.tenantId ?? '');
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(('checkout'.tr() == 'checkout' ? 'Check-out' : 'checkout'.tr()).toUpperCase()),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildActionRow(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildActionPillItem("RENT", "₹${state.rent?.toInt() ?? 0}", _statusTextColor, _statusBgColor),
-        _buildActionPillIcon(Icons.qr_code_scanner_rounded, "SCAN", iconColor: const Color(0xFFFF8600), onTap: () => _openScanner(context)),
-        _buildActionPillIcon(Icons.qr_code_rounded, "QR", iconColor: const Color(0xFF2563EB)),
-      ],
+  void _openScanner(BuildContext context) async {
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const QRScannerScreen()),
     );
-  }
 
-  void _openScanner(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const _ScannerSheet(),
-    );
+    if (result != null && context.mounted) {
+      context.read<BookingsCubit>().scanBooking(result, hostelId: state.hostelId);
+    }
   }
 
   Widget _buildActionPillItem(String label, String value, Color color, Color bgColor) {
@@ -383,7 +511,7 @@ class BedDetailsSheet extends StatelessWidget {
           children: [
             Icon(Icons.check_circle_outline_rounded, color: _statusTextColor, size: 22.sp),
             SizedBox(width: 12.w),
-            Text("DONE", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+            Text('done'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
           ],
         ),
       ),
@@ -393,93 +521,3 @@ class BedDetailsSheet extends StatelessWidget {
 
 
 
-class _ScannerSheet extends StatefulWidget {
-  const _ScannerSheet();
-  @override
-  State<_ScannerSheet> createState() => _ScannerSheetState();
-}
-
-class _ScannerSheetState extends State<_ScannerSheet> {
-  final MobileScannerController _controller = MobileScannerController();
-  String? _scannedValue;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-      ),
-      child: Column(
-        children: [
-          SizedBox(height: 12.h),
-          Container(
-            width: 50.w, height: 4.h,
-            decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2.r)),
-          ),
-          SizedBox(height: 20.h),
-          Text('SCAN QR CODE',
-              style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-          SizedBox(height: 20.h),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20.r),
-              child: _scannedValue != null
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.check_circle_rounded, color: const Color(0xFF87CEEB), size: 64.sp),
-                          SizedBox(height: 16.h),
-                          Text('Scanned!', style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.w900)),
-                          SizedBox(height: 8.h),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 24.w),
-                            child: Text(_scannedValue!, textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
-                          ),
-                        ],
-                      ),
-                    )
-                  : MobileScanner(
-                      controller: _controller,
-                      onDetect: (capture) {
-                        final barcode = capture.barcodes.firstOrNull;
-                        if (barcode?.rawValue != null && mounted) {
-                          setState(() => _scannedValue = barcode!.rawValue);
-                        }
-                      },
-                    ),
-            ),
-          ),
-          SizedBox(height: 24.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32.w),
-            child: SizedBox(
-              width: double.infinity,
-              height: 54.h,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context, _scannedValue),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF87CEEB),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-                ),
-                child: Text(
-                  _scannedValue != null ? 'CONFIRM' : 'CANCEL',
-                  style: TextStyle(color: const Color(0xFF0F172A), fontSize: 14.sp, fontWeight: FontWeight.w900, letterSpacing: 1),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 32.h),
-        ],
-      ),
-    );
-  }
-}

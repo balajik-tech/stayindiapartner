@@ -68,7 +68,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     final formData = FormData.fromMap({
       'avatar': await MultipartFile.fromFile(image.path),
     });
-    final response = await dio.post(ApiConstants.userProfileImage, data: formData);
+    final response = await dio.patch(ApiConstants.userProfile, data: formData);
     if (response.statusCode == 200 || response.statusCode == 201) {
       final raw = response.data;
       final data = (raw is Map && raw['data'] is Map)

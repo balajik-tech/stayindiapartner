@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,7 +23,7 @@ class ReferFriendPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'refer_friend'.tr(),
+          StringUtils.translate('refer_friend', context: context),
           style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, color: Colors.black),
         ),
       ),
@@ -49,7 +49,7 @@ class ReferFriendPage extends StatelessWidget {
               ),
               SizedBox(height: 40.h),
               Text(
-                'refer_title'.tr(),
+                StringUtils.translate('refer_title', context: context),
                 style: GoogleFonts.dmSans(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w900,
@@ -59,7 +59,7 @@ class ReferFriendPage extends StatelessWidget {
               ),
               SizedBox(height: 12.h),
               Text(
-                'refer_desc'.tr(),
+                StringUtils.translate('refer_desc', context: context),
                 style: GoogleFonts.dmSans(
                   fontSize: 14.sp,
                   color: AppColors.textSecondary,
@@ -93,7 +93,7 @@ class ReferFriendPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'your_referral_code'.tr(),
+                StringUtils.translate('your_referral_code', context: context),
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w800,
@@ -117,7 +117,7 @@ class ReferFriendPage extends StatelessWidget {
             onTap: () {
               Clipboard.setData(ClipboardData(text: code));
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('code_copied'.tr())),
+                SnackBar(content: Text(StringUtils.translate('code_copied', context: context))),
               );
             },
             child: Container(
@@ -130,7 +130,7 @@ class ReferFriendPage extends StatelessWidget {
                 ],
               ),
               child: Text(
-                'copy'.tr(),
+                StringUtils.translate('copy', context: context),
                 style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: AppColors.primaryBlue),
               ),
             ),
@@ -165,7 +165,7 @@ class ReferFriendPage extends StatelessWidget {
                 Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 24.sp),
                 SizedBox(width: 12.w),
                 Text(
-                  'share_whatsapp'.tr(),
+                  StringUtils.translate('share_whatsapp', context: context),
                   style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w800),
                 ),
               ],
@@ -191,7 +191,7 @@ class ReferFriendPage extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                'share_referral_link'.tr(),
+                StringUtils.translate('share_referral_link', context: context),
                 style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w800),
               ),
             ),

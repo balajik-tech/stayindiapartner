@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 
 class AddRoomMasterSheet extends StatefulWidget {
   final RoomDetail? room;
@@ -391,9 +392,9 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                         if (mounted) {
                           setState(() => _isSaving = false);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content:
-                                  Text('Room master with this type already exists.'),
+                                  Text('room_master_exists'.tr()),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -423,7 +424,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                     setState(() => _isSaving = false);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Error: ${e.toString()}'),
+                        content: Text(GlobalErrorMapper.map(e).message),
                         backgroundColor: Colors.red,
                       ),
                     );

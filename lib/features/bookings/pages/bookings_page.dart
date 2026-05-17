@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import '../cubit/bookings_cubit.dart';
 import '../cubit/bookings_state.dart';
@@ -14,6 +14,7 @@ import 'package:stayindia_owner/core/widgets/pattern_background.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:stayindia_owner/core/widgets/responsive_widgets.dart';
 
 class _BookingsPageWithScroll extends StatefulWidget {
   const _BookingsPageWithScroll();
@@ -111,8 +112,8 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                 _buildPowerfulHeader(context, const BookingsState()),
                 Expanded(
                   child: _buildEmptyState(
-                    'add_property_first'.tr(), 
-                    'start_by_adding_property_desc'.tr()
+                    StringUtils.translate('add_property_first', context: context), 
+                    StringUtils.translate('start_by_adding_property_desc', context: context)
                   ),
                 ),
               ],
@@ -129,8 +130,8 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        _buildTabContent(context, state, state.requests, 'no_pending_requests'.tr(), 'new_booking_requests_here'.tr()),
-                        _buildTabContent(context, state, state.checkIns, 'no_active_residents'.tr(), 'manage_residents_subtitle'.tr()),
+                        _buildTabContent(context, state, state.requests, StringUtils.translate('no_pending_requests', context: context), StringUtils.translate('new_booking_requests_here', context: context)),
+                        _buildTabContent(context, state, state.checkIns, StringUtils.translate('no_active_residents', context: context), StringUtils.translate('manage_residents_subtitle', context: context)),
                         _buildHistoryTab(context, state),
                       ],
                     ),
@@ -162,7 +163,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'bookings_title'.tr(),
+                      StringUtils.translate('bookings_title', context: context),
                       style: TextStyle(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w900,
@@ -171,7 +172,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                       ),
                     ),
                     Text(
-                      'bookings_subtitle'.tr(),
+                      StringUtils.translate('bookings_subtitle', context: context),
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.white.withValues(alpha: 0.5),
@@ -185,7 +186,6 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildHeaderAction(Icons.search_rounded, () => setState(() => _isSearching = !_isSearching)),
-                  _buildHeaderAction(Icons.filter_list_rounded, () => _showFilterSheet(context)),
                   _buildHeaderAction(Icons.refresh_rounded, () {
                     final hostelId = context.read<HostelCubit>().state.selectedHostelId;
                     context.read<BookingsCubit>().fetchBookings(hostelId: hostelId);
@@ -242,14 +242,14 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
 
   Widget _buildSegmentedTabs(BookingsState state) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
       padding: EdgeInsets.all(5.w),
       decoration: BoxDecoration(
         color: AppColors.backgroundSecondary,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.border),
       ),
-      child: TabBar(
+      child: ResponsiveTabBar(
         controller: _tabController,
         indicator: BoxDecoration(
           color: AppColors.primaryBlue,
@@ -267,11 +267,10 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
         labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
         unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
         indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Colors.transparent,
         tabs: [
-          _buildTabItem('tab_requests'.tr(), state.requests.length, 0),
-          _buildTabItem('tab_active'.tr(), state.checkIns.length, 1),
-          Tab(text: 'tab_history'.tr()),
+          _buildTabItem(StringUtils.translate('tab_requests', context: context), state.requests.length, 0),
+          _buildTabItem(StringUtils.translate('tab_active', context: context), state.checkIns.length, 1),
+          Tab(text: StringUtils.translate('tab_history', context: context)),
         ],
       ),
     );
@@ -352,7 +351,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
 
   Widget _buildHistoryTab(BuildContext context, BookingsState state) {
     final historyBookings = state.bookings.where((b) => [BookingStatus.cancelled, BookingStatus.checkedOut].contains(b.status)).toList();
-    return _buildTabContent(context, state, historyBookings, 'no_history_found'.tr(), 'history_empty_subtitle'.tr());
+    return _buildTabContent(context, state, historyBookings, StringUtils.translate('no_history_found', context: context), StringUtils.translate('history_empty_subtitle', context: context));
   }
 
   Widget _buildEmptyState(String title, String subtitle) {
@@ -384,151 +383,6 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
           ),
         ],
       ),
-    );
-  }
-
-  void _showFilterSheet(BuildContext context) {
-    final cubit = context.read<BookingsCubit>();
-    String? tempKycStatus = cubit.state.kycStatus;
-    String? tempRoomType = cubit.state.roomType;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Container(
-          decoration: BoxDecoration(
-            color: AppColors.backgroundPrimary,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-          ),
-          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 32.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
-              SizedBox(height: 24.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'filter_bookings'.tr(),
-                    style: TextStyle(
-                      fontSize: 22.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setSheetState(() {
-                        tempKycStatus = null;
-                        tempRoomType = null;
-                      });
-                      cubit.changeFilter(kycStatus: '', roomType: '');
-                      Navigator.pop(context);
-                    },
-                    child: Text('reset'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.accentOrange)),
-                  ),
-                ],
-              ),
-              SizedBox(height: 24.h),
-              _buildFilterSection(
-                'kyc_status'.tr(),
-                ['verified'.tr(), 'pending'.tr()],
-                tempKycStatus,
-                (val) => setSheetState(() => tempKycStatus = val),
-              ),
-              SizedBox(height: 24.h),
-              _buildFilterSection(
-                'room_type'.tr(),
-                ['1 Sharing', '2 Sharing', '3 Sharing'],
-                tempRoomType,
-                (val) => setSheetState(() => tempRoomType = val),
-              ),
-              SizedBox(height: 32.h),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    cubit.changeFilter(
-                      kycStatus: tempKycStatus ?? '',
-                      roomType: tempRoomType ?? '',
-                    );
-                    Navigator.pop(context);
-                  },
-                  child: Text('apply_filters'.tr()),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterSection(
-    String title,
-    List<String> options,
-    String? selectedValue,
-    Function(String?) onSelected,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textSecondary,
-            letterSpacing: 0.5,
-          ),
-        ),
-        SizedBox(height: 12.h),
-        Wrap(
-          spacing: 12.w,
-          runSpacing: 12.h,
-          children: options.map((opt) {
-            final isSelected = selectedValue == opt;
-            return InkWell(
-              onTap: () => onSelected(isSelected ? null : opt),
-              borderRadius: BorderRadius.circular(12.r),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.05) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(
-                    color: isSelected ? AppColors.primaryBlue : AppColors.border,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Text(
-                  opt,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? AppColors.primaryBlue : AppColors.textPrimary,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
     );
   }
 }

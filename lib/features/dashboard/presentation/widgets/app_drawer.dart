@@ -11,6 +11,7 @@ import 'package:stayindia_owner/features/staff/presentation/pages/staff_manageme
 import 'package:stayindia_owner/features/finance/presentation/pages/financial_dashboard_page.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -34,11 +35,11 @@ class AppDrawer extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
               physics: const BouncingScrollPhysics(),
               children: [
-                _buildSectionLabel('PROPERTY'),
+                _buildSectionLabel(StringUtils.translate('property_section', context: context)),
                 _buildPremiumMenuItem(
                   context, 
                   Icons.swap_horiz_rounded, 
-                  'Switch Property',
+                  StringUtils.translate('switch_property', context: context),
                   onTap: () {
                     final authState = context.read<AuthCubit>().state;
                     if (authState is AuthAuthenticated && authState.owner.role != 'owner') {
@@ -51,12 +52,12 @@ class AppDrawer extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 if (hasStaffPerm || hasReportsPerm)
-                  _buildSectionLabel('MANAGEMENT'),
+                  _buildSectionLabel(StringUtils.translate('management_section', context: context)),
                 if (hasStaffPerm)
                   _buildPremiumMenuItem(
                     context, 
                     Icons.people_alt_rounded, 
-                    'Staff Management',
+                    StringUtils.translate('staff_management', context: context),
                     onTap: () {
                       final authState = context.read<AuthCubit>().state;
                       if (authState is AuthAuthenticated && !authState.owner.hasPermission('staff')) {
@@ -74,7 +75,7 @@ class AppDrawer extends StatelessWidget {
                   _buildPremiumMenuItem(
                     context, 
                     Icons.insights_rounded, 
-                    'Financial Insights',
+                    StringUtils.translate('financial_insights', context: context),
                     onTap: () {
                       final authState = context.read<AuthCubit>().state;
                       if (authState is AuthAuthenticated && !authState.owner.hasPermission('reports')) {
@@ -93,15 +94,15 @@ class AppDrawer extends StatelessWidget {
                       );
                     },
                   ),
-                _buildPremiumMenuItem(context, Icons.verified_user_rounded, 'Privacy & Policy'),
-                _buildPremiumMenuItem(context, Icons.help_rounded, 'Help & Support'),
-                _buildPremiumMenuItem(context, Icons.chat_bubble_rounded, 'Feedback'),
+                _buildPremiumMenuItem(context, Icons.verified_user_rounded, StringUtils.translate('privacy_policy', context: context)),
+                _buildPremiumMenuItem(context, Icons.help_rounded, StringUtils.translate('help_support', context: context)),
+                _buildPremiumMenuItem(context, Icons.chat_bubble_rounded, StringUtils.translate('feedback', context: context)),
                 
                 SizedBox(height: 32.h),
-                _buildSectionLabel('APPLICATION'),
-                _buildPremiumMenuItem(context, Icons.share_rounded, 'Share App'),
-                _buildPremiumMenuItem(context, Icons.menu_book_rounded, 'User Manual'),
-                _buildPremiumMenuItem(context, Icons.info_outline_rounded, 'Version 1.0.0'),
+                _buildSectionLabel(StringUtils.translate('application_section', context: context)),
+                _buildPremiumMenuItem(context, Icons.share_rounded, StringUtils.translate('share_app', context: context)),
+                _buildPremiumMenuItem(context, Icons.menu_book_rounded, StringUtils.translate('user_manual', context: context)),
+                _buildPremiumMenuItem(context, Icons.info_outline_rounded, '${StringUtils.translate('version', context: context)} 1.0.0'),
                 
                 SizedBox(height: 40.h),
                 _buildLogoutButton(context),
@@ -230,7 +231,7 @@ class AppDrawer extends StatelessWidget {
         child: InkWell(
           onTap: onTap ?? () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('$title is coming soon!')),
+              SnackBar(content: Text(StringUtils.translate('coming_soon', namedArgs: {'feature': title}, context: context))),
             );
           },
           borderRadius: BorderRadius.circular(10.r),
@@ -284,7 +285,7 @@ class AppDrawer extends StatelessWidget {
                 Icon(Icons.logout_rounded, color: const Color(0xFFEF4444), size: 18.sp),
                 SizedBox(width: 8.w),
                 Text(
-                  'Logout',
+                  StringUtils.translate('logout', context: context),
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -304,17 +305,17 @@ class AppDrawer extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(StringUtils.translate('logout', context: context)),
+        content: Text(StringUtils.translate('logout_confirm_msg', context: context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(StringUtils.translate('cancel', context: context)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(StringUtils.translate('logout', context: context), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -357,7 +358,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 SizedBox(height: 20.h),
                 Text(
-                  'Switch Property',
+                  StringUtils.translate('switch_property', context: context),
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,

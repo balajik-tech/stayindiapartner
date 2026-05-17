@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/utils/date_formatter.dart';
 import '../cubit/bookings_cubit.dart';
@@ -9,6 +10,7 @@ import 'package:stayindia_owner/features/bookings/domain/booking.dart';
 import 'qr_check_in_dialog.dart';
 import 'package:stayindia_owner/features/tenants/presentation/widgets/tenant_details_sheet.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/core/widgets/responsive_widgets.dart';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
@@ -127,9 +129,9 @@ class BookingCard extends StatelessWidget {
                   runSpacing: 8.h,
                   children: [
                     _buildStatusBadge(),
-                    if (isKycPending) _buildKycWarningBadge(),
+                    if (isKycPending) _buildKycWarningBadge(context),
                     if (booking.status != BookingStatus.checkedIn && booking.roomTypeName.isEmpty)
-                      _buildPendingAllocationBadge(),
+                      _buildPendingAllocationBadge(context),
                   ],
                 ),
                 SizedBox(height: 16.h),
@@ -148,7 +150,7 @@ class BookingCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _buildInfoItem(
-                          'Check-in Date',
+                          StringUtils.translate('checkin_date', context: context),
                           DateFormatter.formatISO(booking.checkInDate),
                           Icons.calendar_today_outlined,
                         ),
@@ -161,7 +163,7 @@ class BookingCard extends StatelessWidget {
                       ),
                       Expanded(
                         child: _buildInfoItem(
-                          'Room Type',
+                          StringUtils.translate('room_type', context: context),
                           booking.roomTypeName.isNotEmpty ? booking.roomTypeName : (booking.sharingType ?? 'N/A'),
                           Icons.bed_outlined,
                         ),
@@ -280,7 +282,7 @@ class BookingCard extends StatelessWidget {
     }
   }
 
-  Widget _buildKycWarningBadge() {
+  Widget _buildKycWarningBadge(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
@@ -294,7 +296,7 @@ class BookingCard extends StatelessWidget {
           Icon(Icons.error_outline_rounded, color: const Color(0xFFB54708), size: 12.sp),
           SizedBox(width: 4.w),
           Text(
-            'KYC PENDING',
+            StringUtils.translate('kyc_pending', context: context),
             style: TextStyle(
               color: const Color(0xFFB54708),
               fontSize: 10.sp,
@@ -306,7 +308,7 @@ class BookingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPendingAllocationBadge() {
+  Widget _buildPendingAllocationBadge(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
@@ -320,7 +322,7 @@ class BookingCard extends StatelessWidget {
           Icon(Icons.bed_outlined, color: const Color(0xFFB42318), size: 12.sp),
           SizedBox(width: 4.w),
           Text(
-            'NO BED ASSIGNED',
+            StringUtils.translate('no_bed_assigned', context: context),
             style: TextStyle(
               color: const Color(0xFFB42318),
               fontSize: 10.sp,
@@ -344,7 +346,7 @@ class BookingCard extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            booking.status == BookingStatus.cancelled ? 'BOOKING CANCELLED' : 'STAY COMPLETED',
+            booking.status == BookingStatus.cancelled ? StringUtils.translate('booking_cancelled_status', context: context) : StringUtils.translate('stay_completed', context: context),
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w900,
@@ -357,89 +359,41 @@ class BookingCard extends StatelessWidget {
     }
 
     if (booking.status == BookingStatus.checkedIn) {
-      return Row(
+      return AdaptiveActionRow(
         children: [
-          Expanded(
-            child: _buildActionButton(
-              label: 'Change Room',
-              icon: Icons.bed_outlined,
-              onPressed: () => _navigateToRoomSelection(context),
-              isPrimary: true,
-            ),
+          ResponsiveButton(
+            label: StringUtils.translate('change_room', context: context),
+            icon: Icons.bed_outlined,
+            onPressed: () => _navigateToRoomSelection(context),
+            isPrimary: true,
           ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: _buildActionButton(
-              label: 'Check-out',
-              icon: Icons.logout,
-              onPressed: () => _showCheckoutConfirmation(context),
-              isPrimary: true,
-              isDestructive: true,
-            ),
+          ResponsiveButton(
+            label: StringUtils.translate('checkout', context: context),
+            icon: Icons.logout,
+            onPressed: () => _showCheckoutConfirmation(context),
+            isPrimary: true,
+            isDestructive: true,
           ),
         ],
       );
     }
 
-    
-    return Row(
+    return AdaptiveActionRow(
       children: [
-        Expanded(
-          flex: 2,
-          child: _buildActionButton(
-            label: 'Assign Room',
-            icon: Icons.add_task_rounded,
-            onPressed: () => _showCheckInDialog(context),
-            isPrimary: true,
-          ),
+        ResponsiveButton(
+          label: StringUtils.translate('assign_room', context: context),
+          icon: Icons.add_task_rounded,
+          onPressed: () => _showCheckInDialog(context),
+          isPrimary: true,
         ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: _buildActionButton(
-            label: 'Reject',
-            icon: Icons.close,
-            onPressed: () => _showCancelConfirmation(context),
-            isPrimary: false,
-            isDestructive: true,
-          ),
+        ResponsiveButton(
+          label: StringUtils.translate('reject', context: context),
+          icon: Icons.close,
+          onPressed: () => _showCancelConfirmation(context),
+          isPrimary: false,
+          isDestructive: true,
         ),
       ],
-    );
-  }
-
-  Widget _buildActionButton({
-    required String label,
-    required IconData icon,
-    required VoidCallback onPressed,
-    bool isPrimary = true,
-    bool isDestructive = false,
-  }) {
-    if (isPrimary) {
-      return ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 16.sp),
-        label: Text(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isDestructive ? Colors.redAccent : AppColors.primaryBlue,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-          textStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
-        ),
-      );
-    }
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16.sp),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: isDestructive ? Colors.red.shade700 : AppColors.darkText,
-        side: BorderSide(color: isDestructive ? Colors.red.shade200 : AppColors.roomCardBorder),
-        padding: EdgeInsets.symmetric(vertical: 14.h),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-        textStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
-      ),
     );
   }
 
@@ -474,19 +428,19 @@ class BookingCard extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: const Text('Reject Booking'),
-        content: Text('Are you sure you want to reject ${booking.tenantName}\'s booking request?'),
+        title: Text(StringUtils.translate('reject_booking_title', context: context)),
+        content: Text(StringUtils.translate('reject_booking_confirm', context: context, namedArgs: {'name': booking.tenantName})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(StringUtils.translate('cancel', context: context)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(dialogContext);
               context.read<BookingsCubit>().cancelBooking(booking.id);
             },
-            child: const Text('Reject', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text(StringUtils.translate('reject', context: context), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -498,12 +452,12 @@ class BookingCard extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: const Text('Confirm Check-out'),
-        content: Text('Mark ${booking.tenantName}\'s stay as completed? The bed will be marked as available.'),
+        title: Text(StringUtils.translate('confirm_checkout_title', context: context)),
+        content: Text(StringUtils.translate('confirm_checkout_desc', context: context, namedArgs: {'name': booking.tenantName})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('No'),
+            child: Text(StringUtils.translate('no', context: context)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -514,7 +468,7 @@ class BookingCard extends StatelessWidget {
               backgroundColor: Colors.redAccent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
             ),
-            child: const Text('Check-out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(StringUtils.translate('checkout', context: context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

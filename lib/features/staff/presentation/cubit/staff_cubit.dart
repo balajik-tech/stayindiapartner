@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:stayindia_owner/features/staff/domain/entities/staff.dart';
 import 'package:stayindia_owner/features/staff/domain/usecases/staff_usecases.dart';
 import 'package:stayindia_owner/core/utils/error_helper.dart';
+import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/features/staff/data/datasources/staff_remote_datasource.dart';
 
 part 'staff_state.dart';
 
@@ -44,6 +46,9 @@ class StaffCubit extends Cubit<StaffState> {
     String? password,
     required String role,
     Map<String, dynamic>? permissions,
+    double salary = 0.0,
+    String? photo,
+    Map<String, dynamic>? paymentDetails,
   }) async {
     final current = state is StaffLoaded
         ? (state as StaffLoaded).staffList
@@ -58,6 +63,9 @@ class StaffCubit extends Cubit<StaffState> {
         password: password,
         role: role,
         permissions: permissions,
+        salary: salary,
+        photo: photo,
+        paymentDetails: paymentDetails,
       );
       emit(StaffSuccess());
     } catch (e) {
@@ -91,6 +99,15 @@ class StaffCubit extends Cubit<StaffState> {
     } catch (e) {
       emit(StaffLoaded(staffList: current));
       emit(StaffError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<String?> uploadImage(String filePath) async {
+    try {
+      return await sl<StaffRemoteDataSource>().uploadStaffPhoto(filePath);
+    } catch (e) {
+      emit(StaffError(message: ErrorHelper.toFriendlyMessage(e)));
+      return null;
     }
   }
 

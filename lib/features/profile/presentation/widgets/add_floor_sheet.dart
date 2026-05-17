@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
@@ -69,18 +70,18 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLabel('Floor Identity'),
-                  _buildPremiumTextField(_floorNameController, hint: 'e.g. 3rd Floor'),
+                  _buildLabel('floor_identity'.tr()),
+                  _buildPremiumTextField(_floorNameController, hint: 'floor_name_hint'.tr()),
                   SizedBox(height: 32.h),
                   
                   Text(
-                    'Capacity Configuration',
+                    'capacity_config'.tr(),
                     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
                   ),
                   SizedBox(height: 16.h),
                   
                   _buildCounterRow(
-                    label: 'Total Rooms',
+                    label: 'total_rooms'.tr(),
                     value: _roomCount,
                     onDecrement: () {
                       if (_roomCount > 1) {
@@ -114,7 +115,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Add New Floor',
+            'add_new_floor'.tr(),
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
@@ -248,7 +249,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   
                   if (floorName.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a floor name')),
+                      SnackBar(content: Text('please_enter_floor_name'.tr())),
                     );
                     return;
                   }
@@ -306,7 +307,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                     ),
                   )
                 : Text(
-                    'Create New Floor',
+                    'create_new_floor'.tr(),
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w900,

@@ -10,6 +10,7 @@ abstract class SettingsRemoteDataSource {
   Future<void> updateNotifications(String hostelId, Map<String, dynamic> data);
   Future<void> updateRoomConfiguration(String hostelId, Map<String, dynamic> data);
   Future<void> uploadHostelImages(String hostelId, List<String> filePaths);
+  Future<String> uploadSingleImage(String filePath);
 }
 
 class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
@@ -137,6 +138,28 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
       }
     } catch (e) {
       throw Exception('Error uploading images: $e');
+    }
+  }
+
+  @override
+  Future<String> uploadSingleImage(String filePath) async {
+    try {
+      final formData = FormData.fromMap({
+        'image': await MultipartFile.fromFile(filePath),
+      });
+
+      final response = await dio.post(
+        ApiConstants.offerUploadImage,
+        data: formData,
+      );
+
+      if (response.statusCode == 201) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        return data['imageUrl'] as String;
+      }
+      throw Exception('Failed to upload image');
+    } catch (e) {
+      throw Exception('Error uploading image: $e');
     }
   }
 }

@@ -139,6 +139,10 @@ class CommunityRepositoryImpl implements CommunityRepository {
       );
 
   @override
+  Future<List<Map<String, dynamic>>> searchAssociations(String query) =>
+      remote.searchAssociations(query);
+
+  @override
   Future<void> updateOwnerCommunity({
     required String communityId,
     String? name,

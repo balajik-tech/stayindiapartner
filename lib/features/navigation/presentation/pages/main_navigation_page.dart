@@ -20,8 +20,6 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/owners_community_page.dart';
-import 'package:stayindia_owner/features/communities/presentation/cubit/community_cubit.dart';
-import 'package:stayindia_owner/features/communities/presentation/cubit/owner_community_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/social_feed_cubit.dart';
 import 'package:stayindia_owner/features/notices/presentation/cubit/notice_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_cubit.dart';
@@ -31,13 +29,13 @@ import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
 import 'package:stayindia_owner/features/maintenance/presentation/cubit/maintenance_cubit.dart';
 import 'package:stayindia_owner/features/payments/presentation/cubit/payment_cubit.dart';
-import 'package:stayindia_owner/features/staff/presentation/cubit/staff_cubit.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
 import '../widgets/global_action_sheet.dart';
 import 'package:stayindia_owner/features/profile/presentation/pages/floor_management_page.dart';
+import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
@@ -59,6 +57,16 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     _currentIndex = widget.initialIndex;
     _bookingSubscription = sl<SocketService>().bookingStream.listen(_onNewBooking);
     _noticeSubscription = sl<SocketService>().noticeStream.listen(_onNewNotice);
+    
+    // Set up initial hostel if already loaded
+    final hostelState = context.read<HostelCubit>().state;
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+      _currentHostelId = hostelId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _setupSocket(hostelId);
+      });
+    }
   }
 
   List<Widget> _getPages() {
@@ -190,6 +198,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Register dependency on locale to force rebuild on language changes
+    final currentLocale = context.locale;
+    AppLogger.info('Rebuilding MainNavigationPage with locale: $currentLocale');
+    
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => sl<FinanceCubit>()..loadDashboard()),
@@ -242,18 +254,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
               
               AppLogger.info('Hostel changed to: $hostelId. Syncing data...');
 
-              context.read<CommunityCubit>().loadCommunityData(hostelId);
               _setupSocket(hostelId);
               _currentHostelId = hostelId;
 
               context.read<DashboardCubit>().fetchDashboardData(hostelId);
               context.read<BookingsCubit>().fetchBookings(hostelId: hostelId);
               context.read<TenantCubit>().loadTenants(hostelId);
-              context.read<MaintenanceCubit>().loadIssues(hostelId: hostelId);
-              context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
-              context.read<StaffCubit>().loadStaff(hostelId);
-              context.read<OwnerCommunityCubit>().loadCommunities();
-              context.read<FinanceCubit>().loadDashboard(hostelId: hostelId);
             }
           },
         ),
@@ -394,11 +400,15 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           },
           onAddRoom: () {
           },
-          onAddTenant: () {
-            Navigator.push(
+          onAddTenant: () async {
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const AddTenantPage()),
             );
+            if (!context.mounted) return;
+            if (result == true) {
+              _syncAllData();
+            }
           },
           onRoomMaster: () {
             Navigator.push(
@@ -410,6 +420,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const GuestManagementScreen()),
+            );
+          },
+          onSpecialOffers: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const OffersManagementPage()),
             );
           },
         );
@@ -645,12 +661,18 @@ class _FloatingCommunityButton extends StatelessWidget {
               ),
             ),
             SizedBox(height: 6.h),
-            Text(
-              'community'.tr(),
-              style: TextStyle(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w700,
-                color: isSelected ? const Color(0xFF2C599D) : const Color(0xFF64748B),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'community'.tr(),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? const Color(0xFF2C599D) : const Color(0xFF64748B),
+                  ),
+                ),
               ),
             ),
           ],
@@ -679,38 +701,48 @@ class _NavBarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSelected = currentIndex == index;
     
-    return GestureDetector(
-      onTap: () => onTap(index),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isSelected ? const Color(0xFF2C599D) : const Color(0xFF94A3B8),
-            size: 26.sp,
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            label,
-            style: TextStyle(
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onTap(index),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
               color: isSelected ? const Color(0xFF2C599D) : const Color(0xFF94A3B8),
-              fontSize: 11.sp,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+              size: 26.sp,
             ),
-          ),
-          if (isSelected) ...[
             SizedBox(height: 4.h),
-            Container(
-              width: 5.w,
-              height: 5.w,
-              decoration: const BoxDecoration(
-                color: Color(0xFF2C599D),
-                shape: BoxShape.circle,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: isSelected ? const Color(0xFF2C599D) : const Color(0xFF94A3B8),
+                    fontSize: 11.sp,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  ),
+                ),
               ),
             ),
+            if (isSelected) ...[
+              SizedBox(height: 4.h),
+              Container(
+                width: 5.w,
+                height: 5.w,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2C599D),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

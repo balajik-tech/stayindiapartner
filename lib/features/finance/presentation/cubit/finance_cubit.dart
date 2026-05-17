@@ -1,3 +1,4 @@
+import '../../../../core/error/app_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/finance_usecases.dart';
 import 'finance_state.dart';
@@ -30,7 +31,7 @@ class FinanceCubit extends Cubit<FinanceState> {
     } catch (e) {
       emit(state.copyWith(
         status: FinanceStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: GlobalErrorMapper.map(e).message,
       ));
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +14,7 @@ class GlobalActionSheet extends StatelessWidget {
     required VoidCallback onAddTenant,
     required VoidCallback onRoomMaster,
     required VoidCallback onGuestRequests,
+    required VoidCallback onSpecialOffers,
     bool isMultiSelect = false,
   }) {
     return showModalBottomSheet(
@@ -26,6 +28,7 @@ class GlobalActionSheet extends StatelessWidget {
         onAddTenant: onAddTenant,
         onRoomMaster: onRoomMaster,
         onGuestRequests: onGuestRequests,
+        onSpecialOffers: onSpecialOffers,
         isMultiSelect: isMultiSelect,
       ),
     );
@@ -44,6 +47,7 @@ class GlobalActionSheetContent extends StatelessWidget {
   final VoidCallback onAddTenant;
   final VoidCallback onRoomMaster;
   final VoidCallback onGuestRequests;
+  final VoidCallback onSpecialOffers;
   final bool isMultiSelect;
 
   const GlobalActionSheetContent({
@@ -54,6 +58,7 @@ class GlobalActionSheetContent extends StatelessWidget {
     required this.onAddTenant,
     required this.onRoomMaster,
     required this.onGuestRequests,
+    required this.onSpecialOffers,
     this.isMultiSelect = false,
   });
 
@@ -91,8 +96,8 @@ class GlobalActionSheetContent extends StatelessWidget {
           _buildActionItem(
             context,
             icon: Icons.store_rounded,
-            title: 'New Property',
-            subtitle: 'Onboard your new hostel/PG',
+            title: 'new_property'.tr(),
+            subtitle: 'new_property_sub'.tr(),
             onTap: () {
               Navigator.pop(context);
               onNewProperty();
@@ -103,8 +108,8 @@ class GlobalActionSheetContent extends StatelessWidget {
             _buildActionItem(
               context,
               icon: Icons.layers_rounded,
-              title: 'Add New Floor and Rooms',
-              subtitle: 'Expand your existing building',
+              title: 'add_new_floor_rooms'.tr(),
+              subtitle: 'add_new_floor_rooms_sub'.tr(),
               onTap: () {
                 Navigator.pop(context);
                 onAddFloor();
@@ -114,8 +119,8 @@ class GlobalActionSheetContent extends StatelessWidget {
             _buildActionItem(
               context,
               icon: Icons.person_add_rounded,
-              title: 'Add Tenant',
-              subtitle: 'Quick tenant check-in flow',
+              title: 'add_tenant'.tr(),
+              subtitle: 'add_tenant_sub'.tr(),
               onTap: () {
                 Navigator.pop(context);
                 onAddTenant();
@@ -125,8 +130,8 @@ class GlobalActionSheetContent extends StatelessWidget {
             _buildActionItem(
               context,
               icon: Icons.door_front_door_rounded,
-              title: 'Room Master',
-              subtitle: 'Manage room types and pricing',
+              title: 'room_master'.tr(),
+              subtitle: 'room_master_sub'.tr(),
               onTap: () {
                 Navigator.pop(context);
                 onRoomMaster();
@@ -135,12 +140,12 @@ class GlobalActionSheetContent extends StatelessWidget {
             SizedBox(height: 12.h),
             _buildActionItem(
               context,
-              icon: Icons.group_add_rounded,
-              title: 'Guest Requests',
-              subtitle: 'Manage temporary guest stay requests',
+              icon: Icons.local_offer_rounded,
+              title: 'hostel_offers'.tr(),
+              subtitle: 'hostel_offers_sub'.tr(),
               onTap: () {
                 Navigator.pop(context);
-                onGuestRequests();
+                onSpecialOffers();
               },
             ),
           ],

@@ -12,6 +12,7 @@ import 'package:stayindia_owner/features/auth/domain/usecases/request_otp_usecas
 import 'package:stayindia_owner/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
+import 'package:stayindia_owner/core/services/cache_service.dart';
 
 class MockRequestOtpUseCase extends Mock implements RequestOtpUseCase {}
 class MockVerifyOtpUseCase extends Mock implements VerifyOtpUseCase {}
@@ -22,6 +23,7 @@ class MockHasActiveSessionUseCase extends Mock implements HasActiveSessionUseCas
 class MockDeleteAccountUseCase extends Mock implements DeleteAccountUseCase {}
 class MockAuthRepository extends Mock implements AuthRepository {}
 class MockNotificationService extends Mock implements NotificationService {}
+class MockCacheService extends Mock implements CacheService {}
 
 void main() {
   late AuthCubit authCubit;
@@ -34,6 +36,7 @@ void main() {
   late MockDeleteAccountUseCase mockDeleteAccount;
   late MockAuthRepository mockAuthRepository;
   late MockNotificationService mockNotificationService;
+  late MockCacheService mockCacheService;
 
   setUp(() {
     mockRequestOtp = MockRequestOtpUseCase();
@@ -45,6 +48,7 @@ void main() {
     mockDeleteAccount = MockDeleteAccountUseCase();
     mockAuthRepository = MockAuthRepository();
     mockNotificationService = MockNotificationService();
+    mockCacheService = MockCacheService();
 
     authCubit = AuthCubit(
       requestOtpUseCase: mockRequestOtp,
@@ -56,6 +60,7 @@ void main() {
       deleteAccountUseCase: mockDeleteAccount,
       repository: mockAuthRepository,
       notificationService: mockNotificationService,
+      cacheService: mockCacheService,
     );
   });
 
@@ -126,6 +131,23 @@ void main() {
         AuthLoading(),
         isA<AuthError>(),
       ],
+    );
+  });
+
+  group('logout', () {
+    blocTest<AuthCubit, AuthState>(
+      'calls logout usecase and cacheService, then emits [AuthUnauthenticated]',
+      build: () {
+        when(() => mockLogout()).thenAnswer((_) async => {});
+        when(() => mockCacheService.flushAllCache()).thenAnswer((_) async => {});
+        return authCubit;
+      },
+      act: (cubit) => cubit.logout(),
+      expect: () => [AuthUnauthenticated()],
+      verify: (_) {
+        verify(() => mockLogout()).called(1);
+        verify(() => mockCacheService.flushAllCache()).called(1);
+      },
     );
   });
 }

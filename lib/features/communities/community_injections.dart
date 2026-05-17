@@ -38,6 +38,7 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerFactory(
     () => AssociationCubit(
       getAssociationsUseCase: sl(),
+      searchAssociationsUseCase: sl(),
       joinAssociationUseCase: sl(),
       createAssociationUseCase: sl(),
       profileCubit: sl(),
@@ -73,6 +74,7 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetCommunityInfoUseCase(sl()));
   sl.registerLazySingleton(() => UpdateOwnerCommunityUseCase(sl()));
   sl.registerLazySingleton(() => GetAssociationsUseCase(sl()));
+  sl.registerLazySingleton(() => SearchAssociationsUseCase(sl()));
   sl.registerLazySingleton(() => JoinAssociationUseCase(sl()));
   sl.registerLazySingleton(() => CreateAssociationUseCase(sl()));
   sl.registerLazySingleton(() => GetSocialFeedUseCase(sl()));

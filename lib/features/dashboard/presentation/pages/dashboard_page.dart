@@ -4,10 +4,10 @@ import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/floor_filter.dart';
@@ -21,6 +21,7 @@ import '../widgets/staff_dashboard_view.dart';
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
+import 'package:stayindia_owner/features/bookings/pages/room_selection_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final String? hostelId;
@@ -43,6 +44,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
   StreamSubscription? _refreshSubscription;
   StreamSubscription? _bookingSubscription;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -55,12 +57,12 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       final socketService = sl<SocketService>();
       _refreshSubscription = socketService.dashboardRefreshStream.listen((data) {
         if (mounted) {
-          _refreshData();
+          _debouncedRefreshData();
         }
       });
       _bookingSubscription = socketService.bookingStream.listen((data) {
         if (mounted) {
-          _refreshData();
+          _debouncedRefreshData();
         }
       });
     } catch (e) {
@@ -68,10 +70,19 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     }
   }
 
+  void _debouncedRefreshData() {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        _refreshData();
+      }
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _refreshData();
+      _debouncedRefreshData();
     }
   }
 
@@ -80,6 +91,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     WidgetsBinding.instance.removeObserver(this);
     _refreshSubscription?.cancel();
     _bookingSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -87,21 +99,25 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     final hostelCubit = context.read<HostelCubit>();
     final hostelState = hostelCubit.state;
     
-    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+    if (hostelState is HostelLoaded) {
+      if (hostelState.hostels.isNotEmpty) {
+        final hasEmptyIds = hostelState.hostels.any((h) => h.id.isEmpty);
+        if (hasEmptyIds) {
+          hostelCubit.getHostels(forceRefresh: true);
+          return;
+        }
 
-      final hasEmptyIds = hostelState.hostels.any((h) => h.id.isEmpty);
-      if (hasEmptyIds) {
-        hostelCubit.getHostels(forceRefresh: true);
-        return;
-      }
-
-      final selectedIds = hostelState.selectedHostelIndices
-          .where((i) => i < hostelState.hostels.length)
-          .map((i) => hostelState.hostels[i].id)
-          .join(',');
-      
-      if (selectedIds.isNotEmpty) {
-        context.read<DashboardCubit>().fetchDashboardData(selectedIds);
+        final selectedIds = hostelState.selectedHostelIndices
+            .where((i) => i < hostelState.hostels.length)
+            .map((i) => hostelState.hostels[i].id)
+            .join(',');
+        
+        if (selectedIds.isNotEmpty) {
+          context.read<DashboardCubit>().fetchDashboardData(selectedIds);
+        }
+      } else {
+        // Reset dashboard data when no properties exist
+        context.read<DashboardCubit>().reset();
       }
     } else {
       hostelCubit.getHostels();
@@ -140,10 +156,34 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
               ),
               BlocListener<BookingsCubit, BookingsState>(
                 listenWhen: (prev, curr) => 
-                  prev.status != BookingsStatus.success && curr.status == BookingsStatus.success && 
-                  curr.successMessage != null,
+                  (prev.status != BookingsStatus.success && curr.status == BookingsStatus.success && curr.successMessage != null) ||
+                  (prev.scannedBooking == null && curr.scannedBooking != null),
                 listener: (context, state) {
-                  _refreshData();
+                  if (state.successMessage != null) {
+                    _refreshData();
+                  }
+                  
+                  if (state.scannedBooking != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<BookingsCubit>(),
+                          child: RoomSelectionPage(
+                            bookingId: state.scannedBooking!.bookingId,
+                            hostelId: state.scannedBooking!.hostelId,
+                            tenantName: state.scannedBooking!.tenantName,
+                            preAllocatedRoomId: state.scannedBooking!.roomId,
+                            preAllocatedBedNumber: state.scannedBooking!.bedNumber,
+                          ),
+                        ),
+                      ),
+                    ).then((_) {
+                      if (context.mounted) {
+                        context.read<BookingsCubit>().clearScannedBooking();
+                      }
+                    });
+                  }
                 },
               ),
             ],
@@ -152,7 +192,6 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
               color: AppColors.primaryBlue,
               displacement: 40,
               child: BlocBuilder<DashboardCubit, DashboardState>(
-                buildWhen: (prev, curr) => prev is DashboardLoading != curr is DashboardLoading,
                 builder: (context, state) {
                   if (state is DashboardLoading) {
                     return const DashboardShimmer();
@@ -177,9 +216,15 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                               prev.selectedFloorIndex != curr.selectedFloorIndex || 
                               (prev is DashboardLoaded && curr is DashboardLoaded && prev.data.occupancy != curr.data.occupancy),
                             builder: (context, state) {
-                              List<String> floors = ['all_floors'.tr()];
+                              List<String> floors = [StringUtils.translate('all_floors', context: context)];
                               if (state is DashboardLoaded) {
-                                floors.addAll(state.data.occupancy.floors.map((e) => e.floorName));
+                                floors.addAll(state.data.occupancy.floors.map((e) => 
+                                   StringUtils.translate(
+                                     e.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                                     context: context,
+                                     namedArgs: {'n': '${e.floorNum ?? 0}'},
+                                   )
+                                 ));
                               }
                               return FloorFilter(
                                 floors: floors,

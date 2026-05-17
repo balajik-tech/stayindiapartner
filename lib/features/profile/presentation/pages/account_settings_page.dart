@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -115,9 +116,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             _currentProfile = state.profile;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.green),
+            SnackBar(content: Text('update_success'.tr()), backgroundColor: Colors.green),
           );
-          context.read<AuthCubit>().restoreSession();
+          context.read<AuthCubit>().refreshProfile();
+          Navigator.pop(context);
         }
         if (state is ProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -151,41 +153,41 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         children: [
                           _buildAnimatedHeader(profile),
                           SizedBox(height: 32.h),
-                          _buildSectionLabel('PERSONAL INFORMATION'),
+                          _buildSectionLabel('personal_info'.tr().toUpperCase()),
                           _buildEditableBlock([
                             _EditableRow(
-                              label: 'First Name',
+                              label: 'first_name'.tr(),
                               value: _firstNameController.text,
                               icon: Icons.person_rounded,
-                              onTap: () => _showEditSheet('First Name', _firstNameController),
+                              onTap: () => _showEditSheet('first_name'.tr(), _firstNameController),
                             ),
                             _EditableRow(
-                              label: 'Last Name',
+                              label: 'last_name'.tr(),
                               value: _lastNameController.text,
                               icon: Icons.person_rounded,
-                              onTap: () => _showEditSheet('Last Name', _lastNameController),
+                              onTap: () => _showEditSheet('last_name'.tr(), _lastNameController),
                             ),
                             _EditableRow(
-                              label: 'Phone Number',
+                              label: 'phone_number'.tr(),
                               value: '+91 ${_phoneController.text}',
                               icon: Icons.phone_rounded,
                               isLocked: true,
                             ),
                             _EditableRow(
-                              label: 'Email Address',
+                              label: 'email_address'.tr(),
                               value: _emailController.text,
                               icon: Icons.email_rounded,
-                              onTap: () => _showEditSheet('Email Address', _emailController, inputType: TextInputType.emailAddress),
+                              onTap: () => _showEditSheet('email_address'.tr(), _emailController, inputType: TextInputType.emailAddress),
                             ),
                           ]),
                           SizedBox(height: 24.h),
-                          _buildSectionLabel('ADDRESS'),
+                          _buildSectionLabel('address'.tr().toUpperCase()),
                           _buildEditableBlock([
                             _EditableRow(
-                              label: 'Current Address',
+                              label: 'current_address'.tr(),
                               value: _addressController.text,
                               icon: Icons.location_on_rounded,
-                              onTap: () => _showEditSheet('Address', _addressController, isLongText: true),
+                              onTap: () => _showEditSheet('address'.tr(), _addressController, isLongText: true),
                             ),
                           ]),
                           SizedBox(height: 32.h),
@@ -219,7 +221,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        'Account Settings',
+        'account_settings'.tr(),
         style: TextStyle(
           color: AppColors.darkText,
           fontSize: 18.sp,
@@ -371,7 +373,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         ),
         child: isUpdating
             ? SizedBox(height: 24.h, width: 24.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-            : Text('Save Changes', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+            : Text('save_changes'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white)),
       ),
     );
   }
@@ -381,7 +383,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       child: TextButton(
         onPressed: _confirmDelete,
         child: Text(
-          'Delete My Account',
+          'delete_my_account'.tr(),
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,
@@ -397,14 +399,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w900)),
-        content: const Text('This action is permanent and all your data will be lost forever. Confirm?'),
+        title: Text('delete_account'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
+        content: Text('delete_account_confirm'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('cancel'.tr())),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete Permanently', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text('delete_permanently'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -438,7 +440,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             Center(child: Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2.r)))),
             SizedBox(height: 24.h),
             Text(
-              'Update $title',
+              'update_field'.tr(namedArgs: {'field': title}),
               style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
             ),
             SizedBox(height: 16.h),
@@ -466,7 +468,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 minimumSize: Size(double.infinity, 56.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
               ),
-              child: const Text('Confirm', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text('confirm'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -544,7 +546,7 @@ class _EditableRowState extends State<_EditableRow> with SingleTickerProviderSta
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      widget.value.isEmpty ? 'Not set' : widget.value,
+                      widget.value.isEmpty ? 'not_set'.tr() : widget.value,
                       style: TextStyle(
                         fontSize: 15.sp, 
                         fontWeight: FontWeight.w700, 
@@ -554,7 +556,7 @@ class _EditableRowState extends State<_EditableRow> with SingleTickerProviderSta
                     if (widget.isLocked)
                       Padding(
                         padding: EdgeInsets.only(top: 2.h),
-                        child: Text('Cannot be changed', style: TextStyle(fontSize: 10.sp, color: Colors.orange.shade700, fontWeight: FontWeight.bold)),
+                        child: Text('cannot_be_changed'.tr(), style: TextStyle(fontSize: 10.sp, color: Colors.orange.shade700, fontWeight: FontWeight.bold)),
                       ),
                   ],
                 ),

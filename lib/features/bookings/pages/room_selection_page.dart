@@ -8,6 +8,7 @@ import 'package:stayindia_owner/features/dashboard/data/models/occupancy_model.d
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/floor_filter.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/floor_accordion.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/room_card.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import '../cubit/bookings_cubit.dart';
 import '../cubit/bookings_state.dart';
 
@@ -135,8 +136,14 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
 
           final occupancyModel = state.occupancy as OccupancyModel;
           final floorNames = [
-            'All Floors',
-            ...occupancyModel.floors.map((f) => f.floorName)
+            StringUtils.translate('all_floors', context: context),
+            ...occupancyModel.floors.map((f) => 
+               StringUtils.translate(
+                 f.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                 context: context,
+                 namedArgs: {'n': '${f.floorNum ?? 0}'},
+               )
+            )
           ];
 
           return Stack(
@@ -193,31 +200,40 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
       itemBuilder: (context, index) {
         final floor = filteredFloors[index];
         return FloorAccordion(
-          title: floor.floorName,
-          bedInfo: floor.bedInfo,
+          title: StringUtils.translate(
+            floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+            context: context,
+            namedArgs: {'n': '${floor.floorNum ?? 0}'},
+          ),
+          bedInfo: StringUtils.translate(
+            'beds_free_count',
+            context: context,
+            namedArgs: {
+              'free': '${floor.freeBeds ?? 0}', 
+              'total': '${floor.totalBeds ?? 0}'
+            },
+          ),
           isInitialExpanded: _selectedFloorIndex != 0,
-          rooms: floor.rooms
-              .map(
-                (room) {
-                  final isPreAllocatedRoom = room.id == widget.preAllocatedRoomId;
-                  return RoomCard(
-                    room: room,
-                    id: room.id,
-                    roomNumber: room.roomNumber,
-                    sharingType: room.sharingType,
-                    occupancy: room.occupancy,
-                    beds: room.beds,
-                    rent: room.rent,
-                    dailyRent: room.dailyRent,
-                    onBedTap: (roomNumber, bedNumber) {
-                      _showConfirmationDialog(context, room, bedNumber);
-                    },
-                    isPreAllocated: isPreAllocatedRoom,
-                    preAllocatedBedNumber: isPreAllocatedRoom ? widget.preAllocatedBedNumber : null,
-                  );
-                },
-              )
-              .toList(),
+          itemCount: floor.rooms.length,
+          itemBuilder: (context, i) {
+            final room = floor.rooms[i];
+            final isPreAllocatedRoom = room.id == widget.preAllocatedRoomId;
+            return RoomCard(
+              room: room,
+              id: room.id,
+              roomNumber: room.roomNumber,
+              sharingType: room.sharingType,
+              occupancy: room.occupancy,
+              beds: room.beds,
+              rent: room.rent,
+              dailyRent: room.dailyRent,
+              onBedTap: (roomNumber, bedNumber) {
+                _showConfirmationDialog(context, room, bedNumber);
+              },
+              isPreAllocated: isPreAllocatedRoom,
+              preAllocatedBedNumber: isPreAllocatedRoom ? widget.preAllocatedBedNumber : null,
+            );
+          },
         );
       },
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,7 +43,7 @@ class SetupSuccessScreen extends StatelessWidget {
               ),
               SizedBox(height: 48.h),
               Text(
-                'Property Setup Complete!',
+                'property_setup_complete'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 26.sp,
@@ -53,7 +54,7 @@ class SetupSuccessScreen extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Your property and rooms have been created. You are ready to start managing your tenants and rooms.',
+                'property_setup_complete_sub'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15.sp,
@@ -70,7 +71,7 @@ class SetupSuccessScreen extends StatelessWidget {
                   context.read<PropertySetupCubit>().resetState();
                   Navigator.pop(context);
                 },
-                text: 'Go to Dashboard',
+                text: 'go_to_dashboard'.tr(),
               ),
               SizedBox(height: 24.h),
             ],

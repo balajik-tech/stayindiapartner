@@ -1,6 +1,4 @@
-
 class ApiConstants {
-  static const String _androidUrl = 'https://api.koushiksoftwaresolutions.online/api/v1';
 
   static const String _prodUrl = 'https://api.koushiksoftwaresolutions.online/api/v1';
 
@@ -68,6 +66,7 @@ class ApiConstants {
 
   static const String announcements = '/announcements';
   static const String associations = '/associations';
+  static const String associationsSearch = '/associations/search';
   static const String sos = '/sos';
   static const String socialPosts = '/posts';
 
@@ -76,6 +75,7 @@ class ApiConstants {
   static const String notices = '/notices';
   static const String notifications = '/notifications';
   static const String offers = '/offers';
+  static const String offerUploadImage = '/offers/upload';
   static const String payments = '/payments';
   static const String paymentPay = '/payments';
   static const String paymentRemind = '/payments';
@@ -111,7 +111,7 @@ class ApiConstants {
   static const String userProfile = '/users/profile';
   static const String userCompleteProfile = '/users/complete-profile';
   static const String userDeleteAccount = '/users/delete-account';
-  static const String userProfileImage = '/users/profile-image';
+  static const String userProfileImage = '/users/profile';
   static const String userAcceptPolicy = '/users/accept-policy';
 
   static const String userHostels = '/users/hostels';

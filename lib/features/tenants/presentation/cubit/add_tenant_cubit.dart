@@ -86,6 +86,7 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     required double rent,
     String? firstName,
     String? lastName,
+    String? sharingType,
     double? deposit,
     required DateTime startDate,
   }) async {
@@ -99,7 +100,8 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         rent: rent,
         firstName: firstName,
         lastName: lastName,
-        startDate: startDate.toIso8601String(),
+        sharingType: sharingType,
+        startDate: "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}",
         deposit: deposit,
       );
       emit(AddTenantSuccess());

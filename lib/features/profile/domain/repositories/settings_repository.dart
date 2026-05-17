@@ -8,4 +8,5 @@ abstract class SettingsRepository {
   Future<void> updateNotifications(String hostelId, Map<String, dynamic> data);
   Future<void> updateRoomConfiguration(String hostelId, Map<String, dynamic> data);
   Future<void> uploadHostelImages(String hostelId, List<String> filePaths);
+  Future<String> uploadSingleImage(String filePath);
 }

@@ -1,17 +1,20 @@
 class FoodItem {
-  final String name;
-  final String desc;
+  final Map<String, String> name;
+  final Map<String, String> desc;
   final double price;
   final bool isVeg;
   final bool isActive;
 
   FoodItem({
     required this.name,
-    this.desc = '',
+    this.desc = const {},
     this.price = 0.0,
     this.isVeg = true,
     this.isActive = true,
   });
+
+  String getName(String locale) => name[locale] ?? name['en'] ?? '';
+  String getDesc(String locale) => desc[locale] ?? desc['en'] ?? '';
 }
 
 class FoodMenu {

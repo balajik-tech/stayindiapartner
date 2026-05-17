@@ -325,6 +325,8 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
+                          cacheWidth: 200,
+                          cacheHeight: 200,
                         ),
                       ),
                     ),

@@ -57,6 +57,7 @@ abstract class CommunityRemoteDataSource {
     String? description,
     String? imagePath,
   });
+  Future<List<Map<String, dynamic>>> searchAssociations(String query);
   Future<void> updateOwnerCommunity({
     required String communityId,
     String? name,
@@ -402,6 +403,20 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
       return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
     }
     throw Exception('Failed to fetch associations');
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> searchAssociations(String query) async {
+    AppLogger.info('Searching associations: $query');
+    final response = await _dio.get(
+      ApiConstants.associationsSearch,
+      queryParameters: {'query': query},
+    );
+    
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+    }
+    throw Exception('Failed to search associations');
   }
 
   @override

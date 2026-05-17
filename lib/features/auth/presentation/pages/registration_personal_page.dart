@@ -96,9 +96,13 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
       );
 
       if (croppedFile != null) {
-        setState(() {
-          _selectedImage = File(croppedFile.path);
-        });
+        final file = File(croppedFile.path);
+        // Guard: verify file actually exists before setting state
+        if (file.existsSync()) {
+          setState(() {
+            _selectedImage = file;
+          });
+        }
       }
     }
   }
@@ -295,7 +299,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
                     child: CircleAvatar(
                       radius: 54.r,
                       backgroundColor: Colors.white,
-                      backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
+                      backgroundImage: _selectedImage != null ? ResizeImage(FileImage(_selectedImage!), width: 220, height: 220) : null,
                       child: _selectedImage == null
                           ? Icon(Icons.person_rounded, size: 54.sp, color: Colors.grey.shade200)
                           : null,
@@ -483,8 +487,37 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
       }
     } catch (e) {
       if (mounted) {
+        String errMsg = e.toString();
+        if (errMsg.startsWith('Exception: ')) {
+          errMsg = errMsg.substring(11);
+        }
+        
+        SnackBarAction? action;
+        if (e.toString().contains('Location services are disabled')) {
+          action = SnackBarAction(
+            label: 'Enable',
+            textColor: Colors.white,
+            onPressed: () async {
+              await Geolocator.openLocationSettings();
+            },
+          );
+        } else if (e.toString().contains('permissions are denied') || e.toString().contains('permanently denied')) {
+          action = SnackBarAction(
+            label: 'Settings',
+            textColor: Colors.white,
+            onPressed: () async {
+              await Geolocator.openAppSettings();
+            },
+          );
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to fetch location: $e')),
+          SnackBar(
+            content: Text('Failed to fetch location: $errMsg'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.primaryBlue,
+            action: action,
+          ),
         );
       }
     } finally {

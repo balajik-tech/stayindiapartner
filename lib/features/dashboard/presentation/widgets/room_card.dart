@@ -88,7 +88,11 @@ class _RoomCardState extends State<RoomCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.room.floorName?.toUpperCase() ?? 'GROUND FLOOR',
+                        StringUtils.translate(
+                          widget.room.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                          context: context,
+                          namedArgs: {'n': widget.room.floorName?.replaceAll('floor_', '') ?? '0'},
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -121,7 +125,7 @@ class _RoomCardState extends State<RoomCard> {
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
-                              widget.roomType?.toUpperCase() ?? 'AC',
+                              StringUtils.translate(widget.roomType?.toLowerCase() ?? 'ac', context: context),
                               style: TextStyle(
                                 fontSize: 8.sp,
                                 fontWeight: FontWeight.w700,
@@ -142,7 +146,7 @@ class _RoomCardState extends State<RoomCard> {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
-                    StringUtils.formatSharingType(widget.sharingType),
+                    StringUtils.formatSharingType(widget.sharingType, context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -158,8 +162,8 @@ class _RoomCardState extends State<RoomCard> {
               SizedBox(height: 8.h),
               Text(
                 widget.rent != null && widget.rent! > 0
-                    ? '₹${widget.rent!.toInt()}/mo'
-                    : '₹${widget.dailyRent!.toInt()}/day',
+                    ? '₹${widget.rent!.toInt()}${StringUtils.translate('price_per_month', context: context)}'
+                    : '₹${widget.dailyRent!.toInt()}${StringUtils.translate('daily_rate', context: context)}',
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w900,
@@ -176,7 +180,11 @@ class _RoomCardState extends State<RoomCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.room.floorName?.toUpperCase() ?? 'GROUND FLOOR',
+                        StringUtils.translate(
+                          widget.room.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                          context: context,
+                          namedArgs: {'n': widget.room.floorName?.replaceAll('floor_', '') ?? '0'},
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -209,7 +217,7 @@ class _RoomCardState extends State<RoomCard> {
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
-                              widget.roomType?.toUpperCase() ?? 'AC',
+                              StringUtils.translate(widget.roomType?.toLowerCase() ?? 'ac', context: context),
                               style: TextStyle(
                                 fontSize: 8.sp,
                                 fontWeight: FontWeight.w700,
@@ -229,7 +237,7 @@ class _RoomCardState extends State<RoomCard> {
                   children: [
                     if (widget.rent != null && widget.rent! > 0) ...[
                       Text(
-                        '₹${widget.rent!.toInt()}/mo',
+                        '₹${widget.rent!.toInt()}${StringUtils.translate('per_month', context: context)}',
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w900,
@@ -239,7 +247,7 @@ class _RoomCardState extends State<RoomCard> {
                       SizedBox(width: 8.w),
                     ] else if (widget.dailyRent != null && widget.dailyRent! > 0) ...[
                       Text(
-                        '₹${widget.dailyRent!.toInt()}/day',
+                        '₹${widget.dailyRent!.toInt()}${StringUtils.translate('per_day', context: context)}',
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w900,
@@ -291,10 +299,12 @@ class _RoomCardState extends State<RoomCard> {
   Widget _buildBedItem(BuildContext context, entity.BedInfo bed) {
     return BedCard(
       bedNumber: bed.bedNumber,
-      status: bed.isAway ? 'AWAY' : bed.status,
+      status: bed.status,
+      isAwayField: bed.isAway,
       tenantName: bed.tenantName,
       tenantAvatar: bed.tenantAvatar,
       isSelected: widget.isPreAllocated && bed.bedNumber == widget.preAllocatedBedNumber,
+      isSmall: widget.isGridView,
       onTap: () {
         final bedStatus = _mapStatus(bed.status);
         
@@ -320,6 +330,7 @@ class _RoomCardState extends State<RoomCard> {
             dailyRent: widget.dailyRent,
             maintenance: widget.room.maintenance,
             amenities: widget.room.features,
+            awayReturnDate: bed.awayReturnDate,
           ),
         );
       },

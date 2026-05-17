@@ -292,6 +292,7 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
     return BedCard(
       bedNumber: bed.bedNumber,
       status: bed.status,
+      isAwayField: bed.isAway,
       tenantName: bed.tenantName,
       tenantAvatar: bed.tenantAvatar,
       isSelected: isSelected,
@@ -365,6 +366,7 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                       tenantId: bed.tenantId,
                       hostelId: widget.hostelId,
                       roomNumber: widget.room.roomNumber,
+                      awayReturnDate: bed.awayReturnDate,
                     ),
                   );
                 },
@@ -433,6 +435,7 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                     tenantId: bed.tenantId,
                     hostelId: widget.hostelId,
                     roomNumber: widget.room.roomNumber,
+                    awayReturnDate: bed.awayReturnDate,
                   ),
                 );
               },

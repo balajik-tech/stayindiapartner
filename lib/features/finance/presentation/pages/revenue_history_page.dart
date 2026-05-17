@@ -7,6 +7,7 @@ import 'package:stayindia_owner/features/finance/domain/entities/revenue_history
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:intl/intl.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class RevenueHistoryPage extends StatefulWidget {
   const RevenueHistoryPage({super.key});
@@ -42,7 +43,7 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
       backgroundColor: const Color(0xFFFBFBFE),
       appBar: AppBar(
         title: Text(
-          'Revenue History',
+          StringUtils.translate('revenue_history', context: context),
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
         ),
         backgroundColor: Colors.white,
@@ -91,19 +92,19 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
       child: Row(
         children: [
           _FilterChip(
-            label: 'All',
+            label: StringUtils.translate('all', context: context),
             isSelected: _selectedType == 'ALL',
             onSelected: () => _updateType('ALL'),
           ),
           SizedBox(width: 8.w),
           _FilterChip(
-            label: 'Rent',
+            label: StringUtils.translate('rent', context: context),
             isSelected: _selectedType == 'RENT',
             onSelected: () => _updateType('RENT'),
           ),
           SizedBox(width: 8.w),
           _FilterChip(
-            label: 'Maintenance',
+            label: StringUtils.translate('maintenance', context: context),
             isSelected: _selectedType == 'MAINTENANCE',
             onSelected: () => _updateType('MAINTENANCE'),
           ),
@@ -125,7 +126,7 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
           Icon(Icons.history_rounded, size: 64.sp, color: Colors.grey.shade300),
           SizedBox(height: 16.h),
           Text(
-            'No revenue history found',
+            StringUtils.translate('no_revenue_history', context: context),
             style: TextStyle(fontSize: 16.sp, color: AppColors.greyText, fontWeight: FontWeight.w600),
           ),
         ],
@@ -214,9 +215,9 @@ class _RevenueItemCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _AmountRow(label: 'Rent', amount: item.rent),
+                  _AmountRow(label: StringUtils.translate('rent', context: context), amount: item.rent),
                   SizedBox(height: 4.h),
-                  _AmountRow(label: 'Maintenance', amount: item.maintenance),
+                  _AmountRow(label: StringUtils.translate('maintenance', context: context), amount: item.maintenance),
                 ],
               ),
               Column(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/location/location_service.dart';
 
@@ -43,10 +44,25 @@ class _MapPickerPageState extends State<MapPickerPage> {
     } catch (e) {
       if (mounted) {
         String message = 'Failed to get current location';
+        SnackBarAction? action;
         if (e.toString().contains('Location services are disabled')) {
           message = 'Location services are disabled. Please enable them.';
+          action = SnackBarAction(
+            label: 'Enable',
+            textColor: Colors.white,
+            onPressed: () async {
+              await Geolocator.openLocationSettings();
+            },
+          );
         } else if (e.toString().contains('denied')) {
           message = 'Location permissions denied.';
+          action = SnackBarAction(
+            label: 'Settings',
+            textColor: Colors.white,
+            onPressed: () async {
+              await Geolocator.openAppSettings();
+            },
+          );
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -54,6 +70,7 @@ class _MapPickerPageState extends State<MapPickerPage> {
             content: Text(message),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
+            action: action,
           ),
         );
       }

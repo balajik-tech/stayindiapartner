@@ -8,6 +8,7 @@ import 'package:stayindia_owner/features/communities/domain/entities/community_e
 import 'package:stayindia_owner/features/communities/domain/usecases/community_usecases.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CommentsSheet extends StatefulWidget {
   final SocialPostEntity post;
@@ -71,7 +72,7 @@ class CommentsSheetState extends State<CommentsSheet> {
         setState(() => _isPosting = false);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to add comment')));
+        ).showSnackBar(SnackBar(content: Text('failed_add_comment'.tr())));
       }
     }
   }
@@ -101,7 +102,7 @@ class CommentsSheetState extends State<CommentsSheet> {
           Padding(
             padding: EdgeInsets.all(20.r),
             child: Text(
-              'Comments',
+              'comments_title'.tr(),
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
             ),
           ),
@@ -125,7 +126,7 @@ class CommentsSheetState extends State<CommentsSheet> {
                         ),
                         SizedBox(height: 12.h),
                         Text(
-                          'No comments yet',
+                          'no_comments_yet'.tr(),
                           style: TextStyle(
                             color: Colors.grey[400],
                             fontWeight: FontWeight.w700,
@@ -163,7 +164,7 @@ class CommentsSheetState extends State<CommentsSheet> {
                         fontWeight: FontWeight.w500,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Write a comment...',
+                        hintText: 'write_comment_hint'.tr(),
                         hintStyle: TextStyle(color: Colors.grey[400]),
                         border: InputBorder.none,
                       ),
@@ -299,10 +300,10 @@ class CommentsSheetState extends State<CommentsSheet> {
     try {
       final dt = DateTime.parse(date.toString());
       final diff = DateTime.now().difference(dt);
-      if (diff.inDays > 0) return '${diff.inDays}d';
-      if (diff.inHours > 0) return '${diff.inHours}h';
-      if (diff.inMinutes > 0) return '${diff.inMinutes}m';
-      return 'now';
+      if (diff.inDays > 0) return 'time_day_short'.tr(namedArgs: {'count': diff.inDays.toString()});
+      if (diff.inHours > 0) return 'time_hour_short'.tr(namedArgs: {'count': diff.inHours.toString()});
+      if (diff.inMinutes > 0) return 'time_minute_short'.tr(namedArgs: {'count': diff.inMinutes.toString()});
+      return 'time_now'.tr();
     } catch (e) {
       return '';
     }

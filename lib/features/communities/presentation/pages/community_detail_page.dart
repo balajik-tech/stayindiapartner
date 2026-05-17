@@ -11,6 +11,7 @@ import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 
 class CommunityDetailPage extends StatefulWidget {
   final String communityId;
@@ -74,9 +75,9 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                             indicatorColor: AppColors.primaryBlue,
                             indicatorWeight: 3,
                             labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                            tabs: const [
-                              Tab(text: "News"),
-                              Tab(text: "About"),
+                            tabs: [
+                              Tab(text: "news_tab".tr()),
+                              Tab(text: "about_tab".tr()),
                             ],
                           ),
                         ),
@@ -101,7 +102,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       elevation: 4,
       icon: const Icon(Icons.emergency_share_rounded, color: Colors.white),
       label: Text(
-        "RED ALERT",
+        "red_alert".tr(),
         style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );
@@ -145,7 +146,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildMiniTag("ANNOUNCEMENT", AppColors.primaryBlue),
+            _buildMiniTag("announcement_tag".tr(), AppColors.primaryBlue),
             SizedBox(height: 8.h),
             Text("Monthly Association Meeting", style: GoogleFonts.outfit(fontSize: 16.sp, fontWeight: FontWeight.bold)),
             SizedBox(height: 4.h),
@@ -169,7 +170,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       padding: EdgeInsets.all(24.w),
       children: [
         Text(
-          "About Community",
+          "about_community".tr(),
           style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
         ),
         SizedBox(height: 12.h),
@@ -180,7 +181,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
         if (rules != null && rules.isNotEmpty) ...[
           SizedBox(height: 24.h),
           Text(
-            "Community Rules",
+            "community_rules".tr(),
             style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
           ),
           SizedBox(height: 12.h),
@@ -202,12 +203,12 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Members (${members.length})",
+              "members_count".tr(namedArgs: {'count': members.length.toString()}),
               style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
             ),
             if (isAdmin)
               Text(
-                "Admin View",
+                "admin_view".tr(),
                 style: GoogleFonts.outfit(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
               ),
           ],
@@ -258,13 +259,13 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                   ],
                 ),
                 if (isOwner || isAdmin)
-                  Padding(
-                    padding: EdgeInsets.only(top: 2.h),
-                    child: _buildMiniTag(
-                      isOwner ? "COMMUNITY OWNER" : "ADMIN", 
-                      isOwner ? Colors.orange : AppColors.primaryBlue
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.h),
+                      child: _buildMiniTag(
+                        isOwner ? "community_owner_tag".tr() : "admin_tag".tr(), 
+                        isOwner ? Colors.orange : AppColors.primaryBlue
+                      ),
                     ),
-                  ),
               ],
             ),
           ),
@@ -282,10 +283,10 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Remove Member?", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: Text("Are you sure you want to remove ${member['name']} from the community?"),
+        title: Text("remove_member_title".tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: Text("remove_member_confirm".tr(namedArgs: {'name': member['name'] ?? 'User'})),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text("cancel".tr())),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
@@ -297,7 +298,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 );
                 _loadInfo();
                 messenger.showSnackBar(
-                  const SnackBar(content: Text("Member removed successfully")),
+                  SnackBar(content: Text("member_removed_success".tr())),
                 );
               } catch (e) {
                 messenger.showSnackBar(
@@ -305,7 +306,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 );
               }
             },
-            child: const Text("Remove", style: TextStyle(color: Colors.red)),
+            child: Text("remove".tr(), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -331,9 +332,9 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Edit Community", style: GoogleFonts.outfit(fontSize: 22.sp, fontWeight: FontWeight.w800)),
+              Text("edit_community".tr(), style: GoogleFonts.outfit(fontSize: 22.sp, fontWeight: FontWeight.w800)),
               SizedBox(height: 24.h),
-              _buildFieldLabel("Community Name"),
+              _buildFieldLabel("community_name_label".tr()),
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
@@ -343,7 +344,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 ),
               ),
               SizedBox(height: 16.h),
-              _buildFieldLabel("Description"),
+              _buildFieldLabel("description_label".tr()),
               TextField(
                 controller: descController,
                 maxLines: 3,
@@ -354,7 +355,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 ),
               ),
               SizedBox(height: 16.h),
-              _buildFieldLabel("Community Rules"),
+              _buildFieldLabel("community_rules_label".tr()),
               TextField(
                 controller: rulesController,
                 maxLines: 3,
@@ -369,7 +370,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 children: [
                   Expanded(
                     child: _buildImagePickerTile(
-                      "Profile Photo", 
+                      "profile_photo".tr(), 
                       localImagePath ?? _info?['image'],
                       () async {
                         final file = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -380,7 +381,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                   SizedBox(width: 16.w),
                   Expanded(
                     child: _buildImagePickerTile(
-                      "Cover Photo", 
+                      "cover_photo".tr(), 
                       localCoverPath ?? _info?['coverImage'],
                       () async {
                         final file = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -416,7 +417,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                     backgroundColor: AppColors.primaryBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                   ),
-                  child: Text("Save Changes", style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text("save_changes".tr(), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -439,14 +440,14 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
             decoration: BoxDecoration(
               color: AppColors.backgroundGrey,
               borderRadius: BorderRadius.circular(16.r),
-              image: image != null 
-                ? DecorationImage(
-                    image: image is String && image.startsWith('/') 
-                      ? FileImage(File(image)) as ImageProvider
-                      : CachedNetworkImageProvider(image),
-                    fit: BoxFit.cover
-                  )
-                : null,
+                    image: image != null 
+                      ? DecorationImage(
+                          image: image is String && image.startsWith('/') 
+                            ? ResizeImage(FileImage(File(image)), width: 160, height: 160)
+                            : CachedNetworkImageProvider(image),
+                          fit: BoxFit.cover
+                        )
+                      : null,
             ),
             child: image == null ? const Center(child: Icon(Icons.add_a_photo_rounded, color: AppColors.primaryBlue)) : null,
           ),
@@ -463,7 +464,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           Icon(Icons.error_outline_rounded, color: Colors.red.shade300, size: 48.sp),
           SizedBox(height: 16.h),
           Text(
-            'Failed to load community info',
+            'failed_load_community'.tr(),
             style: GoogleFonts.outfit(
               fontSize: 16.sp,
               color: AppColors.greyText,
@@ -479,7 +480,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
-                'Retry',
+                'retry'.tr(),
                 style: GoogleFonts.outfit(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -579,8 +580,8 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                   ),
                   Text(
                     _info?['status']?.toString().toUpperCase() == 'PENDING'
-                      ? 'Verification Pending ⏳'
-                      : 'Verified National Network',
+                      ? 'verification_pending'.tr()
+                      : 'verified_network'.tr(),
                     style: GoogleFonts.outfit(
                       fontSize: 14.sp,
                       color: _info?['status']?.toString().toUpperCase() == 'PENDING'
@@ -653,21 +654,21 @@ class _RedAlertFormState extends State<_RedAlertForm> {
             children: [
               const Icon(Icons.warning_amber_rounded, color: AppColors.sosRed),
               SizedBox(width: 8.w),
-              Text("Raise Red Alert", style: GoogleFonts.outfit(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.sosRed)),
+              Text("raise_red_alert".tr(), style: GoogleFonts.outfit(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.sosRed)),
             ],
           ),
           SizedBox(height: 8.h),
-          Text("This will be broadcasted to all association members and admins immediately.", style: TextStyle(color: AppColors.greyText, fontSize: 12.sp)),
+          Text("red_alert_broadcast_msg".tr(), style: TextStyle(color: AppColors.greyText, fontSize: 12.sp)),
           SizedBox(height: 20.h),
-          _buildFieldLabel("Issue Type"),
+          _buildFieldLabel("issue_type_label".tr()),
           _buildDropdownField(["Safety", "Legal", "Health", "Utility", "Other"]),
           SizedBox(height: 16.h),
-          _buildFieldLabel("Description"),
+          _buildFieldLabel("description_label".tr()),
           TextField(
             controller: _descController,
             maxLines: 3,
             decoration: InputDecoration(
-              hintText: "What's the emergency?",
+              hintText: "emergency_hint".tr(),
               fillColor: AppColors.backgroundGrey,
               filled: true,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
@@ -686,7 +687,7 @@ class _RedAlertFormState extends State<_RedAlertForm> {
               ),
               child: _isBroadcasting 
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text("BROADCAST SOS NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                : Text("broadcast_sos_now".tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -696,7 +697,7 @@ class _RedAlertFormState extends State<_RedAlertForm> {
 
   Future<void> _broadcastSOS() async {
     if (_descController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please provide a description")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("provide_desc_err".tr())));
       return;
     }
 
@@ -712,8 +713,8 @@ class _RedAlertFormState extends State<_RedAlertForm> {
       if (mounted) {
         Navigator.pop(context);
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text("SOS Broadcasted successfully! Help is on the way."),
+          SnackBar(
+            content: Text("sos_broadcast_success".tr()),
             backgroundColor: Colors.green,
           ),
         );

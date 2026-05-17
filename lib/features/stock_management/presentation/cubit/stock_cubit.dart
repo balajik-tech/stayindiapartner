@@ -1,3 +1,4 @@
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/stock_repository.dart';
 import '../../domain/entities/stock_item.dart';
@@ -15,7 +16,7 @@ class StockCubit extends Cubit<StockState> {
       final summary = await repository.getStockSummary(propertyId);
       emit(StockLoaded(items: items, summary: summary));
     } catch (e) {
-      emit(StockError(e.toString()));
+      emit(StockError(GlobalErrorMapper.map(e).message));
     }
   }
 
@@ -27,7 +28,7 @@ class StockCubit extends Cubit<StockState> {
       emit(StockActionSuccess('Item created successfully', items: updatedItems, summary: state.summary));
       loadStocks(item.propertyId);
     } catch (e) {
-      emit(StockError(e.toString(), items: state.items, summary: state.summary));
+      emit(StockError(GlobalErrorMapper.map(e).message, items: state.items, summary: state.summary));
     }
   }
 
@@ -39,7 +40,7 @@ class StockCubit extends Cubit<StockState> {
       emit(StockActionSuccess('Item updated successfully', items: updatedItems, summary: state.summary));
       loadStocks(propertyId);
     } catch (e) {
-      emit(StockError(e.toString(), items: state.items, summary: state.summary));
+      emit(StockError(GlobalErrorMapper.map(e).message, items: state.items, summary: state.summary));
     }
   }
 
@@ -51,7 +52,7 @@ class StockCubit extends Cubit<StockState> {
       emit(StockActionSuccess('Item deleted successfully', items: updatedItems, summary: state.summary));
       loadStocks(propertyId);
     } catch (e) {
-      emit(StockError(e.toString(), items: state.items, summary: state.summary));
+      emit(StockError(GlobalErrorMapper.map(e).message, items: state.items, summary: state.summary));
     }
   }
 
@@ -70,7 +71,7 @@ class StockCubit extends Cubit<StockState> {
         emit(StockError('Item not found in current state', items: state.items, summary: state.summary));
       }
     } catch (e) {
-      emit(StockError(e.toString(), items: state.items, summary: state.summary));
+      emit(StockError(GlobalErrorMapper.map(e).message, items: state.items, summary: state.summary));
     }
   }
 
@@ -83,7 +84,7 @@ class StockCubit extends Cubit<StockState> {
       await loadStocks(propertyId);
       await loadItemDetail(id);
     } catch (e) {
-      emit(StockError(e.toString(), items: state.items, summary: state.summary));
+      emit(StockError(GlobalErrorMapper.map(e).message, items: state.items, summary: state.summary));
     }
   }
 
@@ -96,7 +97,7 @@ class StockCubit extends Cubit<StockState> {
       await loadStocks(propertyId);
       await loadItemDetail(id);
     } catch (e) {
-      emit(StockError(e.toString(), items: state.items, summary: state.summary));
+      emit(StockError(GlobalErrorMapper.map(e).message, items: state.items, summary: state.summary));
     }
   }
   Future<void> addTransaction({
@@ -139,7 +140,7 @@ class StockCubit extends Cubit<StockState> {
       emit(StockActionSuccess('Transaction added successfully', items: state.items, summary: state.summary));
       loadStocks(propertyId);
     } catch (e) {
-      emit(StockError(e.toString(), items: state.items, summary: state.summary));
+      emit(StockError(GlobalErrorMapper.map(e).message, items: state.items, summary: state.summary));
     }
   }
 }

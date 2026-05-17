@@ -1,3 +1,4 @@
+import '../../../../core/error/app_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/notification_entity.dart';
@@ -35,7 +36,7 @@ class NotificationCubit extends Cubit<NotificationState> {
       final notifications = await repository.getNotifications();
       emit(NotificationLoaded(notifications));
     } catch (e) {
-      emit(NotificationError(e.toString()));
+      emit(NotificationError(GlobalErrorMapper.map(e).message));
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/offer_repository.dart';
 import '../../domain/entities/offer_entity.dart';
@@ -14,7 +15,7 @@ class OffersCubit extends Cubit<OffersState> {
       final offers = await repository.getOffers(hostelId: hostelId, createdBy: createdBy);
       emit(OffersLoaded(offers));
     } catch (e) {
-      emit(OffersError(e.toString()));
+      emit(OffersError(GlobalErrorMapper.map(e).message));
     }
   }
 
@@ -25,7 +26,7 @@ class OffersCubit extends Cubit<OffersState> {
       emit(const OfferOperationSuccess('Offer created successfully'));
       await fetchOffers(hostelId: refreshHostelId, createdBy: refreshCreatedBy);
     } catch (e) {
-      emit(OffersError(e.toString()));
+      emit(OffersError(GlobalErrorMapper.map(e).message));
     }
   }
 
@@ -36,7 +37,7 @@ class OffersCubit extends Cubit<OffersState> {
       emit(const OfferOperationSuccess('Offer updated successfully'));
       await fetchOffers(hostelId: refreshHostelId, createdBy: refreshCreatedBy);
     } catch (e) {
-      emit(OffersError(e.toString()));
+      emit(OffersError(GlobalErrorMapper.map(e).message));
     }
   }
 
@@ -47,7 +48,16 @@ class OffersCubit extends Cubit<OffersState> {
       emit(const OfferOperationSuccess('Offer deleted successfully'));
       await fetchOffers(hostelId: refreshHostelId, createdBy: refreshCreatedBy);
     } catch (e) {
-      emit(OffersError(e.toString()));
+      emit(OffersError(GlobalErrorMapper.map(e).message));
+    }
+  }
+
+  Future<String?> uploadImage(String filePath) async {
+    try {
+      return await repository.uploadOfferImage(filePath);
+    } catch (e) {
+      emit(OffersError(GlobalErrorMapper.map(e).message));
+      return null;
     }
   }
 }

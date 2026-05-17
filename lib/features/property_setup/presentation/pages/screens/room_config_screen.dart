@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -35,7 +36,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildSectionHeader('Room Master', 'Customize features for each room.'),
+                  _buildSectionHeader('room_config'.tr(), 'room_config_desc'.tr()),
                   BouncingWrapper(
                     onTap: () {
                       HapticFeedback.mediumImpact();
@@ -56,7 +57,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                           Icon(Icons.copy_all_rounded, color: const Color(0xFF2B5797), size: 16.sp),
                           SizedBox(width: 6.w),
                           Text(
-                            'CLONE FIRST',
+                            'btn_clone'.tr().toUpperCase(),
                             style: TextStyle(color: const Color(0xFF2B5797), fontSize: 10.sp, fontWeight: FontWeight.w900),
                           ),
                         ],
@@ -76,7 +77,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                       separatorBuilder: (context, index) => SizedBox(height: 16.h),
                       itemBuilder: (context, index) {
                         final room = state.rooms[index];
-                        return _buildRoomCard(context, index, room);
+                        return _buildRoomCard(context, index, room, key: ValueKey('room_${room['roomNumber']}'));
                       },
                     ),
             ),
@@ -127,12 +128,12 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           ),
           SizedBox(height: 24.h),
           Text(
-            'No Rooms Found',
+            'no_rooms_found'.tr(),
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
           ),
           SizedBox(height: 8.h),
           Text(
-            'Go back to Step 2 to add rooms.',
+            'no_rooms_found_sub'.tr(),
             style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
           ),
         ],
@@ -140,26 +141,27 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
     );
   }
 
-  Widget _buildRoomCard(BuildContext context, int index, Map<String, dynamic> room) {
+  Widget _buildRoomCard(BuildContext context, int index, Map<String, dynamic> room, {Key? key}) {
     final state = context.watch<PropertySetupCubit>().state;
     final categories = state.roomCategories;
     final features = room['features'] as Map<String, dynamic>? ?? {};
 
     return _PremiumCard(
+      key: key,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildRoomHeader(context, index, room, categories),
           SizedBox(height: 20.h),
           Text(
-            'SHARING TYPE',
+            'sharing_type_label'.tr().toUpperCase(),
             style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
           ),
           SizedBox(height: 12.h),
           _buildSharingSelector(context, index, room['sharingType'] ?? 2),
           SizedBox(height: 24.h),
           Text(
-            'AMENITIES',
+            'amenities_label'.tr().toUpperCase(),
             style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
           ),
           SizedBox(height: 16.h),
@@ -168,25 +170,25 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
             children: [
               _buildFeatureIcon(
                 icon: Icons.ac_unit_rounded,
-                label: 'AC',
+                label: 'amenity_ac'.tr(),
                 isSelected: features['isAC'] ?? false,
                 onTap: () => context.read<PropertySetupCubit>().updateRoomFeature(index, 'isAC', !(features['isAC'] ?? false)),
               ),
               _buildFeatureIcon(
                 icon: Icons.hot_tub_rounded,
-                label: 'Geyser',
+                label: 'amenity_geyser'.tr(),
                 isSelected: features['hasGeyser'] ?? false,
                 onTap: () => context.read<PropertySetupCubit>().updateRoomFeature(index, 'hasGeyser', !(features['hasGeyser'] ?? false)),
               ),
               _buildFeatureIcon(
                 icon: Icons.balcony_rounded,
-                label: 'Balcony',
+                label: 'amenity_balcony'.tr(),
                 isSelected: features['hasBalcony'] ?? false,
                 onTap: () => context.read<PropertySetupCubit>().updateRoomFeature(index, 'hasBalcony', !(features['hasBalcony'] ?? false)),
               ),
               _buildFeatureIcon(
                 icon: Icons.wc_rounded,
-                label: 'Washroom',
+                label: 'amenity_washroom'.tr(),
                 isSelected: features['hasAttachedWashroom'] ?? false,
                 onTap: () => context.read<PropertySetupCubit>().updateRoomFeature(index, 'hasAttachedWashroom', !(features['hasAttachedWashroom'] ?? false)),
               ),
@@ -194,7 +196,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           ),
           SizedBox(height: 24.h),
           Text(
-            'BEDS CONFIGURATION',
+            'beds_config'.tr().toUpperCase(),
             style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
           ),
           SizedBox(height: 12.h),
@@ -231,7 +233,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
             ),
             SizedBox(width: 12.w),
             Text(
-              'Room ${room['roomNumber']}',
+              'room_number_label'.tr(namedArgs: {'number': room['roomNumber'].toString()}),
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)),
             ),
           ],
@@ -244,7 +246,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Text(
-            'FLOOR ${room['floor']}',
+            'floor_label'.tr(namedArgs: {'floor': room['floor'].toString()}),
             style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8)),
           ),
         ),
@@ -254,49 +256,68 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
 
   Widget _buildSharingSelector(BuildContext context, int index, int selected) {
     return Container(
+      height: 52.h,
       padding: EdgeInsets.all(4.r),
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(16.r),
       ),
-      child: Row(
-        children: [1, 2, 3, 4, 5].map((s) {
-          final isSelected = selected == s;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                context.read<PropertySetupCubit>().updateRoomSharing(index, s);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: Stack(
+        children: [
+          // Sliding Background Indicator
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOutBack,
+            alignment: Alignment(
+              -1.0 + ((selected - 1) * (2.0 / 4.0)),
+              0,
+            ),
+            child: FractionallySizedBox(
+              widthFactor: 1 / 5,
+              child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.transparent,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12.r),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          )
-                        ]
-                      : null,
-                ),
-                child: Text(
-                  s == 1 ? 'Single' : (s == 2 ? 'Double' : (s == 3 ? 'Triple' : (s == 4 ? 'Quad' : 'Penta'))),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF64748B),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12.sp,
-                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
                 ),
               ),
             ),
-          );
-        }).toList(),
+          ),
+          // Interactive Labels
+          Row(
+            children: [1, 2, 3, 4, 5].map((s) {
+              final isSelected = selected == s;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    if (!isSelected) {
+                      HapticFeedback.mediumImpact();
+                      context.read<PropertySetupCubit>().updateRoomSharing(index, s);
+                    }
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Text(
+                      'sharing_count'.tr(namedArgs: {'count': s.toString()}),
+                      style: TextStyle(
+                        color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10.5.sp, // Reduced slightly to prevent tight UI issues
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
@@ -311,7 +332,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.all(12.r),
+            padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
               color: isSelected ? const Color(0xFFEDF2F7) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(16.r),
@@ -329,13 +350,13 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                     ]
                   : null,
             ),
-            child: Icon(icon, color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF94A3B8), size: 24.sp),
+            child: Icon(icon, color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF94A3B8), size: 28.sp),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 10.h),
           Text(
             label,
             style: TextStyle(
-              fontSize: 10.sp,
+              fontSize: 12.sp,
               color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
               fontWeight: FontWeight.w800,
             ),
@@ -353,13 +374,13 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('Clone Settings', style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
-        content: Text('Apply current settings of Room ${state.rooms[0]['roomNumber']} to all other rooms?',
+        title: Text('clone_settings'.tr(), style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
+        content: Text('clone_confirm_msg'.tr(namedArgs: {'room': state.rooms[0]['roomNumber'].toString()}),
             style: TextStyle(fontWeight: FontWeight.w500, color: const Color(0xFF64748B))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w700)),
+            child: Text('cancel'.tr(), style: TextStyle(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w700)),
           ),
           Container(
             margin: EdgeInsets.only(left: 8.w),
@@ -368,7 +389,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                 context.read<PropertySetupCubit>().cloneRoomSettings(0);
                 Navigator.pop(dialogContext);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Settings cloned to all rooms!'), backgroundColor: Color(0xFF10B981)),
+                  SnackBar(content: Text('settings_cloned_success'.tr()), backgroundColor: const Color(0xFF10B981)),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -376,7 +397,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 elevation: 0,
               ),
-              child: Text('Clone to All', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+              child: Text('btn_clone_to_all'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
             ),
           ),
         ],
@@ -387,7 +408,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
 
 class _PremiumCard extends StatelessWidget {
   final Widget child;
-  const _PremiumCard({required this.child});
+  const _PremiumCard({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

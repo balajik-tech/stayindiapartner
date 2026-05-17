@@ -52,6 +52,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   final UpdateHostelNotificationsUseCase _updateNotifications;
   final UpdateHostelRoomConfigUseCase _updateRoomConfig;
   final UploadHostelSettingsImagesUseCase _uploadImages;
+  final UploadSingleImageUseCase _uploadSingleImage;
 
   SettingsCubit({
     required GetHostelSettingsUseCase getHostelSettingsUseCase,
@@ -61,6 +62,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     required UpdateHostelNotificationsUseCase updateHostelNotificationsUseCase,
     required UpdateHostelRoomConfigUseCase updateHostelRoomConfigUseCase,
     required UploadHostelSettingsImagesUseCase uploadHostelSettingsImagesUseCase,
+    required UploadSingleImageUseCase uploadSingleImageUseCase,
   })  : _getSettings = getHostelSettingsUseCase,
         _updateProfile = updateHostelProfileUseCase,
         _updateAmenities = updateHostelAmenitiesUseCase,
@@ -68,6 +70,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         _updateNotifications = updateHostelNotificationsUseCase,
         _updateRoomConfig = updateHostelRoomConfigUseCase,
         _uploadImages = uploadHostelSettingsImagesUseCase,
+        _uploadSingleImage = uploadSingleImageUseCase,
         super(SettingsInitial());
 
   Future<void> loadSettings(String hostelId) async {
@@ -145,13 +148,22 @@ class SettingsCubit extends Cubit<SettingsState> {
     required String entryTime,
     required String visitorPolicy,
     required String otherRules,
+    required int penaltyDate,
+    required List<CustomRule> customRules,
   }) async {
     emit(SettingsSaving());
     try {
+      final List<Map<String, dynamic>> customRulesData = customRules.map((e) => {
+        'text': e.text,
+        'photo': e.photo,
+      }).toList();
+
       await _updateHouseRules(hostelId, {
         'entryTime': entryTime,
         'visitorPolicy': visitorPolicy,
         'otherRules': otherRules,
+        'penaltyDate': penaltyDate,
+        'customRules': customRulesData,
       });
       emit(SettingsSaveSuccess(message: 'House rules saved successfully'));
       await loadSettings(hostelId);
@@ -250,6 +262,14 @@ class SettingsCubit extends Cubit<SettingsState> {
       await loadSettings(hostelId);
     } catch (e) {
       emit(SettingsError(message: ErrorHandler.getErrorMessage(e)));
+    }
+  }
+
+  Future<String> uploadImage(String filePath) async {
+    try {
+      return await _uploadSingleImage(filePath);
+    } catch (e) {
+      throw Exception(ErrorHandler.getErrorMessage(e));
     }
   }
 }

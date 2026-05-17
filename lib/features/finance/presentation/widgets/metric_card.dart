@@ -49,28 +49,40 @@ class MetricCard extends StatelessWidget {
               ),
             ],
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.darkText,
-                  letterSpacing: -0.5,
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: 2.h),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.greyText,
+                SizedBox(height: 2.h),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.greyText,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

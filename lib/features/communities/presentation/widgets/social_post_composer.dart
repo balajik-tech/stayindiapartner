@@ -199,6 +199,7 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
               width: double.infinity,
               height: 200.h,
               fit: BoxFit.cover,
+              cacheWidth: 600,
             ),
           ),
           Positioned(

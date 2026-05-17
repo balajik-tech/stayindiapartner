@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
@@ -28,7 +29,9 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget.initialStep);
+    final cubitStep = di.sl<PropertySetupCubit>().state.currentStep;
+    final startPage = widget.initialStep > 0 ? widget.initialStep : cubitStep;
+    _pageController = PageController(initialPage: startPage);
   }
 
   @override
@@ -48,7 +51,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
             final cubit = di.sl<PropertySetupCubit>();
             if (widget.existingHostel != null) {
               cubit.prefillFromHostel(widget.existingHostel!);
-            } else {
+            } else if (cubit.state.rooms.isEmpty && cubit.state.hostelId == null) {
               cubit.resetState();
             }
             if (widget.initialStep > 0) {
@@ -61,22 +64,34 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
           create: (context) => di.sl<RoomCubit>()..getRooms(isMaster: true),
         ),
       ],
-      child: BlocListener<PropertySetupCubit, PropertySetupState>(
-        listenWhen: (previous, current) => previous.currentStep != current.currentStep || previous.error != current.error,
-        listener: (context, state) {
-          if (state.error != null && state.error!.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error!), backgroundColor: Colors.redAccent),
-            );
-          }
-          if (state.currentStep < totalSteps + 1) {
-            _pageController.animateToPage(
-              state.currentStep,
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeInOutQuart,
-            );
-          }
-        },
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<PropertySetupCubit, PropertySetupState>(
+            listenWhen: (previous, current) => previous.currentStep != current.currentStep || previous.error != current.error,
+            listener: (context, state) {
+              if (state.error != null && state.error!.isNotEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.error!), backgroundColor: Colors.redAccent),
+                );
+              }
+              if (state.currentStep < totalSteps + 1) {
+                _pageController.animateToPage(
+                  state.currentStep,
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeInOutQuart,
+                );
+              }
+            },
+          ),
+          BlocListener<RoomCubit, RoomState>(
+            listener: (context, roomState) {
+              if (roomState is RoomLoaded) {
+                final masters = roomState.rooms.where((r) => r.isMaster).toList();
+                context.read<PropertySetupCubit>().setRoomMasters(masters);
+              }
+            },
+          ),
+        ],
         child: Builder(
           builder: (context) {
             return Scaffold(
@@ -146,7 +161,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                         return Column(
                           children: [
                             Text(
-                              'Setup Property',
+                              'setup_property'.tr(),
                               style: TextStyle(
                                 color: const Color(0xFF0F172A),
                                 fontSize: 16.sp,
@@ -156,7 +171,10 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                             ),
                             if (state.currentStep < totalSteps)
                               Text(
-                                'Step ${state.currentStep + 1} of $totalSteps',
+                                'step_x_of_y'.tr(namedArgs: {
+                                  'current': (state.currentStep + 1).toString(),
+                                  'total': totalSteps.toString(),
+                                }),
                                 style: TextStyle(
                                   color: const Color(0xFF64748B),
                                   fontSize: 11.sp,
@@ -243,7 +261,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                     ),
                     child: Text(
-                      'Back',
+                      'btn_back'.tr(),
                       style: TextStyle(
                         color: const Color(0xFF2B5797),
                         fontSize: 16.sp,
@@ -261,7 +279,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                             if (isValid) {
                               context.read<PropertySetupCubit>().saveProperty();
                             } else {
-                              final message = context.read<PropertySetupCubit>().state.validationMessage ?? 'Please complete all fields and pricing';
+                              final message = context.read<PropertySetupCubit>().state.validationMessage ?? 'incomplete_setup_sub'.tr();
                               showDialog(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
@@ -270,14 +288,14 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                                     children: [
                                       const Icon(Icons.warning_amber_rounded, color: Colors.orange),
                                       SizedBox(width: 8.w),
-                                      Text('Incomplete Setup', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900)),
+                                      Text('incomplete_setup'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900)),
                                     ],
                                   ),
                                   content: Text(message, style: TextStyle(fontSize: 14.sp, height: 1.6, color: const Color(0xFF475569))),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(ctx),
-                                      child: Text('Got it', style: TextStyle(color: const Color(0xFF2B5797), fontWeight: FontWeight.w800)),
+                                      child: Text('btn_got_it'.tr(), style: TextStyle(color: const Color(0xFF2B5797), fontWeight: FontWeight.w800)),
                                     ),
                                   ],
                                 ),
@@ -287,7 +305,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                             final buildingName = context.read<PropertySetupCubit>().state.buildingName;
                             if (buildingName.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Please enter property name')),
+                                SnackBar(content: Text('err_property_name_req'.tr())),
                               );
                             } else {
                               context.read<PropertySetupCubit>().nextStep();
@@ -296,8 +314,8 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                             final totalRooms = context.read<PropertySetupCubit>().totalRooms;
                             if (totalRooms == 0) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please add at least 1 room to proceed'),
+                                SnackBar(
+                                  content: Text('err_room_req'.tr()),
                                   backgroundColor: Colors.redAccent,
                                 ),
                               );
@@ -307,8 +325,8 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                           } else if (state.currentStep == 2) {
                             if (state.roomCategories.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please add at least 1 room type to proceed'),
+                                SnackBar(
+                                  content: Text('err_room_type_req'.tr()),
                                   backgroundColor: Colors.redAccent,
                                 ),
                               );
@@ -320,7 +338,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                           }
                         },
                   isLoading: state.isSaving,
-                  text: isLastStep ? 'Finish Setup' : 'Continue',
+                  text: isLastStep ? 'btn_finish_setup'.tr() : 'btn_continue'.tr(),
                 ),
               ),
             ],
@@ -379,7 +397,7 @@ class _PremiumButtonState extends State<_PremiumButton> with SingleTickerProvide
         scale: _scale,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          height: 48.h,
+          height: 56.h,
           width: double.infinity,
           decoration: BoxDecoration(
             color: widget.onPressed == null 

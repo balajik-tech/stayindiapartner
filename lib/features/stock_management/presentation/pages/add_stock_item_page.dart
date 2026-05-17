@@ -8,6 +8,7 @@ import '../cubit/stock_state.dart';
 import '../../domain/entities/stock_item.dart';
 import '../../data/default_stock_items_data.dart';
 import '../../core/stock_constants.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class AddStockItemPage extends StatefulWidget {
   final String propertyId;
@@ -30,7 +31,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
   String _selectedUnit = 'kg';
   String _selectedPaymentMode = 'Cash';
 
-  final List<String> _categories = ['Grocery', 'Food', 'Cleaning', 'Utilities', 'Misc'];
+  final List<String> _categories = ['Grocery', 'Vegetables', 'Cleaning', 'Other'];
   final List<String> _units = ['kg', 'liters', 'pieces', 'packets', 'units'];
   final List<String> _paymentModes = ['UPI', 'Cash', 'Bank Transfer'];
 
@@ -121,7 +122,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Select Stock Item',
+                        StringUtils.translate('select_stock_item', context: context),
                         style: TextStyle(
                           color: const Color(0xFF2C5990),
                           fontSize: 20.sp,
@@ -156,7 +157,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                       },
                       style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A1A)),
                       decoration: InputDecoration(
-                        hintText: 'Search ingredients...',
+                        hintText: StringUtils.translate('search_ingredients', context: context),
                         hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 15.sp),
                         border: InputBorder.none,
                         prefixIcon: Icon(Icons.search_rounded, color: const Color(0xFF64748B), size: 20.sp),
@@ -174,7 +175,9 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                                 Icon(Icons.inventory_2_outlined, size: 48.sp, color: const Color(0xFFCBD5E1)),
                                 SizedBox(height: 12.h),
                                 Text(
-                                  searchQuery.isNotEmpty ? 'No matches found' : 'No items available',
+                                  searchQuery.isNotEmpty 
+                                      ? StringUtils.translate('no_matching_items', context: context) 
+                                      : StringUtils.translate('no_items_available', context: context),
                                   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: const Color(0xFF64748B)),
                                 ),
                                 if (searchQuery.isNotEmpty) ...[
@@ -193,7 +196,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                                         borderRadius: BorderRadius.circular(14.r),
                                       ),
                                       child: Text(
-                                        'Use "$searchQuery"',
+                                        StringUtils.translate('use_query', namedArgs: {'query': searchQuery}, context: context),
                                         style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
                                       ),
                                     ),
@@ -228,7 +231,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                                         SizedBox(width: 12.w),
                                         Expanded(
                                           child: Text(
-                                            'Use "$searchQuery"',
+                                            StringUtils.translate('use_query', namedArgs: {'query': searchQuery}, context: context),
                                             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: const Color(0xFF2C5990)),
                                           ),
                                         ),
@@ -279,7 +282,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                                       ),
                                       SizedBox(width: 8.w),
                                       Text(
-                                        item.category,
+                                        StringUtils.translate(item.category.toLowerCase(), context: context),
                                         style: TextStyle(
                                           fontSize: 12.sp,
                                           fontWeight: FontWeight.w600,
@@ -323,7 +326,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'Quick Entry',
+            StringUtils.translate('quick_entry', context: context),
             style: TextStyle(color: const Color(0xFF1A1A1A), fontSize: 20.sp, fontWeight: FontWeight.w900),
           ),
         ),
@@ -370,7 +373,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                 ),
                 SizedBox(height: 24.h),
 
-                _buildLabel('Item Name'),
+                _buildLabel(StringUtils.translate('item_name_label', context: context)),
                 BouncingWrapper(
                   onTap: () => _showStockItemSelectionSheet(context),
                   child: Container(
@@ -384,7 +387,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            _nameController.text.isEmpty ? 'Search Rice, Milk, Phenyl...' : StockConstants.getLocalizedNameForString(_nameController.text, context.locale.languageCode),
+                            _nameController.text.isEmpty ? StringUtils.translate('search_placeholder', context: context) : StockConstants.getLocalizedNameForString(_nameController.text, context.locale.languageCode),
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
@@ -405,7 +408,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel('Category'),
+                          _buildLabel(StringUtils.translate('category_label', context: context)),
                           _buildDropdown(_selectedCategory, _categories, (val) => setState(() => _selectedCategory = val!)),
                         ],
                       ),
@@ -415,7 +418,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel('Unit'),
+                          _buildLabel(StringUtils.translate('unit_label', context: context)),
                           _buildDropdown(_selectedUnit, _units, (val) => setState(() => _selectedUnit = val!)),
                         ],
                       ),
@@ -430,7 +433,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel('Quantity'),
+                          _buildLabel(StringUtils.translate('quantity_label', context: context)),
                           _buildTextField(_quantityController, '1', keyboardType: TextInputType.number),
                         ],
                       ),
@@ -440,7 +443,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel('Price/Unit (₹)'),
+                          _buildLabel(StringUtils.translate('price_unit_label', context: context)),
                           _buildTextField(_priceController, '0.0', keyboardType: TextInputType.number),
                         ],
                       ),
@@ -449,11 +452,11 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                 ),
                 SizedBox(height: 24.h),
                 
-                _buildLabel('Total Amount (₹)'),
+                _buildLabel(StringUtils.translate('total_amount_label', context: context)),
                 _buildTextField(_totalController, '0.0', keyboardType: TextInputType.number),
                 SizedBox(height: 24.h),
 
-                _buildLabel('Payment Mode'),
+                _buildLabel(StringUtils.translate('payment_mode_label', context: context)),
                 Row(
                   children: _paymentModes.map((mode) {
                     final isSelected = _selectedPaymentMode == mode;
@@ -471,7 +474,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                             ),
                             child: Center(
                               child: Text(
-                                mode,
+                                StringUtils.translate(mode.toLowerCase().replaceAll(' ', '_'), context: context),
                                 style: TextStyle(
                                   color: isSelected ? Colors.white : const Color(0xFF4B5563),
                                   fontSize: 14.sp,
@@ -487,8 +490,8 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
                 ),
                 SizedBox(height: 24.h),
 
-                _buildLabel('Notes (Optional)'),
-                _buildTextField(_notesController, 'Add a note...'),
+                _buildLabel(StringUtils.translate('notes_optional_label', context: context)),
+                _buildTextField(_notesController, StringUtils.translate('add_note_hint', context: context)),
                 
                 SizedBox(height: 48.h),
                 _buildSubmitButton(),
@@ -549,7 +552,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
           style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A1A)),
-          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          items: items.map((e) => DropdownMenuItem(value: e, child: Text(StringUtils.translate(e.toLowerCase().replaceAll(' ', '_'), context: context)))).toList(),
           onChanged: onChanged,
         ),
       ),
@@ -571,7 +574,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
             notes: _notesController.text,
           );
         } else if (_nameController.text.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select an item name'), backgroundColor: Colors.redAccent));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(StringUtils.translate('select_item_error', context: context)), backgroundColor: Colors.redAccent));
         }
       },
       child: Container(
@@ -586,7 +589,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
         ),
         child: Center(
           child: Text(
-            'Save Entry',
+            StringUtils.translate('save_entry', context: context),
             style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w900),
           ),
         ),

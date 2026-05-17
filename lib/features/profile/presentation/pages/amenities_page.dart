@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cubit.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
 
 class AmenitiesPage extends StatefulWidget {
@@ -17,7 +17,6 @@ class AmenitiesPage extends StatefulWidget {
 }
 
 class _AmenitiesPageState extends State<AmenitiesPage> {
-  late final SettingsCubit _cubit;
   List<Map<String, dynamic>> _amenities = [];
   final TextEditingController _customAmenityController = TextEditingController();
 
@@ -32,27 +31,26 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
   @override
   void initState() {
     super.initState();
-    _cubit = sl<SettingsCubit>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final hostelId = _hostelId(context);
       if (hostelId.isNotEmpty) {
-        _cubit.loadSettings(hostelId);
+        context.read<SettingsCubit>().loadSettings(hostelId);
       }
     });
   }
 
   @override
   void dispose() {
-    _cubit.close();
     _customAmenityController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _cubit,
-      child: BlocListener<SettingsCubit, SettingsState>(
+    final hostelState = context.watch<HostelCubit>().state;
+    final hasNoProperty = hostelState is HostelLoaded && hostelState.hostels.isEmpty;
+
+    return BlocListener<SettingsCubit, SettingsState>(
         listener: (context, state) {
           if (state is SettingsLoaded) {
             setState(() {
@@ -82,7 +80,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
-              'Amenities',
+              StringUtils.translate('amenities_title', context: context),
               style: TextStyle(
                 color: AppColors.darkText,
                 fontSize: 20.sp,
@@ -97,31 +95,76 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
               ),
             ),
           ),
-          body: BlocBuilder<SettingsCubit, SettingsState>(
-            builder: (context, state) {
-              if (state is SettingsLoading) {
-                return ListView.builder(
-                  padding: EdgeInsets.all(24.w),
-                  itemCount: 10,
-                  itemBuilder: (context, index) => const TenantCardSkeleton(),
-                );
-              }
-              return Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.all(24.w),
-                      child: _buildAmenitiesList(),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(24.w),
-                    child: _buildSaveButton(context, state),
-                  ),
-                ],
-              );
-            },
-          ),
+          body: hasNoProperty
+              ? _buildNoPropertyPlaceholder()
+              : BlocBuilder<SettingsCubit, SettingsState>(
+                  builder: (context, state) {
+                    if (state is SettingsLoading) {
+                      return ListView.builder(
+                        padding: EdgeInsets.all(24.w),
+                        itemCount: 10,
+                        itemBuilder: (context, index) => const TenantCardSkeleton(),
+                      );
+                    }
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: EdgeInsets.all(24.w),
+                            child: _buildAmenitiesList(),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(24.w),
+                          child: _buildSaveButton(context, state),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+      ),
+    );
+  }
+
+  Widget _buildNoPropertyPlaceholder() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(24.r),
+              decoration: BoxDecoration(
+                color: AppColors.primaryBlue.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add_business_rounded,
+                size: 64.sp,
+                color: AppColors.primaryBlue.withValues(alpha: 0.5),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              StringUtils.translate('add_property_first', context: context),
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.darkText,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              StringUtils.translate('start_by_adding_property_desc', context: context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: AppColors.greyText,
+                height: 1.5,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -197,7 +240,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
                 ),
               ),
               title: Text(
-                'Add Custom Amenity',
+                StringUtils.translate('add_custom_amenity', context: context),
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
@@ -266,13 +309,13 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         title: Text(
-          'Add Custom Amenity',
+          StringUtils.translate('add_custom_amenity', context: context),
           style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
         ),
         content: TextField(
           controller: _customAmenityController,
           decoration: InputDecoration(
-            hintText: 'e.g. Swimming Pool, Gaming Zone',
+            hintText: StringUtils.translate('custom_amenity_hint', context: context),
             hintStyle: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -285,7 +328,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
               _customAmenityController.clear();
               Navigator.pop(context);
             },
-            child: Text('Cancel', style: TextStyle(color: AppColors.greyText)),
+            child: Text(StringUtils.translate('cancel', context: context), style: TextStyle(color: AppColors.greyText)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -307,7 +350,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
               backgroundColor: AppColors.primaryBlue,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
             ),
-            child: const Text('Add', style: TextStyle(color: Colors.white)),
+            child: Text(StringUtils.translate('btn_add', context: context), style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -325,7 +368,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
                 final hostelId = _hostelId(context);
                 if (hostelId.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No hostel selected')),
+                    SnackBar(content: Text(StringUtils.translate('no_hostel_selected', context: context))),
                   );
                   return;
                 }
@@ -333,7 +376,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
                     .where((a) => a['isActive'] == true)
                     .map((a) => a['name'] as String)
                     .toList();
-                _cubit.updateAmenities(hostelId, enabled);
+                context.read<SettingsCubit>().updateAmenities(hostelId, enabled);
               },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryBlue,
@@ -352,7 +395,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
               )
             : Icon(Icons.save_outlined, color: Colors.white, size: 20.sp),
         label: Text(
-          'Save Changes',
+          StringUtils.translate('save_changes', context: context),
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,

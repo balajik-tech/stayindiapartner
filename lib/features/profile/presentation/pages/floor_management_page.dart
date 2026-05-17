@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
@@ -9,6 +10,7 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/widgets/add_floor_sheet.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'room_management_page.dart';
 
 class FloorManagementPage extends StatelessWidget {
@@ -29,7 +31,7 @@ class FloorManagementPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Floor Management',
+          'floor_management'.tr(),
           style: TextStyle(
             color: AppColors.darkText,
             fontSize: 15.sp,
@@ -65,10 +67,10 @@ class FloorManagementPage extends StatelessWidget {
               children: [
                 Icon(Icons.error_outline_rounded, size: 40.sp, color: Colors.grey),
                 SizedBox(height: 12.h),
-                Text('Failed to load floors', style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
+                Text('failed_load_floors'.tr(), style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
                 TextButton(
                   onPressed: () => context.read<DashboardCubit>().fetchDashboardData(hostel.id),
-                  child: const Text('Retry'),
+                  child: Text('btn_retry'.tr()),
                 ),
               ],
             ),
@@ -102,7 +104,7 @@ class FloorManagementPage extends StatelessWidget {
               Icon(Icons.add_rounded, color: Colors.white, size: 18.sp),
               SizedBox(width: 6.w),
               Text(
-                'Add New Floor',
+                'add_new_floor'.tr(),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14.sp,
@@ -160,7 +162,11 @@ class _FloorCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      floor.floorName,
+                      StringUtils.translate(
+                        floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                        context: context,
+                        namedArgs: {'n': '${floor.floorNum ?? 0}'},
+                      ),
                       style: TextStyle(
                         color: AppColors.darkText,
                         fontSize: 14.sp,
@@ -168,7 +174,7 @@ class _FloorCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${floor.rooms.length} Rooms • ${floor.bedInfo}',
+                      '${'floor_label'.tr(namedArgs: {'floor': StringUtils.translate(floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n', context: context, namedArgs: {'n': '${floor.floorNum ?? 0}'})})} • ${'rooms_count'.tr(namedArgs: {'count': floor.rooms.length.toString()})} • ${StringUtils.translate('beds_free_count', context: context, namedArgs: {'free': '${floor.freeBeds ?? 0}', 'total': '${floor.totalBeds ?? 0}'})}',
                       style: TextStyle(
                         color: AppColors.greyText,
                         fontSize: 11.sp,
@@ -182,7 +188,7 @@ class _FloorCard extends StatelessWidget {
                 icon: const Icon(Icons.edit_outlined, color: AppColors.greyText, size: 18),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Custom floor labels coming soon!')),
+                    SnackBar(content: Text('custom_floor_labels_soon'.tr())),
                   );
                 },
               ),
@@ -205,6 +211,7 @@ class _FloorCard extends StatelessWidget {
                     child: RoomManagementPage(
                       hostel: hostel,
                       floorName: floor.floorName,
+                      floorNum: floor.floorNum,
                     ),
                   ),
                 ),
@@ -214,7 +221,7 @@ class _FloorCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Manage Rooms',
+                  'manage_rooms'.tr(),
                   style: TextStyle(
                     color: AppColors.primaryBlue,
                     fontSize: 12.sp,
@@ -234,12 +241,12 @@ class _FloorCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Floor'),
-        content: Text('Are you sure you want to delete ${floor.floorName} and all its ${floor.rooms.length} rooms? This action is permanent.'),
+        title: Text('delete_floor'.tr()),
+        content: Text('delete_floor_confirm'.tr(namedArgs: {'floor': floor.floorName, 'count': floor.rooms.length.toString()})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text('btn_cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
@@ -247,7 +254,7 @@ class _FloorCard extends StatelessWidget {
               final roomIds = floor.rooms.map((r) => r.id).toList();
               context.read<DashboardCubit>().deleteRoomsBulk(roomIds, hostel.id);
             },
-            child: const Text('Delete All', style: TextStyle(color: Colors.red)),
+            child: Text('delete_all'.tr(), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

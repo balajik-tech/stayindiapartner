@@ -11,7 +11,7 @@ class ErrorHandler {
     } else if (error is FormatException) {
       return "Invalid data format received from server.";
     } else if (error is DioException) {
-      final appException = mapDioException(error);
+      final appException = GlobalErrorMapper.map(error);
       return appException.message;
     } else {
       return "Something went wrong. Please try again later.";

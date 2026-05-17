@@ -46,15 +46,24 @@ class SummaryCard extends StatelessWidget {
         onTap: onTap,
         scaleFactor: 0.97,
         child: Container(
-          width: 86.w,
-          height: 68.h,
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          width: 96.w,
+          height: 54.h,
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
           margin: EdgeInsets.only(right: 10.w, bottom: 4.h, top: 2.h),
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(11.r),
-            border: useWhiteStyle ? Border.all(color: const Color(0xFF3B71CA), width: 1.2) : null,
+            border: isSelected 
+              ? Border.all(color: Colors.white.withValues(alpha: 0.8), width: 2.0)
+              : (useWhiteStyle ? Border.all(color: const Color(0xFF3B71CA), width: 1.2) : null),
             boxShadow: [
+              if (isSelected)
+                BoxShadow(
+                  color: (useWhiteStyle ? const Color(0xFF3B71CA) : backgroundColor).withValues(alpha: 0.4),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 0),
+                ),
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 6,
@@ -62,41 +71,44 @@ class SummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: contentColor, size: 20.sp),
-              SizedBox(width: 6.w),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        count,
-                        style: TextStyle(
-                          fontSize: 26.sp,
-                          fontWeight: FontWeight.w900,
-                          color: contentColor,
-                          height: 1.0,
-                        ),
-                      ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: contentColor,
+                    size: 16.sp,
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    count,
+                    style: TextStyle(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w900,
+                      color: contentColor,
+                      height: 1.0,
                     ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w900,
-                        color: contentColor.withValues(alpha: isLightBackground ? 0.75 : 0.95),
-                        height: 1.0,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              SizedBox(height: 2.h),
+              SizedBox(
+                width: 76.w,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w900,
+                      color: contentColor.withValues(alpha: 0.8),
+                      letterSpacing: 0.5,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -127,7 +139,7 @@ class SummaryCardsSection extends StatelessWidget {
         final ops = data?.dailyOperations;
 
         return SizedBox(
-          height: 80.h,
+          height: 64.h,
           child: ListView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -156,8 +168,8 @@ class SummaryCardsSection extends StatelessWidget {
       onTap: () {},
       scaleFactor: 0.97,
       child: Container(
-        width: 110.w,
-        height: 68.h,
+        width: 132.w,
+        height: 54.h,
         margin: EdgeInsets.only(right: 10.w, bottom: 4.h, top: 2.h),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
@@ -165,122 +177,132 @@ class SummaryCardsSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(11.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 8,
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Column(
+        child: Stack(
           children: [
-
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 3.h, horizontal: 7.w),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 0.5)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const _BlinkingDot(),
-                  SizedBox(width: 4.w),
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        'live_attendance'.tr().toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
+            Column(
+              children: [
+                SizedBox(height: 18.h), 
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          color: const Color(0xFF34A853), 
+                          child: _buildAttendanceStat(
+                            label: 'presence_in'.tr(),
+                            count: inCount,
+                            color: Colors.white,
+                            icon: Icons.login_rounded,
+                          ),
                         ),
                       ),
-                    ),
+                      Expanded(
+                        child: Container(
+                          color: const Color(0xFF94A3B8), 
+                          child: _buildAttendanceStat(
+                            label: 'presence_out'.tr(),
+                            count: outCount,
+                            color: Colors.white,
+                            icon: Icons.logout_rounded,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ],
+            ),
+            
+            Positioned(
+              top: 4.h,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 0.5),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const _BlinkingDot(),
+                      SizedBox(width: 4.w),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'live_attendance'.tr().toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 8.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white.withValues(alpha: 0.9),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            Expanded(
-              child: Row(
-                children: [
-
-                  Expanded(
-                    child: Semantics(
-                      label: '${'presence_in'.tr()}: $inCount',
-                      child: Container(
-                        color: const Color(0xFF34A853),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.login_rounded,
-                              color: Colors.white,
-                              size: 14.sp,
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              inCount,
-                              style: TextStyle(
-                                fontSize: 22.sp,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                height: 1.0,
-                              ),
-                            ),
-                            Text(
-                              'presence_in'.tr().toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+  Widget _buildAttendanceStat({
+    required String label,
+    required String count,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Semantics(
+      label: '$label: $count',
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: color, size: 12.sp),
+                SizedBox(width: 4.w),
+                Text(
+                  count,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    height: 1.0,
                   ),
-
-                  Expanded(
-                    child: Semantics(
-                      label: '${'presence_out'.tr()}: $outCount',
-                      child: Container(
-                        color: const Color(0xFF94A3B8),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.logout_rounded,
-                              color: Colors.white,
-                              size: 14.sp,
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              outCount,
-                              style: TextStyle(
-                                fontSize: 22.sp,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                height: 1.0,
-                              ),
-                            ),
-                            Text(
-                              'presence_out'.tr().toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                ),
+              ],
+            ),
+            SizedBox(height: 2.h),
+            SizedBox(
+              width: 58.w,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 8.sp,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
-                ],
+                ),
               ),
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
@@ -9,8 +10,6 @@ import 'package:stayindia_owner/features/property_setup/presentation/cubit/prope
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
 class RoomPricingPage extends StatefulWidget {
@@ -34,21 +33,18 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
 
   void _syncMasters() {
     try {
+      context.read<RoomCubit>().getRooms(isMaster: true);
+
       final roomState = context.read<RoomCubit>().state;
-
-      final hostelState = context.read<HostelCubit>().state;
-      if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-        context.read<RoomCubit>().getRooms(isMaster: true);
-      }
-
       if (roomState is RoomLoaded) {
         final masters = roomState.rooms.where((r) => r.isMaster).toList();
         if (masters.isNotEmpty) {
+          context.read<PropertySetupCubit>().setRoomMasters(masters);
           context.read<PropertySetupCubit>().updatePricingFromMasters();
         }
       }
     } catch (e) {
-      debugPrint('RoomCubit not found in RoomPricingPage');
+      debugPrint('Error syncing masters in RoomPricingPage: $e');
     }
   }
 
@@ -69,6 +65,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                   if (state is RoomLoaded) {
                     final masters = state.rooms.where((r) => r.isMaster).toList();
                     if (masters.isNotEmpty) {
+                      context.read<PropertySetupCubit>().setRoomMasters(masters);
                       context.read<PropertySetupCubit>().updatePricingFromMasters();
                     }
                   }
@@ -84,11 +81,11 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                       (route) => false,
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Property setup completed successfully!')),
+                      SnackBar(content: Text('setup_complete_msg'.tr())),
                     );
                   } else if (state.error != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to save pricing: ${state.error}'), backgroundColor: Colors.redAccent),
+                      SnackBar(content: Text('failed_save_pricing'.tr(namedArgs: {'error': state.error.toString()})), backgroundColor: Colors.redAccent),
                     );
                   } else if (state.validationMessage != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -111,7 +108,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                 title: Column(
                   children: [
                     Text(
-                      'Setup Property',
+                      'setup_property'.tr(),
                       style: TextStyle(
                         color: const Color(0xFF2C5990),
                         fontSize: 16.sp,
@@ -119,7 +116,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                       ),
                     ),
                     Text(
-                      'Step 4 of 4',
+                      'step_4_of_4'.tr(),
                       style: TextStyle(
                         color: const Color(0xFF64748B),
                         fontSize: 11.sp,
@@ -151,7 +148,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionHeader('Pricing Master', 'Set rent and deposits for all rooms.'),
+                        _buildSectionHeader('pricing_master'.tr(), 'pricing_master_desc'.tr()),
                         SizedBox(height: 24.h),
                         
                         if (state.rooms.isEmpty)
@@ -202,7 +199,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
           SizedBox(height: 60.h),
           Icon(Icons.payments_outlined, size: 64.sp, color: const Color(0xFFCBD5E1)),
           SizedBox(height: 16.h),
-          Text('No rooms found to set pricing', style: TextStyle(color: const Color(0xFF64748B), fontSize: 14.sp)),
+          Text('no_rooms_pricing'.tr(), style: TextStyle(color: const Color(0xFF64748B), fontSize: 14.sp)),
         ],
       ),
     );
@@ -231,7 +228,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               child: Icon(icon, color: iconColor, size: 20.sp),
             ),
             SizedBox(width: 12.w),
-            Text('$type ROOMS', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: 0.5)),
+            Text('type_rooms_label'.tr(namedArgs: {'type': type}), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: 0.5)),
           ],
         ),
         SizedBox(height: 16.h),
@@ -251,8 +248,8 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
     double dailyRent = 0.0;
 
     if (config is Map) {
-      rent = (config['rent'] ?? 0.0).toDouble();
-      deposit = (config['deposit'] ?? 0.0).toDouble();
+      rent = (config['rent'] ?? config['monthlyRent'] ?? 0.0).toDouble();
+      deposit = (config['deposit'] ?? config['securityDeposit'] ?? 0.0).toDouble();
       maintenance = (config['maintenance'] ?? 0.0).toDouble();
       dailyRent = (config['dailyRent'] ?? 0.0).toDouble();
     }
@@ -270,11 +267,11 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('$sharing Sharing', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
+              Text('sharing_count_label'.tr(namedArgs: {'count': sharing.toString()}), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(color: const Color(0xFF2C5990).withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8.r)),
-                child: Text('PER BED', style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2C5990))),
+                child: Text('per_bed'.tr(), style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2C5990))),
               ),
             ],
           ),
@@ -283,7 +280,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
             children: [
               Expanded(
                 child: _PriceInput(
-                  label: 'Monthly Rent',
+                  label: 'monthly_rent'.tr(),
                   initialValue: rent > 0 ? rent.toInt().toString() : '',
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
@@ -294,7 +291,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               SizedBox(width: 12.w),
               Expanded(
                 child: _PriceInput(
-                  label: 'Daily Rent',
+                  label: 'daily_rent'.tr(),
                   initialValue: dailyRent > 0 ? dailyRent.toInt().toString() : '',
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
@@ -309,7 +306,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
             children: [
               Expanded(
                 child: _PriceInput(
-                  label: 'Security Deposit',
+                  label: 'security_deposit'.tr(),
                   initialValue: deposit > 0 ? deposit.toInt().toString() : '',
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
@@ -320,7 +317,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               SizedBox(width: 12.w),
               Expanded(
                 child: _PriceInput(
-                  label: 'Maintenance',
+                  label: 'maintenance'.tr(),
                   initialValue: maintenance > 0 ? maintenance.toInt().toString() : '',
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
@@ -343,7 +340,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
         children: [
           Icon(Icons.sync_rounded, color: const Color(0xFFFF7A00), size: 20.sp),
           SizedBox(width: 12.w),
-          Expanded(child: Text('Prices will be applied to all rooms of these types.', style: TextStyle(fontSize: 13.sp, color: const Color(0xFF9A3412), fontWeight: FontWeight.w700))),
+          Expanded(child: Text('sync_prices_info'.tr(), style: TextStyle(fontSize: 13.sp, color: const Color(0xFF9A3412), fontWeight: FontWeight.w700))),
         ],
       ),
     );
@@ -365,7 +362,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                     side: const BorderSide(color: Color(0xFF2C5990), width: 1.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                   ),
-                  child: const Text('Back', style: TextStyle(color: Color(0xFF2C5990), fontWeight: FontWeight.w800)),
+                  child: Text('back'.tr(), style: const TextStyle(color: Color(0xFF2C5990), fontWeight: FontWeight.w800)),
                 ),
               ),
               SizedBox(width: 16.w),
@@ -381,7 +378,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                   ),
                   child: state.isSaving 
                     ? SizedBox(height: 20.h, width: 20.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Finish Setup', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                    : Text('finish_setup'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
                 ),
               ),
             ],

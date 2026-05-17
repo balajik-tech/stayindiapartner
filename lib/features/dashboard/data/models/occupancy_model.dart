@@ -36,12 +36,14 @@ class FloorDataModel extends FloorData {
     required super.floorName,
     required super.bedInfo,
     required super.rooms,
+    super.floorNum,
+    super.totalBeds,
+    super.freeBeds,
   });
 
   factory FloorDataModel.fromJson(Map<String, dynamic> json) {
     final roomsJson = json['rooms'] as List<dynamic>? ?? [];
-    final floorNum = json['floor'];
-    final floorLabel = floorNum == 0 ? 'Ground Floor' : 'Floor $floorNum';
+    final floorNum = json['floor'] ?? 0;
 
     int totalBeds = 0, freeBeds = 0;
     for (final r in roomsJson) {
@@ -51,9 +53,12 @@ class FloorDataModel extends FloorData {
     }
 
     return FloorDataModel(
-      floorName: floorLabel,
-      bedInfo: '$freeBeds/$totalBeds beds free',
-      rooms: roomsJson.map((r) => RoomModel.fromJson(r as Map<String, dynamic>, floorLabel)).toList(),
+      floorName: floorNum == 0 ? 'ground_floor' : 'floor_n',
+      floorNum: floorNum,
+      totalBeds: totalBeds,
+      freeBeds: freeBeds,
+      bedInfo: 'beds_free_count',
+      rooms: roomsJson.map((r) => RoomModel.fromJson(r as Map<String, dynamic>, floorNum == 0 ? 'ground_floor' : 'floor_n')).toList(),
     );
   }
 }
@@ -82,7 +87,12 @@ class RoomModel extends Room {
 
     final List<BedInfo> beds = bedsJson.map((b) {
       final map = b as Map<String, dynamic>;
-      final tenant = map['tenant'] as Map<String, dynamic>?;
+      final tenantObj = map['tenant'];
+      final Map<String, dynamic>? tenant = (tenantObj is Map<String, dynamic>)
+          ? tenantObj
+          : (tenantObj is Map)
+              ? Map<String, dynamic>.from(tenantObj)
+              : null;
       
       String? tenantName;
       if (tenant != null) {
@@ -99,6 +109,7 @@ class RoomModel extends Room {
         tenantAvatar: tenant?['avatar']?.toString() ?? tenant?['userProfile']?['avatar']?.toString(),
         tenantId: tenant?['_id']?.toString() ?? tenant?['id']?.toString(),
         isAway: tenant?['isAway'] == true,
+        awayReturnDate: tenant?['awayReturnDate']?.toString(),
       );
     }).toList();
 

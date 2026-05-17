@@ -21,6 +21,9 @@ class CreateStaffUseCase {
     String? email,
     String? password,
     required String role,
+    double salary = 0.0,
+    String? photo,
+    Map<String, dynamic>? paymentDetails,
     Map<String, dynamic>? permissions,
   }) {
     return repository.createStaff(
@@ -31,6 +34,9 @@ class CreateStaffUseCase {
       password: password,
       role: role,
       permissions: permissions,
+      salary: salary,
+      photo: photo,
+      paymentDetails: paymentDetails,
     );
   }
 }

@@ -147,4 +147,9 @@ class DashboardCubit extends Cubit<DashboardState> {
       }
     }
   }
+
+  void reset() {
+    if (isClosed) return;
+    emit(const DashboardInitial());
+  }
 }

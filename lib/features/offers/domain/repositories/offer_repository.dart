@@ -5,4 +5,5 @@ abstract class OfferRepository {
   Future<OfferEntity> createOffer(OfferEntity offer);
   Future<OfferEntity> updateOffer(String id, Map<String, dynamic> updateData);
   Future<void> deleteOffer(String id);
+  Future<String> uploadOfferImage(String filePath);
 }

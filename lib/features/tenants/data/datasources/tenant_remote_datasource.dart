@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
@@ -59,7 +60,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
           ? raw['data'] as Map<String, dynamic>
           : raw as Map<String, dynamic>;
       final items = (data['results'] ?? data['items']) as List<dynamic>? ?? [];
-      return items.map((j) => TenantModel.fromJson(j as Map<String, dynamic>)).toList();
+      return await Isolate.run(() => items.map((j) => TenantModel.fromJson(j as Map<String, dynamic>)).toList());
     }
     throw Exception('Failed to fetch tenants');
   }
@@ -77,7 +78,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
       final data = (raw is Map && raw['data'] is Map)
           ? raw['data'] as Map<String, dynamic>
           : raw as Map<String, dynamic>;
-      return TenantDetailModel.fromJson(data);
+      return await Isolate.run(() => TenantDetailModel.fromJson(data));
     }
     throw Exception('Failed to load tenant detail');
   }

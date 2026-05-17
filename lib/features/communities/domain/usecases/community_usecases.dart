@@ -179,6 +179,12 @@ class GetAssociationsUseCase {
       repository.getAssociations(parentId: parentId, level: level);
 }
 
+class SearchAssociationsUseCase {
+  final CommunityRepository repository;
+  SearchAssociationsUseCase(this.repository);
+  Future<List<Map<String, dynamic>>> call(String query) => repository.searchAssociations(query);
+}
+
 class JoinAssociationUseCase {
   final CommunityRepository repository;
   JoinAssociationUseCase(this.repository);

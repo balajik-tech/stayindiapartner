@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
@@ -33,9 +35,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
     _addTenantCubit = di.sl<AddTenantCubit>();
     final hostelCubit = context.read<HostelCubit>();
     if (hostelCubit.state is HostelLoaded) {
-      final hostels = (hostelCubit.state as HostelLoaded).hostels;
+      final state = hostelCubit.state as HostelLoaded;
+      final hostels = state.hostels;
       if (hostels.isNotEmpty) {
-        _addTenantCubit.selectHostel(hostels.first);
+        final index = state.selectedHostelIndex;
+        _addTenantCubit.selectHostel(hostels[index < hostels.length ? index : 0]);
       }
     }
   }
@@ -54,7 +58,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
   void _submit(AddTenantState state) {
     if (state is! AddTenantReady) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields'), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text('fill_required_fields'.tr()), backgroundColor: Colors.redAccent),
       );
       return;
     }
@@ -64,16 +68,47 @@ class _AddTenantPageState extends State<AddTenantPage> {
     final rentText = _rentController.text.trim();
     final depositText = _depositController.text.trim();
 
-    if (phone.isEmpty || rentText.isEmpty || _checkInDate == null) {
+    if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields'), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text('please_enter_full_name'.tr()), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
+    if (phone.isEmpty || phone.length != 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('enter_valid_phone'.tr()), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
+    if (_emailController.text.isNotEmpty) {
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (!emailRegex.hasMatch(_emailController.text.trim())) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('enter_valid_email'.tr()), backgroundColor: Colors.redAccent),
+        );
+        return;
+      }
+    }
+
+    if (rentText.isEmpty || (double.tryParse(rentText) ?? 0) <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('enter_valid_rent'.tr()), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
+    if (_checkInDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('select_check_in_date'.tr()), backgroundColor: Colors.redAccent),
       );
       return;
     }
 
     final nameParts = name.split(' ');
-    final firstName = nameParts.isNotEmpty ? nameParts.first : null;
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : null;
+    final firstName = nameParts.isNotEmpty ? nameParts.first : name;
+    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '.';
 
     _addTenantCubit.submit(
       hostel: state.hostel,
@@ -83,6 +118,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       rent: double.tryParse(rentText) ?? 0,
       firstName: firstName,
       lastName: lastName,
+      sharingType: state.selectedRoom.sharingType,
       deposit: depositText.isNotEmpty ? double.tryParse(depositText) : null,
       startDate: _checkInDate!,
     );
@@ -96,7 +132,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         listener: (context, state) {
           if (state is AddTenantSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Tenant added successfully'), backgroundColor: Colors.green),
+              SnackBar(content: Text('tenant_added_success'.tr()), backgroundColor: Colors.green),
             );
             Navigator.pop(context, true);
           } else if (state is AddTenantError) {
@@ -118,7 +154,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
-              'Add New Tenant',
+              'add_new_tenant'.tr(),
               style: TextStyle(color: AppColors.darkText, fontSize: 20.sp, fontWeight: FontWeight.bold),
             ),
           ),
@@ -171,10 +207,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSectionTitle('Property Selection'),
+                          _buildSectionTitle('property_selection'.tr()),
                           SizedBox(height: 16.h),
                           _buildDropdown<Hostel>(
-                            'Select Hostel *',
+                            'select_hostel'.tr(),
                             hostels,
                             selectedHostel,
                             (h) => _addTenantCubit.selectHostel(h!),
@@ -182,36 +218,56 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           ),
 
                           SizedBox(height: 32.h),
-                          _buildSectionTitle('Tenant Details'),
+                          _buildSectionTitle('tenant_details'.tr()),
                           SizedBox(height: 16.h),
-                          _buildTextField('Full Name *', Icons.person_outline, _nameController),
+                          _buildTextField(
+                            'full_name'.tr(), 
+                            Icons.person_outline, 
+                            _nameController,
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))],
+                          ),
                           SizedBox(height: 16.h),
-                          _buildTextField('Phone Number *', Icons.phone_outlined, _phoneController, keyboardType: TextInputType.phone),
+                          _buildTextField(
+                            'phone_number_req'.tr(), 
+                            Icons.phone_outlined, 
+                            _phoneController, 
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                            ],
+                          ),
                           SizedBox(height: 16.h),
-                          _buildTextField('Email Address (Optional)', Icons.email_outlined, _emailController, keyboardType: TextInputType.emailAddress),
+                          _buildTextField('email_optional'.tr(), Icons.email_outlined, _emailController, keyboardType: TextInputType.emailAddress),
 
                           SizedBox(height: 32.h),
-                          _buildSectionTitle('Room Allocation'),
+                          _buildSectionTitle('room_allocation'.tr()),
                           SizedBox(height: 16.h),
                           Row(
                             children: [
                               Expanded(
                                 child: _buildDropdown<int>(
-                                  'Floor *',
+                                  'floor_req'.tr(),
                                   floors,
                                   selectedFloor,
                                   (f) => _addTenantCubit.selectFloor(selectedHostel!, f!, floors),
                                   isLoading: isLoading,
-                                  itemLabel: (f) => f == 0 ? 'Ground' : '$f${f == 1 ? 'st' : f == 2 ? 'nd' : f == 3 ? 'rd' : 'th'} Floor',
+                                  itemLabel: (f) => f == 0 ? 'ground'.tr() : '$f ${'floor_suffix'.tr()}',
                                 ),
                               ),
                               SizedBox(width: 16.w),
                               Expanded(
                                 child: _buildDropdown<RoomDetail>(
-                                  'Room *',
+                                  'room_req'.tr(),
                                   rooms,
                                   selectedRoom,
-                                  (r) => _addTenantCubit.selectRoom(selectedHostel!, selectedFloor!, floors, r!, rooms),
+                                  (r) {
+                                    if (r != null) {
+                                      _rentController.text = r.rent.toString();
+                                      _depositController.text = r.deposit.toString();
+                                      _addTenantCubit.selectRoom(selectedHostel!, selectedFloor!, floors, r, rooms);
+                                    }
+                                  },
                                   isLoading: isLoading,
                                   itemLabel: (r) => r.roomTypename,
                                 ),
@@ -220,7 +276,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           ),
                           SizedBox(height: 16.h),
                           _buildDropdown<String>(
-                            'Bed *',
+                            'bed_req'.tr(),
                             beds,
                             selectedBed,
                             (b) => _addTenantCubit.selectBed(selectedHostel!, selectedFloor!, floors, selectedRoom!, rooms, b!, beds),
@@ -228,20 +284,32 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             itemLabel: (b) {
                               final num = int.tryParse(b);
                               if (num != null && num > 0 && num <= 26) {
-                                return 'Bed ${String.fromCharCode(64 + num)}';
+                                return 'bed_label'.tr(namedArgs: {'label': String.fromCharCode(64 + num)});
                               }
-                              return 'Bed $b';
+                              return 'bed_label'.tr(namedArgs: {'label': b});
                             },
                           ),
 
                           SizedBox(height: 32.h),
-                          _buildSectionTitle('Stay Details'),
+                          _buildSectionTitle('stay_details'.tr()),
                           SizedBox(height: 16.h),
-                          _buildTextField('Monthly Rent *', Icons.currency_rupee, _rentController, keyboardType: TextInputType.number),
+                          _buildTextField(
+                            'monthly_rent_req'.tr(), 
+                            Icons.currency_rupee, 
+                            _rentController, 
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          ),
                           SizedBox(height: 16.h),
-                          _buildTextField('Security Deposit *', Icons.account_balance_wallet_outlined, _depositController, keyboardType: TextInputType.number),
+                          _buildTextField(
+                            'security_deposit_req'.tr(), 
+                            Icons.account_balance_wallet_outlined, 
+                            _depositController, 
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          ),
                           SizedBox(height: 16.h),
-                          _buildDatePicker(context, 'Check-in Date *'),
+                          _buildDatePicker(context, 'check_in_date_req'.tr()),
 
                           SizedBox(height: 40.h),
                           _buildSubmitButton(state),
@@ -273,7 +341,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         ),
         child: isSubmitting
             ? SizedBox(height: 20.h, width: 20.h, child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : Text('Add Tenant', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            : Text('add_new_tenant'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -282,7 +350,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return Text(title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue));
   }
 
-  Widget _buildTextField(String label, IconData icon, TextEditingController controller, {TextInputType? keyboardType}) {
+  Widget _buildTextField(String label, IconData icon, TextEditingController controller, {TextInputType? keyboardType, List<TextInputFormatter>? inputFormatters}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -291,10 +359,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           style: TextStyle(fontSize: 15.sp, color: AppColors.darkText),
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: AppColors.greyText),
-            hintText: 'Enter ${label.replaceAll(' *', '')}',
+            hintText: 'enter_hint'.tr(namedArgs: {'field': label.replaceAll(' *', '')}),
             hintStyle: TextStyle(color: AppColors.greyText.withValues(alpha: 0.5), fontSize: 15.sp),
             filled: true,
             fillColor: const Color(0xFFF2F4F7),
@@ -320,7 +389,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
               value: value,
               hint: isLoading 
                 ? SizedBox(height: 20.h, width: 20.h, child: const CircularProgressIndicator(strokeWidth: 2))
-                : Text('Select ${label.replaceAll(' *', '')}', style: TextStyle(color: AppColors.greyText.withValues(alpha: 0.5), fontSize: 15.sp)),
+                : Text('select_hint'.tr(namedArgs: {'field': label.replaceAll(' *', '')}), style: TextStyle(color: AppColors.greyText.withValues(alpha: 0.5), fontSize: 15.sp)),
               items: items.map((T item) => DropdownMenuItem<T>(value: item, child: Text(itemLabel != null ? itemLabel(item) : item.toString(), style: TextStyle(fontSize: 15.sp)))).toList(),
               onChanged: isLoading ? null : onChanged,
             ),
@@ -356,7 +425,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 Icon(Icons.calendar_today_outlined, color: AppColors.greyText),
                 SizedBox(width: 12.w),
                 Text(
-                  _checkInDate == null ? 'Select Date' : '${_checkInDate!.day}/${_checkInDate!.month}/${_checkInDate!.year}',
+                  _checkInDate == null ? 'select_date'.tr() : '${_checkInDate!.day}/${_checkInDate!.month}/${_checkInDate!.year}',
                   style: TextStyle(color: _checkInDate == null ? AppColors.greyText.withValues(alpha: 0.5) : AppColors.darkText, fontSize: 15.sp),
                 ),
               ],

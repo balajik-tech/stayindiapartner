@@ -55,18 +55,42 @@ class AmenityItemModel extends AmenityItem {
   }
 }
 
+class CustomRuleModel extends CustomRule {
+  const CustomRuleModel({required super.text, super.photo});
+
+  factory CustomRuleModel.fromJson(Map<String, dynamic> json) {
+    return CustomRuleModel(
+      text: json['text'] ?? '',
+      photo: json['photo'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'text': text,
+      'photo': photo,
+    };
+  }
+}
+
 class HouseRulesModel extends HouseRules {
   const HouseRulesModel({
     required super.entryTime,
     required super.visitorPolicy,
     required super.otherRules,
+    required super.penaltyDate,
+    required super.customRules,
   });
 
   factory HouseRulesModel.fromJson(Map<String, dynamic> json) {
     return HouseRulesModel(
-      entryTime: json['entryTime'] ?? '',
-      visitorPolicy: json['visitorPolicy'] ?? '',
+      entryTime: json['entryTime'] ?? '10:00 PM',
+      visitorPolicy: json['visitorPolicy'] ?? 'Visitors allowed in common areas until 8:00 PM.',
       otherRules: json['otherRules'] ?? '',
+      penaltyDate: json['penaltyDate'] ?? 7,
+      customRules: (json['customRules'] as List<dynamic>? ?? [])
+          .map((e) => CustomRuleModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

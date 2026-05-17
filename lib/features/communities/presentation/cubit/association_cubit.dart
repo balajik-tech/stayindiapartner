@@ -1,3 +1,4 @@
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stayindia_owner/features/communities/domain/usecases/community_usecases.dart';
@@ -59,20 +60,31 @@ class AssociationSuccess extends AssociationState {}
 
 class AssociationCubit extends Cubit<AssociationState> {
   final GetAssociationsUseCase _getAssociations;
+  final SearchAssociationsUseCase _searchAssociations;
   final JoinAssociationUseCase _joinAssociation;
   final CreateAssociationUseCase _createAssociation;
   final ProfileCubit _profileCubit;
 
   AssociationCubit({
     required GetAssociationsUseCase getAssociationsUseCase,
+    required SearchAssociationsUseCase searchAssociationsUseCase,
     required JoinAssociationUseCase joinAssociationUseCase,
     required CreateAssociationUseCase createAssociationUseCase,
     required ProfileCubit profileCubit,
   })  : _getAssociations = getAssociationsUseCase,
+        _searchAssociations = searchAssociationsUseCase,
         _joinAssociation = joinAssociationUseCase,
         _createAssociation = createAssociationUseCase,
         _profileCubit = profileCubit,
         super(AssociationInitial());
+
+  Future<List<Map<String, dynamic>>> searchAssociations(String query) async {
+    try {
+      return await _searchAssociations(query);
+    } catch (e) {
+      return [];
+    }
+  }
 
   Future<void> createAssociation({
     required String name,
@@ -97,7 +109,7 @@ class AssociationCubit extends Cubit<AssociationState> {
         await loadLocals(parentId);
       }
     } catch (e) {
-      emit(AssociationError(e.toString()));
+      emit(AssociationError(GlobalErrorMapper.map(e).message));
     }
   }
 
@@ -107,7 +119,7 @@ class AssociationCubit extends Cubit<AssociationState> {
       final states = await _getAssociations(level: 'STATE');
       emit(AssociationLoaded(states: states));
     } catch (e) {
-      emit(AssociationError(e.toString()));
+      emit(AssociationError(GlobalErrorMapper.map(e).message));
     }
   }
 
@@ -119,7 +131,7 @@ class AssociationCubit extends Cubit<AssociationState> {
         final districts = await _getAssociations(parentId: stateId, level: 'DISTRICT');
         emit(currentState.copyWith(districts: districts, wards: [], locals: [], isSubLoading: false));
       } catch (e) {
-        emit(AssociationError(e.toString()));
+        emit(AssociationError(GlobalErrorMapper.map(e).message));
       }
     }
   }
@@ -132,7 +144,7 @@ class AssociationCubit extends Cubit<AssociationState> {
         final wards = await _getAssociations(parentId: districtId, level: 'WARD');
         emit(currentState.copyWith(wards: wards, locals: [], isSubLoading: false));
       } catch (e) {
-        emit(AssociationError(e.toString()));
+        emit(AssociationError(GlobalErrorMapper.map(e).message));
       }
     }
   }
@@ -145,7 +157,7 @@ class AssociationCubit extends Cubit<AssociationState> {
         final locals = await _getAssociations(parentId: wardId, level: 'LOCAL');
         emit(currentState.copyWith(locals: locals, isSubLoading: false));
       } catch (e) {
-        emit(AssociationError(e.toString()));
+        emit(AssociationError(GlobalErrorMapper.map(e).message));
       }
     }
   }
@@ -157,7 +169,7 @@ class AssociationCubit extends Cubit<AssociationState> {
       await _profileCubit.loadProfile(); 
       emit(AssociationSuccess());
     } catch (e) {
-      emit(AssociationError(e.toString()));
+      emit(AssociationError(GlobalErrorMapper.map(e).message));
     }
   }
 }

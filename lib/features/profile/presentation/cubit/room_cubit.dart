@@ -260,7 +260,13 @@ class RoomCubit extends Cubit<RoomState> {
     if (state is RoomLoading) return;
     emit(RoomLoading());
     try {
-      final floorNumber = int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      int floorNumber = 0;
+      final nameUpper = floorName.toUpperCase();
+      if (nameUpper == 'GROUND_FLOOR' || nameUpper == 'GROUND FLOOR' || nameUpper == 'G' || nameUpper == '0') {
+        floorNumber = 0;
+      } else {
+        floorNumber = int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      }
       
       final List<RoomDetail> rooms = [];
       for (int i = 1; i <= roomCount; i++) {

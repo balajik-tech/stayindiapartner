@@ -17,6 +17,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/core/widgets/pattern_background.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 
 class TenantsPage extends StatefulWidget {
   const TenantsPage({super.key});
@@ -60,6 +61,11 @@ class _TenantsPageState extends State<TenantsPage> {
     if (hostelId != null) {
       context.read<TenantCubit>().loadTenants(hostelId);
       context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
+      try {
+        context.read<DashboardCubit>().fetchDashboardData(hostelId);
+      } catch (e) {
+        debugPrint('Error refreshing dashboard in TenantsPage: $e');
+      }
     }
   }
 
@@ -209,7 +215,7 @@ class _TenantsPageState extends State<TenantsPage> {
       child: GestureDetector(
         onTap: () => setState(() => _selectedTabIndex = index),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12.h),
+          padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primaryBlue : Colors.transparent,
             borderRadius: BorderRadius.circular(12.r),
@@ -231,13 +237,19 @@ class _TenantsPageState extends State<TenantsPage> {
                 size: 16.sp,
                 color: isSelected ? Colors.white : AppColors.textSecondary,
               ),
-              SizedBox(width: 8.w),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
-                  fontSize: 12.sp,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+              SizedBox(width: 6.w),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                      fontSize: 12.sp,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -384,9 +396,9 @@ class _TenantsPageState extends State<TenantsPage> {
                 return SliverFillRemaining(
                   child: _buildEmptyState(
                     icon: isForbidden ? Icons.lock_person_rounded : Icons.error_outline_rounded,
-                    title: isForbidden ? 'access_denied'.tr() : 'Something went wrong',
+                    title: isForbidden ? 'access_denied'.tr() : 'something_wrong'.tr(),
                     message: isForbidden 
-                      ? 'You don\'t have permission for this property or your session is stale. Please try refreshing or re-selecting the property.'
+                      ? 'access_denied_msg'.tr()
                       : state.message,
                   ),
                 );
@@ -473,11 +485,15 @@ class _TenantsPageState extends State<TenantsPage> {
   Widget? _buildFAB(BuildContext context) {
     if (_selectedTabIndex == 0) {
       return FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddTenantPage()),
           );
+          if (!context.mounted) return;
+          if (result == true) {
+            _loadData();
+          }
         },
         backgroundColor: AppColors.primaryBlue,
         elevation: 8,

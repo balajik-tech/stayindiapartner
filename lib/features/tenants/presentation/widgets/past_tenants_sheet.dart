@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/injection_container.dart';
@@ -73,7 +74,7 @@ class PastTenantsSheet extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Past Occupants',
+                              'past_occupants'.tr(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -83,7 +84,7 @@ class PastTenantsSheet extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Hostel Stay History',
+                              'hostel_stay_history'.tr(),
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 color: AppColors.greyText,
@@ -128,7 +129,7 @@ class PastTenantsSheet extends StatelessWidget {
                               ),
                               SizedBox(height: 16.h),
                               Text(
-                                'No history found',
+                                'no_history_found'.tr(),
                                 style: TextStyle(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.w600,
@@ -137,7 +138,7 @@ class PastTenantsSheet extends StatelessWidget {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                'Previous tenant records will appear here',
+                                'previous_tenant_records'.tr(),
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   color: AppColors.greyText.withValues(alpha: 0.7),

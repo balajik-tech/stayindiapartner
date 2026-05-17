@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/utils/image_utils.dart';
 
@@ -14,8 +14,10 @@ import 'package:stayindia_owner/features/auth/domain/usecases/delete_account_use
 import 'package:stayindia_owner/features/auth/domain/usecases/has_active_session_usecase.dart';
 import 'package:stayindia_owner/core/utils/error_helper.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
+import 'package:stayindia_owner/core/services/cache_service.dart';
 import 'package:stayindia_owner/features/auth/domain/repositories/auth_repository.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
+import 'package:stayindia_owner/core/services/session_reset_coordinator.dart';
 
 part 'auth_state.dart';
 
@@ -30,6 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   final AuthRepository _repository;
   final NotificationService _notificationService;
+  final CacheService _cacheService;
 
   AuthCubit({
     required RequestOtpUseCase requestOtpUseCase,
@@ -41,6 +44,7 @@ class AuthCubit extends Cubit<AuthState> {
     required DeleteAccountUseCase deleteAccountUseCase,
     required AuthRepository repository,
     required NotificationService notificationService,
+    required CacheService cacheService,
   }) : _requestOtp = requestOtpUseCase,
        _verifyOtp = verifyOtpUseCase,
        _getCurrentOwner = getCurrentOwnerUseCase,
@@ -50,7 +54,10 @@ class AuthCubit extends Cubit<AuthState> {
        _deleteAccount = deleteAccountUseCase,
        _repository = repository,
        _notificationService = notificationService,
-       super(AuthInitial());
+       _cacheService = cacheService,
+       super(AuthInitial()) {
+    AppLogger.debug('AuthCubit initialized with ${_cacheService.runtimeType}');
+  }
 
   Future<void> _syncDeviceToken() async {
     try {
@@ -82,7 +89,9 @@ class AuthCubit extends Cubit<AuthState> {
       AppLogger.info('Session restored for owner: ${owner.id}');
     } on DioException catch (e) {
       final code = e.response?.statusCode;
-      if (code == 401 || code == 403 || code == 404) {
+      final responseStr = e.response?.data?.toString() ?? '';
+      final isUserNotFound = responseStr.contains('User not found') || responseStr.contains('Owner not found');
+      if (code == 401 || code == 403 || code == 404 || isUserNotFound) {
         await _logout();
         emit(AuthUnauthenticated());
       } else {
@@ -147,18 +156,29 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       ProfileParams finalParams = params;
       if (params.avatarPath != null) {
-        final compressed = await ImageUtils.compressImage(
-          File(params.avatarPath!),
-        );
-        if (compressed != null) {
+        final imageFile = File(params.avatarPath!);
+        if (!imageFile.existsSync()) {
+          AppLogger.warning('Avatar file no longer exists at ${params.avatarPath}. Submitting without image.');
           finalParams = ProfileParams(
             firstName: params.firstName,
             lastName: params.lastName,
             email: params.email,
             phone: params.phone,
             address: params.address,
-            avatarPath: compressed.path,
+            avatarPath: null,
           );
+        } else {
+          final compressed = await ImageUtils.compressImage(imageFile);
+          if (compressed != null) {
+            finalParams = ProfileParams(
+              firstName: params.firstName,
+              lastName: params.lastName,
+              email: params.email,
+              phone: params.phone,
+              address: params.address,
+              avatarPath: compressed.path,
+            );
+          }
         }
       }
       final owner = await _completeProfile(finalParams);
@@ -173,22 +193,26 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> logout() async {
     try {
       await _logout();
-    } catch (_) {
-    } finally {
-      emit(AuthUnauthenticated());
-      AppLogger.info('Owner logged out.');
+    } catch (e) {
+      AppLogger.error('Logout error: $e');
     }
+    await SessionResetCoordinator.resetSession();
+    emit(AuthUnauthenticated());
+    SessionResetCoordinator.postResetCleanup();
+    AppLogger.info('Owner logged out.');
   }
 
   Future<void> deleteAccount() async {
     emit(AuthLoading());
     try {
       await _deleteAccount();
-      emit(AuthUnauthenticated());
     } catch (e) {
-      AppLogger.error('deleteAccount failed', e);
-      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+      AppLogger.error('deleteAccount failed: $e');
     }
+    await SessionResetCoordinator.resetSession();
+    emit(AuthUnauthenticated());
+    SessionResetCoordinator.postResetCleanup();
+    AppLogger.info('Owner account deleted.');
   }
 
   Future<void> refreshProfile() async {

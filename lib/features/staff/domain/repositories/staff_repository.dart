@@ -11,6 +11,9 @@ abstract class StaffRepository {
     String? password,
     required String role,
     Map<String, dynamic>? permissions,
+    double salary = 0.0,
+    String? photo,
+    Map<String, dynamic>? paymentDetails,
   });
   Future<void> updateStaff(String id, Map<String, dynamic> data);
   Future<void> logActivity(String id, String action, String? details);

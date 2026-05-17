@@ -463,8 +463,16 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
 
   Widget _buildDropdown(String value, List<String> items, void Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
+      isExpanded: true,
       initialValue: value,
-      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+      items: items.map((e) => DropdownMenuItem(
+        value: e,
+        child: Text(
+          e,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+      )).toList(),
       onChanged: onChanged,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),

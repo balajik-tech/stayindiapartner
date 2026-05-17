@@ -19,6 +19,7 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
 
@@ -164,28 +165,39 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Stay India',
-                style: TextStyle(
-                  fontSize: 32.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.darkText,
-                  letterSpacing: -0.5,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'app_name'.tr(),
+                    style: TextStyle(
+                      fontSize: 32.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
                 ),
-              ),
-              Text(
-                'PG Owners Community',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  color: AppColors.greyText.withValues(alpha: 0.8),
-                  fontWeight: FontWeight.w600,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'pg_owners_community'.tr(),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      color: AppColors.greyText.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+          SizedBox(width: 16.w),
           Row(
             children: [
               _buildNotificationAction(),
@@ -257,7 +269,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        'Explore',
+                        'explore'.tr(),
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
@@ -377,7 +389,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   maxLines: 4,
                   minLines: 1,
                   decoration: InputDecoration(
-                    hintText: _isPoll ? 'Ask a question...' : 'Share your thoughts...',
+                    hintText: _isPoll ? 'ask_question'.tr() : 'share_your_thoughts'.tr(),
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16.sp, fontWeight: FontWeight.w500),
                     border: InputBorder.none,
                     counterText: '',
@@ -398,6 +410,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     width: double.infinity,
                     height: 180.h,
                     fit: BoxFit.cover,
+                    cacheWidth: 600,
                   ),
                 ),
                 Positioned(
@@ -429,14 +442,14 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Poll Options', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText)),
+                    Text('poll_options'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText)),
                     TextButton(
                       onPressed: () {
                         setState(() {
                           _isPoll = false;
                         });
                       },
-                      child: Text('Cancel Poll', style: TextStyle(fontSize: 12.sp, color: Colors.red)),
+                      child: Text('cancel_poll'.tr(), style: TextStyle(fontSize: 12.sp, color: Colors.red)),
                     ),
                   ],
                 ),
@@ -458,7 +471,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                             child: TextField(
                               controller: _pollOptionControllers[index],
                               decoration: InputDecoration(
-                                hintText: 'Option ${index + 1}',
+                                hintText: 'option_n'.tr(namedArgs: {'n': '${index + 1}'}),
                                 hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
                                 border: InputBorder.none,
                               ),
@@ -490,7 +503,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       });
                     },
                     icon: Icon(Icons.add, size: 18.sp, color: AppColors.primaryBlue),
-                    label: Text('Add Option', style: TextStyle(fontSize: 13.sp, color: AppColors.primaryBlue, fontWeight: FontWeight.w700)),
+                    label: Text('add_option'.tr(), style: TextStyle(fontSize: 13.sp, color: AppColors.primaryBlue, fontWeight: FontWeight.w700)),
                   ),
               ],
             ),
@@ -558,7 +571,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                                 child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                               )
                             : Text(
-                                'Post',
+                                'post_btn'.tr(),
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.sp),
                               ),
                       );
@@ -596,12 +609,12 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     Icon(Icons.feed_outlined, size: 64.sp, color: Colors.grey.shade300),
                     SizedBox(height: 16.h),
                     Text(
-                      'No posts yet',
+                      'no_posts_yet'.tr(),
                       style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Be the first one to share your thoughts with the community!',
+                      'be_first_share'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
                     ),
@@ -651,14 +664,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               padding: EdgeInsets.all(32.w),
               child: Column(
                 children: [
-                  Icon(Icons.error_outline_rounded, size: 48.sp, color: Colors.red.shade300),
+                  Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
                   SizedBox(height: 16.h),
-                  Text(state.message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.greyText)),
-                  SizedBox(height: 16.h),
-                  ElevatedButton(
-                    onPressed: () => context.read<SocialFeedCubit>().loadFeed(),
-                    child: const Text('Retry'),
-                  ),
+                  Text('something_wrong'.tr()),
                 ],
               ),
             ),
@@ -746,7 +754,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Feed Updates',
+                        'feed_updates'.tr(),
                         style: GoogleFonts.dmSans(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w800,
@@ -760,14 +768,14 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                             setModalState(() {});
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('All posts marked as read!'),
-                                duration: Duration(seconds: 1),
+                              SnackBar(
+                                content: Text('all_read_success'.tr()),
+                                duration: const Duration(seconds: 1),
                               ),
                             );
                           },
                           child: Text(
-                            'Mark all read',
+                            'mark_all_read'.tr(),
                             style: TextStyle(
                               color: AppColors.primaryBlue,
                               fontWeight: FontWeight.w700,

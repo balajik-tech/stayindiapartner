@@ -5,7 +5,7 @@ import '../utils/logger.dart';
 class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    final appException = mapDioException(err);
+    final appException = GlobalErrorMapper.map(err);
     
     AppLogger.error(
       '[NETWORK ERROR] ${err.requestOptions.method} ${err.requestOptions.uri}\n'

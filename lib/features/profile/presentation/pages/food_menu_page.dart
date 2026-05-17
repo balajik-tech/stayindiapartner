@@ -9,6 +9,8 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/presentation/cubit/food_menu_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/widgets/add_food_item_sheet.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class FoodMenuPage extends StatefulWidget {
   const FoodMenuPage({super.key});
@@ -28,6 +30,7 @@ class _FoodMenuPageState extends State<FoodMenuPage>
   final List<String> _mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 
   final Map<String, Map<String, List<FoodItem>>> _menuData = {};
+  final bool _isApplyingTemplate = false;
 
   @override
   void initState() {
@@ -93,6 +96,7 @@ class _FoodMenuPageState extends State<FoodMenuPage>
     await _cubit.saveMenu(menu);
   }
 
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -102,9 +106,7 @@ class _FoodMenuPageState extends State<FoodMenuPage>
           if (state is FoodMenuLoaded) {
             _applyMenuToLocal(state.menu);
           } else if (state is FoodMenuSaved) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Menu saved successfully')),
-            );
+            // Success snackbar handled in specific cases
           } else if (state is FoodMenuError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message), backgroundColor: Colors.red),
@@ -112,60 +114,45 @@ class _FoodMenuPageState extends State<FoodMenuPage>
           }
         },
         child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: AppColors.darkText),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              'Food Menu',
-              style: TextStyle(
-                color: AppColors.darkText,
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            bottom: PreferredSize(
-              preferredSize: Size.fromHeight(60.h),
-              child: Column(
+          backgroundColor: const Color(0xFFF8FAFC),
+          appBar: _buildAppBar(),
+          body: Stack(
+            children: [
+              Column(
                 children: [
                   _buildDaySelector(),
-                  Divider(
-                    height: 1,
-                    color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+                  _buildMealTypeTabs(),
+                  Expanded(
+                    child: BlocBuilder<FoodMenuCubit, FoodMenuState>(
+                      builder: (context, state) {
+                        if (state is FoodMenuLoading && !_isApplyingTemplate) {
+                          return ListView.builder(
+                            padding: EdgeInsets.symmetric(horizontal: 20.w),
+                            itemCount: 5,
+                            itemBuilder: (context, index) => const TenantCardSkeleton(),
+                          );
+                        }
+                        return TabBarView(
+                          controller: _mealTabController,
+                          children: _mealTypes
+                              .map((type) => _buildFoodList(type))
+                              .toList(),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
-            ),
-          ),
-          body: Column(
-            children: [
-              _buildMealTypeTabs(),
-              Expanded(
-                child: BlocBuilder<FoodMenuCubit, FoodMenuState>(
-                  builder: (context, state) {
-                    if (state is FoodMenuLoading) {
-                      return ListView.builder(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        itemCount: 5,
-                        itemBuilder: (context, index) => const TenantCardSkeleton(),
-                      );
-                    }
-                    return TabBarView(
-                      controller: _mealTabController,
-                      children: _mealTypes
-                          .map((type) => _buildFoodList(type))
-                          .toList(),
-                    );
-                  },
+              if (_isApplyingTemplate)
+                Container(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  child: const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                 ),
-              ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: FloatingActionButton.extended(
             onPressed: () => AddFoodItemSheet.show(
               context,
               day: _days[_selectedDayIndex],
@@ -176,73 +163,96 @@ class _FoodMenuPageState extends State<FoodMenuPage>
                 setState(() {
                   _menuData[day]![mealType]!.add(FoodItem(
                     name: itemData['name'],
-                    desc: itemData['desc'],
-                    price: itemData['price'],
-                    isVeg: itemData['isVeg'],
-                    isActive: itemData['isActive'],
+                    desc: itemData['description'] ?? {},
+                    price: itemData['price'] ?? 0.0,
+                    isVeg: itemData['foodType'] == 'VEG',
+                    isActive: itemData['isAvailable'] ?? true,
                   ));
                 });
                 _saveCurrentDay();
               },
             ),
             backgroundColor: AppColors.primaryBlue,
-            child: const Icon(Icons.add, color: Colors.white),
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: Text(StringUtils.translate('add_dish', context: context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.white)),
           ),
         ),
       ),
     );
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: true,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20.sp),
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: Text(
+        StringUtils.translate('weekly_food_menu', context: context),
+        style: TextStyle(
+          color: AppColors.darkText,
+          fontSize: 18.sp,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+
+
   Widget _buildDaySelector() {
     return Container(
-      height: 50.h,
-      padding: EdgeInsets.symmetric(vertical: 4.h),
-      child: ListView.builder(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
-        itemCount: _days.length,
-        itemBuilder: (context, index) {
-          final isSelected = _selectedDayIndex == index;
-          return GestureDetector(
-            onTap: () {
-              setState(() => _selectedDayIndex = index);
-              _loadDay();
-            },
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 6.w),
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryBlue : Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(
-                  color: isSelected ? AppColors.primaryBlue : AppColors.roomCardBorder,
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Row(
+          children: List.generate(_days.length, (index) {
+            final isSelected = _selectedDayIndex == index;
+            return GestureDetector(
+              onTap: () {
+                setState(() => _selectedDayIndex = index);
+                _loadDay();
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: EdgeInsets.only(right: 12.w),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primaryBlue : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: isSelected ? [
+                    BoxShadow(color: AppColors.primaryBlue.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
+                  ] : [],
+                ),
+                child: Text(
+                  StringUtils.translate('day_${_dayKeys[index]}', context: context),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: isSelected ? Colors.white : const Color(0xFF64748B),
+                  ),
                 ),
               ),
-              child: Text(
-                _days[index],
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.white : AppColors.darkText,
-                ),
-              ),
-            ),
-          );
-        },
+            );
+          }),
+        ),
       ),
     );
   }
 
   Widget _buildMealTypeTabs() {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      color: Colors.white,
+      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.h),
       child: Container(
         padding: EdgeInsets.all(4.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: AppColors.roomCardBorder),
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(16.r),
         ),
         child: TabBar(
           controller: _mealTabController,
@@ -250,21 +260,17 @@ class _FoodMenuPageState extends State<FoodMenuPage>
           dividerColor: Colors.transparent,
           indicator: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8.r),
+            borderRadius: BorderRadius.circular(12.r),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
             ],
           ),
-          labelColor: AppColors.darkText,
-          unselectedLabelColor: AppColors.greyText,
-          labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-          unselectedLabelStyle: TextStyle(fontSize: 13.sp),
+          labelColor: AppColors.primaryBlue,
+          unselectedLabelColor: const Color(0xFF64748B),
+          labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900),
+          unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
           labelPadding: EdgeInsets.zero,
-          tabs: _mealTypes.map((type) => Tab(text: type)).toList(),
+          tabs: _mealTypes.map((type) => Tab(text: StringUtils.translate('meal_${type.toLowerCase()}', context: context))).toList(),
         ),
       ),
     );
@@ -279,86 +285,51 @@ class _FoodMenuPageState extends State<FoodMenuPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.restaurant_menu, size: 48.sp,
-                color: AppColors.greyText.withValues(alpha: 0.5)),
+            Container(
+              padding: EdgeInsets.all(24.r),
+              decoration: BoxDecoration(color: const Color(0xFFF1F5F9), shape: BoxShape.circle),
+              child: Icon(Icons.restaurant_menu_rounded, size: 40.sp, color: const Color(0xFF94A3B8)),
+            ),
             SizedBox(height: 16.h),
-            Text('No items added for this meal',
-                style: TextStyle(fontSize: 15.sp, color: AppColors.greyText)),
+            Text(StringUtils.translate('no_dishes_for_meal', namedArgs: {'meal': StringUtils.translate('meal_${mealType.toLowerCase()}', context: context)}, context: context),
+                style: TextStyle(fontSize: 15.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+            SizedBox(height: 8.h),
+            Text(StringUtils.translate('add_dish_instruction', context: context),
+                style: TextStyle(fontSize: 12.sp, color: const Color(0xFFCBD5E1), fontWeight: FontWeight.w500)),
           ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 100.h),
+      physics: const BouncingScrollPhysics(),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
         return Container(
           margin: EdgeInsets.only(bottom: 16.h),
-          padding: EdgeInsets.all(16.w),
+          padding: EdgeInsets.all(16.r),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: AppColors.roomCardBorder),
+            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  _buildVegIndicator(item.isVeg),
+                  SizedBox(width: 10.w),
                   Expanded(
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            item.name,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkText,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        _buildCategoryBadge(item.isVeg),
-                      ],
+                    child: Text(
+                      item.getName(context.locale.languageCode),
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
                     ),
                   ),
-                  Transform.scale(
-                    scale: 0.8,
-                    child: Switch(
-                      value: item.isActive,
-                      onChanged: (val) {
-                      },
-                      activeThumbColor: Colors.white,
-                      activeTrackColor: AppColors.primaryBlue,
-                      inactiveTrackColor: const Color(0xFFEAECF0),
-                    ),
-                  ),
-                ],
-              ),
-              if (item.desc.isNotEmpty) ...[
-                SizedBox(height: 4.h),
-                Text(item.desc,
-                    style: TextStyle(fontSize: 13.sp, color: AppColors.greyText)),
-              ],
-              SizedBox(height: 8.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (item.price > 0)
-                    Text(
-                      '${item.price}',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryBlue,
-                      ),
-                    )
-                  else
-                    const SizedBox.shrink(),
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -366,13 +337,16 @@ class _FoodMenuPageState extends State<FoodMenuPage>
                       });
                       _saveCurrentDay();
                     },
-                    icon: Icon(Icons.delete_outline,
-                        size: 20.sp, color: Colors.red.withValues(alpha: 0.7)),
+                    icon: Icon(Icons.delete_outline_rounded, size: 20.sp, color: Colors.redAccent.withValues(alpha: 0.7)),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
                 ],
               ),
+              if (item.getDesc(context.locale.languageCode).isNotEmpty) ...[
+                SizedBox(height: 6.h),
+                Text(item.getDesc(context.locale.languageCode), style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500, height: 1.4)),
+              ],
             ],
           ),
         );
@@ -380,33 +354,19 @@ class _FoodMenuPageState extends State<FoodMenuPage>
     );
   }
 
-  Widget _buildCategoryBadge(bool isVeg) {
+  Widget _buildVegIndicator(bool isVeg) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+      width: 14.w,
+      height: 14.w,
+      padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
-        color: isVeg ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: isVeg
-              ? Colors.green.withValues(alpha: 0.3)
-              : Colors.red.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: isVeg ? Colors.green : Colors.red, width: 1.5),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.eco, size: 10.sp,
-              color: isVeg ? Colors.green : Colors.red),
-          SizedBox(width: 4.w),
-          Text(
-            isVeg ? 'Veg' : 'Non-Veg',
-            style: TextStyle(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.bold,
-              color: isVeg ? Colors.green : Colors.red,
-            ),
-          ),
-        ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: isVeg ? Colors.green : Colors.red,
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }

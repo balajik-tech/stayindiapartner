@@ -62,6 +62,7 @@ abstract class CommunityRepository {
     String? parentId,
     String? description,
   });
+  Future<List<Map<String, dynamic>>> searchAssociations(String query);
   Future<void> updateOwnerCommunity({
     required String communityId,
     String? name,

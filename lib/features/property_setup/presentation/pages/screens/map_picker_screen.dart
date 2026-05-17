@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,7 +17,7 @@ class MapPickerScreen extends StatefulWidget {
 class _MapPickerScreenState extends State<MapPickerScreen> {
   late LatLng _selectedLocation;
   final MapController _mapController = MapController();
-  String _currentAddress = "Loading address...";
+  String _currentAddress = "loading_address".tr();
   bool _isLoadingLocation = false;
 
   @override
@@ -37,7 +38,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       }
     } catch (e) {
       setState(() {
-        _currentAddress = "Could not fetch address";
+        _currentAddress = "err_fetch_address".tr();
       });
     }
   }
@@ -119,7 +120,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Confirm Location',
+                    'confirm_location'.tr(),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w900,
@@ -158,7 +159,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Confirm Pin Location',
+                        'confirm_pin_location'.tr(),
                         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900),
                       ),
                     ),
@@ -184,7 +185,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
-                      'Tap anywhere on the map to move the pin',
+                      'map_tap_hint'.tr(),
                       style: TextStyle(fontSize: 13.sp, color: const Color(0xFF1E3A8A), fontWeight: FontWeight.w700),
                     ),
                   ),
@@ -225,7 +226,17 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location services are disabled.')),
+            SnackBar(
+              content: Text('location_services_disabled'.tr()),
+              behavior: SnackBarBehavior.floating,
+              action: SnackBarAction(
+                label: 'settings'.tr(),
+                textColor: Colors.white,
+                onPressed: () async {
+                  await Geolocator.openLocationSettings();
+                },
+              ),
+            ),
           );
         }
         return;
@@ -237,7 +248,17 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Location permissions are denied')),
+              SnackBar(
+                content: Text('location_permission_denied'.tr()),
+                behavior: SnackBarBehavior.floating,
+                action: SnackBarAction(
+                  label: 'settings'.tr(),
+                  textColor: Colors.white,
+                  onPressed: () async {
+                    await Geolocator.openAppSettings();
+                  },
+                ),
+              ),
             );
           }
           return;
@@ -247,7 +268,17 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are permanently denied.')),
+            SnackBar(
+              content: Text('location_permission_denied_forever'.tr()),
+              behavior: SnackBarBehavior.floating,
+              action: SnackBarAction(
+                label: 'settings'.tr(),
+                textColor: Colors.white,
+                onPressed: () async {
+                  await Geolocator.openAppSettings();
+                },
+              ),
+            ),
           );
         }
         return;
@@ -263,8 +294,31 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       _getAddress(latLng);
     } catch (e) {
       if (mounted) {
+        SnackBarAction? action;
+        if (e.toString().contains('Location services are disabled')) {
+          action = SnackBarAction(
+            label: 'settings'.tr(),
+            textColor: Colors.white,
+            onPressed: () async {
+              await Geolocator.openLocationSettings();
+            },
+          );
+        } else if (e.toString().contains('denied')) {
+          action = SnackBarAction(
+            label: 'settings'.tr(),
+            textColor: Colors.white,
+            onPressed: () async {
+              await Geolocator.openAppSettings();
+            },
+          );
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error fetching location: $e')),
+          SnackBar(
+            content: Text('Error fetching location: $e'),
+            behavior: SnackBarBehavior.floating,
+            action: action,
+          ),
         );
       }
     } finally {

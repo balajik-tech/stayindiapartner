@@ -16,13 +16,23 @@ class FoodMenuModel extends FoodMenu {
       if (mealData is Map) {
         final items = mealData['items'];
         if (items is List) {
-          return items.whereType<Map>().map((e) => FoodItem(
-                name: e['name']?.toString() ?? '',
-                desc: e['description']?.toString() ?? '',
-                price: (e['price'] is num) ? (e['price'] as num).toDouble() : double.tryParse(e['price']?.toString() ?? '0') ?? 0.0,
-                isVeg: e['foodType'] == 'VEG' || e['foodType'] == null,
-                isActive: e['isAvailable'] ?? true,
-              )).where((item) => item.name.isNotEmpty).toList();
+          return items.whereType<Map>().map((e) {
+            Map<String, String> parseMap(dynamic val) {
+              if (val is Map) {
+                return val.map((k, v) => MapEntry(k.toString(), v.toString()));
+              }
+              if (val is String) return {'en': val};
+              return {};
+            }
+
+            return FoodItem(
+              name: parseMap(e['name']),
+              desc: parseMap(e['description']),
+              price: (e['price'] is num) ? (e['price'] as num).toDouble() : double.tryParse(e['price']?.toString() ?? '0') ?? 0.0,
+              isVeg: e['foodType'] == 'VEG' || e['foodType'] == null,
+              isActive: e['isAvailable'] ?? true,
+            );
+          }).where((item) => item.name.isNotEmpty).toList();
         }
       }
       return [];

@@ -299,6 +299,7 @@ class AuthDropdown<T> extends StatelessWidget {
         ),
         SizedBox(height: 8.h),
         DropdownButtonFormField<T>(
+          isExpanded: true,
           initialValue: value,
           items: items,
           onChanged: onChanged,

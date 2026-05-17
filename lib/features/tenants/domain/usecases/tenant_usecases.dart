@@ -30,7 +30,7 @@ class GetTenantsForHostelUseCase {
 
   Future<List<TenantEntity>> call(String hostelId) {
     return repository
-        .getTenants(status: 'CHECKED_IN', limit: 200)
+        .getTenants(status: 'CHECKED_IN', limit: 200, hostelId: hostelId)
         .then((all) => all.where((t) => t.hostelId == hostelId).toList());
   }
 }

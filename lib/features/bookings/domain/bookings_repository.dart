@@ -4,8 +4,8 @@ abstract class BookingsRepository {
   Future<List<Booking>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId});
   Future<List<PendingBooking>> getPendingBookings({int page = 1, int limit = 10});
   Future<List<PendingBooking>> getConfirmedBookings({int page = 1, int limit = 10});
-  Future<ScanBookingResponse> scanBooking(String token, {String? hostelId});
-  Future<ScanBookingResponse> manualCheckin(String accessCode, {String? hostelId});
+  Future<ScanBookingResponse> scanBooking(String token, {String? hostelId, String? bookingId});
+  Future<ScanBookingResponse> manualCheckin(String accessCode, {String? hostelId, String? bookingId});
   Future<ScanBookingResponse> getCheckinData({String? bookingId, String? accessCode, String? hostelId});
   Future<void> assignRoom(String bookingId, String roomId, String bedNumber);
   Future<void> finalizeCheckin({

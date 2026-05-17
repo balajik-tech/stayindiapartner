@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/profile/core/food_constants.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class AddFoodItemSheet extends StatefulWidget {
   final String day;
@@ -40,12 +43,82 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
   late TextEditingController _nameController;
   late TextEditingController _descController;
   bool _isVeg = true;
+  Map<String, String> _nameTranslations = {};
+  Map<String, String> _descTranslations = {};
+  List<Map<String, dynamic>> _suggestions = [];
+  bool _showSuggestions = false;
+  final LayerLink _layerLink = LayerLink();
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
     _descController = TextEditingController();
+    _nameController.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() {
+    final query = _nameController.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      setState(() {
+        _suggestions = [];
+        _showSuggestions = false;
+      });
+      return;
+    }
+
+    final queryWords = query.split(' ').where((w) => w.isNotEmpty).toList();
+    if (queryWords.isEmpty) return;
+
+    final List<Map<String, dynamic>> allMatches = [];
+    
+    // Search across ALL categories in the food library
+    FoodConstants.foodLibrary.forEach((category, items) {
+      for (final item in items) {
+        final nameMap = item['name'] as Map<String, dynamic>;
+        final descMap = (item['desc'] ?? {}) as Map<String, dynamic>;
+        
+        // Check if all query words are present in any localized name or description
+        bool matches = true;
+        for (final word in queryWords) {
+          bool wordFound = false;
+          // Search in names
+          if (nameMap.values.any((val) => val.toString().toLowerCase().contains(word))) {
+            wordFound = true;
+          }
+          // Search in descriptions
+          if (!wordFound && descMap.values.any((val) => val.toString().toLowerCase().contains(word))) {
+            wordFound = true;
+          }
+          
+          if (!wordFound) {
+            matches = false;
+            break;
+          }
+        }
+        
+        if (matches) {
+          // Avoid duplicates (same item might be in multiple categories, though unlikely in our current dataset)
+          final isDuplicate = allMatches.any((m) => m['name']['en'] == nameMap['en']);
+          if (!isDuplicate) {
+            allMatches.add({...item, 'originalCategory': category});
+          }
+        }
+      }
+    });
+
+    // Prioritize items from the current category
+    allMatches.sort((a, b) {
+      if (a['originalCategory'] == widget.mealType && b['originalCategory'] != widget.mealType) return -1;
+      if (a['originalCategory'] != widget.mealType && b['originalCategory'] == widget.mealType) return 1;
+      return 0;
+    });
+
+    setState(() {
+      _suggestions = allMatches.take(10).toList(); // Show top 10 matches
+      _showSuggestions = _suggestions.isNotEmpty;
+      debugPrint('Food Search Universal: query="$query", matches=${allMatches.length}, show=$_showSuggestions');
+    });
   }
 
   @override
@@ -55,10 +128,21 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
     super.dispose();
   }
 
+  void _selectFromLibrary(Map<String, dynamic> item) {
+    setState(() {
+      _nameTranslations = Map<String, String>.from(item['name']);
+      _descTranslations = Map<String, String>.from(item['desc'] ?? {});
+      final locale = context.locale.languageCode;
+      _nameController.text = _nameTranslations[locale] ?? _nameTranslations['en'] ?? '';
+      _descController.text = _descTranslations[locale] ?? _descTranslations['en'] ?? '';
+      _isVeg = item['isVeg'] ?? true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 0.8.sh,
+      height: 0.85.sh,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -70,51 +154,129 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
         children: [
           _buildHeader(),
           Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(24.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Adding to: ${widget.day}  ${widget.mealType}',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: AppColors.primaryBlue,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildLabel('Dish Name *'),
-                  _buildTextField(_nameController, hint: 'e.g. Idli Sambar'),
-                  SizedBox(height: 20.h),
-                  _buildLabel('Description'),
-                  _buildTextField(
-                    _descController,
-                    hint: 'e.g. Soft idlis with sambar & chutney',
-                    maxLines: 2,
-                  ),
-                  SizedBox(height: 20.h),
-                  Column(
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildLabel('Category'),
+                      SizedBox(height: 12.h),
+                      _buildLabel(StringUtils.translate('dish_name_label', context: context)),
+                      CompositedTransformTarget(
+                        link: _layerLink,
+                        child: _buildTextField(_nameController, hint: StringUtils.translate('dish_name_hint', context: context)),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildLabel(StringUtils.translate('dish_description_label', context: context)),
+                      _buildTextField(
+                        _descController,
+                        hint: StringUtils.translate('dish_description_hint', context: context),
+                        maxLines: 2,
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildLabel(StringUtils.translate('dish_category_label', context: context)),
                       Row(
                         children: [
-                          _buildCategoryOption('Veg', true),
+                          _buildCategoryOption(StringUtils.translate('veg', context: context), true),
                           SizedBox(width: 12.w),
-                          _buildCategoryOption('Non-Veg', false),
+                          _buildCategoryOption(StringUtils.translate('non_veg', context: context), false),
                         ],
                       ),
+                      SizedBox(height: 48.h),
+                      _buildSaveButton(),
                     ],
                   ),
-                  SizedBox(height: 48.h),
-                  _buildSaveButton(),
-                  SizedBox(height: 24.h),
-                ],
-              ),
+                ),
+                if (_showSuggestions)
+                  CompositedTransformFollower(
+                    link: _layerLink,
+                    showWhenUnlinked: false,
+                    offset: Offset(0, 56.h),
+                    child: Material(
+                      elevation: 12,
+                      shadowColor: Colors.black.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(16.r),
+                      color: Colors.white,
+                      child: Container(
+                        constraints: BoxConstraints(maxHeight: 300.h),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.r),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: _suggestions.map((item) => _buildSuggestionTile(item)).toList(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionTile(Map<String, dynamic> item) {
+    final locale = context.locale.languageCode;
+    final name = item['name'][locale] ?? item['name']['en'] ?? '';
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectFromLibrary(item);
+            _showSuggestions = false;
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+          ),
+          child: Row(
+            children: [
+              _buildVegIndicator(item['isVeg'] ?? true),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.darkText,
+                  ),
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, size: 12.sp, color: const Color(0xFFCBD5E1)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVegIndicator(bool isVeg) {
+    return Container(
+      width: 12.w,
+      height: 12.w,
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        border: Border.all(color: isVeg ? Colors.green : Colors.red, width: 1),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isVeg ? Colors.green : Colors.red,
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }
@@ -124,27 +286,33 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
     return GestureDetector(
       onTap: () => setState(() => _isVeg = isVeg),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: isSelected
               ? (isVeg ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE))
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8.r),
+              : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected
                 ? (isVeg ? Colors.green : Colors.red)
-                : AppColors.roomCardBorder,
+                : const Color(0xFFE2E8F0),
           ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w600,
-            color: isSelected
-                ? (isVeg ? Colors.green : Colors.red)
-                : AppColors.greyText,
-          ),
+        child: Row(
+          children: [
+             _buildVegIndicator(isVeg),
+             SizedBox(width: 8.w),
+             Text(
+              label,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: isSelected
+                    ? (isVeg ? Colors.green : Colors.red)
+                    : const Color(0xFF64748B),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -156,14 +324,33 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Add New Dish',
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkText,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  StringUtils.translate('add_dish_to_menu', context: context),
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkText,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  "${StringUtils.translate('day_${widget.day.toLowerCase()}', context: context)} • ${StringUtils.translate('meal_${widget.mealType.toLowerCase()}', context: context)}",
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+              ],
             ),
           ),
+          SizedBox(width: 8.w),
           IconButton(
             onPressed: () => Navigator.pop(context),
             icon: Icon(Icons.close, color: AppColors.greyText, size: 24.sp),
@@ -179,9 +366,9 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w600,
-          color: AppColors.darkText,
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF64748B),
         ),
       ),
     );
@@ -191,30 +378,28 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
     TextEditingController controller, {
     required String hint,
     int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
   }) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
-      keyboardType: keyboardType,
-      style: TextStyle(fontSize: 16.sp, color: AppColors.darkText),
+      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
+        hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 14.sp),
         filled: true,
-        fillColor: const Color(0xFFF9FAFB),
+        fillColor: const Color(0xFFF8FAFC),
         contentPadding:
             EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(color: AppColors.roomCardBorder),
+          borderRadius: BorderRadius.circular(14.r),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(color: AppColors.roomCardBorder),
+          borderRadius: BorderRadius.circular(14.r),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(14.r),
           borderSide: BorderSide(color: AppColors.primaryBlue),
         ),
       ),
@@ -227,34 +412,45 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
       child: ElevatedButton(
         onPressed: () {
           final name = _nameController.text.trim();
+          final desc = _descController.text.trim();
+          final locale = context.locale.languageCode;
+
           if (name.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please enter a dish name')),
+              SnackBar(content: Text(StringUtils.translate('please_enter_dish_name', context: context))),
             );
             return;
           }
+
+          // Update current locale translation before saving
+          if (_nameTranslations.isEmpty) _nameTranslations = {'en': name};
+          _nameTranslations[locale] = name;
+          
+          if (_descTranslations.isEmpty && desc.isNotEmpty) _descTranslations = {'en': desc};
+          if (desc.isNotEmpty) _descTranslations[locale] = desc;
+
           Navigator.pop(context);
           widget.onSave({
-            'name': name,
-            'desc': _descController.text.trim(),
+            'name': _nameTranslations,
+            'description': _descTranslations,
             'price': 0.0,
-            'isVeg': _isVeg,
-            'isActive': true,
+            'foodType': _isVeg ? 'VEG' : 'NON_VEG',
+            'isAvailable': true,
           });
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryBlue,
-          padding: EdgeInsets.symmetric(vertical: 16.h),
+          padding: EdgeInsets.symmetric(vertical: 18.h),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(18.r),
           ),
           elevation: 0,
         ),
         child: Text(
-          'Add to Menu',
+          StringUtils.translate('add_to_menu', context: context),
           style: TextStyle(
             fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
         ),

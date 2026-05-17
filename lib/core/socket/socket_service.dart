@@ -1,5 +1,7 @@
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'dart:async';
+import 'package:stayindia_owner/core/services/token_storage.dart';
+import 'package:stayindia_owner/injection_container.dart';
 import '../utils/logger.dart';
 
 class SocketService {
@@ -23,20 +25,37 @@ class SocketService {
   String? _lastRoomId;
   String? _lastUserId;
   String? _lastRole;
+  String? _currentToken;
 
   SocketService({required this.baseUrl});
 
-  void connect() {
-    AppLogger.debug(' Socket: Attempting to connect to $baseUrl');
+  Future<void> connect() async {
+    final token = await sl<TokenStorage>().getToken();
+
+    if (_socket != null) {
+      if (_currentToken == token && _socket!.connected) {
+        AppLogger.debug(' Socket: Already connected with active token. Skipping.');
+        return;
+      }
+      AppLogger.debug(' Socket: Token changed or socket disconnected. Re-initializing socket.');
+      _socket!.disconnect();
+      _socket = null;
+    }
+
+    _currentToken = token;
+    AppLogger.debug(' Socket: Attempting to connect to $baseUrl with token: ${token != null}');
     
     _socket = io.io(baseUrl, io.OptionBuilder()
       .setTransports(['websocket'])
+      .setAuth({
+        'token': token,
+        'appType': 'OWNER_APP',
+      })
       .enableAutoConnect()
       .enableReconnection()
       .setReconnectionDelay(2000)
       .setReconnectionAttempts(20)
       .build());
-
 
     _socket!.connect();
 
@@ -151,6 +170,9 @@ class SocketService {
   void disconnect() {
     _socket?.disconnect();
     _socket = null;
+    _lastRoomId = null;
+    _lastUserId = null;
+    _lastRole = null;
   }
 
   

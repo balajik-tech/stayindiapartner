@@ -4,7 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class FloorAccordion extends StatefulWidget {
   final String title;
   final String bedInfo;
-  final List<Widget> rooms;
+  final int itemCount;
+  final Widget Function(BuildContext context, int index) itemBuilder;
   final bool isInitialExpanded;
   final bool isGridView;
 
@@ -12,7 +13,8 @@ class FloorAccordion extends StatefulWidget {
     super.key,
     required this.title,
     required this.bedInfo,
-    required this.rooms,
+    required this.itemCount,
+    required this.itemBuilder,
     this.isInitialExpanded = false,
     this.isGridView = false,
   });
@@ -21,7 +23,7 @@ class FloorAccordion extends StatefulWidget {
   State<FloorAccordion> createState() => _FloorAccordionState();
 }
 
-class _FloorAccordionState extends State<FloorAccordion> {
+class _FloorAccordionState extends State<FloorAccordion> with SingleTickerProviderStateMixin {
   late bool _isExpanded;
 
   @override
@@ -67,21 +69,27 @@ class _FloorAccordionState extends State<FloorAccordion> {
                         ),
                       ),
                       SizedBox(width: 12.w),
-                      Text(
-                        widget.title,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1E293B),
+                      Flexible(
+                        child: Text(
+                          widget.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF1E293B),
+                          ),
                         ),
                       ),
                       SizedBox(width: 12.w),
-                      _buildBedInfo(widget.bedInfo),
+                      Flexible(
+                        child: _buildBedInfo(widget.bedInfo),
+                      ),
                       const Spacer(),
                       Container(
                         padding: EdgeInsets.all(4.r),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF1F5F9),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -98,39 +106,48 @@ class _FloorAccordionState extends State<FloorAccordion> {
               ),
             ),
           ),
-          if (_isExpanded)
-            Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
-              child: widget.isGridView
-                  ? LayoutBuilder(
-                      builder: (context, constraints) {
-                        final double width = constraints.maxWidth;
+          
+          // RepaintBoundary wrapping the expanded body to isolate paint operations
+          if (_isExpanded && widget.itemCount > 0)
+            RepaintBoundary(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
+                child: widget.isGridView
+                    ? LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double width = constraints.maxWidth;
 
-                        int crossAxisCount = 2;
-                        if (width > 900) {
-                          crossAxisCount = 4;
-                        } else if (width > 600) {
-                          crossAxisCount = 3;
-                        }
+                          int crossAxisCount = 2;
+                          if (width > 900) {
+                            crossAxisCount = 4;
+                          } else if (width > 600) {
+                            crossAxisCount = 3;
+                          }
 
-                        final double spacing = 16.w;
-                        final double itemWidth = (width - (crossAxisCount - 1) * spacing) / crossAxisCount;
+                          final double spacing = 16.w;
+                          final double itemWidth = (width - (crossAxisCount - 1) * spacing) / crossAxisCount;
 
-                        return Wrap(
-                          spacing: spacing,
-                          runSpacing: 16.h,
-                          children: widget.rooms.map((room) {
-                            return SizedBox(
-                              width: itemWidth,
-                              child: room,
-                            );
-                          }).toList(),
-                        );
-                      },
-                    )
-                  : Column(
-                      children: widget.rooms,
-                    ),
+                          return Wrap(
+                            spacing: spacing,
+                            runSpacing: 16.h,
+                            children: List.generate(widget.itemCount, (index) {
+                              return SizedBox(
+                                width: itemWidth,
+                                child: widget.itemBuilder(context, index),
+                              );
+                            }),
+                          );
+                        },
+                      )
+                    : Column(
+                        children: List.generate(widget.itemCount, (index) {
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: widget.itemBuilder(context, index),
+                          );
+                        }),
+                      ),
+              ),
             ),
         ],
       ),
@@ -142,11 +159,14 @@ class _FloorAccordionState extends State<FloorAccordion> {
     
     final parts = info.split('/');
     if (parts.length < 2) {
-      return Text(
-        info,
-        style: TextStyle(
-          fontSize: 12.sp,
-          color: const Color(0xFF64748B),
+      return FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          info,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: const Color(0xFF64748B),
+          ),
         ),
       );
     }
@@ -160,23 +180,26 @@ class _FloorAccordionState extends State<FloorAccordion> {
         color: const Color(0xFFF1F5FF),
         borderRadius: BorderRadius.circular(12.r),
       ),
-      child: Text.rich(
-        TextSpan(
-          style: TextStyle(
-            fontSize: 11.sp,
-            color: const Color(0xFF64748B),
-            fontWeight: FontWeight.w600,
-          ),
-          children: [
-            TextSpan(
-              text: '$currentCount ',
-              style: const TextStyle(
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF2C599D),
-              ),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text.rich(
+          TextSpan(
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: const Color(0xFF64748B),
+              fontWeight: FontWeight.w600,
             ),
-            TextSpan(text: '/ $remaining'),
-          ],
+            children: [
+              TextSpan(
+                text: '$currentCount ',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF2C599D),
+                ),
+              ),
+              TextSpan(text: '/ $remaining'),
+            ],
+          ),
         ),
       ),
     );

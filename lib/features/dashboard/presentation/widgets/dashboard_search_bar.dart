@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import '../cubit/dashboard_cubit.dart';
@@ -85,7 +85,7 @@ class _DashboardSearchBarState extends State<DashboardSearchBar> {
                             letterSpacing: -0.3,
                           ),
                           decoration: InputDecoration(
-                            hintText: 'search_room_tenant'.tr(),
+                            hintText: StringUtils.translate('search_room_tenant', context: context),
                             hintStyle: TextStyle(
                               color: AppColors.textSecondary.withValues(alpha: 0.5), 
                               fontSize: 15.sp,
@@ -102,7 +102,7 @@ class _DashboardSearchBarState extends State<DashboardSearchBar> {
                       ),
                       if (state.searchQuery.isNotEmpty)
                         Semantics(
-                          label: 'clear_search'.tr(),
+                          label: StringUtils.translate('clear_search', context: context),
                           button: true,
                           child: GestureDetector(
                             onTap: () {
@@ -154,7 +154,7 @@ class ViewModeToggle extends StatelessWidget {
         children: [
           Expanded(
             child: Semantics(
-              label: 'grid_view'.tr(),
+              label: StringUtils.translate('grid_view', context: context),
               selected: isGridView,
               button: true,
               child: BouncingWrapper(
@@ -180,7 +180,7 @@ class ViewModeToggle extends StatelessWidget {
           ),
           Expanded(
             child: Semantics(
-              label: 'list_view'.tr(),
+              label: StringUtils.translate('list_view', context: context),
               selected: !isGridView,
               button: true,
               child: BouncingWrapper(

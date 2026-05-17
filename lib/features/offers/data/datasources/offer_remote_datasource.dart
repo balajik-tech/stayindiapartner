@@ -7,6 +7,7 @@ abstract class OfferRemoteDataSource {
   Future<OfferEntity> createOffer(OfferEntity offer);
   Future<OfferEntity> updateOffer(String id, Map<String, dynamic> updateData);
   Future<void> deleteOffer(String id);
+  Future<String> uploadOfferImage(String filePath);
 }
 
 class OfferRemoteDataSourceImpl implements OfferRemoteDataSource {
@@ -65,5 +66,22 @@ class OfferRemoteDataSourceImpl implements OfferRemoteDataSource {
     if (response.statusCode != 200) {
       throw Exception(response.data['message'] ?? 'Failed to delete offer');
     }
+  }
+
+  @override
+  Future<String> uploadOfferImage(String filePath) async {
+    final formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(filePath),
+    });
+
+    final response = await _dio.post(
+      ApiConstants.offerUploadImage,
+      data: formData,
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return response.data['data']['imageUrl'];
+    }
+    throw Exception(response.data['message'] ?? 'Failed to upload image');
   }
 }

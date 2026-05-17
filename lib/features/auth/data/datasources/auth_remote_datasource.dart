@@ -10,30 +10,21 @@ import 'package:stayindia_owner/core/services/token_storage.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import '../models/owner_model.dart';
 
-
-
 abstract class AuthRemoteDataSource {
   
   Future<String?> requestOtp(String phone);
 
-  
-  
-  Future<({OwnerModel owner, bool isNewUser})> verifyOtp(
-      String phone, String otp);
+  Future<({OwnerModel owner, bool isNewUser})> verifyOtp(String phone, String otp);
 
-  
   Future<OwnerModel> getCurrentOwner();
 
-  
   Future<OwnerModel> completeProfile(Map<String, dynamic> data);
 
   
   Future<OwnerModel> updateProfile(Map<String, dynamic> data);
 
-  
   Future<void> logout();
 
-  
   Future<void> deleteAccount();
   Future<void> updateDeviceToken({
     required String pushToken,
@@ -56,13 +47,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   })  : _dio = dio,
         _tokenStorage = tokenStorage;
 
-  
-
-  
   String _sanitizePhone(String phone) =>
       phone.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^91'), '');
 
-  
   Map<String, dynamic> _extractOwnerJson(dynamic responseData) {
     if (responseData is! Map) {
       throw ServerException(message: 'Unexpected response format from server.');
@@ -70,7 +57,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final data = responseData.containsKey('data') && responseData['data'] is Map
         ? responseData['data'] as Map<String, dynamic>
         : responseData as Map<String, dynamic>;
-
     
     if (data.containsKey('user') && data['user'] is Map) {
       return data['user'] as Map<String, dynamic>;
@@ -258,6 +244,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'pushToken': pushToken,
         'platform': platform,
         'deviceId': deviceId,
+        'appType': 'OWNER_APP',
       },
     );
 

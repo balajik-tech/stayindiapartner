@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
@@ -16,10 +16,10 @@ class UnifiedHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HostelCubit, HostelState>(
       builder: (context, state) {
-        String selectedHostelName = "select_property".tr();
+        String selectedHostelName = StringUtils.translate("select_property", context: context);
         if (state is HostelLoaded && state.hostels.isNotEmpty) {
           if (state.selectedHostelIndices.length > 1) {
-            selectedHostelName = "${state.selectedHostelIndices.length} ${"properties".tr()}";
+            selectedHostelName = "${state.selectedHostelIndices.length} ${StringUtils.translate("properties", context: context)}";
           } else {
             final index = state.selectedHostelIndices.isNotEmpty 
                 ? state.selectedHostelIndices.first 
@@ -77,8 +77,8 @@ class UnifiedHeader extends StatelessWidget {
               
 
               Semantics(
-                label: 'switch_property'.tr(),
-                hint: '${'current_property'.tr()}: $selectedHostelName',
+                label: StringUtils.translate('switch_property', context: context),
+                hint: '${StringUtils.translate('current_property', context: context)}: $selectedHostelName',
                 button: true,
                 child: GestureDetector(
                   onTap: () => _showSwitchHostelSheet(context),
@@ -120,10 +120,10 @@ class UnifiedHeader extends StatelessWidget {
 
 
               Semantics(
-                label: 'notifications'.tr(),
+                label: StringUtils.translate('notifications', context: context),
                 button: true,
                 child: Tooltip(
-                  message: 'notifications'.tr(),
+                  message: StringUtils.translate('notifications', context: context),
                   child: BouncingWrapper(
                     onTap: () {
                       HapticFeedback.lightImpact();
@@ -186,7 +186,7 @@ class UnifiedHeader extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 Text(
-                  'switch_property'.tr(),
+                  StringUtils.translate('switch_property', context: context),
                   style: TextStyle(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.w800,

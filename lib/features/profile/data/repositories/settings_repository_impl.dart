@@ -44,4 +44,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<void> uploadHostelImages(String hostelId, List<String> filePaths) {
     return remoteDataSource.uploadHostelImages(hostelId, filePaths);
   }
+
+  @override
+  Future<String> uploadSingleImage(String filePath) {
+    return remoteDataSource.uploadSingleImage(filePath);
+  }
 }

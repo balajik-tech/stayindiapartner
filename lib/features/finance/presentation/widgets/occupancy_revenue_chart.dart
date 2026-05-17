@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class OccupancyRevenueChart extends StatelessWidget {
   final int occupied;
@@ -12,7 +13,7 @@ class OccupancyRevenueChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (total == 0) {
-      return const Center(child: Text('No rooms available'));
+      return Center(child: Text('no_rooms_available'.tr()));
     }
 
     return BarChart(
@@ -30,10 +31,10 @@ class OccupancyRevenueChart extends StatelessWidget {
                 String text;
                 switch (value.toInt()) {
                   case 0:
-                    text = 'Occupied';
+                    text = 'occupied'.tr();
                     break;
                   case 1:
-                    text = 'Available';
+                    text = 'available'.tr();
                     break;
                   default:
                     text = '';

@@ -1,3 +1,4 @@
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stayindia_owner/features/dashboard/domain/entities/rent_due_details.dart';
@@ -37,7 +38,7 @@ class RentDueCubit extends Cubit<RentDueState> {
       final details = await _getRentDueDetails(hostelId);
       emit(RentDueLoaded(details: details));
     } catch (e) {
-      emit(RentDueError(message: e.toString()));
+      emit(RentDueError(message: GlobalErrorMapper.map(e).message));
     }
   }
 }

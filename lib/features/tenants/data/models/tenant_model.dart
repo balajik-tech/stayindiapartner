@@ -38,7 +38,7 @@ class TenantModel extends TenantEntity {
       bedNumber: json['bedNumber']?.toString() ?? '',
       firstName: json['firstName']?.toString() ?? '',
       lastName: json['lastName']?.toString() ?? '',
-      mobile: json['mobile']?.toString() ?? '',
+      mobile: (json['mobile'] ?? json['phone'])?.toString() ?? '',
       email: json['email']?.toString(),
       avatar: json['avatar']?.toString(),
       kycVerified: json['kycVerified'] == true || (json['kyc'] is Map && json['kyc']['verified'] == true),
@@ -81,7 +81,7 @@ class TenantDetailModel extends TenantDetailEntity {
     return TenantDetailModel(
       id: (tenantData['_id'] ?? tenantData['id'] ?? '').toString(),
       name: name,
-      mobile: (tenantData['mobile'] ?? '').toString(),
+      mobile: (tenantData['mobile'] ?? tenantData['phone'] ?? '').toString(),
       email: tenantData['email']?.toString(),
       avatar: tenantData['avatar']?.toString(),
       kycVerified: tenantData['kyc']?['verified'] == true,
@@ -128,7 +128,7 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
       floor: floorRaw is int
           ? floorRaw
           : int.tryParse(floorRaw?.toString() ?? '0') ?? 0,
-      bedNumber: (json['bedNumber'] ?? room['bedNumber'])?.toString() ?? '',
+      bedNumber: (json['bedNumber'] ?? room['bedNumber'] ?? json['bed']?.toString() ?? '').toString(),
       rent: _toDouble(json['rent'] ?? room['rent']),
       deposit: _toDouble(json['deposit']),
       checkInDate: (json['checkInDate'] ?? json['startDate'])?.toString(),

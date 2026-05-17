@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
@@ -154,7 +155,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     final displayName = detail?.name ?? widget.name;
     final displayRoom = detail?.stay?.roomTypename ?? widget.room;
     final bedNum = detail?.stay?.bedNumber ?? '';
-    final bedLabel = bedNum.isNotEmpty ? '  Bed $bedNum' : '';
+    final bedLabel = bedNum.isNotEmpty ? '  ${'bed_label'.tr(namedArgs: {'label': bedNum})}' : '';
     return Padding(
       padding: EdgeInsets.all(20.w),
       child: Row(
@@ -232,7 +233,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                               Icon(Icons.info_outline, size: 12.sp, color: Colors.orange.shade700),
                               SizedBox(width: 4.w),
                               Text(
-                                'CURRENTLY AWAY',
+                                'currently_away'.tr(),
                                 style: TextStyle(
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.bold,
@@ -245,9 +246,9 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       ],
                       SizedBox(height: 4.h),
                       Text(
-                        displayRoom.isEmpty || displayRoom == 'Room'
-                            ? 'Not Assigned'
-                            : '${displayRoom.toLowerCase().startsWith('room') ? displayRoom : 'Room $displayRoom'}$bedLabel',
+                        (detail?.stay?.roomTypename == null)
+                            ? 'not_assigned'.tr()
+                            : '${displayRoom.toLowerCase().startsWith('room') ? displayRoom : 'room_number_label'.tr(namedArgs: {'number': displayRoom})}$bedLabel',
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.greyText,
@@ -287,7 +288,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     final phone = detail?.mobile ?? '';
     final email = detail?.email ?? '';
     return _buildSection(
-      'Contact Information',
+      'contact_info'.tr(),
       Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
@@ -298,19 +299,19 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
         ),
         child: Column(
           children: [
-            _buildContactItem(Icons.phone_iphone_rounded, 'Phone', phone),
+            _buildContactItem(Icons.phone_iphone_rounded, 'phone'.tr(), phone),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 12.h),
               child: Divider(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
             ),
-            _buildContactItem(Icons.mail_outline_rounded, 'Email', email),
+            _buildContactItem(Icons.mail_outline_rounded, 'email'.tr(), email),
             if (detail?.parentMobile != null && detail!.parentMobile!.isNotEmpty) ...[
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 child: Divider(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
               ),
               _buildContactItem(
-                  Icons.family_restroom_rounded, 'Parent/Guardian', detail.parentMobile!),
+                  Icons.family_restroom_rounded, 'parent_guardian'.tr(), detail.parentMobile!),
             ],
           ],
         ),
@@ -364,15 +365,15 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     final checkIn = stay?.checkInDate != null ? _formatDate(stay!.checkInDate!) : '';
     final rent = stay != null ? stay.rent.toStringAsFixed(0) : '';
     return _buildSection(
-      'Stay Details',
+      'stay_details'.tr(),
       Row(
         children: [
           Expanded(
-            child: _buildStayItem(Icons.calendar_today_rounded, 'Check-in Date', checkIn),
+            child: _buildStayItem(Icons.calendar_today_rounded, 'check_in_date_req'.tr().replaceAll(' *', ''), checkIn),
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: _buildStayItem(Icons.payments_rounded, 'Monthly Rent', rent),
+            child: _buildStayItem(Icons.payments_rounded, 'monthly_rent'.tr(), rent),
           ),
         ],
       ),
@@ -417,7 +418,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
   Widget _buildKycDocuments(TenantDetailEntity? detail) {
     final verified = detail?.kycVerified ?? false;
     return _buildSection(
-      'KYC Documents',
+      'kyc_docs'.tr(),
       Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
@@ -445,7 +446,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Aadhaar Card',
+                  Text('aadhaar_card'.tr(),
                       style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -460,7 +461,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        verified ? 'Verified & Secured' : 'Verification Pending',
+                        verified ? 'verified_secured'.tr() : 'verification_pending'.tr(),
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
@@ -484,7 +485,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     final pendingCount = summary['pendingCount'] ?? bills['pendingCount'] ?? bills['pendingMonths'] ?? 0;
     final isDue = totalDue > 0;
     return _buildSection(
-      'Dues Summary',
+      'dues_summary'.tr(),
       Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
@@ -509,7 +510,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isDue ? 'Amount Due' : 'All Dues Clear',
+                    isDue ? 'amount_due'.tr() : 'all_dues_clear'.tr(),
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -520,7 +521,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    isDue ? '${totalDue.toStringAsFixed(0)}' : 'Great Job!',
+                    isDue ? '${totalDue.toStringAsFixed(0)}' : 'great_job'.tr(),
                     style: TextStyle(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.bold,
@@ -538,7 +539,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
-                  '$pendingCount pending',
+                  'pending_count_label'.tr(namedArgs: {'count': pendingCount.toString()}),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
@@ -556,7 +557,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     final payments = detail?.payments ?? [];
     final preview = payments.take(4).toList();
     return _buildSection(
-      'Payment History',
+      'payment_history'.tr(),
       Column(
         children: [
           if (preview.isEmpty)
@@ -574,7 +575,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                   Icon(Icons.history_rounded,
                       size: 32.sp, color: AppColors.greyText.withValues(alpha: 0.5)),
                   SizedBox(height: 12.h),
-                  Text('No payment records found',
+                  Text('no_payment_records'.tr(),
                       style: TextStyle(fontSize: 14.sp, color: AppColors.greyText)),
                 ],
               ),
@@ -634,7 +635,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('View Full Payment History',
+                    Text('view_full_history'.tr(),
                         style: TextStyle(
                             color: AppColors.primaryBlue,
                             fontSize: 15.sp,
@@ -699,7 +700,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
 
   Widget _buildComplaintsHistory(BuildContext context) {
     return _buildSection(
-      'Complaints History',
+      'complaints_history'.tr(),
       Container(
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
@@ -729,12 +730,12 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Maintenance Issues',
+                      Text('maintenance_issues'.tr(),
                           style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.bold,
                               color: AppColors.darkText)),
-                      Text('Track reported room problems',
+                      Text('track_problems'.tr(),
                           style: TextStyle(fontSize: 12.sp, color: AppColors.greyText)),
                     ],
                   ),
@@ -750,7 +751,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       ),
                     );
                   },
-                  child: Text('History',
+                  child: Text('history'.tr(),
                       style: TextStyle(
                           fontWeight: FontWeight.bold, color: AppColors.primaryBlue)),
                 ),
@@ -789,7 +790,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                   ),
                 ),
                 child: Text(
-                  'Give Notice',
+                  'give_notice'.tr(),
                   style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,

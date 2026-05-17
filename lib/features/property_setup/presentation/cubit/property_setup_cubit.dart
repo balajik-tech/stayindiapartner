@@ -1,6 +1,9 @@
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart' as cropper;
@@ -27,6 +30,10 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
           'floor': room.floor.toString(),
           'sharingType': room.capacity,
           'roomType': room.roomType,
+          'rent': room.rent,
+          'deposit': room.deposit,
+          'maintenance': room.maintenance,
+          'dailyRent': room.dailyRent,
           'features': {
             'isAC': room.roomType == 'AC',
             'hasGeyser': room.features.contains('GEYSER'),
@@ -76,10 +83,11 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
 
     if (state.currentStep == 2) {
       autoGenerateRooms();
+      syncPricingFromCategories();
     }
     
     if (state.currentStep == 3) {
-      syncRoomCategories();
+      syncRoomCategoriesAndPricing();
     }
     
     if (state.currentStep < 5) {
@@ -89,7 +97,14 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
 
   void previousStep() {
     if (state.currentStep > 0) {
-      emit(state.copyWith(currentStep: state.currentStep - 1));
+      final int targetStep = state.currentStep - 1;
+      
+      // If going back from Price Master to Room Config, or from Room Config to Room Master
+      if (state.currentStep == 4 || state.currentStep == 3) {
+        syncRoomCategoriesAndPricing();
+      }
+      
+      emit(state.copyWith(currentStep: targetStep));
     }
   }
 
@@ -262,7 +277,15 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       );
 
       if (result != null && result.files.single.path != null) {
-        final path = result.files.single.path!;
+        String path = result.files.single.path!;
+        final extension = path.split('.').last.toLowerCase();
+        
+        if (['jpg', 'jpeg', 'png'].contains(extension)) {
+          final croppedPath = await _cropImage(path);
+          if (croppedPath == null) return; 
+          path = croppedPath;
+        }
+
         if (type == 'food') emit(state.copyWith(foodLicense: path));
         if (type == 'hostel') emit(state.copyWith(hostelLicense: path));
         if (type == 'trade') emit(state.copyWith(tradeLicense: path));
@@ -320,7 +343,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     
     for (var floor in state.selectedFloors) {
       final roomCount = state.floorRoomCounts[floor] ?? 0;
-      final floorPrefix = floor == 'G' ? '0' : floor;
+      final floorPrefix = floor == 'G' ? 'G' : floor;
       
       for (int i = 1; i <= roomCount; i++) {
         final roomNumber = '$floorPrefix${i.toString().padLeft(2, '0')}';
@@ -394,6 +417,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     rooms[index] = room;
     
     emit(state.copyWith(rooms: rooms));
+    syncRoomCategoriesAndPricing();
   }
 
   void updateRoomSharing(int index, int sharing) {
@@ -411,16 +435,17 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     rooms[index] = room;
     
     emit(state.copyWith(rooms: rooms));
+    syncRoomCategoriesAndPricing();
   }
 
   void _autoAssignCategory(Map<String, dynamic> room) {
     final isAC = room['features']?['isAC'] == true;
     final sharing = room['sharingType'] ?? 2;
     
-    final matchingCategory = state.roomCategories.firstWhere(
+    final matches = state.roomCategories.where(
       (cat) => cat['sharingType'] == sharing && cat['isAC'] == isAC,
-      orElse: () => {},
     );
+    final Map<String, dynamic> matchingCategory = matches.isNotEmpty ? matches.first : <String, dynamic>{};
 
     if (matchingCategory.isNotEmpty) {
       room['categoryId'] = matchingCategory['id'];
@@ -458,9 +483,27 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   void updatePricing(String roomType, String sharing, String field, double value) {
     final pricing = Map<String, dynamic>.from(state.masterPricing);
     final typeMap = Map<String, dynamic>.from(pricing[roomType] ?? {});
-    final sharingMap = Map<String, dynamic>.from(typeMap[sharing] ?? {'rent': 0.0, 'deposit': 0.0, 'maintenance': 0.0, 'dailyRent': 0.0});
+    final sharingMap = Map<String, dynamic>.from(typeMap[sharing] ?? {
+      'rent': 0.0,
+      'monthlyRent': 0.0,
+      'deposit': 0.0,
+      'securityDeposit': 0.0,
+      'maintenance': 0.0,
+      'dailyRent': 0.0,
+    });
     
     sharingMap[field] = value;
+    if (field == 'rent') {
+      sharingMap['monthlyRent'] = value;
+    } else if (field == 'monthlyRent') {
+      sharingMap['rent'] = value;
+    }
+    if (field == 'deposit') {
+      sharingMap['securityDeposit'] = value;
+    } else if (field == 'securityDeposit') {
+      sharingMap['deposit'] = value;
+    }
+    
     typeMap[sharing] = sharingMap;
     pricing[roomType] = typeMap;
     emit(state.copyWith(masterPricing: pricing));
@@ -476,17 +519,35 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       final typeMap = Map<String, dynamic>.from(pricing[type] ?? {});
       for (var sharing in sharingTypes) {
         final sharingMap = Map<String, dynamic>.from(typeMap[sharing] ?? {
-          'rent': 0.0, 
-          'deposit': 0.0, 
-          'maintenance': 0.0, 
-          'dailyRent': 0.0
+          'rent': 0.0,
+          'monthlyRent': 0.0,
+          'deposit': 0.0,
+          'securityDeposit': 0.0,
+          'maintenance': 0.0,
+          'dailyRent': 0.0,
         });
         sharingMap[field] = value;
+        if (field == 'rent') {
+          sharingMap['monthlyRent'] = value;
+        } else if (field == 'deposit') {
+          sharingMap['securityDeposit'] = value;
+        }
         typeMap[sharing] = sharingMap;
       }
       pricing[type] = typeMap;
     }
-    emit(state.copyWith(masterPricing: pricing));
+
+    // Also update roomCategories to stay in sync
+    final updatedCategories = state.roomCategories.map((cat) {
+      final newCat = Map<String, dynamic>.from(cat);
+      if (field == 'rent') newCat['monthlyRent'] = value.toString();
+      if (field == 'deposit') newCat['securityDeposit'] = value.toString();
+      if (field == 'maintenance') newCat['maintenance'] = value.toString();
+      if (field == 'dailyRent') newCat['dailyRent'] = value.toString();
+      return newCat;
+    }).toList();
+
+    emit(state.copyWith(masterPricing: pricing, roomCategories: updatedCategories));
   }
 
   bool get isStepValid {
@@ -494,7 +555,35 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       return state.hostelType.isNotEmpty && 
              state.buildingName.trim().isNotEmpty && 
              state.lat != null && 
-             state.lng != null;
+             state.lng != null &&
+             state.detailedAddress.trim().isNotEmpty &&
+             state.area.trim().isNotEmpty &&
+             state.city.trim().isNotEmpty &&
+             state.state.trim().isNotEmpty &&
+             state.pincode.trim().isNotEmpty;
+    }
+    if (state.currentStep == 1) {
+      if (state.selectedFloors.isEmpty) return false;
+      for (final floor in state.selectedFloors) {
+        if ((state.floorRoomCounts[floor] ?? 0) <= 0) return false;
+      }
+      return true;
+    }
+    if (state.currentStep == 2) {
+      if (state.roomCategories.isEmpty) return false;
+      for (final cat in state.roomCategories) {
+        final monthlyRent = cat['monthlyRent']?.toString().trim() ?? '';
+        final securityDeposit = cat['securityDeposit']?.toString().trim() ?? '';
+        final dailyRent = cat['dailyRent']?.toString().trim() ?? '';
+        final maintenance = cat['maintenance']?.toString().trim() ?? '';
+        final dailyRentThresholdDays = cat['dailyRentThresholdDays']?.toString().trim() ?? '';
+        
+        if (monthlyRent.isEmpty || securityDeposit.isEmpty || dailyRent.isEmpty || 
+            maintenance.isEmpty || dailyRentThresholdDays.isEmpty) {
+          return false;
+        }
+      }
+      return true;
     }
     return true;
   }
@@ -559,15 +648,16 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       final roomsWithPricing = state.rooms.map((room) {
         final r = Map<String, dynamic>.from(room);
         final catId = r['categoryId'];
-        Map<String, dynamic> cat = state.roomCategories.firstWhere((c) => c['id'] == catId, orElse: () => {});
+        final matches = state.roomCategories.where((c) => c['id'] == catId);
+        Map<String, dynamic> cat = matches.isNotEmpty ? matches.first : <String, dynamic>{};
         
         if (cat.isEmpty && state.roomCategories.isNotEmpty) {
           final isAC = (r['features'] as Map?)?['isAC'] == true;
           final sharing = r['sharingType'] ?? 2;
-          cat = state.roomCategories.firstWhere(
-            (c) => c['sharingType'] == sharing && c['isAC'] == isAC, 
-            orElse: () => {}
+          final matches2 = state.roomCategories.where(
+            (c) => c['sharingType'] == sharing && c['isAC'] == isAC,
           );
+          cat = matches2.isNotEmpty ? matches2.first : <String, dynamic>{};
           if (cat.isEmpty) {
             cat = state.roomCategories.first;
           }
@@ -618,39 +708,52 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       );
       emit(state.copyWith(isSaving: false, currentStep: 5, hostelId: hostel.id));
     } catch (e) {
-      emit(state.copyWith(isSaving: false, error: e.toString()));
+      emit(state.copyWith(isSaving: false, error: GlobalErrorMapper.map(e).message));
     }
   }
 
-  void syncRoomCategories() {
+  void syncRoomCategoriesAndPricing() {
     final List<Map<String, dynamic>> rooms = List<Map<String, dynamic>>.from(state.rooms.map((r) => Map<String, dynamic>.from(r)));
     final List<Map<String, dynamic>> categories = List<Map<String, dynamic>>.from(state.roomCategories.map((c) => Map<String, dynamic>.from(c)));
     bool changed = false;
 
+    // 1. Sync Categories from Rooms
     for (int i = 0; i < rooms.length; i++) {
       final room = rooms[i];
       final features = room['features'] as Map<String, dynamic>? ?? {};
       final isAC = features['isAC'] == true;
       final sharing = room['sharingType'] ?? 2;
 
-      
       int existingCatIndex = categories.indexWhere(
         (cat) => cat['sharingType'] == sharing && cat['isAC'] == isAC
       );
 
       if (existingCatIndex == -1) {
-        
         final newCatId = 'cat_${DateTime.now().millisecondsSinceEpoch}_$i';
+        
+        final matches = state.roomMasters.where(
+          (m) => m['sharingType'] == sharing && m['isAC'] == isAC,
+        );
+        final Map<String, dynamic> matchingMaster = matches.isNotEmpty ? matches.first : <String, dynamic>{};
+
         final newCat = {
           'id': newCatId,
           'sharingType': sharing,
           'isAC': isAC,
           'roomSize': room['roomSize'] ?? 'Medium',
           'roomCount': 0,
-          'monthlyRent': '',
-          'dailyRent': '',
-          'securityDeposit': '',
-          'maintenance': '',
+          'monthlyRent': (room['rent'] != null && (double.tryParse(room['rent'].toString()) ?? 0) > 0)
+              ? room['rent'].toString()
+              : (matchingMaster.isNotEmpty ? matchingMaster['rent']?.toString() ?? '' : ''),
+          'dailyRent': (room['dailyRent'] != null && (double.tryParse(room['dailyRent'].toString()) ?? 0) > 0)
+              ? room['dailyRent'].toString()
+              : (matchingMaster.isNotEmpty ? matchingMaster['dailyRent']?.toString() ?? '' : ''),
+          'securityDeposit': (room['deposit'] != null && (double.tryParse(room['deposit'].toString()) ?? 0) > 0)
+              ? room['deposit'].toString()
+              : (matchingMaster.isNotEmpty ? matchingMaster['deposit']?.toString() ?? '' : ''),
+          'maintenance': (room['maintenance'] != null && (double.tryParse(room['maintenance'].toString()) ?? 0) > 0)
+              ? room['maintenance'].toString()
+              : (matchingMaster.isNotEmpty ? matchingMaster['maintenance']?.toString() ?? '' : ''),
           'dailyRentThresholdDays': '10',
         };
         categories.add(newCat);
@@ -658,28 +761,114 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
         changed = true;
       }
 
-      
       if (room['categoryId'] != categories[existingCatIndex]['id']) {
         rooms[i]['categoryId'] = categories[existingCatIndex]['id'];
         changed = true;
       }
     }
 
-    
-    for (var cat in categories) {
+    // Update room counts in categories and autofill pricing if empty from global Room Master
+    for (var i = 0; i < categories.length; i++) {
+      final cat = categories[i];
       final count = rooms.where((r) => r['categoryId'] == cat['id']).length;
       if (cat['roomCount'] != count) {
         cat['roomCount'] = count;
         changed = true;
       }
+
+      // Autofill from masters if pricing is currently empty
+      final sharing = cat['sharingType'] ?? 2;
+      final isAC = cat['isAC'] == true;
+      final matches3 = state.roomMasters.where(
+        (m) => m['sharingType'] == sharing && m['isAC'] == isAC,
+      );
+      final Map<String, dynamic> matchingMaster = matches3.isNotEmpty ? matches3.first : <String, dynamic>{};
+
+      if (matchingMaster.isNotEmpty) {
+        if (_isPricingUnset(cat['monthlyRent'])) {
+          cat['monthlyRent'] = matchingMaster['rent']?.toString() ?? '';
+          changed = true;
+        }
+        if (_isPricingUnset(cat['securityDeposit'])) {
+          cat['securityDeposit'] = matchingMaster['deposit']?.toString() ?? '';
+          changed = true;
+        }
+        if (_isPricingUnset(cat['dailyRent'])) {
+          cat['dailyRent'] = matchingMaster['dailyRent']?.toString() ?? '';
+          changed = true;
+        }
+        if (_isPricingUnset(cat['maintenance'])) {
+          cat['maintenance'] = matchingMaster['maintenance']?.toString() ?? '';
+          changed = true;
+        }
+      }
     }
 
-    if (changed) {
-      emit(state.copyWith(
-        roomCategories: categories,
-        rooms: rooms,
-      ));
+    // 2. Sync Pricing from updated categories
+    final Map<String, dynamic> currentPricing = {};
+    state.masterPricing.forEach((key, value) {
+      if (value is Map) {
+        currentPricing[key] = Map<String, dynamic>.from(value);
+      } else {
+        currentPricing[key] = value;
+      }
+    });
+
+    for (var category in categories) {
+      final type = category['isAC'] == true ? 'AC' : 'NON-AC';
+      final sharing = category['sharingType'].toString();
+      
+      if (currentPricing[type] == null) {
+        currentPricing[type] = <String, dynamic>{};
+      }
+      
+      final Map<String, dynamic> typeMap = Map<String, dynamic>.from(currentPricing[type] as Map);
+      
+      // Only update if it's not already set or if the category was just changed
+      if (typeMap[sharing] == null || changed) {
+        typeMap[sharing] = <String, dynamic>{
+          'rent': double.tryParse(category['monthlyRent']?.toString() ?? '0') ?? 0.0,
+          'monthlyRent': double.tryParse(category['monthlyRent']?.toString() ?? '0') ?? 0.0,
+          'dailyRent': double.tryParse(category['dailyRent']?.toString() ?? '0') ?? 0.0,
+          'deposit': double.tryParse(category['securityDeposit']?.toString() ?? '0') ?? 0.0,
+          'securityDeposit': double.tryParse(category['securityDeposit']?.toString() ?? '0') ?? 0.0,
+          'maintenance': double.tryParse(category['maintenance']?.toString() ?? '0') ?? 0.0,
+          'dailyRentThresholdDays': int.tryParse(category['dailyRentThresholdDays']?.toString() ?? '0') ?? 0,
+        };
+        currentPricing[type] = typeMap;
+      }
     }
+
+    // 3. Clean up empty categories — only remove if truly no rooms are assigned AND no price is set
+    // Guard: if rooms list is non-empty, never remove a category that rooms still reference
+    final Set<String> usedCategoryIds = rooms.map((r) => r['categoryId']?.toString() ?? '').toSet();
+    categories.removeWhere((cat) {
+      final catId = cat['id']?.toString() ?? '';
+      final hasLinkedRooms = usedCategoryIds.contains(catId);
+      if (hasLinkedRooms) return false; // never remove if rooms reference it
+      if (rooms.isNotEmpty) {
+        // If rooms list is non-empty, and no rooms reference this category, it should be removed completely!
+        return true;
+      }
+      final hasNoRooms = (cat['roomCount'] ?? 0) == 0;
+      final hasNoPrice = (cat['monthlyRent']?.toString() ?? '').isEmpty &&
+                         (cat['dailyRent']?.toString() ?? '').isEmpty;
+      return hasNoRooms && hasNoPrice;
+    });
+
+    emit(state.copyWith(
+      roomCategories: categories,
+      rooms: rooms,
+      masterPricing: currentPricing,
+    ));
+  }
+
+  void syncRoomCategories() {
+    syncRoomCategoriesAndPricing();
+  }
+
+  void syncPricingFromCategories() {
+    syncRoomCategoriesAndPricing();
   }
 
   void resetState() {
@@ -692,7 +881,63 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     emit(state.copyWith(rooms: currentRooms));
   }
 
+  void setRoomMasters(List<RoomDetail> masters) {
+    final List<Map<String, dynamic>> mapped = masters.map((m) => {
+      'id': m.id,
+      'sharingType': m.capacity,
+      'isAC': m.roomType == 'AC',
+      'rent': m.rent,
+      'dailyRent': m.dailyRent,
+      'deposit': m.deposit,
+      'maintenance': m.maintenance,
+    }).toList();
+    emit(state.copyWith(roomMasters: mapped));
+    
+    syncRoomCategoriesAndPricing();
+  }
+
+  bool _isPricingUnset(dynamic value) {
+    if (value == null) return true;
+    final s = value.toString().trim();
+    return s.isEmpty || s == 'null' || s == '0' || s == '0.0';
+  }
+
   void updatePricingFromMasters() {
+    final List<Map<String, dynamic>> categories = List<Map<String, dynamic>>.from(
+      state.roomCategories.map((c) => Map<String, dynamic>.from(c)),
+    );
+    
+    bool changed = false;
+    for (var i = 0; i < categories.length; i++) {
+      final cat = categories[i];
+      final sharing = cat['sharingType'] ?? 2;
+      final isAC = cat['isAC'] == true;
+      
+      final matches = state.roomMasters.where(
+        (m) => m['sharingType'] == sharing && m['isAC'] == isAC,
+      );
+      final Map<String, dynamic> matchingMaster = matches.isNotEmpty ? matches.first : <String, dynamic>{};
+
+      if (matchingMaster.isNotEmpty) {
+        if (_isPricingUnset(cat['monthlyRent'])) {
+          cat['monthlyRent'] = matchingMaster['rent']?.toString() ?? '';
+          changed = true;
+        }
+        if (_isPricingUnset(cat['securityDeposit'])) {
+          cat['securityDeposit'] = matchingMaster['deposit']?.toString() ?? '';
+          changed = true;
+        }
+        if (_isPricingUnset(cat['dailyRent'])) {
+          cat['dailyRent'] = matchingMaster['dailyRent']?.toString() ?? '';
+          changed = true;
+        }
+        if (_isPricingUnset(cat['maintenance'])) {
+          cat['maintenance'] = matchingMaster['maintenance']?.toString() ?? '';
+          changed = true;
+        }
+      }
+    }
+
     final rooms = List<Map<String, dynamic>>.from(state.rooms.map((r) => Map<String, dynamic>.from(r)));
     final updatedRooms = rooms.map((room) {
       final features = room['features'] as Map<String, dynamic>? ?? {};
@@ -704,13 +949,18 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       final config = pricing[sharing];
       
       if (config is Map) {
-        room['rent'] = double.tryParse(config['rent']?.toString() ?? '0.0') ?? 0.0;
-        room['deposit'] = double.tryParse(config['deposit']?.toString() ?? '0.0') ?? 0.0;
+        room['rent'] = double.tryParse(config['rent']?.toString() ?? config['monthlyRent']?.toString() ?? '0.0') ?? 0.0;
+        room['deposit'] = double.tryParse(config['deposit']?.toString() ?? config['securityDeposit']?.toString() ?? '0.0') ?? 0.0;
       }
       return room;
     }).toList();
     
-    emit(state.copyWith(rooms: updatedRooms));
+    emit(state.copyWith(
+      rooms: updatedRooms,
+      roomCategories: changed ? categories : state.roomCategories,
+    ));
+
+    syncRoomCategoriesAndPricing();
   }
 
   void toggleFloor(String floor) {
@@ -747,6 +997,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     }).toList();
 
     emit(state.copyWith(selectedAmenities: amenities, rooms: updatedRooms));
+    syncRoomCategoriesAndPricing();
   }
 
   void removeRoomMaster(int index) {
@@ -802,7 +1053,8 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
 
   Map<String, dynamic>? getCategoryPricing(String? categoryId) {
     if (categoryId == null) return null;
-    final category = state.roomCategories.firstWhere((cat) => cat['id'] == categoryId, orElse: () => {});
+    final matches = state.roomCategories.where((cat) => cat['id'] == categoryId);
+    final Map<String, dynamic> category = matches.isNotEmpty ? matches.first : <String, dynamic>{};
     if (category.isEmpty) return null;
 
     final type = (category['isAC'] == true) ? 'AC' : 'NON-AC';
@@ -817,7 +1069,8 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
 
   void assignCategoryToRoom(int roomIndex, String categoryId) {
     final categories = state.roomCategories;
-    final category = categories.firstWhere((c) => c['id'] == categoryId, orElse: () => {});
+    final matches = categories.where((c) => c['id'] == categoryId);
+    final Map<String, dynamic> category = matches.isNotEmpty ? matches.first : <String, dynamic>{};
     if (category.isEmpty) return;
 
     final rooms = List<Map<String, dynamic>>.from(state.rooms.map((r) => Map<String, dynamic>.from(r)));
@@ -850,5 +1103,17 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   @override
   Map<String, dynamic>? toJson(PropertySetupState state) {
     return state.toJson();
+  }
+
+  @override
+  String get id {
+    try {
+      final authCubit = GetIt.instance<AuthCubit>();
+      final ownerId = authCubit.currentOwner?.id;
+      if (ownerId != null && ownerId.isNotEmpty) {
+        return '_$ownerId';
+      }
+    } catch (_) {}
+    return '';
   }
 }

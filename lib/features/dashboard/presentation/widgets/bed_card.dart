@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 class BedCard extends StatelessWidget {
@@ -10,8 +11,10 @@ class BedCard extends StatelessWidget {
   final String? tenantName;
   final String? tenantAvatar;
   final bool isSelected;
+  final bool isSmall;
+  final bool? isAwayField;
   final VoidCallback onTap;
-
+  
   const BedCard({
     super.key,
     required this.bedNumber,
@@ -19,6 +22,8 @@ class BedCard extends StatelessWidget {
     this.tenantName,
     this.tenantAvatar,
     this.isSelected = false,
+    this.isSmall = false,
+    this.isAwayField,
     required this.onTap,
   });
 
@@ -29,7 +34,7 @@ class BedCard extends StatelessWidget {
     Color textColor;
 
     final upperStatus = status.toUpperCase();
-    final bool isAway = upperStatus == 'AWAY';
+    final bool isAway = isAwayField ?? (upperStatus == 'AWAY');
     final bool isBooked = upperStatus == 'BOOKED';
     final bool isNotice = upperStatus == 'NOTICE';
     final bool isFree = upperStatus == 'FREE';
@@ -87,20 +92,20 @@ class BedCard extends StatelessWidget {
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  width: 56.w,
-                  height: 80.h,
+                  width: isSmall ? 52.w : 72.w,
+                  height: isSmall ? 76.h : 106.h,
                   child: CustomPaint(
                     foregroundPainter: _DottedBorderPainter(
                       color: borderColor,
                       strokeWidth: 3.0,
                       dashWidth: 4,
                       dashSpace: 3,
-                      borderRadius: 18.r,
+                      borderRadius: isSmall ? 14.r : 18.r,
                     ),
                     child: Container(
                       decoration: BoxDecoration(
                         color: bgColor,
-                        borderRadius: BorderRadius.circular(18.r),
+                        borderRadius: BorderRadius.circular(isSmall ? 14.r : 18.r),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
@@ -112,7 +117,7 @@ class BedCard extends StatelessWidget {
                             : null,
                       ),
                       child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+                        padding: EdgeInsets.symmetric(vertical: isSmall ? 8.h : 12.h, horizontal: 4.w),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -120,23 +125,22 @@ class BedCard extends StatelessWidget {
                               CustomAvatar(
                                 imageUrl: ApiConstants.getImageUrl(tenantAvatar),
                                 name: tenantName ?? 'T',
-                                size: 32.r,
-                                fontSize: 14.sp,
+                                size: isSmall ? 30.r : 42.r,
+                                fontSize: isSmall ? 14.sp : 18.sp,
                                 isCircle: true,
                               )
                             else
                               Icon(
                                 Icons.bed_rounded,
-                                size: 24.sp,
+                                size: isSmall ? 22.sp : 34.sp,
                                 color: textColor.withValues(alpha: 0.8),
                               ),
-                            SizedBox(height: 6.h),
+                            SizedBox(height: isSmall ? 4.h : 8.h),
                              FittedBox(
-                                fit: BoxFit.scaleDown,
                                 child: Text(
                                   bedLabel,
                                   style: TextStyle(
-                                    fontSize: 12.sp,
+                                    fontSize: isSmall ? 11.sp : 14.sp,
                                     fontWeight: FontWeight.w900,
                                     color: textColor.withValues(alpha: 0.6),
                                     height: 1,
@@ -149,20 +153,61 @@ class BedCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (isAway || isNotice)
+                if (isAway && isNotice) ...[
                   Positioned(
-                    top: -6.h,
-                    right: 4.w,
+                    top: isSmall ? -4.h : -6.h,
+                    left: isSmall ? 2.w : 4.w,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(horizontal: isSmall ? 3.w : 4.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE91E63),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        'away'.tr(),
+                        style: TextStyle(
+                          fontSize: isSmall ? 7.sp : 9.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: isSmall ? -4.h : -6.h,
+                    right: isSmall ? 2.w : 4.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: isSmall ? 3.w : 4.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFB300),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        'notice_status'.tr(),
+                        style: TextStyle(
+                          fontSize: isSmall ? 7.sp : 9.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ] else if (isAway || isNotice)
+                  Positioned(
+                    top: isSmall ? -4.h : -6.h,
+                    right: isSmall ? 2.w : 4.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: isSmall ? 3.w : 4.w, vertical: 2.h),
                       decoration: BoxDecoration(
                         color: borderColor,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
-                        isAway ? 'AWAY' : 'NOTICE',
+                        isAway ? 'away'.tr() : 'notice_status'.tr(),
                         style: TextStyle(
-                          fontSize: 7.sp,
+                          fontSize: isSmall ? 7.sp : 9.sp,
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
                           letterSpacing: 0.5,
@@ -172,14 +217,14 @@ class BedCard extends StatelessWidget {
                   ),
               ],
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: isSmall ? 4.h : 6.h),
             Text(
-              isFree ? 'Available' : (tenantName?.split(' ')[0] ?? upperStatus),
+              isFree ? StringUtils.translate('available', context: context) : (tenantName?.split(' ')[0] ?? upperStatus),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 10.sp,
+                fontSize: isSmall ? 9.sp : 13.sp,
                 fontWeight: FontWeight.w700,
                 color: textColor,
                 letterSpacing: 0.1,

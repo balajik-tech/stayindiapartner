@@ -82,6 +82,7 @@ void registerProfileFeature(GetIt sl) {
         updateHostelNotificationsUseCase: sl(),
         updateHostelRoomConfigUseCase: sl(),
         uploadHostelSettingsImagesUseCase: sl(),
+        uploadSingleImageUseCase: sl(),
       ));
 
   sl.registerFactory(() => DocumentCubit(
@@ -125,6 +126,7 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => UpdateHostelNotificationsUseCase(sl()));
   sl.registerLazySingleton(() => UpdateHostelRoomConfigUseCase(sl()));
   sl.registerLazySingleton(() => UploadHostelSettingsImagesUseCase(sl()));
+  sl.registerLazySingleton(() => UploadSingleImageUseCase(sl()));
 
   sl.registerLazySingleton(() => GetDocumentsUseCase(sl()));
   sl.registerLazySingleton(() => UploadDocumentUseCase(sl()));

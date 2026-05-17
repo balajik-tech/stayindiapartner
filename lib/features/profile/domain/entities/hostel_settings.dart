@@ -41,15 +41,26 @@ class AmenityItem {
   const AmenityItem({required this.name, required this.enabled});
 }
 
+class CustomRule {
+  final String text;
+  final String? photo;
+
+  const CustomRule({required this.text, this.photo});
+}
+
 class HouseRules {
   final String entryTime;
   final String visitorPolicy;
   final String otherRules;
+  final int penaltyDate;
+  final List<CustomRule> customRules;
 
   const HouseRules({
     required this.entryTime,
     required this.visitorPolicy,
     required this.otherRules,
+    required this.penaltyDate,
+    required this.customRules,
   });
 }
 

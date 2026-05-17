@@ -23,12 +23,18 @@ class Occupancy {
 class FloorData {
   final String floorName;
   final String bedInfo; 
+  final int? floorNum;
+  final int? totalBeds;
+  final int? freeBeds;
   final List<Room> rooms;
 
   FloorData({
     required this.floorName,
     required this.bedInfo,
     required this.rooms,
+    this.floorNum,
+    this.totalBeds,
+    this.freeBeds,
   });
 }
 
@@ -69,6 +75,7 @@ class BedInfo {
   final String? tenantAvatar;
   final String? tenantId;
   final bool isAway;
+  final String? awayReturnDate;
 
   BedInfo({
     required this.bedNumber,
@@ -77,5 +84,6 @@ class BedInfo {
     this.tenantAvatar,
     this.tenantId,
     this.isAway = false,
+    this.awayReturnDate,
   });
 }

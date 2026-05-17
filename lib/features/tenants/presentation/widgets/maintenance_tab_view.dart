@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/maintenance/domain/entities/maintenance.dart';
 import 'package:stayindia_owner/features/maintenance/presentation/cubit/maintenance_cubit.dart';
@@ -18,7 +18,7 @@ class MaintenanceTabView extends StatefulWidget {
 
 class _MaintenanceTabViewState extends State<MaintenanceTabView> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedFilter = 'All';
+  String _selectedFilter = 'all';
   String _searchQuery = '';
 
   @override
@@ -68,7 +68,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                 SizedBox(height: 16.h),
                 ElevatedButton(
                   onPressed: _reloadIssues,
-                  child: const Text('Retry'),
+                  child: Text('retry'.tr()),
                 ),
               ],
             ),
@@ -103,10 +103,10 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
           t.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           (t.roomId?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
       
-      final matchesFilter = _selectedFilter == 'All' ||
-          (_selectedFilter == 'Open' && t.status == 'OPEN') ||
-          (_selectedFilter == 'In Progress' && t.status == 'IN_PROGRESS') ||
-          (_selectedFilter == 'Fixed' && t.status == 'RESOLVED');
+      final matchesFilter = _selectedFilter == 'all' ||
+          (_selectedFilter == 'open' && t.status == 'OPEN') ||
+          (_selectedFilter == 'in_progress' && t.status == 'IN_PROGRESS') ||
+          (_selectedFilter == 'fixed' && t.status == 'RESOLVED');
 
       return matchesSearch && matchesFilter;
     }).toList();
@@ -130,7 +130,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
               controller: _searchController,
               onChanged: (val) => setState(() => _searchQuery = val),
               decoration: InputDecoration(
-                hintText: 'Search tenant, room, phone...',
+                hintText: 'search_maintenance_hint'.tr(),
                 hintStyle: TextStyle(color: AppColors.greyText, fontSize: 15.sp),
                 border: InputBorder.none,
                 isDense: true,
@@ -144,20 +144,20 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
   }
 
   Widget _buildFilterPills(List<Maintenance> allTickets) {
-    final filters = ['All', 'Open', 'In Progress', 'Fixed'];
+    final filters = ['all', 'open', 'in_progress', 'fixed'];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: filters.map((f) {
           final isSelected = _selectedFilter == f;
           int count = 0;
-          if (f == 'All') {
+          if (f == 'all') {
             count = allTickets.length;
-          } else if (f == 'Open') {
+          } else if (f == 'open') {
             count = allTickets.where((t) => t.status == 'OPEN').length;
-          } else if (f == 'In Progress') {
+          } else if (f == 'in_progress') {
             count = allTickets.where((t) => t.status == 'IN_PROGRESS').length;
-          } else if (f == 'Fixed') {
+          } else if (f == 'fixed') {
             count = allTickets.where((t) => t.status == 'RESOLVED').length;
           }
 
@@ -179,12 +179,12 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (f == 'Open') Icon(Icons.warning_amber_rounded, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
-                    if (f == 'In Progress') Icon(Icons.access_time, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
-                    if (f == 'Fixed') Icon(Icons.check_circle_outline, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
-                    if (f != 'All') SizedBox(width: 6.w),
+                    if (f == 'open') Icon(Icons.warning_amber_rounded, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
+                    if (f == 'in_progress') Icon(Icons.access_time, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
+                    if (f == 'fixed') Icon(Icons.check_circle_outline, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
+                    if (f != 'all') SizedBox(width: 6.w),
                     Text(
-                      '$f ($count)',
+                      '${f.tr()} ($count)',
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -206,7 +206,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
       children: [
         Expanded(
           child: _buildSummaryVerticalCard(
-            label: 'Open',
+            label: 'open'.tr(),
             count: summary.open.toString(),
             color: const Color(0xFFF04438),
             bgColor: const Color(0xFFFEF3F2),
@@ -215,7 +215,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         SizedBox(width: 8.w),
         Expanded(
           child: _buildSummaryVerticalCard(
-            label: 'In Progress',
+            label: 'in_progress'.tr(),
             count: summary.inProgress.toString(),
             color: const Color(0xFFF79009),
             bgColor: const Color(0xFFFEF9F2),
@@ -224,7 +224,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         SizedBox(width: 8.w),
         Expanded(
           child: _buildSummaryVerticalCard(
-            label: 'Fixed',
+            label: 'fixed'.tr(),
             count: summary.resolved.toString(),
             color: const Color(0xFF12B76A),
             bgColor: const Color(0xFFF0FDF4),
@@ -272,7 +272,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         Center(
           child: Padding(
             padding: EdgeInsets.only(top: 40.h),
-            child: Text('No tickets found', style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
+            child: Text('no_tickets_found'.tr(), style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
           ),
         ),
       ];
@@ -284,15 +284,15 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
 
     List<Widget> sections = [];
     if (open.isNotEmpty) {
-      sections.add(_buildSectionHeader('Open Issues', const Color(0xFFF04438), Icons.warning_amber_rounded));
+      sections.add(_buildSectionHeader('open_issues'.tr(), const Color(0xFFF04438), Icons.warning_amber_rounded));
       sections.addAll(open.map((t) => _buildMaintenanceCard(t)));
     }
     if (inProgress.isNotEmpty) {
-      sections.add(_buildSectionHeader('In Progress', const Color(0xFFF79009), Icons.access_time));
+      sections.add(_buildSectionHeader('in_progress'.tr(), const Color(0xFFF79009), Icons.access_time));
       sections.addAll(inProgress.map((t) => _buildMaintenanceCard(t)));
     }
     if (fixed.isNotEmpty) {
-      sections.add(_buildSectionHeader('Fixed Issues', const Color(0xFF12B76A), Icons.check_circle_outline));
+      sections.add(_buildSectionHeader('fixed_issues'.tr(), const Color(0xFF12B76A), Icons.check_circle_outline));
       sections.addAll(fixed.map((t) => _buildMaintenanceCard(t)));
     }
     return sections;
@@ -372,7 +372,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'Room ${ticket.roomId ?? 'N/A'}',
+                          'room_number_label'.tr(namedArgs: {'number': ticket.roomId ?? 'not_available'.tr()}),
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColors.greyText,
@@ -391,7 +391,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Reported on $dateStr',
+                    'reported_on'.tr(namedArgs: {'date': dateStr}),
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: AppColors.greyText,
@@ -412,9 +412,9 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
     Color color;
     String label = status.replaceAll('_', ' ');
     switch (status.toUpperCase()) {
-      case 'OPEN': color = const Color(0xFFF04438); label = 'Open'; break;
-      case 'IN_PROGRESS': color = const Color(0xFFF79009); label = 'In Progress'; break;
-      case 'RESOLVED': color = const Color(0xFF12B76A); label = 'Fixed'; break;
+      case 'OPEN': color = const Color(0xFFF04438); label = 'open'.tr(); break;
+      case 'IN_PROGRESS': color = const Color(0xFFF79009); label = 'in_progress'.tr(); break;
+      case 'RESOLVED': color = const Color(0xFF12B76A); label = 'fixed'.tr(); break;
       default: color = AppColors.greyText;
     }
     return Container(
@@ -488,7 +488,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Issue Details',
+                            'issue_details'.tr(),
                             style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.bold,
@@ -538,14 +538,14 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                                   Icon(Icons.location_on_outlined, size: 16.sp, color: AppColors.greyText),
                                   SizedBox(width: 4.w),
                                   Text(
-                                    'Room ${ticket.roomId ?? 'N/A'}',
+                                    'room_number_label'.tr(namedArgs: {'number': ticket.roomId ?? 'not_available'.tr()}),
                                     style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
                                   ),
                                   SizedBox(width: 16.w),
                                   Icon(Icons.warning_amber_rounded, size: 16.sp, color: const Color(0xFFF04438)),
                                   SizedBox(width: 4.w),
                                   Text(
-                                    ticket.priority ?? 'High Priority',
+                                    ticket.priority ?? 'high_priority'.tr(),
                                     style: TextStyle(fontSize: 14.sp, color: const Color(0xFFF04438), fontWeight: FontWeight.w500),
                                   ),
                                 ],
@@ -556,7 +556,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                         SizedBox(height: 24.h),
 
                         Text(
-                          'Timeline',
+                          'timeline'.tr(),
                           style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
                         ),
                         SizedBox(height: 12.h),
@@ -581,7 +581,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Reported',
+                                    'reported'.tr(),
                                     style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
                                   ),
                                   Text(
@@ -596,14 +596,14 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                         SizedBox(height: 24.h),
 
                         Text(
-                          'Update Status',
+                          'update_status'.tr(),
                           style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
                         ),
                         SizedBox(height: 12.h),
                         Row(
                           children: [
                             _buildStatusBox(
-                              'Open',
+                              'open'.tr(),
                               Icons.cancel_outlined,
                               selectedStatus == 'OPEN',
                               const Color(0xFF2952A3),
@@ -611,7 +611,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                             ),
                             SizedBox(width: 8.w),
                             _buildStatusBox(
-                              'In Progress',
+                              'in_progress'.tr(),
                               Icons.build_outlined,
                               selectedStatus == 'IN_PROGRESS',
                               const Color(0xFF667085),
@@ -619,7 +619,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                             ),
                             SizedBox(width: 8.w),
                             _buildStatusBox(
-                              'Fixed',
+                              'fixed'.tr(),
                               Icons.check_circle_outline,
                               selectedStatus == 'RESOLVED',
                               const Color(0xFF12B76A),
@@ -664,7 +664,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                           ),
                           SizedBox(width: 8.w),
                           Text(
-                            selectedStatus == 'RESOLVED' ? 'Mark as Fixed' : 'Update Status',
+                            selectedStatus == 'RESOLVED' ? 'mark_as_fixed'.tr() : 'update_status'.tr(),
                             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                         ],

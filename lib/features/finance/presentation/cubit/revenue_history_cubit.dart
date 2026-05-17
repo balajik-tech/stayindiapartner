@@ -1,3 +1,4 @@
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stayindia_owner/features/finance/domain/entities/revenue_history_item.dart';
@@ -47,7 +48,7 @@ class RevenueHistoryCubit extends Cubit<RevenueHistoryState> {
       );
       emit(RevenueHistoryLoaded(items: items));
     } catch (e) {
-      emit(RevenueHistoryError(message: e.toString()));
+      emit(RevenueHistoryError(message: GlobalErrorMapper.map(e).message));
     }
   }
 }

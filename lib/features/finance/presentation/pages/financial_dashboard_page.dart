@@ -15,6 +15,7 @@ import 'revenue_history_page.dart';
 import '../cubit/revenue_history_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class FinancialDashboardPage extends StatefulWidget {
   const FinancialDashboardPage({super.key});
@@ -70,14 +71,14 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                       _buildMetricGrid(state),
                       SizedBox(height: 32.h),
                       _buildChartSection(
-                        title: 'Revenue Trends',
-                        subtitle: 'Daily earnings overview',
+                        title: StringUtils.translate('revenue_trends', context: context),
+                        subtitle: StringUtils.translate('daily_earnings_overview', context: context),
                         child: RevenueChart(trends: state.revenueTrends),
                       ),
                       SizedBox(height: 24.h),
                       _buildChartSection(
-                        title: 'Occupancy vs Capacity',
-                        subtitle: 'Beds distribution',
+                        title: StringUtils.translate('occupancy_vs_capacity', context: context),
+                        subtitle: StringUtils.translate('beds_distribution', context: context),
                         child: OccupancyRevenueChart(
                           occupied: state.stats?.occupiedBeds ?? 0,
                           total: state.stats?.totalBeds ?? 0,
@@ -124,7 +125,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Financial Insights',
+                        StringUtils.translate('financial_insights', context: context),
                         style: TextStyle(
                           fontSize: 26.sp,
                           fontWeight: FontWeight.w900,
@@ -134,7 +135,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        'Revenue, occupancy & growth analytics',
+                        StringUtils.translate('financial_insights_sub', context: context),
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: Colors.white.withValues(alpha: 0.6),
@@ -181,7 +182,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
             Icon(Icons.ios_share_rounded, color: Colors.white, size: 20.sp),
             SizedBox(width: 8.w),
             Text(
-              'Export',
+              StringUtils.translate('export', context: context),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14.sp,
@@ -202,7 +203,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Performance Overview',
+              StringUtils.translate('performance_overview', context: context),
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w900,
@@ -224,7 +225,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
               },
               icon: Icon(Icons.history_rounded, size: 18.sp, color: AppColors.primaryBlue),
               label: Text(
-                'View History',
+                StringUtils.translate('view_history', context: context),
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
@@ -241,7 +242,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
         ),
         SizedBox(height: 4.h),
         Text(
-          'Real-time data from your properties',
+          StringUtils.translate('real_time_data_hint', context: context),
           style: TextStyle(
             fontSize: 13.sp,
             color: AppColors.greyText,
@@ -263,25 +264,25 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
       childAspectRatio: 1.4,
       children: [
         MetricCard(
-          title: 'Total Revenue',
+          title: StringUtils.translate('total_revenue', context: context),
           value: currencyFormat.format(state.stats?.totalRevenue ?? 0),
           icon: Icons.account_balance_wallet_rounded,
           color: AppColors.primaryBlue,
         ),
         MetricCard(
-          title: 'This Month',
+          title: StringUtils.translate('this_month', context: context),
           value: currencyFormat.format(state.stats?.thisMonthRevenue ?? 0),
           icon: Icons.trending_up_rounded,
           color: const Color(0xFF099268),
         ),
         MetricCard(
-          title: 'Occupancy',
+          title: StringUtils.translate('occupancy', context: context),
           value: '${(state.stats?.occupancyRate ?? 0).toStringAsFixed(1)}%',
           icon: Icons.bed_rounded,
           color: const Color(0xFFF08C00),
         ),
         MetricCard(
-          title: 'Pending',
+          title: StringUtils.translate('pending', context: context),
           value: currencyFormat.format(state.stats?.pendingPayments ?? 0),
           icon: Icons.hourglass_empty_rounded,
           color: const Color(0xFFE03131),

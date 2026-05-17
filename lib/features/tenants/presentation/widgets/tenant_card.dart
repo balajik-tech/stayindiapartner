@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
@@ -108,23 +109,21 @@ class TenantCard extends StatelessWidget {
                     children: [
                       _buildInfoItem(
                         Icons.meeting_room_rounded,
-                        tenant.roomTypename.toLowerCase().startsWith('room') 
-                            ? tenant.roomTypename 
-                            : 'Room ${tenant.roomTypename}',
-                        'Position',
+                        tenant.roomTypename,
+                        'position'.tr(),
                       ),
                       _buildVerticalDivider(),
                       _buildInfoItem(
                         Icons.access_time_rounded,
-                        'Since ${_formatDate(tenant.checkInDate)}',
-                        'Duration',
+                        'since'.tr(namedArgs: {'date': _formatDate(tenant.checkInDate, context)}),
+                        'duration'.tr(),
                       ),
                       if (isNotice) ...[
                         _buildVerticalDivider(),
                         _buildInfoItem(
                           Icons.exit_to_app_rounded,
-                          _formatDate(tenant.checkOutDate),
-                          'Vacating',
+                          _formatDate(tenant.checkOutDate, context),
+                          'vacating'.tr(),
                         ),
                       ],
                     ],
@@ -139,13 +138,13 @@ class TenantCard extends StatelessWidget {
                   children: [
                     _buildQuickAction(
                       Icons.call_rounded,
-                      'Call Resident',
+                      'call_resident'.tr(),
                       const Color(0xFF27C26C),
                       () => _launchUrl('tel:${tenant.mobile}'),
                     ),
                     const Spacer(),
                     Text(
-                      'View Details',
+                      'view_details'.tr(),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w800,
@@ -187,14 +186,15 @@ class TenantCard extends StatelessWidget {
 
   Widget _buildStatusIndicator(bool isActive, bool isPending, bool isNotice) {
     Color color = AppColors.primaryBlue;
-    String label = 'ACTIVE';
-
+    String label;
     if (isNotice) {
       color = const Color(0xFFF24822);
-      label = 'NOTICE';
+      label = 'notice_status'.tr();
     } else if (isPending) {
       color = const Color(0xFFFFB800);
-      label = 'PENDING';
+      label = 'pending_status'.tr();
+    } else {
+      label = 'active_status'.tr();
     }
 
     return Container(
@@ -298,12 +298,11 @@ class TenantCard extends StatelessWidget {
     }
   }
 
-  String _formatDate(String? date) {
-    if (date == null || date.isEmpty) return 'N/A';
+  String _formatDate(String? date, BuildContext context) {
+    if (date == null || date.isEmpty) return 'not_available'.tr();
     try {
       final dt = DateTime.parse(date);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return '${months[dt.month - 1]} ${dt.day}, ${dt.year.toString().substring(2)}';
+      return DateFormat.yMMMd(context.locale.languageCode).format(dt);
     } catch (_) {
       return date;
     }

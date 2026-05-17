@@ -26,4 +26,9 @@ class OfferRepositoryImpl implements OfferRepository {
   Future<void> deleteOffer(String id) async {
     return await remoteDataSource.deleteOffer(id);
   }
+
+  @override
+  Future<String> uploadOfferImage(String filePath) async {
+    return await remoteDataSource.uploadOfferImage(filePath);
+  }
 }

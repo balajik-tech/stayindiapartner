@@ -23,13 +23,13 @@ class BookingsRepositoryImpl implements BookingsRepository {
   }
 
   @override
-  Future<ScanBookingResponse> scanBooking(String token, {String? hostelId}) {
-    return remote.scanBooking(token, hostelId: hostelId);
+  Future<ScanBookingResponse> scanBooking(String token, {String? hostelId, String? bookingId}) {
+    return remote.scanBooking(token, hostelId: hostelId, bookingId: bookingId);
   }
 
   @override
-  Future<ScanBookingResponse> manualCheckin(String accessCode, {String? hostelId}) {
-    return remote.manualCheckin(accessCode, hostelId: hostelId);
+  Future<ScanBookingResponse> manualCheckin(String accessCode, {String? hostelId, String? bookingId}) {
+    return remote.manualCheckin(accessCode, hostelId: hostelId, bookingId: bookingId);
   }
 
   @override

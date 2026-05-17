@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
@@ -201,15 +202,7 @@ class RoomMasterSetupScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        sharing == 1
-                            ? 'Single Sharing'
-                            : (sharing == 2
-                                ? 'Double Sharing'
-                                : (sharing == 3
-                                    ? 'Triple Sharing'
-                                    : (sharing == 4
-                                        ? 'Quad Sharing'
-                                        : '5 Sharing'))),
+                        '$sharing Sharing',
                         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)),
                       ),
                       SizedBox(height: 2.h),
@@ -383,103 +376,159 @@ class RoomMasterSetupScreen extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 16.h),
-                Text('Sharing Type', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B))),
+                Text('sharing_type_label'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B))),
                 SizedBox(height: 8.h),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                  height: 52.h,
+                  padding: EdgeInsets.all(4.r),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: selectedSharing,
-                      isExpanded: true,
-                      icon: Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF2C5990), size: 24.sp),
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: const Color(0xFF0F172A)),
-                      items: const [
-                        DropdownMenuItem(value: 1, child: Text('Single Sharing')),
-                        DropdownMenuItem(value: 2, child: Text('Double Sharing')),
-                        DropdownMenuItem(value: 3, child: Text('Triple Sharing')),
-                        DropdownMenuItem(value: 4, child: Text('Quad Sharing')),
-                        DropdownMenuItem(value: 5, child: Text('5 Sharing')),
-                      ],
-                      onChanged: (val) => setSheetState(() => selectedSharing = val!),
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double toggleWidth = (constraints.maxWidth - 8.r) / 5;
+                      return Stack(
+                        children: [
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOutBack,
+                            left: (selectedSharing - 1) * toggleWidth,
+                            width: toggleWidth,
+                            top: 0,
+                            bottom: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Row(
+                            children: [1, 2, 3, 4, 5].map((s) {
+                              final isSelected = selectedSharing == s;
+                              return Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    setSheetState(() => selectedSharing = s);
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    color: Colors.transparent,
+                                    child: AnimatedDefaultTextStyle(
+                                      duration: const Duration(milliseconds: 300),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                                        color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
+                                      ),
+                                      child: Text('$s'),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 SizedBox(height: 20.h),
-                Text('Room Type', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B))),
+                Text('room_type_label'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B))),
                 SizedBox(height: 8.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setSheetState(() => selectedRoomType = 'NON-AC'),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
-                          decoration: BoxDecoration(
-                            color: selectedRoomType == 'NON-AC'
-                                ? const Color(0xFF2C5990).withValues(alpha: 0.1)
-                                : const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(16.r),
-                            border: Border.all(
-                              color: selectedRoomType == 'NON-AC'
-                                  ? const Color(0xFF2C5990)
-                                  : const Color(0xFFE2E8F0),
-                              width: 1.5,
+                Container(
+                  height: 52.h,
+                  padding: EdgeInsets.all(4.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double toggleWidth = (constraints.maxWidth - 8.r) / 2;
+                      final bool isACSelected = selectedRoomType == 'AC';
+                      return Stack(
+                        children: [
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOutBack,
+                            left: isACSelected ? toggleWidth : 0,
+                            width: toggleWidth,
+                            top: 0,
+                            bottom: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          child: Text(
-                            'NON-AC',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: selectedRoomType == 'NON-AC'
-                                  ? const Color(0xFF2C5990)
-                                  : const Color(0xFF64748B),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 14.sp,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    setSheetState(() => selectedRoomType = 'NON-AC');
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    color: Colors.transparent,
+                                    child: AnimatedDefaultTextStyle(
+                                      duration: const Duration(milliseconds: 300),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: !isACSelected ? FontWeight.w900 : FontWeight.w700,
+                                        color: !isACSelected ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
+                                      ),
+                                      child: Text('NON-AC'),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    setSheetState(() => selectedRoomType = 'AC');
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    color: Colors.transparent,
+                                    child: AnimatedDefaultTextStyle(
+                                      duration: const Duration(milliseconds: 300),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: isACSelected ? FontWeight.w900 : FontWeight.w700,
+                                        color: isACSelected ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
+                                      ),
+                                      child: Text('AC'),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 16.w),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setSheetState(() => selectedRoomType = 'AC'),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
-                          decoration: BoxDecoration(
-                            color: selectedRoomType == 'AC'
-                                ? const Color(0xFFF98125).withValues(alpha: 0.1)
-                                : const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(16.r),
-                            border: Border.all(
-                              color: selectedRoomType == 'AC'
-                                  ? const Color(0xFFF98125)
-                                  : const Color(0xFFE2E8F0),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Text(
-                            'AC',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: selectedRoomType == 'AC'
-                                  ? const Color(0xFFF98125)
-                                  : const Color(0xFF64748B),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                        ],
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(height: 24.h),
                 Row(

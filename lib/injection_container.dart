@@ -2,9 +2,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/services/token_storage.dart';
+import 'package:stayindia_owner/core/services/cache_service.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
+import 'package:stayindia_owner/core/services/offline_queue_service.dart';
 import 'package:stayindia_owner/features/auth/auth_injections.dart';
 import 'package:stayindia_owner/features/bookings/bookings_injections.dart';
 import 'package:stayindia_owner/features/dashboard/dashboard_injections.dart';
@@ -22,12 +24,10 @@ import 'package:stayindia_owner/features/notifications/notification_injections.d
 import 'package:stayindia_owner/features/property_setup/property_setup_injections.dart';
 import 'package:stayindia_owner/features/offers/offers_injections.dart';
 import 'package:stayindia_owner/core/theme/theme_cubit.dart';
-
-
-
 import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/core/network/error_interceptor.dart';
 import 'package:stayindia_owner/core/network/connectivity_interceptor.dart';
+import 'package:stayindia_owner/core/network/retry_interceptor.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/core/location/location_cubit.dart';
 import 'package:stayindia_owner/core/location/location_service.dart';
@@ -60,12 +60,15 @@ Future<void> init() async {
         storage: sl<FlutterSecureStorage>(),
       ));
 
+  sl.registerLazySingleton(() => CacheService(sl()));
+
   sl.registerLazySingleton<SocketService>(() {
     final String socketBaseUrl = Uri.parse(ApiConstants.effectiveBaseUrl).origin;
     return SocketService(baseUrl: socketBaseUrl)..connect();
   });
 
   sl.registerLazySingleton(() => NotificationService());
+  sl.registerLazySingleton(() => OfflineQueueService());
 
   sl.registerLazySingleton(() => const FlutterSecureStorage(
         aOptions: AndroidOptions(
@@ -77,11 +80,12 @@ Future<void> init() async {
     final dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.effectiveBaseUrl,
-        connectTimeout: const Duration(seconds: 60),
-        receiveTimeout: const Duration(seconds: 60),
-        sendTimeout: const Duration(seconds: 60),
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(seconds: 10),
       ),
     );
+    dio.transformer = BackgroundTransformer();
     
     dio.interceptors.addAll([
       ConnectivityInterceptor(),
@@ -110,10 +114,15 @@ Future<void> init() async {
           final isAuthPath = e.requestOptions.path.contains('/auth/') || 
                             e.requestOptions.path.contains('/users/');
           
-          if (e.response?.statusCode == 401) {
+          final responseData = e.response?.data;
+          final isOwnerNotFound = responseData?.toString().contains('Owner not found') ?? false;
+          final isUserNotFound = responseData?.toString().contains('User not found') ?? false;
 
-            if (!isAuthPath) {
-              AppLogger.warning('Session expired (401) on ${e.requestOptions.path}. Logging out...');
+          final isAuthError = e.response?.statusCode == 401 || isOwnerNotFound || isUserNotFound;
+
+          if (isAuthError) {
+            if (!isAuthPath || isUserNotFound || isOwnerNotFound) {
+              AppLogger.warning('Session expired or User not found on ${e.requestOptions.path}. Logging out...');
               sl<AuthCubit>().logout();
             } else {
               AppLogger.debug('401 on auth path ${e.requestOptions.path}. Letting cubit handle it.');
@@ -125,8 +134,39 @@ Future<void> init() async {
         },
       ),
       ErrorInterceptor(),
+      RetryInterceptor(dio: dio),
     ]);
+    
+    // Start background syncing of the offline queue
+    sl<OfflineQueueService>().startSyncListener(dio);
     
     return dio;
   });
+}
+
+Future<void> resetInjections() async {
+  AuthCubit? authCubit;
+  ThemeCubit? themeCubit;
+  try {
+    if (sl.isRegistered<AuthCubit>()) {
+      authCubit = sl<AuthCubit>();
+    }
+  } catch (_) {}
+  try {
+    if (sl.isRegistered<ThemeCubit>()) {
+      themeCubit = sl<ThemeCubit>();
+    }
+  } catch (_) {}
+
+  await sl.reset();
+  await init();
+  
+  if (authCubit != null) {
+    sl.unregister<AuthCubit>();
+    sl.registerSingleton<AuthCubit>(authCubit);
+  }
+  if (themeCubit != null) {
+    sl.unregister<ThemeCubit>();
+    sl.registerSingleton<ThemeCubit>(themeCubit);
+  }
 }

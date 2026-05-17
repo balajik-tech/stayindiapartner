@@ -103,14 +103,14 @@ class BookingsCubit extends Cubit<BookingsState> {
     fetchBookings(kycStatus: kycStatus, roomType: roomType);
   }
 
-  Future<void> scanBooking(String token, {String? hostelId}) async {
+  Future<void> scanBooking(String token, {String? hostelId, String? bookingId}) async {
     emit(state.copyWith(
         status: BookingsStatus.loading,
         errorMessage: null,
         successMessage: null,
       ));
     try {
-      final response = await scanBookingUseCase.execute(token, hostelId: hostelId);
+      final response = await scanBookingUseCase.execute(token, hostelId: hostelId, bookingId: bookingId);
       emit(state.copyWith(
         status: BookingsStatus.success,
         scannedBooking: response,
@@ -123,14 +123,14 @@ class BookingsCubit extends Cubit<BookingsState> {
     }
   }
 
-  Future<void> manualCheckin(String accessCode, {String? hostelId}) async {
+  Future<void> manualCheckin(String accessCode, {String? hostelId, String? bookingId}) async {
     emit(state.copyWith(
       status: BookingsStatus.loading,
       errorMessage: null,
       successMessage: null,
     ));
     try {
-      final response = await scanBookingUseCase.execute(accessCode, hostelId: hostelId, isManual: true);
+      final response = await scanBookingUseCase.execute(accessCode, hostelId: hostelId, bookingId: bookingId, isManual: true);
       emit(state.copyWith(
         status: BookingsStatus.success,
         scannedBooking: response,

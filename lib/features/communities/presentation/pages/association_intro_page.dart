@@ -11,8 +11,10 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/features/communities/domain/usecases/community_usecases.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 
 import 'package:stayindia_owner/core/utils/logger.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -127,7 +129,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Feed Updates',
+                        StringUtils.translate('feed_updates_title', context: context),
                         style: GoogleFonts.dmSans(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w800,
@@ -141,14 +143,14 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                             setModalState(() {});
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('All posts marked as read!'),
-                                duration: Duration(seconds: 1),
+                              SnackBar(
+                                content: Text(StringUtils.translate('all_posts_read_msg', context: context)),
+                                duration: const Duration(seconds: 1),
                               ),
                             );
                           },
                           child: Text(
-                            'Mark all read',
+                            StringUtils.translate('mark_all_read', context: context),
                             style: TextStyle(
                               color: AppColors.primaryBlue,
                               fontWeight: FontWeight.w700,
@@ -182,8 +184,8 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                             children: [
                               Text(
                                 unreadCount > 0 
-                                    ? 'You have $unreadCount new posts'
-                                    : 'You are all caught up!',
+                                    ? StringUtils.translate('new_posts_count', namedArgs: {'count': unreadCount.toString()}, context: context)
+                                    : StringUtils.translate('all_caught_up', context: context),
                                 style: GoogleFonts.dmSans(
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
@@ -193,8 +195,8 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                               SizedBox(height: 4.h),
                               Text(
                                 unreadCount > 0
-                                    ? 'Scroll through the community feed to read new updates instantly.'
-                                    : 'No new unread community announcements at this time.',
+                                    ? StringUtils.translate('feed_scroll_msg', context: context)
+                                    : StringUtils.translate('no_unread_announcements', context: context),
                                 style: GoogleFonts.dmSans(
                                   fontWeight: FontWeight.w500,
                                   color: AppColors.textSecondary,
@@ -222,7 +224,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Close',
+                        StringUtils.translate('cancel', context: context),
                         style: GoogleFonts.dmSans(
                           fontWeight: FontWeight.bold,
                           fontSize: 14.sp,
@@ -383,7 +385,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to vote: ${e.toString().split(':').last}'),
+            content: Text(StringUtils.translate('failed_vote_err', context: context)),
           ),
         );
       }
@@ -395,16 +397,16 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Post', style: GoogleFonts.dmSans(fontWeight: FontWeight.bold)),
-        content: Text('Are you sure you want to delete this post?', style: GoogleFonts.dmSans()),
+        title: Text(StringUtils.translate('delete_post_title', context: context), style: GoogleFonts.dmSans(fontWeight: FontWeight.bold)),
+        content: Text(StringUtils.translate('delete_post_confirm', context: context), style: GoogleFonts.dmSans()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: GoogleFonts.dmSans(color: Colors.grey)),
+            child: Text(StringUtils.translate('cancel', context: context), style: GoogleFonts.dmSans(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: GoogleFonts.dmSans(color: Colors.red)),
+            child: Text(StringUtils.translate('remove', context: context), style: GoogleFonts.dmSans(color: Colors.red)),
           ),
         ],
       ),
@@ -433,7 +435,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
           _posts.insert(index, originalPost);
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete post: ${e.toString().split(':').last}')),
+          SnackBar(content: Text(StringUtils.translate('failed_delete_post_err', context: context))),
         );
       }
     }
@@ -464,6 +466,21 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(StringUtils.translate('location_services_disabled', context: context)),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: StringUtils.translate('settings', context: context),
+              textColor: Colors.white,
+              onPressed: () async {
+                await Geolocator.openLocationSettings();
+              },
+            ),
+          ),
+        );
+      }
       return;
     }
 
@@ -471,11 +488,41 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(StringUtils.translate('location_permission_denied', context: context)),
+              behavior: SnackBarBehavior.floating,
+              action: SnackBarAction(
+                label: StringUtils.translate('settings', context: context),
+                textColor: Colors.white,
+                onPressed: () async {
+                  await Geolocator.openAppSettings();
+                },
+              ),
+            ),
+          );
+        }
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(StringUtils.translate('location_permission_denied_forever', context: context)),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: StringUtils.translate('settings', context: context),
+              textColor: Colors.white,
+              onPressed: () async {
+                await Geolocator.openAppSettings();
+              },
+            ),
+          ),
+        );
+      }
       return;
     }
 
@@ -577,7 +624,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Failed to create post: ${e.toString().split(':').last}',
+              StringUtils.translate('failed_create_post_err', context: context),
             ),
           ),
         );
@@ -748,7 +795,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Stay India',
+                    StringUtils.translate('app_name', context: context),
                     style: GoogleFonts.dmSans(
                       fontSize: 28.sp,
                       fontWeight: FontWeight.w900,
@@ -759,7 +806,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'PG Owners Community',
+                    StringUtils.translate('pg_owners_community', context: context),
                     style: GoogleFonts.dmSans(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -789,7 +836,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please select a property first')),
+                    SnackBar(content: Text(StringUtils.translate('select_property_err', context: context))),
                   );
                 }
               },
@@ -1807,7 +1854,7 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to join: ${e.toString()}'),
+            content: Text(GlobalErrorMapper.map(e).message),
             backgroundColor: Colors.red,
           ),
         );

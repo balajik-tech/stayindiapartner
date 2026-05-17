@@ -218,7 +218,7 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
 
 
               if (result != null && result.isNotEmpty && context.mounted) {
-                context.read<BookingsCubit>().scanBooking(result, hostelId: widget.booking.hostelId);
+                context.read<BookingsCubit>().scanBooking(result, hostelId: widget.booking.hostelId, bookingId: widget.booking.id);
                 Navigator.pop(context); 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Processing scanned booking...')),
@@ -249,7 +249,7 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
             onPressed: () {
               final code = _accessCodeController.text.trim();
               if (code.isNotEmpty) {
-                context.read<BookingsCubit>().manualCheckin(code, hostelId: widget.booking.hostelId);
+                context.read<BookingsCubit>().manualCheckin(code, hostelId: widget.booking.hostelId, bookingId: widget.booking.id);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Processing manual check-in...')),
@@ -278,7 +278,7 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
         SizedBox(height: 16.h),
         TextButton(
           onPressed: () {
-            context.read<BookingsCubit>().manualCheckin(widget.booking.id, hostelId: widget.booking.hostelId);
+            context.read<BookingsCubit>().manualCheckin(widget.booking.id, hostelId: widget.booking.hostelId, bookingId: widget.booking.id);
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Proceeding to direct allocation...')),

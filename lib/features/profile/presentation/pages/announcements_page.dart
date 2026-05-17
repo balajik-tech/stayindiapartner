@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stayindia_owner/features/notices/presentation/cubit/notice_cubit.dart';
@@ -41,45 +42,56 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
   String _selectedCategory = 'All';
   late NoticeCubit _noticeCubit;
 
-  final List<String> _categories = ['All', 'Food', 'Payments', 'Maintenance', 'Rules', 'Events'];
+  List<String> _getLocalizedCategories(BuildContext context) {
+    return [
+      StringUtils.translate('category_all', context: context),
+      StringUtils.translate('category_food', context: context),
+      StringUtils.translate('category_payments', context: context),
+      StringUtils.translate('category_maintenance', context: context),
+      StringUtils.translate('category_rules', context: context),
+      StringUtils.translate('category_events', context: context),
+    ];
+  }
 
-  final List<AnnouncementTemplate> _templates = [
-    AnnouncementTemplate(
-      category: 'Food',
-      title: "Today's Menu",
-      description: "Fresh meals served! Check out today's delicious menu in the mess area.",
-      icon: Icons.restaurant_rounded,
-      color: Colors.orange,
-    ),
-    AnnouncementTemplate(
-      category: 'Payments',
-      title: "Rent Reminder",
-      description: "Friendly reminder that rent is due by the 5th. Please ensure timely payment.",
-      icon: Icons.payments_rounded,
-      color: Colors.green,
-    ),
-    AnnouncementTemplate(
-      category: 'Maintenance',
-      title: "Water Update",
-      description: "Scheduled water tank cleaning tomorrow from 10 AM to 2 PM. Plan accordingly.",
-      icon: Icons.water_drop_rounded,
-      color: Colors.blue,
-    ),
-    AnnouncementTemplate(
-      category: 'Rules',
-      title: "Gate Timing",
-      description: "For your safety, the main gate will be locked from 11 PM to 6 AM daily.",
-      icon: Icons.door_front_door_rounded,
-      color: Colors.red,
-    ),
-    AnnouncementTemplate(
-      category: 'Events',
-      title: "Movie Night",
-      description: "Join us for a movie night in the common area this Sunday at 7 PM! All are welcome.",
-      icon: Icons.movie_rounded,
-      color: Colors.purple,
-    ),
-  ];
+  List<AnnouncementTemplate> _getLocalizedTemplates(BuildContext context) {
+    return [
+      AnnouncementTemplate(
+        category: StringUtils.translate('category_food', context: context),
+        title: StringUtils.translate('template_today_menu_title', context: context),
+        description: StringUtils.translate('template_today_menu_desc', context: context),
+        icon: Icons.restaurant_rounded,
+        color: Colors.orange,
+      ),
+      AnnouncementTemplate(
+        category: StringUtils.translate('category_payments', context: context),
+        title: StringUtils.translate('template_rent_reminder_title', context: context),
+        description: StringUtils.translate('template_rent_reminder_desc', context: context),
+        icon: Icons.payments_rounded,
+        color: Colors.green,
+      ),
+      AnnouncementTemplate(
+        category: StringUtils.translate('category_maintenance', context: context),
+        title: StringUtils.translate('template_water_update_title', context: context),
+        description: StringUtils.translate('template_water_update_desc', context: context),
+        icon: Icons.water_drop_rounded,
+        color: Colors.blue,
+      ),
+      AnnouncementTemplate(
+        category: StringUtils.translate('category_rules', context: context),
+        title: StringUtils.translate('template_gate_timing_title', context: context),
+        description: StringUtils.translate('template_gate_timing_desc', context: context),
+        icon: Icons.door_front_door_rounded,
+        color: Colors.red,
+      ),
+      AnnouncementTemplate(
+        category: StringUtils.translate('category_events', context: context),
+        title: StringUtils.translate('template_movie_night_title', context: context),
+        description: StringUtils.translate('template_movie_night_desc', context: context),
+        icon: Icons.movie_rounded,
+        color: Colors.purple,
+      ),
+    ];
+  }
 
   @override
   void initState() {
@@ -114,9 +126,11 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
     super.dispose();
   }
 
-  List<AnnouncementTemplate> get _filteredTemplates {
-    return _templates.where((t) {
-      final matchesCategory = _selectedCategory == 'All' || t.category == _selectedCategory;
+  List<AnnouncementTemplate> _getFilteredTemplates(BuildContext context) {
+    final templates = _getLocalizedTemplates(context);
+    final allCategoryLabel = StringUtils.translate('category_all', context: context);
+    return templates.where((t) {
+      final matchesCategory = _selectedCategory == allCategoryLabel || t.category == _selectedCategory;
       final matchesSearch = t.title.toLowerCase().contains(_searchController.text.toLowerCase()) ||
           t.description.toLowerCase().contains(_searchController.text.toLowerCase());
       return matchesCategory && matchesSearch;
@@ -125,25 +139,88 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
 
   @override
   Widget build(BuildContext context) {
+    final hostelState = context.watch<HostelCubit>().state;
+    final hasNoProperty = hostelState is HostelLoaded && hostelState.hostels.isEmpty;
+
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _noticeCubit),
       ],
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            _buildSliverAppBar(),
+        body: hasNoProperty
+            ? Scaffold(
+                appBar: AppBar(
+                  backgroundColor: AppColors.primaryBlue,
+                  elevation: 0,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  title: Text(
+                    StringUtils.translate('announcements_title', context: context),
+                    style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, color: Colors.white),
+                  ),
+                ),
+                body: _buildNoPropertyPlaceholder(),
+              )
+            : NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  _buildSliverAppBar(),
+                ],
+                body: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildTemplatesView(),
+                    _buildHistoryView(),
+                  ],
+                ),
+              ),
+        bottomNavigationBar: hasNoProperty ? null : _buildWriteNewButton(),
+      ),
+    );
+  }
+
+  Widget _buildNoPropertyPlaceholder() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(24.r),
+              decoration: BoxDecoration(
+                color: AppColors.primaryBlue.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add_business_rounded,
+                size: 64.sp,
+                color: AppColors.primaryBlue.withValues(alpha: 0.5),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              StringUtils.translate('add_property_first', context: context),
+              style: GoogleFonts.dmSans(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.darkText,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              StringUtils.translate('start_by_adding_property_desc', context: context),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.dmSans(
+                fontSize: 14.sp,
+                color: AppColors.greyText,
+                height: 1.5,
+              ),
+            ),
           ],
-          body: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildTemplatesView(),
-              _buildHistoryView(),
-            ],
-          ),
         ),
-        bottomNavigationBar: _buildWriteNewButton(),
       ),
     );
   }
@@ -159,7 +236,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        'Announcements',
+        StringUtils.translate('announcements_title', context: context),
         style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, color: Colors.white),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -212,11 +289,11 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                     ),
                     SizedBox(height: 12.h),
                     Text(
-                      "Broadcasting Center",
+                      StringUtils.translate('broadcasting_center_title', context: context),
                       style: GoogleFonts.dmSans(fontSize: 24.sp, fontWeight: FontWeight.w900, color: Colors.white),
                     ),
                     Text(
-                      "Reach all your residents instantly with important updates.",
+                      StringUtils.translate('broadcasting_center_desc', context: context),
                       style: GoogleFonts.dmSans(fontSize: 13.sp, color: Colors.white.withValues(alpha: 0.8)),
                     ),
                     SizedBox(height: 32.h),
@@ -241,9 +318,9 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
             labelColor: AppColors.primaryBlue,
             unselectedLabelColor: AppColors.greyText,
             labelStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 14.sp),
-            tabs: const [
-              Tab(text: "Templates"),
-              Tab(text: "Recent Sent"),
+            tabs: [
+              Tab(text: StringUtils.translate('templates_tab', context: context)),
+              Tab(text: StringUtils.translate('recent_sent_tab', context: context)),
             ],
           ),
         ),
@@ -252,13 +329,14 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
   }
 
   Widget _buildTemplatesView() {
+    final filteredTemplates = _getFilteredTemplates(context);
     return Column(
       children: [
-        _buildSearchBar(),
-        _buildCategoryFilter(),
+        _buildSearchBar(context),
+        _buildCategoryFilter(context),
         Expanded(
-          child: _filteredTemplates.isEmpty
-              ? _buildEmptyState("No templates found", Icons.search_off_rounded)
+          child: filteredTemplates.isEmpty
+              ? _buildEmptyState(StringUtils.translate('no_templates_found', context: context), Icons.search_off_rounded)
               : GridView.builder(
                   padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 100.h),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -266,8 +344,8 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                     childAspectRatio: 2.2,
                     mainAxisSpacing: 16.h,
                   ),
-                  itemCount: _filteredTemplates.length,
-                  itemBuilder: (context, index) => _buildTemplateCard(_filteredTemplates[index]),
+                  itemCount: filteredTemplates.length,
+                  itemBuilder: (context, index) => _buildTemplateCard(filteredTemplates[index]),
                 ),
         ),
       ],
@@ -297,7 +375,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
       );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
@@ -310,7 +388,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
         onChanged: (v) => setState(() {}),
         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
-          hintText: "Search templates...",
+          hintText: StringUtils.translate('search_templates_hint', context: context),
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp, fontWeight: FontWeight.w500),
           prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryBlue, size: 20.sp),
           border: InputBorder.none,
@@ -322,16 +400,22 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
     );
   }
 
-  Widget _buildCategoryFilter() {
+  Widget _buildCategoryFilter(BuildContext context) {
+    final categories = _getLocalizedCategories(context);
+    final allCategoryLabel = StringUtils.translate('category_all', context: context);
+    
+    // Ensure selected category is valid for current locale (first load or switch)
+    if (_selectedCategory == 'All') _selectedCategory = allCategoryLabel;
+
     return Container(
       height: 36.h,
       margin: EdgeInsets.only(bottom: 16.h),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 24.w),
-        itemCount: _categories.length,
+        itemCount: categories.length,
         itemBuilder: (context, index) {
-          final cat = _categories[index];
+          final cat = categories[index];
           final isSelected = _selectedCategory == cat;
           return BouncingWrapper(
             onTap: () => setState(() => _selectedCategory = cat),
@@ -461,12 +545,12 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text("Confirm Broadcast", style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 18.sp)),
-        content: Text("Are you sure you want to send this announcement to all residents of the selected property?", style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
+        title: Text(StringUtils.translate('confirm_broadcast_title', context: context), style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 18.sp)),
+        content: Text(StringUtils.translate('confirm_broadcast_desc', context: context), style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Cancel", style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.bold)),
+            child: Text(StringUtils.translate('cancel', context: context), style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -478,7 +562,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
               backgroundColor: AppColors.primaryBlue,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
             ),
-            child: const Text("Send", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(StringUtils.translate('send', context: context), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -497,7 +581,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
           content: content,
         ).then((_) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Announcement Sent!'), backgroundColor: Colors.green));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(StringUtils.translate('announcement_sent_msg', context: context)), backgroundColor: Colors.green));
           
           _titleController.clear();
           _messageController.clear();
@@ -505,10 +589,10 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
           _loadHistory();
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a valid property first.'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(StringUtils.translate('select_property_err', context: context)), backgroundColor: Colors.red));
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No property data available.'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(StringUtils.translate('no_property_data_available', context: context)), backgroundColor: Colors.red));
     }
   }
 
@@ -543,7 +627,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                   Icon(Icons.edit_document, color: Colors.white, size: 20.sp),
                   SizedBox(width: 12.w),
                   Text(
-                    "Write Custom Announcement",
+                    StringUtils.translate('write_custom_announcement', context: context),
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -610,13 +694,13 @@ class _WriteNewSheet extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24.h),
-            Text("Create Announcement", style: GoogleFonts.dmSans(fontSize: 22.sp, fontWeight: FontWeight.w900)),
+            Text(StringUtils.translate('create_announcement_title', context: context), style: GoogleFonts.dmSans(fontSize: 22.sp, fontWeight: FontWeight.w900)),
             SizedBox(height: 8.h),
-            Text("Residents of the selected property will be notified.", style: TextStyle(color: AppColors.greyText, fontSize: 13.sp)),
+            Text(StringUtils.translate('create_announcement_desc', context: context), style: TextStyle(color: AppColors.greyText, fontSize: 13.sp)),
             SizedBox(height: 32.h),
-            _buildTextField("SUBJECT", "e.g., WiFi Maintenance Update", titleController, 1),
+            _buildTextField(StringUtils.translate('subject_label', context: context), "e.g., WiFi Maintenance Update", titleController, 1),
             SizedBox(height: 20.h),
-            _buildTextField("MESSAGE", "Type your announcement details here...", messageController, 5),
+            _buildTextField(StringUtils.translate('message_label', context: context), "Type your announcement details here...", messageController, 5),
             SizedBox(height: 40.h),
             BouncingWrapper(
               onTap: () => onSend(titleController.text.trim(), messageController.text.trim()),
@@ -628,7 +712,7 @@ class _WriteNewSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 alignment: Alignment.center,
-                child: Text("Broadcast Now", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16.sp)),
+                child: Text(StringUtils.translate('broadcast_now_btn', context: context), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16.sp)),
               ),
             ),
             SizedBox(height: 12.h),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -63,7 +64,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildSectionHeader('Pricing Master', 'Set standard rent and deposits.'),
+                  _buildSectionHeader('pricing_master'.tr(), 'pricing_master_sub'.tr()),
                   if (state.rooms.isNotEmpty)
                     BouncingWrapper(
                       onTap: () {
@@ -85,7 +86,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                           Icon(Icons.auto_fix_high_rounded, color: const Color(0xFF2C5990), size: 16.sp),
                           SizedBox(width: 6.w),
                           Text(
-                            'BULK EDIT',
+                            'btn_bulk_edit'.tr().toUpperCase(),
                             style: TextStyle(color: const Color(0xFF2C5990), fontSize: 10.sp, fontWeight: FontWeight.w900),
                           ),
                         ],
@@ -101,7 +102,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               else ...[
                 _buildPricingSection(context, state, 'AC', Icons.ac_unit_rounded, const Color(0xFFE0F2FE), const Color(0xFF0EA5E9)),
                 SizedBox(height: 24.h),
-                _buildPricingSection(context, state, 'NON-AC', Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
+                _buildPricingSection(context, state, 'amenity_non_ac'.tr().toUpperCase(), Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
                 
                 SizedBox(height: 32.h),
                 _buildSyncInfo(context, state),
@@ -159,12 +160,12 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
           ),
           SizedBox(height: 24.h),
           Text(
-            'No Rooms Found',
+            'no_rooms_found'.tr(),
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
           ),
           SizedBox(height: 8.h),
           Text(
-            'Go back to Step 2 to add rooms.',
+            'no_rooms_found_sub'.tr(),
             style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
           ),
         ],
@@ -180,7 +181,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
 
     if (categoriesOfType.isEmpty) return const SizedBox.shrink();
 
-    final displayLabel = type == 'AC' ? 'AC' : 'NON-AC';
+    final displayLabel = type;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,14 +198,15 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
             ),
             SizedBox(width: 12.w),
             Text(
-              '$displayLabel ROOMS',
+              'rooms_type'.tr(namedArgs: {'type': displayLabel}).toUpperCase(),
               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF334155), letterSpacing: 0.5),
             ),
           ],
         ),
         SizedBox(height: 16.h),
         ...categoriesOfType.map((cat) {
-          final catIndex = state.roomCategories.indexOf(cat);
+          final catIndex = state.roomCategories.indexWhere((c) => c['id'] == cat['id']);
+          if (catIndex == -1) return const SizedBox.shrink();
           return _buildPricingCard(context, state, cat, catIndex);
         }),
       ],
@@ -223,30 +225,58 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               Row(
                 children: [
                   Container(
-                    width: 32.w,
-                    height: 32.w,
+                    width: 36.w,
+                    height: 36.w,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF1F5F9),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.people_alt_rounded, size: 16.sp, color: const Color(0xFF64748B)),
+                    child: Icon(Icons.people_alt_rounded, size: 18.sp, color: const Color(0xFF64748B)),
                   ),
                   SizedBox(width: 12.w),
                   Text(
-                    '$sharing Sharing',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF334155)),
+                    'sharing_count'.tr(namedArgs: {'count': sharing.toString()}),
+                    style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w900, color: const Color(0xFF334155)),
                   ),
                 ],
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2B5797).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
-                  'PER BED',
-                  style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
+                  'per_bed'.tr().toUpperCase(),
+                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 24.h),
+          Row(
+            children: [
+              Expanded(
+                child: _PremiumPriceInput(
+                  key: ValueKey('${category['id']}_monthly'),
+                  label: 'monthly_rent'.tr(),
+                  initialValue: category['monthlyRent']?.toString() ?? '',
+                  hint: 'monthly_rent_hint'.tr(),
+                  onChanged: (val) {
+                    context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'monthlyRent': val});
+                  },
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _PremiumPriceInput(
+                  key: ValueKey('${category['id']}_daily'),
+                  label: 'daily_rent'.tr(),
+                  initialValue: category['dailyRent']?.toString() ?? '',
+                  hint: 'daily_rent_hint'.tr(),
+                  onChanged: (val) {
+                    context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'dailyRent': val});
+                  },
                 ),
               ),
             ],
@@ -256,35 +286,10 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
             children: [
               Expanded(
                 child: _PremiumPriceInput(
-                  label: 'Monthly Rent',
-                  initialValue: category['monthlyRent']?.toString() ?? '',
-                  hint: 'e.g. 8500',
-                  onChanged: (val) {
-                    context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'monthlyRent': val});
-                  },
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _PremiumPriceInput(
-                  label: 'Daily Rent',
-                  initialValue: category['dailyRent']?.toString() ?? '',
-                  hint: 'e.g. 500',
-                  onChanged: (val) {
-                    context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'dailyRent': val});
-                  },
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Row(
-            children: [
-              Expanded(
-                child: _PremiumPriceInput(
-                  label: 'Security Deposit',
+                  key: ValueKey('${category['id']}_deposit'),
+                  label: 'deposit'.tr(),
                   initialValue: category['securityDeposit']?.toString() ?? '',
-                  hint: 'e.g. 5000',
+                  hint: 'security_deposit_hint'.tr(),
                   onChanged: (val) {
                     context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'securityDeposit': val});
                   },
@@ -293,9 +298,10 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               SizedBox(width: 12.w),
               Expanded(
                 child: _PremiumPriceInput(
-                  label: 'Maintenance',
+                  key: ValueKey('${category['id']}_maint'),
+                  label: 'maintenance'.tr(),
                   initialValue: category['maintenance']?.toString() ?? '',
-                  hint: 'e.g. 500',
+                  hint: 'maintenance_hint'.tr(),
                   onChanged: (val) {
                     context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'maintenance': val});
                   },
@@ -303,9 +309,10 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 20.h),
           _PremiumPriceInput(
-            label: 'Daily Rent Applies Up To (Days)',
+            key: ValueKey('${category['id']}_threshold'),
+            label: 'daily_rent_limit_label'.tr(),
             initialValue: category['dailyRentThresholdDays']?.toString() ?? '',
             hint: 'e.g. 10',
             suffix: 'days',
@@ -336,7 +343,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
           SizedBox(width: 16.w),
           Expanded(
             child: Text(
-              'Prices will automatically apply to all ${state.rooms.length} rooms.',
+              'prices_auto_apply'.tr(namedArgs: {'count': state.rooms.length.toString()}),
               style: TextStyle(fontSize: 13.sp, color: const Color(0xFF9A3412), fontWeight: FontWeight.w700, height: 1.4),
             ),
           ),
@@ -355,28 +362,28 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('Apply to All Rooms', style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF334155))),
+        title: Text('apply_to_all_rooms'.tr(), style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF334155))),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Enter prices to apply globally to every room sharing type.', 
+              Text('apply_to_all_rooms_sub'.tr(), 
                   style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500)),
               SizedBox(height: 20.h),
-              _DialogTextField(controller: rentController, label: 'Monthly Rent', hint: '8000', icon: Icons.currency_rupee_rounded),
+              _DialogTextField(controller: rentController, label: 'monthly_rent'.tr(), hint: '8000', icon: Icons.currency_rupee_rounded),
               SizedBox(height: 12.h),
-              _DialogTextField(controller: depositController, label: 'Security Deposit', hint: '5000', icon: Icons.security_rounded),
+              _DialogTextField(controller: depositController, label: 'deposit'.tr(), hint: '5000', icon: Icons.security_rounded),
               SizedBox(height: 12.h),
-              _DialogTextField(controller: maintenanceController, label: 'Maintenance', hint: '500', icon: Icons.handyman_rounded),
+              _DialogTextField(controller: maintenanceController, label: 'maintenance'.tr(), hint: '500', icon: Icons.handyman_rounded),
               SizedBox(height: 12.h),
-              _DialogTextField(controller: dailyRentController, label: 'Daily Rent', hint: '400', icon: Icons.today_rounded),
+              _DialogTextField(controller: dailyRentController, label: 'daily_rent'.tr(), hint: '400', icon: Icons.today_rounded),
             ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w700)),
+            child: Text('btn_cancel'.tr(), style: TextStyle(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w700)),
           ),
           Container(
             margin: EdgeInsets.only(left: 8.w),
@@ -394,7 +401,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                 
                 Navigator.pop(dialogContext);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Bulk prices applied!'), backgroundColor: Color(0xFF10B981)),
+                  SnackBar(content: Text('bulk_prices_applied'.tr()), backgroundColor: const Color(0xFF10B981)),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -402,7 +409,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 elevation: 0,
               ),
-              child: Text('Apply All', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+              child: Text('btn_apply_all'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
             ),
           ),
         ],
@@ -419,6 +426,7 @@ class _PremiumPriceInput extends StatefulWidget {
   final Function(String) onChanged;
 
   const _PremiumPriceInput({
+    super.key,
     required this.label,
     required this.initialValue,
     required this.hint,
@@ -432,6 +440,27 @@ class _PremiumPriceInput extends StatefulWidget {
 
 class _PremiumPriceInputState extends State<_PremiumPriceInput> {
   bool _isFocused = false;
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void didUpdateWidget(covariant _PremiumPriceInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue != oldWidget.initialValue && widget.initialValue != _controller.text) {
+      _controller.text = widget.initialValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -448,7 +477,7 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
           onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
             decoration: BoxDecoration(
               color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(14.r),
@@ -460,17 +489,17 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
             child: Row(
               children: [
                 if (!hasSuffix) ...[
-                  Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
+                  Text('₹', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
                   SizedBox(width: 8.w),
                 ],
                 Expanded(
                   child: TextFormField(
-                    initialValue: widget.initialValue,
+                    controller: _controller,
                     onChanged: widget.onChanged,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: widget.hint,
-                      hintStyle: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 14.sp, fontWeight: FontWeight.w600),
+                      hintStyle: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 15.sp, fontWeight: FontWeight.w600),
                       filled: false,
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -478,12 +507,12 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
                   ),
                 ),
                 if (hasSuffix) ...[
                   SizedBox(width: 4.w),
-                  Text(widget.suffix!, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
+                  Text(widget.suffix!, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
                 ],
               ],
             ),
@@ -505,7 +534,7 @@ class _DialogTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(12.r),
@@ -514,16 +543,16 @@ class _DialogTextField extends StatelessWidget {
         controller: controller,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          icon: Icon(icon, color: const Color(0xFF94A3B8), size: 20.sp),
+          icon: Icon(icon, color: const Color(0xFF94A3B8), size: 24.sp),
           labelText: label,
-          labelStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w700),
+          labelStyle: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w700),
           hintText: hint,
           filled: false,
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
         ),
-        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
+        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
       ),
     );
   }

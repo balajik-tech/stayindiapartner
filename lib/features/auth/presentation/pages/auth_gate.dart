@@ -6,7 +6,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit
 import '../cubit/auth_cubit.dart';
 import 'login_page.dart';
 
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   final Widget dashboard;
   final Widget registration;
 
@@ -17,11 +17,17 @@ class AuthGate extends StatelessWidget {
   });
 
   @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  AuthState? _lastActiveState;
+
+  @override
   Widget build(BuildContext context) {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated || state is AuthProfileCompleted) {
-
           context.read<HostelCubit>().getHostels(forceRefresh: true);
         }
       },
@@ -31,34 +37,40 @@ class AuthGate extends StatelessWidget {
             current is! AuthError &&
             current is! AuthOtpSent,
         builder: (context, state) {
-          if (state is AuthInitial || state is AuthSessionRestoring) {
+          // Cache the last non-transient active state
+          if (state is! AuthLoading && state is! AuthError) {
+            _lastActiveState = state;
+          }
+
+          // Use the cached last active state if the current state is transient (loading or error)
+          final activeState = _lastActiveState ?? state;
+
+          if (activeState is AuthInitial || activeState is AuthSessionRestoring) {
             return const _SplashScreen();
           }
 
-          if (state is AuthAuthenticated || state is AuthProfileCompleted) {
-            final bool requiresRegistration = state is AuthAuthenticated ? state.requiresRegistration : false;
+          if (activeState is AuthAuthenticated || activeState is AuthProfileCompleted) {
+            final bool requiresRegistration = activeState is AuthAuthenticated ? activeState.requiresRegistration : false;
             
             if (requiresRegistration) {
-              return registration;
+              return widget.registration;
             }
-            return dashboard;
+            return widget.dashboard;
           }
 
-          if (state is AuthUnauthenticated || state is AuthOtpSent) {
-
+          if (activeState is AuthUnauthenticated || activeState is AuthOtpSent) {
             context.read<HostelCubit>().reset();
             return const LoginPage();
           }
 
-          if (state is AuthSessionRestoreError) {
+          if (activeState is AuthSessionRestoreError) {
             return _SessionErrorScreen(
-              message: state.message,
+              message: activeState.message,
               onRetry: () => context.read<AuthCubit>().restoreSession(),
               onLogin: () => context.read<AuthCubit>().logout(),
             );
           }
 
-          
           return const LoginPage();
         },
       ),

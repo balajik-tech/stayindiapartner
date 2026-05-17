@@ -13,15 +13,35 @@ abstract class StaffRemoteDataSource {
     String? password,
     required String role,
     Map<String, dynamic>? permissions,
+    double salary = 0.0,
+    String? photo,
+    Map<String, dynamic>? paymentDetails,
   });
   Future<void> updateStaff(String id, Map<String, dynamic> data);
   Future<void> logActivity(String id, String action, String? details);
+  Future<String> uploadStaffPhoto(String filePath);
 }
 
 class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
   final Dio dio;
 
   StaffRemoteDataSourceImpl({required this.dio});
+
+  @override
+  Future<String> uploadStaffPhoto(String filePath) async {
+    try {
+      final formData = FormData.fromMap({
+        'image': await MultipartFile.fromFile(filePath, filename: filePath.split('/').last),
+      });
+      final response = await dio.post(ApiConstants.offerUploadImage, data: formData);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data['url'] ?? response.data['data']?['url'] ?? '';
+      }
+      throw Exception('Failed to upload photo');
+    } catch (e) {
+      throw Exception('Error uploading photo: $e');
+    }
+  }
 
   @override
   Future<List<StaffModel>> getStaff(String? hostelId) async {
@@ -71,8 +91,11 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
     required String phone,
     String? email,
     String? password,
-    required String role,
+    String? role,
     Map<String, dynamic>? permissions,
+    double salary = 0.0,
+    String? photo,
+    Map<String, dynamic>? paymentDetails,
   }) async {
     try {
       final body = <String, dynamic>{
@@ -80,8 +103,12 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         'name': name,
         'phone': phone,
         'role': role,
+        'salary': salary,
         if (email?.isNotEmpty == true) 'email': email,
         if (password?.isNotEmpty == true) 'password': password,
+        if (photo?.isNotEmpty == true) 'photo': photo,
+        if (paymentDetails != null && paymentDetails.isNotEmpty)
+          'paymentDetails': paymentDetails,
         if (permissions != null && permissions.isNotEmpty)
           'permissions': permissions,
       };

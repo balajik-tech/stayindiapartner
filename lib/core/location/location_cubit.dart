@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'location_service.dart';
 import 'location_state.dart';
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 
 class LocationCubit extends Cubit<LocationState> {
   final LocationService _locationService;
@@ -24,7 +25,7 @@ class LocationCubit extends Cubit<LocationState> {
         longitude: result.longitude,
       ));
     } catch (e) {
-      emit(LocationError('Error fetching location: ${e.toString()}'));
+      emit(LocationError(GlobalErrorMapper.map(e).message));
     }
   }
 }

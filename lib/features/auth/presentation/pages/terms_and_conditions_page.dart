@@ -6,6 +6,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class TermsAndConditionsPage extends StatefulWidget {
   final bool readOnly;
@@ -33,8 +34,8 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
         listener: (context, state) {
           if (state is AuthAuthenticated && state.owner.hasAcceptedPolicy) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Service agreement accepted successfully!'),
+              SnackBar(
+                content: Text(StringUtils.translate('agreement_accepted_msg', context: context)),
                 backgroundColor: Colors.green,
               ),
             );
@@ -113,7 +114,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Service Agreement',
+                  StringUtils.translate('service_agreement_title', context: context),
                   style: GoogleFonts.dmSans(
                     fontSize: 24.sp,
                     fontWeight: FontWeight.w900,
@@ -123,7 +124,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Master Service Agreement & Privacy Policy',
+                  StringUtils.translate('master_service_agreement_subtitle', context: context),
                   style: GoogleFonts.dmSans(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
@@ -143,30 +144,30 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
       controller: _scrollController,
       padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 40.h),
       children: [
-        _buildSectionTitle('Welcome to Stay India!'),
+        _buildSectionTitle(StringUtils.translate('welcome_stay_india', context: context)),
         _buildSectionBody(
-            'By using our app, you agree to the following terms and conditions. Stay India is a technology platform (SaaS) providing services across the country.'),
+            StringUtils.translate('welcome_stay_india_desc', context: context)),
         SizedBox(height: 32.h),
-        _buildPolicySection('1. Pan-India Services', 
-            'Stay India is an advanced software platform providing its services all over India. PG owners and residents from any part of the country can utilize our digital services.'),
-        _buildPolicySection('2. SaaS & Limitation of Liability', 
-            'We are strictly a Software as a Service (SaaS) provider and act only as a bridge between PG owners and residents.\n\n• Physical Facilities: Stay India is not responsible for the quality of furniture, room conditions, or any physical assets within the PG.\n\n• Food Quality: The company does not take responsibility for the quality, taste, or menu of the food provided at the PG. Residents must verify this personally.'),
-        _buildPolicySection('3. Data Privacy & Security', 
-            'Your personal information is highly secure with us.\n\n• Collection: We collect details like your name, phone number, and Aadhaar card for verification purposes only.\n\n• Protection: We do not sell your personal data. It remains confidential and will only be shared if required by law.'),
-        _buildPolicySection('4. Payments & Methods', 
-            '• Payment Process: Residents shall pay rent directly to the PG owner using the QR code, Debit/Credit Card, Internet Banking, or other online payment methods available on the platform.\n\n• Liability: Stay India is not responsible for any transaction failures, payment disputes, or refund issues. These must be settled between the resident and the owner.'),
-        _buildPolicySection('5. Tenant Conduct & Damage', 
-            '• Discipline: Stay India is not involved in disputes arising from residents violating PG rules, late entries, or personal conflicts with owners.\n\n• Property Damage: Any damage caused by residents to the PG furniture or property is a private matter between the resident and the owner. The app is not liable for any compensation.'),
-        _buildPolicySection('6. App Support & Customer Care', 
-            '• Software Issues: If the app is slow or if any feature is not functioning correctly, you can immediately contact our customer care for technical support.\n\n• Assistance: For any technical help related to the software, please call our support number: +91 9888936836. Our team is ready to assist you.'),
-        _buildPolicySection('7. Validity & Changes', 
-            'This agreement remains valid as long as you use the app. Any future changes to these terms will be notified through the app. Until then, the current terms shall apply.'),
+        _buildPolicySection(StringUtils.translate('pan_india_services_title', context: context), 
+            StringUtils.translate('pan_india_services_desc', context: context)),
+        _buildPolicySection(StringUtils.translate('saas_liability_title', context: context), 
+            StringUtils.translate('saas_liability_desc', context: context)),
+        _buildPolicySection(StringUtils.translate('data_privacy_title', context: context), 
+            StringUtils.translate('data_privacy_desc', context: context)),
+        _buildPolicySection(StringUtils.translate('payments_methods_title', context: context), 
+            StringUtils.translate('payments_methods_desc', context: context)),
+        _buildPolicySection(StringUtils.translate('tenant_conduct_title', context: context), 
+            StringUtils.translate('tenant_conduct_desc', context: context)),
+        _buildPolicySection(StringUtils.translate('app_support_title', context: context), 
+            StringUtils.translate('app_support_desc', context: context)),
+        _buildPolicySection(StringUtils.translate('validity_changes_title', context: context), 
+            StringUtils.translate('validity_changes_desc', context: context)),
         
         SizedBox(height: 16.h),
         Divider(color: Colors.grey.shade200),
         SizedBox(height: 24.h),
         
-        _buildSectionTitle('Contact Us'),
+        _buildSectionTitle(StringUtils.translate('contact_us_title', context: context)),
         SizedBox(height: 12.h),
         _buildContactRow(Icons.email_outlined, 'support@stayindia.in'),
         SizedBox(height: 8.h),
@@ -174,7 +175,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
         
         SizedBox(height: 32.h),
         Text(
-          'Last updated: May 2024',
+          StringUtils.translate('last_updated', namedArgs: {'date': 'May 2024'}, context: context),
           style: GoogleFonts.dmSans(
             fontSize: 11.sp,
             color: AppColors.greyText.withValues(alpha: 0.5),
@@ -288,7 +289,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
-                    'I have read and I agree to follow all the Rules and Regulations mentioned above.',
+                    StringUtils.translate('agree_terms_checkbox', context: context),
                     style: GoogleFonts.dmSans(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -332,7 +333,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                             ),
                           )
                         : Text(
-                            'Accept & Continue',
+                            StringUtils.translate('accept_continue_button', context: context),
                             style: GoogleFonts.dmSans(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w800,

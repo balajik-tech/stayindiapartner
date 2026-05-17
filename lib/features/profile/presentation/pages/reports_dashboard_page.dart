@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
@@ -39,7 +40,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Reports & Analytics',
+          StringUtils.translate('reports_analytics_title', context: context),
           style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, color: Colors.black),
         ),
       ),
@@ -53,7 +54,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionLabel('SELECT REPORT TYPE'),
+                  _buildSectionLabel(StringUtils.translate('select_report_type_label', context: context)),
                   SizedBox(height: 16.h),
                   _buildReportGrid(),
                   if (_previewData.isNotEmpty) ...[
@@ -61,7 +62,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
                     _buildPreviewSection(),
                   ],
                   SizedBox(height: 32.h),
-                  if (_isGenerating) _buildGeneratingState() else _buildExportOptions(),
+                  if (_isGenerating) _buildGeneratingState(context) else _buildExportOptions(context),
                   SizedBox(height: 40.h),
                 ],
               ),
@@ -85,7 +86,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionLabel('DATE RANGE'),
+          _buildSectionLabel(StringUtils.translate('date_range_label', context: context)),
           SizedBox(height: 12.h),
           Row(
             children: [
@@ -95,7 +96,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
             ],
           ),
           SizedBox(height: 20.h),
-          _buildSectionLabel('PROPERTY FILTER'),
+          _buildSectionLabel(StringUtils.translate('property_filter_label', context: context)),
           SizedBox(height: 12.h),
           BlocBuilder<HostelCubit, HostelState>(
             builder: (context, state) {
@@ -110,10 +111,10 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
                   child: DropdownButton<String?>(
                     value: _selectedHostelId,
                     isExpanded: true,
-                    hint: Text('All Properties', style: GoogleFonts.dmSans(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                    hint: Text(StringUtils.translate('all_properties_hint', context: context), style: GoogleFonts.dmSans(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                     style: GoogleFonts.dmSans(fontSize: 14.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                     items: [
-                      const DropdownMenuItem(value: null, child: Text('All Properties')),
+                      DropdownMenuItem(value: null, child: Text(StringUtils.translate('all_properties_hint', context: context))),
                       ...hostels.map((h) => DropdownMenuItem(value: h.id, child: Text(h.name))),
                     ],
                     onChanged: (val) {
@@ -174,11 +175,11 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
   Widget _buildReportGrid() {
     return Row(
       children: [
-        Expanded(child: _buildReportCard('Payments', 'payments', Icons.payments_rounded, Colors.green)),
+        Expanded(child: _buildReportCard(StringUtils.translate('payments_report', context: context), 'payments', Icons.payments_rounded, Colors.green)),
         SizedBox(width: 12.w),
-        Expanded(child: _buildReportCard('Tenants', 'tenants', Icons.people_alt_rounded, Colors.blue)),
+        Expanded(child: _buildReportCard(StringUtils.translate('tenants_report', context: context), 'tenants', Icons.people_alt_rounded, Colors.blue)),
         SizedBox(width: 12.w),
-        Expanded(child: _buildReportCard('Bookings', 'bookings', Icons.event_available_rounded, Colors.orange)),
+        Expanded(child: _buildReportCard(StringUtils.translate('bookings_report', context: context), 'bookings', Icons.event_available_rounded, Colors.orange)),
       ],
     );
   }
@@ -233,9 +234,9 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionLabel('DATA PREVIEW'),
+            _buildSectionLabel(StringUtils.translate('data_preview_label', context: context)),
             Text(
-              'Showing latest 5',
+              StringUtils.translate('showing_latest_5', context: context),
               style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
             ),
           ],
@@ -287,27 +288,27 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
     );
   }
 
-  Widget _buildExportOptions() {
+  Widget _buildExportOptions(BuildContext context) {
     final canExport = _selectedReportType != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionLabel('EXPORT DATA'),
+        _buildSectionLabel(StringUtils.translate('export_data_label', context: context)),
         SizedBox(height: 16.h),
         Row(
           children: [
-            Expanded(child: _buildExportButton('Excel (.xlsx)', Icons.table_view_rounded, const Color(0xFF1D6F42), canExport)),
+            Expanded(child: _buildExportButton(StringUtils.translate('excel_export', context: context), 'excel', Icons.table_view_rounded, const Color(0xFF1D6F42), canExport)),
             SizedBox(width: 12.w),
-            Expanded(child: _buildExportButton('PDF Report', Icons.picture_as_pdf_rounded, const Color(0xFFD32F2F), canExport)),
+            Expanded(child: _buildExportButton(StringUtils.translate('pdf_report', context: context), 'pdf', Icons.picture_as_pdf_rounded, const Color(0xFFD32F2F), canExport)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildExportButton(String label, IconData icon, Color color, bool enabled) {
+  Widget _buildExportButton(String label, String format, IconData icon, Color color, bool enabled) {
     return BouncingWrapper(
-      onTap: enabled ? () => _handleExport(label) : null,
+      onTap: enabled ? () => _handleExport(format) : null,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
         opacity: enabled ? 1.0 : 0.4,
@@ -372,12 +373,15 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
           ? ApiConstants.reportsPayments 
           : (_selectedReportType == 'tenants' ? ApiConstants.reportsTenants : ApiConstants.reportsBookings);
 
+      // No longer need to parse format from label
+
       final response = await dio.get(
         endpoint,
         queryParameters: {
           'startDate': _startDate.toIso8601String(),
           'endDate': _endDate.toIso8601String(),
           if (_selectedHostelId != null) 'propertyId': _selectedHostelId,
+          'format': format,
         },
       );
 
@@ -389,7 +393,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Report download started successfully!')),
+                SnackBar(content: Text(StringUtils.translate('report_download_success', context: context))),
               );
             }
           }
@@ -398,7 +402,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to generate report. Please try again.')),
+          SnackBar(content: Text(StringUtils.translate('report_download_failed', context: context))),
         );
       }
     } finally {
@@ -406,7 +410,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
     }
   }
 
-  Widget _buildGeneratingState() {
+  Widget _buildGeneratingState(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(24.w),
@@ -419,11 +423,11 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
           const CircularProgressIndicator(color: AppColors.primaryBlue),
           SizedBox(height: 16.h),
           Text(
-            'Processing Request...',
+            StringUtils.translate('processing_request', context: context),
             style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 16.sp),
           ),
           Text(
-            'Please wait while we crunch the numbers',
+            StringUtils.translate('crunching_numbers_msg', context: context),
             style: GoogleFonts.dmSans(color: AppColors.textSecondary, fontSize: 13.sp),
           ),
         ],

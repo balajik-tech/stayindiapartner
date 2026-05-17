@@ -14,6 +14,13 @@ class StockConstants {
       {'name': 'Soap', 'unit': 'PCS'},
       {'name': 'Detergent', 'unit': 'KG'},
     ],
+    'Vegetables': [
+      {'name': 'Tomato', 'unit': 'KG'},
+      {'name': 'Onion', 'unit': 'KG'},
+      {'name': 'Potato', 'unit': 'KG'},
+      {'name': 'Green Chilli', 'unit': 'KG'},
+      {'name': 'Ginger', 'unit': 'KG'},
+    ],
     'Other': [
       {'name': 'Bulb', 'unit': 'PCS'},
       {'name': 'Battery', 'unit': 'PCS'},

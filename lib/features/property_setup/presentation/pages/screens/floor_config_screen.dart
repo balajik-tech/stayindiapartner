@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,7 +19,7 @@ class FloorConfigScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionHeader('Floor Configuration', 'Define the total floors and rooms in your property.'),
+              _buildSectionHeader('floor_config'.tr(), 'floor_config_sub'.tr()),
               SizedBox(height: 12.h),
               
               _PremiumCard(
@@ -26,7 +27,7 @@ class FloorConfigScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total Floors',
+                      'total_floors'.tr(),
                       style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
                     ),
                     SizedBox(height: 12.h),
@@ -45,11 +46,11 @@ class FloorConfigScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Rooms per Floor',
+                          'rooms_per_floor'.tr(),
                           style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
                         ),
                         Text(
-                          'Set room count for each floor.',
+                          'rooms_per_floor_sub'.tr(),
                           style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -61,40 +62,18 @@ class FloorConfigScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
-                        'Total: ${context.read<PropertySetupCubit>().totalRooms}',
+                        'total_rooms_count'.tr(namedArgs: {'count': context.read<PropertySetupCubit>().totalRooms.toString()}),
                         style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.w900),
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 4.h),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () {
-                      HapticFeedback.mediumImpact();
-                      context.read<PropertySetupCubit>().updateAllFloorsRoomCount(10);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.bolt_rounded, size: 12.sp, color: const Color(0xFF2B5797)),
-                          SizedBox(width: 4.w),
-                          Text(
-                            'APPLY 10 TO ALL',
-                            style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                Wrap(
+                  spacing: 8.w,
+                  runSpacing: 8.h,
+                  alignment: WrapAlignment.end,
+                  children: [2, 4, 5, 10].map((count) => _buildQuickApplyButton(context, count)).toList(),
                 ),
                 SizedBox(height: 8.h),
                 ListView.separated(
@@ -169,7 +148,7 @@ class FloorConfigScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B), height: 1.1),
               ),
               Text(
-                'FLOORS',
+                'floors_label'.tr(),
                 style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
               ),
             ],
@@ -243,11 +222,11 @@ class FloorConfigScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Floor $floor',
+                  'floor_x'.tr(namedArgs: {'floor': floor}),
                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
                 ),
                 Text(
-                  '$currentCount rooms planned',
+                  'rooms_planned'.tr(namedArgs: {'count': currentCount.toString()}),
                   style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w600),
                 ),
               ],
@@ -298,13 +277,41 @@ class FloorConfigScreen extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(6.r),
-        margin: EdgeInsets.all(3.r),
+        padding: EdgeInsets.all(10.r),
+        margin: EdgeInsets.all(4.r),
         decoration: BoxDecoration(
           color: const Color(0xFF2B5797),
-          borderRadius: BorderRadius.circular(8.r),
+          borderRadius: BorderRadius.circular(10.r),
         ),
-        child: Icon(icon, color: Colors.white, size: 16.sp),
+        child: Icon(icon, color: Colors.white, size: 20.sp),
+      ),
+    );
+  }
+
+  Widget _buildQuickApplyButton(BuildContext context, int count) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.read<PropertySetupCubit>().updateAllFloorsRoomCount(count);
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.bolt_rounded, size: 14.sp, color: const Color(0xFF2B5797)),
+            SizedBox(width: 6.w),
+            Text(
+              'apply_x_to_all'.tr(namedArgs: {'count': count.toString()}),
+              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
+            ),
+          ],
+        ),
       ),
     );
   }

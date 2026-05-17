@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:stayindia_owner/core/location/location_service.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cubit.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'hostel_documents_page.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'dart:io';
 
@@ -40,7 +42,6 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   List<String> _images = [];
   final List<String> _localImagePaths = [];
 
-  late final SettingsCubit _cubit;
   bool _isFetchingLocation = false;
 
   String _hostelId(BuildContext context) {
@@ -54,10 +55,9 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   @override
   void initState() {
     super.initState();
-    _cubit = sl<SettingsCubit>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final hostelId = _hostelId(context);
-      if (hostelId.isNotEmpty) _cubit.loadSettings(hostelId);
+      if (hostelId.isNotEmpty) context.read<SettingsCubit>().loadSettings(hostelId);
     });
   }
 
@@ -73,7 +73,6 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     _phoneController.dispose();
     _emailController.dispose();
     _descriptionController.dispose();
-    _cubit.close();
     super.dispose();
   }
 
@@ -98,15 +97,31 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     } catch (e) {
       if (mounted) {
         String message = 'Error: $e';
+        SnackBarAction? action;
         if (e.toString().contains('Location services are disabled')) {
           message = 'Location services are disabled. Please enable them.';
+          action = SnackBarAction(
+            label: StringUtils.translate('settings', context: context),
+            textColor: Colors.white,
+            onPressed: () async {
+              await Geolocator.openLocationSettings();
+            },
+          );
         } else if (e.toString().contains('denied')) {
           message = 'Location permissions denied.';
+          action = SnackBarAction(
+            label: StringUtils.translate('settings', context: context),
+            textColor: Colors.white,
+            onPressed: () async {
+              await Geolocator.openAppSettings();
+            },
+          );
         }
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(message),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
+          action: action,
         ));
       }
     } finally {
@@ -116,10 +131,8 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _cubit,
-      child: BlocListener<SettingsCubit, SettingsState>(
-        listener: (context, state) {
+    return BlocListener<SettingsCubit, SettingsState>(
+      listener: (context, state) {
           if (state is SettingsLoaded) {
             final p = state.settings.profile;
             _nameController.text = p.name;
@@ -155,7 +168,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
-              'Hostel Profile',
+              StringUtils.translate('hostel_profile_title', context: context),
               style: TextStyle(color: AppColors.darkText, fontSize: 18.sp, fontWeight: FontWeight.w900),
             ),
           ),
@@ -173,22 +186,22 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                           _buildPremiumImageSection(state),
                           SizedBox(height: 12.h),
                           _buildSection(
-                            title: 'BASIC INFO',
+                            title: StringUtils.translate('basic_info', context: context),
                             icon: Icons.business_rounded,
                             children: [
-                              _buildInputField(label: 'Hostel Name', controller: _nameController, hint: 'e.g. Stay India Premium'),
+                              _buildInputField(label: StringUtils.translate('hostel_name', context: context), controller: _nameController, hint: 'e.g. Stay India Premium'),
                               SizedBox(height: 20.h),
                               Row(
                                 children: [
-                                  Expanded(child: _buildDropdownField(label: 'Hostel Type', value: _hostelType, items: ['men', 'women', 'co-ed'], onChanged: (v) => setState(() => _hostelType = v!))),
+                                  Expanded(child: _buildDropdownField(label: StringUtils.translate('hostel_type', context: context), value: _hostelType, items: ['men', 'women', 'co-ed'], onChanged: (v) => setState(() => _hostelType = v!))),
                                   SizedBox(width: 16.w),
-                                  Expanded(child: _buildDropdownField(label: 'Category', value: _propertyTag, items: ['PG', 'BOYS', 'GIRLS', 'CO_LIVING'], onChanged: (v) => setState(() => _propertyTag = v!))),
+                                  Expanded(child: _buildDropdownField(label: StringUtils.translate('category', context: context), value: _propertyTag, items: ['PG', 'BOYS', 'GIRLS', 'CO_LIVING'], onChanged: (v) => setState(() => _propertyTag = v!))),
                                 ],
                               ),
                             ],
                           ),
                           _buildSection(
-                            title: 'LOCATION DETAILS',
+                            title: StringUtils.translate('location_details', context: context),
                             icon: Icons.location_on_rounded,
                             action: _buildGPSButton(),
                             children: [
@@ -196,30 +209,30 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                               SizedBox(height: 16.h),
                               Row(
                                 children: [
-                                  Expanded(child: _buildInputField(label: 'State', controller: _stateController, hint: 'State')),
+                                  Expanded(child: _buildInputField(label: StringUtils.translate('state', context: context), controller: _stateController, hint: 'State')),
                                   SizedBox(width: 16.w),
-                                  Expanded(child: _buildInputField(label: 'District', controller: _districtController, hint: 'District')),
+                                  Expanded(child: _buildInputField(label: StringUtils.translate('district', context: context), controller: _districtController, hint: 'District')),
                                 ],
                               ),
                               SizedBox(height: 20.h),
-                              _buildInputField(label: 'City / Village', controller: _villageController, hint: 'City name'),
+                              _buildInputField(label: StringUtils.translate('city_village', context: context), controller: _villageController, hint: 'City name'),
                               SizedBox(height: 20.h),
-                              _buildInputField(label: 'Area / Landmark', controller: _areaController, hint: 'Street, near XYZ...'),
+                              _buildInputField(label: StringUtils.translate('area_landmark', context: context), controller: _areaController, hint: 'Street, near XYZ...'),
                               SizedBox(height: 20.h),
-                              _buildInputField(label: 'Pincode', controller: _pincodeController, hint: '6-digit code', keyboardType: TextInputType.number),
+                              _buildInputField(label: StringUtils.translate('pincode', context: context), controller: _pincodeController, hint: '6-digit code', keyboardType: TextInputType.number),
                               SizedBox(height: 20.h),
-                              _buildInputField(label: 'Auto-generated Full Address', controller: _addressController, hint: 'Fetched from GPS', maxLines: 2, readOnly: true),
+                              _buildInputField(label: StringUtils.translate('full_address_hint', context: context), controller: _addressController, hint: 'Fetched from GPS', maxLines: 2, readOnly: true),
                             ],
                           ),
                           _buildSection(
-                            title: 'CONTACT & DESCRIPTION',
+                            title: StringUtils.translate('contact_description', context: context),
                             icon: Icons.contact_phone_rounded,
                             children: [
-                              _buildInputField(label: 'Contact Number', controller: _phoneController, hint: '9988776655', keyboardType: TextInputType.phone),
+                              _buildInputField(label: StringUtils.translate('contact_number', context: context), controller: _phoneController, hint: '9988776655', keyboardType: TextInputType.phone),
                               SizedBox(height: 20.h),
-                              _buildInputField(label: 'Official Email', controller: _emailController, hint: 'hostel@email.com', keyboardType: TextInputType.emailAddress),
+                              _buildInputField(label: StringUtils.translate('official_email', context: context), controller: _emailController, hint: 'hostel@email.com', keyboardType: TextInputType.emailAddress),
                               SizedBox(height: 20.h),
-                              _buildInputField(label: 'About Hostel', controller: _descriptionController, hint: 'Tell tenants about your hostel...', maxLines: 4, keyboardType: TextInputType.multiline),
+                              _buildInputField(label: StringUtils.translate('about_hostel', context: context), controller: _descriptionController, hint: 'Tell tenants about your hostel...', maxLines: 4, keyboardType: TextInputType.multiline),
                             ],
                           ),
                           _buildDocumentsTile(),
@@ -233,7 +246,6 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
               );
             },
           ),
-        ),
       ),
     );
   }
@@ -254,9 +266,21 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
             children: [
               Icon(icon, size: 18.sp, color: AppColors.primaryBlue),
               SizedBox(width: 8.w),
-              Text(title, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: AppColors.greyText.withValues(alpha: 0.6), letterSpacing: 1.2)),
-              const Spacer(),
-              action ?? const SizedBox.shrink(),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.greyText.withValues(alpha: 0.6),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+              if (action != null) ...[
+                SizedBox(width: 8.w),
+                action,
+              ],
             ],
           ),
           SizedBox(height: 20.h),
@@ -307,7 +331,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
               value: value,
               isExpanded: true,
               icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              items: items.map((e) => DropdownMenuItem(value: e, child: Text(e.toUpperCase(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)))).toList(),
+              items: items.map((e) => DropdownMenuItem(value: e, child: Text(e.toLowerCase().tr().toUpperCase(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)))).toList(),
               onChanged: onChanged,
             ),
           ),
@@ -329,7 +353,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
               ? SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue))
               : Icon(Icons.my_location_rounded, size: 14.sp, color: AppColors.primaryBlue),
             SizedBox(width: 6.w),
-            Text(_isFetchingLocation ? 'Fetching...' : 'GPS Fetch', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppColors.primaryBlue)),
+            Text(_isFetchingLocation ? StringUtils.translate('fetching', context: context) : StringUtils.translate('gps_fetch', context: context), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppColors.primaryBlue)),
           ],
         ),
       ),
@@ -345,7 +369,15 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
         children: [
           const Icon(Icons.check_circle_rounded, color: Color(0xFF228BE6), size: 16),
           SizedBox(width: 8.w),
-          Text('Location Verified: ${_lat!.toStringAsFixed(4)}, ${_lng!.toStringAsFixed(4)}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1971C2))),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                StringUtils.translate('location_verified', namedArgs: {'coords': '${_lat!.toStringAsFixed(4)}, ${_lng!.toStringAsFixed(4)}'}, context: context),
+                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1971C2)),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -368,7 +400,12 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                   borderRadius: BorderRadius.circular(24.r),
                   child: allImages[0]['remote'] as bool
                     ? CachedNetworkImage(imageUrl: ApiConstants.getPlaceholderImageUrl(allImages[0]['path'] as String), width: double.infinity, fit: BoxFit.cover)
-                    : Image.file(File(allImages[0]['path'] as String), width: double.infinity, fit: BoxFit.cover),
+                    : Image.file(
+                        File(allImages[0]['path'] as String),
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        cacheWidth: 600,
+                      ),
                 ),
                 Positioned(top: 12, right: 12, child: _buildImageDeleteBtn(0, allImages[0]['remote'] as bool)),
                 Positioned(bottom: 12, left: 12, child: Container(padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h), decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(12.r)), child: Text('Cover Photo', style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w800)))),
@@ -389,7 +426,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                   padding: EdgeInsets.only(right: 12.w),
                   child: Stack(
                     children: [
-                      Container(width: 80.w, decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.r), border: Border.all(color: Colors.white, width: 2)), child: ClipRRect(borderRadius: BorderRadius.circular(14.r), child: img['remote'] as bool ? CachedNetworkImage(imageUrl: ApiConstants.getPlaceholderImageUrl(img['path'] as String), fit: BoxFit.cover) : Image.file(File(img['path'] as String), fit: BoxFit.cover))),
+                      Container(width: 80.w, decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.r), border: Border.all(color: Colors.white, width: 2)), child: ClipRRect(borderRadius: BorderRadius.circular(14.r), child: img['remote'] as bool ? CachedNetworkImage(imageUrl: ApiConstants.getPlaceholderImageUrl(img['path'] as String), fit: BoxFit.cover) : Image.file(File(img['path'] as String), fit: BoxFit.cover, cacheWidth: 160, cacheHeight: 160))),
                       Positioned(top: 4, right: 4, child: _buildImageDeleteBtn(index, img['remote'] as bool, small: true)),
                     ],
                   ),
@@ -406,7 +443,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 14.h),
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r), border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2), style: BorderStyle.solid)),
-              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add_photo_alternate_rounded, color: AppColors.primaryBlue, size: 20.sp), SizedBox(width: 8.w), Text('Add Hostel Photos', style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.w800, fontSize: 14.sp))]),
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add_photo_alternate_rounded, color: AppColors.primaryBlue, size: 20.sp), SizedBox(width: 8.w), Text(StringUtils.translate('add_hostel_photos', context: context), style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.w800, fontSize: 14.sp))]),
             ),
           ),
         ),
@@ -420,7 +457,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
       width: double.infinity,
       margin: EdgeInsets.symmetric(horizontal: 20.w),
       decoration: BoxDecoration(color: const Color(0xFFF1F3F5), borderRadius: BorderRadius.circular(24.r)),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.image_search_rounded, size: 48.sp, color: AppColors.greyText.withValues(alpha: 0.3)), SizedBox(height: 12.h), Text('No images uploaded', style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.w600, fontSize: 14.sp))]),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.image_search_rounded, size: 48.sp, color: AppColors.greyText.withValues(alpha: 0.3)), SizedBox(height: 12.h), Text(StringUtils.translate('no_images', context: context), style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.w600, fontSize: 14.sp))]),
     );
   }
 
@@ -444,7 +481,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)), elevation: 0),
           child: isSaving 
             ? const CircularProgressIndicator(color: Colors.white) 
-            : Text('Save Property Profile', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+            : Text(StringUtils.translate('save_property_profile', context: context), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white)),
         ),
       ),
     );
@@ -454,7 +491,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     final hostelId = _hostelId(context);
     if (hostelId.isEmpty) return;
     HapticFeedback.mediumImpact();
-    _cubit.updateFullProfile(hostelId, name: _nameController.text, address: _addressController.text, city: _villageController.text, village: _villageController.text, district: _districtController.text, area: _areaController.text, state: _stateController.text, pincode: _pincodeController.text, contactNumber: _phoneController.text, contactEmail: _emailController.text, description: _descriptionController.text, hostelType: _hostelType, propertyTag: _propertyTag, lat: _lat, lng: _lng, newImagePaths: _localImagePaths.isEmpty ? null : _localImagePaths, existingImages: _images);
+    context.read<SettingsCubit>().updateFullProfile(hostelId, name: _nameController.text, address: _addressController.text, city: _villageController.text, village: _villageController.text, district: _districtController.text, area: _areaController.text, state: _stateController.text, pincode: _pincodeController.text, contactNumber: _phoneController.text, contactEmail: _emailController.text, description: _descriptionController.text, hostelType: _hostelType, propertyTag: _propertyTag, lat: _lat, lng: _lng, newImagePaths: _localImagePaths.isEmpty ? null : _localImagePaths, existingImages: _images);
   }
 
   Future<void> _pickImages() async {
@@ -470,8 +507,8 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HostelDocumentsPage(hostelId: _hostelId(context)))),
         contentPadding: EdgeInsets.all(16.r),
         leading: Container(padding: EdgeInsets.all(10.r), decoration: BoxDecoration(color: const Color(0xFFFFF4E6), borderRadius: BorderRadius.circular(12.r)), child: const Icon(Icons.description_rounded, color: Color(0xFFF08C00))),
-        title: Text('Property Documents', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: AppColors.darkText)),
-        subtitle: Text('Manage certificates & legal docs', style: TextStyle(fontSize: 12.sp, color: AppColors.greyText)),
+        title: Text(StringUtils.translate('property_documents', context: context), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: AppColors.darkText)),
+        subtitle: Text(StringUtils.translate('manage_docs_sub', context: context), style: TextStyle(fontSize: 12.sp, color: AppColors.greyText)),
         trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
       ),
     );

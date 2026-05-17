@@ -26,6 +26,9 @@ class StaffRepositoryImpl implements StaffRepository {
     String? password,
     required String role,
     Map<String, dynamic>? permissions,
+    double salary = 0.0,
+    String? photo,
+    Map<String, dynamic>? paymentDetails,
   }) {
     return remoteDataSource.createStaff(
       hostelId: hostelId,
@@ -35,6 +38,9 @@ class StaffRepositoryImpl implements StaffRepository {
       password: password,
       role: role,
       permissions: permissions,
+      salary: salary,
+      photo: photo,
+      paymentDetails: paymentDetails,
     );
   }
 

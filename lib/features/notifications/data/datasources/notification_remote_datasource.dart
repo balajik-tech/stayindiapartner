@@ -18,7 +18,9 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
     if (response.statusCode == 200) {
       
       final dynamic responseData = response.data['data'];
-      final List results = (responseData is Map) ? (responseData['results'] ?? []) : [];
+      final List results = (responseData is Map)
+          ? (responseData['items'] ?? responseData['results'] ?? [])
+          : [];
       return results.map((json) => NotificationEntity.fromJson(json)).toList();
     }
     throw Exception('Failed to fetch notifications');

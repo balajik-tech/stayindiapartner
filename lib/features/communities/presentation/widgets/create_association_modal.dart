@@ -7,6 +7,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/domain/usecases/community_usecases.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 
 class CreateAssociationModal extends StatefulWidget {
   final List<Map<String, dynamic>> allStates;
@@ -167,7 +168,7 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
                       radius: 40.r,
                       backgroundColor: Colors.grey[100],
                       backgroundImage: _imageFile != null
-                          ? FileImage(_imageFile!)
+                          ? ResizeImage(FileImage(_imageFile!), width: 160, height: 160)
                           : null,
                       child: _imageFile == null
                           ? Icon(
@@ -237,6 +238,7 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
             ),
             SizedBox(height: 8.h),
             DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: _selectedStateId,
               decoration: _inputDecoration('Choose State'),
               items: widget.allStates
@@ -245,6 +247,8 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
                       value: (s['_id'] ?? s['id'] ?? '').toString(),
                       child: Text(
                         s['name'] ?? '',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                         style: TextStyle(fontSize: 14.sp),
                       ),
                     ),
@@ -278,6 +282,7 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
               _isLoadingDistricts
                   ? const LinearProgressIndicator()
                   : DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _selectedDistrictId,
                       decoration: _inputDecoration(
                         _selectedStateId == null
@@ -290,6 +295,8 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
                               value: (d['_id'] ?? d['id'] ?? '').toString(),
                               child: Text(
                                 d['name'] ?? '',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                                 style: TextStyle(fontSize: 14.sp),
                               ),
                             ),
@@ -324,6 +331,7 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
               _isLoadingWards
                   ? const LinearProgressIndicator()
                   : DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _selectedWardId,
                       decoration: _inputDecoration(
                         _selectedDistrictId == null
@@ -336,6 +344,8 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
                               value: (w['_id'] ?? w['id'] ?? '').toString(),
                               child: Text(
                                 w['name'] ?? '',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                                 style: TextStyle(fontSize: 14.sp),
                               ),
                             ),
@@ -483,7 +493,7 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create association: ${e.toString()}'),
+            content: Text(GlobalErrorMapper.map(e).message),
             backgroundColor: Colors.red,
           ),
         );

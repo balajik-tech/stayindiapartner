@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class HelpSupportPage extends StatefulWidget {
   const HelpSupportPage({super.key});
@@ -12,38 +13,34 @@ class HelpSupportPage extends StatefulWidget {
 class _HelpSupportPageState extends State<HelpSupportPage> {
   int _expandedIndex = 0;
 
-  final List<Map<String, String>> _faqs = [
-    {
-      'question': 'How do I add a new tenant?',
-      'answer':
-          'Go to the Room Occupancy page, tap on any vacant bed, and select "Add Tenant". Fill in the tenant details including KYC documents and payment information.',
-    },
-    {
-      'question': 'How do I collect rent payments?',
-      'answer':
-          'Select a tenant from the Tenants list, tap on "Add Payment", enter the amount and payment mode, and save to update the history.',
-    },
-    {
-      'question': 'How do I transfer a tenant to another bed?',
-      'answer':
-          'Open the tenant details, select "Transfer Bed", choose the target room and bed number, and confirm the transfer.',
-    },
-    {
-      'question': 'How do I process a tenant checkout?',
-      'answer':
-          'In the tenant details, tap on "Checkout", clear any outstanding dues, and confirm the release of the occupied bed.',
-    },
-    {
-      'question': 'How do I manage staff access?',
-      'answer':
-          'Go to Staff Management in Settings to add new members and define their specific permission levels.',
-    },
-    {
-      'question': 'How do I report a maintenance issue?',
-      'answer':
-          'Tenants can report via their app, or you can manually add a complaint in the "Complaints" section of the dashboard.',
-    },
-  ];
+  List<Map<String, String>> _getLocalizedFaqs(BuildContext context) {
+    return [
+      {
+        'question': StringUtils.translate('faq_q1', context: context),
+        'answer': StringUtils.translate('faq_a1', context: context),
+      },
+      {
+        'question': StringUtils.translate('faq_q2', context: context),
+        'answer': StringUtils.translate('faq_a2', context: context),
+      },
+      {
+        'question': StringUtils.translate('faq_q3', context: context),
+        'answer': StringUtils.translate('faq_a3', context: context),
+      },
+      {
+        'question': StringUtils.translate('faq_q4', context: context),
+        'answer': StringUtils.translate('faq_a4', context: context),
+      },
+      {
+        'question': StringUtils.translate('faq_q5', context: context),
+        'answer': StringUtils.translate('faq_a5', context: context),
+      },
+      {
+        'question': StringUtils.translate('faq_q6', context: context),
+        'answer': StringUtils.translate('faq_a6', context: context),
+      },
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +54,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Help & Support',
+          StringUtils.translate('help_support_title', context: context),
           style: TextStyle(
             color: AppColors.darkText,
             fontSize: 20.sp,
@@ -81,10 +78,10 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             SizedBox(height: 32.h),
             _buildSectionHeader(
               Icons.description_outlined,
-              'Frequently Asked Questions',
+              StringUtils.translate('faq_title', context: context),
             ),
             SizedBox(height: 16.h),
-            _buildFaqList(),
+            _buildFaqList(context),
             SizedBox(height: 32.h),
             _buildQuickLinks(),
           ],
@@ -99,19 +96,19 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
       child: Row(
         children: [
           _buildContactCard(
-            'Call Us',
+            StringUtils.translate('call_us_option', context: context),
             Icons.phone_outlined,
             const Color(0xFF2C5EBD),
           ),
           SizedBox(width: 12.w),
           _buildContactCard(
-            'WhatsApp',
+            StringUtils.translate('whatsapp_option', context: context),
             Icons.chat_bubble_outline,
             const Color(0xFF10B981),
           ),
           SizedBox(width: 12.w),
           _buildContactCard(
-            'Email',
+            StringUtils.translate('email_option', context: context),
             Icons.mail_outline,
             const Color(0xFFF97316),
           ),
@@ -167,11 +164,12 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
     );
   }
 
-  Widget _buildFaqList() {
+  Widget _buildFaqList(BuildContext context) {
+    final faqs = _getLocalizedFaqs(context);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Column(
-        children: List.generate(_faqs.length, (index) {
+        children: List.generate(faqs.length, (index) {
           final isExpanded = _expandedIndex == index;
           return Container(
             margin: EdgeInsets.only(bottom: 12.h),
@@ -194,7 +192,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                   if (expanded) setState(() => _expandedIndex = index);
                 },
                 title: Text(
-                  _faqs[index]['question']!,
+                  faqs[index]['question']!,
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
@@ -212,7 +210,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                   Padding(
                     padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
                     child: Text(
-                      _faqs[index]['answer']!,
+                      faqs[index]['answer']!,
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: const Color(0xFF667085),
@@ -241,7 +239,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Quick Links',
+            StringUtils.translate('quick_links_title', context: context),
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
@@ -249,9 +247,9 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             ),
           ),
           SizedBox(height: 16.h),
-          _buildLinkItem('Video Tutorials'),
-          _buildLinkItem('User Guide (PDF)'),
-          _buildLinkItem('Privacy Policy'),
+          _buildLinkItem(StringUtils.translate('video_tutorials_link', context: context)),
+          _buildLinkItem(StringUtils.translate('user_guide_link', context: context)),
+          _buildLinkItem(StringUtils.translate('privacy_policy', context: context)),
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
@@ -7,8 +8,8 @@ abstract class BookingsRemoteDataSource {
   Future<List<BookingModel>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId});
   Future<List<PendingBookingModel>> getPendingBookings({int page = 1, int limit = 10});
   Future<List<PendingBookingModel>> getConfirmedBookings({int page = 1, int limit = 10});
-  Future<ScanBookingResponseModel> scanBooking(String token, {String? hostelId});
-  Future<ScanBookingResponseModel> manualCheckin(String accessCode, {String? hostelId});
+  Future<ScanBookingResponseModel> scanBooking(String token, {String? hostelId, String? bookingId});
+  Future<ScanBookingResponseModel> manualCheckin(String accessCode, {String? hostelId, String? bookingId});
   Future<ScanBookingResponseModel> getCheckinData({String? bookingId, String? accessCode, String? hostelId});
   Future<void> assignRoom(String bookingId, String roomId, String bedNumber);
   Future<void> finalizeCheckin({
@@ -56,7 +57,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
         final rawData = response.data['data'];
         final List<dynamic> data = rawData is Map ? (rawData['results'] ?? []) : rawData;
         AppLogger.debug('[BOOKINGS] Fetched owner bookings: ${data.length}');
-        return data.map((json) => BookingModel.fromJson(json)).toList();
+        return await Isolate.run(() => data.map((json) => BookingModel.fromJson(json)).toList());
       }
       throw Exception('Failed to fetch bookings');
     } catch (e) {
@@ -76,7 +77,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
         final raw = response.data['data'];
         final List<dynamic> list = raw is Map ? (raw['results'] ?? []) : (raw is List ? raw : []);
         AppLogger.debug('[BOOKINGS] Fetched confirmed bookings: ${list.length}');
-        return list.map((j) => PendingBookingModel.fromJson(j)).toList();
+        return await Isolate.run(() => list.map((j) => PendingBookingModel.fromJson(j)).toList());
       }
       throw Exception('Failed to fetch confirmed bookings');
     } catch (e) {
@@ -96,7 +97,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
         final raw = response.data['data'];
         final List<dynamic> list = raw is Map ? (raw['results'] ?? []) : (raw is List ? raw : []);
         AppLogger.debug('[BOOKINGS] Fetched pending bookings: ${list.length}');
-        return list.map((json) => PendingBookingModel.fromJson(json)).toList();
+        return await Isolate.run(() => list.map((json) => PendingBookingModel.fromJson(json)).toList());
       }
       throw Exception('Failed to fetch pending bookings');
     } catch (e) {
@@ -106,11 +107,11 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<ScanBookingResponseModel> scanBooking(String token, {String? hostelId}) async {
+  Future<ScanBookingResponseModel> scanBooking(String token, {String? hostelId, String? bookingId}) async {
     try {
       final response = await dio.post(
         ApiConstants.scanBooking,
-        data: {'token': token, 'hostelId': hostelId},
+        data: {'token': token, 'hostelId': hostelId, 'bookingId': bookingId},
       );
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
@@ -124,11 +125,11 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<ScanBookingResponseModel> manualCheckin(String accessCode, {String? hostelId}) async {
+  Future<ScanBookingResponseModel> manualCheckin(String accessCode, {String? hostelId, String? bookingId}) async {
     try {
       final response = await dio.post(
         ApiConstants.manualCheckin,
-        data: {'accessCode': accessCode, 'hostelId': hostelId},
+        data: {'accessCode': accessCode, 'hostelId': hostelId, 'bookingId': bookingId},
       );
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;

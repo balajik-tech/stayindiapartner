@@ -6,6 +6,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/association_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/association_hierarchy_page.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ExploreCommunitiesPage extends StatefulWidget {
   const ExploreCommunitiesPage({super.key});
@@ -76,7 +77,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
           ),
           SizedBox(height: 32.h),
           Text(
-            'Explore\nCommunities\nby State',
+            'explore_communities_by_state'.tr(),
             style: GoogleFonts.dmSans(
               fontSize: 34.sp,
               fontWeight: FontWeight.w900,
@@ -87,7 +88,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'Select your state to join local owner\ncommunities',
+            'select_state_desc'.tr(),
             style: GoogleFonts.dmSans(
               fontSize: 16.sp,
               fontWeight: FontWeight.w500,
@@ -113,7 +114,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                     }),
                     style: GoogleFonts.dmSans(fontSize: 15.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
                     decoration: InputDecoration(
-                      hintText: 'Search state...',
+                      hintText: 'search_state_hint'.tr(),
                       hintStyle: GoogleFonts.dmSans(color: Colors.grey.shade400, fontSize: 15.sp),
                       prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20.sp),
                       suffixIcon: _searchQuery.isNotEmpty
@@ -244,7 +245,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
             return Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 40.h),
-                child: Text('No states found', style: GoogleFonts.dmSans(color: Colors.white, fontSize: 16.sp)),
+                child: Text('no_states_found'.tr(), style: GoogleFonts.dmSans(color: Colors.white, fontSize: 16.sp)),
               ),
             );
           }
@@ -326,7 +327,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                           Icon(Icons.add, color: AppColors.primaryBlue, size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
-                            'Show More States',
+                            'show_more_states'.tr(),
                             style: GoogleFonts.dmSans(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w800,
@@ -443,7 +444,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'More',
+                          'more'.tr(),
                           style: GoogleFonts.dmSans(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w800,
@@ -489,7 +490,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                     ),
                     SizedBox(width: 12.w),
                     Text(
-                      'Our Growth Potential',
+                      'our_growth_potential'.tr(),
                       style: GoogleFonts.dmSans(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w800,
@@ -502,14 +503,14 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildStatItem('28', 'states'),
-                    _buildStatItem('500+', 'cities'),
-                    _buildStatItem('10K+', 'associations'),
+                    _buildStatItem('28', 'states_label'.tr()),
+                    _buildStatItem('500+', 'cities_label'.tr()),
+                    _buildStatItem('10K+', 'associations_label'.tr()),
                   ],
                 ),
                 SizedBox(height: 32.h),
                 Text(
-                  'Empowering PG Owners\nAcross India',
+                  'empowering_pg_owners'.tr(),
                   style: GoogleFonts.dmSans(
                     fontSize: 24.sp,
                     fontWeight: FontWeight.w800,
@@ -519,7 +520,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  'Join the largest network of professional accommodation providers and experience the power of unity.',
+                  'join_largest_network'.tr(),
                   style: GoogleFonts.dmSans(
                     fontSize: 15.sp,
                     color: AppColors.greyText,
@@ -553,7 +554,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                     Icon(Icons.visibility_outlined, color: AppColors.accentOrange, size: 22.sp),
                     SizedBox(width: 12.w),
                     Text(
-                      'Our Vision',
+                      'our_vision'.tr(),
                       style: GoogleFonts.dmSans(
                         fontSize: 17.sp,
                         fontWeight: FontWeight.w800,
@@ -564,7 +565,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  'To create a transparent, standardized, and profitable ecosystem for the student housing and co-living industry in India.',
+                  'vision_statement'.tr(),
                   style: GoogleFonts.dmSans(
                     fontSize: 14.sp,
                     color: AppColors.greyText,
@@ -579,7 +580,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Text(
-              'Key Features & Benefits',
+              'key_features_benefits'.tr(),
               style: GoogleFonts.dmSans(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w800,
@@ -622,54 +623,54 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
   Widget _buildAccordionFeatures() {
     final features = [
       {
-        'title': 'Unified National Digital Platform',
+        'title': 'feature_unified_national'.tr(),
         'icon': Icons.hub_outlined,
-        'desc': 'Connect with property owners across India on a single seamless network.',
+        'desc': 'feature_unified_national_desc'.tr(),
       },
       {
-        'title': 'Local Leadership & Team Support',
+        'title': 'feature_leadership_support'.tr(),
         'icon': Icons.face_retouching_natural_outlined,
-        'desc': 'Dedicated city and state leadership teams to guide and assist you locally.',
+        'desc': 'feature_leadership_support_desc'.tr(),
       },
       {
-        'title': 'Legal & Regulatory Support',
+        'title': 'feature_legal_regulatory'.tr(),
         'icon': Icons.gavel_rounded,
-        'desc': 'Access expert advice and documentation assistance for compliance and regulations.',
+        'desc': 'feature_legal_regulatory_desc'.tr(),
       },
       {
-        'title': 'Safety & Security Network',
+        'title': 'feature_safety_security'.tr(),
         'icon': Icons.security_rounded,
-        'desc': 'Shared alert mechanisms and security protocols for safer living environments.',
+        'desc': 'feature_safety_security_desc'.tr(),
       },
       {
-        'title': 'Verified Tenant Database',
+        'title': 'feature_tenant_verification'.tr(),
         'icon': Icons.verified_user_outlined,
-        'desc': 'Background-checked tenant profiles to minimize risks and ensure reliable occupancy.',
+        'desc': 'feature_tenant_verification_desc'.tr(),
       },
       {
-        'title': 'Issue Resolution Hub',
+        'title': 'feature_issue_resolution'.tr(),
         'icon': Icons.forum_outlined,
-        'desc': 'Dedicated mediation channels for resolving disputes quickly and fairly.',
+        'desc': 'feature_issue_resolution_desc'.tr(),
       },
       {
-        'title': 'Professional Staffing Solutions',
+        'title': 'feature_staffing_solutions'.tr(),
         'icon': Icons.work_outline_rounded,
-        'desc': 'Verified staff hiring network for managers, housekeeping, and security personnel.',
+        'desc': 'feature_staffing_solutions_desc'.tr(),
       },
       {
-        'title': 'Strict Blacklist & Fraud Alert System',
+        'title': 'feature_blacklist_system'.tr(),
         'icon': Icons.block_flipped,
-        'desc': 'National alert system to report and prevent fraud and problematic tenants instantly.',
+        'desc': 'feature_blacklist_system_desc'.tr(),
       },
       {
-        'title': '24/7 Digital Management App',
+        'title': 'feature_digital_mgmt'.tr(),
         'icon': Icons.app_registration_rounded,
-        'desc': 'Manage notices, rent dues, stock, and community chats anytime, anywhere.',
+        'desc': 'feature_digital_mgmt_desc'.tr(),
       },
       {
-        'title': 'Standardized Quality of Living',
+        'title': 'feature_quality_living'.tr(),
         'icon': Icons.star_border_rounded,
-        'desc': 'Implementing best practices and benchmarks to elevate property standards nationwide.',
+        'desc': 'feature_quality_living_desc'.tr(),
       },
     ];
 
