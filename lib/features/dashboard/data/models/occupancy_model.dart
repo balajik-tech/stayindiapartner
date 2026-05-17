@@ -53,12 +53,12 @@ class FloorDataModel extends FloorData {
     }
 
     return FloorDataModel(
-      floorName: floorNum == 0 ? 'ground_floor' : 'floor_n',
+      floorName: floorNum == 0 ? 'ground_floor' : 'floor_$floorNum',
       floorNum: floorNum,
       totalBeds: totalBeds,
       freeBeds: freeBeds,
       bedInfo: 'beds_free_count',
-      rooms: roomsJson.map((r) => RoomModel.fromJson(r as Map<String, dynamic>, floorNum == 0 ? 'ground_floor' : 'floor_n')).toList(),
+      rooms: roomsJson.map((r) => RoomModel.fromJson(r as Map<String, dynamic>, floorNum == 0 ? 'ground_floor' : 'floor_$floorNum')).toList(),
     );
   }
 }
@@ -75,6 +75,7 @@ class RoomModel extends Room {
     super.rent,
     super.dailyRent,
     super.maintenance,
+    super.deposit,
     super.features,
     super.floorName,
   });
@@ -130,6 +131,7 @@ class RoomModel extends Room {
       rent: json['rent'] != null ? double.tryParse(json['rent'].toString()) : null,
       dailyRent: json['dailyRent'] != null ? double.tryParse(json['dailyRent'].toString()) : null,
       maintenance: json['maintenance'] != null ? double.tryParse(json['maintenance'].toString()) : null,
+      deposit: json['deposit'] != null ? double.tryParse(json['deposit'].toString()) : null,
       features: (json['features'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
       floorName: floorName,
     );

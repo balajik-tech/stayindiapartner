@@ -49,6 +49,7 @@ class Room {
   final double? rent;
   final double? dailyRent;
   final double? maintenance;
+  final double? deposit;
   final List<String> features;
   final String? floorName;
 
@@ -63,6 +64,7 @@ class Room {
     this.rent,
     this.dailyRent,
     this.maintenance,
+    this.deposit,
     this.features = const [],
     this.floorName,
   });

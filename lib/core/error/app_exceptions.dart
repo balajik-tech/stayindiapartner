@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 abstract class AppException implements Exception {
   final String message;
@@ -50,6 +51,15 @@ class ErrorSanitizer {
     if (message.isEmpty) return 'An unexpected error occurred.';
     
     final lowerMessage = message.toLowerCase();
+
+    // Check for duplicate room name specifically
+    if (lowerMessage.contains('room name already exists') || lowerMessage.contains('room already exists')) {
+      try {
+        final val = 'room_exists_title'.tr();
+        if (val != 'room_exists_title') return val;
+      } catch (_) {}
+      return 'Room Already Exists';
+    }
     
     // Check for Mongoose validation error specifically!
     if (lowerMessage.contains("validation failed")) {

@@ -123,15 +123,46 @@ class RoomCategoryScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Row(
             children: [
               Expanded(
                 child: _buildDropdown<int>(
                   label: 'sharing_type_label'.tr(),
-                  value: category['sharingType'],
-                  items: [1, 2, 3, 4, 5].map((e) => DropdownMenuItem(value: e, child: Text('$e ${'sharing'.tr()}'))).toList(),
-                  onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'sharingType': val}),
+                  value: category['sharingType'] as int,
+                  items: (() {
+                    final list = [1, 2, 3, 4, 5];
+                    final currentVal = category['sharingType'] as int;
+                    final menuItems = list.map((e) => DropdownMenuItem<int>(
+                      value: e,
+                      child: Text('$e ${'sharing'.tr()}'),
+                    )).toList();
+                    
+                    if (!list.contains(currentVal)) {
+                      menuItems.add(DropdownMenuItem<int>(
+                        value: currentVal,
+                        child: Text('$currentVal ${'sharing'.tr()}'),
+                      ));
+                    }
+                    
+                    menuItems.add(DropdownMenuItem<int>(
+                      value: -1,
+                      child: Text(_translate('custom_dots', 'Custom...')),
+                    ));
+                    
+                    return menuItems;
+                  })(),
+                  onChanged: (val) async {
+                    if (val == -1) {
+                      final cubit = context.read<PropertySetupCubit>();
+                      final customVal = await _showCustomSharingDialog(context);
+                      if (customVal != null && customVal > 0) {
+                        cubit.updateRoomCategory(index, {'sharingType': customVal});
+                      }
+                    } else if (val != null) {
+                      context.read<PropertySetupCubit>().updateRoomCategory(index, {'sharingType': val});
+                    }
+                  },
                 ),
               ),
               SizedBox(width: 12.w),
@@ -148,7 +179,7 @@ class RoomCategoryScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 14.h),
           Row(
             children: [
               Expanded(child: Divider(color: const Color(0xFFE2E8F0), thickness: 1)),
@@ -162,7 +193,7 @@ class RoomCategoryScreen extends StatelessWidget {
               Expanded(child: Divider(color: const Color(0xFFE2E8F0), thickness: 1)),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Row(
             children: [
               Expanded(
@@ -188,7 +219,7 @@ class RoomCategoryScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 10.h),
           Row(
             children: [
               Expanded(
@@ -214,7 +245,7 @@ class RoomCategoryScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 10.h),
           _buildTextField(
             label: 'daily_rent_limit_label'.tr(),
             hint: 'e.g. 10',
@@ -233,12 +264,12 @@ class RoomCategoryScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
-        SizedBox(height: 6.h),
+        SizedBox(height: 4.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: DropdownButtonHideUnderline(
@@ -247,8 +278,8 @@ class RoomCategoryScreen extends StatelessWidget {
               items: items,
               onChanged: onChanged,
               isExpanded: true,
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
-              icon: Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF2B5797), size: 24.sp),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
+              icon: Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF2B5797), size: 20.sp),
             ),
           ),
         ),
@@ -269,12 +300,12 @@ class RoomCategoryScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
-        SizedBox(height: 6.h),
+        SizedBox(height: 4.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Row(
@@ -282,7 +313,7 @@ class RoomCategoryScreen extends StatelessWidget {
               if (prefix != null)
                 Text(
                   prefix,
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: const Color(0xFF64748B)),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF64748B)),
                 ),
               if (prefix != null) SizedBox(width: 4.w),
               Expanded(
@@ -292,17 +323,17 @@ class RoomCategoryScreen extends StatelessWidget {
                   keyboardType: keyboardType,
                   decoration: InputDecoration(
                     hintText: hint,
-                    hintStyle: TextStyle(fontSize: 15.sp, color: const Color(0xFFCBD5E1)),
+                    hintStyle: TextStyle(fontSize: 14.sp, color: const Color(0xFFCBD5E1)),
                     border: InputBorder.none,
                     isDense: true,
                   ),
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
                 ),
               ),
               if (suffix != null)
                 Text(
                   suffix,
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8)),
+                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8)),
                 ),
             ],
           ),
@@ -340,6 +371,91 @@ class RoomCategoryScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  String _translate(String key, String fallback) {
+    final val = key.tr();
+    return val == key ? fallback : val;
+  }
+
+  Future<int?> _showCustomSharingDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    return showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          title: Text(
+            _translate('custom_sharing', 'Custom Sharing'),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF2B5797),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _translate('enter_sharing_number', 'Enter sharing number'),
+                style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B)),
+              ),
+              SizedBox(height: 12.h),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                autofocus: true,
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  hintText: 'e.g. 6',
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFF2B5797)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'cancel'.tr(),
+                style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final val = int.tryParse(controller.text);
+                Navigator.pop(context, val);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2B5797),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              ),
+              child: Text(
+                _translate('ok', 'OK'),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

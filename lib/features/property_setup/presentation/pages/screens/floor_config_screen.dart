@@ -9,6 +9,21 @@ import 'package:stayindia_owner/features/property_setup/presentation/cubit/prope
 class FloorConfigScreen extends StatelessWidget {
   const FloorConfigScreen({super.key});
 
+  String _translate(String key, String fallback) {
+    final val = key.tr();
+    return val == key ? fallback : val;
+  }
+
+  String _getFloorLabel(BuildContext context, String floor) {
+    if (floor == 'B') {
+      return 'basement_floor'.tr() == 'basement_floor' ? 'Basement Floor' : 'basement_floor'.tr();
+    }
+    if (floor == 'G') {
+      return 'ground_floor'.tr() == 'ground_floor' ? 'Ground Floor' : 'ground_floor'.tr();
+    }
+    return 'floor_x'.tr(namedArgs: {'floor': floor});
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PropertySetupCubit, PropertySetupState>(
@@ -32,6 +47,39 @@ class FloorConfigScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 12.h),
                     _buildFloorCounter(context, state),
+                    Divider(color: const Color(0xFFE2E8F0), height: 24.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _translate('include_basement', 'Include Basement Floor'),
+                                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+                              ),
+                              SizedBox(height: 2.h),
+                              Text(
+                                _translate('include_basement_sub', 'Add rooms located in the basement level'),
+                                style: TextStyle(fontSize: 10.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: state.selectedFloors.contains('B'),
+                          activeThumbColor: const Color(0xFF2B5797),
+                          activeTrackColor: const Color(0xFF2B5797).withValues(alpha: 0.2),
+                          inactiveThumbColor: const Color(0xFF94A3B8),
+                          inactiveTrackColor: const Color(0xFFE2E8F0),
+                          onChanged: (val) {
+                            HapticFeedback.selectionClick();
+                            context.read<PropertySetupCubit>().toggleBasement(val);
+                          },
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -122,6 +170,7 @@ class FloorConfigScreen extends StatelessWidget {
   }
 
   Widget _buildFloorCounter(BuildContext context, PropertySetupState state) {
+    final standardFloorCount = state.selectedFloors.where((f) => f != 'B').length;
     return Container(
       padding: EdgeInsets.all(6.r),
       decoration: BoxDecoration(
@@ -135,16 +184,16 @@ class FloorConfigScreen extends StatelessWidget {
           _buildCounterButton(
             icon: Icons.remove_rounded,
             onTap: () {
-              if (state.selectedFloors.length > 1) {
+              if (standardFloorCount > 1) {
                 HapticFeedback.lightImpact();
-                context.read<PropertySetupCubit>().setTotalFloors(state.selectedFloors.length - 1);
+                context.read<PropertySetupCubit>().setTotalFloors(standardFloorCount - 1);
               }
             },
           ),
           Column(
             children: [
               Text(
-                state.selectedFloors.length.toString(),
+                standardFloorCount.toString(),
                 style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B), height: 1.1),
               ),
               Text(
@@ -156,9 +205,9 @@ class FloorConfigScreen extends StatelessWidget {
           _buildCounterButton(
             icon: Icons.add_rounded,
             onTap: () {
-              if (state.selectedFloors.length < 15) {
+              if (standardFloorCount < 15) {
                 HapticFeedback.mediumImpact();
-                context.read<PropertySetupCubit>().setTotalFloors(state.selectedFloors.length + 1);
+                context.read<PropertySetupCubit>().setTotalFloors(standardFloorCount + 1);
               }
             },
           ),
@@ -222,7 +271,7 @@ class FloorConfigScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'floor_x'.tr(namedArgs: {'floor': floor}),
+                  _getFloorLabel(context, floor),
                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
                 ),
                 Text(

@@ -29,6 +29,30 @@ class StringUtils {
   }
 
   static String translate(String key, {Map<String, String>? namedArgs, BuildContext? context}) {
+    if (key == 'floor_n') {
+      final nStr = namedArgs?['n'] ?? '';
+      final n = int.tryParse(nStr);
+      if (n != null) {
+        final String locale = context != null 
+            ? Localizations.localeOf(context).languageCode 
+            : 'en';
+        if (locale == 'te') return '$nవ అంతస్తు';
+        if (locale == 'hi') return '$nवीं मंजिल';
+        if (locale == 'ml') return '$n-ാം നില';
+        if (locale == 'kn') return '$nನೇ ಮಹಡಿ';
+        if (locale == 'ta') return '$nவது மாடி';
+
+        final suffix = (n % 10 == 1 && n % 100 != 11)
+            ? 'st'
+            : (n % 10 == 2 && n % 100 != 12)
+                ? 'nd'
+                : (n % 10 == 3 && n % 100 != 13)
+                    ? 'rd'
+                    : 'th';
+        return '$n$suffix Floor';
+      }
+    }
+
     String translated = context != null ? key.tr(context: context, namedArgs: namedArgs) : key.tr(namedArgs: namedArgs);
     
     if (translated == key) {
@@ -42,12 +66,13 @@ class StringUtils {
         if (locale == 'ml') return 'നിലം നില';
         return 'Ground Floor';
       }
-      if (key == 'floor_n') {
-        final n = namedArgs?['n'] ?? '';
-        if (locale == 'te') return '$nవ అంతస్తు';
-        if (locale == 'hi') return '$nवीं मंजिल';
-        if (locale == 'ml') return '$n-ാം നില';
-        return 'Floor $n';
+      if (key == 'basement') {
+        if (locale == 'te') return 'బేస్మెంట్';
+        if (locale == 'hi') return 'तहखाना';
+        if (locale == 'ml') return 'അടിത്തറ';
+        if (locale == 'ta') return 'அடித்தளம்';
+        if (locale == 'kn') return 'ನೆಲಮಾಳಿಗೆ';
+        return 'Basement';
       }
       if (key == 'beds_free_count') {
         final free = namedArgs?['free'] ?? '0';
@@ -2320,7 +2345,7 @@ class StringUtils {
     return translated;
   }
 
-  static String formatSharingType(String type, [BuildContext? context]) {
+  static String formatSharingType(String type, [BuildContext? context, int? capacity]) {
     switch (type.toUpperCase()) {
       case 'SINGLE':
         return translate('sharing_type', namedArgs: {'count': '1'}, context: context);
@@ -2333,8 +2358,15 @@ class StringUtils {
       case 'QUINTUPLE':
         return translate('sharing_type', namedArgs: {'count': '5'}, context: context);
       case 'DORMITORY':
+        if (capacity != null && capacity > 0) {
+          return translate('sharing_count', namedArgs: {'count': capacity.toString()}, context: context);
+        }
         return translate('dormitory_short', context: context);
       default:
+        final digits = RegExp(r'\d+').firstMatch(type)?.group(0);
+        if (digits != null) {
+          return translate('sharing_count', namedArgs: {'count': digits}, context: context);
+        }
         return type;
     }
   }

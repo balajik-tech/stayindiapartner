@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stayindia_owner/core/widgets/local_pdf_preview_screen.dart';
+
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
@@ -424,6 +427,49 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
             ),
           ),
         ),
+        if (hasFile) ...[
+          SizedBox(height: 12.h),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () {
+                final filePath = _filePath;
+                if (filePath == null) return;
+                
+                final isPdf = filePath.toLowerCase().endsWith('.pdf');
+                if (isPdf) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LocalPdfPreviewScreen(
+                        filePath: filePath,
+                        title: _selectedLicenseType ?? 'Document Preview',
+                      ),
+                    ),
+                  );
+                } else {
+                  _showFullScreenImage(context, filePath);
+                }
+              },
+              icon: const Icon(Icons.visibility_rounded, color: AppColors.primaryBlue),
+              label: Text(
+                'Preview Uploaded Document',
+                style: GoogleFonts.outfit(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryBlue,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.05),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+            ),
+          ),
+        ],
         SizedBox(height: 16.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -466,6 +512,36 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
             onPressed: _onComplete,
           );
         },
+      ),
+    );
+  }
+
+  void _showFullScreenImage(BuildContext context, String path) {
+    showDialog(
+      context: context,
+      useSafeArea: false,
+      builder: (context) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: InteractiveViewer(
+            panEnabled: true,
+            boundaryMargin: const EdgeInsets.all(20),
+            minScale: 0.5,
+            maxScale: 4,
+            child: Image.file(
+              File(path),
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
       ),
     );
   }

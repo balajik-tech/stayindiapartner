@@ -179,7 +179,9 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
 
       int floorNum = 1;
       final roomNo = roomData['roomNumber']?.toString() ?? '';
-      if (roomNo.startsWith('G') || roomNo.startsWith('0')) {
+      if (roomNo.startsWith('B')) {
+        floorNum = -1;
+      } else if (roomNo.startsWith('G') || roomNo.startsWith('0')) {
         floorNum = 0;
       } else {
         floorNum = int.tryParse(roomNo.substring(0, 1)) ?? 1;

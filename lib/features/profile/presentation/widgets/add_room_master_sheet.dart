@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -47,6 +48,7 @@ class AddRoomMasterSheet extends StatefulWidget {
 
 class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
   bool _isSaving = false;
+  String? _errorMessage;
   late TextEditingController _nameController;
   late TextEditingController _rentController;
   late TextEditingController _dailyRentController;
@@ -91,7 +93,25 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
       text: room != null ? room.maintenance.toStringAsFixed(0) : '',
     );
     _selectedType = (room?.roomType == 'NON-AC') ? 'NON-AC' : 'AC';
-    _selectedSharingType = _sharingTypeMap[room?.sharingType] ?? _sharingTypes.first;
+    final rawSharing = room?.sharingType;
+    if (rawSharing != null) {
+      if (rawSharing.toUpperCase() == 'DORMITORY' && room != null && room.capacity > 0) {
+        _selectedSharingType = '${room.capacity} Sharing';
+      } else if (_sharingTypeMap.containsKey(rawSharing)) {
+        _selectedSharingType = _sharingTypeMap[rawSharing]!;
+      } else {
+        final digits = RegExp(r'\d+').firstMatch(rawSharing)?.group(0);
+        if (digits != null) {
+          _selectedSharingType = '$digits Sharing';
+        } else if (rawSharing.toUpperCase() == 'SINGLE') {
+          _selectedSharingType = 'Single Sharing';
+        } else {
+          _selectedSharingType = rawSharing;
+        }
+      }
+    } else {
+      _selectedSharingType = _sharingTypes.first;
+    }
     
     _rentController.addListener(_onRentChanged);
   }
@@ -151,15 +171,38 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                             _buildLabel('sharing_type_req'.tr()),
                             _buildDropdown(
                               value: _selectedSharingType,
-                              items: _sharingTypes,
+                              items: (() {
+                                final list = List<String>.from(_sharingTypes);
+                                if (!list.contains(_selectedSharingType) && _selectedSharingType != 'Custom...') {
+                                  list.add(_selectedSharingType);
+                                }
+                                list.add('Custom...');
+                                return list;
+                              })(),
                               displayLabels: {
                                 'Single Sharing': 'sharing_single'.tr(),
                                 '2 Sharing': 'sharing_double'.tr(),
                                 '3 Sharing': 'sharing_triple'.tr(),
                                 '4 Sharing': 'sharing_quad'.tr(),
                                 '5 Sharing': 'sharing_count'.tr(namedArgs: {'count': '5'}),
+                                'Custom...': _translate('custom_dots', 'Custom...'),
                               },
-                              onChanged: (val) => setState(() => _selectedSharingType = val!),
+                              onChanged: (val) async {
+                                if (val == 'Custom...') {
+                                  final customVal = await _showCustomSharingDialog(context);
+                                  if (customVal != null && customVal > 0) {
+                                    setState(() {
+                                      _selectedSharingType = '$customVal Sharing';
+                                      _errorMessage = null;
+                                    });
+                                  }
+                                } else if (val != null) {
+                                  setState(() {
+                                    _selectedSharingType = val;
+                                    _errorMessage = null;
+                                  });
+                                }
+                              },
                             ),
                           ],
                         ),
@@ -177,7 +220,10 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                                 'AC': 'amenity_ac'.tr(),
                                 'NON-AC': 'amenity_non_ac'.tr(),
                               },
-                              onChanged: (val) => setState(() => _selectedType = val!),
+                              onChanged: (val) => setState(() {
+                                _selectedType = val!;
+                                _errorMessage = null;
+                              }),
                             ),
                           ],
                         ),
@@ -231,6 +277,33 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                       ),
                     ],
                   ),
+                  if (_errorMessage != null) ...[
+                    SizedBox(height: 24.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: const Color(0xFFFCA5A5)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline_rounded, color: const Color(0xFFDC2626), size: 20.sp),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: TextStyle(
+                                color: const Color(0xFF991B1B),
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   SizedBox(height: 40.h),
                   _buildSaveButton(isEditing),
                   SizedBox(height: 30.h),
@@ -384,20 +457,18 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                   if (!isEditing) {
                     final roomState = context.read<RoomCubit>().state;
                     if (roomState is RoomLoaded) {
+                      final backendMasterName = '$mappedSharingType $_selectedType';
                       final exists = roomState.rooms.any((room) =>
                           room.isMaster &&
-                          room.roomTypename == generatedRoomTypename);
+                          (room.roomTypename == generatedRoomTypename ||
+                           room.roomTypename == backendMasterName));
 
                       if (exists) {
                         if (mounted) {
-                          setState(() => _isSaving = false);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text('room_master_exists'.tr()),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                          setState(() {
+                            _isSaving = false;
+                            _errorMessage = 'room_master_exists'.tr();
+                          });
                         }
                         return;
                       }
@@ -421,13 +492,10 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                   }
                 } catch (e) {
                   if (mounted) {
-                    setState(() => _isSaving = false);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(GlobalErrorMapper.map(e).message),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+                    setState(() {
+                      _isSaving = false;
+                      _errorMessage = GlobalErrorMapper.map(e).message;
+                    });
                   }
                 }
               },
@@ -458,6 +526,91 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                 ),
               ),
       ),
+    );
+  }
+
+  String _translate(String key, String fallback) {
+    final val = key.tr();
+    return val == key ? fallback : val;
+  }
+
+  Future<int?> _showCustomSharingDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    return showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          title: Text(
+            _translate('custom_sharing', 'Custom Sharing'),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryBlue,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _translate('enter_sharing_number', 'Enter sharing number'),
+                style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+              ),
+              SizedBox(height: 12.h),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                autofocus: true,
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                decoration: InputDecoration(
+                  hintText: 'e.g. 6',
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(color: AppColors.roomCardBorder),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(color: AppColors.roomCardBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(color: AppColors.primaryBlue),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'cancel'.tr(),
+                style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final val = int.tryParse(controller.text);
+                Navigator.pop(context, val);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              ),
+              child: Text(
+                _translate('ok', 'OK'),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

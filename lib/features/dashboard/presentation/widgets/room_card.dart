@@ -88,11 +88,23 @@ class _RoomCardState extends State<RoomCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        StringUtils.translate(
-                          widget.room.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
-                          context: context,
-                          namedArgs: {'n': widget.room.floorName?.replaceAll('floor_', '') ?? '0'},
-                        ),
+                        (() {
+                          final fName = widget.room.floorName ?? '0';
+                          final clean = fName.replaceAll('floor_', '');
+                          final val = int.tryParse(clean);
+                          if (fName == 'basement' || (val != null && val < 0)) {
+                            final absNum = val != null ? val.abs() : 1;
+                            if (absNum > 1) {
+                              return '${StringUtils.translate('basement', context: context)} $absNum';
+                            }
+                            return StringUtils.translate('basement', context: context);
+                          }
+                          return StringUtils.translate(
+                            fName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                            context: context,
+                            namedArgs: {'n': clean},
+                          );
+                        })(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -146,7 +158,7 @@ class _RoomCardState extends State<RoomCard> {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
-                    StringUtils.formatSharingType(widget.sharingType, context),
+                    StringUtils.formatSharingType(widget.sharingType, context, widget.beds.length),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -180,11 +192,23 @@ class _RoomCardState extends State<RoomCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        StringUtils.translate(
-                          widget.room.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
-                          context: context,
-                          namedArgs: {'n': widget.room.floorName?.replaceAll('floor_', '') ?? '0'},
-                        ),
+                        (() {
+                          final fName = widget.room.floorName ?? '0';
+                          final clean = fName.replaceAll('floor_', '');
+                          final val = int.tryParse(clean);
+                          if (fName == 'basement' || (val != null && val < 0)) {
+                            final absNum = val != null ? val.abs() : 1;
+                            if (absNum > 1) {
+                              return '${StringUtils.translate('basement', context: context)} $absNum';
+                            }
+                            return StringUtils.translate('basement', context: context);
+                          }
+                          return StringUtils.translate(
+                            fName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                            context: context,
+                            namedArgs: {'n': clean},
+                          );
+                        })(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -263,7 +287,7 @@ class _RoomCardState extends State<RoomCard> {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
-                        StringUtils.formatSharingType(widget.sharingType),
+                        StringUtils.formatSharingType(widget.sharingType, null, widget.beds.length),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

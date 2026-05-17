@@ -129,6 +129,17 @@ class GlobalActionSheetContent extends StatelessWidget {
             SizedBox(height: 12.h),
             _buildActionItem(
               context,
+              icon: Icons.assignment_ind_rounded,
+              title: 'guest_requests'.tr(),
+              subtitle: 'bookings_subtitle'.tr(),
+              onTap: () {
+                Navigator.pop(context);
+                onGuestRequests();
+              },
+            ),
+            SizedBox(height: 12.h),
+            _buildActionItem(
+              context,
               icon: Icons.door_front_door_rounded,
               title: 'room_master'.tr(),
               subtitle: 'room_master_sub'.tr(),

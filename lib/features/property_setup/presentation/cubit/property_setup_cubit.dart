@@ -61,8 +61,9 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
       hostelType: hostel.hostelType,
       gstNumber: '', 
       selectedFloors: List.generate(hostel.floors, (i) => i == 0 ? 'G' : i.toString()),
-      rooms: mappedRooms.isNotEmpty ? mappedRooms : state.rooms,
-      currentStep: mappedRooms.isNotEmpty ? 3 : 0, 
+      rooms: rooms != null ? mappedRooms : state.rooms,
+      roomCategories: rooms != null ? const [] : state.roomCategories,
+      currentStep: rooms != null ? 3 : 0, 
     ));
     syncRoomCategories();
   }
@@ -318,8 +319,32 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   }
 
   void setTotalFloors(int count) {
+    final hasB = state.selectedFloors.contains('B');
     final floors = List.generate(count, (i) => i == 0 ? 'G' : i.toString());
+    if (hasB) {
+      floors.insert(0, 'B');
+    }
     emit(state.copyWith(selectedFloors: floors));
+  }
+
+  void toggleBasement(bool include) {
+    final floors = List<String>.from(state.selectedFloors);
+    final counts = Map<String, int>.from(state.floorRoomCounts);
+    
+    if (include) {
+      if (!floors.contains('B')) {
+        floors.insert(0, 'B');
+        counts['B'] = counts['B'] ?? 0;
+      }
+    } else {
+      floors.remove('B');
+      counts.remove('B');
+    }
+    
+    emit(state.copyWith(
+      selectedFloors: floors,
+      floorRoomCounts: counts,
+    ));
   }
 
   void updateFloorRoomCount(String floor, int count) {
@@ -506,14 +531,38 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     
     typeMap[sharing] = sharingMap;
     pricing[roomType] = typeMap;
-    emit(state.copyWith(masterPricing: pricing));
+
+    final isAC = roomType == 'AC';
+    final sharingInt = int.tryParse(sharing) ?? 2;
+    final List<Map<String, dynamic>> categories = List<Map<String, dynamic>>.from(
+      state.roomCategories.map((c) => Map<String, dynamic>.from(c)),
+    );
+    final catIndex = categories.indexWhere((c) => c['sharingType'] == sharingInt && c['isAC'] == isAC);
+    if (catIndex != -1) {
+      final updatedCat = Map<String, dynamic>.from(categories[catIndex]);
+      if (field == 'rent' || field == 'monthlyRent') {
+        updatedCat['monthlyRent'] = value.toString();
+      } else if (field == 'deposit' || field == 'securityDeposit') {
+        updatedCat['securityDeposit'] = value.toString();
+      } else if (field == 'dailyRent') {
+        updatedCat['dailyRent'] = value.toString();
+      } else if (field == 'maintenance') {
+        updatedCat['maintenance'] = value.toString();
+      }
+      categories[catIndex] = updatedCat;
+    }
+
+    emit(state.copyWith(masterPricing: pricing, roomCategories: categories));
   }
 
   void applyPricingToAllRooms(String field, double value) {
     final pricing = Map<String, dynamic>.from(state.masterPricing);
     
     final roomTypes = ['AC', 'NON-AC'];
-    final sharingTypes = ['1', '2', '3', '4', '5'];
+    final sharingTypes = {
+      '1', '2', '3', '4', '5',
+      ...state.roomCategories.map((c) => (c['sharingType'] ?? 2).toString())
+    }.toList();
     
     for (var type in roomTypes) {
       final typeMap = Map<String, dynamic>.from(pricing[type] ?? {});
@@ -563,13 +612,6 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
              state.pincode.trim().isNotEmpty;
     }
     if (state.currentStep == 1) {
-      if (state.selectedFloors.isEmpty) return false;
-      for (final floor in state.selectedFloors) {
-        if ((state.floorRoomCounts[floor] ?? 0) <= 0) return false;
-      }
-      return true;
-    }
-    if (state.currentStep == 2) {
       if (state.roomCategories.isEmpty) return false;
       for (final cat in state.roomCategories) {
         final monthlyRent = cat['monthlyRent']?.toString().trim() ?? '';
@@ -582,6 +624,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             maintenance.isEmpty || dailyRentThresholdDays.isEmpty) {
           return false;
         }
+      }
+      return true;
+    }
+    if (state.currentStep == 2) {
+      if (state.selectedFloors.isEmpty) return false;
+      for (final floor in state.selectedFloors) {
+        if ((state.floorRoomCounts[floor] ?? 0) <= 0) return false;
       }
       return true;
     }
@@ -663,12 +712,43 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
           }
         }
 
-        if (cat.isNotEmpty) {
-          r['rent'] = double.tryParse(cat['monthlyRent']?.toString() ?? '0') ?? 0.0;
-          r['deposit'] = double.tryParse(cat['securityDeposit']?.toString() ?? '0') ?? 0.0;
-          r['maintenance'] = double.tryParse(cat['maintenance']?.toString() ?? '0') ?? 0.0;
-          r['dailyRent'] = double.tryParse(cat['dailyRent']?.toString() ?? '0') ?? 0.0;
+        final isAC = (r['features'] as Map?)?['isAC'] == true;
+        final type = isAC ? 'AC' : 'NON-AC';
+        final sharingStr = (r['sharingType'] ?? 2).toString();
+        
+        final pricing = state.masterPricing[type] ?? {};
+        final config = pricing[sharingStr];
+
+        double rent = 0.0;
+        double deposit = 0.0;
+        double maintenance = 0.0;
+        double dailyRent = 0.0;
+
+        if (config is Map) {
+          rent = double.tryParse(config['rent']?.toString() ?? config['monthlyRent']?.toString() ?? '0') ?? 0.0;
+          deposit = double.tryParse(config['deposit']?.toString() ?? config['securityDeposit']?.toString() ?? '0') ?? 0.0;
+          maintenance = double.tryParse(config['maintenance']?.toString() ?? '0') ?? 0.0;
+          dailyRent = double.tryParse(config['dailyRent']?.toString() ?? '0') ?? 0.0;
         }
+
+        if (cat.isNotEmpty) {
+          final catRent = double.tryParse(cat['monthlyRent']?.toString() ?? '0') ?? 0.0;
+          if (catRent > 0) rent = catRent;
+          
+          final catDeposit = double.tryParse(cat['securityDeposit']?.toString() ?? '0') ?? 0.0;
+          if (catDeposit > 0) deposit = catDeposit;
+
+          final catMaintenance = double.tryParse(cat['maintenance']?.toString() ?? '0') ?? 0.0;
+          if (catMaintenance > 0) maintenance = catMaintenance;
+
+          final catDailyRent = double.tryParse(cat['dailyRent']?.toString() ?? '0') ?? 0.0;
+          if (catDailyRent > 0) dailyRent = catDailyRent;
+        }
+
+        r['rent'] = rent;
+        r['deposit'] = deposit;
+        r['maintenance'] = maintenance;
+        r['dailyRent'] = dailyRent;
         return r;
       }).toList();
 

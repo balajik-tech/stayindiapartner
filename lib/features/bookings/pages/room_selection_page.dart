@@ -39,6 +39,21 @@ class RoomSelectionPage extends StatefulWidget {
 class _RoomSelectionPageState extends State<RoomSelectionPage> {
   int _selectedFloorIndex = 0;
 
+  String _getFloorDisplayName(FloorData floor) {
+    if (floor.floorName == 'basement' || (floor.floorNum != null && floor.floorNum! < 0)) {
+      final absNum = floor.floorNum != null ? floor.floorNum!.abs() : 1;
+      if (absNum > 1) {
+        return '${StringUtils.translate('basement', context: context)} $absNum';
+      }
+      return StringUtils.translate('basement', context: context);
+    }
+    return StringUtils.translate(
+      floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+      context: context,
+      namedArgs: {'n': '${floor.floorNum ?? 0}'},
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -137,13 +152,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
           final occupancyModel = state.occupancy as OccupancyModel;
           final floorNames = [
             StringUtils.translate('all_floors', context: context),
-            ...occupancyModel.floors.map((f) => 
-               StringUtils.translate(
-                 f.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
-                 context: context,
-                 namedArgs: {'n': '${f.floorNum ?? 0}'},
-               )
-            )
+            ...occupancyModel.floors.map((f) => _getFloorDisplayName(f))
           ];
 
           return Stack(
@@ -200,11 +209,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
       itemBuilder: (context, index) {
         final floor = filteredFloors[index];
         return FloorAccordion(
-          title: StringUtils.translate(
-            floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
-            context: context,
-            namedArgs: {'n': '${floor.floorNum ?? 0}'},
-          ),
+          title: _getFloorDisplayName(floor),
           bedInfo: StringUtils.translate(
             'beds_free_count',
             context: context,

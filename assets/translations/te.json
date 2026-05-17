@@ -492,6 +492,10 @@
   "add_new_floor_rooms_sub": "మీ ప్రాపర్టీ సామర్థ్యాన్ని పెంచండి",
   "bookings_title": "బుకింగ్‌లు",
   "bookings_subtitle": "మీ అతిథి అభ్యర్థనలు మరియు బసలను నిర్వహించండి",
+  "guest_requests": "అతిథి అభ్యర్థనలు",
+  "guest_name": "అతిథి పేరు",
+  "total_amount": "మొత్తం ధర",
+  "rejection_reason": "తిరస్కరణకు కారణం",
   "tab_requests": "అభ్యర్థనలు",
   "tab_active": "ప్రస్తుత",
   "tab_history": "చరిత్ర",
@@ -555,6 +559,7 @@
   "per_month": "/నెల",
   "per_day": "/రోజు",
   "ground_floor": "గ్రౌండ్ ఫ్లోర్",
+  "basement": "బేస్మెంట్",
   "floor_n": "{n}వ అంతస్తు",
   "available_status": "ఖాళీగా ఉంది",
   "sharing_n": "{n}-షేరింగ్",
@@ -889,5 +894,10 @@
   "sharing_triple": "ట్రిపుల్",
   "sharing_quad": "4 షేరింగ్",
   "no_staff_found": "ఎలాంటి సిబ్బంది కనుగొనబడలేదు",
-  "add_staff_desc": "వారి పాత్రలను నిర్వహించడానికి దయచేసి సిబ్బందిని జోడించండి."
+  "add_staff_desc": "వారి పాత్రలను నిర్వహించడానికి దయచేసి సిబ్బందిని జోడించండి.",
+  "select_image_source": "చిత్ర మూలాన్ని ఎంచుకోండి",
+  "camera": "కెమెరా",
+  "gallery": "గ్యాలరీ",
+  "custom_dots": "కస్టమ్...",
+  "room_exists_title": "గది ఇప్పటికే ఉంది"
 }

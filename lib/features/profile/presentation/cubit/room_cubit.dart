@@ -151,7 +151,12 @@ class RoomCubit extends Cubit<RoomState> {
       case 'TRIPLE': return 3;
       case 'QUADRUPLE': return 4;
       case 'QUINTUPLE': return 5;
-      default: return 1;
+      default:
+        final digits = RegExp(r'\d+').firstMatch(sharing)?.group(0);
+        if (digits != null) {
+          return int.tryParse(digits) ?? 1;
+        }
+        return 1;
     }
   }
 
@@ -261,21 +266,41 @@ class RoomCubit extends Cubit<RoomState> {
     emit(RoomLoading());
     try {
       int floorNumber = 0;
-      final nameUpper = floorName.toUpperCase();
+      final nameUpper = floorName.toUpperCase().trim();
       if (nameUpper == 'GROUND_FLOOR' || nameUpper == 'GROUND FLOOR' || nameUpper == 'G' || nameUpper == '0') {
         floorNumber = 0;
+      } else if (nameUpper == 'BASEMENT' || nameUpper == 'B') {
+        floorNumber = -1;
+      } else if (nameUpper.startsWith('BASEMENT') || nameUpper.startsWith('B')) {
+        final numStr = nameUpper.replaceAll(RegExp(r'[^0-9]'), '');
+        final parsed = int.tryParse(numStr);
+        if (parsed != null) {
+          floorNumber = -parsed;
+        } else {
+          floorNumber = -1;
+        }
       } else {
         floorNumber = int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
       }
       
       final List<RoomDetail> rooms = [];
+      final isBasement = floorNumber < 0 || nameUpper.contains('BASEMENT') || nameUpper.startsWith('B');
+
       for (int i = 1; i <= roomCount; i++) {
-        final roomNo = (floorNumber * 100) + i;
+        String roomNoStr;
+        if (isBasement) {
+          final absFloor = floorNumber.abs();
+          final prefix = absFloor > 1 ? 'B$absFloor' : 'B';
+          roomNoStr = '$prefix${i.toString().padLeft(2, '0')}';
+        } else {
+          final roomNo = (floorNumber * 100) + i;
+          roomNoStr = roomNo.toString();
+        }
         
         rooms.add(RoomDetail(
           id: '',
           hostelId: hostelId,
-          roomTypename: roomNo.toString(),
+          roomTypename: roomNoStr,
           floor: floorNumber,
           sharingType: _mapCapacityToSharing(bedsPerRoom),
           roomType: 'NON-AC',
@@ -302,7 +327,7 @@ class RoomCubit extends Cubit<RoomState> {
       case 3: return 'TRIPLE';
       case 4: return 'QUADRUPLE';
       case 5: return 'QUINTUPLE';
-      default: return 'SINGLE';
+      default: return '$capacity Sharing';
     }
   }
 }

@@ -48,6 +48,49 @@ class AddFloorSheet extends StatefulWidget {
 class _AddFloorSheetState extends State<AddFloorSheet> {
   final _floorNameController = TextEditingController();
   int _roomCount = 1;
+  bool _isBasement = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final nextStd = getNextStandardFloorNumber();
+    _floorNameController.text = nextStd == 1 
+        ? '1st Floor' 
+        : nextStd == 2 
+            ? '2nd Floor' 
+            : nextStd == 3 
+                ? '3rd Floor' 
+                : '${nextStd}th Floor';
+  }
+
+  int getNextStandardFloorNumber() {
+    int maxFloor = 0;
+    final dashboardState = widget.dashboardCubit.state;
+    if (dashboardState is DashboardLoaded) {
+      for (var floor in dashboardState.data.occupancy.floors) {
+        final num = floor.floorNum;
+        if (num != null && num > maxFloor) {
+          maxFloor = num;
+        }
+      }
+    }
+    return maxFloor + 1;
+  }
+
+  int getNextBasementNumber() {
+    int count = 0;
+    final dashboardState = widget.dashboardCubit.state;
+    if (dashboardState is DashboardLoaded) {
+      for (var floor in dashboardState.data.occupancy.floors) {
+        final name = floor.floorName.toLowerCase();
+        final num = floor.floorNum;
+        if (name.contains('basement') || name == 'b' || (num != null && num < 0)) {
+          count++;
+        }
+      }
+    }
+    return count + 1;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +113,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildFloorTypeSelector(),
                   _buildLabel('floor_identity'.tr()),
                   _buildPremiumTextField(_floorNameController, hint: 'floor_name_hint'.tr()),
                   SizedBox(height: 32.h),
@@ -100,6 +144,87 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   SizedBox(height: 48.h),
                   _buildAddButton(),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloorTypeSelector() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 24.h),
+      height: 48.h,
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (_isBasement) {
+                  setState(() {
+                    _isBasement = false;
+                    final nextStd = getNextStandardFloorNumber();
+                    _floorNameController.text = nextStd == 1 ? '1st Floor' : nextStd == 2 ? '2nd Floor' : nextStd == 3 ? '3rd Floor' : '${nextStd}th Floor';
+                  });
+                  HapticFeedback.lightImpact();
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: !_isBasement ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: !_isBasement ? [
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))
+                  ] : [],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Standard Floor',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: !_isBasement ? AppColors.primaryBlue : AppColors.greyText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (!_isBasement) {
+                  setState(() {
+                    _isBasement = true;
+                    final nextB = getNextBasementNumber();
+                    _floorNameController.text = nextB == 1 ? 'Basement' : 'Basement $nextB';
+                  });
+                  HapticFeedback.lightImpact();
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _isBasement ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: _isBasement ? [
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))
+                  ] : [],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Basement Floor',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: _isBasement ? AppColors.primaryBlue : AppColors.greyText,
+                  ),
+                ),
               ),
             ),
           ),
@@ -263,6 +388,15 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   if (hostel != null) {
                     Navigator.pop(context);
                     
+                    int floorNumCalculated;
+                    if (_isBasement) {
+                      final numStr = floorName.replaceAll(RegExp(r'[^0-9]'), '');
+                      final parsed = int.tryParse(numStr);
+                      floorNumCalculated = parsed != null ? -parsed : -getNextBasementNumber();
+                    } else {
+                      floorNumCalculated = int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? getNextStandardFloorNumber();
+                    }
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -274,6 +408,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                           child: RoomManagementPage(
                             hostel: hostel!,
                             floorName: floorName,
+                            floorNum: floorNumCalculated,
                             isDraftMode: true,
                             draftRoomCount: _roomCount,
                           ),

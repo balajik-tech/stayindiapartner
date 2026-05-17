@@ -234,11 +234,20 @@ class FloorListSection extends StatelessWidget {
                 return Padding(
                   padding: EdgeInsets.only(bottom: 16.h),
                   child: FloorAccordion(
-                    title: StringUtils.translate(
+                    title: (() {
+                      if (floor.floorName == 'basement' || (floor.floorNum != null && floor.floorNum! < 0)) {
+                        final absNum = floor.floorNum != null ? floor.floorNum!.abs() : 1;
+                        if (absNum > 1) {
+                          return '${StringUtils.translate('basement', context: context)} $absNum';
+                        }
+                        return StringUtils.translate('basement', context: context);
+                      }
+                      return StringUtils.translate(
                         floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
                         context: context,
                         namedArgs: {'n': '${floor.floorNum ?? 0}'},
-                    ),
+                      );
+                    })(),
                     bedInfo: StringUtils.translate(
                         'beds_free_count',
                         context: context,

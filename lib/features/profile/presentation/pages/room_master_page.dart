@@ -67,7 +67,64 @@ class _RoomMasterViewState extends State<_RoomMasterView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFE),
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.darkText,
+            size: 18.sp,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'room_master'.tr(),
+          style: TextStyle(
+            color: const Color(0xFF2C5990),
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(48.h),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+            height: 38.h,
+            padding: EdgeInsets.all(3.r),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              indicator: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              labelColor: const Color(0xFF2C5990),
+              unselectedLabelColor: const Color(0xFF64748B),
+              labelStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800),
+              tabs: [
+                Tab(text: StringUtils.translate('all', context: context)),
+                Tab(text: StringUtils.translate('amenity_ac', context: context)),
+                Tab(text: StringUtils.translate('amenity_non_ac', context: context)),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: BlocConsumer<RoomCubit, RoomState>(
         listener: (context, state) {
           if (state is RoomOperationSuccess) {
@@ -85,25 +142,16 @@ class _RoomMasterViewState extends State<_RoomMasterView>
           }
         },
         builder: (context, state) {
-          return CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-            slivers: [
-              _buildPremiumHeader(context),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h),
-                sliver: state is RoomLoading
-                    ? const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
-                    : SliverFillRemaining(
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'All'),
-                            _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'AC'),
-                            _RoomListBuilder(rooms: state is RoomLoaded ? state.rooms : [], filter: 'NON-AC'),
-                          ],
-                        ),
-                      ),
-              ),
+          if (state is RoomLoading) {
+            return const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue));
+          }
+          final rooms = state is RoomLoaded ? state.rooms : <RoomDetail>[];
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _RoomListBuilder(rooms: rooms, filter: 'All'),
+              _RoomListBuilder(rooms: rooms, filter: 'AC'),
+              _RoomListBuilder(rooms: rooms, filter: 'NON-AC'),
             ],
           );
         },
@@ -147,94 +195,6 @@ class _RoomMasterViewState extends State<_RoomMasterView>
         },
         backgroundColor: AppColors.primaryBlue,
         child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-
-  Widget _buildPremiumHeader(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Container(
-        padding: EdgeInsets.fromLTRB(12.w, 54.h, 24.w, 32.h),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF1E3A8A), Color(0xFF2C5EBD)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF1E3A8A).withValues(alpha: 0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'room_master'.tr(),
-                        style: TextStyle(
-                          fontSize: 26.sp,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -1.0,
-                        ),
-                      ),
-                      Text(
-                        'room_master_sub'.tr(),
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.h),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 12.w),
-              height: 50.h,
-              padding: EdgeInsets.all(4.r),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                indicator: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                labelColor: const Color(0xFF1E3A8A),
-                unselectedLabelColor: Colors.white.withValues(alpha: 0.8),
-                labelStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
-                tabs: [
-                  Tab(text: StringUtils.translate('all', context: context)),
-                  Tab(text: StringUtils.translate('amenity_ac', context: context)),
-                  Tab(text: StringUtils.translate('amenity_non_ac', context: context)),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -297,7 +257,7 @@ class _RoomMasterCard extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              _getLocalizedRoomTypename(context, room.roomTypename),
+                              _getLocalizedRoomTypename(context, room),
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
@@ -312,7 +272,7 @@ class _RoomMasterCard extends StatelessWidget {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        _getLocalizedSharingType(context, room.sharingType),
+                        _getLocalizedSharingType(context, room),
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: const Color(0xFF667085),
@@ -443,7 +403,12 @@ class _RoomMasterCard extends StatelessWidget {
       case 'TRIPLE': return 3;
       case 'QUADRUPLE': return 4;
       case 'QUINTUPLE': return 5;
-      default: return 1;
+      default:
+        final digits = RegExp(r'\d+').firstMatch(sharing)?.group(0);
+        if (digits != null) {
+          return int.tryParse(digits) ?? 1;
+        }
+        return 1;
     }
   }
 
@@ -452,7 +417,7 @@ class _RoomMasterCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(StringUtils.translate('delete_room', context: context)),
-        content: Text(StringUtils.translate('delete_room_confirm', namedArgs: {'room': _getLocalizedRoomTypename(context, room.roomTypename)}, context: context)),
+        content: Text(StringUtils.translate('delete_room_confirm', namedArgs: {'room': _getLocalizedRoomTypename(context, room)}, context: context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -470,24 +435,49 @@ class _RoomMasterCard extends StatelessWidget {
     );
   }
 
-  String _getLocalizedSharingType(BuildContext context, String sharing) {
+  String _getLocalizedSharingType(BuildContext context, RoomDetail room) {
+    final sharing = room.sharingType;
     switch (sharing.toUpperCase()) {
       case 'SINGLE': return StringUtils.translate('sharing_single', context: context);
       case 'DOUBLE': return StringUtils.translate('sharing_double', context: context);
       case 'TRIPLE': return StringUtils.translate('sharing_triple', context: context);
       case 'QUADRUPLE': return StringUtils.translate('sharing_quad', context: context);
       case 'QUINTUPLE': return StringUtils.translate('sharing_count', namedArgs: {'count': '5'}, context: context);
-      default: return sharing;
+      case 'DORMITORY':
+        if (room.capacity > 0) {
+          return StringUtils.translate('sharing_count', namedArgs: {'count': room.capacity.toString()}, context: context);
+        }
+        return StringUtils.translate('sharing_dormitory', context: context);
+      default:
+        final digits = RegExp(r'\d+').firstMatch(sharing)?.group(0);
+        if (digits != null) {
+          return StringUtils.translate('sharing_count', namedArgs: {'count': digits}, context: context);
+        }
+        return sharing;
     }
   }
 
-  String _getLocalizedRoomTypename(BuildContext context, String name) {
-    String res = name;
+  String _getLocalizedRoomTypename(BuildContext context, RoomDetail room) {
+    String res = room.roomTypename;
+    if (res.toUpperCase().contains('DORMITORY')) {
+      final capStr = room.capacity > 0 ? '${room.capacity} Sharing' : 'Dormitory';
+      res = res.replaceAll(RegExp(r'DORMITORY', caseSensitive: false), capStr);
+    }
+    
     res = res.replaceAll('Single Sharing', StringUtils.translate('sharing_single', context: context));
     res = res.replaceAll('2 Sharing', StringUtils.translate('sharing_double', context: context));
     res = res.replaceAll('3 Sharing', StringUtils.translate('sharing_triple', context: context));
     res = res.replaceAll('4 Sharing', StringUtils.translate('sharing_quad', context: context));
     res = res.replaceAll('5 Sharing', StringUtils.translate('sharing_count', namedArgs: {'count': '5'}, context: context));
+    
+    // Support custom sharing count in typename
+    final match = RegExp(r'(\d+) Sharing').firstMatch(res);
+    if (match != null) {
+      final count = match.group(1)!;
+      final localized = StringUtils.translate('sharing_count', namedArgs: {'count': count}, context: context);
+      res = res.replaceAll('$count Sharing', localized);
+    }
+
     if (res.contains('NON-AC')) {
       res = res.replaceAll('NON-AC', StringUtils.translate('amenity_non_ac', context: context));
     } else if (res.contains('AC')) {

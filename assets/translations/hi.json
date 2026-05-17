@@ -487,6 +487,10 @@
   "add_new_floor_rooms_sub": "अपनी संपत्ति की क्षमता बढ़ाएं",
   "bookings_title": "बुकिंग",
   "bookings_subtitle": "अपने अतिथि अनुरोधों और ठहरने का प्रबंधन करें",
+  "guest_requests": "अतिथि अनुरोध",
+  "guest_name": "अतिथि का नाम",
+  "total_amount": "कुल राशि",
+  "rejection_reason": "अस्वीकृति का कारण",
   "tab_requests": "अनुरोध",
   "tab_active": "सक्रिय",
   "tab_history": "इतिहास",
@@ -550,6 +554,7 @@
   "per_month": "/माह",
   "per_day": "/दिन",
   "ground_floor": "भूतल",
+  "basement": "तहखाना",
   "floor_n": "मंजिल {n}",
   "available_status": "उपलब्ध",
   "sharing_n": "{n}-शेयरिंग",
@@ -889,5 +894,10 @@
   "sharing_triple": "ट्रिपल",
   "sharing_quad": "4 शेयरिंग",
   "no_staff_found": "कोई कर्मचारी नहीं मिला",
-  "add_staff_desc": "उनकी भूमिकाओं को प्रबंधित करने के लिए कृपया कर्मचारी जोड़ें।"
+  "add_staff_desc": "उनकी भूमिकाओं को प्रबंधित करने के लिए कृपया कर्मचारी जोड़ें।",
+  "select_image_source": "छवि स्रोत चुनें",
+  "camera": "कैमरा",
+  "gallery": "गैलरी",
+  "custom_dots": "कस्टम...",
+  "room_exists_title": "कमरा पहले से मौजूद है"
 }

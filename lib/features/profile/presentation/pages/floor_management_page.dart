@@ -134,6 +134,21 @@ class _FloorCard extends StatelessWidget {
 
   const _FloorCard({required this.floor, required this.hostel});
 
+  String _getFloorDisplayName(BuildContext context) {
+    if (floor.floorName == 'basement' || (floor.floorNum != null && floor.floorNum! < 0)) {
+      final absNum = floor.floorNum != null ? floor.floorNum!.abs() : 1;
+      if (absNum > 1) {
+        return '${StringUtils.translate('basement', context: context)} $absNum';
+      }
+      return StringUtils.translate('basement', context: context);
+    }
+    return StringUtils.translate(
+      floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+      context: context,
+      namedArgs: {'n': '${floor.floorNum ?? 0}'},
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -162,11 +177,7 @@ class _FloorCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      StringUtils.translate(
-                        floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
-                        context: context,
-                        namedArgs: {'n': '${floor.floorNum ?? 0}'},
-                      ),
+                      _getFloorDisplayName(context),
                       style: TextStyle(
                         color: AppColors.darkText,
                         fontSize: 14.sp,
@@ -174,7 +185,7 @@ class _FloorCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${'floor_label'.tr(namedArgs: {'floor': StringUtils.translate(floor.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n', context: context, namedArgs: {'n': '${floor.floorNum ?? 0}'})})} • ${'rooms_count'.tr(namedArgs: {'count': floor.rooms.length.toString()})} • ${StringUtils.translate('beds_free_count', context: context, namedArgs: {'free': '${floor.freeBeds ?? 0}', 'total': '${floor.totalBeds ?? 0}'})}',
+                      '${_getFloorDisplayName(context)} • ${'rooms_count'.tr(namedArgs: {'count': floor.rooms.length.toString()})} • ${StringUtils.translate('beds_free_count', context: context, namedArgs: {'free': '${floor.freeBeds ?? 0}', 'total': '${floor.totalBeds ?? 0}'})}',
                       style: TextStyle(
                         color: AppColors.greyText,
                         fontSize: 11.sp,

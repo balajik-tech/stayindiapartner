@@ -472,15 +472,15 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
           widget.label,
           style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B)),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 4.h),
         Focus(
           onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
                 color: _isFocused ? const Color(0xFFF98125) : const Color(0xFFE2E8F0),
                 width: 1.5,
@@ -489,8 +489,8 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
             child: Row(
               children: [
                 if (!hasSuffix) ...[
-                  Text('₹', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
-                  SizedBox(width: 8.w),
+                  Text('₹', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
+                  SizedBox(width: 6.w),
                 ],
                 Expanded(
                   child: TextFormField(
@@ -499,7 +499,7 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: widget.hint,
-                      hintStyle: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 15.sp, fontWeight: FontWeight.w600),
+                      hintStyle: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 14.sp, fontWeight: FontWeight.w600),
                       filled: false,
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -507,12 +507,12 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
+                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
                   ),
                 ),
                 if (hasSuffix) ...[
                   SizedBox(width: 4.w),
-                  Text(widget.suffix!, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
+                  Text(widget.suffix!, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
                 ],
               ],
             ),

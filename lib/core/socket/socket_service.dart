@@ -47,6 +47,8 @@ class SocketService {
     
     _socket = io.io(baseUrl, io.OptionBuilder()
       .setTransports(['websocket'])
+      .enableForceNew()
+      .disableMultiplex()
       .setAuth({
         'token': token,
         'appType': 'OWNER_APP',

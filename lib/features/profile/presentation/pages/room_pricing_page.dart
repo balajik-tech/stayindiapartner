@@ -15,8 +15,9 @@ import 'package:stayindia_owner/injection_container.dart';
 class RoomPricingPage extends StatefulWidget {
   final Hostel hostel;
   final List<RoomDetail>? rooms;
+  final String? floorName;
 
-  const RoomPricingPage({super.key, required this.hostel, this.rooms});
+  const RoomPricingPage({super.key, required this.hostel, this.rooms, this.floorName});
 
   @override
   State<RoomPricingPage> createState() => _RoomPricingPageState();
@@ -205,10 +206,24 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
     );
   }
 
+  int? get _resolvedFloorNum {
+    if (widget.floorName == null) return null;
+    final nameUpper = widget.floorName!.toUpperCase();
+    if (nameUpper == 'GROUND_FLOOR' || nameUpper == 'GROUND FLOOR' || nameUpper == 'G' || nameUpper == '0') {
+      return 0;
+    }
+    return int.tryParse(widget.floorName!.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+  }
+
   Widget _buildPricingSection(BuildContext context, PropertySetupState state, String type, IconData icon, Color bgColor, Color iconColor) {
+    final resolvedFloor = _resolvedFloorNum;
     final roomsOfType = state.rooms.where((r) {
       final features = r['features'] as Map<String, dynamic>? ?? {};
       final isAC = features['isAC'] ?? false;
+      if (resolvedFloor != null) {
+        final roomFloorNum = int.tryParse(r['floor']?.toString() ?? '');
+        if (roomFloorNum != resolvedFloor) return false;
+      }
       return type == 'AC' ? isAC : !isAC;
     }).toList();
     
@@ -369,7 +384,34 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: state.isSaving ? null : () => context.read<PropertySetupCubit>().saveProperty(),
+                  onPressed: state.isSaving ? null : () {
+                    final cubit = context.read<PropertySetupCubit>();
+                    if (cubit.isValidToFinish) {
+                      cubit.saveProperty();
+                    } else {
+                      final message = cubit.state.validationMessage ?? 'incomplete_setup_sub'.tr();
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+                          title: Row(
+                            children: [
+                              const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                              SizedBox(width: 8.w),
+                              Text('incomplete_setup'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900)),
+                            ],
+                          ),
+                          content: Text(message, style: TextStyle(fontSize: 14.sp, height: 1.6, color: const Color(0xFF475569))),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: Text('btn_got_it'.tr(), style: const TextStyle(color: Color(0xFF2C5990), fontWeight: FontWeight.w800)),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2C5990),
                     padding: EdgeInsets.symmetric(vertical: 14.h),

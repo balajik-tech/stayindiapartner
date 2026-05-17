@@ -29,7 +29,19 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
   @override
   void initState() {
     super.initState();
-    final cubitStep = di.sl<PropertySetupCubit>().state.currentStep;
+    final cubit = di.sl<PropertySetupCubit>();
+    if (widget.existingHostel != null) {
+      cubit.prefillFromHostel(widget.existingHostel!);
+    } else if (widget.existingHostel == null) {
+      if (cubit.state.hostelId != null || (cubit.state.rooms.isEmpty && cubit.state.hostelId == null)) {
+        cubit.resetState();
+      }
+    }
+    if (widget.initialStep > 0) {
+      cubit.setStep(widget.initialStep);
+    }
+
+    final cubitStep = cubit.state.currentStep;
     final startPage = widget.initialStep > 0 ? widget.initialStep : cubitStep;
     _pageController = PageController(initialPage: startPage);
   }
@@ -46,19 +58,8 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) {
-            final cubit = di.sl<PropertySetupCubit>();
-            if (widget.existingHostel != null) {
-              cubit.prefillFromHostel(widget.existingHostel!);
-            } else if (cubit.state.rooms.isEmpty && cubit.state.hostelId == null) {
-              cubit.resetState();
-            }
-            if (widget.initialStep > 0) {
-              cubit.setStep(widget.initialStep);
-            }
-            return cubit;
-          },
+        BlocProvider.value(
+          value: di.sl<PropertySetupCubit>(),
         ),
         BlocProvider(
           create: (context) => di.sl<RoomCubit>()..getRooms(isMaster: true),
@@ -106,8 +107,8 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
                         const BuildingIdentityScreen(),
-                        const FloorConfigScreen(),
                         const RoomCategoryScreen(),
+                        const FloorConfigScreen(),
                         const RoomConfigScreen(),
                         const PriceMasterScreen(),
                         const SetupSuccessScreen(),
@@ -252,20 +253,24 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
             children: [
               if (state.currentStep > 0)
                 Container(
-                  margin: EdgeInsets.only(right: 16.w),
-                  child: OutlinedButton(
-                    onPressed: () => context.read<PropertySetupCubit>().previousStep(),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF2B5797), width: 2),
-                      padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 16.h),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-                    ),
-                    child: Text(
-                      'btn_back'.tr(),
-                      style: TextStyle(
-                        color: const Color(0xFF2B5797),
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w900,
+                  margin: EdgeInsets.only(right: 12.w),
+                  child: SizedBox(
+                    height: 50.h,
+                    width: 105.w,
+                    child: OutlinedButton(
+                      onPressed: () => context.read<PropertySetupCubit>().previousStep(),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      ),
+                      child: Text(
+                        'btn_back'.tr(),
+                        style: TextStyle(
+                          color: const Color(0xFF2B5797),
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
@@ -311,11 +316,10 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                               context.read<PropertySetupCubit>().nextStep();
                             }
                           } else if (state.currentStep == 1) {
-                            final totalRooms = context.read<PropertySetupCubit>().totalRooms;
-                            if (totalRooms == 0) {
+                            if (state.roomCategories.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('err_room_req'.tr()),
+                                  content: Text('err_room_type_req'.tr()),
                                   backgroundColor: Colors.redAccent,
                                 ),
                               );
@@ -323,10 +327,11 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                               context.read<PropertySetupCubit>().nextStep();
                             }
                           } else if (state.currentStep == 2) {
-                            if (state.roomCategories.isEmpty) {
+                            final totalRooms = context.read<PropertySetupCubit>().totalRooms;
+                            if (totalRooms == 0) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('err_room_type_req'.tr()),
+                                  content: Text('err_room_req'.tr()),
                                   backgroundColor: Colors.redAccent,
                                 ),
                               );
@@ -397,7 +402,7 @@ class _PremiumButtonState extends State<_PremiumButton> with SingleTickerProvide
         scale: _scale,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          height: 56.h,
+          height: 50.h,
           width: double.infinity,
           decoration: BoxDecoration(
             color: widget.onPressed == null 

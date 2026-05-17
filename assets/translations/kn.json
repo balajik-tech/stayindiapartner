@@ -487,6 +487,10 @@
   "add_new_floor_rooms_sub": "ನಿಮ್ಮ ಆಸ್ತಿ ಸಾಮರ್ಥ್ಯವನ್ನು ವಿಸ್ತರಿಸಿ",
   "bookings_title": "ಬುಕಿಂಗ್‌ಗಳು",
   "bookings_subtitle": "ನಿಮ್ಮ ಅತಿಥಿ ವಿನಂತಿಗಳು ಮತ್ತು ವಾಸ್ತವ್ಯಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+  "guest_requests": "ಅತಿಥಿ ವಿನಂತಿಗಳು",
+  "guest_name": "ಅತಿಥಿ ಹೆಸರು",
+  "total_amount": "ಒಟ್ಟು ಮೊತ್ತ",
+  "rejection_reason": "ತಿರಸ್ಕಾರದ ಕಾರಣ",
   "tab_requests": "ವಿನಂತಿಗಳು",
   "tab_active": "ಸಕ್ರಿಯ",
   "tab_history": "ಇತಿಹಾಸ",
@@ -550,6 +554,7 @@
   "per_month": "/ತಿಂಗಳು",
   "per_day": "/ದಿನ",
   "ground_floor": "ನೆಲ ಅಂತಸ್ತು",
+  "basement": "ನೆಲಮಾಳಿಗೆ",
   "floor_n": "ಮಹಡಿ {n}",
   "available_status": "ಲಭ್ಯವಿದೆ",
   "sharing_n": "{n}-ಶೇರಿಂಗ್",
@@ -889,5 +894,10 @@
   "sharing_triple": "ತ್ರಿಪಲ್",
   "sharing_quad": "4 ಶೇರಿಂಗ್",
   "no_staff_found": "ಯಾವುದೇ ಸಿಬ್ಬಂದಿ ಕಂಡುಬಂದಿಲ್ಲ",
-  "add_staff_desc": "ಅವರ ಪಾತ್ರಗಳನ್ನು ನಿರ್ವಹಿಸಲು ದಯವಿಟ್ಟು ಸಿಬ್ಬಂದಿ ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ."
+  "add_staff_desc": "ಅವರ ಪಾತ್ರಗಳನ್ನು ನಿರ್ವಹಿಸಲು ದಯವಿಟ್ಟು ಸಿಬ್ಬಂದಿ ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ.",
+  "select_image_source": "ಚಿತ್ರದ ಮೂಲವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  "camera": "ಕ್ಯಾಮೆರಾ",
+  "gallery": "ಗ್ಯಾಲರಿ",
+  "custom_dots": "ಕಸ್ಟಮ್...",
+  "room_exists_title": "ಕೊಠಡಿ ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ"
 }

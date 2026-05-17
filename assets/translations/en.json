@@ -492,6 +492,10 @@
   "add_new_floor_rooms_sub": "Expand your property capacity",
   "bookings_title": "Bookings",
   "bookings_subtitle": "Manage your guest requests and stays",
+  "guest_requests": "Guest Requests",
+  "guest_name": "Guest Name",
+  "total_amount": "Total Amount",
+  "rejection_reason": "Rejection Reason",
   "tab_requests": "Requests",
   "tab_active": "Active",
   "tab_history": "History",
@@ -555,6 +559,7 @@
   "per_month": "/mo",
   "per_day": "/day",
   "ground_floor": "Ground Floor",
+  "basement": "Basement",
   "floor_n": "Floor {n}",
   "available_status": "Available",
   "sharing_n": "{n}-SHARING",
@@ -889,5 +894,10 @@
   "sharing_triple": "Triple",
   "sharing_quad": "4 Sharing",
   "no_staff_found": "No Staff Found",
-  "add_staff_desc": "Please add staff members to manage their roles."
+  "add_staff_desc": "Please add staff members to manage their roles.",
+  "select_image_source": "Select Image Source",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "custom_dots": "Custom...",
+  "room_exists_title": "Room Already Exists"
 }

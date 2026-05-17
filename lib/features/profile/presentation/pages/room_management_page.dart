@@ -46,9 +46,20 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
 
   int get _resolvedFloorNum {
     if (widget.floorNum != null) return widget.floorNum!;
-    final nameUpper = widget.floorName.toUpperCase();
+    final nameUpper = widget.floorName.toUpperCase().trim();
     if (nameUpper == 'GROUND_FLOOR' || nameUpper == 'GROUND FLOOR' || nameUpper == 'G' || nameUpper == '0') {
       return 0;
+    }
+    if (nameUpper == 'BASEMENT' || nameUpper == 'B') {
+      return -1;
+    }
+    if (nameUpper.startsWith('BASEMENT') || nameUpper.startsWith('B')) {
+      final numStr = nameUpper.replaceAll(RegExp(r'[^0-9]'), '');
+      final parsed = int.tryParse(numStr);
+      if (parsed != null) {
+        return -parsed;
+      }
+      return -1;
     }
     return int.tryParse(widget.floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
   }
@@ -63,6 +74,8 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
   }
   List<RoomDetail>? _draftRooms;
   final Map<String, RoomDetail> _modifiedRooms = {};
+  final Set<String> _updatingRoomIds = {};
+  bool get _anyCardUpdating => _updatingRoomIds.isNotEmpty;
 
 
   @override
@@ -81,12 +94,23 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
 
   void _initDraftRooms() {
     final floorNum = _resolvedFloorNum;
+    final isBasement = floorNum < 0 || widget.floorName.toUpperCase().contains('BASEMENT') || widget.floorName.toUpperCase().startsWith('B');
+
     _draftRooms = List.generate(widget.draftRoomCount!, (index) {
-      final roomNo = (floorNum * 100) + (index + 1);
+      String roomNoStr;
+      if (isBasement) {
+        final absFloor = floorNum.abs();
+        final prefix = absFloor > 1 ? 'B$absFloor' : 'B';
+        roomNoStr = '$prefix${(index + 1).toString().padLeft(2, '0')}';
+      } else {
+        final roomNo = (floorNum * 100) + (index + 1);
+        roomNoStr = roomNo.toString();
+      }
+
       return RoomDetail(
         id: 'draft_$index',
         hostelId: widget.hostel.id,
-        roomTypename: roomNo.toString(),
+        roomTypename: roomNoStr,
         floor: floorNum,
         sharingType: 'SINGLE',
         roomType: 'NON-AC',
@@ -355,6 +379,16 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                   floorName: widget.floorName,
                   isSetupMode: true,
                   onSaveComplete: _requestRefresh,
+                  onUpdatingStatusChanged: (isUpdating) {
+                    setState(() {
+                      final cardId = 'setup_$index';
+                      if (isUpdating) {
+                        _updatingRoomIds.add(cardId);
+                      } else {
+                        _updatingRoomIds.remove(cardId);
+                      }
+                    });
+                  },
                 );
               } else if (widget.isDraftMode) {
                 return _RoomManageCard(
@@ -369,6 +403,16 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                       _draftRooms![index] = updatedRoom;
                     });
                   },
+                  onUpdatingStatusChanged: (isUpdating) {
+                    setState(() {
+                      final cardId = room.id;
+                      if (isUpdating) {
+                        _updatingRoomIds.add(cardId);
+                      } else {
+                        _updatingRoomIds.remove(cardId);
+                      }
+                    });
+                  },
                 );
               } else {
                 if (room is entity.Room) {
@@ -380,7 +424,8 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     sharingType: room.sharingType,
                     roomType: room.roomType ?? 'NON-AC',
                     rent: room.rent ?? 0,
-                    deposit: 0,
+                    dailyRent: room.dailyRent ?? 0,
+                    deposit: room.deposit ?? 0,
                     maintenance: room.maintenance ?? 0,
                     isActive: true,
                     isMaster: false,
@@ -402,6 +447,16 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                       });
                     },
                     onSaveComplete: _requestRefresh,
+                    onUpdatingStatusChanged: (isUpdating) {
+                      setState(() {
+                        final cardId = room.id;
+                        if (isUpdating) {
+                          _updatingRoomIds.add(cardId);
+                        } else {
+                          _updatingRoomIds.remove(cardId);
+                        }
+                      });
+                    },
                   );
                 } else {
                   final draftRoom = room as RoomDetail;
@@ -419,6 +474,16 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                         final draftIdx = _draftRooms?.indexWhere((dr) => dr.id == draftRoom.id) ?? -1;
                         if (draftIdx != -1) {
                            _draftRooms![draftIdx] = updatedRoom;
+                        }
+                      });
+                    },
+                    onUpdatingStatusChanged: (isUpdating) {
+                      setState(() {
+                        final cardId = draftRoom.id;
+                        if (isUpdating) {
+                          _updatingRoomIds.add(cardId);
+                        } else {
+                          _updatingRoomIds.remove(cardId);
                         }
                       });
                     },
@@ -457,12 +522,12 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: () => _proceedToPricing(),
+              onPressed: _anyCardUpdating ? null : () => _proceedToPricing(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2C5990),
+                backgroundColor: _anyCardUpdating ? const Color(0xFFCBD5E1) : const Color(0xFF2C5990),
                 padding: EdgeInsets.symmetric(vertical: 14.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                elevation: 4,
+                elevation: _anyCardUpdating ? 0 : 4,
                 shadowColor: const Color(0xFF2C5990).withValues(alpha: 0.3),
               ),
               child: Text('set_pricing'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
@@ -479,22 +544,53 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
     if (_lastData != null) {
       for (var floor in _lastData!.occupancy.floors) {
         for (var r in floor.rooms) {
-          allRooms.add(RoomDetail(
-            id: r.id,
-            hostelId: widget.hostel.id,
-            roomTypename: r.roomNumber,
-            floor: floor.floorNum ?? 0,
-            sharingType: r.sharingType,
-            roomType: r.roomType ?? 'NON-AC',
-            rent: r.rent ?? 0,
-            deposit: 0,
-            maintenance: r.maintenance ?? 0,
-            isActive: true,
-            isMaster: false,
-            capacity: r.beds.length,
-            features: List<String>.from(r.features),
-            beds: r.beds.map((b) => BedInfo(bedNumber: b.bedNumber, status: b.status)).toList(),
-          ));
+          if (_modifiedRooms.containsKey(r.id)) {
+            final modified = _modifiedRooms[r.id]!;
+            List<BedInfo> beds = modified.beds;
+            if (beds.length != modified.capacity || beds.isEmpty) {
+              beds = List.generate(
+                modified.capacity,
+                (index) => BedInfo(
+                  bedNumber: String.fromCharCode(65 + index),
+                  status: 'FREE',
+                ),
+              );
+            }
+            allRooms.add(RoomDetail(
+              id: modified.id,
+              hostelId: modified.hostelId,
+              roomTypename: modified.roomTypename,
+              floor: modified.floor,
+              sharingType: modified.sharingType,
+              roomType: modified.roomType,
+              rent: modified.rent,
+              deposit: modified.deposit,
+              maintenance: modified.maintenance,
+              isActive: modified.isActive,
+              isMaster: modified.isMaster,
+              capacity: modified.capacity,
+              features: modified.features,
+              beds: beds,
+            ));
+          } else {
+            allRooms.add(RoomDetail(
+              id: r.id,
+              hostelId: widget.hostel.id,
+              roomTypename: r.roomNumber,
+              floor: floor.floorNum ?? 0,
+              sharingType: r.sharingType,
+              roomType: r.roomType ?? 'NON-AC',
+              rent: r.rent ?? 0,
+              dailyRent: r.dailyRent ?? 0,
+              deposit: r.deposit ?? 0,
+              maintenance: r.maintenance ?? 0,
+              isActive: true,
+              isMaster: false,
+              capacity: r.beds.length,
+              features: List<String>.from(r.features),
+              beds: r.beds.map((b) => BedInfo(bedNumber: b.bedNumber, status: b.status)).toList(),
+            ));
+          }
         }
       }
     }
@@ -518,6 +614,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
           child: RoomPricingPage(
             hostel: widget.hostel,
             rooms: allRooms.isNotEmpty ? allRooms : _draftRooms,
+            floorName: widget.floorName,
           ),
         ),
       ),
@@ -988,14 +1085,40 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: () async {
-                final List<RoomDetail> allRooms = [];
+              onPressed: _anyCardUpdating ? null : () async {
+                 final List<RoomDetail> allRooms = [];
                 
                 if (_lastData != null) {
                   for (var floor in _lastData!.occupancy.floors) {
                     for (var r in floor.rooms) {
                       if (_modifiedRooms.containsKey(r.id)) {
-                        allRooms.add(_modifiedRooms[r.id]!);
+                        final modified = _modifiedRooms[r.id]!;
+                        List<BedInfo> beds = modified.beds;
+                        if (beds.length != modified.capacity || beds.isEmpty) {
+                          beds = List.generate(
+                            modified.capacity,
+                            (index) => BedInfo(
+                              bedNumber: String.fromCharCode(65 + index),
+                              status: 'FREE',
+                            ),
+                          );
+                        }
+                        allRooms.add(RoomDetail(
+                          id: modified.id,
+                          hostelId: modified.hostelId,
+                          roomTypename: modified.roomTypename,
+                          floor: modified.floor,
+                          sharingType: modified.sharingType,
+                          roomType: modified.roomType,
+                          rent: modified.rent,
+                          deposit: modified.deposit,
+                          maintenance: modified.maintenance,
+                          isActive: modified.isActive,
+                          isMaster: modified.isMaster,
+                          capacity: modified.capacity,
+                          features: modified.features,
+                          beds: beds,
+                        ));
                       } else {
                         allRooms.add(RoomDetail(
                           id: r.id,
@@ -1005,7 +1128,8 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                           sharingType: r.sharingType,
                           roomType: r.roomType ?? 'NON-AC',
                           rent: r.rent ?? 0,
-                          deposit: 0,
+                          dailyRent: r.dailyRent ?? 0,
+                          deposit: r.deposit ?? 0,
                           maintenance: r.maintenance ?? 0,
                           isActive: true,
                           isMaster: false,
@@ -1039,6 +1163,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                       child: RoomPricingPage(
                         hostel: widget.hostel,
                         rooms: allRooms.isNotEmpty ? allRooms : null,
+                        floorName: widget.floorName,
                       ),
                     ),
                   ),
@@ -1046,10 +1171,10 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2C5990),
+                backgroundColor: _anyCardUpdating ? const Color(0xFFCBD5E1) : const Color(0xFF2C5990),
                 padding: EdgeInsets.symmetric(vertical: 14.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                elevation: 4,
+                elevation: _anyCardUpdating ? 0 : 4,
                 shadowColor: const Color(0xFF2C5990).withValues(alpha: 0.3),
               ),
               child: const Text('Continue', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
@@ -1071,6 +1196,7 @@ class _RoomManageCard extends StatefulWidget {
   final bool isDraftMode;
   final RoomDetail? draftRoom;
   final Function(RoomDetail)? onDraftUpdate;
+  final Function(bool)? onUpdatingStatusChanged;
 
   const _RoomManageCard({
     super.key,
@@ -1084,6 +1210,7 @@ class _RoomManageCard extends StatefulWidget {
     this.draftRoom,
     this.onDraftUpdate,
     this.onSaveComplete,
+    this.onUpdatingStatusChanged,
   });
 
   final VoidCallback? onSaveComplete;
@@ -1098,6 +1225,14 @@ class _RoomManageCardState extends State<_RoomManageCard> {
   late List<String> _localFeatures;
   late String _localRoomType;
   bool _isUpdating = false;
+
+  void _setUpdating(bool value) {
+    if (!mounted) return;
+    setState(() {
+      _isUpdating = value;
+    });
+    widget.onUpdatingStatusChanged?.call(value);
+  }
 
   int get _resolvedFloorNum {
     if (widget.floorNum != null) return widget.floorNum!;
@@ -1277,8 +1412,8 @@ class _RoomManageCardState extends State<_RoomManageCard> {
   void _toggleFeature(BuildContext context, String type, String value) {
     HapticFeedback.lightImpact();
 
+    _setUpdating(true);
     setState(() {
-      _isUpdating = true;
       if (type == 'roomType') {
         _localRoomType = value;
       } else {
@@ -1304,7 +1439,7 @@ class _RoomManageCardState extends State<_RoomManageCard> {
                     : value;
         cubit.updateRoomFeature(widget.roomIndex!, cubitFeatureKey, _localFeatures.contains(value));
       }
-      if (mounted) setState(() => _isUpdating = false);
+      _setUpdating(false);
     }
     
     _debounceSave();
@@ -1336,14 +1471,14 @@ class _RoomManageCardState extends State<_RoomManageCard> {
           beds: [],
         );
         widget.onDraftUpdate?.call(updatedRoom);
-        if (mounted) setState(() => _isUpdating = false);
+        _setUpdating(false);
         return;
       }
 
       final floorNum = _resolvedFloorNum;
       
       if (!mounted) return;
-      if (!_isUpdating) setState(() => _isUpdating = true);
+      if (!_isUpdating) _setUpdating(true);
       
       try {
         if (widget.draftRoom == null) return;
@@ -1377,15 +1512,15 @@ class _RoomManageCardState extends State<_RoomManageCard> {
       } catch (e) {
         debugPrint('Error saving room: $e');
       } finally {
-        if (mounted) setState(() => _isUpdating = false);
+        _setUpdating(false);
       }
     });
   }
 
   void _updateCapacity(BuildContext context, int capacity) {
     HapticFeedback.selectionClick();
+    _setUpdating(true);
     setState(() {
-      _isUpdating = true;
       _localCapacity = capacity;
     });
 
@@ -1393,7 +1528,7 @@ class _RoomManageCardState extends State<_RoomManageCard> {
       if (widget.roomIndex != null) {
         context.read<PropertySetupCubit>().updateRoomSharing(widget.roomIndex!, capacity);
       }
-      if (mounted) setState(() => _isUpdating = false);
+      _setUpdating(false);
       return;
     }
     
@@ -1403,6 +1538,9 @@ class _RoomManageCardState extends State<_RoomManageCard> {
   @override
   void dispose() {
     _debounceTimer?.cancel();
+    if (_isUpdating) {
+      widget.onUpdatingStatusChanged?.call(false);
+    }
     super.dispose();
   }
 
@@ -1422,7 +1560,14 @@ class _RoomManageCardState extends State<_RoomManageCard> {
   }
 
   Widget _buildSharingSelector(BuildContext context, int capacity) {
-    final sharingList = ['1 Sharing', '2 Sharing', '3 Sharing', '4 Sharing', '5 Sharing'];
+    final options = [1, 2, 3, 4, 5];
+    final hasCustom = capacity > 5;
+    final List<dynamic> displayOptions = [...options];
+    if (hasCustom) {
+      displayOptions.add(capacity);
+    }
+    displayOptions.add('custom');
+
     return Container(
       padding: EdgeInsets.all(4.r),
       decoration: BoxDecoration(
@@ -1430,13 +1575,26 @@ class _RoomManageCardState extends State<_RoomManageCard> {
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
-        children: List.generate(5, (index) {
-          final isSelected = (index + 1) == capacity;
+        children: displayOptions.map((s) {
+          final isSelected = capacity == s;
+          final isCustomTrigger = s == 'custom';
+          final label = isCustomTrigger
+              ? _translate('custom_dots', 'Custom...')
+              : '$s Sharing';
+
           return Expanded(
             child: GestureDetector(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                _updateCapacity(context, index + 1);
+              onTap: () async {
+                if (isCustomTrigger) {
+                  HapticFeedback.selectionClick();
+                  final customVal = await _showCustomSharingDialog(context);
+                  if (context.mounted && customVal != null && customVal > 0) {
+                    _updateCapacity(context, customVal);
+                  }
+                } else {
+                  HapticFeedback.selectionClick();
+                  _updateCapacity(context, s as int);
+                }
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -1447,18 +1605,18 @@ class _RoomManageCardState extends State<_RoomManageCard> {
                   border: isSelected ? Border.all(color: const Color(0xFFF98125), width: 1.5) : null,
                 ),
                 child: Text(
-                  sharingList[index],
+                  label,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: isSelected ? const Color(0xFFF98125) : const Color(0xFF64748B),
                     fontWeight: FontWeight.w800,
-                    fontSize: 10.sp, 
+                    fontSize: 9.sp,
                   ),
                 ),
               ),
             ),
           );
-        }),
+        }).toList(),
       ),
     );
   }
@@ -1492,6 +1650,91 @@ class _RoomManageCardState extends State<_RoomManageCard> {
           ),
         ],
       ),
+    );
+  }
+
+  String _translate(String key, String fallback) {
+    final val = key.tr();
+    return val == key ? fallback : val;
+  }
+
+  Future<int?> _showCustomSharingDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    return showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          title: Text(
+            _translate('custom_sharing', 'Custom Sharing'),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF2B5797),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _translate('enter_sharing_number', 'Enter sharing number'),
+                style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B)),
+              ),
+              SizedBox(height: 12.h),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                autofocus: true,
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  hintText: 'e.g. 6',
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFF2B5797)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'cancel'.tr(),
+                style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final val = int.tryParse(controller.text);
+                Navigator.pop(context, val);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2B5797),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              ),
+              child: Text(
+                _translate('ok', 'OK'),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

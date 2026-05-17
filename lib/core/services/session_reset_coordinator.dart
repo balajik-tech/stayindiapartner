@@ -74,15 +74,26 @@ class SessionResetCoordinator {
   }
 
   static void postResetCleanup() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    try {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          AppLogger.warning('🧹 Post-Logout Cache Cleanup: Wiping HydratedBloc and Hive storage...');
+          await HydratedBloc.storage.clear();
+          await Hive.deleteFromDisk();
+          AppLogger.success('🧹 Post-Logout Cache Cleanup complete!');
+        } catch (e) {
+          AppLogger.error('Failed to perform post-logout cleanup: $e');
+        }
+      });
+    } catch (_) {
+      // Binding not initialized (e.g. in pure Dart unit tests). Run immediately!
       try {
-        AppLogger.warning('🧹 Post-Logout Cache Cleanup: Wiping HydratedBloc and Hive storage...');
-        await HydratedBloc.storage.clear();
-        await Hive.deleteFromDisk();
-        AppLogger.success('🧹 Post-Logout Cache Cleanup complete!');
+        AppLogger.warning('🧹 Post-Logout Cache Cleanup (Immediate): Wiping HydratedBloc and Hive storage...');
+        HydratedBloc.storage.clear();
+        Hive.deleteFromDisk();
       } catch (e) {
-        AppLogger.error('Failed to perform post-logout cleanup: $e');
+        AppLogger.error('Failed to perform immediate post-logout cleanup: $e');
       }
-    });
+    }
   }
 }

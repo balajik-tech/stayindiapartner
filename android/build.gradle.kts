@@ -22,3 +22,30 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
+subprojects {
+    if (project.name != "app") {
+        plugins.withType<com.android.build.gradle.BasePlugin> {
+            configure<com.android.build.gradle.BaseExtension> {
+                compileSdkVersion(34)
+                if (namespace.isNullOrEmpty()) {
+                    val manifestFile = project.file("src/main/AndroidManifest.xml")
+                    if (manifestFile.exists()) {
+                        val manifestText = manifestFile.readText()
+                        val matchResult = Regex("""package=["']([^"']+)["']""").find(manifestText)
+                        val packageName = matchResult?.groupValues?.get(1)
+                        if (!packageName.isNullOrEmpty()) {
+                            namespace = packageName
+                        }
+                    }
+                    if (namespace.isNullOrEmpty()) {
+                        namespace = project.group.toString().takeIf { it.isNotBlank() && it.contains(".") }
+                            ?: "com.stayindia.${project.name.replace("-", "_").replace(" ", "_")}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+

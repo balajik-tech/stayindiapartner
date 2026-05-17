@@ -196,6 +196,11 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e) {
       AppLogger.error('Logout error: $e');
     }
+    try {
+      await _cacheService.flushAllCache();
+    } catch (e) {
+      AppLogger.error('Cache flush error: $e');
+    }
     await SessionResetCoordinator.resetSession();
     emit(AuthUnauthenticated());
     SessionResetCoordinator.postResetCleanup();

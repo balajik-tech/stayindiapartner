@@ -2,7 +2,7 @@ import 'dart:io';
 
 class ApiConstants {
 
-  static const String _prodUrl = 'http://localhost:5050/api/v1';
+  static const String _prodUrl = 'https://api.koushiksoftwaresolutions.online/api/v1';
 
   static String get baseUrl {
     const url = String.fromEnvironment(

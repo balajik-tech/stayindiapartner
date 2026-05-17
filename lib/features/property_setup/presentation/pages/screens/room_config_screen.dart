@@ -246,7 +246,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Text(
-            'floor_label'.tr(namedArgs: {'floor': room['floor'].toString()}),
+            _getFloorLabel(room['floor'].toString()),
             style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8)),
           ),
         ),
@@ -255,6 +255,17 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
   }
 
   Widget _buildSharingSelector(BuildContext context, int index, int selected) {
+    final options = [1, 2, 3, 4, 5];
+    final hasCustom = selected > 5;
+    final List<dynamic> displayOptions = [...options];
+    if (hasCustom) {
+      displayOptions.add(selected);
+    }
+    displayOptions.add('custom');
+
+    final selectedIndex = displayOptions.indexOf(selected);
+    final widthFactor = 1 / displayOptions.length;
+
     return Container(
       height: 52.h,
       padding: EdgeInsets.all(4.r),
@@ -265,50 +276,63 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
       child: Stack(
         children: [
           // Sliding Background Indicator
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeOutBack,
-            alignment: Alignment(
-              -1.0 + ((selected - 1) * (2.0 / 4.0)),
-              0,
-            ),
-            child: FractionallySizedBox(
-              widthFactor: 1 / 5,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
+          if (selectedIndex != -1)
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeOutBack,
+              alignment: Alignment(
+                -1.0 + (selectedIndex * (2.0 / (displayOptions.length - 1))),
+                0,
+              ),
+              child: FractionallySizedBox(
+                widthFactor: widthFactor,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
           // Interactive Labels
           Row(
-            children: [1, 2, 3, 4, 5].map((s) {
+            children: displayOptions.map((s) {
               final isSelected = selected == s;
+              final isCustomTrigger = s == 'custom';
+              final label = isCustomTrigger
+                  ? _translate('custom_dots', 'Custom...')
+                  : 'sharing_count'.tr(namedArgs: {'count': s.toString()});
+
               return Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    if (!isSelected) {
+                  onTap: () async {
+                    if (isCustomTrigger) {
                       HapticFeedback.mediumImpact();
-                      context.read<PropertySetupCubit>().updateRoomSharing(index, s);
+                      final cubit = context.read<PropertySetupCubit>();
+                      final customVal = await _showCustomSharingDialog(context);
+                      if (customVal != null && customVal > 0) {
+                        cubit.updateRoomSharing(index, customVal);
+                      }
+                    } else if (!isSelected) {
+                      HapticFeedback.mediumImpact();
+                      context.read<PropertySetupCubit>().updateRoomSharing(index, s as int);
                     }
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Center(
                     child: Text(
-                      'sharing_count'.tr(namedArgs: {'count': s.toString()}),
+                      label,
                       style: TextStyle(
                         color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF64748B),
                         fontWeight: FontWeight.w900,
-                        fontSize: 10.5.sp, // Reduced slightly to prevent tight UI issues
+                        fontSize: 9.sp,
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -363,6 +387,101 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  String _translate(String key, String fallback) {
+    final val = key.tr();
+    return val == key ? fallback : val;
+  }
+
+  String _getFloorLabel(String floor) {
+    if (floor == 'B') {
+      return 'basement_floor'.tr() == 'basement_floor' ? 'Basement' : 'basement_floor'.tr();
+    }
+    if (floor == 'G') {
+      return 'ground_floor'.tr() == 'ground_floor' ? 'Ground' : 'ground_floor'.tr();
+    }
+    return 'floor_label'.tr(namedArgs: {'floor': floor});
+  }
+
+  Future<int?> _showCustomSharingDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    return showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          title: Text(
+            _translate('custom_sharing', 'Custom Sharing'),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF2B5797),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _translate('enter_sharing_number', 'Enter sharing number'),
+                style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B)),
+              ),
+              SizedBox(height: 12.h),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                autofocus: true,
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  hintText: 'e.g. 6',
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Color(0xFF2B5797)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'cancel'.tr(),
+                style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final val = int.tryParse(controller.text);
+                Navigator.pop(context, val);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2B5797),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              ),
+              child: Text(
+                _translate('ok', 'OK'),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

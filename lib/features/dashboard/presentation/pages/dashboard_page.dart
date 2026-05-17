@@ -218,13 +218,20 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                             builder: (context, state) {
                               List<String> floors = [StringUtils.translate('all_floors', context: context)];
                               if (state is DashboardLoaded) {
-                                floors.addAll(state.data.occupancy.floors.map((e) => 
-                                   StringUtils.translate(
-                                     e.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
-                                     context: context,
-                                     namedArgs: {'n': '${e.floorNum ?? 0}'},
-                                   )
-                                 ));
+                                floors.addAll(state.data.occupancy.floors.map((e) {
+                                  if (e.floorName == 'basement' || (e.floorNum != null && e.floorNum! < 0)) {
+                                    final absNum = e.floorNum != null ? e.floorNum!.abs() : 1;
+                                    if (absNum > 1) {
+                                      return '${StringUtils.translate('basement', context: context)} $absNum';
+                                    }
+                                    return StringUtils.translate('basement', context: context);
+                                  }
+                                  return StringUtils.translate(
+                                    e.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                                    context: context,
+                                    namedArgs: {'n': '${e.floorNum ?? 0}'},
+                                  );
+                                }));
                               }
                               return FloorFilter(
                                 floors: floors,

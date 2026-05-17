@@ -9,6 +9,8 @@ import 'package:latlong2/latlong.dart' as ll;
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'map_picker_screen.dart';
+import 'package:stayindia_owner/core/widgets/local_pdf_preview_screen.dart';
+
 
 class BuildingIdentityScreen extends StatefulWidget {
   const BuildingIdentityScreen({super.key});
@@ -284,6 +286,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.foodLicense?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.foodLicense,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('food'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('food'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -292,6 +295,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.hostelLicense?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.hostelLicense,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('hostel'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('hostel'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -300,6 +304,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.tradeLicense?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.tradeLicense,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('trade'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('trade'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -308,6 +313,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.fireSafety?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.fireSafety,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('fire'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('fire'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -316,6 +322,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.policeNoc?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.policeNoc,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('police'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('police'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -324,6 +331,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.gstRegistration?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.gstRegistration,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('gst'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('gst'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -332,6 +340,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.healthSanitation?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.healthSanitation,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('health'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('health'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -340,6 +349,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.utilityBill?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.utilityBill,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('utility'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('utility'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -348,6 +358,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.pollutionNoc?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.pollutionNoc,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('pollution'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('pollution'),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
@@ -356,6 +367,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     hint: state.residentVerification?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.residentVerification,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('resident'),
+                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('resident'),
                   ),
                 ]),
               ],
@@ -616,18 +628,46 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
             ),
             child: Column(
               children: [
-                Container(
-                  width: 64.r,
-                  height: 64.r,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(16.r),
-                    image: hasImage ? DecorationImage(
-                      image: ResizeImage(FileImage(File(images.last)), width: 128, height: 128),
-                      fit: BoxFit.cover,
-                    ) : null,
-                  ),
-                  child: !hasImage ? Icon(cat['icon'] as IconData, color: const Color(0xFF1E3A8A), size: 24.sp) : null,
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 64.r,
+                      height: 64.r,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(16.r),
+                        image: hasImage ? DecorationImage(
+                          image: ResizeImage(FileImage(File(images.last)), width: 128, height: 128),
+                          fit: BoxFit.cover,
+                        ) : null,
+                      ),
+                      child: !hasImage ? Icon(cat['icon'] as IconData, color: const Color(0xFF1E3A8A), size: 24.sp) : null,
+                    ),
+                    if (hasImage)
+                      Positioned(
+                        top: -6.r,
+                        right: -6.r,
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.mediumImpact();
+                            context.read<PropertySetupCubit>().removeCategoryImage(cat['id'] as String, images.length - 1);
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4.r),
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: Colors.white,
+                              size: 12.sp,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 SizedBox(height: 12.h),
                 Text(
@@ -672,6 +712,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     required String hint,
     required VoidCallback onTap,
     required String? filePath,
+    VoidCallback? onRemove,
   }) {
     final hasFile = filePath != null && filePath.isNotEmpty;
     final isImage = hasFile && (filePath.toLowerCase().endsWith('.jpg') || 
@@ -729,17 +770,30 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   ),
                 )
               else
-                Container(
-                  width: 48.r,
-                  height: 48.r,
-                  decoration: BoxDecoration(
-                    color: hasFile ? const Color(0xFFEFF6FF) : const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Icon(
-                    hasFile ? Icons.file_present_rounded : Icons.upload_file_rounded, 
-                    color: hasFile ? const Color(0xFF1E3A8A) : const Color(0xFF94A3B8), 
-                    size: 24.sp
+                GestureDetector(
+                  onTap: hasFile ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LocalPdfPreviewScreen(
+                          filePath: filePath,
+                          title: label,
+                        ),
+                      ),
+                    );
+                  } : null,
+                  child: Container(
+                    width: 48.r,
+                    height: 48.r,
+                    decoration: BoxDecoration(
+                      color: hasFile ? const Color(0xFFEFF6FF) : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Icon(
+                      hasFile ? Icons.file_present_rounded : Icons.upload_file_rounded, 
+                      color: hasFile ? const Color(0xFF1E3A8A) : const Color(0xFF94A3B8), 
+                      size: 24.sp
+                    ),
                   ),
                 ),
               SizedBox(width: 12.w),
@@ -759,7 +813,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     ),
                     if (hasFile)
                       Text(
-                        isImage ? 'click_to_view'.tr() : 'file_uploaded'.tr(),
+                        'click_to_view'.tr(),
                         style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
                       ),
                   ],
@@ -786,6 +840,23 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900)
                 ),
               ),
+              if (hasFile && onRemove != null) ...[
+                SizedBox(width: 8.w),
+                IconButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    onRemove();
+                  },
+                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.all(8.r),
+                    backgroundColor: Colors.red.shade50,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -832,62 +903,94 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => BlocProvider.value(
-        value: cubit,
-        child: Container(
-          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 32.h),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
-              SizedBox(height: 24.h),
-              Text(
-                'select_image_source'.tr(),
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E3A8A)),
-              ),
-              SizedBox(height: 24.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSourceButton(
-                      context,
-                      icon: Icons.camera_alt_rounded,
-                      label: 'camera'.tr(),
-                      onTap: () {
-                        Navigator.pop(context);
-                        cubit.pickCategoryImage(category, source: ImageSource.camera);
-                      },
-                    ),
+      builder: (context) {
+        final hasImage = cubit.state.categorizedImages[category]?.isNotEmpty == true;
+        return BlocProvider.value(
+          value: cubit,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 32.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(2.r),
                   ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: _buildSourceButton(
-                      context,
-                      icon: Icons.photo_library_rounded,
-                      label: 'gallery'.tr(),
-                      onTap: () {
+                ),
+                SizedBox(height: 24.h),
+                Text(
+                  'select_image_source'.tr(),
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E3A8A)),
+                ),
+                SizedBox(height: 24.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSourceButton(
+                        context,
+                        icon: Icons.camera_alt_rounded,
+                        label: 'camera'.tr(),
+                        onTap: () {
+                          Navigator.pop(context);
+                          cubit.pickCategoryImage(category, source: ImageSource.camera);
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: _buildSourceButton(
+                        context,
+                        icon: Icons.photo_library_rounded,
+                        label: 'gallery'.tr(),
+                        onTap: () {
+                          Navigator.pop(context);
+                          cubit.pickCategoryImage(category, source: ImageSource.gallery);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                if (hasImage) ...[
+                  SizedBox(height: 20.h),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton.icon(
+                      onPressed: () {
                         Navigator.pop(context);
-                        cubit.pickCategoryImage(category, source: ImageSource.gallery);
+                        HapticFeedback.mediumImpact();
+                        cubit.removeCategoryImage(category, (cubit.state.categorizedImages[category]?.length ?? 0) - 1);
                       },
+                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                      label: Text(
+                        'remove'.tr(),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        backgroundColor: Colors.red.shade50,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
