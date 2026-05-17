@@ -1,17 +1,27 @@
+import 'dart:io';
+
 class ApiConstants {
 
   static const String _prodUrl = 'http://localhost:5050/api/v1';
 
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: _prodUrl,
-  );
+  static String get baseUrl {
+    const url = String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: _prodUrl,
+    );
+    if (Platform.isAndroid && url.contains('localhost')) {
+      return url.replaceAll('localhost', '10.0.2.2');
+    }
+    return url;
+  }
 
   static String get effectiveBaseUrl {
     const fromEnv = String.fromEnvironment('API_BASE_URL');
-    if (fromEnv.isNotEmpty) return fromEnv;
-
-    return _prodUrl;
+    final url = fromEnv.isNotEmpty ? fromEnv : _prodUrl;
+    if (Platform.isAndroid && url.contains('localhost')) {
+      return url.replaceAll('localhost', '10.0.2.2');
+    }
+    return url;
   }
 
   static const String requestOtp = '/auth/request-otp';
