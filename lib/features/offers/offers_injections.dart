@@ -13,7 +13,5 @@ void registerOffersFeature(GetIt sl) {
     () => OfferRepositoryImpl(remoteDataSource: sl()),
   );
 
-  sl.registerFactory(
-    () => OffersCubit(repository: sl()),
-  );
+  sl.registerFactory(() => OffersCubit(repository: sl()));
 }

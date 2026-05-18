@@ -13,12 +13,11 @@ class BookingsState extends Equatable {
   final String? successMessage;
   final ScanBookingResponse? scannedBooking;
   final OccupancyModel? occupancy;
-  final String? searchQuery; 
+  final String? searchQuery;
   final String? kycStatus;
   final String? roomType;
   final String? hostelId;
-  
-  
+
   final int page;
   final bool hasMore;
   final bool isLoadMore;
@@ -40,27 +39,26 @@ class BookingsState extends Equatable {
     this.isLoadMore = false,
   });
 
-  
   List<Booking> get _filtered => searchQuery == null || searchQuery!.isEmpty
       ? bookings
       : bookings.where((b) {
           final q = searchQuery!.toLowerCase();
           return b.tenantName.toLowerCase().contains(q) ||
-                 b.roomTypeName.toLowerCase().contains(q) ||
-                 b.bedNumber.toLowerCase().contains(q) ||
-                 b.tenantPhone.toLowerCase().contains(q);
+              b.roomTypeName.toLowerCase().contains(q) ||
+              b.bedNumber.toLowerCase().contains(q) ||
+              b.tenantPhone.toLowerCase().contains(q);
         }).toList();
 
   List<Booking> get requests => _filtered
-      .where((b) => [BookingStatus.confirmed, BookingStatus.pending].contains(b.status))
+      .where(
+        (b) =>
+            [BookingStatus.confirmed, BookingStatus.pending].contains(b.status),
+      )
       .toList();
 
-  List<Booking> get checkIns => _filtered
-      .where((b) => b.status == BookingStatus.checkedIn)
-      .toList();
+  List<Booking> get checkIns =>
+      _filtered.where((b) => b.status == BookingStatus.checkedIn).toList();
 
-  
-  
   static const Object _keep = Object();
 
   BookingsState copyWith({
@@ -83,10 +81,18 @@ class BookingsState extends Equatable {
       status: status ?? this.status,
       bookings: bookings ?? this.bookings,
       pendingBookings: pendingBookings ?? this.pendingBookings,
-      errorMessage: errorMessage == _keep ? this.errorMessage : errorMessage as String?,
-      successMessage: successMessage == _keep ? this.successMessage : successMessage as String?,
-      scannedBooking: scannedBooking == _keep ? this.scannedBooking : scannedBooking as ScanBookingResponse?,
-      searchQuery: searchQuery == _keep ? this.searchQuery : searchQuery as String?,
+      errorMessage: errorMessage == _keep
+          ? this.errorMessage
+          : errorMessage as String?,
+      successMessage: successMessage == _keep
+          ? this.successMessage
+          : successMessage as String?,
+      scannedBooking: scannedBooking == _keep
+          ? this.scannedBooking
+          : scannedBooking as ScanBookingResponse?,
+      searchQuery: searchQuery == _keep
+          ? this.searchQuery
+          : searchQuery as String?,
       kycStatus: kycStatus == _keep ? this.kycStatus : kycStatus as String?,
       roomType: roomType == _keep ? this.roomType : roomType as String?,
       hostelId: hostelId == _keep ? this.hostelId : hostelId as String?,
@@ -99,19 +105,19 @@ class BookingsState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        bookings,
-        pendingBookings,
-        errorMessage,
-        successMessage,
-        scannedBooking,
-        searchQuery,
-        kycStatus,
-        roomType,
-        hostelId,
-        occupancy,
-        page,
-        hasMore,
-        isLoadMore,
-      ];
+    status,
+    bookings,
+    pendingBookings,
+    errorMessage,
+    successMessage,
+    scannedBooking,
+    searchQuery,
+    kycStatus,
+    roomType,
+    hostelId,
+    occupancy,
+    page,
+    hasMore,
+    isLoadMore,
+  ];
 }

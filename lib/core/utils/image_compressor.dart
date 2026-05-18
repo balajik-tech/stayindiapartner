@@ -8,14 +8,14 @@ class ImageCompressor {
     try {
       final tempDir = await getTemporaryDirectory();
       final targetPath = p.join(
-        tempDir.path, 
-        '${DateTime.now().millisecondsSinceEpoch}_compressed${p.extension(file.path)}'
+        tempDir.path,
+        '${DateTime.now().millisecondsSinceEpoch}_compressed${p.extension(file.path)}',
       );
 
       final result = await FlutterImageCompress.compressAndGetFile(
         file.absolute.path,
         targetPath,
-        quality: 70, 
+        quality: 70,
         minWidth: 1024,
         minHeight: 1024,
       );

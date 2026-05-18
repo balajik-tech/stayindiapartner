@@ -14,14 +14,14 @@ class PropertySetupState extends Equatable {
   final String gstNumber;
   final List<String> images;
   final List<String> selectedFloors;
-  final Map<String, int> floorRoomCounts; 
+  final Map<String, int> floorRoomCounts;
   final List<String> selectedAmenities;
   final bool isBulkMode;
   final String roomStartRange;
   final String roomEndRange;
   final int sharingType;
-  final String roomType; 
-  final Map<String, dynamic> masterPricing; 
+  final String roomType;
+  final Map<String, dynamic> masterPricing;
   final List<Map<String, dynamic>> rooms;
   final String? hostelId;
   final bool isSaving;
@@ -280,51 +280,53 @@ class PropertySetupState extends Equatable {
         ),
       ),
       roomMasters: List<Map<String, dynamic>>.from(json['roomMasters'] ?? []),
-      roomCategories: List<Map<String, dynamic>>.from(json['roomCategories'] ?? []),
+      roomCategories: List<Map<String, dynamic>>.from(
+        json['roomCategories'] ?? [],
+      ),
     );
   }
 
   @override
   List<Object?> get props => [
-        currentStep,
-        buildingName,
-        address,
-        lat,
-        lng,
-        area,
-        city,
-        state,
-        pincode,
-        hostelType,
-        gstNumber,
-        images,
-        selectedFloors,
-        floorRoomCounts,
-        selectedAmenities,
-        isBulkMode,
-        roomStartRange,
-        roomEndRange,
-        sharingType,
-        roomType,
-        masterPricing,
-        rooms,
-        hostelId,
-        isSaving,
-        error,
-        foodLicense,
-        hostelLicense,
-        tradeLicense,
-        fireSafety,
-        policeNoc,
-        shopsEstablishment,
-        gstRegistration,
-        healthSanitation,
-        utilityBill,
-        pollutionNoc,
-        residentVerification,
-        detailedAddress,
-        categorizedImages,
-        roomMasters,
-        roomCategories,
-      ];
+    currentStep,
+    buildingName,
+    address,
+    lat,
+    lng,
+    area,
+    city,
+    state,
+    pincode,
+    hostelType,
+    gstNumber,
+    images,
+    selectedFloors,
+    floorRoomCounts,
+    selectedAmenities,
+    isBulkMode,
+    roomStartRange,
+    roomEndRange,
+    sharingType,
+    roomType,
+    masterPricing,
+    rooms,
+    hostelId,
+    isSaving,
+    error,
+    foodLicense,
+    hostelLicense,
+    tradeLicense,
+    fireSafety,
+    policeNoc,
+    shopsEstablishment,
+    gstRegistration,
+    healthSanitation,
+    utilityBill,
+    pollutionNoc,
+    residentVerification,
+    detailedAddress,
+    categorizedImages,
+    roomMasters,
+    roomCategories,
+  ];
 }

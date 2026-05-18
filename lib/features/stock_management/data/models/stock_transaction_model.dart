@@ -24,7 +24,9 @@ class StockTransactionModel extends StockTransaction {
       pricePerUnit: (json['pricePerUnit'] ?? 0).toDouble(),
       totalCost: (json['totalCost'] ?? 0).toDouble(),
       paymentMode: json['paymentMode'] ?? 'Cash',
-      entryDate: json['entryDate'] != null ? DateTime.parse(json['entryDate']) : DateTime.now(),
+      entryDate: json['entryDate'] != null
+          ? DateTime.parse(json['entryDate'])
+          : DateTime.now(),
       note: json['note'],
       createdBy: json['createdBy'] ?? '',
       createdAt: DateTime.parse(json['createdAt']),

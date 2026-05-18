@@ -8,7 +8,10 @@ abstract class SettingsRemoteDataSource {
   Future<void> updateAmenities(String hostelId, List<String> enabledAmenities);
   Future<void> updateHouseRules(String hostelId, Map<String, dynamic> data);
   Future<void> updateNotifications(String hostelId, Map<String, dynamic> data);
-  Future<void> updateRoomConfiguration(String hostelId, Map<String, dynamic> data);
+  Future<void> updateRoomConfiguration(
+    String hostelId,
+    Map<String, dynamic> data,
+  );
   Future<void> uploadHostelImages(String hostelId, List<String> filePaths);
   Future<String> uploadSingleImage(String filePath);
 }
@@ -52,7 +55,9 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
 
   @override
   Future<void> updateAmenities(
-      String hostelId, List<String> enabledAmenities) async {
+    String hostelId,
+    List<String> enabledAmenities,
+  ) async {
     try {
       final response = await dio.patch(
         '${ApiConstants.settings}/$hostelId/amenities',
@@ -68,7 +73,9 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
 
   @override
   Future<void> updateHouseRules(
-      String hostelId, Map<String, dynamic> data) async {
+    String hostelId,
+    Map<String, dynamic> data,
+  ) async {
     try {
       final response = await dio.patch(
         '${ApiConstants.settings}/$hostelId/house-rules',
@@ -84,7 +91,9 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
 
   @override
   Future<void> updateNotifications(
-      String hostelId, Map<String, dynamic> data) async {
+    String hostelId,
+    Map<String, dynamic> data,
+  ) async {
     try {
       final response = await dio.patch(
         '${ApiConstants.settings}/$hostelId/notifications',
@@ -100,7 +109,9 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
 
   @override
   Future<void> updateRoomConfiguration(
-      String hostelId, Map<String, dynamic> data) async {
+    String hostelId,
+    Map<String, dynamic> data,
+  ) async {
     try {
       final response = await dio.patch(
         '${ApiConstants.settings}/$hostelId/room-configuration',
@@ -115,15 +126,15 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
   }
 
   @override
-  Future<void> uploadHostelImages(String hostelId, List<String> filePaths) async {
+  Future<void> uploadHostelImages(
+    String hostelId,
+    List<String> filePaths,
+  ) async {
     try {
       final formData = FormData();
       for (final path in filePaths) {
         formData.files.add(
-          MapEntry(
-            'images',
-            await MultipartFile.fromFile(path),
-          ),
+          MapEntry('images', await MultipartFile.fromFile(path)),
         );
       }
       formData.fields.add(const MapEntry('folder', 'hostels'));

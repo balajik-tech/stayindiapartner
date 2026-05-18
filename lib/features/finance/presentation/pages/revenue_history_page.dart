@@ -29,12 +29,13 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
   void _fetchData() {
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-      _selectedHostelId ??= hostelState.hostels[hostelState.selectedHostelIndex].id;
+      _selectedHostelId ??=
+          hostelState.hostels[hostelState.selectedHostelIndex].id;
     }
     context.read<RevenueHistoryCubit>().fetchRevenueHistory(
-          hostelId: _selectedHostelId,
-          type: _selectedType == 'ALL' ? null : _selectedType,
-        );
+      hostelId: _selectedHostelId,
+      type: _selectedType == 'ALL' ? null : _selectedType,
+    );
   }
 
   @override
@@ -44,12 +45,20 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
       appBar: AppBar(
         title: Text(
           StringUtils.translate('revenue_history', context: context),
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.darkText,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20.sp),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.darkText,
+            size: 20.sp,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -63,7 +72,12 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (state is RevenueHistoryError) {
-                  return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                  return Center(
+                    child: Text(
+                      state.message,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
                 }
                 if (state is RevenueHistoryLoaded) {
                   if (state.items.isEmpty) {
@@ -72,8 +86,10 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
                   return ListView.separated(
                     padding: EdgeInsets.all(20.w),
                     itemCount: state.items.length,
-                    separatorBuilder: (context, index) => SizedBox(height: 12.h),
-                    itemBuilder: (context, index) => _RevenueItemCard(item: state.items[index]),
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 12.h),
+                    itemBuilder: (context, index) =>
+                        _RevenueItemCard(item: state.items[index]),
                   );
                 }
                 return const SizedBox();
@@ -127,7 +143,11 @@ class _RevenueHistoryPageState extends State<RevenueHistoryPage> {
           SizedBox(height: 16.h),
           Text(
             StringUtils.translate('no_revenue_history', context: context),
-            style: TextStyle(fontSize: 16.sp, color: AppColors.greyText, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: AppColors.greyText,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -140,7 +160,11 @@ class _FilterChip extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onSelected;
 
-  const _FilterChip({required this.label, required this.isSelected, required this.onSelected});
+  const _FilterChip({
+    required this.label,
+    required this.isSelected,
+    required this.onSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +202,11 @@ class _RevenueItemCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -190,21 +218,33 @@ class _RevenueItemCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   item.tenantName,
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
                 '₹${item.total.toInt()}',
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: AppColors.primaryBlue),
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryBlue,
+                ),
               ),
             ],
           ),
           SizedBox(height: 4.h),
           Text(
             item.hostelName,
-            style: TextStyle(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: AppColors.greyText,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           SizedBox(height: 12.h),
           Divider(color: Colors.grey.shade100, height: 1),
@@ -215,9 +255,18 @@ class _RevenueItemCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _AmountRow(label: StringUtils.translate('rent', context: context), amount: item.rent),
+                  _AmountRow(
+                    label: StringUtils.translate('rent', context: context),
+                    amount: item.rent,
+                  ),
                   SizedBox(height: 4.h),
-                  _AmountRow(label: StringUtils.translate('maintenance', context: context), amount: item.maintenance),
+                  _AmountRow(
+                    label: StringUtils.translate(
+                      'maintenance',
+                      context: context,
+                    ),
+                    amount: item.maintenance,
+                  ),
                 ],
               ),
               Column(
@@ -225,11 +274,18 @@ class _RevenueItemCard extends StatelessWidget {
                 children: [
                   Text(
                     DateFormat('dd MMM yyyy').format(item.paymentDate),
-                    style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppColors.greyText,
+                    ),
                   ),
                   Text(
                     item.month,
-                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkText,
+                    ),
                   ),
                 ],
               ),
@@ -252,8 +308,18 @@ class _AmountRow extends StatelessWidget {
     if (amount <= 0) return const SizedBox.shrink();
     return Row(
       children: [
-        Text('$label: ', style: TextStyle(fontSize: 12.sp, color: AppColors.greyText)),
-        Text('₹${amount.toInt()}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+        Text(
+          '$label: ',
+          style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+        ),
+        Text(
+          '₹${amount.toInt()}',
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkText,
+          ),
+        ),
       ],
     );
   }

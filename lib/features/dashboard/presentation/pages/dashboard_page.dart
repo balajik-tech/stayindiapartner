@@ -30,7 +30,7 @@ class DashboardPage extends StatefulWidget {
   final OwnerEntity? owner;
 
   const DashboardPage({
-    super.key, 
+    super.key,
     this.hostelId,
     this.onAddRoom,
     this.isMultiProperty = false,
@@ -41,7 +41,8 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
+class _DashboardPageState extends State<DashboardPage>
+    with WidgetsBindingObserver {
   StreamSubscription? _refreshSubscription;
   StreamSubscription? _bookingSubscription;
   Timer? _debounceTimer;
@@ -51,11 +52,12 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _refreshData());
-    
 
     try {
       final socketService = sl<SocketService>();
-      _refreshSubscription = socketService.dashboardRefreshStream.listen((data) {
+      _refreshSubscription = socketService.dashboardRefreshStream.listen((
+        data,
+      ) {
         if (mounted) {
           _debouncedRefreshData();
         }
@@ -98,7 +100,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   void _refreshData() {
     final hostelCubit = context.read<HostelCubit>();
     final hostelState = hostelCubit.state;
-    
+
     if (hostelState is HostelLoaded) {
       if (hostelState.hostels.isNotEmpty) {
         final hasEmptyIds = hostelState.hostels.any((h) => h.id.isEmpty);
@@ -111,12 +113,11 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
             .where((i) => i < hostelState.hostels.length)
             .map((i) => hostelState.hostels[i].id)
             .join(',');
-        
+
         if (selectedIds.isNotEmpty) {
           context.read<DashboardCubit>().fetchDashboardData(selectedIds);
         }
       } else {
-        
         context.read<DashboardCubit>().reset();
       }
     } else {
@@ -126,15 +127,15 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
-
     final owner = context.select((AuthCubit cubit) {
       final state = cubit.state;
       return state is AuthAuthenticated ? state.owner : null;
     });
-    
+
     final role = owner?.role.toLowerCase() ?? 'owner';
 
-    if (owner != null && (role == 'cook' || role == 'cleaning_staff' || role == 'security')) {
+    if (owner != null &&
+        (role == 'cook' || role == 'cleaning_staff' || role == 'security')) {
       return StaffDashboardView(owner: owner, role: role);
     }
 
@@ -145,24 +146,29 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
           child: MultiBlocListener(
             listeners: [
               BlocListener<HostelCubit, HostelState>(
-                listenWhen: (prev, curr) => 
-                  (prev is! HostelLoaded && curr is HostelLoaded) || 
-                  (prev is HostelLoaded && curr is HostelLoaded && 
-                   (prev.selectedHostelIndex != curr.selectedHostelIndex || 
-                    prev.selectedHostelIndices != curr.selectedHostelIndices)),
+                listenWhen: (prev, curr) =>
+                    (prev is! HostelLoaded && curr is HostelLoaded) ||
+                    (prev is HostelLoaded &&
+                        curr is HostelLoaded &&
+                        (prev.selectedHostelIndex != curr.selectedHostelIndex ||
+                            prev.selectedHostelIndices !=
+                                curr.selectedHostelIndices)),
                 listener: (context, state) {
                   _refreshData();
                 },
               ),
               BlocListener<BookingsCubit, BookingsState>(
-                listenWhen: (prev, curr) => 
-                  (prev.status != BookingsStatus.success && curr.status == BookingsStatus.success && curr.successMessage != null) ||
-                  (prev.scannedBooking == null && curr.scannedBooking != null),
+                listenWhen: (prev, curr) =>
+                    (prev.status != BookingsStatus.success &&
+                        curr.status == BookingsStatus.success &&
+                        curr.successMessage != null) ||
+                    (prev.scannedBooking == null &&
+                        curr.scannedBooking != null),
                 listener: (context, state) {
                   if (state.successMessage != null) {
                     _refreshData();
                   }
-                  
+
                   if (state.scannedBooking != null) {
                     Navigator.push(
                       context,
@@ -174,7 +180,8 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                             hostelId: state.scannedBooking!.hostelId,
                             tenantName: state.scannedBooking!.tenantName,
                             preAllocatedRoomId: state.scannedBooking!.roomId,
-                            preAllocatedBedNumber: state.scannedBooking!.bedNumber,
+                            preAllocatedBedNumber:
+                                state.scannedBooking!.bedNumber,
                           ),
                         ),
                       ),
@@ -197,10 +204,12 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                     return const DashboardShimmer();
                   }
                   return CustomScrollView(
-                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                    physics: const BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
                     slivers: [
                       const SliverToBoxAdapter(child: UnifiedHeader()),
-                      
+
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -212,31 +221,52 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                         child: Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: BlocBuilder<DashboardCubit, DashboardState>(
-                            buildWhen: (prev, curr) => 
-                              prev.selectedFloorIndex != curr.selectedFloorIndex || 
-                              (prev is DashboardLoaded && curr is DashboardLoaded && prev.data.occupancy != curr.data.occupancy),
+                            buildWhen: (prev, curr) =>
+                                prev.selectedFloorIndex !=
+                                    curr.selectedFloorIndex ||
+                                (prev is DashboardLoaded &&
+                                    curr is DashboardLoaded &&
+                                    prev.data.occupancy != curr.data.occupancy),
                             builder: (context, state) {
-                              List<String> floors = [StringUtils.translate('all_floors', context: context)];
+                              List<String> floors = [
+                                StringUtils.translate(
+                                  'all_floors',
+                                  context: context,
+                                ),
+                              ];
                               if (state is DashboardLoaded) {
-                                floors.addAll(state.data.occupancy.floors.map((e) {
-                                  if (e.floorName == 'basement' || (e.floorNum != null && e.floorNum! < 0)) {
-                                    final absNum = e.floorNum != null ? e.floorNum!.abs() : 1;
-                                    if (absNum > 1) {
-                                      return '${StringUtils.translate('basement', context: context)} $absNum';
+                                floors.addAll(
+                                  state.data.occupancy.floors.map((e) {
+                                    if (e.floorName == 'basement' ||
+                                        (e.floorNum != null &&
+                                            e.floorNum! < 0)) {
+                                      final absNum = e.floorNum != null
+                                          ? e.floorNum!.abs()
+                                          : 1;
+                                      if (absNum > 1) {
+                                        return '${StringUtils.translate('basement', context: context)} $absNum';
+                                      }
+                                      return StringUtils.translate(
+                                        'basement',
+                                        context: context,
+                                      );
                                     }
-                                    return StringUtils.translate('basement', context: context);
-                                  }
-                                  return StringUtils.translate(
-                                    e.floorName == 'ground_floor' ? 'ground_floor' : 'floor_n',
-                                    context: context,
-                                    namedArgs: {'n': '${e.floorNum ?? 0}'},
-                                  );
-                                }));
+                                    return StringUtils.translate(
+                                      e.floorName == 'ground_floor'
+                                          ? 'ground_floor'
+                                          : 'floor_n',
+                                      context: context,
+                                      namedArgs: {'n': '${e.floorNum ?? 0}'},
+                                    );
+                                  }),
+                                );
                               }
                               return FloorFilter(
                                 floors: floors,
                                 selectedIndex: state.selectedFloorIndex + 1,
-                                onSelected: (index) => context.read<DashboardCubit>().selectFloor(index - 1),
+                                onSelected: (index) => context
+                                    .read<DashboardCubit>()
+                                    .selectFloor(index - 1),
                               );
                             },
                           ),
@@ -249,11 +279,11 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                           child: const DashboardSearchBar(),
                         ),
                       ),
-                      
+
                       SliverToBoxAdapter(child: SizedBox(height: 4.h)),
 
                       const FloorListSection(),
-                      
+
                       SliverToBoxAdapter(child: SizedBox(height: 100.h)),
                     ],
                   );

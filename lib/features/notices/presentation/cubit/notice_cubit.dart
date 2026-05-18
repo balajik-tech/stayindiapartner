@@ -23,13 +23,13 @@ class NoticeCubit extends Cubit<NoticeState> {
     required UpdateNoticeUseCase updateNoticeUseCase,
     required PostAnnouncementUseCase postAnnouncementUseCase,
     required GetAnnouncementsUseCase getAnnouncementsUseCase,
-  })  : _createNotice = createNoticeUseCase,
-        _getNotices = getNoticesUseCase,
-        _getNoticeById = getNoticeByIdUseCase,
-        _updateNotice = updateNoticeUseCase,
-        _postAnnouncement = postAnnouncementUseCase,
-        _getAnnouncements = getAnnouncementsUseCase,
-        super(NoticeInitial());
+  }) : _createNotice = createNoticeUseCase,
+       _getNotices = getNoticesUseCase,
+       _getNoticeById = getNoticeByIdUseCase,
+       _updateNotice = updateNoticeUseCase,
+       _postAnnouncement = postAnnouncementUseCase,
+       _getAnnouncements = getAnnouncementsUseCase,
+       super(NoticeInitial());
 
   Future<void> postAnnouncement({
     required String hostelId,
@@ -83,7 +83,11 @@ class NoticeCubit extends Cubit<NoticeState> {
     }
   }
 
-  Future<void> updateNotice(String id, Map<String, dynamic> data, {String? hostelId}) async {
+  Future<void> updateNotice(
+    String id,
+    Map<String, dynamic> data, {
+    String? hostelId,
+  }) async {
     emit(NoticeUpdating());
     try {
       await _updateNotice(id, data);

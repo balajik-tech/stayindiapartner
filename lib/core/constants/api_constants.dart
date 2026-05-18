@@ -1,14 +1,11 @@
 import 'dart:io';
 
 class ApiConstants {
-
-  static const String _prodUrl = 'https://api.koushiksoftwaresolutions.online/api/v1';
+  static const String _prodUrl =
+      'https://api.koushiksoftwaresolutions.online/api/v1';
 
   static String get baseUrl {
-    const url = String.fromEnvironment(
-      'API_BASE_URL',
-      defaultValue: _prodUrl,
-    );
+    const url = String.fromEnvironment('API_BASE_URL', defaultValue: _prodUrl);
     if (Platform.isAndroid && url.contains('localhost')) {
       return url.replaceAll('localhost', '10.0.2.2');
     }
@@ -29,6 +26,7 @@ class ApiConstants {
   static const String staffLogin = '/auth/login';
   static const String getMe = '/auth/me';
   static const String deviceToken = '/auth/device-token';
+  static const String googleLogin = '/auth/google-login';
 
   static const String hostels = '/hostels';
   static const String hostelsHome = '/hostels/home';

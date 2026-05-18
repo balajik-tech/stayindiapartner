@@ -47,7 +47,8 @@ class CheckoutSettlementModal extends StatefulWidget {
   }
 
   @override
-  State<CheckoutSettlementModal> createState() => _CheckoutSettlementModalState();
+  State<CheckoutSettlementModal> createState() =>
+      _CheckoutSettlementModalState();
 }
 
 class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
@@ -116,7 +117,10 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
         top: 20.h,
         left: 20.w,
         right: 20.w,
-        bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 20.h,
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            20.h,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -163,10 +167,7 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
           ),
           Text(
             'Verify all financial balances for ${widget.tenantName} before confirming the checkout.',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.greyText,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
           ),
           SizedBox(height: 24.h),
           if (_isLoading)
@@ -209,7 +210,6 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
               ),
             )
           else ...[
-            // Status Indicator Banner
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -227,18 +227,26 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
               child: Row(
                 children: [
                   Icon(
-                    _totalDues > 0 ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-                    color: _totalDues > 0 ? const Color(0xFFDC2626) : const Color(0xFF16A34A),
+                    _totalDues > 0
+                        ? Icons.warning_amber_rounded
+                        : Icons.check_circle_outline,
+                    color: _totalDues > 0
+                        ? const Color(0xFFDC2626)
+                        : const Color(0xFF16A34A),
                     size: 20.sp,
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Text(
-                      _totalDues > 0 ? 'Pending Dues Found' : 'Clear to Checkout',
+                      _totalDues > 0
+                          ? 'Pending Dues Found'
+                          : 'Clear to Checkout',
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
-                        color: _totalDues > 0 ? const Color(0xFF991B1B) : const Color(0xFF166534),
+                        color: _totalDues > 0
+                            ? const Color(0xFF991B1B)
+                            : const Color(0xFF166534),
                       ),
                     ),
                   ),
@@ -247,7 +255,6 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
             ),
             SizedBox(height: 20.h),
 
-            // Financial Snapshot Cards
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
@@ -279,7 +286,9 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _finalSettlement >= 0 ? 'Refund to Tenant' : 'Tenant Oues Owner',
+                        _finalSettlement >= 0
+                            ? 'Refund to Tenant'
+                            : 'Tenant Oues Owner',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
@@ -291,7 +300,9 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
                         style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w900,
-                          color: _finalSettlement >= 0 ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                          color: _finalSettlement >= 0
+                              ? const Color(0xFF16A34A)
+                              : const Color(0xFFDC2626),
                         ),
                       ),
                     ],
@@ -301,7 +312,6 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
             ),
             SizedBox(height: 28.h),
 
-            // Tactile Slider Confirmation
             _SlideToConfirmButton(
               label: 'Slide to Confirm Check-out',
               onConfirmed: () {
@@ -315,7 +325,11 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
     );
   }
 
-  Widget _buildFinancialRow(String title, double amount, {required bool isPositive}) {
+  Widget _buildFinancialRow(
+    String title,
+    double amount, {
+    required bool isPositive,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -332,7 +346,9 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
           style: TextStyle(
             fontSize: 15.sp,
             fontWeight: FontWeight.bold,
-            color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+            color: isPositive
+                ? const Color(0xFF16A34A)
+                : const Color(0xFFDC2626),
           ),
         ),
       ],
@@ -344,10 +360,7 @@ class _SlideToConfirmButton extends StatefulWidget {
   final String label;
   final VoidCallback onConfirmed;
 
-  const _SlideToConfirmButton({
-    required this.label,
-    required this.onConfirmed,
-  });
+  const _SlideToConfirmButton({required this.label, required this.onConfirmed});
 
   @override
   State<_SlideToConfirmButton> createState() => _SlideToConfirmButtonState();
@@ -378,7 +391,9 @@ class _SlideToConfirmButtonState extends State<_SlideToConfirmButton> {
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.bold,
-                    color: _confirmed ? const Color(0xFF16A34A) : const Color(0xFF64748B),
+                    color: _confirmed
+                        ? const Color(0xFF16A34A)
+                        : const Color(0xFF64748B),
                   ),
                 ),
               ),

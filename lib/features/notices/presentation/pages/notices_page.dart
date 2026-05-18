@@ -75,7 +75,12 @@ class _NoticesPageState extends State<NoticesPage> {
             if (state is NoticeLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is NoticeLoadError) {
-              return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+              return Center(
+                child: Text(
+                  state.message,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
             } else if (state is NoticesLoaded) {
               final notices = state.notices;
               if (notices.isEmpty) {
@@ -100,7 +105,14 @@ class _NoticesPageState extends State<NoticesPage> {
               MaterialPageRoute(builder: (context) => const GiveNoticePage()),
             ).then((_) => _loadNotices());
           },
-          label: Text('Give Notice', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+          label: Text(
+            'Give Notice',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           icon: const Icon(Icons.add, color: Colors.white),
           backgroundColor: AppColors.primaryBlue,
         ),
@@ -150,10 +162,15 @@ class _NoticesPageState extends State<NoticesPage> {
                 children: [
                   CircleAvatar(
                     radius: 20.r,
-                    backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    backgroundColor: AppColors.primaryBlue.withValues(
+                      alpha: 0.1,
+                    ),
                     child: Text(
                       (notice.tenantName ?? 'T')[0].toUpperCase(),
-                      style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: AppColors.primaryBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -162,11 +179,18 @@ class _NoticesPageState extends State<NoticesPage> {
                     children: [
                       Text(
                         notice.tenantName ?? 'Tenant',
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkText,
+                        ),
                       ),
                       Text(
                         'Room ${notice.roomTypename ?? notice.roomId}  Bed ${notice.bedNumber}',
-                        style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: AppColors.greyText,
+                        ),
                       ),
                     ],
                   ),
@@ -180,9 +204,18 @@ class _NoticesPageState extends State<NoticesPage> {
           SizedBox(height: 12.h),
           Row(
             children: [
-              _buildDateInfo('Notice Date', notice.noticeDate ?? 'N/A', Icons.calendar_today_outlined),
+              _buildDateInfo(
+                'Notice Date',
+                notice.noticeDate ?? 'N/A',
+                Icons.calendar_today_outlined,
+              ),
               const Spacer(),
-              _buildDateInfo('Vacating Date', _formatDate(notice.vacatingDate), Icons.exit_to_app, isHighlight: true),
+              _buildDateInfo(
+                'Vacating Date',
+                _formatDate(notice.vacatingDate),
+                Icons.exit_to_app,
+                isHighlight: true,
+              ),
             ],
           ),
           if (notice.reason != null && notice.reason!.isNotEmpty) ...[
@@ -196,12 +229,20 @@ class _NoticesPageState extends State<NoticesPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, size: 14.sp, color: AppColors.greyText),
+                  Icon(
+                    Icons.info_outline,
+                    size: 14.sp,
+                    color: AppColors.greyText,
+                  ),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       notice.reason!,
-                      style: TextStyle(fontSize: 12.sp, color: AppColors.greyText, fontStyle: FontStyle.italic),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.greyText,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ),
                 ],
@@ -233,27 +274,45 @@ class _NoticesPageState extends State<NoticesPage> {
       ),
       child: Text(
         status,
-        style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: color),
+        style: TextStyle(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
       ),
     );
   }
 
-  Widget _buildDateInfo(String label, String date, IconData icon, {bool isHighlight = false}) {
+  Widget _buildDateInfo(
+    String label,
+    String date,
+    IconData icon, {
+    bool isHighlight = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 11.sp, color: AppColors.greyText)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11.sp, color: AppColors.greyText),
+        ),
         SizedBox(height: 4.h),
         Row(
           children: [
-            Icon(icon, size: 14.sp, color: isHighlight ? const Color(0xFFF04438) : AppColors.darkText),
+            Icon(
+              icon,
+              size: 14.sp,
+              color: isHighlight ? const Color(0xFFF04438) : AppColors.darkText,
+            ),
             SizedBox(width: 4.w),
             Text(
               date,
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
-                color: isHighlight ? const Color(0xFFF04438) : AppColors.darkText,
+                color: isHighlight
+                    ? const Color(0xFFF04438)
+                    : AppColors.darkText,
               ),
             ),
           ],
@@ -265,7 +324,20 @@ class _NoticesPageState extends State<NoticesPage> {
   String _formatDate(String date) {
     try {
       final dt = DateTime.parse(date);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
     } catch (_) {
       return date;

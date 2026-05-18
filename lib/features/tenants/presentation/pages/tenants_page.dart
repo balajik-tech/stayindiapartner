@@ -46,7 +46,8 @@ class _TenantsPageState extends State<TenantsPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       if (_selectedTabIndex == 0) {
         final hostelId = context.read<HostelCubit>().state.selectedHostelId;
         if (hostelId != null) {
@@ -76,62 +77,75 @@ class _TenantsPageState extends State<TenantsPage> {
       body: PatternBackground(
         child: SafeArea(
           child: BlocListener<HostelCubit, HostelState>(
-            listenWhen: (prev, curr) => 
-              (prev is! HostelLoaded && curr is HostelLoaded) || 
-              (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+            listenWhen: (prev, curr) =>
+                (prev is! HostelLoaded && curr is HostelLoaded) ||
+                (prev is HostelLoaded &&
+                    curr is HostelLoaded &&
+                    prev.selectedHostelIndex != curr.selectedHostelIndex),
             listener: (context, state) => _loadData(),
             child: BlocListener<TenantCubit, TenantState>(
-            listener: (context, state) {
-              if (state is TenantLoaded && state.errorMessage != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.errorMessage!),
-                    backgroundColor: AppColors.error,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+              listener: (context, state) {
+                if (state is TenantLoaded && state.errorMessage != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.errorMessage!),
+                      backgroundColor: AppColors.error,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: RefreshIndicator(
+                onRefresh: () async => _loadData(),
+                color: AppColors.primaryBlue,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
                   ),
-                );
-              }
-            },
-            child: RefreshIndicator(
-              onRefresh: () async => _loadData(),
-              color: AppColors.primaryBlue,
-              child: CustomScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                slivers: [
-                  _buildAppHeader(),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _SliverHeaderDelegate(
-                      height: 80.h,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.scaffoldBackground.withValues(alpha: 0.9),
+                  slivers: [
+                    _buildAppHeader(),
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _SliverHeaderDelegate(
+                        height: 80.h,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20.w,
+                            vertical: 12.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.scaffoldBackground.withValues(
+                              alpha: 0.9,
+                            ),
+                          ),
+                          child: _buildTabBar(),
                         ),
-                        child: _buildTabBar(),
                       ),
                     ),
-                  ),
-                  if (_selectedTabIndex == 0)
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
-                      sliver: SliverToBoxAdapter(
-                        child: _buildControlBar(context),
+                    if (_selectedTabIndex == 0)
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
+                        sliver: SliverToBoxAdapter(
+                          child: _buildControlBar(context),
+                        ),
                       ),
-                    ),
-                  ..._buildSliverContent(context),
-                ],
+                    ..._buildSliverContent(context),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ),
       floatingActionButton: _buildFAB(context) != null
           ? Padding(
-              padding: EdgeInsets.only(bottom: 10.h + MediaQuery.of(context).padding.bottom),
+              padding: EdgeInsets.only(
+                bottom: 10.h + MediaQuery.of(context).padding.bottom,
+              ),
               child: _buildFAB(context),
             )
           : null,
@@ -180,9 +194,15 @@ class _TenantsPageState extends State<TenantsPage> {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                 ),
-                child: Icon(Icons.refresh_rounded, size: 24.sp, color: Colors.white),
+                child: Icon(
+                  Icons.refresh_rounded,
+                  size: 24.sp,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
@@ -203,7 +223,11 @@ class _TenantsPageState extends State<TenantsPage> {
         children: [
           _buildTabItem(0, 'tab_tenants'.tr(), Icons.group_rounded),
           _buildTabItem(1, 'tab_services'.tr(), Icons.build_rounded),
-          _buildTabItem(2, 'tab_notices'.tr(), Icons.notification_important_rounded),
+          _buildTabItem(
+            2,
+            'tab_notices'.tr(),
+            Icons.notification_important_rounded,
+          ),
         ],
       ),
     );
@@ -245,9 +269,13 @@ class _TenantsPageState extends State<TenantsPage> {
                     label,
                     maxLines: 1,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                      color: isSelected
+                          ? Colors.white
+                          : AppColors.textSecondary,
                       fontSize: 12.sp,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                      fontWeight: isSelected
+                          ? FontWeight.w800
+                          : FontWeight.w600,
                     ),
                   ),
                 ),
@@ -270,7 +298,9 @@ class _TenantsPageState extends State<TenantsPage> {
             decoration: BoxDecoration(
               color: AppColors.backgroundPrimary,
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+              border: Border.all(
+                color: AppColors.border.withValues(alpha: 0.8),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -281,24 +311,34 @@ class _TenantsPageState extends State<TenantsPage> {
             ),
             child: Row(
               children: [
-                Icon(Icons.search_rounded, color: AppColors.textSecondary.withValues(alpha: 0.6), size: 22.sp),
+                Icon(
+                  Icons.search_rounded,
+                  color: AppColors.textSecondary.withValues(alpha: 0.6),
+                  size: 22.sp,
+                ),
                 SizedBox(width: 12.w),
                 Expanded(
                   child: TextField(
                     controller: _searchController,
                     onChanged: (value) {
                       final hostelState = context.read<HostelCubit>().state;
-                      if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                        final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-                        context.read<TenantCubit>().searchTenants(hostelId, value);
+                      if (hostelState is HostelLoaded &&
+                          hostelState.hostels.isNotEmpty) {
+                        final hostelId = hostelState
+                            .hostels[hostelState.selectedHostelIndex]
+                            .id;
+                        context.read<TenantCubit>().searchTenants(
+                          hostelId,
+                          value,
+                        );
                       }
                     },
                     decoration: InputDecoration(
                       hintText: 'search_residents'.tr(),
                       hintStyle: TextStyle(
-                        color: AppColors.textSecondary.withValues(alpha: 0.4), 
-                        fontSize: 14.sp, 
-                        fontWeight: FontWeight.w500
+                        color: AppColors.textSecondary.withValues(alpha: 0.4),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
                       ),
                       filled: false,
                       fillColor: Colors.transparent,
@@ -308,7 +348,11 @@ class _TenantsPageState extends State<TenantsPage> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -316,12 +360,20 @@ class _TenantsPageState extends State<TenantsPage> {
           ),
         ),
         SizedBox(width: 12.w),
-        _buildControlAction(Icons.history_rounded, () => PastTenantsSheet.show(context), isActive: true),
+        _buildControlAction(
+          Icons.history_rounded,
+          () => PastTenantsSheet.show(context),
+          isActive: true,
+        ),
       ],
     );
   }
 
-  Widget _buildControlAction(IconData icon, VoidCallback onTap, {bool isActive = false}) {
+  Widget _buildControlAction(
+    IconData icon,
+    VoidCallback onTap, {
+    bool isActive = false,
+  }) {
     return BouncingWrapper(
       onTap: onTap,
       child: Container(
@@ -329,7 +381,11 @@ class _TenantsPageState extends State<TenantsPage> {
         width: 52.w,
         decoration: BoxDecoration(
           color: AppColors.backgroundPrimary,
-          border: Border.all(color: isActive ? AppColors.primaryBlue.withValues(alpha: 0.3) : AppColors.border),
+          border: Border.all(
+            color: isActive
+                ? AppColors.primaryBlue.withValues(alpha: 0.3)
+                : AppColors.border,
+          ),
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
@@ -339,7 +395,11 @@ class _TenantsPageState extends State<TenantsPage> {
             ),
           ],
         ),
-        child: Icon(icon, color: isActive ? AppColors.primaryBlue : AppColors.textSecondary, size: 22.sp),
+        child: Icon(
+          icon,
+          color: isActive ? AppColors.primaryBlue : AppColors.textSecondary,
+          size: 22.sp,
+        ),
       ),
     );
   }
@@ -350,7 +410,7 @@ class _TenantsPageState extends State<TenantsPage> {
         SliverPadding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
           sliver: const SliverToBoxAdapter(child: MaintenanceTabView()),
-        )
+        ),
       ];
     }
     if (_selectedTabIndex == 2) {
@@ -358,7 +418,7 @@ class _TenantsPageState extends State<TenantsPage> {
         SliverPadding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
           sliver: const SliverToBoxAdapter(child: NoticesTabView()),
-        )
+        ),
       ];
     }
 
@@ -390,16 +450,21 @@ class _TenantsPageState extends State<TenantsPage> {
               }
 
               if (state is TenantError) {
-                final bool isForbidden = state.message.toLowerCase().contains('not allowed') || 
-                                       state.message.toLowerCase().contains('forbidden');
-                
+                final bool isForbidden =
+                    state.message.toLowerCase().contains('not allowed') ||
+                    state.message.toLowerCase().contains('forbidden');
+
                 return SliverFillRemaining(
                   child: _buildEmptyState(
-                    icon: isForbidden ? Icons.lock_person_rounded : Icons.error_outline_rounded,
-                    title: isForbidden ? 'access_denied'.tr() : 'something_wrong'.tr(),
-                    message: isForbidden 
-                      ? 'access_denied_msg'.tr()
-                      : state.message,
+                    icon: isForbidden
+                        ? Icons.lock_person_rounded
+                        : Icons.error_outline_rounded,
+                    title: isForbidden
+                        ? 'access_denied'.tr()
+                        : 'something_wrong'.tr(),
+                    message: isForbidden
+                        ? 'access_denied_msg'.tr()
+                        : state.message,
                   ),
                 );
               }
@@ -409,7 +474,9 @@ class _TenantsPageState extends State<TenantsPage> {
                   child: _buildEmptyState(
                     icon: Icons.people_outline_rounded,
                     title: 'no_residents_found'.tr(),
-                    message: (state is TenantEmpty ? state.message : null) ?? 'no_residents_desc'.tr(),
+                    message:
+                        (state is TenantEmpty ? state.message : null) ??
+                        'no_residents_desc'.tr(),
                   ),
                 );
               }
@@ -425,10 +492,16 @@ class _TenantsPageState extends State<TenantsPage> {
                         }
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 20),
-                          child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue)),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primaryBlue,
+                            ),
+                          ),
                         );
                       },
-                      childCount: state.tenants.length + (state.isLoadMore ? 1 : 0),
+                      childCount:
+                          state.tenants.length + (state.isLoadMore ? 1 : 0),
                     ),
                   ),
                 );
@@ -442,7 +515,11 @@ class _TenantsPageState extends State<TenantsPage> {
     ];
   }
 
-  Widget _buildEmptyState({required IconData icon, required String title, required String message}) {
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String message,
+  }) {
     return Padding(
       padding: EdgeInsets.only(left: 40.w, right: 40.w, bottom: 100.h),
       child: Column(
@@ -454,7 +531,11 @@ class _TenantsPageState extends State<TenantsPage> {
               color: AppColors.primaryBlue.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 64.sp, color: AppColors.primaryBlue.withValues(alpha: 0.2)),
+            child: Icon(
+              icon,
+              size: 64.sp,
+              color: AppColors.primaryBlue.withValues(alpha: 0.2),
+            ),
           ),
           SizedBox(height: 24.h),
           Text(
@@ -520,7 +601,11 @@ class _TenantsPageState extends State<TenantsPage> {
         },
         backgroundColor: AppColors.primaryBlue,
         elevation: 8,
-        icon: Icon(Icons.assignment_late_rounded, color: Colors.white, size: 20.sp),
+        icon: Icon(
+          Icons.assignment_late_rounded,
+          color: Colors.white,
+          size: 20.sp,
+        ),
         label: Text(
           'move_out_notice'.tr(),
           style: TextStyle(
@@ -551,7 +636,11 @@ class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return SizedBox.expand(child: child);
   }
 

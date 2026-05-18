@@ -14,7 +14,12 @@ class FinanceCubit extends Cubit<FinanceState> {
 
   Future<void> loadDashboard({String? hostelId}) async {
     final currentHostelId = hostelId ?? state.selectedHostelId;
-    emit(state.copyWith(status: FinanceStatus.loading, selectedHostelId: currentHostelId));
+    emit(
+      state.copyWith(
+        status: FinanceStatus.loading,
+        selectedHostelId: currentHostelId,
+      ),
+    );
 
     try {
       final stats = await getFinancialStatsUseCase(hostelId: currentHostelId);
@@ -23,16 +28,20 @@ class FinanceCubit extends Cubit<FinanceState> {
         interval: state.interval,
       );
 
-      emit(state.copyWith(
-        status: FinanceStatus.success,
-        stats: stats,
-        revenueTrends: trends,
-      ));
+      emit(
+        state.copyWith(
+          status: FinanceStatus.success,
+          stats: stats,
+          revenueTrends: trends,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: FinanceStatus.failure,
-        errorMessage: GlobalErrorMapper.map(e).message,
-      ));
+      emit(
+        state.copyWith(
+          status: FinanceStatus.failure,
+          errorMessage: GlobalErrorMapper.map(e).message,
+        ),
+      );
     }
   }
 

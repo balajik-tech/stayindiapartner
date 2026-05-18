@@ -17,7 +17,12 @@ class RoomPricingPage extends StatefulWidget {
   final List<RoomDetail>? rooms;
   final String? floorName;
 
-  const RoomPricingPage({super.key, required this.hostel, this.rooms, this.floorName});
+  const RoomPricingPage({
+    super.key,
+    required this.hostel,
+    this.rooms,
+    this.floorName,
+  });
 
   @override
   State<RoomPricingPage> createState() => _RoomPricingPageState();
@@ -34,7 +39,10 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
 
   void _syncMasters() {
     try {
-      context.read<RoomCubit>().getRooms(isMaster: true, hostelId: widget.hostel.id);
+      context.read<RoomCubit>().getRooms(
+        isMaster: true,
+        hostelId: widget.hostel.id,
+      );
 
       final roomState = context.read<RoomCubit>().state;
       if (roomState is RoomLoaded) {
@@ -53,7 +61,11 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => sl<PropertySetupCubit>()..prefillFromHostel(widget.hostel, rooms: widget.rooms)),
+        BlocProvider(
+          create: (context) =>
+              sl<PropertySetupCubit>()
+                ..prefillFromHostel(widget.hostel, rooms: widget.rooms),
+        ),
       ],
       child: Builder(
         builder: (context) {
@@ -64,10 +76,16 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               BlocListener<RoomCubit, RoomState>(
                 listener: (context, state) {
                   if (state is RoomLoaded) {
-                    final masters = state.rooms.where((r) => r.isMaster).toList();
+                    final masters = state.rooms
+                        .where((r) => r.isMaster)
+                        .toList();
                     if (masters.isNotEmpty) {
-                      context.read<PropertySetupCubit>().setRoomMasters(masters);
-                      context.read<PropertySetupCubit>().updatePricingFromMasters();
+                      context.read<PropertySetupCubit>().setRoomMasters(
+                        masters,
+                      );
+                      context
+                          .read<PropertySetupCubit>()
+                          .updatePricingFromMasters();
                     }
                   }
                 },
@@ -75,10 +93,14 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               BlocListener<PropertySetupCubit, PropertySetupState>(
                 listener: (context, state) {
                   if (state.currentStep == 5) {
-                    context.read<DashboardCubit>().fetchDashboardData(widget.hostel.id);
+                    context.read<DashboardCubit>().fetchDashboardData(
+                      widget.hostel.id,
+                    );
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainNavigationPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigationPage(),
+                      ),
                       (route) => false,
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -86,11 +108,21 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                     );
                   } else if (state.error != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('failed_save_pricing'.tr(namedArgs: {'error': state.error.toString()})), backgroundColor: Colors.redAccent),
+                      SnackBar(
+                        content: Text(
+                          'failed_save_pricing'.tr(
+                            namedArgs: {'error': state.error.toString()},
+                          ),
+                        ),
+                        backgroundColor: Colors.redAccent,
+                      ),
                     );
                   } else if (state.validationMessage != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.validationMessage!), backgroundColor: Colors.orangeAccent),
+                      SnackBar(
+                        content: Text(state.validationMessage!),
+                        backgroundColor: Colors.orangeAccent,
+                      ),
                     );
                   }
                 },
@@ -103,7 +135,11 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                 elevation: 0,
                 centerTitle: true,
                 leading: IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 18.sp),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: AppColors.darkText,
+                    size: 18.sp,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Column(
@@ -133,10 +169,15 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                       LinearProgressIndicator(
                         value: 1.0,
                         backgroundColor: const Color(0xFFF1F5F9),
-                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFF98125)),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFFF98125),
+                        ),
                         minHeight: 4.h,
                       ),
-                      Divider(height: 1, color: Colors.black.withValues(alpha: 0.05)),
+                      Divider(
+                        height: 1,
+                        color: Colors.black.withValues(alpha: 0.05),
+                      ),
                     ],
                   ),
                 ),
@@ -149,16 +190,33 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionHeader('pricing_master'.tr(), 'pricing_master_desc'.tr()),
+                        _buildSectionHeader(
+                          'pricing_master'.tr(),
+                          'pricing_master_desc'.tr(),
+                        ),
                         SizedBox(height: 24.h),
-                        
+
                         if (state.rooms.isEmpty)
                           _buildEmptyState()
                         else ...[
-                          _buildPricingSection(context, state, 'AC', Icons.ac_unit_rounded, const Color(0xFFE0F2FE), const Color(0xFF0EA5E9)),
+                          _buildPricingSection(
+                            context,
+                            state,
+                            'AC',
+                            Icons.ac_unit_rounded,
+                            const Color(0xFFE0F2FE),
+                            const Color(0xFF0EA5E9),
+                          ),
                           SizedBox(height: 24.h),
-                          _buildPricingSection(context, state, 'NON-AC', Icons.mode_fan_off_rounded, const Color(0xFFF1F5F9), const Color(0xFF64748B)),
-                          
+                          _buildPricingSection(
+                            context,
+                            state,
+                            'NON-AC',
+                            Icons.mode_fan_off_rounded,
+                            const Color(0xFFF1F5F9),
+                            const Color(0xFF64748B),
+                          ),
+
                           SizedBox(height: 32.h),
                           _buildSyncInfo(state),
                         ],
@@ -182,12 +240,21 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2C5990), letterSpacing: -0.5),
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF2C5990),
+            letterSpacing: -0.5,
+          ),
         ),
         SizedBox(height: 4.h),
         Text(
           subtitle,
-          style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: const Color(0xFF64748B),
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -198,9 +265,16 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
       child: Column(
         children: [
           SizedBox(height: 60.h),
-          Icon(Icons.payments_outlined, size: 64.sp, color: const Color(0xFFCBD5E1)),
+          Icon(
+            Icons.payments_outlined,
+            size: 64.sp,
+            color: const Color(0xFFCBD5E1),
+          ),
           SizedBox(height: 16.h),
-          Text('no_rooms_pricing'.tr(), style: TextStyle(color: const Color(0xFF64748B), fontSize: 14.sp)),
+          Text(
+            'no_rooms_pricing'.tr(),
+            style: TextStyle(color: const Color(0xFF64748B), fontSize: 14.sp),
+          ),
         ],
       ),
     );
@@ -209,13 +283,24 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
   int? get _resolvedFloorNum {
     if (widget.floorName == null) return null;
     final nameUpper = widget.floorName!.toUpperCase();
-    if (nameUpper == 'GROUND_FLOOR' || nameUpper == 'GROUND FLOOR' || nameUpper == 'G' || nameUpper == '0') {
+    if (nameUpper == 'GROUND_FLOOR' ||
+        nameUpper == 'GROUND FLOOR' ||
+        nameUpper == 'G' ||
+        nameUpper == '0') {
       return 0;
     }
-    return int.tryParse(widget.floorName!.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    return int.tryParse(widget.floorName!.replaceAll(RegExp(r'[^0-9]'), '')) ??
+        0;
   }
 
-  Widget _buildPricingSection(BuildContext context, PropertySetupState state, String type, IconData icon, Color bgColor, Color iconColor) {
+  Widget _buildPricingSection(
+    BuildContext context,
+    PropertySetupState state,
+    String type,
+    IconData icon,
+    Color bgColor,
+    Color iconColor,
+  ) {
     final resolvedFloor = _resolvedFloorNum;
     final roomsOfType = state.rooms.where((r) {
       final features = r['features'] as Map<String, dynamic>? ?? {};
@@ -226,10 +311,13 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
       }
       return type == 'AC' ? isAC : !isAC;
     }).toList();
-    
+
     if (roomsOfType.isEmpty) return const SizedBox.shrink();
 
-    final uniqueSharingTypes = roomsOfType.map((r) => (r['sharingType'] ?? 2) as int).toSet().toList();
+    final uniqueSharingTypes = roomsOfType
+        .map((r) => (r['sharingType'] ?? 2) as int)
+        .toSet()
+        .toList();
     uniqueSharingTypes.sort();
 
     return Column(
@@ -239,24 +327,42 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
           children: [
             Container(
               padding: EdgeInsets.all(10.r),
-              decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(10.r)),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
               child: Icon(icon, color: iconColor, size: 20.sp),
             ),
             SizedBox(width: 12.w),
-            Text('type_rooms_label'.tr(namedArgs: {'type': type}), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: 0.5)),
+            Text(
+              'type_rooms_label'.tr(namedArgs: {'type': type}),
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF0F172A),
+                letterSpacing: 0.5,
+              ),
+            ),
           ],
         ),
         SizedBox(height: 16.h),
-        ...uniqueSharingTypes.map((sharing) => _buildPricingCard(context, state, type, sharing)),
+        ...uniqueSharingTypes.map(
+          (sharing) => _buildPricingCard(context, state, type, sharing),
+        ),
       ],
     );
   }
 
-  Widget _buildPricingCard(BuildContext context, PropertySetupState state, String type, int sharing) {
+  Widget _buildPricingCard(
+    BuildContext context,
+    PropertySetupState state,
+    String type,
+    int sharing,
+  ) {
     final sharingStr = sharing.toString();
     final pricing = state.masterPricing[type] ?? {};
     final config = pricing[sharingStr];
-    
+
     double rent = 0.0;
     double deposit = 0.0;
     double maintenance = 0.0;
@@ -264,7 +370,8 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
 
     if (config is Map) {
       rent = (config['rent'] ?? config['monthlyRent'] ?? 0.0).toDouble();
-      deposit = (config['deposit'] ?? config['securityDeposit'] ?? 0.0).toDouble();
+      deposit = (config['deposit'] ?? config['securityDeposit'] ?? 0.0)
+          .toDouble();
       maintenance = (config['maintenance'] ?? 0.0).toDouble();
       dailyRent = (config['dailyRent'] ?? 0.0).toDouble();
     }
@@ -274,11 +381,21 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
       (m) => m['sharingType'] == sharing && m['isAC'] == isAC,
     );
     final matchingMaster = matches.isNotEmpty ? matches.first : null;
-    
-    final masterRent = matchingMaster != null ? (double.tryParse(matchingMaster['rent']?.toString() ?? '') ?? 0.0) : 0.0;
-    final masterDailyRent = matchingMaster != null ? (double.tryParse(matchingMaster['dailyRent']?.toString() ?? '') ?? 0.0) : 0.0;
-    final masterDeposit = matchingMaster != null ? (double.tryParse(matchingMaster['deposit']?.toString() ?? '') ?? 0.0) : 0.0;
-    final masterMaintenance = matchingMaster != null ? (double.tryParse(matchingMaster['maintenance']?.toString() ?? '') ?? 0.0) : 0.0;
+
+    final masterRent = matchingMaster != null
+        ? (double.tryParse(matchingMaster['rent']?.toString() ?? '') ?? 0.0)
+        : 0.0;
+    final masterDailyRent = matchingMaster != null
+        ? (double.tryParse(matchingMaster['dailyRent']?.toString() ?? '') ??
+              0.0)
+        : 0.0;
+    final masterDeposit = matchingMaster != null
+        ? (double.tryParse(matchingMaster['deposit']?.toString() ?? '') ?? 0.0)
+        : 0.0;
+    final masterMaintenance = matchingMaster != null
+        ? (double.tryParse(matchingMaster['maintenance']?.toString() ?? '') ??
+              0.0)
+        : 0.0;
 
     final hasRentInMaster = masterRent > 0;
     final hasDailyRentInMaster = masterDailyRent > 0;
@@ -291,18 +408,43 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 24, offset: const Offset(0, 12))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('sharing_count_label'.tr(namedArgs: {'count': sharing.toString()}), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
+              Text(
+                'sharing_count_label'.tr(
+                  namedArgs: {'count': sharing.toString()},
+                ),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(color: const Color(0xFF2C5990).withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8.r)),
-                child: Text('per_bed'.tr(), style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2C5990))),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2C5990).withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  'per_bed'.tr(),
+                  style: TextStyle(
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF2C5990),
+                  ),
+                ),
               ),
             ],
           ),
@@ -316,7 +458,12 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                   enabled: !hasRentInMaster,
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'rent', price);
+                    context.read<PropertySetupCubit>().updatePricing(
+                      type,
+                      sharingStr,
+                      'rent',
+                      price,
+                    );
                   },
                 ),
               ),
@@ -324,11 +471,18 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               Expanded(
                 child: _PriceInput(
                   label: 'daily_rent'.tr(),
-                  initialValue: dailyRent > 0 ? dailyRent.toInt().toString() : '',
+                  initialValue: dailyRent > 0
+                      ? dailyRent.toInt().toString()
+                      : '',
                   enabled: !hasDailyRentInMaster,
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'dailyRent', price);
+                    context.read<PropertySetupCubit>().updatePricing(
+                      type,
+                      sharingStr,
+                      'dailyRent',
+                      price,
+                    );
                   },
                 ),
               ),
@@ -344,7 +498,12 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                   enabled: !hasDepositInMaster,
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'deposit', price);
+                    context.read<PropertySetupCubit>().updatePricing(
+                      type,
+                      sharingStr,
+                      'deposit',
+                      price,
+                    );
                   },
                 ),
               ),
@@ -352,11 +511,18 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               Expanded(
                 child: _PriceInput(
                   label: 'maintenance'.tr(),
-                  initialValue: maintenance > 0 ? maintenance.toInt().toString() : '',
+                  initialValue: maintenance > 0
+                      ? maintenance.toInt().toString()
+                      : '',
                   enabled: !hasMaintenanceInMaster,
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
-                    context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'maintenance', price);
+                    context.read<PropertySetupCubit>().updatePricing(
+                      type,
+                      sharingStr,
+                      'maintenance',
+                      price,
+                    );
                   },
                 ),
               ),
@@ -371,12 +537,25 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
   Widget _buildSyncInfo(PropertySetupState state) {
     return Container(
       padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(color: const Color(0xFFFFF7ED), borderRadius: BorderRadius.circular(20.r), border: Border.all(color: const Color(0xFFFFE4C4))),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: const Color(0xFFFFE4C4)),
+      ),
       child: Row(
         children: [
           Icon(Icons.sync_rounded, color: const Color(0xFFFF7A00), size: 20.sp),
           SizedBox(width: 12.w),
-          Expanded(child: Text('sync_prices_info'.tr(), style: TextStyle(fontSize: 13.sp, color: const Color(0xFF9A3412), fontWeight: FontWeight.w700))),
+          Expanded(
+            child: Text(
+              'sync_prices_info'.tr(),
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: const Color(0xFF9A3412),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -385,7 +564,12 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
   Widget _buildBottomBar(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
-      decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.05)))),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+        ),
+      ),
       child: BlocBuilder<PropertySetupCubit, PropertySetupState>(
         builder: (context, state) {
           return Row(
@@ -395,53 +579,107 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 14.h),
-                    side: const BorderSide(color: Color(0xFF2C5990), width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    side: const BorderSide(
+                      color: Color(0xFF2C5990),
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                   ),
-                  child: Text('back'.tr(), style: const TextStyle(color: Color(0xFF2C5990), fontWeight: FontWeight.w800)),
+                  child: Text(
+                    'back'.tr(),
+                    style: const TextStyle(
+                      color: Color(0xFF2C5990),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(width: 16.w),
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: state.isSaving ? null : () {
-                    final cubit = context.read<PropertySetupCubit>();
-                    if (cubit.isValidToFinish) {
-                      cubit.saveProperty();
-                    } else {
-                      final message = cubit.state.validationMessage ?? 'incomplete_setup_sub'.tr();
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-                          title: Row(
-                            children: [
-                              const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                              SizedBox(width: 8.w),
-                              Text('incomplete_setup'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900)),
-                            ],
-                          ),
-                          content: Text(message, style: TextStyle(fontSize: 14.sp, height: 1.6, color: const Color(0xFF475569))),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: Text('btn_got_it'.tr(), style: const TextStyle(color: Color(0xFF2C5990), fontWeight: FontWeight.w800)),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: state.isSaving
+                      ? null
+                      : () {
+                          final cubit = context.read<PropertySetupCubit>();
+                          if (cubit.isValidToFinish) {
+                            cubit.saveProperty();
+                          } else {
+                            final message =
+                                cubit.state.validationMessage ??
+                                'incomplete_setup_sub'.tr();
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                title: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: Colors.orange,
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Text(
+                                      'incomplete_setup'.tr(),
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                content: Text(
+                                  message,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    height: 1.6,
+                                    color: const Color(0xFF475569),
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: Text(
+                                      'btn_got_it'.tr(),
+                                      style: const TextStyle(
+                                        color: Color(0xFF2C5990),
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2C5990),
                     padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                     elevation: 4,
                   ),
-                  child: state.isSaving 
-                    ? SizedBox(height: 20.h, width: 20.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text('finish_setup'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                  child: state.isSaving
+                      ? SizedBox(
+                          height: 20.h,
+                          width: 20.h,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          'finish_setup'.tr(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -500,7 +738,16 @@ class _PriceInputState extends State<_PriceInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: isEnabled ? const Color(0xFF64748B) : const Color(0xFF94A3B8))),
+        Text(
+          widget.label,
+          style: TextStyle(
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w800,
+            color: isEnabled
+                ? const Color(0xFF64748B)
+                : const Color(0xFF94A3B8),
+          ),
+        ),
         SizedBox(height: 6.h),
         Focus(
           onFocusChange: (hasFocus) {
@@ -515,9 +762,13 @@ class _PriceInputState extends State<_PriceInput> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
-              color: isEnabled ? Colors.white : const Color(0xFFF1F5F9), 
-              borderRadius: BorderRadius.circular(12.r), 
-              border: Border.all(color: _isFocused && isEnabled ? const Color(0xFFF98125) : const Color(0xFFE2E8F0)),
+              color: isEnabled ? Colors.white : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: _isFocused && isEnabled
+                    ? const Color(0xFFF98125)
+                    : const Color(0xFFE2E8F0),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.02),
@@ -529,7 +780,16 @@ class _PriceInputState extends State<_PriceInput> {
             child: Row(
               children: [
                 if (widget.prefix.isNotEmpty) ...[
-                  Text(widget.prefix, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: _isFocused && isEnabled ? const Color(0xFFF98125) : const Color(0xFF64748B))),
+                  Text(
+                    widget.prefix,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w900,
+                      color: _isFocused && isEnabled
+                          ? const Color(0xFFF98125)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
                   SizedBox(width: 8.w),
                 ],
                 Expanded(
@@ -550,7 +810,9 @@ class _PriceInputState extends State<_PriceInput> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w800,
-                      color: isEnabled ? const Color(0xFF334155) : const Color(0xFF94A3B8),
+                      color: isEnabled
+                          ? const Color(0xFF334155)
+                          : const Color(0xFF94A3B8),
                     ),
                   ),
                 ),

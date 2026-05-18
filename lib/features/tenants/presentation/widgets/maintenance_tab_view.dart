@@ -52,12 +52,11 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         }
       },
       builder: (context, state) {
-        if (state is MaintenanceLoading || state is MaintenanceSaving || state is MaintenanceSuccess) {
+        if (state is MaintenanceLoading ||
+            state is MaintenanceSaving ||
+            state is MaintenanceSuccess) {
           return Column(
-            children: List.generate(
-              5,
-              (index) => const TenantCardSkeleton(),
-            ),
+            children: List.generate(5, (index) => const TenantCardSkeleton()),
           );
         } else if (state is MaintenanceError) {
           return Center(
@@ -77,7 +76,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
           final summary = state.summary!;
           final filteredTickets = _filterTickets(summary.items);
           final groupedItems = _buildGroupedListItems(filteredTickets);
-          
+
           return Column(
             children: [
               _buildSearchBar(),
@@ -99,11 +98,14 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
 
   List<Maintenance> _filterTickets(List<Maintenance> items) {
     return items.where((t) {
-      final matchesSearch = _searchQuery.isEmpty ||
+      final matchesSearch =
+          _searchQuery.isEmpty ||
           t.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          (t.roomId?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
-      
-      final matchesFilter = _selectedFilter == 'all' ||
+          (t.roomId?.toLowerCase().contains(_searchQuery.toLowerCase()) ??
+              false);
+
+      final matchesFilter =
+          _selectedFilter == 'all' ||
           (_selectedFilter == 'open' && t.status == 'OPEN') ||
           (_selectedFilter == 'in_progress' && t.status == 'IN_PROGRESS') ||
           (_selectedFilter == 'fixed' && t.status == 'RESOLVED');
@@ -131,7 +133,10 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
               onChanged: (val) => setState(() => _searchQuery = val),
               decoration: InputDecoration(
                 hintText: 'search_maintenance_hint'.tr(),
-                hintStyle: TextStyle(color: AppColors.greyText, fontSize: 15.sp),
+                hintStyle: TextStyle(
+                  color: AppColors.greyText,
+                  fontSize: 15.sp,
+                ),
                 border: InputBorder.none,
                 isDense: true,
               ),
@@ -173,15 +178,32 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                   color: isSelected ? AppColors.primaryBlue : Colors.white,
                   borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(
-                    color: isSelected ? AppColors.primaryBlue : AppColors.roomCardBorder,
+                    color: isSelected
+                        ? AppColors.primaryBlue
+                        : AppColors.roomCardBorder,
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (f == 'open') Icon(Icons.warning_amber_rounded, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
-                    if (f == 'in_progress') Icon(Icons.access_time, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
-                    if (f == 'fixed') Icon(Icons.check_circle_outline, size: 14.sp, color: isSelected ? Colors.white : AppColors.darkText),
+                    if (f == 'open')
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 14.sp,
+                        color: isSelected ? Colors.white : AppColors.darkText,
+                      ),
+                    if (f == 'in_progress')
+                      Icon(
+                        Icons.access_time,
+                        size: 14.sp,
+                        color: isSelected ? Colors.white : AppColors.darkText,
+                      ),
+                    if (f == 'fixed')
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 14.sp,
+                        color: isSelected ? Colors.white : AppColors.darkText,
+                      ),
                     if (f != 'all') SizedBox(width: 6.w),
                     Text(
                       '${f.tr()} ($count)',
@@ -234,7 +256,12 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
     );
   }
 
-  Widget _buildSummaryVerticalCard({required String label, required String count, required Color color, required Color bgColor}) {
+  Widget _buildSummaryVerticalCard({
+    required String label,
+    required String count,
+    required Color color,
+    required Color bgColor,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 20.h),
       decoration: BoxDecoration(
@@ -272,7 +299,10 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         Center(
           child: Padding(
             padding: EdgeInsets.only(top: 40.h),
-            child: Text('no_tickets_found'.tr(), style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
+            child: Text(
+              'no_tickets_found'.tr(),
+              style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+            ),
           ),
         ),
       ];
@@ -284,15 +314,33 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
 
     List<Widget> sections = [];
     if (open.isNotEmpty) {
-      sections.add(_buildSectionHeader('open_issues'.tr(), const Color(0xFFF04438), Icons.warning_amber_rounded));
+      sections.add(
+        _buildSectionHeader(
+          'open_issues'.tr(),
+          const Color(0xFFF04438),
+          Icons.warning_amber_rounded,
+        ),
+      );
       sections.addAll(open.map((t) => _buildMaintenanceCard(t)));
     }
     if (inProgress.isNotEmpty) {
-      sections.add(_buildSectionHeader('in_progress'.tr(), const Color(0xFFF79009), Icons.access_time));
+      sections.add(
+        _buildSectionHeader(
+          'in_progress'.tr(),
+          const Color(0xFFF79009),
+          Icons.access_time,
+        ),
+      );
       sections.addAll(inProgress.map((t) => _buildMaintenanceCard(t)));
     }
     if (fixed.isNotEmpty) {
-      sections.add(_buildSectionHeader('fixed_issues'.tr(), const Color(0xFF12B76A), Icons.check_circle_outline));
+      sections.add(
+        _buildSectionHeader(
+          'fixed_issues'.tr(),
+          const Color(0xFF12B76A),
+          Icons.check_circle_outline,
+        ),
+      );
       sections.addAll(fixed.map((t) => _buildMaintenanceCard(t)));
     }
     return sections;
@@ -317,6 +365,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
       ),
     );
   }
+
   Widget _buildMaintenanceCard(Maintenance ticket) {
     String dateStr = '---';
     try {
@@ -355,7 +404,11 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                       color: const Color(0xFFF2F4F7),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: Icon(Icons.build_outlined, size: 22.sp, color: AppColors.darkText),
+                    child: Icon(
+                      Icons.build_outlined,
+                      size: 22.sp,
+                      color: AppColors.darkText,
+                    ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
@@ -372,7 +425,11 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'room_number_label'.tr(namedArgs: {'number': ticket.roomId ?? 'not_available'.tr()}),
+                          'room_number_label'.tr(
+                            namedArgs: {
+                              'number': ticket.roomId ?? 'not_available'.tr(),
+                            },
+                          ),
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColors.greyText,
@@ -398,7 +455,11 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios, size: 12.sp, color: AppColors.greyText),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 12.sp,
+                    color: AppColors.greyText,
+                  ),
                 ],
               ),
             ],
@@ -412,10 +473,20 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
     Color color;
     String label = status.replaceAll('_', ' ');
     switch (status.toUpperCase()) {
-      case 'OPEN': color = const Color(0xFFF04438); label = 'open'.tr(); break;
-      case 'IN_PROGRESS': color = const Color(0xFFF79009); label = 'in_progress'.tr(); break;
-      case 'RESOLVED': color = const Color(0xFF12B76A); label = 'fixed'.tr(); break;
-      default: color = AppColors.greyText;
+      case 'OPEN':
+        color = const Color(0xFFF04438);
+        label = 'open'.tr();
+        break;
+      case 'IN_PROGRESS':
+        color = const Color(0xFFF79009);
+        label = 'in_progress'.tr();
+        break;
+      case 'RESOLVED':
+        color = const Color(0xFF12B76A);
+        label = 'fixed'.tr();
+        break;
+      default:
+        color = AppColors.greyText;
     }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -428,7 +499,9 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            status.toUpperCase() == 'RESOLVED' ? Icons.check_circle_outline : Icons.error_outline,
+            status.toUpperCase() == 'RESOLVED'
+                ? Icons.check_circle_outline
+                : Icons.error_outline,
             size: 10.sp,
             color: color,
           ),
@@ -449,7 +522,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
   void _showIssueDetailsSheet(Maintenance ticket) {
     final maintenanceCubit = context.read<MaintenanceCubit>();
     String selectedStatus = ticket.status;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -459,229 +532,304 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         child: StatefulBuilder(
           builder: (context, setModalState) {
             return Container(
-            height: MediaQuery.of(context).size.height * 0.85,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(32.r),
-                topRight: Radius.circular(32.r),
-              ),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(top: 12.h),
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
+              height: MediaQuery.of(context).size.height * 0.85,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32.r),
+                  topRight: Radius.circular(32.r),
                 ),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 12.h),
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
 
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 16.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 16.h),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'issue_details'.tr(),
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkText,
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            _buildStatusBadge(ticket.status),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(
+                            Icons.close,
+                            color: AppColors.greyText,
+                            size: 24.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(20.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
+                                color: AppColors.roomCardBorder,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  ticket.title,
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.darkText,
+                                  ),
+                                ),
+                                SizedBox(height: 12.h),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on_outlined,
+                                      size: 16.sp,
+                                      color: AppColors.greyText,
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      'room_number_label'.tr(
+                                        namedArgs: {
+                                          'number':
+                                              ticket.roomId ??
+                                              'not_available'.tr(),
+                                        },
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: AppColors.greyText,
+                                      ),
+                                    ),
+                                    SizedBox(width: 16.w),
+                                    Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 16.sp,
+                                      color: const Color(0xFFF04438),
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      ticket.priority ?? 'high_priority'.tr(),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: const Color(0xFFF04438),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 24.h),
+
                           Text(
-                            'issue_details'.tr(),
+                            'timeline'.tr(),
                             style: TextStyle(
-                              fontSize: 18.sp,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
                               color: AppColors.darkText,
                             ),
                           ),
-                          SizedBox(height: 4.h),
-                          _buildStatusBadge(ticket.status),
+                          SizedBox(height: 12.h),
+                          Container(
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2F4F7),
+                              borderRadius: BorderRadius.circular(16.r),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(10.w),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFEF3F2),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.calendar_today_outlined,
+                                    color: const Color(0xFFB42318),
+                                    size: 18.sp,
+                                  ),
+                                ),
+                                SizedBox(width: 16.w),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'reported'.tr(),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.darkText,
+                                      ),
+                                    ),
+                                    Text(
+                                      _formatDate(ticket.createdAt),
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: AppColors.greyText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 24.h),
+
+                          Text(
+                            'update_status'.tr(),
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkText,
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          Row(
+                            children: [
+                              _buildStatusBox(
+                                'open'.tr(),
+                                Icons.cancel_outlined,
+                                selectedStatus == 'OPEN',
+                                const Color(0xFF2952A3),
+                                () => setModalState(
+                                  () => selectedStatus = 'OPEN',
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              _buildStatusBox(
+                                'in_progress'.tr(),
+                                Icons.build_outlined,
+                                selectedStatus == 'IN_PROGRESS',
+                                const Color(0xFF667085),
+                                () => setModalState(
+                                  () => selectedStatus = 'IN_PROGRESS',
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              _buildStatusBox(
+                                'fixed'.tr(),
+                                Icons.check_circle_outline,
+                                selectedStatus == 'RESOLVED',
+                                const Color(0xFF12B76A),
+                                () => setModalState(
+                                  () => selectedStatus = 'RESOLVED',
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 32.h),
                         ],
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.close, color: AppColors.greyText, size: 24.sp),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
 
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(20.w),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20.r),
-                            border: Border.all(color: AppColors.roomCardBorder),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                ticket.title,
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.darkText,
-                                ),
-                              ),
-                              SizedBox(height: 12.h),
-                              Row(
-                                children: [
-                                  Icon(Icons.location_on_outlined, size: 16.sp, color: AppColors.greyText),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    'room_number_label'.tr(namedArgs: {'number': ticket.roomId ?? 'not_available'.tr()}),
-                                    style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
-                                  ),
-                                  SizedBox(width: 16.w),
-                                  Icon(Icons.warning_amber_rounded, size: 16.sp, color: const Color(0xFFF04438)),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    ticket.priority ?? 'high_priority'.tr(),
-                                    style: TextStyle(fontSize: 14.sp, color: const Color(0xFFF04438), fontWeight: FontWeight.w500),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                  Container(
+                    padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -4),
                         ),
-                        SizedBox(height: 24.h),
-
-                        Text(
-                          'timeline'.tr(),
-                          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                        ),
-                        SizedBox(height: 12.h),
-                        Container(
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF2F4F7),
-                            borderRadius: BorderRadius.circular(16.r),
+                      ],
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.read<MaintenanceCubit>().updateIssue(
+                            ticket.id,
+                            status: selectedStatus,
+                          );
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF12B76A),
+                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
                           ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(10.w),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFEF3F2),
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                child: Icon(Icons.calendar_today_outlined, color: const Color(0xFFB42318), size: 18.sp),
-                              ),
-                              SizedBox(width: 16.w),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'reported'.tr(),
-                                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                                  ),
-                                  Text(
-                                    _formatDate(ticket.createdAt),
-                                    style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                          elevation: 0,
                         ),
-                        SizedBox(height: 24.h),
-
-                        Text(
-                          'update_status'.tr(),
-                          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                        ),
-                        SizedBox(height: 12.h),
-                        Row(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildStatusBox(
-                              'open'.tr(),
-                              Icons.cancel_outlined,
-                              selectedStatus == 'OPEN',
-                              const Color(0xFF2952A3),
-                              () => setModalState(() => selectedStatus = 'OPEN'),
+                            Icon(
+                              selectedStatus == 'RESOLVED'
+                                  ? Icons.check_circle_outline
+                                  : Icons.update,
+                              color: Colors.white,
+                              size: 20.sp,
                             ),
                             SizedBox(width: 8.w),
-                            _buildStatusBox(
-                              'in_progress'.tr(),
-                              Icons.build_outlined,
-                              selectedStatus == 'IN_PROGRESS',
-                              const Color(0xFF667085),
-                              () => setModalState(() => selectedStatus = 'IN_PROGRESS'),
-                            ),
-                            SizedBox(width: 8.w),
-                            _buildStatusBox(
-                              'fixed'.tr(),
-                              Icons.check_circle_outline,
-                              selectedStatus == 'RESOLVED',
-                              const Color(0xFF12B76A),
-                              () => setModalState(() => selectedStatus = 'RESOLVED'),
+                            Text(
+                              selectedStatus == 'RESOLVED'
+                                  ? 'mark_as_fixed'.tr()
+                                  : 'update_status'.tr(),
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 32.h),
-                      ],
-                    ),
-                  ),
-                ),
-
-                Container(
-                  padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -4)),
-                    ],
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.read<MaintenanceCubit>().updateIssue(ticket.id, status: selectedStatus);
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF12B76A),
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                        elevation: 0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            selectedStatus == 'RESOLVED' ? Icons.check_circle_outline : Icons.update,
-                            color: Colors.white,
-                            size: 20.sp,
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            selectedStatus == 'RESOLVED' ? 'mark_as_fixed'.tr() : 'update_status'.tr(),
-                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ],
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-  Widget _buildStatusBox(String label, IconData icon, bool isSelected, Color activeColor, VoidCallback onTap) {
+  Widget _buildStatusBox(
+    String label,
+    IconData icon,
+    bool isSelected,
+    Color activeColor,
+    VoidCallback onTap,
+  ) {
     return Expanded(
       child: Material(
         color: Colors.transparent,
@@ -693,11 +841,17 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
             decoration: BoxDecoration(
               color: isSelected ? activeColor : const Color(0xFFF9FAFB),
               borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: isSelected ? activeColor : AppColors.roomCardBorder),
+              border: Border.all(
+                color: isSelected ? activeColor : AppColors.roomCardBorder,
+              ),
             ),
             child: Column(
               children: [
-                Icon(icon, color: isSelected ? Colors.white : AppColors.greyText, size: 24.sp),
+                Icon(
+                  icon,
+                  color: isSelected ? Colors.white : AppColors.greyText,
+                  size: 24.sp,
+                ),
                 SizedBox(height: 8.h),
                 Text(
                   label,

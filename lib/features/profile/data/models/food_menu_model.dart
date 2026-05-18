@@ -16,23 +16,31 @@ class FoodMenuModel extends FoodMenu {
       if (mealData is Map) {
         final items = mealData['items'];
         if (items is List) {
-          return items.whereType<Map>().map((e) {
-            Map<String, String> parseMap(dynamic val) {
-              if (val is Map) {
-                return val.map((k, v) => MapEntry(k.toString(), v.toString()));
-              }
-              if (val is String) return {'en': val};
-              return {};
-            }
+          return items
+              .whereType<Map>()
+              .map((e) {
+                Map<String, String> parseMap(dynamic val) {
+                  if (val is Map) {
+                    return val.map(
+                      (k, v) => MapEntry(k.toString(), v.toString()),
+                    );
+                  }
+                  if (val is String) return {'en': val};
+                  return {};
+                }
 
-            return FoodItem(
-              name: parseMap(e['name']),
-              desc: parseMap(e['description']),
-              price: (e['price'] is num) ? (e['price'] as num).toDouble() : double.tryParse(e['price']?.toString() ?? '0') ?? 0.0,
-              isVeg: e['foodType'] == 'VEG' || e['foodType'] == null,
-              isActive: e['isAvailable'] ?? true,
-            );
-          }).where((item) => item.name.isNotEmpty).toList();
+                return FoodItem(
+                  name: parseMap(e['name']),
+                  desc: parseMap(e['description']),
+                  price: (e['price'] is num)
+                      ? (e['price'] as num).toDouble()
+                      : double.tryParse(e['price']?.toString() ?? '0') ?? 0.0,
+                  isVeg: e['foodType'] == 'VEG' || e['foodType'] == null,
+                  isActive: e['isAvailable'] ?? true,
+                );
+              })
+              .where((item) => item.name.isNotEmpty)
+              .toList();
         }
       }
       return [];
@@ -49,14 +57,17 @@ class FoodMenuModel extends FoodMenu {
   }
 
   Map<String, dynamic> toJson() {
-    List<Map<String, dynamic>> toItemObjects(List<FoodItem> items) =>
-        items.map((item) => {
-              'name': item.name,
-              'description': item.desc,
-              'price': item.price,
-              'foodType': item.isVeg ? 'VEG' : 'NON_VEG',
-              'isAvailable': item.isActive,
-            }).toList();
+    List<Map<String, dynamic>> toItemObjects(List<FoodItem> items) => items
+        .map(
+          (item) => {
+            'name': item.name,
+            'description': item.desc,
+            'price': item.price,
+            'foodType': item.isVeg ? 'VEG' : 'NON_VEG',
+            'isAvailable': item.isActive,
+          },
+        )
+        .toList();
 
     return {
       'hostelId': hostelId,

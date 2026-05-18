@@ -62,13 +62,20 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
           ? raw['data'] as Map<String, dynamic>
           : raw as Map<String, dynamic>;
       final items = (data['results'] ?? data['items']) as List<dynamic>? ?? [];
-      return await Isolate.run(() => items.map((j) => TenantModel.fromJson(j as Map<String, dynamic>)).toList());
+      return await Isolate.run(
+        () => items
+            .map((j) => TenantModel.fromJson(j as Map<String, dynamic>))
+            .toList(),
+      );
     }
     throw Exception('Failed to fetch tenants');
   }
 
   @override
-  Future<TenantDetailModel> getTenantDetail(String tenantId, String hostelId) async {
+  Future<TenantDetailModel> getTenantDetail(
+    String tenantId,
+    String hostelId,
+  ) async {
     AppLogger.info('Fetching tenant detail | ID: $tenantId');
     final response = await _dio.get(
       '${ApiConstants.tenantDetail}/$tenantId',
@@ -110,33 +117,42 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     };
     if (firstName != null && firstName.isNotEmpty) map['firstName'] = firstName;
     if (lastName != null && lastName.isNotEmpty) map['lastName'] = lastName;
-    if (sharingType != null && sharingType.isNotEmpty) map['sharingType'] = sharingType;
+    if (sharingType != null && sharingType.isNotEmpty) {
+      map['sharingType'] = sharingType;
+    }
     if (startDate != null && startDate.isNotEmpty) map['startDate'] = startDate;
     if (deposit != null) map['deposit'] = deposit;
 
     final formData = FormData.fromMap(map);
 
     if (userPhotoPath != null && userPhotoPath.isNotEmpty) {
-      formData.files.add(MapEntry(
-        'avatar',
-        await MultipartFile.fromFile(
-          userPhotoPath,
-          contentType: DioMediaType('image', 'jpeg'),
+      formData.files.add(
+        MapEntry(
+          'avatar',
+          await MultipartFile.fromFile(
+            userPhotoPath,
+            contentType: DioMediaType('image', 'jpeg'),
+          ),
         ),
-      ));
+      );
     }
 
     if (aadharPhotoPath != null && aadharPhotoPath.isNotEmpty) {
-      formData.files.add(MapEntry(
-        'aadharCard',
-        await MultipartFile.fromFile(
-          aadharPhotoPath,
-          contentType: DioMediaType('image', 'jpeg'),
+      formData.files.add(
+        MapEntry(
+          'aadharCard',
+          await MultipartFile.fromFile(
+            aadharPhotoPath,
+            contentType: DioMediaType('image', 'jpeg'),
+          ),
         ),
-      ));
+      );
     }
 
-    final response = await _dio.post(ApiConstants.tenantsManual, data: formData);
+    final response = await _dio.post(
+      ApiConstants.tenantsManual,
+      data: formData,
+    );
     if (response.statusCode != 200 && response.statusCode != 201) {
       final msg = response.data?['message'] ?? 'Failed to add tenant';
       throw Exception(msg);

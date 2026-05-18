@@ -21,7 +21,12 @@ class NetworkException extends AppException {
 
 class ServerException extends AppException {
   final int? statusCode;
-  ServerException({required super.message, this.statusCode, super.code, super.originalError});
+  ServerException({
+    required super.message,
+    this.statusCode,
+    super.code,
+    super.originalError,
+  });
 }
 
 class AuthException extends AppException {
@@ -29,7 +34,11 @@ class AuthException extends AppException {
 }
 
 class ValidationException extends AppException {
-  ValidationException({required super.message, super.code, super.originalError});
+  ValidationException({
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 }
 
 class CacheException extends AppException {
@@ -37,48 +46,78 @@ class CacheException extends AppException {
 }
 
 class UnexpectedException extends AppException {
-  UnexpectedException({required super.message, super.code, super.originalError});
+  UnexpectedException({
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 }
 
 class ErrorSanitizer {
   static final List<String> _technicalKeywords = [
-    'exception', 'error', 'stacktrace', 'null', 'undefined', 'mongoose', 'mongodb', 'sql',
-    'internal server', 'socket', 'connection', 'dio', 'firebase', 'unexpected', 'failed to',
-    'lookup', 'host lookup', 'invalid', 'argument', 'type cast', 'missing', 'field'
+    'exception',
+    'error',
+    'stacktrace',
+    'null',
+    'undefined',
+    'mongoose',
+    'mongodb',
+    'sql',
+    'internal server',
+    'socket',
+    'connection',
+    'dio',
+    'firebase',
+    'unexpected',
+    'failed to',
+    'lookup',
+    'host lookup',
+    'invalid',
+    'argument',
+    'type cast',
+    'missing',
+    'field',
   ];
 
   static String sanitize(String message) {
     if (message.isEmpty) return 'An unexpected error occurred.';
-    
+
     final lowerMessage = message.toLowerCase();
 
-    
-    if (lowerMessage.contains('room name already exists') || lowerMessage.contains('room already exists')) {
+    if (lowerMessage.contains('room name already exists') ||
+        lowerMessage.contains('room already exists')) {
       try {
         final val = 'room_exists_title'.tr();
         if (val != 'room_exists_title') return val;
       } catch (_) {}
       return 'Room Already Exists';
     }
-    
-    
+
     if (lowerMessage.contains("validation failed")) {
       return cleanMongooseMessage(message);
     }
-    
-    
-    bool isTechnical = _technicalKeywords.any((keyword) => lowerMessage.contains(keyword));
-    
-    
-    if (isTechnical || message.contains('[') || message.contains('{') || message.contains(':')) {
-      
-      if (lowerMessage.contains('not found') && !lowerMessage.contains('404')) return 'Requested item not found.';
-      if (lowerMessage.contains('already exists')) return 'This record already exists.';
-      if (lowerMessage.contains('invalid credentials')) return 'Invalid email or password.';
-      
+
+    bool isTechnical = _technicalKeywords.any(
+      (keyword) => lowerMessage.contains(keyword),
+    );
+
+    if (isTechnical ||
+        message.contains('[') ||
+        message.contains('{') ||
+        message.contains(':')) {
+      if (lowerMessage.contains('not found') && !lowerMessage.contains('404')) {
+        return 'Requested item not found.';
+      }
+      if (lowerMessage.contains('already exists')) {
+        return 'This record already exists.';
+      }
+      if (lowerMessage.contains('invalid credentials')) {
+        return 'Invalid email or password.';
+      }
+
       return 'Something went wrong. Please try again later.';
     }
-    
+
     return message;
   }
 
@@ -93,33 +132,43 @@ class ErrorSanitizer {
       if (lowerMsg.contains("email") && lowerMsg.contains("invalid")) {
         return "Please enter a valid email address.";
       }
-      
+
       String clean = msg;
-      clean = clean.replaceAll(RegExp(r'^.*validation failed:\s*', caseSensitive: false), '');
-      
-      clean = clean.replaceAllMapped(RegExp(r"Path\s+`([^`]+)`\s+is\s+required", caseSensitive: false), (match) {
-        final field = match.group(1) ?? 'field';
-        return "${_capitalize(field)} is required";
-      });
-      clean = clean.replaceAllMapped(RegExp(r"Path\s+`([^`]+)`\s+is\s+invalid", caseSensitive: false), (match) {
-        final field = match.group(1) ?? 'field';
-        return "${_capitalize(field)} is invalid";
-      });
-      
+      clean = clean.replaceAll(
+        RegExp(r'^.*validation failed:\s*', caseSensitive: false),
+        '',
+      );
+
+      clean = clean.replaceAllMapped(
+        RegExp(r"Path\s+`([^`]+)`\s+is\s+required", caseSensitive: false),
+        (match) {
+          final field = match.group(1) ?? 'field';
+          return "${_capitalize(field)} is required";
+        },
+      );
+      clean = clean.replaceAllMapped(
+        RegExp(r"Path\s+`([^`]+)`\s+is\s+invalid", caseSensitive: false),
+        (match) {
+          final field = match.group(1) ?? 'field';
+          return "${_capitalize(field)} is invalid";
+        },
+      );
+
       clean = clean.replaceAll(RegExp(r'\s*\([^)]*\)'), '');
-      
+
       clean = clean.replaceAllMapped(RegExp(r"(\w+):\s+\1\s+"), (match) {
         return "${match.group(1)}: ";
       });
-      
-      clean = clean.replaceAll("phone:", "Phone:")
-                   .replaceAll("mobile:", "Mobile:")
-                   .replaceAll("email:", "Email:")
-                   .replaceAll("firstName:", "First Name:")
-                   .replaceAll("lastName:", "Last Name:")
-                   .replaceAll("sharingType:", "Sharing Type:")
-                   .replaceAll("startDate:", "Start Date:");
-      
+
+      clean = clean
+          .replaceAll("phone:", "Phone:")
+          .replaceAll("mobile:", "Mobile:")
+          .replaceAll("email:", "Email:")
+          .replaceAll("firstName:", "First Name:")
+          .replaceAll("lastName:", "Last Name:")
+          .replaceAll("sharingType:", "Sharing Type:")
+          .replaceAll("startDate:", "Start Date:");
+
       clean = clean.trim();
       if (clean.endsWith(",") || clean.endsWith(".")) {
         clean = clean.substring(0, clean.length - 1);
@@ -205,7 +254,6 @@ class GlobalErrorMapper {
           }
         }
 
-        
         if (backendCode != null) {
           final translated = ErrorCodeDictionary.translate(backendCode);
           if (translated != null) {
@@ -215,7 +263,9 @@ class GlobalErrorMapper {
 
         if (statusCode == 401 || statusCode == 403) {
           return AuthException(
-            message: message.isNotEmpty ? message : 'Session expired. Please login again.',
+            message: message.isNotEmpty
+                ? message
+                : 'Session expired. Please login again.',
             code: backendCode ?? 'UNAUTHORIZED',
             originalError: e,
           );
@@ -271,7 +321,8 @@ class GlobalErrorMapper {
 class ErrorCodeDictionary {
   static final Map<String, String> _dictionary = {
     'BOOKING_ALREADY_EXISTS': 'This booking already exists in the system.',
-    'INSUFFICIENT_STOCK': 'Not enough items in stock to complete this operation.',
+    'INSUFFICIENT_STOCK':
+        'Not enough items in stock to complete this operation.',
     'INVALID_COUPON': 'The applied coupon is invalid or has expired.',
     'PAYMENT_FAILED': 'The payment could not be processed. Please try again.',
     'ROOM_NOT_AVAILABLE': 'The selected room is no longer available.',
@@ -279,7 +330,6 @@ class ErrorCodeDictionary {
     'UNAUTHORIZED_ACTION': 'You do not have permission to perform this action.',
   };
 
-  
   static String? translate(String code) {
     return _dictionary[code];
   }

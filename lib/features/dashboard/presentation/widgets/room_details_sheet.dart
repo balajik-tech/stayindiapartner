@@ -5,7 +5,6 @@ import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'bed_card.dart';
 import 'bed_details_sheet.dart';
 
-
 class RoomDetailsSheet extends StatefulWidget {
   final Room room;
   final String? initialBedNumber;
@@ -18,12 +17,21 @@ class RoomDetailsSheet extends StatefulWidget {
     this.initialBedNumber,
   });
 
-  static void show(BuildContext context, {required Room room, String? bedNumber, required String hostelId}) {
+  static void show(
+    BuildContext context, {
+    required Room room,
+    String? bedNumber,
+    required String hostelId,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => RoomDetailsSheet(room: room, initialBedNumber: bedNumber, hostelId: hostelId),
+      builder: (_) => RoomDetailsSheet(
+        room: room,
+        initialBedNumber: bedNumber,
+        hostelId: hostelId,
+      ),
     );
   }
 
@@ -67,7 +75,7 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
             ),
           ),
           SizedBox(height: 16.h),
-          
+
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
@@ -97,7 +105,10 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(8.r),
@@ -105,7 +116,9 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                   child: Row(
                     children: [
                       Icon(
-                        widget.room.roomType == 'AC' ? Icons.ac_unit_rounded : Icons.air_rounded,
+                        widget.room.roomType == 'AC'
+                            ? Icons.ac_unit_rounded
+                            : Icons.air_rounded,
                         size: 12.sp,
                         color: Colors.blue,
                       ),
@@ -124,16 +137,18 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
               ],
             ),
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           if (widget.room.features.isNotEmpty) ...[
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Wrap(
                 spacing: 8.w,
                 runSpacing: 8.h,
-                children: widget.room.features.map((feature) => _buildFeatureChip(feature)).toList(),
+                children: widget.room.features
+                    .map((feature) => _buildFeatureChip(feature))
+                    .toList(),
               ),
             ),
             SizedBox(height: 16.h),
@@ -150,9 +165,19 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
               ),
               child: Row(
                 children: [
-                  _buildPriceItem('Monthly Rent', '₹${widget.room.rent?.toStringAsFixed(0) ?? "0"}'),
-                  Container(width: 1, height: 24.h, color: const Color(0xFFE2E8F0)),
-                  _buildPriceItem('Daily Rent', '₹${widget.room.dailyRent?.toStringAsFixed(0) ?? "0"}'),
+                  _buildPriceItem(
+                    'Monthly Rent',
+                    '₹${widget.room.rent?.toStringAsFixed(0) ?? "0"}',
+                  ),
+                  Container(
+                    width: 1,
+                    height: 24.h,
+                    color: const Color(0xFFE2E8F0),
+                  ),
+                  _buildPriceItem(
+                    'Daily Rent',
+                    '₹${widget.room.dailyRent?.toStringAsFixed(0) ?? "0"}',
+                  ),
                 ],
               ),
             ),
@@ -216,7 +241,7 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
   Widget _buildFeatureChip(String feature) {
     IconData icon;
     String label = feature;
-    
+
     switch (feature.toLowerCase()) {
       case 'ac':
         icon = Icons.ac_unit_rounded;
@@ -301,8 +326,11 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
   }
 
   Widget _buildBedActionArea(BedInfo bed) {
-    final bool isOccupied = bed.status == 'OCCUPIED' || bed.status == 'AWAY' || bed.status == 'NOTICE';
-    
+    final bool isOccupied =
+        bed.status == 'OCCUPIED' ||
+        bed.status == 'AWAY' ||
+        bed.status == 'NOTICE';
+
     if (isOccupied) {
       return Container(
         padding: EdgeInsets.all(12.r),
@@ -362,7 +390,9 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                       tenantName: bed.tenantName,
                       profileImage: bed.tenantAvatar,
                       joiningDate: "01 May 2024",
-                      vacatingDate: bedStatus == BedStatus.notice ? "31 May 2024" : null,
+                      vacatingDate: bedStatus == BedStatus.notice
+                          ? "31 May 2024"
+                          : null,
                       tenantId: bed.tenantId,
                       hostelId: widget.hostelId,
                       roomNumber: widget.room.roomNumber,
@@ -372,7 +402,9 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F172A),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
                   elevation: 0,
                 ),
                 child: Text(
@@ -400,7 +432,11 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
             ),
             child: Row(
               children: [
-                Icon(Icons.check_circle_rounded, color: Colors.green.shade600, size: 18.sp),
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.green.shade600,
+                  size: 18.sp,
+                ),
                 SizedBox(width: 10.w),
                 Expanded(
                   child: Text(
@@ -431,7 +467,9 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                     tenantName: bed.tenantName,
                     profileImage: bed.tenantAvatar,
                     joiningDate: "01 May 2024",
-                    vacatingDate: bedStatus == BedStatus.notice ? "31 May 2024" : null,
+                    vacatingDate: bedStatus == BedStatus.notice
+                        ? "31 May 2024"
+                        : null,
                     tenantId: bed.tenantId,
                     hostelId: widget.hostelId,
                     roomNumber: widget.room.roomNumber,
@@ -441,7 +479,9 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
                 elevation: 0,
               ),
               child: Text(
@@ -468,7 +508,11 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
             ),
             child: Row(
               children: [
-                Icon(Icons.handyman_rounded, color: const Color(0xFF475569), size: 18.sp),
+                Icon(
+                  Icons.handyman_rounded,
+                  color: const Color(0xFF475569),
+                  size: 18.sp,
+                ),
                 SizedBox(width: 10.w),
                 Expanded(
                   child: Text(
@@ -516,7 +560,9 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFCBD5E1),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
                 elevation: 0,
               ),
               child: Text(
@@ -541,7 +587,11 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
         child: Center(
           child: Text(
             'Bed is ${bed.status}',
-            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: const Color(0xFF94A3B8)),
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
         ),
       );
@@ -563,4 +613,3 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
     }
   }
 }
-

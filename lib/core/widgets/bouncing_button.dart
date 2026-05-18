@@ -10,6 +10,7 @@ class BouncingButton extends StatelessWidget {
   final double? height;
   final double? elevation;
   final BorderRadiusGeometry? borderRadius;
+  final BoxBorder? border;
 
   const BouncingButton({
     super.key,
@@ -19,6 +20,7 @@ class BouncingButton extends StatelessWidget {
     this.height,
     this.elevation,
     this.borderRadius,
+    this.border,
   });
 
   @override
@@ -36,13 +38,14 @@ class BouncingButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: defaultBg,
           borderRadius: defaultRadius,
+          border: border,
           boxShadow: elevation != null && elevation! > 0
               ? [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: elevation!,
                     offset: Offset(0, elevation! / 2),
-                  )
+                  ),
                 ]
               : null,
         ),

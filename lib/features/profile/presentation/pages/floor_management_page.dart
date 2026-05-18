@@ -27,7 +27,11 @@ class FloorManagementPage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 18),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.darkText,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -40,13 +44,18 @@ class FloorManagementPage extends StatelessWidget {
         ),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(1.h),
-          child: Divider(height: 1, color: Colors.black.withValues(alpha: 0.05)),
+          child: Divider(
+            height: 1,
+            color: Colors.black.withValues(alpha: 0.05),
+          ),
         ),
       ),
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue));
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryBlue),
+            );
           }
 
           if (state is DashboardLoaded) {
@@ -65,11 +74,20 @@ class FloorManagementPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline_rounded, size: 40.sp, color: Colors.grey),
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 40.sp,
+                  color: Colors.grey,
+                ),
                 SizedBox(height: 12.h),
-                Text('failed_load_floors'.tr(), style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
+                Text(
+                  'failed_load_floors'.tr(),
+                  style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                ),
                 TextButton(
-                  onPressed: () => context.read<DashboardCubit>().fetchDashboardData(hostel.id),
+                  onPressed: () => context
+                      .read<DashboardCubit>()
+                      .fetchDashboardData(hostel.id),
                   child: Text('btn_retry'.tr()),
                 ),
               ],
@@ -83,10 +101,19 @@ class FloorManagementPage extends StatelessWidget {
 
   Widget _buildBottomAction(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, MediaQuery.of(context).padding.bottom > 0 ? MediaQuery.of(context).padding.bottom + 8.h : 24.h),
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        12.h,
+        20.w,
+        MediaQuery.of(context).padding.bottom > 0
+            ? MediaQuery.of(context).padding.bottom + 8.h
+            : 24.h,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
+        border: Border(
+          top: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+        ),
       ),
       child: BouncingWrapper(
         onTap: () {
@@ -135,7 +162,8 @@ class _FloorCard extends StatelessWidget {
   const _FloorCard({required this.floor, required this.hostel});
 
   String _getFloorDisplayName(BuildContext context) {
-    if (floor.floorName == 'basement' || (floor.floorNum != null && floor.floorNum! < 0)) {
+    if (floor.floorName == 'basement' ||
+        (floor.floorNum != null && floor.floorNum! < 0)) {
       final absNum = floor.floorNum != null ? floor.floorNum!.abs() : 1;
       if (absNum > 1) {
         return '${StringUtils.translate('basement', context: context)} $absNum';
@@ -169,7 +197,11 @@ class _FloorCard extends StatelessWidget {
                   color: AppColors.primaryBlue.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(Icons.layers_rounded, color: AppColors.primaryBlue, size: 18.sp),
+                child: Icon(
+                  Icons.layers_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 18.sp,
+                ),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -196,7 +228,11 @@ class _FloorCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.redAccent,
+                  size: 18,
+                ),
                 onPressed: () => _showDeleteFloorConfirmation(context),
               ),
             ],
@@ -232,7 +268,11 @@ class _FloorCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 4.w),
-                Icon(Icons.arrow_forward_rounded, color: AppColors.primaryBlue, size: 14.sp),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 14.sp,
+                ),
               ],
             ),
           ),
@@ -240,12 +280,20 @@ class _FloorCard extends StatelessWidget {
       ),
     );
   }
+
   void _showDeleteFloorConfirmation(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('delete_floor'.tr()),
-        content: Text('delete_floor_confirm'.tr(namedArgs: {'floor': floor.floorName, 'count': floor.rooms.length.toString()})),
+        content: Text(
+          'delete_floor_confirm'.tr(
+            namedArgs: {
+              'floor': floor.floorName,
+              'count': floor.rooms.length.toString(),
+            },
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -255,9 +303,15 @@ class _FloorCard extends StatelessWidget {
             onPressed: () {
               Navigator.pop(ctx);
               final roomIds = floor.rooms.map((r) => r.id).toList();
-              context.read<DashboardCubit>().deleteRoomsBulk(roomIds, hostel.id);
+              context.read<DashboardCubit>().deleteRoomsBulk(
+                roomIds,
+                hostel.id,
+              );
             },
-            child: Text('delete_all'.tr(), style: const TextStyle(color: Colors.red)),
+            child: Text(
+              'delete_all'.tr(),
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

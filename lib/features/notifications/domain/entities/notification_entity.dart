@@ -27,8 +27,8 @@ class NotificationEntity extends Equatable {
       message: json['message'] ?? '',
       type: json['type'] ?? 'SYSTEM',
       isRead: json['isRead'] ?? false,
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
     );
   }

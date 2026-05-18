@@ -12,14 +12,21 @@ class OffersCubit extends Cubit<OffersState> {
   Future<void> fetchOffers({String? hostelId, String? createdBy}) async {
     emit(OffersLoading());
     try {
-      final offers = await repository.getOffers(hostelId: hostelId, createdBy: createdBy);
+      final offers = await repository.getOffers(
+        hostelId: hostelId,
+        createdBy: createdBy,
+      );
       emit(OffersLoaded(offers));
     } catch (e) {
       emit(OffersError(GlobalErrorMapper.map(e).message));
     }
   }
 
-  Future<void> createOffer(OfferEntity offer, {String? refreshHostelId, String? refreshCreatedBy}) async {
+  Future<void> createOffer(
+    OfferEntity offer, {
+    String? refreshHostelId,
+    String? refreshCreatedBy,
+  }) async {
     emit(OffersLoading());
     try {
       await repository.createOffer(offer);
@@ -30,7 +37,12 @@ class OffersCubit extends Cubit<OffersState> {
     }
   }
 
-  Future<void> updateOffer(String id, Map<String, dynamic> updateData, {String? refreshHostelId, String? refreshCreatedBy}) async {
+  Future<void> updateOffer(
+    String id,
+    Map<String, dynamic> updateData, {
+    String? refreshHostelId,
+    String? refreshCreatedBy,
+  }) async {
     emit(OffersLoading());
     try {
       await repository.updateOffer(id, updateData);
@@ -41,7 +53,11 @@ class OffersCubit extends Cubit<OffersState> {
     }
   }
 
-  Future<void> deleteOffer(String id, {String? refreshHostelId, String? refreshCreatedBy}) async {
+  Future<void> deleteOffer(
+    String id, {
+    String? refreshHostelId,
+    String? refreshCreatedBy,
+  }) async {
     emit(OffersLoading());
     try {
       await repository.deleteOffer(id);

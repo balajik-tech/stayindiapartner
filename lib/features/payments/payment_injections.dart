@@ -7,18 +7,18 @@ import 'domain/usecases/payment_usecases.dart';
 import 'presentation/cubit/payment_cubit.dart';
 
 void registerPaymentFeature(GetIt sl) {
-  
-  sl.registerFactory(() => PaymentCubit(
-        getPaymentsUseCase: sl(),
-        createPaymentUseCase: sl(),
-        markPaymentPaidUseCase: sl(),
-        sendPaymentReminderUseCase: sl(),
-        sendBulkPaymentReminderUseCase: sl(),
-        getReminderHistoryUseCase: sl(),
-        getBillsUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => PaymentCubit(
+      getPaymentsUseCase: sl(),
+      createPaymentUseCase: sl(),
+      markPaymentPaidUseCase: sl(),
+      sendPaymentReminderUseCase: sl(),
+      sendBulkPaymentReminderUseCase: sl(),
+      getReminderHistoryUseCase: sl(),
+      getBillsUseCase: sl(),
+    ),
+  );
 
-  
   sl.registerLazySingleton(() => GetPaymentsUseCase(sl()));
   sl.registerLazySingleton(() => CreatePaymentUseCase(sl()));
   sl.registerLazySingleton(() => MarkPaymentPaidUseCase(sl()));
@@ -27,12 +27,10 @@ void registerPaymentFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetReminderHistoryUseCase(sl()));
   sl.registerLazySingleton(() => GetBillsUseCase(sl()));
 
-  
   sl.registerLazySingleton<PaymentRepository>(
     () => PaymentRepositoryImpl(remoteDataSource: sl()),
   );
 
-  
   sl.registerLazySingleton<PaymentRemoteDataSource>(
     () => PaymentRemoteDataSourceImpl(dio: sl<Dio>()),
   );

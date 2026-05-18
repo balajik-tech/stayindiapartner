@@ -13,7 +13,8 @@ class QuickAddTransactionPage extends StatefulWidget {
   const QuickAddTransactionPage({super.key, required this.propertyId});
 
   @override
-  State<QuickAddTransactionPage> createState() => _QuickAddTransactionPageState();
+  State<QuickAddTransactionPage> createState() =>
+      _QuickAddTransactionPageState();
 }
 
 class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
@@ -23,14 +24,21 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
   final _priceController = TextEditingController();
   final _totalController = TextEditingController();
   final _noteController = TextEditingController();
-  
+
   DateTime _selectedDate = DateTime.now();
   String _selectedCategory = 'Grocery';
   String _selectedUnit = 'kg';
   String _selectedPaymentMode = 'Cash';
   String? _selectedTeluguName;
-  
-  final List<String> _categories = ['Grocery', 'Perishables', 'Utilities', 'Maintenance', 'Staff', 'Misc'];
+
+  final List<String> _categories = [
+    'Grocery',
+    'Perishables',
+    'Utilities',
+    'Maintenance',
+    'Staff',
+    'Misc',
+  ];
   final List<String> _units = ['kg', 'liters', 'pieces', 'packets', 'units'];
   final List<String> _paymentModes = ['UPI', 'Cash', 'Bank Transfer'];
 
@@ -52,27 +60,30 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
   void _onItemSearch(String query) {
     final allItems = StockConstants.getAllItems();
     final langCode = context.locale.languageCode;
-    final match = allItems.firstWhere(
-      (item) {
-        final name = item['name']!.toLowerCase();
-        final nameTe = item['nameTelugu']?.toLowerCase() ?? '';
-        final nameHi = item['nameHindi']?.toLowerCase() ?? '';
-        final nameTa = item['nameTamil']?.toLowerCase() ?? '';
-        final nameKn = item['nameKannada']?.toLowerCase() ?? '';
-        final q = query.toLowerCase();
-        return name == q || nameTe == q || nameHi == q || nameTa == q || nameKn == q ||
-               StockConstants.getLocalizedName(item, langCode).toLowerCase() == q;
-      },
-      orElse: () => {},
-    );
+    final match = allItems.firstWhere((item) {
+      final name = item['name']!.toLowerCase();
+      final nameTe = item['nameTelugu']?.toLowerCase() ?? '';
+      final nameHi = item['nameHindi']?.toLowerCase() ?? '';
+      final nameTa = item['nameTamil']?.toLowerCase() ?? '';
+      final nameKn = item['nameKannada']?.toLowerCase() ?? '';
+      final q = query.toLowerCase();
+      return name == q ||
+          nameTe == q ||
+          nameHi == q ||
+          nameTa == q ||
+          nameKn == q ||
+          StockConstants.getLocalizedName(item, langCode).toLowerCase() == q;
+    }, orElse: () => {});
 
     if (match.isNotEmpty) {
       setState(() {
         _selectedCategory = match['category']!;
         _selectedUnit = match['unit']!;
-        _selectedTeluguName = langCode == 'en' ? null : StockConstants.getLocalizedName(match, langCode);
+        _selectedTeluguName = langCode == 'en'
+            ? null
+            : StockConstants.getLocalizedName(match, langCode);
         if (_nameController.text != match['name']) {
-           _nameController.text = match['name']!;
+          _nameController.text = match['name']!;
         }
       });
     } else {
@@ -86,9 +97,22 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
       (item) {
         final name = item.name.toLowerCase();
         final q = query.toLowerCase();
-        return name == q || (item.nameTelugu != null && item.nameTelugu!.toLowerCase() == q);
+        return name == q ||
+            (item.nameTelugu != null && item.nameTelugu!.toLowerCase() == q);
       },
-      orElse: () => StockItemModel(id: '', propertyId: '', name: '', category: '', unit: '', currentQuantity: 0, minimumThreshold: 0, pricePerUnit: 0, createdBy: '', createdAt: DateTime.now(), updatedAt: DateTime.now()), 
+      orElse: () => StockItemModel(
+        id: '',
+        propertyId: '',
+        name: '',
+        category: '',
+        unit: '',
+        currentQuantity: 0,
+        minimumThreshold: 0,
+        pricePerUnit: 0,
+        createdBy: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
     );
 
     if (existingMatch.id.isNotEmpty) {
@@ -103,10 +127,20 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
     return BlocListener<StockCubit, StockState>(
       listener: (context, state) {
         if (state is StockActionSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: const Color(0xFF10B981)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: const Color(0xFF10B981),
+            ),
+          );
           Navigator.pop(context);
         } else if (state is StockError) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.redAccent));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
         }
       },
       child: Scaffold(
@@ -120,7 +154,11 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
           ),
           title: Text(
             'Quick Entry',
-            style: TextStyle(color: const Color(0xFF1A1A1A), fontSize: 20.sp, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: const Color(0xFF1A1A1A),
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
         body: SingleChildScrollView(
@@ -132,16 +170,23 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
               children: [
                 _buildDateSelector(),
                 SizedBox(height: 24.h),
-                
+
                 _buildLabel('Item Name'),
                 _buildAutocompleteField(),
                 if (_selectedTeluguName != null)
                   Padding(
                     padding: EdgeInsets.only(top: 4.h, left: 4.w),
-                    child: Text(_selectedTeluguName!, style: TextStyle(fontSize: 14.sp, color: Colors.blueGrey, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      _selectedTeluguName!,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.blueGrey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 SizedBox(height: 24.h),
-                
+
                 Row(
                   children: [
                     Expanded(
@@ -149,7 +194,11 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLabel('Category'),
-                          _buildDropdown(_selectedCategory, _categories, (val) => setState(() => _selectedCategory = val!)),
+                          _buildDropdown(
+                            _selectedCategory,
+                            _categories,
+                            (val) => setState(() => _selectedCategory = val!),
+                          ),
                         ],
                       ),
                     ),
@@ -159,14 +208,18 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLabel('Unit'),
-                          _buildDropdown(_selectedUnit, _units, (val) => setState(() => _selectedUnit = val!)),
+                          _buildDropdown(
+                            _selectedUnit,
+                            _units,
+                            (val) => setState(() => _selectedUnit = val!),
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 24.h),
-                
+
                 Row(
                   children: [
                     Expanded(
@@ -174,7 +227,11 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLabel('Quantity'),
-                          _buildTextField(_quantityController, '0.0', keyboardType: TextInputType.number),
+                          _buildTextField(
+                            _quantityController,
+                            '0.0',
+                            keyboardType: TextInputType.number,
+                          ),
                         ],
                       ),
                     ),
@@ -184,25 +241,38 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLabel('Price/Unit (₹)'),
-                          _buildTextField(_priceController, '0.0', keyboardType: TextInputType.number),
+                          _buildTextField(
+                            _priceController,
+                            '0.0',
+                            keyboardType: TextInputType.number,
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 24.h),
-                
+
                 _buildLabel('Total Amount (₹)'),
-                _buildTextField(_totalController, '0.0', keyboardType: TextInputType.number, readOnly: true),
+                _buildTextField(
+                  _totalController,
+                  '0.0',
+                  keyboardType: TextInputType.number,
+                  readOnly: true,
+                ),
                 SizedBox(height: 24.h),
-                
+
                 _buildLabel('Payment Mode'),
                 _buildPaymentModeSelector(),
                 SizedBox(height: 24.h),
 
                 _buildLabel('Notes (Optional)'),
-                _buildTextField(_noteController, 'Add a note...', isOptional: true),
-                
+                _buildTextField(
+                  _noteController,
+                  'Add a note...',
+                  isOptional: true,
+                ),
+
                 SizedBox(height: 48.h),
                 _buildSubmitButton(),
               ],
@@ -233,14 +303,25 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_rounded, color: Color(0xFF2C5990), size: 20),
+            const Icon(
+              Icons.calendar_today_rounded,
+              color: Color(0xFF2C5990),
+              size: 20,
+            ),
             SizedBox(width: 12.w),
             Text(
               DateFormat('EEE, dd MMM yyyy').format(_selectedDate),
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A1A)),
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A1A),
+              ),
             ),
             const Spacer(),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: Color(0xFF64748B),
+            ),
           ],
         ),
       ),
@@ -250,10 +331,11 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
   Widget _buildAutocompleteField() {
     final allItems = StockConstants.getAllItems();
     final langCode = context.locale.languageCode;
-    
-    final currentValue = _nameController.text.isNotEmpty && 
-        allItems.any((item) => item['name'] == _nameController.text) 
-        ? _nameController.text 
+
+    final currentValue =
+        _nameController.text.isNotEmpty &&
+            allItems.any((item) => item['name'] == _nameController.text)
+        ? _nameController.text
         : null;
 
     return FormField<String>(
@@ -284,7 +366,9 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
-                    color: hasError ? Colors.red.shade400 : const Color(0xFFE2E8F0),
+                    color: hasError
+                        ? Colors.red.shade400
+                        : const Color(0xFFE2E8F0),
                     width: hasError ? 1.5 : 1.0,
                   ),
                   boxShadow: [
@@ -302,14 +386,20 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                         selectedItemName ?? 'Select Stock Item...',
                         style: TextStyle(
                           fontSize: 16.sp,
-                          fontWeight: selectedItemName != null ? FontWeight.w700 : FontWeight.w500,
-                          color: selectedItemName != null ? const Color(0xFF1A1A1A) : const Color(0xFF94A3B8),
+                          fontWeight: selectedItemName != null
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: selectedItemName != null
+                              ? const Color(0xFF1A1A1A)
+                              : const Color(0xFF94A3B8),
                         ),
                       ),
                     ),
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: hasError ? Colors.red.shade400 : const Color(0xFF64748B),
+                      color: hasError
+                          ? Colors.red.shade400
+                          : const Color(0xFF64748B),
                     ),
                   ],
                 ),
@@ -335,7 +425,10 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
     );
   }
 
-  void _showSearchableBottomSheet(BuildContext context, FormFieldState<String> formState) {
+  void _showSearchableBottomSheet(
+    BuildContext context,
+    FormFieldState<String> formState,
+  ) {
     final allItems = StockConstants.getAllItems();
     final langCode = context.locale.languageCode;
     final searchController = TextEditingController();
@@ -355,13 +448,16 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
               final nameTa = item['nameTamil']?.toLowerCase() ?? '';
               final nameKn = item['nameKannada']?.toLowerCase() ?? '';
               final q = searchVal.toLowerCase();
-              
-              return name.contains(q) || 
-                     nameTe.contains(q) || 
-                     nameHi.contains(q) || 
-                     nameTa.contains(q) || 
-                     nameKn.contains(q) ||
-                     StockConstants.getLocalizedName(item, langCode).toLowerCase().contains(q);
+
+              return name.contains(q) ||
+                  nameTe.contains(q) ||
+                  nameHi.contains(q) ||
+                  nameTa.contains(q) ||
+                  nameKn.contains(q) ||
+                  StockConstants.getLocalizedName(
+                    item,
+                    langCode,
+                  ).toLowerCase().contains(q);
             }).toList();
 
             return Container(
@@ -378,7 +474,9 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                 ],
               ),
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
+                bottom:
+                    MediaQuery.of(context).viewInsets.bottom +
+                    MediaQuery.of(context).padding.bottom,
               ),
               child: SafeArea(
                 top: false,
@@ -420,7 +518,9 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                         itemBuilder: (context, index) {
                           final item = filteredItems[index];
                           return ListTile(
-                            title: Text(StockConstants.getLocalizedName(item, langCode)),
+                            title: Text(
+                              StockConstants.getLocalizedName(item, langCode),
+                            ),
                             onTap: () {
                               _nameController.text = item['name']!;
                               _onItemSearch(item['name']!);
@@ -443,16 +543,31 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
   Widget _buildLabel(String text) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
-      child: Text(text, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF64748B),
+        ),
+      ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, {TextInputType? keyboardType, bool readOnly = false, bool isOptional = false}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hint, {
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    bool isOptional = false,
+  }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       readOnly: readOnly,
-      validator: isOptional ? null : (val) => val == null || val.isEmpty ? 'Required' : null,
+      validator: isOptional
+          ? null
+          : (val) => val == null || val.isEmpty ? 'Required' : null,
       decoration: InputDecoration(
         hintText: hint,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
@@ -461,18 +576,22 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
     );
   }
 
-  Widget _buildDropdown(String value, List<String> items, void Function(String?) onChanged) {
+  Widget _buildDropdown(
+    String value,
+    List<String> items,
+    void Function(String?) onChanged,
+  ) {
     return DropdownButtonFormField<String>(
       isExpanded: true,
       initialValue: value,
-      items: items.map((e) => DropdownMenuItem(
-        value: e,
-        child: Text(
-          e,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
-      )).toList(),
+      items: items
+          .map(
+            (e) => DropdownMenuItem(
+              value: e,
+              child: Text(e, overflow: TextOverflow.ellipsis, maxLines: 1),
+            ),
+          )
+          .toList(),
       onChanged: onChanged,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
@@ -505,7 +624,7 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
           if (_formKey.currentState!.validate()) {
             final qty = double.tryParse(_quantityController.text) ?? 0;
             final total = double.tryParse(_totalController.text) ?? 0;
-            
+
             context.read<StockCubit>().addTransaction(
               propertyId: widget.propertyId,
               itemName: _nameController.text,
@@ -520,10 +639,19 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
         },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.symmetric(vertical: 16.h),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
           backgroundColor: const Color(0xFF2C5990),
         ),
-        child: Text('Submit Entry', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+        child: Text(
+          'Submit Entry',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

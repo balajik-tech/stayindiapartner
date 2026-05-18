@@ -11,13 +11,16 @@ abstract class NotificationState extends Equatable {
 }
 
 class NotificationInitial extends NotificationState {}
+
 class NotificationLoading extends NotificationState {}
+
 class NotificationLoaded extends NotificationState {
   final List<NotificationEntity> notifications;
   const NotificationLoaded(this.notifications);
   @override
   List<Object?> get props => [notifications];
 }
+
 class NotificationError extends NotificationState {
   final String message;
   const NotificationError(this.message);
@@ -45,7 +48,7 @@ class NotificationCubit extends Cubit<NotificationState> {
       await repository.markAllAsRead();
       fetchNotifications();
     } catch (e) {
-      // ignore: empty_catches
+      // Failures marking notifications as read are caught silently to avoid interrupting the UI flow.
     }
   }
 }

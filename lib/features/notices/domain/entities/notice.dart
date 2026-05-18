@@ -9,7 +9,7 @@ class Notice {
   final String? noticeDate;
   final String vacatingDate;
   final String? reason;
-  final String status; 
+  final String status;
   final String? createdAt;
   final int? daysLeft;
 

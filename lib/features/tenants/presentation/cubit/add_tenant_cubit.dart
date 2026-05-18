@@ -18,11 +18,11 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     required GetRoomsByFloorUseCase getRoomsByFloorUseCase,
     required GetFreeBedsUseCase getFreeBedsUseCase,
     required AddTenantUseCase addTenantUseCase,
-  })  : _getFloors = getFloorsUseCase,
-        _getRoomsByFloor = getRoomsByFloorUseCase,
-        _getFreeBeds = getFreeBedsUseCase,
-        _addTenant = addTenantUseCase,
-        super(AddTenantInitial());
+  }) : _getFloors = getFloorsUseCase,
+       _getRoomsByFloor = getRoomsByFloorUseCase,
+       _getFreeBeds = getFreeBedsUseCase,
+       _addTenant = addTenantUseCase,
+       super(AddTenantInitial());
 
   void selectHostel(Hostel hostel) async {
     emit(const AddTenantLoading(message: "Loading floors..."));
@@ -38,44 +38,64 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     emit(const AddTenantLoading(message: "Loading rooms..."));
     try {
       final rooms = await _getRoomsByFloor(hostel.id, floor);
-      emit(AddTenantRoomsLoaded(
-        hostel: hostel,
-        floors: floors,
-        selectedFloor: floor,
-        rooms: rooms,
-      ));
+      emit(
+        AddTenantRoomsLoaded(
+          hostel: hostel,
+          floors: floors,
+          selectedFloor: floor,
+          rooms: rooms,
+        ),
+      );
     } catch (e) {
       emit(AddTenantError(ErrorHandler.getErrorMessage(e)));
     }
   }
 
-  void selectRoom(Hostel hostel, int floor, List<int> floors, RoomDetail room, List<RoomDetail> rooms) async {
+  void selectRoom(
+    Hostel hostel,
+    int floor,
+    List<int> floors,
+    RoomDetail room,
+    List<RoomDetail> rooms,
+  ) async {
     emit(const AddTenantLoading(message: "Loading beds..."));
     try {
       final beds = await _getFreeBeds(room.id);
-      emit(AddTenantBedsLoaded(
+      emit(
+        AddTenantBedsLoaded(
+          hostel: hostel,
+          floors: floors,
+          selectedFloor: floor,
+          rooms: rooms,
+          selectedRoom: room,
+          beds: beds,
+        ),
+      );
+    } catch (e) {
+      emit(AddTenantError(ErrorHandler.getErrorMessage(e)));
+    }
+  }
+
+  void selectBed(
+    Hostel hostel,
+    int floor,
+    List<int> floors,
+    RoomDetail room,
+    List<RoomDetail> rooms,
+    String bed,
+    List<String> beds,
+  ) {
+    emit(
+      AddTenantReady(
         hostel: hostel,
         floors: floors,
         selectedFloor: floor,
         rooms: rooms,
         selectedRoom: room,
         beds: beds,
-      ));
-    } catch (e) {
-      emit(AddTenantError(ErrorHandler.getErrorMessage(e)));
-    }
-  }
-
-  void selectBed(Hostel hostel, int floor, List<int> floors, RoomDetail room, List<RoomDetail> rooms, String bed, List<String> beds) {
-    emit(AddTenantReady(
-      hostel: hostel,
-      floors: floors,
-      selectedFloor: floor,
-      rooms: rooms,
-      selectedRoom: room,
-      beds: beds,
-      selectedBed: bed,
-    ));
+        selectedBed: bed,
+      ),
+    );
   }
 
   Future<void> submit({
@@ -103,7 +123,8 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         firstName: firstName,
         lastName: lastName,
         sharingType: sharingType,
-        startDate: "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}",
+        startDate:
+            "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}",
         deposit: deposit,
         userPhotoPath: userPhotoPath,
         aadharPhotoPath: aadharPhotoPath,

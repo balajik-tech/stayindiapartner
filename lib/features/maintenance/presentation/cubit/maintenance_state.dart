@@ -14,7 +14,8 @@ class MaintenanceLoading extends MaintenanceState {
 }
 
 class MaintenanceLoaded extends MaintenanceState {
-  const MaintenanceLoaded({required TicketSummary summary}) : super(summary: summary);
+  const MaintenanceLoaded({required TicketSummary summary})
+    : super(summary: summary);
 }
 
 class MaintenanceSaving extends MaintenanceState {

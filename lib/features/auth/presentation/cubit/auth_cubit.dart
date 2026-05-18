@@ -90,7 +90,9 @@ class AuthCubit extends Cubit<AuthState> {
     } on DioException catch (e) {
       final code = e.response?.statusCode;
       final responseStr = e.response?.data?.toString() ?? '';
-      final isUserNotFound = responseStr.contains('User not found') || responseStr.contains('Owner not found');
+      final isUserNotFound =
+          responseStr.contains('User not found') ||
+          responseStr.contains('Owner not found');
       if (code == 401 || code == 403 || code == 404 || isUserNotFound) {
         await _logout();
         emit(AuthUnauthenticated());
@@ -133,10 +135,24 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> verifyOtp(String phone, String otp) async {
+  Future<void> verifyOtp(
+    String phone,
+    String otp, {
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? avatar,
+  }) async {
     emit(AuthLoading());
     try {
-      final result = await _verifyOtp(phone, otp);
+      final result = await _verifyOtp(
+        phone,
+        otp,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        avatar: avatar,
+      );
       AppLogger.info(
         'AuthCubit: OTP verified for ${result.owner.id}. isNewUser: ${result.isNewUser}, isProfileComplete: ${result.owner.isProfileComplete}',
       );
@@ -151,6 +167,43 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> loginWithGoogle() async {
+    emit(AuthLoading());
+    try {
+      final result = await _repository.loginWithGoogle('OWNER');
+      if (result['needsPhone'] == true) {
+        final email = result['email']?.toString() ?? '';
+        final name = result['name']?.toString() ?? '';
+        final avatar = result['avatar']?.toString() ?? '';
+
+        final nameParts = name.split(' ');
+        final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+        final lastName = nameParts.length > 1
+            ? nameParts.sublist(1).join(' ')
+            : '';
+
+        emit(
+          AuthGoogleNeedsPhone(
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            avatar: avatar,
+          ),
+        );
+      } else {
+        final owner = await _getCurrentOwner();
+        emit(AuthAuthenticated(owner: owner, isNewUser: false));
+        _syncDeviceToken();
+        AppLogger.success(
+          'Google Login: Existing owner authenticated: ${owner.id}',
+        );
+      }
+    } catch (e) {
+      AppLogger.error('loginWithGoogle failed', e);
+      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
   Future<void> completeProfile(ProfileParams params) async {
     emit(AuthLoading());
     try {
@@ -158,7 +211,9 @@ class AuthCubit extends Cubit<AuthState> {
       if (params.avatarPath != null) {
         final imageFile = File(params.avatarPath!);
         if (!imageFile.existsSync()) {
-          AppLogger.warning('Avatar file no longer exists at ${params.avatarPath}. Submitting without image.');
+          AppLogger.warning(
+            'Avatar file no longer exists at ${params.avatarPath}. Submitting without image.',
+          );
           finalParams = ProfileParams(
             firstName: params.firstName,
             lastName: params.lastName,

@@ -41,18 +41,10 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            SliverToBoxAdapter(
-              child: _buildTopSection(),
-            ),
-            SliverToBoxAdapter(
-              child: _buildStatesSection(),
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(height: 48.h),
-            ),
-            SliverToBoxAdapter(
-              child: _buildBottomContent(),
-            ),
+            SliverToBoxAdapter(child: _buildTopSection()),
+            SliverToBoxAdapter(child: _buildStatesSection()),
+            SliverToBoxAdapter(child: SizedBox(height: 48.h)),
+            SliverToBoxAdapter(child: _buildBottomContent()),
             SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
@@ -79,10 +71,18 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                 shape: BoxShape.circle,
                 border: Border.all(color: const Color(0xFFF1F5F9)),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 4, offset: const Offset(0, 2)),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
                 ],
               ),
-              child: Icon(Icons.arrow_back_rounded, color: AppColors.darkText, size: 20.sp),
+              child: Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.darkText,
+                size: 20.sp,
+              ),
             ),
           ),
           SizedBox(height: 24.h),
@@ -127,14 +127,30 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                 _searchQuery = val;
                 _maxCount = 15;
               }),
-              style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w500, color: AppColors.darkText),
+              style: GoogleFonts.inter(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.darkText,
+              ),
               decoration: InputDecoration(
                 hintText: 'Search states...',
-                hintStyle: GoogleFonts.inter(color: Colors.grey.shade400, fontSize: 15.sp, fontWeight: FontWeight.w400),
-                prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20.sp),
+                hintStyle: GoogleFonts.inter(
+                  color: Colors.grey.shade400,
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w400,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: Colors.grey.shade400,
+                  size: 20.sp,
+                ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.close_rounded, color: Colors.grey.shade400, size: 18.sp),
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: Colors.grey.shade400,
+                          size: 18.sp,
+                        ),
                         onPressed: () {
                           _searchController.clear();
                           setState(() {
@@ -168,7 +184,9 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
     if (lower.contains('gujarat')) return Icons.pets_rounded;
     if (lower.contains('haryana')) return Icons.grass_rounded;
     if (lower.contains('himachal')) return Icons.landscape_rounded;
-    if (lower.contains('jammu') || lower.contains('kashmir')) return Icons.sailing_rounded;
+    if (lower.contains('jammu') || lower.contains('kashmir')) {
+      return Icons.sailing_rounded;
+    }
     if (lower.contains('jharkhand')) return Icons.waves_rounded;
     if (lower.contains('karnataka')) return Icons.castle_rounded;
     if (lower.contains('kerala')) return Icons.houseboat_rounded;
@@ -194,13 +212,54 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
     return Icons.location_on_rounded;
   }
 
+  Color _getStateColor(String name, int index) {
+    final colors = [
+      const Color(0xFF0284C7),
+      const Color(0xFF0D9488),
+      const Color(0xFF7C3AED),
+      const Color(0xFFEA580C),
+      const Color(0xFFE11D48),
+      const Color(0xFF16A34A),
+      const Color(0xFF4F46E5),
+      const Color(0xFFDB2777),
+      const Color(0xFFB45309),
+      const Color(0xFF06B6D4),
+      const Color(0xFF059669),
+      const Color(0xFFDC2626),
+      const Color(0xFF8B5CF6),
+      const Color(0xFFF43F5E),
+      const Color(0xFF6366F1),
+      const Color(0xFF84CC16),
+    ];
+    final hash = name.codeUnits.fold<int>(0, (prev, element) => prev + element);
+    return colors[(hash + index) % colors.length];
+  }
+
+  Color _getFeatureColor(int index) {
+    final colors = [
+      const Color(0xFF4F46E5),
+      const Color(0xFF0D9488),
+      const Color(0xFFB45309),
+      const Color(0xFFE11D48),
+      const Color(0xFF16A34A),
+      const Color(0xFF7C3AED),
+      const Color(0xFF0284C7),
+      const Color(0xFFEA580C),
+      const Color(0xFFDB2777),
+      const Color(0xFF059669),
+    ];
+    return colors[index % colors.length];
+  }
+
   Widget _buildStatesSection() {
     return BlocBuilder<AssociationCubit, AssociationState>(
       builder: (context, state) {
         if (state is AssociationLoading) {
           return Padding(
             padding: EdgeInsets.symmetric(vertical: 40.h),
-            child: const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue)),
+            child: const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryBlue),
+            ),
           );
         }
         if (state is AssociationLoaded) {
@@ -214,7 +273,13 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
             return Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 40.h),
-                child: Text('no_states_found'.tr(), style: GoogleFonts.inter(color: AppColors.greyText, fontSize: 15.sp)),
+                child: Text(
+                  'no_states_found'.tr(),
+                  style: GoogleFonts.inter(
+                    color: AppColors.greyText,
+                    fontSize: 15.sp,
+                  ),
+                ),
               ),
             );
           }
@@ -234,6 +299,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                   final s = displayStates[index];
                   final stateName = s['name'] as String? ?? '';
                   final stateIcon = _getStateIcon(stateName);
+                  final Color baseColor = _getStateColor(stateName, index);
 
                   return BouncingWrapper(
                     onTap: () {
@@ -248,29 +314,41 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                       );
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 14.h,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: const Color(0xFFF1F5F9)),
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: baseColor.withValues(alpha: 0.12),
+                          width: 1,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.02),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: baseColor.withValues(alpha: 0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.all(8.r),
+                            padding: EdgeInsets.all(10.r),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(color: const Color(0xFFF1F5F9)),
+                              color: baseColor.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(
+                                color: baseColor.withValues(alpha: 0.15),
+                              ),
                             ),
-                            child: Icon(stateIcon, color: AppColors.textPrimary, size: 18.sp),
+                            child: Icon(
+                              stateIcon,
+                              color: baseColor,
+                              size: 18.sp,
+                            ),
                           ),
                           SizedBox(width: 14.w),
                           Expanded(
@@ -279,17 +357,29 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                               children: [
                                 Text(
                                   stateName,
-                                  style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.darkText,
+                                  ),
                                 ),
-                                SizedBox(height: 2.h),
+                                SizedBox(height: 3.h),
                                 Text(
                                   'Active community',
-                                  style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w400, color: AppColors.greyText),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.greyText,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade300, size: 14.sp),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: baseColor.withValues(alpha: 0.4),
+                            size: 14.sp,
+                          ),
                         ],
                       ),
                     ),
@@ -397,7 +487,11 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
                         color: AppColors.accentOrange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6.r),
                       ),
-                      child: Icon(Icons.visibility_outlined, color: AppColors.accentOrange, size: 16.sp),
+                      child: Icon(
+                        Icons.visibility_outlined,
+                        color: AppColors.accentOrange,
+                        size: 16.sp,
+                      ),
                     ),
                     SizedBox(width: 10.w),
                     Text(
@@ -531,6 +625,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
           title: f['title'] as String,
           icon: f['icon'] as IconData,
           description: f['desc'] as String,
+          accentColor: _getFeatureColor(index),
         );
       },
     );
@@ -541,11 +636,13 @@ class _ExpandableFeatureItem extends StatefulWidget {
   final String title;
   final IconData icon;
   final String description;
+  final Color accentColor;
 
   const _ExpandableFeatureItem({
     required this.title,
     required this.icon,
     required this.description,
+    required this.accentColor,
   });
 
   @override
@@ -557,14 +654,22 @@ class _ExpandableFeatureItemState extends State<_ExpandableFeatureItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(
+          color: _isExpanded
+              ? widget.accentColor.withValues(alpha: 0.3)
+              : const Color(0xFFF1F5F9),
+          width: _isExpanded ? 1.5 : 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: _isExpanded
+                ? widget.accentColor.withValues(alpha: 0.04)
+                : Colors.black.withValues(alpha: 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -577,12 +682,12 @@ class _ExpandableFeatureItemState extends State<_ExpandableFeatureItem> {
           tilePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 0),
           minTileHeight: 56.h,
           leading: Container(
-            padding: EdgeInsets.all(6.r),
+            padding: EdgeInsets.all(8.r),
             decoration: BoxDecoration(
-              color: AppColors.accentOrange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6.r),
+              color: widget.accentColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(widget.icon, color: AppColors.accentOrange, size: 16.sp),
+            child: Icon(widget.icon, color: widget.accentColor, size: 16.sp),
           ),
           title: Text(
             widget.title,
@@ -593,8 +698,10 @@ class _ExpandableFeatureItemState extends State<_ExpandableFeatureItem> {
             ),
           ),
           trailing: Icon(
-            _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-            color: Colors.grey[400],
+            _isExpanded
+                ? Icons.keyboard_arrow_up_rounded
+                : Icons.keyboard_arrow_down_rounded,
+            color: _isExpanded ? widget.accentColor : Colors.grey[400],
             size: 20.sp,
           ),
           children: [

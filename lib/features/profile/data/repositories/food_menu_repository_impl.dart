@@ -15,13 +15,15 @@ class FoodMenuRepositoryImpl implements FoodMenuRepository {
 
   @override
   Future<void> saveFoodMenu(FoodMenu menu) {
-    return remoteDataSource.saveFoodMenu(FoodMenuModel(
-      hostelId: menu.hostelId,
-      day: menu.day,
-      breakfast: menu.breakfast,
-      lunch: menu.lunch,
-      dinner: menu.dinner,
-      snacks: menu.snacks,
-    ));
+    return remoteDataSource.saveFoodMenu(
+      FoodMenuModel(
+        hostelId: menu.hostelId,
+        day: menu.day,
+        breakfast: menu.breakfast,
+        lunch: menu.lunch,
+        dinner: menu.dinner,
+        snacks: menu.snacks,
+      ),
+    );
   }
 }

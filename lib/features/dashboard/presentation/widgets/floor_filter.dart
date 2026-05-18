@@ -35,7 +35,9 @@ class FloorFilter extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected ? const Color(0xFF2C599D) : Colors.white,
                   borderRadius: BorderRadius.circular(24.r),
-                  border: isSelected ? null : Border.all(color: const Color(0xFFE2E8F0)),
+                  border: isSelected
+                      ? null
+                      : Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Text(
                   floors[index],

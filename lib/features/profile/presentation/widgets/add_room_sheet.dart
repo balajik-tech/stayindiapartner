@@ -11,7 +11,12 @@ class AddRoomSheet extends StatefulWidget {
   final int? initialFloor;
   final Future<void> Function(Map<String, dynamic> data) onSave;
 
-  const AddRoomSheet({super.key, this.room, this.initialFloor, required this.onSave});
+  const AddRoomSheet({
+    super.key,
+    this.room,
+    this.initialFloor,
+    required this.onSave,
+  });
 
   static Future<void> show(
     BuildContext context, {
@@ -26,7 +31,11 @@ class AddRoomSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: roomCubit,
-        child: AddRoomSheet(room: room, initialFloor: initialFloor, onSave: onSave),
+        child: AddRoomSheet(
+          room: room,
+          initialFloor: initialFloor,
+          onSave: onSave,
+        ),
       ),
     );
   }
@@ -67,7 +76,6 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     '5 Sharing',
   ];
 
-
   static const Map<int, String> _floorLabels = {
     0: 'Ground Floor',
     1: '1st Floor',
@@ -95,10 +103,10 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
       text: room != null ? room.maintenance.toStringAsFixed(0) : '',
     );
     _selectedType = (room?.roomType == 'NON-AC') ? 'NON-AC' : 'AC';
-    _selectedSharingType = _sharingTypeMap[room?.sharingType] ?? _sharingTypes.first;
+    _selectedSharingType =
+        _sharingTypeMap[room?.sharingType] ?? _sharingTypes.first;
     _selectedFloor = widget.initialFloor ?? room?.floor ?? 0;
-    
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _onMappingChanged();
     });
@@ -109,8 +117,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
   void _onRentChanged() {
     final monthly = double.tryParse(_rentController.text) ?? 0;
     final currentDaily = double.tryParse(_dailyRentController.text) ?? 0;
-    
-    
+
     if (monthly > 0 && currentDaily == 0) {
       final daily = (monthly / 30).round();
       _dailyRentController.text = daily.toString();
@@ -137,8 +144,9 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
         '4 Sharing': 'QUADRUPLE',
         '5 Sharing': 'QUINTUPLE',
       };
-      
-      final backendSharingType = sharingTypeMap[_selectedSharingType] ?? _selectedSharingType;
+
+      final backendSharingType =
+          sharingTypeMap[_selectedSharingType] ?? _selectedSharingType;
 
       try {
         final template = state.rooms.firstWhere(
@@ -220,20 +228,34 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
           _buildHeader(isEditing),
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h),
+              padding: EdgeInsets.fromLTRB(
+                24.w,
+                8.h,
+                24.w,
+                MediaQuery.of(context).viewInsets.bottom +
+                    MediaQuery.of(context).padding.bottom +
+                    24.h,
+              ),
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Basic Details',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                    ),
                   ),
                   SizedBox(height: 16.h),
                   _buildLabel('Room Number / Name'),
-                  _buildPremiumTextField(_nameController, hint: 'e.g. Room 101'),
+                  _buildPremiumTextField(
+                    _nameController,
+                    hint: 'e.g. Room 101',
+                  ),
                   SizedBox(height: 24.h),
-                  
+
                   Row(
                     children: [
                       Expanded(
@@ -261,10 +283,16 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                               _buildLabel('Floor'),
                               _buildPremiumDropdown(
                                 value: _selectedFloor.toString(),
-                                items: _floorLabels.keys.map((k) => k.toString()).toList(),
-                                displayLabels: _floorLabels.map((k, v) => MapEntry(k.toString(), v)),
+                                items: _floorLabels.keys
+                                    .map((k) => k.toString())
+                                    .toList(),
+                                displayLabels: _floorLabels.map(
+                                  (k, v) => MapEntry(k.toString(), v),
+                                ),
                                 onChanged: (val) {
-                                  setState(() => _selectedFloor = int.parse(val!));
+                                  setState(
+                                    () => _selectedFloor = int.parse(val!),
+                                  );
                                   _onMappingChanged();
                                 },
                               ),
@@ -278,7 +306,11 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                   SizedBox(height: 32.h),
                   Text(
                     'Features',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                    ),
                   ),
                   SizedBox(height: 16.h),
                   Row(
@@ -320,7 +352,11 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                   SizedBox(height: 32.h),
                   Text(
                     'Financial Details',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                    ),
                   ),
                   SizedBox(height: 16.h),
                   _buildPriceInput(
@@ -346,7 +382,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                     controller: _maintenanceController,
                     enabled: !_hasMasterMaintenance,
                   ),
-                  
+
                   SizedBox(height: 40.h),
                   _buildSaveButton(isEditing),
                 ],
@@ -380,7 +416,11 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                 color: Colors.grey.shade50,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.close_rounded, color: AppColors.greyText, size: 20.sp),
+              child: Icon(
+                Icons.close_rounded,
+                color: AppColors.greyText,
+                size: 20.sp,
+              ),
             ),
           ),
         ],
@@ -402,7 +442,10 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     );
   }
 
-  Widget _buildPremiumTextField(TextEditingController controller, {required String hint}) {
+  Widget _buildPremiumTextField(
+    TextEditingController controller, {
+    required String hint,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -412,7 +455,11 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
       ),
       child: TextField(
         controller: controller,
-        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.darkText,
+        ),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
@@ -442,15 +489,27 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
           isExpanded: true,
           disabledHint: Text(
             displayLabels?[value] ?? value,
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.greyText),
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.greyText,
+            ),
           ),
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.greyText, size: 20.sp),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: AppColors.greyText,
+            size: 20.sp,
+          ),
           items: items.map((String item) {
             return DropdownMenuItem(
               value: item,
               child: Text(
                 displayLabels?[item] ?? item,
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.darkText,
+                ),
               ),
             );
           }).toList(),
@@ -460,7 +519,12 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     );
   }
 
-  Widget _buildFeatureIcon({required IconData icon, required String label, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildFeatureIcon({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -469,11 +533,21 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
             duration: const Duration(milliseconds: 200),
             padding: EdgeInsets.all(12.r),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.1) : Colors.grey.shade50,
+              color: isSelected
+                  ? AppColors.primaryBlue.withValues(alpha: 0.1)
+                  : Colors.grey.shade50,
               shape: BoxShape.circle,
-              border: Border.all(color: isSelected ? AppColors.primaryBlue : Colors.grey.shade200),
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primaryBlue
+                    : Colors.grey.shade200,
+              ),
             ),
-            child: Icon(icon, color: isSelected ? AppColors.primaryBlue : Colors.grey.shade400, size: 24.sp),
+            child: Icon(
+              icon,
+              color: isSelected ? AppColors.primaryBlue : Colors.grey.shade400,
+              size: 24.sp,
+            ),
           ),
           SizedBox(height: 8.h),
           Text(
@@ -489,14 +563,22 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     );
   }
 
-  Widget _buildPriceInput({required String label, required TextEditingController controller, bool enabled = true}) {
+  Widget _buildPriceInput({
+    required String label,
+    required TextEditingController controller,
+    bool enabled = true,
+  }) {
     return Row(
       children: [
         Expanded(
           flex: 2,
           child: Text(
             label,
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: enabled ? AppColors.darkText : AppColors.greyText),
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: enabled ? AppColors.darkText : AppColors.greyText,
+            ),
           ),
         ),
         Expanded(
@@ -506,11 +588,22 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
             decoration: BoxDecoration(
               color: enabled ? Colors.grey.shade50 : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: enabled ? Colors.grey.shade200 : const Color(0xFFE2E8F0)),
+              border: Border.all(
+                color: enabled ? Colors.grey.shade200 : const Color(0xFFE2E8F0),
+              ),
             ),
             child: Row(
               children: [
-                Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: enabled ? AppColors.primaryBlue : const Color(0xFF94A3B8))),
+                Text(
+                  '₹',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w900,
+                    color: enabled
+                        ? AppColors.primaryBlue
+                        : const Color(0xFF94A3B8),
+                  ),
+                ),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: TextField(
@@ -519,12 +612,21 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: '0',
-                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontSize: 14.sp,
+                      ),
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: enabled ? AppColors.darkText : const Color(0xFF64748B)),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: enabled
+                          ? AppColors.darkText
+                          : const Color(0xFF64748B),
+                    ),
                   ),
                 ),
               ],
@@ -561,12 +663,15 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                 await widget.onSave({
                   'roomTypename': _nameController.text.trim(),
                   'floor': _selectedFloor,
-                  'sharingType': sharingTypeMap[_selectedSharingType] ?? _selectedSharingType,
+                  'sharingType':
+                      sharingTypeMap[_selectedSharingType] ??
+                      _selectedSharingType,
                   'roomType': _selectedType,
                   'rent': double.tryParse(_rentController.text) ?? 0,
                   'dailyRent': double.tryParse(_dailyRentController.text) ?? 0,
                   'deposit': double.tryParse(_depositController.text) ?? 0,
-                  'maintenance': double.tryParse(_maintenanceController.text) ?? 0,
+                  'maintenance':
+                      double.tryParse(_maintenanceController.text) ?? 0,
                 });
 
                 if (mounted) {

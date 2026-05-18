@@ -36,29 +36,51 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildSectionHeader('room_config'.tr(), 'room_config_desc'.tr()),
+                  _buildSectionHeader(
+                    'room_config'.tr(),
+                    'room_config_desc'.tr(),
+                  ),
                   BouncingWrapper(
                     onTap: () {
                       HapticFeedback.mediumImpact();
                       _showCloneDialog(context);
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 8.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEDF2F7),
                         borderRadius: BorderRadius.circular(20.r),
-                        border: Border.all(color: const Color(0xFF2B5797).withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: const Color(0xFF2B5797).withValues(alpha: 0.3),
+                        ),
                         boxShadow: [
-                          BoxShadow(color: const Color(0xFF2B5797).withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))
+                          BoxShadow(
+                            color: const Color(
+                              0xFF2B5797,
+                            ).withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
                         ],
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.copy_all_rounded, color: const Color(0xFF2B5797), size: 16.sp),
+                          Icon(
+                            Icons.copy_all_rounded,
+                            color: const Color(0xFF2B5797),
+                            size: 16.sp,
+                          ),
                           SizedBox(width: 6.w),
                           Text(
                             'btn_clone'.tr().toUpperCase(),
-                            style: TextStyle(color: const Color(0xFF2B5797), fontSize: 10.sp, fontWeight: FontWeight.w900),
+                            style: TextStyle(
+                              color: const Color(0xFF2B5797),
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ],
                       ),
@@ -71,13 +93,22 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               child: state.rooms.isEmpty
                   ? _buildEmptyState()
                   : ListView.separated(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 8.h,
+                      ),
                       physics: const BouncingScrollPhysics(),
                       itemCount: state.rooms.length,
-                      separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 16.h),
                       itemBuilder: (context, index) {
                         final room = state.rooms[index];
-                        return _buildRoomCard(context, index, room, key: ValueKey('room_${room['roomNumber']}'));
+                        return _buildRoomCard(
+                          context,
+                          index,
+                          room,
+                          key: ValueKey('room_${room['roomNumber']}'),
+                        );
                       },
                     ),
             ),
@@ -124,24 +155,41 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               color: const Color(0xFFF1F5F9),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.meeting_room_rounded, size: 48.sp, color: const Color(0xFF94A3B8)),
+            child: Icon(
+              Icons.meeting_room_rounded,
+              size: 48.sp,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
           SizedBox(height: 24.h),
           Text(
             'no_rooms_found'.tr(),
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF1E293B),
+            ),
           ),
           SizedBox(height: 8.h),
           Text(
             'no_rooms_found_sub'.tr(),
-            style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: const Color(0xFF64748B),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRoomCard(BuildContext context, int index, Map<String, dynamic> room, {Key? key}) {
+  Widget _buildRoomCard(
+    BuildContext context,
+    int index,
+    Map<String, dynamic> room, {
+    Key? key,
+  }) {
     final state = context.watch<PropertySetupCubit>().state;
     final categories = state.roomCategories;
     final features = room['features'] as Map<String, dynamic>? ?? {};
@@ -155,21 +203,36 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           SizedBox(height: 20.h),
           Text(
             'sharing_type_label'.tr().toUpperCase(),
-            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF94A3B8),
+              letterSpacing: 0.5,
+            ),
           ),
           SizedBox(height: 12.h),
           _buildSharingSelector(context, index, room['sharingType'] ?? 2),
           SizedBox(height: 24.h),
           Text(
             'ROOM TYPE',
-            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF94A3B8),
+              letterSpacing: 0.5,
+            ),
           ),
           SizedBox(height: 12.h),
           _buildAcToggle(context, index, features['isAC'] ?? false),
           SizedBox(height: 24.h),
           Text(
             'beds_config'.tr().toUpperCase(),
-            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF94A3B8),
+              letterSpacing: 0.5,
+            ),
           ),
           SizedBox(height: 12.h),
           Wrap(
@@ -188,7 +251,12 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
     );
   }
 
-  Widget _buildRoomHeader(BuildContext context, int index, Map<String, dynamic> room, List<Map<String, dynamic>> categories) {
+  Widget _buildRoomHeader(
+    BuildContext context,
+    int index,
+    Map<String, dynamic> room,
+    List<Map<String, dynamic>> categories,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -201,12 +269,22 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                 color: const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(Icons.door_front_door_rounded, size: 18.sp, color: const Color(0xFF64748B)),
+              child: Icon(
+                Icons.door_front_door_rounded,
+                size: 18.sp,
+                color: const Color(0xFF64748B),
+              ),
             ),
             SizedBox(width: 12.w),
             Text(
-              'room_number_label'.tr(namedArgs: {'number': room['roomNumber'].toString()}),
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)),
+              'room_number_label'.tr(
+                namedArgs: {'number': room['roomNumber'].toString()},
+              ),
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF0F172A),
+              ),
             ),
           ],
         ),
@@ -219,7 +297,11 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           ),
           child: Text(
             _getFloorLabel(room['floor'].toString()),
-            style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8)),
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
         ),
       ],
@@ -247,7 +329,6 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
       ),
       child: Stack(
         children: [
-          
           if (selectedIndex != -1)
             AnimatedAlign(
               duration: const Duration(milliseconds: 350),
@@ -267,13 +348,13 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                         color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
-          
+
           Row(
             children: displayOptions.map((s) {
               final isSelected = selected == s;
@@ -294,7 +375,10 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                       }
                     } else if (!isSelected) {
                       HapticFeedback.mediumImpact();
-                      context.read<PropertySetupCubit>().updateRoomSharing(index, s as int);
+                      context.read<PropertySetupCubit>().updateRoomSharing(
+                        index,
+                        s as int,
+                      );
                     }
                   },
                   behavior: HitTestBehavior.opaque,
@@ -302,7 +386,9 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                     child: Text(
                       label,
                       style: TextStyle(
-                        color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                        color: isSelected
+                            ? const Color(0xFF2B5797)
+                            : const Color(0xFF64748B),
                         fontWeight: FontWeight.w900,
                         fontSize: 9.sp,
                         letterSpacing: -0.2,
@@ -333,7 +419,11 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               onTap: () {
                 if (!isAC) {
                   HapticFeedback.lightImpact();
-                  context.read<PropertySetupCubit>().updateRoomFeature(index, 'isAC', true);
+                  context.read<PropertySetupCubit>().updateRoomFeature(
+                    index,
+                    'isAC',
+                    true,
+                  );
                 }
               },
               child: Container(
@@ -357,13 +447,17 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                       Icon(
                         Icons.ac_unit_rounded,
                         size: 16.sp,
-                        color: isAC ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                        color: isAC
+                            ? const Color(0xFF2B5797)
+                            : const Color(0xFF64748B),
                       ),
                       SizedBox(width: 6.w),
                       Text(
                         'AC',
                         style: TextStyle(
-                          color: isAC ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                          color: isAC
+                              ? const Color(0xFF2B5797)
+                              : const Color(0xFF64748B),
                           fontWeight: FontWeight.w900,
                           fontSize: 12.sp,
                         ),
@@ -379,7 +473,11 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               onTap: () {
                 if (isAC) {
                   HapticFeedback.lightImpact();
-                  context.read<PropertySetupCubit>().updateRoomFeature(index, 'isAC', false);
+                  context.read<PropertySetupCubit>().updateRoomFeature(
+                    index,
+                    'isAC',
+                    false,
+                  );
                 }
               },
               child: Container(
@@ -403,13 +501,17 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                       Icon(
                         Icons.thermostat_rounded,
                         size: 16.sp,
-                        color: !isAC ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                        color: !isAC
+                            ? const Color(0xFF2B5797)
+                            : const Color(0xFF64748B),
                       ),
                       SizedBox(width: 6.w),
                       Text(
                         'Non-AC',
                         style: TextStyle(
-                          color: !isAC ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                          color: !isAC
+                              ? const Color(0xFF2B5797)
+                              : const Color(0xFF64748B),
                           fontWeight: FontWeight.w900,
                           fontSize: 12.sp,
                         ),
@@ -432,10 +534,14 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
 
   String _getFloorLabel(String floor) {
     if (floor == 'B') {
-      return 'basement_floor'.tr() == 'basement_floor' ? 'Basement' : 'basement_floor'.tr();
+      return 'basement_floor'.tr() == 'basement_floor'
+          ? 'Basement'
+          : 'basement_floor'.tr();
     }
     if (floor == 'G') {
-      return 'ground_floor'.tr() == 'ground_floor' ? 'Ground' : 'ground_floor'.tr();
+      return 'ground_floor'.tr() == 'ground_floor'
+          ? 'Ground'
+          : 'ground_floor'.tr();
     }
     return 'floor_label'.tr(namedArgs: {'floor': floor});
   }
@@ -446,7 +552,9 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
           title: Text(
             _translate('custom_sharing', 'Custom Sharing'),
             style: TextStyle(
@@ -461,7 +569,10 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
             children: [
               Text(
                 _translate('enter_sharing_number', 'Enter sharing number'),
-                style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B)),
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF64748B),
+                ),
               ),
               SizedBox(height: 12.h),
               TextField(
@@ -474,7 +585,10 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                   hintText: 'e.g. 6',
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -496,7 +610,10 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'cancel'.tr(),
-                style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             ElevatedButton(
@@ -507,7 +624,9 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2B5797),
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
               ),
               child: Text(
                 _translate('ok', 'OK'),
@@ -527,14 +646,35 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('clone_settings'.tr(), style: TextStyle(fontWeight: FontWeight.w900, color: const Color(0xFF0F172A))),
-        content: Text('clone_confirm_msg'.tr(namedArgs: {'room': state.rooms[0]['roomNumber'].toString()}),
-            style: TextStyle(fontWeight: FontWeight.w500, color: const Color(0xFF64748B))),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        title: Text(
+          'clone_settings'.tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF0F172A),
+          ),
+        ),
+        content: Text(
+          'clone_confirm_msg'.tr(
+            namedArgs: {'room': state.rooms[0]['roomNumber'].toString()},
+          ),
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF64748B),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('cancel'.tr(), style: TextStyle(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w700)),
+            child: Text(
+              'cancel'.tr(),
+              style: TextStyle(
+                color: const Color(0xFF94A3B8),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           Container(
             margin: EdgeInsets.only(left: 8.w),
@@ -543,15 +683,26 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                 context.read<PropertySetupCubit>().cloneRoomSettings(0);
                 Navigator.pop(dialogContext);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('settings_cloned_success'.tr()), backgroundColor: const Color(0xFF10B981)),
+                  SnackBar(
+                    content: Text('settings_cloned_success'.tr()),
+                    backgroundColor: const Color(0xFF10B981),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2B5797),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
                 elevation: 0,
               ),
-              child: Text('btn_clone_to_all'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+              child: Text(
+                'btn_clone_to_all'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
           ),
         ],

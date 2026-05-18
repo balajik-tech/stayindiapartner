@@ -22,10 +22,7 @@ class AppColors {
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF2B5797),
-      Color(0xFF1E3A68),
-    ],
+    colors: [Color(0xFF2B5797), Color(0xFF1E3A68)],
   );
 
   static const Color sosRed = Color(0xFFE53935);

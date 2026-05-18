@@ -62,34 +62,31 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _info == null
-                ? _buildErrorState()
-                : NestedScrollView(
-                    headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                      _buildSliverAppBar(),
-                      SliverPersistentHeader(
-                        pinned: true,
-                        delegate: _SliverAppBarDelegate(
-                          TabBar(
-                            labelColor: AppColors.primaryBlue,
-                            unselectedLabelColor: AppColors.greyText,
-                            indicatorColor: AppColors.primaryBlue,
-                            indicatorWeight: 3,
-                            labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                            tabs: [
-                              Tab(text: "news_tab".tr()),
-                              Tab(text: "about_tab".tr()),
-                            ],
-                          ),
+            ? _buildErrorState()
+            : NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  _buildSliverAppBar(),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _SliverAppBarDelegate(
+                      TabBar(
+                        labelColor: AppColors.primaryBlue,
+                        unselectedLabelColor: AppColors.greyText,
+                        indicatorColor: AppColors.primaryBlue,
+                        indicatorWeight: 3,
+                        labelStyle: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
                         ),
+                        tabs: [
+                          Tab(text: "news_tab".tr()),
+                          Tab(text: "about_tab".tr()),
+                        ],
                       ),
-                    ],
-                    body: TabBarView(
-                      children: [
-                        _buildNewsTab(),
-                        _buildAboutTab(),
-                      ],
                     ),
                   ),
+                ],
+                body: TabBarView(children: [_buildNewsTab(), _buildAboutTab()]),
+              ),
         floatingActionButton: _buildRedAlertButton(),
       ),
     );
@@ -103,7 +100,10 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       icon: const Icon(Icons.emergency_share_rounded, color: Colors.white),
       label: Text(
         "red_alert".tr(),
-        style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+        style: GoogleFonts.outfit(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -127,7 +127,14 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4.r),
       ),
-      child: Text(label, style: TextStyle(fontSize: 8.sp, color: color, fontWeight: FontWeight.bold)),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 8.sp,
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
@@ -148,41 +155,64 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           children: [
             _buildMiniTag("announcement_tag".tr(), AppColors.primaryBlue),
             SizedBox(height: 8.h),
-            Text("Monthly Association Meeting", style: GoogleFonts.outfit(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+            Text(
+              "Monthly Association Meeting",
+              style: GoogleFonts.outfit(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             SizedBox(height: 4.h),
-            Text("We will discuss the new government regulations for PGs.", style: GoogleFonts.outfit(color: AppColors.greyText)),
+            Text(
+              "We will discuss the new government regulations for PGs.",
+              style: GoogleFonts.outfit(color: AppColors.greyText),
+            ),
           ],
         ),
       ),
     );
   }
 
-
-
   Widget _buildAboutTab() {
     final members = _info?['members'] as List? ?? [];
     final description = _info?['description'] ?? 'No description provided.';
     final rules = _info?['rules'];
     final currentUserId = context.read<AuthCubit>().currentOwner?.id;
-    final isAdmin = (_info?['admins'] as List?)?.any((id) => id.toString() == currentUserId) ?? false;
+    final isAdmin =
+        (_info?['admins'] as List?)?.any(
+          (id) => id.toString() == currentUserId,
+        ) ??
+        false;
 
     return ListView(
       padding: EdgeInsets.all(24.w),
       children: [
         Text(
           "about_community".tr(),
-          style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+          style: GoogleFonts.outfit(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.darkText,
+          ),
         ),
         SizedBox(height: 12.h),
         Text(
           description,
-          style: GoogleFonts.outfit(fontSize: 14.sp, color: AppColors.greyText, height: 1.5),
+          style: GoogleFonts.outfit(
+            fontSize: 14.sp,
+            color: AppColors.greyText,
+            height: 1.5,
+          ),
         ),
         if (rules != null && rules.isNotEmpty) ...[
           SizedBox(height: 24.h),
           Text(
             "community_rules".tr(),
-            style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+            style: GoogleFonts.outfit(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.darkText,
+            ),
           ),
           SizedBox(height: 12.h),
           Container(
@@ -194,7 +224,11 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
             ),
             child: Text(
               rules,
-              style: GoogleFonts.outfit(fontSize: 14.sp, color: Colors.orange.shade900, height: 1.5),
+              style: GoogleFonts.outfit(
+                fontSize: 14.sp,
+                color: Colors.orange.shade900,
+                height: 1.5,
+              ),
             ),
           ),
         ],
@@ -203,13 +237,23 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "members_count".tr(namedArgs: {'count': members.length.toString()}),
-              style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+              "members_count".tr(
+                namedArgs: {'count': members.length.toString()},
+              ),
+              style: GoogleFonts.outfit(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.darkText,
+              ),
             ),
             if (isAdmin)
               Text(
                 "admin_view".tr(),
-                style: GoogleFonts.outfit(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                style: GoogleFonts.outfit(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryBlue,
+                ),
               ),
           ],
         ),
@@ -219,7 +263,11 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     );
   }
 
-  Widget _buildMemberItem(Map<String, dynamic> member, bool isRequesterAdmin, String? currentUserId) {
+  Widget _buildMemberItem(
+    Map<String, dynamic> member,
+    bool isRequesterAdmin,
+    String? currentUserId,
+  ) {
     final isOwner = member['isOwner'] ?? false;
     final isAdmin = member['isAdmin'] ?? false;
     final isMe = member['_id']?.toString() == currentUserId;
@@ -230,16 +278,20 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+        ),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 20.r,
-            backgroundImage: member['profileImage'] != null 
-              ? CachedNetworkImageProvider(member['profileImage']) 
-              : null,
-            child: member['profileImage'] == null ? const Icon(Icons.person) : null,
+            backgroundImage: member['profileImage'] != null
+                ? CachedNetworkImageProvider(member['profileImage'])
+                : null,
+            child: member['profileImage'] == null
+                ? const Icon(Icons.person)
+                : null,
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -250,28 +302,42 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                   children: [
                     Text(
                       member['name'] ?? 'User',
-                      style: GoogleFonts.outfit(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                      style: GoogleFonts.outfit(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkText,
+                      ),
                     ),
                     if (isMe) ...[
                       SizedBox(width: 4.w),
-                      Text("(You)", style: GoogleFonts.outfit(fontSize: 12.sp, color: AppColors.greyText)),
+                      Text(
+                        "(You)",
+                        style: GoogleFonts.outfit(
+                          fontSize: 12.sp,
+                          color: AppColors.greyText,
+                        ),
+                      ),
                     ],
                   ],
                 ),
                 if (isOwner || isAdmin)
-                    Padding(
-                      padding: EdgeInsets.only(top: 2.h),
-                      child: _buildMiniTag(
-                        isOwner ? "community_owner_tag".tr() : "admin_tag".tr(), 
-                        isOwner ? Colors.orange : AppColors.primaryBlue
-                      ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 2.h),
+                    child: _buildMiniTag(
+                      isOwner ? "community_owner_tag".tr() : "admin_tag".tr(),
+                      isOwner ? Colors.orange : AppColors.primaryBlue,
                     ),
+                  ),
               ],
             ),
           ),
           if (isRequesterAdmin && !isOwner && !isMe)
             IconButton(
-              icon: const Icon(Icons.person_remove_rounded, color: Colors.red, size: 20),
+              icon: const Icon(
+                Icons.person_remove_rounded,
+                color: Colors.red,
+                size: 20,
+              ),
               onPressed: () => _confirmRemoveMember(member),
             ),
         ],
@@ -283,10 +349,20 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("remove_member_title".tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: Text("remove_member_confirm".tr(namedArgs: {'name': member['name'] ?? 'User'})),
+        title: Text(
+          "remove_member_title".tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          "remove_member_confirm".tr(
+            namedArgs: {'name': member['name'] ?? 'User'},
+          ),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text("cancel".tr())),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("cancel".tr()),
+          ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
@@ -306,7 +382,10 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 );
               }
             },
-            child: Text("remove".tr(), style: const TextStyle(color: Colors.red)),
+            child: Text(
+              "remove".tr(),
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -326,13 +405,30 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
-          padding: EdgeInsets.only(left: 24.w, right: 24.w, top: 24.w, bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.w),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(32.r))),
+          padding: EdgeInsets.only(
+            left: 24.w,
+            right: 24.w,
+            top: 24.w,
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom +
+                MediaQuery.of(context).padding.bottom +
+                24.w,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("edit_community".tr(), style: GoogleFonts.outfit(fontSize: 22.sp, fontWeight: FontWeight.w800)),
+              Text(
+                "edit_community".tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               SizedBox(height: 24.h),
               _buildFieldLabel("community_name_label".tr()),
               TextField(
@@ -340,7 +436,10 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 decoration: InputDecoration(
                   fillColor: AppColors.backgroundGrey,
                   filled: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.r),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               SizedBox(height: 16.h),
@@ -351,7 +450,10 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 decoration: InputDecoration(
                   fillColor: AppColors.backgroundGrey,
                   filled: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.r),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               SizedBox(height: 16.h),
@@ -362,7 +464,10 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 decoration: InputDecoration(
                   fillColor: AppColors.backgroundGrey,
                   filled: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.r),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               SizedBox(height: 24.h),
@@ -370,23 +475,31 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 children: [
                   Expanded(
                     child: _buildImagePickerTile(
-                      "profile_photo".tr(), 
+                      "profile_photo".tr(),
                       localImagePath ?? _info?['image'],
                       () async {
-                        final file = await ImagePicker().pickImage(source: ImageSource.gallery);
-                        if (file != null) setModalState(() => localImagePath = file.path);
-                      }
+                        final file = await ImagePicker().pickImage(
+                          source: ImageSource.gallery,
+                        );
+                        if (file != null) {
+                          setModalState(() => localImagePath = file.path);
+                        }
+                      },
                     ),
                   ),
                   SizedBox(width: 16.w),
                   Expanded(
                     child: _buildImagePickerTile(
-                      "cover_photo".tr(), 
+                      "cover_photo".tr(),
                       localCoverPath ?? _info?['coverImage'],
                       () async {
-                        final file = await ImagePicker().pickImage(source: ImageSource.gallery);
-                        if (file != null) setModalState(() => localCoverPath = file.path);
-                      }
+                        final file = await ImagePicker().pickImage(
+                          source: ImageSource.gallery,
+                        );
+                        if (file != null) {
+                          setModalState(() => localCoverPath = file.path);
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -410,14 +523,24 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                       );
                       _loadInfo();
                     } catch (e) {
-                      messenger.showSnackBar(SnackBar(content: Text("Update failed: $e")));
+                      messenger.showSnackBar(
+                        SnackBar(content: Text("Update failed: $e")),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryBlue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
                   ),
-                  child: Text("save_changes".tr(), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    "save_changes".tr(),
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -427,11 +550,22 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     );
   }
 
-  Widget _buildImagePickerTile(String label, dynamic image, VoidCallback onTap) {
+  Widget _buildImagePickerTile(
+    String label,
+    dynamic image,
+    VoidCallback onTap,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.greyText)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.greyText,
+          ),
+        ),
         SizedBox(height: 8.h),
         BouncingWrapper(
           onTap: onTap,
@@ -440,16 +574,27 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
             decoration: BoxDecoration(
               color: AppColors.backgroundGrey,
               borderRadius: BorderRadius.circular(16.r),
-                    image: image != null 
-                      ? DecorationImage(
-                          image: image is String && image.startsWith('/') 
-                            ? ResizeImage(FileImage(File(image)), width: 160, height: 160)
-                            : CachedNetworkImageProvider(image),
-                          fit: BoxFit.cover
-                        )
-                      : null,
+              image: image != null
+                  ? DecorationImage(
+                      image: image is String && image.startsWith('/')
+                          ? ResizeImage(
+                              FileImage(File(image)),
+                              width: 160,
+                              height: 160,
+                            )
+                          : CachedNetworkImageProvider(image),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: image == null ? const Center(child: Icon(Icons.add_a_photo_rounded, color: AppColors.primaryBlue)) : null,
+            child: image == null
+                ? const Center(
+                    child: Icon(
+                      Icons.add_a_photo_rounded,
+                      color: AppColors.primaryBlue,
+                    ),
+                  )
+                : null,
           ),
         ),
       ],
@@ -461,7 +606,11 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline_rounded, color: Colors.red.shade300, size: 48.sp),
+          Icon(
+            Icons.error_outline_rounded,
+            color: Colors.red.shade300,
+            size: 48.sp,
+          ),
           SizedBox(height: 16.h),
           Text(
             'failed_load_community'.tr(),
@@ -508,26 +657,32 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               color: Colors.black.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
           ),
         ),
       ),
       actions: [
         if (_info != null)
-          Builder(builder: (context) {
-            final currentUserId = context.read<AuthCubit>().currentOwner?.id;
-            final isOwner = _info!['owner']?.toString() == currentUserId;
-            
-            if (!isOwner) return const SizedBox.shrink();
-            
-            return Padding(
-              padding: EdgeInsets.only(right: 8.w),
-              child: IconButton(
-                icon: const Icon(Icons.edit_rounded, color: Colors.white),
-                onPressed: _showEditCommunityDialog,
-              ),
-            );
-          }),
+          Builder(
+            builder: (context) {
+              final currentUserId = context.read<AuthCubit>().currentOwner?.id;
+              final isOwner = _info!['owner']?.toString() == currentUserId;
+
+              if (!isOwner) return const SizedBox.shrink();
+
+              return Padding(
+                padding: EdgeInsets.only(right: 8.w),
+                child: IconButton(
+                  icon: const Icon(Icons.edit_rounded, color: Colors.white),
+                  onPressed: _showEditCommunityDialog,
+                ),
+              );
+            },
+          ),
       ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
@@ -580,16 +735,20 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                   ),
                   Text(
                     _info?['status']?.toString().toUpperCase() == 'PENDING'
-                      ? 'verification_pending'.tr()
-                      : 'verified_network'.tr(),
+                        ? 'verification_pending'.tr()
+                        : 'verified_network'.tr(),
                     style: GoogleFonts.outfit(
                       fontSize: 14.sp,
-                      color: _info?['status']?.toString().toUpperCase() == 'PENDING'
-                        ? Colors.orange.shade300
-                        : Colors.white70,
-                      fontWeight: _info?['status']?.toString().toUpperCase() == 'PENDING'
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                      color:
+                          _info?['status']?.toString().toUpperCase() ==
+                              'PENDING'
+                          ? Colors.orange.shade300
+                          : Colors.white70,
+                      fontWeight:
+                          _info?['status']?.toString().toUpperCase() ==
+                              'PENDING'
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ],
@@ -600,10 +759,14 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       ),
     );
   }
+
   Widget _buildFieldLabel(String label) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
-      child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+      child: Text(
+        label,
+        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+      ),
     );
   }
 }
@@ -616,9 +779,14 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => _tabBar.preferredSize.height;
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(color: Colors.white, child: _tabBar);
   }
+
   @override
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) => false;
 }
@@ -641,7 +809,15 @@ class _RedAlertFormState extends State<_RedAlertForm> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 24.w, right: 24.w, top: 24.w, bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.w),
+      padding: EdgeInsets.only(
+        left: 24.w,
+        right: 24.w,
+        top: 24.w,
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            24.w,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
@@ -654,14 +830,30 @@ class _RedAlertFormState extends State<_RedAlertForm> {
             children: [
               const Icon(Icons.warning_amber_rounded, color: AppColors.sosRed),
               SizedBox(width: 8.w),
-              Text("raise_red_alert".tr(), style: GoogleFonts.outfit(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.sosRed)),
+              Text(
+                "raise_red_alert".tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.sosRed,
+                ),
+              ),
             ],
           ),
           SizedBox(height: 8.h),
-          Text("red_alert_broadcast_msg".tr(), style: TextStyle(color: AppColors.greyText, fontSize: 12.sp)),
+          Text(
+            "red_alert_broadcast_msg".tr(),
+            style: TextStyle(color: AppColors.greyText, fontSize: 12.sp),
+          ),
           SizedBox(height: 20.h),
           _buildFieldLabel("issue_type_label".tr()),
-          _buildDropdownField(["Safety", "Legal", "Health", "Utility", "Other"]),
+          _buildDropdownField([
+            "Safety",
+            "Legal",
+            "Health",
+            "Utility",
+            "Other",
+          ]),
           SizedBox(height: 16.h),
           _buildFieldLabel("description_label".tr()),
           TextField(
@@ -671,7 +863,10 @@ class _RedAlertFormState extends State<_RedAlertForm> {
               hintText: "emergency_hint".tr(),
               fillColor: AppColors.backgroundGrey,
               filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
           SizedBox(height: 24.h),
@@ -681,13 +876,30 @@ class _RedAlertFormState extends State<_RedAlertForm> {
             child: ElevatedButton(
               onPressed: _isBroadcasting ? null : _broadcastSOS,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.sosRed, 
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                disabledBackgroundColor: AppColors.sosRed.withValues(alpha: 0.5),
+                backgroundColor: AppColors.sosRed,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                disabledBackgroundColor: AppColors.sosRed.withValues(
+                  alpha: 0.5,
+                ),
               ),
-              child: _isBroadcasting 
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : Text("broadcast_sos_now".tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: _isBroadcasting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      "broadcast_sos_now".tr(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -697,7 +909,9 @@ class _RedAlertFormState extends State<_RedAlertForm> {
 
   Future<void> _broadcastSOS() async {
     if (_descController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("provide_desc_err".tr())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("provide_desc_err".tr())));
       return;
     }
 
@@ -732,7 +946,10 @@ class _RedAlertFormState extends State<_RedAlertForm> {
   Widget _buildFieldLabel(String label) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
-      child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
+      child: Text(
+        label,
+        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+      ),
     );
   }
 
@@ -747,7 +964,9 @@ class _RedAlertFormState extends State<_RedAlertForm> {
         child: DropdownButton<String>(
           isExpanded: true,
           value: _selectedType,
-          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          items: items
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
           onChanged: (v) {
             if (v != null) setState(() => _selectedType = v);
           },

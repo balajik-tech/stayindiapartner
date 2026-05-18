@@ -37,28 +37,31 @@ class _AuthGateState extends State<AuthGate> {
             current is! AuthError &&
             current is! AuthOtpSent,
         builder: (context, state) {
-          
           if (state is! AuthLoading && state is! AuthError) {
             _lastActiveState = state;
           }
 
-          
           final activeState = _lastActiveState ?? state;
 
-          if (activeState is AuthInitial || activeState is AuthSessionRestoring) {
+          if (activeState is AuthInitial ||
+              activeState is AuthSessionRestoring) {
             return const _SplashScreen();
           }
 
-          if (activeState is AuthAuthenticated || activeState is AuthProfileCompleted) {
-            final bool requiresRegistration = activeState is AuthAuthenticated ? activeState.requiresRegistration : false;
-            
+          if (activeState is AuthAuthenticated ||
+              activeState is AuthProfileCompleted) {
+            final bool requiresRegistration = activeState is AuthAuthenticated
+                ? activeState.requiresRegistration
+                : false;
+
             if (requiresRegistration) {
               return widget.registration;
             }
             return widget.dashboard;
           }
 
-          if (activeState is AuthUnauthenticated || activeState is AuthOtpSent) {
+          if (activeState is AuthUnauthenticated ||
+              activeState is AuthOtpSent) {
             context.read<HostelCubit>().reset();
             return const LoginPage();
           }
@@ -133,9 +136,10 @@ class _SessionErrorScreen extends StatelessWidget {
               Text(
                 'Connection Error',
                 style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText),
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
               ),
               SizedBox(height: 12.h),
               Text(
@@ -152,20 +156,23 @@ class _SessionErrorScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryBlue,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r)),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                     elevation: 0,
                   ),
-                  child: Text('Try Again',
-                      style:
-                          TextStyle(color: Colors.white, fontSize: 16.sp)),
+                  child: Text(
+                    'Try Again',
+                    style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                  ),
                 ),
               ),
               SizedBox(height: 12.h),
               TextButton(
                 onPressed: onLogin,
-                child: Text('Go to Login',
-                    style: TextStyle(
-                        fontSize: 14.sp, color: AppColors.greyText)),
+                child: Text(
+                  'Go to Login',
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
+                ),
               ),
             ],
           ),

@@ -4,7 +4,8 @@ import '../repositories/community_repository.dart';
 class GetCommunityDetailsUseCase {
   final CommunityRepository repository;
   GetCommunityDetailsUseCase(this.repository);
-  Future<CommunityDetailsEntity> call(String hostelId) => repository.getCommunityDetails(hostelId);
+  Future<CommunityDetailsEntity> call(String hostelId) =>
+      repository.getCommunityDetails(hostelId);
 }
 
 class GetCommunityMessagesUseCase {
@@ -14,39 +15,42 @@ class GetCommunityMessagesUseCase {
     String hostelId, {
     int limit = 50,
     String? before,
-  }) =>
-      repository.getMessages(hostelId, limit: limit, before: before);
+  }) => repository.getMessages(hostelId, limit: limit, before: before);
 }
 
 class SendCommunityMessageUseCase {
   final CommunityRepository repository;
   SendCommunityMessageUseCase(this.repository);
-  Future<void> call(String hostelId, String text) => repository.sendMessage(hostelId, text);
+  Future<void> call(String hostelId, String text) =>
+      repository.sendMessage(hostelId, text);
 }
 
 class SendCommunityImageUseCase {
   final CommunityRepository repository;
   SendCommunityImageUseCase(this.repository);
-  Future<void> call(String hostelId, String imagePath) => repository.sendImageMessage(hostelId, imagePath);
+  Future<void> call(String hostelId, String imagePath) =>
+      repository.sendImageMessage(hostelId, imagePath);
 }
 
 class GetAnnouncementsUseCase {
   final CommunityRepository repository;
   GetAnnouncementsUseCase(this.repository);
-  Future<List<AnnouncementEntity>> call(String hostelId) => repository.getAnnouncements(hostelId);
+  Future<List<AnnouncementEntity>> call(String hostelId) =>
+      repository.getAnnouncements(hostelId);
 }
 
 class PostAnnouncementUseCase {
   final CommunityRepository repository;
   PostAnnouncementUseCase(this.repository);
-  Future<void> call(String hostelId, String title, String content) => 
+  Future<void> call(String hostelId, String title, String content) =>
       repository.postAnnouncement(hostelId, title, content);
 }
 
 class GetOwnerDiscussionsUseCase {
   final CommunityRepository repository;
   GetOwnerDiscussionsUseCase(this.repository);
-  Future<List<OwnerDiscussionEntity>> call(String hostelId) => repository.getOwnerDiscussions(hostelId);
+  Future<List<OwnerDiscussionEntity>> call(String hostelId) =>
+      repository.getOwnerDiscussions(hostelId);
 }
 
 class CreateOwnerDiscussionUseCase {
@@ -129,7 +133,8 @@ class CreateOwnerCommunityUseCase {
 class GetPendingJoinRequestsUseCase {
   final CommunityRepository repository;
   GetPendingJoinRequestsUseCase(this.repository);
-  Future<List<Map<String, dynamic>>> call() => repository.getPendingJoinRequests();
+  Future<List<Map<String, dynamic>>> call() =>
+      repository.getPendingJoinRequests();
 }
 
 class HandleJoinRequestUseCase {
@@ -149,7 +154,8 @@ class HandleJoinRequestUseCase {
 class GetCommunityInfoUseCase {
   final CommunityRepository repository;
   GetCommunityInfoUseCase(this.repository);
-  Future<Map<String, dynamic>> call(String communityId) => repository.getCommunityInfo(communityId);
+  Future<Map<String, dynamic>> call(String communityId) =>
+      repository.getCommunityInfo(communityId);
 }
 
 class UpdateOwnerCommunityUseCase {
@@ -175,20 +181,22 @@ class UpdateOwnerCommunityUseCase {
 class GetAssociationsUseCase {
   final CommunityRepository repository;
   GetAssociationsUseCase(this.repository);
-  Future<List<Map<String, dynamic>>> call({String? parentId, String? level}) => 
+  Future<List<Map<String, dynamic>>> call({String? parentId, String? level}) =>
       repository.getAssociations(parentId: parentId, level: level);
 }
 
 class SearchAssociationsUseCase {
   final CommunityRepository repository;
   SearchAssociationsUseCase(this.repository);
-  Future<List<Map<String, dynamic>>> call(String query) => repository.searchAssociations(query);
+  Future<List<Map<String, dynamic>>> call(String query) =>
+      repository.searchAssociations(query);
 }
 
 class JoinAssociationUseCase {
   final CommunityRepository repository;
   JoinAssociationUseCase(this.repository);
-  Future<void> call(String associationId) => repository.joinAssociation(associationId);
+  Future<void> call(String associationId) =>
+      repository.joinAssociation(associationId);
 }
 
 class CreateAssociationUseCase {
@@ -210,15 +218,16 @@ class CreateAssociationUseCase {
 class GetSocialFeedUseCase {
   final CommunityRepository repository;
   GetSocialFeedUseCase(this.repository);
-  Future<List<SocialPostEntity>> call({int limit = 20, int skip = 0}) => repository.getSocialFeed(limit: limit, skip: skip);
+  Future<List<SocialPostEntity>> call({int limit = 20, int skip = 0}) =>
+      repository.getSocialFeed(limit: limit, skip: skip);
 }
 
 class CreateSocialPostUseCase {
   final CommunityRepository repository;
   CreateSocialPostUseCase(this.repository);
   Future<SocialPostEntity> call({
-    String? communityId, 
-    required String content, 
+    String? communityId,
+    required String content,
     String type = 'POST',
     String? imagePath,
     List<String>? pollOptions,
@@ -242,19 +251,25 @@ class TogglePostLikeUseCase {
 class GetPostCommentsUseCase {
   final CommunityRepository repository;
   GetPostCommentsUseCase(this.repository);
-  Future<List<Map<String, dynamic>>> call(String postId, {int limit = 20, int skip = 0}) => repository.getPostComments(postId, limit: limit, skip: skip);
+  Future<List<Map<String, dynamic>>> call(
+    String postId, {
+    int limit = 20,
+    int skip = 0,
+  }) => repository.getPostComments(postId, limit: limit, skip: skip);
 }
 
 class AddPostCommentUseCase {
   final CommunityRepository repository;
   AddPostCommentUseCase(this.repository);
-  Future<void> call(String postId, String text) => repository.addPostComment(postId, text);
+  Future<void> call(String postId, String text) =>
+      repository.addPostComment(postId, text);
 }
 
 class VotePollUseCase {
   final CommunityRepository repository;
   VotePollUseCase(this.repository);
-  Future<void> call(String postId, int optionIndex) => repository.votePoll(postId, optionIndex);
+  Future<void> call(String postId, int optionIndex) =>
+      repository.votePoll(postId, optionIndex);
 }
 
 class DeleteSocialPostUseCase {

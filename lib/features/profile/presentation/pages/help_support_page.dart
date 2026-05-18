@@ -247,9 +247,15 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             ),
           ),
           SizedBox(height: 16.h),
-          _buildLinkItem(StringUtils.translate('video_tutorials_link', context: context)),
-          _buildLinkItem(StringUtils.translate('user_guide_link', context: context)),
-          _buildLinkItem(StringUtils.translate('privacy_policy', context: context)),
+          _buildLinkItem(
+            StringUtils.translate('video_tutorials_link', context: context),
+          ),
+          _buildLinkItem(
+            StringUtils.translate('user_guide_link', context: context),
+          ),
+          _buildLinkItem(
+            StringUtils.translate('privacy_policy', context: context),
+          ),
         ],
       ),
     );

@@ -24,12 +24,16 @@ class StaffModel extends Staff {
       phone: json['phone']?.toString() ?? '',
       email: json['email']?.toString(),
       role: json['role']?.toString() ?? '',
-      permissions: json['permissions'] is Map ? Map<String, dynamic>.from(json['permissions']) : null,
+      permissions: json['permissions'] is Map
+          ? Map<String, dynamic>.from(json['permissions'])
+          : null,
       isActive: json['isActive'] == true,
       createdAt: json['createdAt']?.toString() ?? '',
       photo: json['photo']?.toString(),
-      paymentDetails: json['paymentDetails'] != null 
-          ? StaffPaymentDetailsModel.fromJson(Map<String, dynamic>.from(json['paymentDetails']))
+      paymentDetails: json['paymentDetails'] != null
+          ? StaffPaymentDetailsModel.fromJson(
+              Map<String, dynamic>.from(json['paymentDetails']),
+            )
           : null,
       salary: (json['salary'] as num?)?.toDouble() ?? 0.0,
     );
@@ -44,7 +48,8 @@ class StaffModel extends Staff {
       'permissions': permissions,
       'photo': photo,
       'salary': salary,
-      if (paymentDetails != null) 'paymentDetails': (paymentDetails as StaffPaymentDetailsModel).toJson(),
+      if (paymentDetails != null)
+        'paymentDetails': (paymentDetails as StaffPaymentDetailsModel).toJson(),
     };
   }
 }

@@ -33,7 +33,16 @@ class LocationFetched extends LocationState {
   });
 
   @override
-  List<Object?> get props => [address, area, city, state, district, pincode, latitude, longitude];
+  List<Object?> get props => [
+    address,
+    area,
+    city,
+    state,
+    district,
+    pincode,
+    latitude,
+    longitude,
+  ];
 }
 
 class LocationError extends LocationState {

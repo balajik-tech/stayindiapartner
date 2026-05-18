@@ -95,7 +95,9 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
     _selectedType = (room?.roomType == 'NON-AC') ? 'NON-AC' : 'AC';
     final rawSharing = room?.sharingType;
     if (rawSharing != null) {
-      if (rawSharing.toUpperCase() == 'DORMITORY' && room != null && room.capacity > 0) {
+      if (rawSharing.toUpperCase() == 'DORMITORY' &&
+          room != null &&
+          room.capacity > 0) {
         _selectedSharingType = '${room.capacity} Sharing';
       } else if (_sharingTypeMap.containsKey(rawSharing)) {
         _selectedSharingType = _sharingTypeMap[rawSharing]!;
@@ -112,7 +114,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
     } else {
       _selectedSharingType = _sharingTypes.first;
     }
-    
+
     _rentController.addListener(_onRentChanged);
   }
 
@@ -142,177 +144,194 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
 
     return Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom,
       ),
       child: Container(
         height: 0.85.sh,
         decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24.r),
+            topRight: Radius.circular(24.r),
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          _buildHeader(isEditing),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 24.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('sharing_type_req'.tr()),
-                            _buildDropdown(
-                              value: _selectedSharingType,
-                              items: (() {
-                                final list = List<String>.from(_sharingTypes);
-                                if (!list.contains(_selectedSharingType) && _selectedSharingType != 'Custom...') {
-                                  list.add(_selectedSharingType);
-                                }
-                                list.add('Custom...');
-                                return list;
-                              })(),
-                              displayLabels: {
-                                'Single Sharing': 'sharing_single'.tr(),
-                                '2 Sharing': 'sharing_double'.tr(),
-                                '3 Sharing': 'sharing_triple'.tr(),
-                                '4 Sharing': 'sharing_quad'.tr(),
-                                '5 Sharing': 'sharing_count'.tr(namedArgs: {'count': '5'}),
-                                'Custom...': _translate('custom_dots', 'Custom...'),
-                              },
-                              onChanged: (val) async {
-                                if (val == 'Custom...') {
-                                  final customVal = await _showCustomSharingDialog(context);
-                                  if (customVal != null && customVal > 0) {
+        child: Column(
+          children: [
+            _buildHeader(isEditing),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 24.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('sharing_type_req'.tr()),
+                              _buildDropdown(
+                                value: _selectedSharingType,
+                                items: (() {
+                                  final list = List<String>.from(_sharingTypes);
+                                  if (!list.contains(_selectedSharingType) &&
+                                      _selectedSharingType != 'Custom...') {
+                                    list.add(_selectedSharingType);
+                                  }
+                                  list.add('Custom...');
+                                  return list;
+                                })(),
+                                displayLabels: {
+                                  'Single Sharing': 'sharing_single'.tr(),
+                                  '2 Sharing': 'sharing_double'.tr(),
+                                  '3 Sharing': 'sharing_triple'.tr(),
+                                  '4 Sharing': 'sharing_quad'.tr(),
+                                  '5 Sharing': 'sharing_count'.tr(
+                                    namedArgs: {'count': '5'},
+                                  ),
+                                  'Custom...': _translate(
+                                    'custom_dots',
+                                    'Custom...',
+                                  ),
+                                },
+                                onChanged: (val) async {
+                                  if (val == 'Custom...') {
+                                    final customVal =
+                                        await _showCustomSharingDialog(context);
+                                    if (customVal != null && customVal > 0) {
+                                      setState(() {
+                                        _selectedSharingType =
+                                            '$customVal Sharing';
+                                        _errorMessage = null;
+                                      });
+                                    }
+                                  } else if (val != null) {
                                     setState(() {
-                                      _selectedSharingType = '$customVal Sharing';
+                                      _selectedSharingType = val;
                                       _errorMessage = null;
                                     });
                                   }
-                                } else if (val != null) {
-                                  setState(() {
-                                    _selectedSharingType = val;
-                                    _errorMessage = null;
-                                  });
-                                }
-                              },
-                            ),
-                          ],
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('room_type_req'.tr()),
-                            _buildDropdown(
-                              value: _selectedType,
-                              items: _roomTypes,
-                              displayLabels: {
-                                'AC': 'amenity_ac'.tr(),
-                                'NON-AC': 'amenity_non_ac'.tr(),
-                              },
-                              onChanged: (val) => setState(() {
-                                _selectedType = val!;
-                                _errorMessage = null;
-                              }),
-                            ),
-                          ],
+                        SizedBox(width: 16.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('room_type_req'.tr()),
+                              _buildDropdown(
+                                value: _selectedType,
+                                items: _roomTypes,
+                                displayLabels: {
+                                  'AC': 'amenity_ac'.tr(),
+                                  'NON-AC': 'amenity_non_ac'.tr(),
+                                },
+                                onChanged: (val) => setState(() {
+                                  _selectedType = val!;
+                                  _errorMessage = null;
+                                }),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 24.h),
-                  
-                  _buildLabel('financial_details'.tr()),
-                  SizedBox(height: 12.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          _rentController,
-                          label: 'monthly_rent'.tr(),
-                          hint: '0',
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: _buildTextField(
-                          _dailyRentController,
-                          label: 'daily_rent'.tr(),
-                          hint: '0',
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          _depositController,
-                          label: 'deposit'.tr(),
-                          hint: '0',
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: _buildTextField(
-                          _maintenanceController,
-                          label: 'maintenance'.tr(),
-                          hint: '0',
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (_errorMessage != null) ...[
+                      ],
+                    ),
                     SizedBox(height: 24.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEF2F2),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: const Color(0xFFFCA5A5)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.error_outline_rounded, color: const Color(0xFFDC2626), size: 20.sp),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: TextStyle(
-                                color: const Color(0xFF991B1B),
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w600,
+
+                    _buildLabel('financial_details'.tr()),
+                    SizedBox(height: 12.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            _rentController,
+                            label: 'monthly_rent'.tr(),
+                            hint: '0',
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: _buildTextField(
+                            _dailyRentController,
+                            label: 'daily_rent'.tr(),
+                            hint: '0',
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            _depositController,
+                            label: 'deposit'.tr(),
+                            hint: '0',
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: _buildTextField(
+                            _maintenanceController,
+                            label: 'maintenance'.tr(),
+                            hint: '0',
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_errorMessage != null) ...[
+                      SizedBox(height: 24.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: const Color(0xFFFCA5A5)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline_rounded,
+                              color: const Color(0xFFDC2626),
+                              size: 20.sp,
+                            ),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: TextStyle(
+                                  color: const Color(0xFF991B1B),
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
+                    SizedBox(height: 40.h),
+                    _buildSaveButton(isEditing),
+                    SizedBox(height: 30.h),
                   ],
-                  SizedBox(height: 40.h),
-                  _buildSaveButton(isEditing),
-                  SizedBox(height: 30.h),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -379,7 +398,10 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
             hintStyle: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
             filled: true,
             fillColor: const Color(0xFFF9FAFB),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 14.h,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: AppColors.roomCardBorder),
@@ -450,18 +472,23 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                   };
 
                   final mappedSharingType =
-                      sharingTypeMap[_selectedSharingType] ?? _selectedSharingType;
+                      sharingTypeMap[_selectedSharingType] ??
+                      _selectedSharingType;
 
-                  final generatedRoomTypename = '$_selectedSharingType $_selectedType';
+                  final generatedRoomTypename =
+                      '$_selectedSharingType $_selectedType';
 
                   if (!isEditing) {
                     final roomState = context.read<RoomCubit>().state;
                     if (roomState is RoomLoaded) {
-                      final backendMasterName = '$mappedSharingType $_selectedType';
-                      final exists = roomState.rooms.any((room) =>
-                          room.isMaster &&
-                          (room.roomTypename == generatedRoomTypename ||
-                           room.roomTypename == backendMasterName));
+                      final backendMasterName =
+                          '$mappedSharingType $_selectedType';
+                      final exists = roomState.rooms.any(
+                        (room) =>
+                            room.isMaster &&
+                            (room.roomTypename == generatedRoomTypename ||
+                                room.roomTypename == backendMasterName),
+                      );
 
                       if (exists) {
                         if (mounted) {
@@ -482,9 +509,11 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                     'sharingType': mappedSharingType,
                     'roomType': _selectedType,
                     'rent': double.tryParse(_rentController.text) ?? 0,
-                    'dailyRent': double.tryParse(_dailyRentController.text) ?? 0,
+                    'dailyRent':
+                        double.tryParse(_dailyRentController.text) ?? 0,
                     'deposit': double.tryParse(_depositController.text) ?? 0,
-                    'maintenance': double.tryParse(_maintenanceController.text) ?? 0,
+                    'maintenance':
+                        double.tryParse(_maintenanceController.text) ?? 0,
                   });
 
                   if (mounted) {
@@ -520,10 +549,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
               )
             : Text(
                 isEditing ? 'edit_room_master'.tr() : 'add_room_master'.tr(),
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
               ),
       ),
     );
@@ -540,7 +566,9 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
           title: Text(
             _translate('custom_sharing', 'Custom Sharing'),
             style: TextStyle(
@@ -563,12 +591,19 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 autofocus: true,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
                 decoration: InputDecoration(
                   hintText: 'e.g. 6',
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(color: AppColors.roomCardBorder),
@@ -590,7 +625,10 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'cancel'.tr(),
-                style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.greyText,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             ElevatedButton(
@@ -601,7 +639,9 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
               ),
               child: Text(
                 _translate('ok', 'OK'),
@@ -613,5 +653,4 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
       },
     );
   }
-
 }

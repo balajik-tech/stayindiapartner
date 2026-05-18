@@ -6,7 +6,7 @@ import '../utils/logger.dart';
 
 class OfflineAction {
   final String id;
-  final String type; 
+  final String type;
   final Map<String, dynamic> payload;
   final DateTime timestamp;
   final int retryCount;
@@ -22,22 +22,24 @@ class OfflineAction {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'type': type,
-        'payload': payload,
-        'timestamp': timestamp.toIso8601String(),
-        'retryCount': retryCount,
-        'lastAttempt': lastAttempt?.toIso8601String(),
-      };
+    'id': id,
+    'type': type,
+    'payload': payload,
+    'timestamp': timestamp.toIso8601String(),
+    'retryCount': retryCount,
+    'lastAttempt': lastAttempt?.toIso8601String(),
+  };
 
   factory OfflineAction.fromJson(Map<String, dynamic> json) => OfflineAction(
-        id: json['id'],
-        type: json['type'],
-        payload: Map<String, dynamic>.from(json['payload']),
-        timestamp: DateTime.parse(json['timestamp']),
-        retryCount: json['retryCount'] ?? 0,
-        lastAttempt: json['lastAttempt'] != null ? DateTime.parse(json['lastAttempt']) : null,
-      );
+    id: json['id'],
+    type: json['type'],
+    payload: Map<String, dynamic>.from(json['payload']),
+    timestamp: DateTime.parse(json['timestamp']),
+    retryCount: json['retryCount'] ?? 0,
+    lastAttempt: json['lastAttempt'] != null
+        ? DateTime.parse(json['lastAttempt'])
+        : null,
+  );
 }
 
 class OfflineQueueService {
@@ -55,7 +57,7 @@ class OfflineQueueService {
 
   Future<void> enqueueAction(String type, Map<String, dynamic> payload) async {
     final box = await _getBox();
-    
+
     final newAction = OfflineAction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       type: type,
@@ -64,13 +66,15 @@ class OfflineQueueService {
     );
 
     await box.put(newAction.id, newAction.toJson());
-    AppLogger.info('[OFFLINE QUEUE] Queued action: $type for path: ${payload['path']}');
+    AppLogger.info(
+      '[OFFLINE QUEUE] Queued action: $type for path: ${payload['path']}',
+    );
   }
 
   Future<List<OfflineAction>> getPendingActions() async {
     final box = await _getBox();
     final List<OfflineAction> actions = [];
-    
+
     for (var key in box.keys) {
       final value = box.get(key);
       if (value != null) {
@@ -81,7 +85,7 @@ class OfflineQueueService {
         }
       }
     }
-    
+
     actions.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     return actions;
   }
@@ -103,10 +107,14 @@ class OfflineQueueService {
   }
 
   void startSyncListener(Dio dio) {
-    AppLogger.info('[OFFLINE QUEUE] Listening for connectivity changes to sync queue...');
+    AppLogger.info(
+      '[OFFLINE QUEUE] Listening for connectivity changes to sync queue...',
+    );
     Connectivity().onConnectivityChanged.listen((results) {
       if (!results.contains(ConnectivityResult.none)) {
-        AppLogger.info('[OFFLINE QUEUE] Internet connection restored, starting sync...');
+        AppLogger.info(
+          '[OFFLINE QUEUE] Internet connection restored, starting sync...',
+        );
         syncOfflineQueue(dio);
       }
     });
@@ -123,74 +131,89 @@ class OfflineQueueService {
         return;
       }
 
-      AppLogger.info('[OFFLINE QUEUE] Replaying ${actions.length} pending actions...');
+      AppLogger.info(
+        '[OFFLINE QUEUE] Replaying ${actions.length} pending actions...',
+      );
 
       for (var action in actions) {
-        
         if (action.lastAttempt != null) {
-          final timeSinceLastAttempt = DateTime.now().toUtc().difference(action.lastAttempt!);
+          final timeSinceLastAttempt = DateTime.now().toUtc().difference(
+            action.lastAttempt!,
+          );
           final requiredDelay = Duration(seconds: 5 * action.retryCount);
           if (timeSinceLastAttempt < requiredDelay) {
-            AppLogger.info('[OFFLINE QUEUE] Skipping action ${action.id} due to retry throttle (retry count: ${action.retryCount})');
+            AppLogger.info(
+              '[OFFLINE QUEUE] Skipping action ${action.id} due to retry throttle (retry count: ${action.retryCount})',
+            );
             continue;
           }
         }
 
-        
         final connectivityResult = await Connectivity().checkConnectivity();
         if (connectivityResult.contains(ConnectivityResult.none)) {
-          AppLogger.warning('[OFFLINE QUEUE] Internet lost during sync. Stopping sync.');
+          AppLogger.warning(
+            '[OFFLINE QUEUE] Internet lost during sync. Stopping sync.',
+          );
           break;
         }
 
         bool success = false;
         try {
           final payload = action.payload;
-          
-          AppLogger.info('[OFFLINE QUEUE] Replaying action ${action.id}: ${payload['method']} ${payload['path']}');
-          
+
+          AppLogger.info(
+            '[OFFLINE QUEUE] Replaying action ${action.id}: ${payload['method']} ${payload['path']}',
+          );
+
           final response = await dio.request(
             payload['path'],
             data: payload['data'],
-            queryParameters: payload['queryParameters'] != null 
-                ? Map<String, dynamic>.from(payload['queryParameters']) 
+            queryParameters: payload['queryParameters'] != null
+                ? Map<String, dynamic>.from(payload['queryParameters'])
                 : null,
             options: Options(
               method: payload['method'],
-              headers: payload['headers'] != null 
-                  ? Map<String, dynamic>.from(payload['headers']) 
+              headers: payload['headers'] != null
+                  ? Map<String, dynamic>.from(payload['headers'])
                   : null,
             ),
           );
 
-          if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+          if (response.statusCode != null &&
+              response.statusCode! >= 200 &&
+              response.statusCode! < 300) {
             success = true;
-            AppLogger.info('[OFFLINE QUEUE] Replay succeeded for action ${action.id}');
+            AppLogger.info(
+              '[OFFLINE QUEUE] Replay succeeded for action ${action.id}',
+            );
           }
         } on DioException catch (de) {
           final statusCode = de.response?.statusCode;
           if (statusCode != null) {
             if (statusCode >= 400 && statusCode < 500) {
-              
-              
               success = true;
-              AppLogger.warning('[OFFLINE QUEUE] Replay failed with status $statusCode. Removing invalid request from queue.');
+              AppLogger.warning(
+                '[OFFLINE QUEUE] Replay failed with status $statusCode. Removing invalid request from queue.',
+              );
             } else {
-              
-              AppLogger.error('[OFFLINE QUEUE] Replay failed with server error $statusCode. Keeping in queue for retry.');
+              AppLogger.error(
+                '[OFFLINE QUEUE] Replay failed with server error $statusCode. Keeping in queue for retry.',
+              );
             }
           } else {
-            
-            AppLogger.error('[OFFLINE QUEUE] Replay failed with network error. Keeping in queue for retry.');
+            AppLogger.error(
+              '[OFFLINE QUEUE] Replay failed with network error. Keeping in queue for retry.',
+            );
           }
         } catch (e) {
-          AppLogger.error('[OFFLINE QUEUE] Replay failed with unexpected error: $e. Keeping in queue.');
+          AppLogger.error(
+            '[OFFLINE QUEUE] Replay failed with unexpected error: $e. Keeping in queue.',
+          );
         }
 
         if (success) {
           await removeAction(action.id);
         } else {
-          
           final updatedAction = OfflineAction(
             id: action.id,
             type: action.type,

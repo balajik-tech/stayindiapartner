@@ -8,13 +8,10 @@ import 'domain/usecases/setup_property_usecase.dart';
 import 'presentation/cubit/property_setup_cubit.dart';
 
 void registerPropertySetupFeature(GetIt sl) {
-  
   sl.registerFactory(() => PropertySetupCubit(sl()));
 
-  
   sl.registerLazySingleton(() => SetupPropertyUseCase(sl()));
 
-  
   sl.registerLazySingleton<PropertySetupRepository>(
     () => PropertySetupRepositoryImpl(
       hostelRemoteDataSource: sl<HostelRemoteDataSource>(),

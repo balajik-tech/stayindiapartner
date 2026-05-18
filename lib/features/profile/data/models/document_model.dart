@@ -19,7 +19,8 @@ class DocumentModel extends Document {
       licenseType: json['licenseType']?.toString() ?? '',
       licenseNumber: json['licenseNumber']?.toString() ?? '',
       expiryDate: json['expiryDate']?.toString(),
-      documentUrl: json['documentUrl']?.toString() ?? json['document']?.toString() ?? '',
+      documentUrl:
+          json['documentUrl']?.toString() ?? json['document']?.toString() ?? '',
       status: json['status']?.toString() ?? 'pending',
       createdAt: json['createdAt']?.toString() ?? '',
     );

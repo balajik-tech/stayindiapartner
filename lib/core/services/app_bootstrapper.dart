@@ -24,7 +24,8 @@ class AppBootstrapper extends StatefulWidget {
   State<AppBootstrapper> createState() => _AppBootstrapperState();
 }
 
-class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProviderStateMixin {
+class _AppBootstrapperState extends State<AppBootstrapper>
+    with SingleTickerProviderStateMixin {
   double _progress = 0.0;
   String _statusText = 'Preparing system...';
   bool _hasError = false;
@@ -76,7 +77,6 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
     });
 
     try {
-      
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
@@ -88,7 +88,6 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         _statusText = 'Building secure storage...';
       });
 
-      
       final storageDir = await getApplicationDocumentsDirectory();
       HydratedBloc.storage = await HydratedStorage.build(
         storageDirectory: storageDir,
@@ -100,17 +99,19 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         _statusText = 'Connecting Stay India Cloud...';
       });
 
-      
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      
       FlutterError.onError = (details) {
         FirebaseCrashlytics.instance.recordFlutterFatalError(details);
         final errorString = details.exception.toString();
         if (!errorString.contains('parentDataDirty')) {
-          AppLogger.error('FLUTTER FRAMEWORK ERROR: ${details.exception}', details.exception, details.stack);
+          AppLogger.error(
+            'FLUTTER FRAMEWORK ERROR: ${details.exception}',
+            details.exception,
+            details.stack,
+          );
         }
       };
 
@@ -125,7 +126,6 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         _statusText = 'Initializing services & dependencies...';
       });
 
-      
       await di.init();
 
       setState(() {
@@ -133,20 +133,17 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         _statusText = 'Optimizing caches & notifications...';
       });
 
-      
       await di.sl<CacheService>().checkAndFlushOnUpdate();
       await di.sl<NotificationService>().init();
       await di.sl<NotificationService>().requestPermissions();
 
       AppLogger.info('Stay India Owner App Initialized via Bootstrapper');
 
-      
       setState(() {
         _progress = 1.0;
         _statusText = 'Welcome Owner';
       });
 
-      
       await Future.delayed(const Duration(milliseconds: 300));
 
       if (mounted) {
@@ -155,7 +152,11 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         });
       }
     } catch (e, stack) {
-      AppLogger.error('OWNER STARTUP INITIALIZATION CRITICAL ERROR: $e', e, stack);
+      AppLogger.error(
+        'OWNER STARTUP INITIALIZATION CRITICAL ERROR: $e',
+        e,
+        stack,
+      );
       if (mounted) {
         setState(() {
           _hasError = true;
@@ -217,8 +218,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Spacer(),
-                      
-                      
+
                       Container(
                         width: 140,
                         height: 140,
@@ -228,7 +228,9 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF1E3A8A).withValues(alpha: 0.1),
+                              color: const Color(
+                                0xFF1E3A8A,
+                              ).withValues(alpha: 0.1),
                               blurRadius: 30,
                               offset: const Offset(0, 10),
                             ),
@@ -236,7 +238,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                         ),
                         child: ClipOval(
                           child: Image.asset(
-                            'assets/images/logo.png', 
+                            'assets/images/logo.png',
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(
@@ -248,9 +250,9 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       const Text(
                         'STAY INDIA OWNER',
                         style: TextStyle(
@@ -260,9 +262,9 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           color: Color(0xFF1E3A8A),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 8),
-                      
+
                       Text(
                         'Enterprise Property & Tenant Console',
                         style: TextStyle(
@@ -271,7 +273,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           fontWeight: FontWeight.w400,
                         ),
                       ),
-                      
+
                       const Spacer(),
 
                       if (_hasError) ...[
@@ -306,7 +308,10 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF1E3A8A),
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -319,7 +324,6 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           ),
                         ),
                       ] else ...[
-                        
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: SizedBox(
@@ -333,8 +337,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           ),
                         ),
                         const SizedBox(height: 16),
-                        
-                        
+
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 200),
                           child: Text(
@@ -348,7 +351,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           ),
                         ),
                       ],
-                      
+
                       const SizedBox(height: 48),
                     ],
                   ),

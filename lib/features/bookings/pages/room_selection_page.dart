@@ -40,7 +40,8 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
   int _selectedFloorIndex = 0;
 
   String _getFloorDisplayName(FloorData floor) {
-    if (floor.floorName == 'basement' || (floor.floorNum != null && floor.floorNum! < 0)) {
+    if (floor.floorName == 'basement' ||
+        (floor.floorNum != null && floor.floorNum! < 0)) {
       final absNum = floor.floorNum != null ? floor.floorNum!.abs() : 1;
       if (absNum > 1) {
         return '${StringUtils.translate('basement', context: context)} $absNum';
@@ -76,119 +77,120 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.darkText),
-          onPressed: () {
-            context.read<BookingsCubit>().clearScannedBooking();
-            Navigator.pop(context);
-          },
-        ),
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            widget.isRoomChange 
-                ? 'Move ${widget.tenantName} to...' 
-                : 'Select Bed for ${widget.tenantName}',
-            style: TextStyle(
-              color: AppColors.darkText,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.darkText),
+            onPressed: () {
+              context.read<BookingsCubit>().clearScannedBooking();
+              Navigator.pop(context);
+            },
+          ),
+          title: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              widget.isRoomChange
+                  ? 'Move ${widget.tenantName} to...'
+                  : 'Select Bed for ${widget.tenantName}',
+              style: TextStyle(
+                color: AppColors.darkText,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
-      ),
-      body: BlocConsumer<BookingsCubit, BookingsState>(
-        listener: (context, state) {
-          if ((state.successMessage?.contains('successfully') ?? false) && state.status == BookingsStatus.success) {
-            ScaffoldMessenger.of(context).clearSnackBars();
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              }
-            });
-          }
-          
-          if (state.errorMessage != null && state.status == BookingsStatus.failure) {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state.status == BookingsStatus.loading && state.occupancy == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        body: BlocConsumer<BookingsCubit, BookingsState>(
+          listener: (context, state) {
+            if ((state.successMessage?.contains('successfully') ?? false) &&
+                state.status == BookingsStatus.success) {
+              ScaffoldMessenger.of(context).clearSnackBars();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
+              });
+            }
 
-          if (state.status == BookingsStatus.failure && state.occupancy == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: ${state.errorMessage}'),
-                  SizedBox(height: 16.h),
-                  ElevatedButton(
-                    onPressed: () => context
-                        .read<BookingsCubit>()
-                        .fetchOccupancy(widget.hostelId),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
+            if (state.errorMessage != null &&
+                state.status == BookingsStatus.failure) {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage!),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state.status == BookingsStatus.loading &&
+                state.occupancy == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state.occupancy == null) {
-            return const Center(child: Text('No occupancy data found'));
-          }
+            if (state.status == BookingsStatus.failure &&
+                state.occupancy == null) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Error: ${state.errorMessage}'),
+                    SizedBox(height: 16.h),
+                    ElevatedButton(
+                      onPressed: () => context
+                          .read<BookingsCubit>()
+                          .fetchOccupancy(widget.hostelId),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
 
-          final occupancyModel = state.occupancy as OccupancyModel;
-          final floorNames = [
-            StringUtils.translate('all_floors', context: context),
-            ...occupancyModel.floors.map((f) => _getFloorDisplayName(f))
-          ];
+            if (state.occupancy == null) {
+              return const Center(child: Text('No occupancy data found'));
+            }
 
-          return Stack(
-            children: [
-              Column(
-                children: [
-                  FloorFilter(
-                    floors: floorNames,
-                    selectedIndex: _selectedFloorIndex,
-                    onSelected: (index) {
-                      setState(() {
-                        _selectedFloorIndex = index;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16.h),
-                  Expanded(
-                    child: _buildFloorsList(occupancyModel),
-                  ),
-                ],
-              ),
-              if (state.status == BookingsStatus.loading)
-                Container(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryBlue,
+            final occupancyModel = state.occupancy as OccupancyModel;
+            final floorNames = [
+              StringUtils.translate('all_floors', context: context),
+              ...occupancyModel.floors.map((f) => _getFloorDisplayName(f)),
+            ];
+
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    FloorFilter(
+                      floors: floorNames,
+                      selectedIndex: _selectedFloorIndex,
+                      onSelected: (index) {
+                        setState(() {
+                          _selectedFloorIndex = index;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    Expanded(child: _buildFloorsList(occupancyModel)),
+                  ],
+                ),
+                if (state.status == BookingsStatus.loading)
+                  Container(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryBlue,
+                      ),
                     ),
                   ),
-                ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
-    ),
-   );
+    );
   }
 
   Widget _buildFloorsList(OccupancyModel occupancyModel) {
@@ -214,8 +216,8 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
             'beds_free_count',
             context: context,
             namedArgs: {
-              'free': '${floor.freeBeds ?? 0}', 
-              'total': '${floor.totalBeds ?? 0}'
+              'free': '${floor.freeBeds ?? 0}',
+              'total': '${floor.totalBeds ?? 0}',
             },
           ),
           isInitialExpanded: _selectedFloorIndex != 0,
@@ -236,7 +238,9 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                 _showConfirmationDialog(context, room, bedNumber);
               },
               isPreAllocated: isPreAllocatedRoom,
-              preAllocatedBedNumber: isPreAllocatedRoom ? widget.preAllocatedBedNumber : null,
+              preAllocatedBedNumber: isPreAllocatedRoom
+                  ? widget.preAllocatedBedNumber
+                  : null,
             );
           },
         );
@@ -244,11 +248,17 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
     );
   }
 
-  void _showConfirmationDialog(BuildContext context, Room room, String bedNumber) {
+  void _showConfirmationDialog(
+    BuildContext context,
+    Room room,
+    String bedNumber,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: Container(
@@ -274,14 +284,18 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  widget.isRoomChange ? Icons.swap_horiz_rounded : Icons.person_add_rounded,
+                  widget.isRoomChange
+                      ? Icons.swap_horiz_rounded
+                      : Icons.person_add_rounded,
                   color: AppColors.primaryBlue,
                   size: 32.sp,
                 ),
               ),
               SizedBox(height: 20.h),
               Text(
-                widget.isRoomChange ? 'Confirm Room Change' : 'Confirm Check-in',
+                widget.isRoomChange
+                    ? 'Confirm Room Change'
+                    : 'Confirm Check-in',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20.sp,
@@ -302,12 +316,18 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                     const TextSpan(text: 'Are you sure you want to allocate '),
                     TextSpan(
                       text: 'Room ${room.roomNumber}, Bed $bedNumber',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkText),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkText,
+                      ),
                     ),
                     const TextSpan(text: ' to '),
                     TextSpan(
                       text: widget.tenantName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkText),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkText,
+                      ),
                     ),
                     const TextSpan(text: '?'),
                   ],

@@ -22,7 +22,7 @@ class AnnouncementCard extends StatelessWidget {
             color: AppColors.primaryBlue.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -43,7 +43,11 @@ class AnnouncementCard extends StatelessWidget {
           SizedBox(height: 8.h),
           Text(
             announcement.content,
-            style: TextStyle(color: Colors.black87, fontSize: 14.sp, height: 1.5),
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 14.sp,
+              height: 1.5,
+            ),
           ),
           SizedBox(height: 16.h),
           _buildFooter(),
@@ -103,7 +107,9 @@ class AnnouncementCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
-    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
       return 'Today, ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     }
     return '${date.day}/${date.month}/${date.year}';

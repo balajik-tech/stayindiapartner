@@ -42,10 +42,12 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
         ApiConstants.hostels,
         queryParameters: {'page': page, 'limit': limit},
       );
-      
+
       if (response.statusCode == 200) {
         final dynamic rawData = response.data['data'];
-        final dynamic data = rawData is Map ? (rawData['results'] ?? []) : rawData;
+        final dynamic data = rawData is Map
+            ? (rawData['results'] ?? [])
+            : rawData;
         if (data is List) {
           return data.map((json) => HostelModel.fromJson(json)).toList();
         }
@@ -65,7 +67,7 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
         ApiConstants.hostels,
         data: hostel.toJson(),
       );
-      
+
       if (response.statusCode == 201 || response.statusCode == 200) {
         final dynamic data = response.data['data'] ?? response.data;
         return HostelModel.fromJson(data);
@@ -84,7 +86,7 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
         '${ApiConstants.hostels}/${hostel.id}',
         data: hostel.toJson(),
       );
-      
+
       if (response.statusCode == 200) {
         final dynamic data = response.data['data'] ?? response.data;
         return HostelModel.fromJson(data);
@@ -109,50 +111,59 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
   }
 
   @override
-  Future<HostelModel> uploadHostelImages(String id, List<String> filePaths) async {
+  Future<HostelModel> uploadHostelImages(
+    String id,
+    List<String> filePaths,
+  ) async {
     try {
       final formData = FormData();
       final tempDir = await getTemporaryDirectory();
 
       for (final path in filePaths) {
         String uploadPath = path;
-        
+
         try {
           final File file = File(path);
-          final String targetPath = p.join(tempDir.path, "temp_hostel_${DateTime.now().millisecondsSinceEpoch}_${p.basenameWithoutExtension(path)}.jpg");
-          
-          AppLogger.info('Compressing hostel image: $path -> $targetPath');
-          
-          final XFile? compressedFile = await FlutterImageCompress.compressAndGetFile(
-            file.absolute.path,
-            targetPath,
-            quality: 50,
-            minWidth: 1024,
-            minHeight: 1024,
+          final String targetPath = p.join(
+            tempDir.path,
+            "temp_hostel_${DateTime.now().millisecondsSinceEpoch}_${p.basenameWithoutExtension(path)}.jpg",
           );
+
+          AppLogger.info('Compressing hostel image: $path -> $targetPath');
+
+          final XFile? compressedFile =
+              await FlutterImageCompress.compressAndGetFile(
+                file.absolute.path,
+                targetPath,
+                quality: 50,
+                minWidth: 1024,
+                minHeight: 1024,
+              );
 
           if (compressedFile != null) {
             uploadPath = compressedFile.path;
           }
         } catch (e) {
-          AppLogger.error('Hostel image compression failed, using original: $e');
+          AppLogger.error(
+            'Hostel image compression failed, using original: $e',
+          );
         }
 
-        formData.files.add(MapEntry(
-          'images',
-          await MultipartFile.fromFile(
-            uploadPath,
-            contentType: DioMediaType('image', 'jpeg'),
+        formData.files.add(
+          MapEntry(
+            'images',
+            await MultipartFile.fromFile(
+              uploadPath,
+              contentType: DioMediaType('image', 'jpeg'),
+            ),
           ),
-        ));
+        );
       }
 
       final response = await dio.post(
         '${ApiConstants.hostels}/$id/images',
         data: formData,
-        options: Options(
-          headers: {'x-upload-folder': 'hostels'},
-        ),
+        options: Options(headers: {'x-upload-folder': 'hostels'}),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -182,13 +193,15 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
   }) async {
     try {
       final formData = FormData();
-      
+
       Future<void> addFiles(String? fieldVal, String fieldName) async {
         if (fieldVal != null && fieldVal.isNotEmpty) {
           final paths = fieldVal.split(',').where((p) => p.isNotEmpty).toList();
           for (final path in paths) {
             if (!path.startsWith('http')) {
-              formData.files.add(MapEntry(fieldName, await MultipartFile.fromFile(path)));
+              formData.files.add(
+                MapEntry(fieldName, await MultipartFile.fromFile(path)),
+              );
             }
           }
         }
@@ -243,7 +256,7 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
         '${ApiConstants.propertyOccupancyStatus}/$id/location',
         data: {'lat': lat, 'lng': lng},
       );
-      
+
       if (response.statusCode != 200) {
         throw Exception('Failed to update property location');
       }

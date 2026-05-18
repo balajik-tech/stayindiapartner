@@ -97,9 +97,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
       final getRooms = di.sl<GetRoomsUseCase>();
       final rooms = await getRooms(hostelId: hostel.id, isMaster: false);
 
-      // Extract unique sharing types which have at least one FREE bed
       final sharings = rooms
-          .where((r) => r.isActive == true && r.beds.any((b) => b.status == 'FREE'))
+          .where(
+            (r) => r.isActive == true && r.beds.any((b) => b.status == 'FREE'),
+          )
           .map((r) {
             if (r.sharingType.toUpperCase() == 'DORMITORY') {
               return 'DORMITORY_${r.capacity}';
@@ -120,7 +121,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load hostel details: $e'), backgroundColor: Colors.redAccent),
+          SnackBar(
+            content: Text('Failed to load hostel details: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
         );
       }
     }
@@ -129,16 +133,20 @@ class _AddTenantPageState extends State<AddTenantPage> {
   void _onSharingSelected(String? sharing) {
     if (sharing == null) return;
 
-    final floors = _allRooms
-        .where((r) => r.isActive == true &&
-            (r.sharingType.toUpperCase() == 'DORMITORY'
-                ? 'DORMITORY_${r.capacity}' == sharing
-                : r.sharingType.toUpperCase() == sharing) &&
-            r.beds.any((b) => b.status == 'FREE'))
-        .map((r) => r.floor)
-        .toSet()
-        .toList()
-      ..sort();
+    final floors =
+        _allRooms
+            .where(
+              (r) =>
+                  r.isActive == true &&
+                  (r.sharingType.toUpperCase() == 'DORMITORY'
+                      ? 'DORMITORY_${r.capacity}' == sharing
+                      : r.sharingType.toUpperCase() == sharing) &&
+                  r.beds.any((b) => b.status == 'FREE'),
+            )
+            .map((r) => r.floor)
+            .toSet()
+            .toList()
+          ..sort();
 
     setState(() {
       _selectedSharing = sharing;
@@ -155,12 +163,15 @@ class _AddTenantPageState extends State<AddTenantPage> {
     if (floor == null) return;
 
     final rooms = _allRooms
-        .where((r) => r.isActive == true &&
-            (r.sharingType.toUpperCase() == 'DORMITORY'
-                ? 'DORMITORY_${r.capacity}' == _selectedSharing
-                : r.sharingType.toUpperCase() == _selectedSharing) &&
-            r.floor == floor &&
-            r.beds.any((b) => b.status == 'FREE'))
+        .where(
+          (r) =>
+              r.isActive == true &&
+              (r.sharingType.toUpperCase() == 'DORMITORY'
+                  ? 'DORMITORY_${r.capacity}' == _selectedSharing
+                  : r.sharingType.toUpperCase() == _selectedSharing) &&
+              r.floor == floor &&
+              r.beds.any((b) => b.status == 'FREE'),
+        )
         .toList();
 
     setState(() {
@@ -215,7 +226,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
       case 'DORMITORY':
         return 'Dormitory';
       default:
-        return type.isNotEmpty ? '${type[0].toUpperCase()}${type.substring(1).toLowerCase()} Sharing' : 'Unknown';
+        return type.isNotEmpty
+            ? '${type[0].toUpperCase()}${type.substring(1).toLowerCase()} Sharing'
+            : 'Unknown';
     }
   }
 
@@ -227,14 +240,20 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('please_enter_full_name'.tr()), backgroundColor: Colors.redAccent),
+        SnackBar(
+          content: Text('please_enter_full_name'.tr()),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
 
     if (phone.isEmpty || phone.length != 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('enter_valid_phone'.tr()), backgroundColor: Colors.redAccent),
+        SnackBar(
+          content: Text('enter_valid_phone'.tr()),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
@@ -243,50 +262,74 @@ class _AddTenantPageState extends State<AddTenantPage> {
       final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
       if (!emailRegex.hasMatch(_emailController.text.trim())) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('enter_valid_email'.tr()), backgroundColor: Colors.redAccent),
+          SnackBar(
+            content: Text('enter_valid_email'.tr()),
+            backgroundColor: Colors.redAccent,
+          ),
         );
         return;
       }
     }
 
-    if (_selectedHostel == null || _selectedSharing == null || _selectedFloor == null || _selectedRoom == null || _selectedBed == null) {
+    if (_selectedHostel == null ||
+        _selectedSharing == null ||
+        _selectedFloor == null ||
+        _selectedRoom == null ||
+        _selectedBed == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select all room allocation details'), backgroundColor: Colors.redAccent),
+        const SnackBar(
+          content: Text('Please select all room allocation details'),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
 
     if (rentText.isEmpty || (double.tryParse(rentText) ?? 0) <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('enter_valid_rent'.tr()), backgroundColor: Colors.redAccent),
+        SnackBar(
+          content: Text('enter_valid_rent'.tr()),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
 
     if (_checkInDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('select_check_in_date'.tr()), backgroundColor: Colors.redAccent),
+        SnackBar(
+          content: Text('select_check_in_date'.tr()),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
 
     if (_userPhoto == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please take a user photo (Face validation required)'), backgroundColor: Colors.redAccent),
+        const SnackBar(
+          content: Text('Please take a user photo (Face validation required)'),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
 
     if (_aadharPhoto == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please upload Aadhar Card'), backgroundColor: Colors.redAccent),
+        const SnackBar(
+          content: Text('Please upload Aadhar Card'),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
 
     final nameParts = name.split(' ');
     final firstName = nameParts.isNotEmpty ? nameParts.first : name;
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '.';
+    final lastName = nameParts.length > 1
+        ? nameParts.sublist(1).join(' ')
+        : '.';
 
     _addTenantCubit.submit(
       hostel: _selectedHostel!,
@@ -312,12 +355,18 @@ class _AddTenantPageState extends State<AddTenantPage> {
         listener: (context, state) {
           if (state is AddTenantSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('tenant_added_success'.tr()), backgroundColor: Colors.green),
+              SnackBar(
+                content: Text('tenant_added_success'.tr()),
+                backgroundColor: Colors.green,
+              ),
             );
             Navigator.pop(context, true);
           } else if (state is AddTenantError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.redAccent),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.redAccent,
+              ),
             );
           }
         },
@@ -332,7 +381,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
             ),
             title: Text(
               'add_new_tenant'.tr(),
-              style: TextStyle(color: AppColors.darkText, fontSize: 20.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: AppColors.darkText,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           body: SafeArea(
@@ -343,7 +396,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   hostels = hostelState.hostels;
                   if (_selectedHostel == null && hostels.isNotEmpty) {
                     final index = hostelState.selectedHostelIndex;
-                    final defaultHostel = hostels[index < hostels.length ? index : 0];
+                    final defaultHostel =
+                        hostels[index < hostels.length ? index : 0];
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted && _selectedHostel == null) {
                         setState(() {
@@ -376,16 +430,20 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           _buildSectionTitle('tenant_details'.tr()),
                           SizedBox(height: 16.h),
                           _buildTextField(
-                            'full_name'.tr(), 
-                            Icons.person_outline, 
+                            'full_name'.tr(),
+                            Icons.person_outline,
                             _nameController,
-                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[a-zA-Z\s]'),
+                              ),
+                            ],
                           ),
                           SizedBox(height: 16.h),
                           _buildTextField(
-                            'phone_number_req'.tr(), 
-                            Icons.phone_outlined, 
-                            _phoneController, 
+                            'phone_number_req'.tr(),
+                            Icons.phone_outlined,
+                            _phoneController,
                             keyboardType: TextInputType.phone,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
@@ -393,13 +451,20 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             ],
                           ),
                           SizedBox(height: 16.h),
-                          _buildTextField('email_optional'.tr(), Icons.email_outlined, _emailController, keyboardType: TextInputType.emailAddress),
+                          _buildTextField(
+                            'email_optional'.tr(),
+                            Icons.email_outlined,
+                            _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
 
                           SizedBox(height: 32.h),
                           _buildSectionTitle('room_allocation'.tr()),
                           SizedBox(height: 16.h),
                           _buildDropdown<String>(
-                            'room_sharing_req'.tr() == 'room_sharing_req' ? 'Room Sharing *' : 'room_sharing_req'.tr(),
+                            'room_sharing_req'.tr() == 'room_sharing_req'
+                                ? 'Room Sharing *'
+                                : 'room_sharing_req'.tr(),
                             _availableSharings,
                             _selectedSharing,
                             _onSharingSelected,
@@ -416,7 +481,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                                   _selectedFloor,
                                   _onFloorSelected,
                                   isLoading: _isLoadingRooms,
-                                  itemLabel: (f) => f == 0 ? 'ground'.tr() : '$f ${'floor_suffix'.tr()}',
+                                  itemLabel: (f) => f == 0
+                                      ? 'ground'.tr()
+                                      : '$f ${'floor_suffix'.tr()}',
                                 ),
                               ),
                               SizedBox(width: 16.w),
@@ -442,7 +509,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             itemLabel: (b) {
                               final num = int.tryParse(b);
                               if (num != null && num > 0 && num <= 26) {
-                                return 'bed_label'.tr(namedArgs: {'label': String.fromCharCode(64 + num)});
+                                return 'bed_label'.tr(
+                                  namedArgs: {
+                                    'label': String.fromCharCode(64 + num),
+                                  },
+                                );
                               }
                               return 'bed_label'.tr(namedArgs: {'label': b});
                             },
@@ -452,19 +523,23 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           _buildSectionTitle('stay_details'.tr()),
                           SizedBox(height: 16.h),
                           _buildTextField(
-                            'monthly_rent_req'.tr(), 
-                            Icons.currency_rupee, 
-                            _rentController, 
+                            'monthly_rent_req'.tr(),
+                            Icons.currency_rupee,
+                            _rentController,
                             keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                           ),
                           SizedBox(height: 16.h),
                           _buildTextField(
-                            'security_deposit_req'.tr(), 
-                            Icons.account_balance_wallet_outlined, 
-                            _depositController, 
+                            'security_deposit_req'.tr(),
+                            Icons.account_balance_wallet_outlined,
+                            _depositController,
                             keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                           ),
                           SizedBox(height: 16.h),
                           _buildDatePicker(context, 'check_in_date_req'.tr()),
@@ -497,25 +572,57 @@ class _AddTenantPageState extends State<AddTenantPage> {
           backgroundColor: AppColors.primaryBlue,
           foregroundColor: Colors.white,
           padding: EdgeInsets.symmetric(vertical: 16.h),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
           elevation: 0,
         ),
         child: isSubmitting
-            ? SizedBox(height: 20.h, width: 20.h, child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : Text('add_new_tenant'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            ? SizedBox(
+                height: 20.h,
+                width: 20.h,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                'add_new_tenant'.tr(),
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              ),
       ),
     );
   }
 
   Widget _buildSectionTitle(String title) {
-    return Text(title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue));
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.bold,
+        color: AppColors.primaryBlue,
+      ),
+    );
   }
 
-  Widget _buildTextField(String label, IconData icon, TextEditingController controller, {TextInputType? keyboardType, List<TextInputFormatter>? inputFormatters}) {
+  Widget _buildTextField(
+    String label,
+    IconData icon,
+    TextEditingController controller, {
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: AppColors.greyText,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         SizedBox(height: 8.h),
         TextField(
           controller: controller,
@@ -524,34 +631,81 @@ class _AddTenantPageState extends State<AddTenantPage> {
           style: TextStyle(fontSize: 15.sp, color: AppColors.darkText),
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: AppColors.greyText),
-            hintText: 'enter_hint'.tr(namedArgs: {'field': label.replaceAll(' *', '')}),
-            hintStyle: TextStyle(color: AppColors.greyText.withValues(alpha: 0.5), fontSize: 15.sp),
+            hintText: 'enter_hint'.tr(
+              namedArgs: {'field': label.replaceAll(' *', '')},
+            ),
+            hintStyle: TextStyle(
+              color: AppColors.greyText.withValues(alpha: 0.5),
+              fontSize: 15.sp,
+            ),
             filled: true,
             fillColor: const Color(0xFFF2F4F7),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide.none,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDropdown<T>(String label, List<T> items, T? value, ValueChanged<T?> onChanged, {bool isLoading = false, String Function(T)? itemLabel}) {
+  Widget _buildDropdown<T>(
+    String label,
+    List<T> items,
+    T? value,
+    ValueChanged<T?> onChanged, {
+    bool isLoading = false,
+    String Function(T)? itemLabel,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: AppColors.greyText,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         SizedBox(height: 8.h),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
-          decoration: BoxDecoration(color: const Color(0xFFF2F4F7), borderRadius: BorderRadius.circular(12.r)),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF2F4F7),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
               isExpanded: true,
               value: value,
-              hint: isLoading 
-                ? SizedBox(height: 20.h, width: 20.h, child: const CircularProgressIndicator(strokeWidth: 2))
-                : Text('select_hint'.tr(namedArgs: {'field': label.replaceAll(' *', '')}), style: TextStyle(color: AppColors.greyText.withValues(alpha: 0.5), fontSize: 15.sp)),
-              items: items.map((T item) => DropdownMenuItem<T>(value: item, child: Text(itemLabel != null ? itemLabel(item) : item.toString(), style: TextStyle(fontSize: 15.sp)))).toList(),
+              hint: isLoading
+                  ? SizedBox(
+                      height: 20.h,
+                      width: 20.h,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      'select_hint'.tr(
+                        namedArgs: {'field': label.replaceAll(' *', '')},
+                      ),
+                      style: TextStyle(
+                        color: AppColors.greyText.withValues(alpha: 0.5),
+                        fontSize: 15.sp,
+                      ),
+                    ),
+              items: items
+                  .map(
+                    (T item) => DropdownMenuItem<T>(
+                      value: item,
+                      child: Text(
+                        itemLabel != null ? itemLabel(item) : item.toString(),
+                        style: TextStyle(fontSize: 15.sp),
+                      ),
+                    ),
+                  )
+                  .toList(),
               onChanged: isLoading ? null : onChanged,
             ),
           ),
@@ -564,7 +718,14 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: AppColors.greyText,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         SizedBox(height: 8.h),
         GestureDetector(
           onTap: () async {
@@ -580,14 +741,24 @@ class _AddTenantPageState extends State<AddTenantPage> {
           },
           child: Container(
             padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(color: const Color(0xFFF2F4F7), borderRadius: BorderRadius.circular(12.r)),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2F4F7),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
             child: Row(
               children: [
                 Icon(Icons.calendar_today_outlined, color: AppColors.greyText),
                 SizedBox(width: 12.w),
                 Text(
-                  _checkInDate == null ? 'select_date'.tr() : '${_checkInDate!.day}/${_checkInDate!.month}/${_checkInDate!.year}',
-                  style: TextStyle(color: _checkInDate == null ? AppColors.greyText.withValues(alpha: 0.5) : AppColors.darkText, fontSize: 15.sp),
+                  _checkInDate == null
+                      ? 'select_date'.tr()
+                      : '${_checkInDate!.day}/${_checkInDate!.month}/${_checkInDate!.year}',
+                  style: TextStyle(
+                    color: _checkInDate == null
+                        ? AppColors.greyText.withValues(alpha: 0.5)
+                        : AppColors.darkText,
+                    fontSize: 15.sp,
+                  ),
                 ),
               ],
             ),
@@ -612,7 +783,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
         _isDetectingFace = true;
       });
 
-      // Run ML Kit Face Detection
       final inputImage = InputImage.fromFilePath(image.path);
       final faceDetector = FaceDetector(
         options: FaceDetectorOptions(
@@ -644,12 +814,21 @@ class _AddTenantPageState extends State<AddTenantPage> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
               title: Row(
                 children: [
-                  Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 28.sp),
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.redAccent,
+                    size: 28.sp,
+                  ),
                   SizedBox(width: 10.w),
-                  const Text('No Face Detected', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'No Face Detected',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
               content: const Text(
@@ -658,7 +837,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Try Again', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Try Again',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -671,7 +853,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Face detection error: $e'), backgroundColor: Colors.redAccent),
+          SnackBar(
+            content: Text('Face detection error: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
         );
       }
     }
@@ -680,7 +865,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
   Future<void> _pickAadharPhoto() async {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
       backgroundColor: Colors.white,
       builder: (bottomSheetContext) {
         return SafeArea(
@@ -702,7 +889,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   children: [
                     Text(
                       'Upload Aadhar Card',
-                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkText,
+                      ),
                     ),
                   ],
                 ),
@@ -710,14 +901,26 @@ class _AddTenantPageState extends State<AddTenantPage> {
               ListTile(
                 leading: Container(
                   padding: EdgeInsets.all(8.r),
-                  decoration: BoxDecoration(color: Colors.blue[50], shape: BoxShape.circle),
-                  child: Icon(Icons.camera_alt_rounded, color: Colors.blue[700]),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.camera_alt_rounded,
+                    color: Colors.blue[700],
+                  ),
                 ),
-                title: const Text('Take Photo (Camera)', style: TextStyle(fontWeight: FontWeight.w600)),
+                title: const Text(
+                  'Take Photo (Camera)',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 onTap: () async {
                   Navigator.pop(bottomSheetContext);
                   final picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+                  final XFile? image = await picker.pickImage(
+                    source: ImageSource.camera,
+                    imageQuality: 85,
+                  );
                   if (image != null) {
                     setState(() {
                       _aadharPhoto = File(image.path);
@@ -728,14 +931,26 @@ class _AddTenantPageState extends State<AddTenantPage> {
               ListTile(
                 leading: Container(
                   padding: EdgeInsets.all(8.r),
-                  decoration: BoxDecoration(color: Colors.green[50], shape: BoxShape.circle),
-                  child: Icon(Icons.photo_library_rounded, color: Colors.green[700]),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.photo_library_rounded,
+                    color: Colors.green[700],
+                  ),
                 ),
-                title: const Text('Choose from Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
+                title: const Text(
+                  'Choose from Gallery',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 onTap: () async {
                   Navigator.pop(bottomSheetContext);
                   final picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+                  final XFile? image = await picker.pickImage(
+                    source: ImageSource.gallery,
+                    imageQuality: 85,
+                  );
                   if (image != null) {
                     setState(() {
                       _aadharPhoto = File(image.path);
@@ -755,11 +970,14 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('verification_documents'.tr() == 'verification_documents' ? 'Verification Documents' : 'verification_documents'.tr()),
+        _buildSectionTitle(
+          'verification_documents'.tr() == 'verification_documents'
+              ? 'Verification Documents'
+              : 'verification_documents'.tr(),
+        ),
         SizedBox(height: 16.h),
         Row(
           children: [
-            // User Photo Card
             Expanded(
               child: GestureDetector(
                 onTap: _isDetectingFace ? null : _pickUserPhoto,
@@ -769,9 +987,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                     color: const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(
-                      color: _userPhoto != null 
-                          ? Colors.green.withValues(alpha: 0.5) 
-                          : const Color(0xFFE2E8F0), 
+                      color: _userPhoto != null
+                          ? Colors.green.withValues(alpha: 0.5)
+                          : const Color(0xFFE2E8F0),
                       width: 1.5,
                     ),
                   ),
@@ -781,15 +999,27 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       if (_userPhoto != null) ...[
                         ClipRRect(
                           borderRadius: BorderRadius.circular(16.r),
-                          child: Image.file(_userPhoto!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                          child: Image.file(
+                            _userPhoto!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
                         ),
                         Positioned(
                           top: 8.h,
                           right: 8.w,
                           child: Container(
                             padding: EdgeInsets.all(4.r),
-                            decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
-                            child: Icon(Icons.check, color: Colors.white, size: 14.sp),
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 14.sp,
+                            ),
                           ),
                         ),
                         Positioned(
@@ -800,12 +1030,18 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             padding: EdgeInsets.symmetric(vertical: 4.h),
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)),
+                              borderRadius: BorderRadius.vertical(
+                                bottom: Radius.circular(16.r),
+                              ),
                             ),
                             child: const Text(
                               'Tap to retake',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -814,15 +1050,42 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             if (_isDetectingFace) ...[
-                              const CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2C599D)),
+                              const CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Color(0xFF2C599D),
+                              ),
                               SizedBox(height: 8.h),
-                              Text('Detecting face...', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF475569))),
+                              Text(
+                                'Detecting face...',
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF475569),
+                                ),
+                              ),
                             ] else ...[
-                              Icon(Icons.face_retouching_natural_rounded, color: const Color(0xFF2C599D), size: 32.sp),
+                              Icon(
+                                Icons.face_retouching_natural_rounded,
+                                color: const Color(0xFF2C599D),
+                                size: 32.sp,
+                              ),
                               SizedBox(height: 8.h),
-                              Text('User Photo *', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
+                              Text(
+                                'User Photo *',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1E293B),
+                                ),
+                              ),
                               SizedBox(height: 2.h),
-                              Text('Face Scan (Camera)', style: TextStyle(fontSize: 10.sp, color: const Color(0xFF64748B))),
+                              Text(
+                                'Face Scan (Camera)',
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: const Color(0xFF64748B),
+                                ),
+                              ),
                             ],
                           ],
                         ),
@@ -833,7 +1096,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
               ),
             ),
             SizedBox(width: 16.w),
-            // Aadhar Card Card
+
             Expanded(
               child: GestureDetector(
                 onTap: _pickAadharPhoto,
@@ -843,9 +1106,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                     color: const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(
-                      color: _aadharPhoto != null 
-                          ? Colors.green.withValues(alpha: 0.5) 
-                          : const Color(0xFFE2E8F0), 
+                      color: _aadharPhoto != null
+                          ? Colors.green.withValues(alpha: 0.5)
+                          : const Color(0xFFE2E8F0),
                       width: 1.5,
                     ),
                   ),
@@ -855,15 +1118,27 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       if (_aadharPhoto != null) ...[
                         ClipRRect(
                           borderRadius: BorderRadius.circular(16.r),
-                          child: Image.file(_aadharPhoto!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                          child: Image.file(
+                            _aadharPhoto!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
                         ),
                         Positioned(
                           top: 8.h,
                           right: 8.w,
                           child: Container(
                             padding: EdgeInsets.all(4.r),
-                            decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
-                            child: Icon(Icons.check, color: Colors.white, size: 14.sp),
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 14.sp,
+                            ),
                           ),
                         ),
                         Positioned(
@@ -874,12 +1149,18 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             padding: EdgeInsets.symmetric(vertical: 4.h),
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)),
+                              borderRadius: BorderRadius.vertical(
+                                bottom: Radius.circular(16.r),
+                              ),
                             ),
                             child: const Text(
                               'Tap to retake',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -887,11 +1168,28 @@ class _AddTenantPageState extends State<AddTenantPage> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.badge_rounded, color: const Color(0xFFF98125), size: 32.sp),
+                            Icon(
+                              Icons.badge_rounded,
+                              color: const Color(0xFFF98125),
+                              size: 32.sp,
+                            ),
                             SizedBox(height: 8.h),
-                            Text('Aadhar Card *', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
+                            Text(
+                              'Aadhar Card *',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E293B),
+                              ),
+                            ),
                             SizedBox(height: 2.h),
-                            Text('Camera or Gallery', style: TextStyle(fontSize: 10.sp, color: const Color(0xFF64748B))),
+                            Text(
+                              'Camera or Gallery',
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
                           ],
                         ),
                       ],

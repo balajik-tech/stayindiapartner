@@ -17,12 +17,16 @@ class StaffOptionsSheet extends StatelessWidget {
     required this.onUpdated,
   });
 
-  static void show(BuildContext context,
-      {required Staff staff, required VoidCallback onUpdated}) {
+  static void show(
+    BuildContext context, {
+    required Staff staff,
+    required VoidCallback onUpdated,
+  }) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => StaffOptionsSheet(staff: staff, onUpdated: onUpdated),
+      builder: (context) =>
+          StaffOptionsSheet(staff: staff, onUpdated: onUpdated),
     );
   }
 
@@ -33,7 +37,12 @@ class StaffOptionsSheet extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
       ),
-      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, MediaQuery.of(context).padding.bottom + 16.h),
+      padding: EdgeInsets.fromLTRB(
+        24.w,
+        12.h,
+        24.w,
+        MediaQuery.of(context).padding.bottom + 16.h,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -54,7 +63,11 @@ class StaffOptionsSheet extends StatelessWidget {
                   color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.person_rounded, color: AppColors.primaryBlue, size: 28.sp),
+                child: Icon(
+                  Icons.person_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 28.sp,
+                ),
               ),
               SizedBox(width: 16.w),
               Expanded(
@@ -70,7 +83,10 @@ class StaffOptionsSheet extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      StringUtils.translate(staff.role.toLowerCase().replaceAll(' ', '_'), context: context),
+                      StringUtils.translate(
+                        staff.role.toLowerCase().replaceAll(' ', '_'),
+                        context: context,
+                      ),
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: AppColors.greyText,
@@ -86,7 +102,10 @@ class StaffOptionsSheet extends StatelessWidget {
           _buildOption(
             context,
             icon: Icons.edit_rounded,
-            label: StringUtils.translate('edit_details_option', context: context),
+            label: StringUtils.translate(
+              'edit_details_option',
+              context: context,
+            ),
             color: AppColors.darkText,
             onTap: () {
               Navigator.pop(context);
@@ -100,11 +119,25 @@ class StaffOptionsSheet extends StatelessWidget {
           ),
           _buildOption(
             context,
-            icon: staff.isActive ? Icons.block_rounded : Icons.check_circle_outline_rounded,
-            label: staff.isActive ? StringUtils.translate('deactivate_account_option', context: context) : StringUtils.translate('activate_account_option', context: context),
-            color: staff.isActive ? const Color(0xFFF04438) : const Color(0xFF099268),
+            icon: staff.isActive
+                ? Icons.block_rounded
+                : Icons.check_circle_outline_rounded,
+            label: staff.isActive
+                ? StringUtils.translate(
+                    'deactivate_account_option',
+                    context: context,
+                  )
+                : StringUtils.translate(
+                    'activate_account_option',
+                    context: context,
+                  ),
+            color: staff.isActive
+                ? const Color(0xFFF04438)
+                : const Color(0xFF099268),
             onTap: () {
-              context.read<StaffCubit>().updateStaff(staff.id, {'isActive': !staff.isActive});
+              context.read<StaffCubit>().updateStaff(staff.id, {
+                'isActive': !staff.isActive,
+              });
               Navigator.pop(context);
               onUpdated();
             },
@@ -132,7 +165,9 @@ class StaffOptionsSheet extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.greyText.withValues(alpha: 0.1)),
+              border: Border.all(
+                color: AppColors.greyText.withValues(alpha: 0.1),
+              ),
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Row(
@@ -148,8 +183,11 @@ class StaffOptionsSheet extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Icon(Icons.arrow_forward_ios_rounded,
-                    color: AppColors.greyText.withValues(alpha: 0.2), size: 14.sp),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: AppColors.greyText.withValues(alpha: 0.2),
+                  size: 14.sp,
+                ),
               ],
             ),
           ),

@@ -60,7 +60,14 @@ class AddTenantBedsLoaded extends AddTenantState {
   });
 
   @override
-  List<Object?> get props => [hostel, floors, selectedFloor, rooms, selectedRoom, beds];
+  List<Object?> get props => [
+    hostel,
+    floors,
+    selectedFloor,
+    rooms,
+    selectedRoom,
+    beds,
+  ];
 }
 
 class AddTenantReady extends AddTenantState {
@@ -83,7 +90,15 @@ class AddTenantReady extends AddTenantState {
   });
 
   @override
-  List<Object?> get props => [hostel, floors, selectedFloor, rooms, selectedRoom, beds, selectedBed];
+  List<Object?> get props => [
+    hostel,
+    floors,
+    selectedFloor,
+    rooms,
+    selectedRoom,
+    beds,
+    selectedBed,
+  ];
 }
 
 class AddTenantSubmitting extends AddTenantState {}

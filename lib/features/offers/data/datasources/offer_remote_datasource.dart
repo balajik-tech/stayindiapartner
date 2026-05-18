@@ -16,7 +16,10 @@ class OfferRemoteDataSourceImpl implements OfferRemoteDataSource {
   OfferRemoteDataSourceImpl(this._dio);
 
   @override
-  Future<List<OfferEntity>> getOffers({String? hostelId, String? createdBy}) async {
+  Future<List<OfferEntity>> getOffers({
+    String? hostelId,
+    String? createdBy,
+  }) async {
     final Map<String, dynamic> params = {};
     if (hostelId != null) params['hostelId'] = hostelId;
     if (createdBy != null) params['createdBy'] = createdBy;
@@ -36,10 +39,7 @@ class OfferRemoteDataSourceImpl implements OfferRemoteDataSource {
 
   @override
   Future<OfferEntity> createOffer(OfferEntity offer) async {
-    final response = await _dio.post(
-      ApiConstants.offers,
-      data: offer.toJson(),
-    );
+    final response = await _dio.post(ApiConstants.offers, data: offer.toJson());
 
     if (response.statusCode == 201) {
       return OfferEntity.fromJson(response.data['data']);
@@ -48,7 +48,10 @@ class OfferRemoteDataSourceImpl implements OfferRemoteDataSource {
   }
 
   @override
-  Future<OfferEntity> updateOffer(String id, Map<String, dynamic> updateData) async {
+  Future<OfferEntity> updateOffer(
+    String id,
+    Map<String, dynamic> updateData,
+  ) async {
     final response = await _dio.put(
       '${ApiConstants.offers}/$id',
       data: updateData,

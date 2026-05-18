@@ -53,9 +53,7 @@ abstract class PaymentRemoteDataSource {
     String? message,
   });
 
-  Future<List<Map<String, dynamic>>> getReminderHistory({
-    String? hostelId,
-  });
+  Future<List<Map<String, dynamic>>> getReminderHistory({String? hostelId});
 }
 
 class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
@@ -219,9 +217,7 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
     String? hostelId,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'hostelId': ?hostelId,
-      };
+      final queryParams = <String, dynamic>{'hostelId': ?hostelId};
       final response = await dio.get(
         ApiConstants.paymentReminders,
         queryParameters: queryParams,
@@ -231,7 +227,8 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
         final data = (raw is Map && raw['data'] is Map)
             ? raw['data'] as Map<String, dynamic>
             : raw as Map<String, dynamic>;
-        final items = (data['results'] ?? data['items']) as List<dynamic>? ?? [];
+        final items =
+            (data['results'] ?? data['items']) as List<dynamic>? ?? [];
         return items.cast<Map<String, dynamic>>();
       }
       throw Exception('Failed to load reminder history');
@@ -258,7 +255,8 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
       }
       throw Exception('Failed to load bills');
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] ?? e.message ?? 'Error loading bills';
+      final msg =
+          e.response?.data?['message'] ?? e.message ?? 'Error loading bills';
       throw Exception(msg);
     } catch (e) {
       throw Exception('Error loading bills: $e');

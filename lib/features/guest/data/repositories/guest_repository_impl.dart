@@ -13,7 +13,15 @@ class GuestRepositoryImpl implements GuestRepository {
   }
 
   @override
-  Future<GuestRequest> updateGuestRequestStatus(String requestId, String status, {String? rejectionReason}) async {
-    return await remoteDataSource.updateGuestRequestStatus(requestId, status, rejectionReason: rejectionReason);
+  Future<GuestRequest> updateGuestRequestStatus(
+    String requestId,
+    String status, {
+    String? rejectionReason,
+  }) async {
+    return await remoteDataSource.updateGuestRequestStatus(
+      requestId,
+      status,
+      rejectionReason: rejectionReason,
+    );
   }
 }

@@ -4,7 +4,7 @@ abstract class TenantRepository {
   Future<List<TenantEntity>> getTenants({
     String status = 'CHECKED_IN',
     int page = 1,
-    int limit = 100, 
+    int limit = 100,
     String? search,
     String? hostelId,
   });

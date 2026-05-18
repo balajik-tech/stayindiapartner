@@ -11,16 +11,18 @@ import 'package:stayindia_owner/features/tenants/presentation/cubit/complaints_c
 void registerTenantsFeature(GetIt sl) {
   sl.registerFactory(() => TenantCubit(getTenantsUseCase: sl()));
   sl.registerFactory(() => TenantDetailCubit(getTenantDetailUseCase: sl()));
-  sl.registerFactory(() => AddTenantCubit(
-        getFloorsUseCase: sl(),
-        getRoomsByFloorUseCase: sl(),
-        getFreeBedsUseCase: sl(),
-        addTenantUseCase: sl(),
-      ));
-  sl.registerFactory(() => ComplaintsCubit(
-        getComplaintsUseCase: sl(),
-        updateStatusUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => AddTenantCubit(
+      getFloorsUseCase: sl(),
+      getRoomsByFloorUseCase: sl(),
+      getFreeBedsUseCase: sl(),
+      addTenantUseCase: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () =>
+        ComplaintsCubit(getComplaintsUseCase: sl(), updateStatusUseCase: sl()),
+  );
 
   sl.registerLazySingleton(() => GetTenantsUseCase(sl()));
   sl.registerLazySingleton(() => GetTenantsForHostelUseCase(sl()));

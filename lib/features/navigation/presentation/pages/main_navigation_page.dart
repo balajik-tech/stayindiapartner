@@ -55,10 +55,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _bookingSubscription = sl<SocketService>().bookingStream.listen(_onNewBooking);
+    _bookingSubscription = sl<SocketService>().bookingStream.listen(
+      _onNewBooking,
+    );
     _noticeSubscription = sl<SocketService>().noticeStream.listen(_onNewNotice);
-    
-    
+
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
       final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
@@ -71,7 +72,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   List<Widget> _getPages() {
     final localeKey = ValueKey('locale_${context.locale.languageCode}');
-    
+
     return [
       DashboardPage(key: ValueKey('dash_page_$localeKey')),
       BookingsPage(key: ValueKey('book_page_$localeKey')),
@@ -98,22 +99,28 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     sl<NotificationService>().showNotification(
       id: DateTime.now().millisecond,
       title: 'notification_new_booking_title'.tr(),
-      body: 'notification_new_booking_body'.tr(namedArgs: {
-        'name': tenantName,
-        'sharing': sharingType,
-        'amount': amount.toString(),
-      }),
+      body: 'notification_new_booking_body'.tr(
+        namedArgs: {
+          'name': tenantName,
+          'sharing': sharingType,
+          'amount': amount.toString(),
+        },
+      ),
       payload: 'booking',
     );
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('notification_new_booking_body'.tr(namedArgs: {
-          'name': tenantName,
-          'sharing': sharingType,
-          'amount': amount.toString(),
-        })),
+        content: Text(
+          'notification_new_booking_body'.tr(
+            namedArgs: {
+              'name': tenantName,
+              'sharing': sharingType,
+              'amount': amount.toString(),
+            },
+          ),
+        ),
         backgroundColor: Colors.green.shade600,
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(16.w),
@@ -134,7 +141,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     if (!mounted) return;
 
     final tenantName = data['tenantName'] ?? 'A resident';
-    final vacatingDate = data['vacatingDate'] != null 
+    final vacatingDate = data['vacatingDate'] != null
         ? DateFormat('dd MMM yyyy').format(DateTime.parse(data['vacatingDate']))
         : 'soon';
 
@@ -191,176 +198,227 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     _currentHostelId = hostelId;
     final authState = context.read<AuthCubit>().state;
     if (authState is AuthAuthenticated || authState is AuthProfileCompleted) {
-      final owner = authState is AuthAuthenticated ? authState.owner : (authState as AuthProfileCompleted).owner;
+      final owner = authState is AuthAuthenticated
+          ? authState.owner
+          : (authState as AuthProfileCompleted).owner;
       sl<SocketService>().joinCommunity(hostelId, owner.id);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    
     final currentLocale = context.locale;
     AppLogger.info('Rebuilding MainNavigationPage with locale: $currentLocale');
-    
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => sl<FinanceCubit>()..loadDashboard()),
         BlocProvider(create: (context) => sl<SocialFeedCubit>()..loadFeed()),
       ],
       child: MultiBlocListener(
-      listeners: [
-        BlocListener<AuthCubit, AuthState>(
-          listener: (context, state) {
-            if (state is AuthUnauthenticated) {}
-          },
-        ),
-        BlocListener<BookingsCubit, BookingsState>(
-          listener: (context, state) {
-            if (state.status == BookingsStatus.success && state.successMessage != null) {
-              _syncAllData();
-              if (state.successMessage!.contains('finalized')) {
-                setState(() => _currentIndex = 0);
+        listeners: [
+          BlocListener<AuthCubit, AuthState>(
+            listener: (context, state) {
+              if (state is AuthUnauthenticated) {}
+            },
+          ),
+          BlocListener<BookingsCubit, BookingsState>(
+            listener: (context, state) {
+              if (state.status == BookingsStatus.success &&
+                  state.successMessage != null) {
+                _syncAllData();
+                if (state.successMessage!.contains('finalized')) {
+                  setState(() => _currentIndex = 0);
+                }
               }
-            }
-          },
-        ),
-        BlocListener<PaymentCubit, PaymentState>(
-          listener: (context, state) {
-            if (state is PaymentSuccess && state.shouldRefresh) {
-              _syncAllData();
-            }
-          },
-        ),
-        BlocListener<MaintenanceCubit, MaintenanceState>(
-          listener: (context, state) {
-            if (state is MaintenanceSuccess) {
-              _syncAllData();
-            }
-          },
-        ),
-        BlocListener<NoticeCubit, NoticeState>(
-          listener: (context, state) {
-            if (state is NoticeSuccess || state is NoticeUpdateSuccess) {
-              _syncAllData();
-            }
-          },
-        ),
-        BlocListener<HostelCubit, HostelState>(
-          listener: (context, state) {
-            if (state is HostelLoaded && state.hostels.isNotEmpty) {
-              final hostelId = state.hostels[state.selectedHostelIndex].id;
+            },
+          ),
+          BlocListener<PaymentCubit, PaymentState>(
+            listener: (context, state) {
+              if (state is PaymentSuccess && state.shouldRefresh) {
+                _syncAllData();
+              }
+            },
+          ),
+          BlocListener<MaintenanceCubit, MaintenanceState>(
+            listener: (context, state) {
+              if (state is MaintenanceSuccess) {
+                _syncAllData();
+              }
+            },
+          ),
+          BlocListener<NoticeCubit, NoticeState>(
+            listener: (context, state) {
+              if (state is NoticeSuccess || state is NoticeUpdateSuccess) {
+                _syncAllData();
+              }
+            },
+          ),
+          BlocListener<HostelCubit, HostelState>(
+            listener: (context, state) {
+              if (state is HostelLoaded && state.hostels.isNotEmpty) {
+                final hostelId = state.hostels[state.selectedHostelIndex].id;
 
-              if (hostelId == _currentHostelId) return;
-              
-              AppLogger.info('Hostel changed to: $hostelId. Syncing data...');
+                if (hostelId == _currentHostelId) return;
 
-              _setupSocket(hostelId);
-              _currentHostelId = hostelId;
+                AppLogger.info('Hostel changed to: $hostelId. Syncing data...');
 
-              context.read<DashboardCubit>().fetchDashboardData(hostelId);
-              context.read<BookingsCubit>().fetchBookings(hostelId: hostelId);
-              context.read<TenantCubit>().loadTenants(hostelId);
-            }
-          },
-        ),
-      ],
-      child: BlocBuilder<HostelCubit, HostelState>(
-        buildWhen: (previous, current) => previous != current,
-        builder: (context, hostelState) {
-          if (hostelState is HostelInitial || hostelState is HostelLoading) {
-            return const Scaffold(
-              backgroundColor: Colors.white,
-              body: Center(child: CircularProgressIndicator(color: AppColors.primaryBlue)),
-            );
-          }
+                _setupSocket(hostelId);
+                _currentHostelId = hostelId;
 
-          if (hostelState is HostelLoaded) {
-            final pages = _getPages();
-            return Scaffold(
-              extendBody: true,
-              body: IndexedStack(
-                index: _currentIndex >= pages.length ? 0 : _currentIndex, 
-                children: pages,
-              ),
-              bottomNavigationBar: _PremiumNavBar(
-                currentIndex: _currentIndex,
-                onTap: (index) {
-                  final authState = context.read<AuthCubit>().state;
-                  if (authState is AuthAuthenticated || authState is AuthProfileCompleted) {
-                    final owner = authState is AuthAuthenticated ? authState.owner : (authState as AuthProfileCompleted).owner;
-                    if (index == 0 && !owner.hasPermission('dashboard')) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to view Dashboard.')));
-                      return;
-                    }
-                    if (index == 1 && !owner.hasPermission('bookings')) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to view Bookings.')));
-                      return;
-                    }
-                    if (index == 2 && owner.role != 'owner' && owner.role != 'manager') {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to view Community Feed.')));
-                      return;
-                    }
-                    if (index == 3 && !owner.hasPermission('tenants')) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to view Tenants.')));
-                      return;
-                    }
-                  }
-
-                  HapticFeedback.lightImpact();
-                  setState(() => _currentIndex = index);
-                },
-              ),
-              floatingActionButton: _currentIndex == 0 ? _buildPremiumFAB(context) : null,
-              floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-            );
-          }
-
-          if (hostelState is HostelError) {
-            return Scaffold(
-              body: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text(
-                        hostelState.message,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () => context.read<HostelCubit>().getHostels(forceRefresh: true),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+                context.read<DashboardCubit>().fetchDashboardData(hostelId);
+                context.read<BookingsCubit>().fetchBookings(hostelId: hostelId);
+                context.read<TenantCubit>().loadTenants(hostelId);
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<HostelCubit, HostelState>(
+          buildWhen: (previous, current) => previous != current,
+          builder: (context, hostelState) {
+            if (hostelState is HostelInitial || hostelState is HostelLoading) {
+              return const Scaffold(
+                backgroundColor: Colors.white,
+                body: Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryBlue,
                   ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          return const Scaffold(
-            body: Center(child: Text('Initializing...')),
-          );
-        },
+            if (hostelState is HostelLoaded) {
+              final pages = _getPages();
+              return Scaffold(
+                extendBody: true,
+                body: IndexedStack(
+                  index: _currentIndex >= pages.length ? 0 : _currentIndex,
+                  children: pages,
+                ),
+                bottomNavigationBar: _PremiumNavBar(
+                  currentIndex: _currentIndex,
+                  onTap: (index) {
+                    final authState = context.read<AuthCubit>().state;
+                    if (authState is AuthAuthenticated ||
+                        authState is AuthProfileCompleted) {
+                      final owner = authState is AuthAuthenticated
+                          ? authState.owner
+                          : (authState as AuthProfileCompleted).owner;
+                      if (index == 0 && !owner.hasPermission('dashboard')) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Access Denied: You do not have permission to view Dashboard.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (index == 1 && !owner.hasPermission('bookings')) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Access Denied: You do not have permission to view Bookings.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (index == 2 &&
+                          owner.role != 'owner' &&
+                          owner.role != 'manager') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Access Denied: You do not have permission to view Community Feed.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (index == 3 && !owner.hasPermission('tenants')) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Access Denied: You do not have permission to view Tenants.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                    }
+
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = index);
+                  },
+                ),
+                floatingActionButton: _currentIndex == 0
+                    ? _buildPremiumFAB(context)
+                    : null,
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.endFloat,
+              );
+            }
+
+            if (hostelState is HostelError) {
+              return Scaffold(
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          hostelState.message,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () => context
+                              .read<HostelCubit>()
+                              .getHostels(forceRefresh: true),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return const Scaffold(body: Center(child: Text('Initializing...')));
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildPremiumFAB(BuildContext context) {
     return BouncingWrapper(
       onTap: () {
         HapticFeedback.heavyImpact();
         final authState = context.read<AuthCubit>().state;
-        if (authState is AuthAuthenticated || authState is AuthProfileCompleted) {
-          final owner = authState is AuthAuthenticated ? authState.owner : (authState as AuthProfileCompleted).owner;
+        if (authState is AuthAuthenticated ||
+            authState is AuthProfileCompleted) {
+          final owner = authState is AuthAuthenticated
+              ? authState.owner
+              : (authState as AuthProfileCompleted).owner;
           final role = owner.role;
           if (role != 'owner' && role != 'manager') {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: Only Owner or Manager can perform quick actions.')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Access Denied: Only Owner or Manager can perform quick actions.',
+                ),
+              ),
+            );
             return;
           }
         }
@@ -377,13 +435,22 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           context,
           isMultiSelect: isMultiSelect,
           onNewProperty: () {
-            if (authState is AuthAuthenticated && authState.owner.role != 'owner') {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: Only Owners can add new properties.')));
+            if (authState is AuthAuthenticated &&
+                authState.owner.role != 'owner') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Access Denied: Only Owners can add new properties.',
+                  ),
+                ),
+              );
               return;
             }
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const PropertySetupStepperPage()),
+              MaterialPageRoute(
+                builder: (context) => const PropertySetupStepperPage(),
+              ),
             );
           },
           onAddFloor: () {
@@ -391,15 +458,15 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FloorManagementPage(hostel: currentHostel!),
+                  builder: (context) =>
+                      FloorManagementPage(hostel: currentHostel!),
                 ),
               );
             } else {
               _showNoHostelError(context);
             }
           },
-          onAddRoom: () {
-          },
+          onAddRoom: () {},
           onAddTenant: () async {
             final result = await Navigator.push(
               context,
@@ -419,13 +486,17 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           onGuestRequests: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const GuestManagementScreen()),
+              MaterialPageRoute(
+                builder: (context) => const GuestManagementScreen(),
+              ),
             );
           },
           onSpecialOffers: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const OffersManagementPage()),
+              MaterialPageRoute(
+                builder: (context) => const OffersManagementPage(),
+              ),
             );
           },
         );
@@ -433,10 +504,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       child: Container(
         width: 60.w,
         height: 60.w,
-        margin: EdgeInsets.only(
-                bottom: 16.h,
-                right: 8.w,
-              ),
+        margin: EdgeInsets.only(bottom: 16.h, right: 8.w),
         decoration: BoxDecoration(
           color: const Color(0xFFFF7000),
           borderRadius: BorderRadius.circular(20.r),
@@ -459,14 +527,18 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         content: const Text('Please select or add a hostel first'),
         backgroundColor: const Color(0xFFFF7000),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
         action: SnackBarAction(
           label: 'ADD',
           textColor: Colors.white,
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const PropertySetupStepperPage()),
+              MaterialPageRoute(
+                builder: (context) => const PropertySetupStepperPage(),
+              ),
             );
           },
         ),
@@ -479,19 +551,17 @@ class _PremiumNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const _PremiumNavBar({
-    required this.currentIndex, 
-    required this.onTap,
-  });
+  const _PremiumNavBar({required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthCubit>().state;
-    final owner = authState is AuthAuthenticated 
-        ? authState.owner 
+    final owner = authState is AuthAuthenticated
+        ? authState.owner
         : (authState is AuthProfileCompleted ? authState.owner : null);
     final bool hasBookings = owner?.hasPermission('bookings') ?? true;
-    final bool hasCommunity = owner?.role == 'owner' || owner?.role == 'manager';
+    final bool hasCommunity =
+        owner?.role == 'owner' || owner?.role == 'manager';
     final bool hasTenants = owner?.hasPermission('tenants') ?? true;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
@@ -634,7 +704,10 @@ class _FloatingCommunityButton extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _FloatingCommunityButton({required this.isSelected, required this.onTap});
+  const _FloatingCommunityButton({
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -676,7 +749,9 @@ class _FloatingCommunityButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
-                    color: isSelected ? const Color(0xFF2C599D) : const Color(0xFF64748B),
+                    color: isSelected
+                        ? const Color(0xFF2C599D)
+                        : const Color(0xFF64748B),
                   ),
                 ),
               ),
@@ -706,7 +781,7 @@ class _NavBarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSelected = currentIndex == index;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () => onTap(index),
@@ -717,7 +792,9 @@ class _NavBarItem extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? const Color(0xFF2C599D) : const Color(0xFF94A3B8),
+              color: isSelected
+                  ? const Color(0xFF2C599D)
+                  : const Color(0xFF94A3B8),
               size: 26.sp,
             ),
             SizedBox(height: 4.h),
@@ -729,7 +806,9 @@ class _NavBarItem extends StatelessWidget {
                   label,
                   maxLines: 1,
                   style: TextStyle(
-                    color: isSelected ? const Color(0xFF2C599D) : const Color(0xFF94A3B8),
+                    color: isSelected
+                        ? const Color(0xFF2C599D)
+                        : const Color(0xFF94A3B8),
                     fontSize: 11.sp,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                   ),

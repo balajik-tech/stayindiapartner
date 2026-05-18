@@ -26,7 +26,9 @@ class CommunityStoriesBar extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 8.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200, width: 0.5),
+        ),
       ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -58,7 +60,11 @@ class CommunityStoriesBar extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.primaryBlue, width: 1.5),
               ),
-              child: Icon(Icons.add_rounded, color: AppColors.primaryBlue, size: 28.sp),
+              child: Icon(
+                Icons.add_rounded,
+                color: AppColors.primaryBlue,
+                size: 28.sp,
+              ),
             ),
             SizedBox(height: 6.h),
             Text(

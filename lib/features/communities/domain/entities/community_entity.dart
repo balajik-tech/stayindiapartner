@@ -27,17 +27,17 @@ class CommunityDetailsEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        image,
-        memberCount,
-        status,
-        level,
-        stateId,
-        districtId,
-        wardId
-      ];
+    id,
+    name,
+    description,
+    image,
+    memberCount,
+    status,
+    level,
+    stateId,
+    districtId,
+    wardId,
+  ];
 }
 
 class CommunityMessageEntity extends Equatable {
@@ -72,7 +72,21 @@ class CommunityMessageEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, senderId, senderName, senderAvatar, text, imageUrl, roomId, createdAt, type, isSystem, isMe, associationLevel, isVerified];
+  List<Object?> get props => [
+    id,
+    senderId,
+    senderName,
+    senderAvatar,
+    text,
+    imageUrl,
+    roomId,
+    createdAt,
+    type,
+    isSystem,
+    isMe,
+    associationLevel,
+    isVerified,
+  ];
 }
 
 class AnnouncementEntity extends Equatable {
@@ -112,7 +126,14 @@ class OwnerDiscussionEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, title, description, type, createdAt, authorName];
+  List<Object?> get props => [
+    id,
+    title,
+    description,
+    type,
+    createdAt,
+    authorName,
+  ];
 }
 
 class SocialPostEntity extends Equatable {
@@ -196,22 +217,22 @@ class SocialPostEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        userName,
-        userAvatar,
-        userRole,
-        content,
-        type,
-        likesCount,
-        commentsCount,
-        isLiked,
-        createdAt,
-        visibility,
-        poll,
-        userVote,
-        imageUrl,
-        videoUrl,
-        location,
-      ];
+    id,
+    userId,
+    userName,
+    userAvatar,
+    userRole,
+    content,
+    type,
+    likesCount,
+    commentsCount,
+    isLiked,
+    createdAt,
+    visibility,
+    poll,
+    userVote,
+    imageUrl,
+    videoUrl,
+    location,
+  ];
 }

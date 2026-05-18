@@ -16,11 +16,7 @@ class BookingCard extends StatelessWidget {
   final Booking booking;
   final bool isCompact;
 
-  const BookingCard({
-    super.key,
-    required this.booking,
-    this.isCompact = false,
-  });
+  const BookingCard({super.key, required this.booking, this.isCompact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +25,17 @@ class BookingCard extends StatelessWidget {
     }
 
     final isKycPending = !booking.isKycVerified;
-    final isRequest = [BookingStatus.confirmed, BookingStatus.pending].contains(booking.status);
+    final isRequest = [
+      BookingStatus.confirmed,
+      BookingStatus.pending,
+    ].contains(booking.status);
 
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
       decoration: BoxDecoration(
-        color: isKycPending && isRequest ? const Color(0xFFFFF9F2) : Colors.white,
+        color: isKycPending && isRequest
+            ? const Color(0xFFFFF9F2)
+            : Colors.white,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
@@ -44,8 +45,8 @@ class BookingCard extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: isKycPending && isRequest 
-              ? const Color(0xFFFFE5CC) 
+          color: isKycPending && isRequest
+              ? const Color(0xFFFFE5CC)
               : AppColors.roomCardBorder.withValues(alpha: 0.5),
           width: 1,
         ),
@@ -70,7 +71,6 @@ class BookingCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -98,7 +98,9 @@ class BookingCard extends StatelessWidget {
                               ),
                               if (booking.createdAt != null && isRequest)
                                 Text(
-                                  DateFormatter.formatTimeAgo(booking.createdAt),
+                                  DateFormatter.formatTimeAgo(
+                                    booking.createdAt,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w600,
@@ -122,35 +124,39 @@ class BookingCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 16.h),
-                
-                
+
                 Wrap(
                   spacing: 8.w,
                   runSpacing: 8.h,
                   children: [
                     _buildStatusBadge(),
                     if (isKycPending) _buildKycWarningBadge(context),
-                    if (booking.status != BookingStatus.checkedIn && booking.roomTypeName.isEmpty)
+                    if (booking.status != BookingStatus.checkedIn &&
+                        booking.roomTypeName.isEmpty)
                       _buildPendingAllocationBadge(context),
                   ],
                 ),
                 SizedBox(height: 16.h),
 
-                
                 Container(
                   padding: EdgeInsets.all(14.w),
                   decoration: BoxDecoration(
-                    color: isKycPending && isRequest 
-                        ? Colors.white.withValues(alpha: 0.5) 
+                    color: isKycPending && isRequest
+                        ? Colors.white.withValues(alpha: 0.5)
                         : const Color(0xFFF8F9FB),
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: Colors.black.withValues(alpha: 0.03)),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.03),
+                    ),
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: _buildInfoItem(
-                          StringUtils.translate('checkin_date', context: context),
+                          StringUtils.translate(
+                            'checkin_date',
+                            context: context,
+                          ),
                           DateFormatter.formatISO(booking.checkInDate),
                           Icons.calendar_today_outlined,
                         ),
@@ -164,7 +170,9 @@ class BookingCard extends StatelessWidget {
                       Expanded(
                         child: _buildInfoItem(
                           StringUtils.translate('room_type', context: context),
-                          booking.roomTypeName.isNotEmpty ? booking.roomTypeName : (booking.sharingType ?? 'N/A'),
+                          booking.roomTypeName.isNotEmpty
+                              ? booking.roomTypeName
+                              : (booking.sharingType ?? 'N/A'),
                           Icons.bed_outlined,
                         ),
                       ),
@@ -173,7 +181,6 @@ class BookingCard extends StatelessWidget {
                 ),
                 SizedBox(height: 20.h),
 
-                
                 _buildActions(context),
               ],
             ),
@@ -185,7 +192,9 @@ class BookingCard extends StatelessWidget {
 
   Widget _buildProfileAvatar() {
     final imageUrl = ApiConstants.getImageUrl(booking.tenantAvatar);
-    final initials = booking.tenantName.isNotEmpty ? booking.tenantName[0].toUpperCase() : 'T';
+    final initials = booking.tenantName.isNotEmpty
+        ? booking.tenantName[0].toUpperCase()
+        : 'T';
 
     return Container(
       decoration: BoxDecoration(
@@ -202,7 +211,9 @@ class BookingCard extends StatelessWidget {
       child: CircleAvatar(
         radius: 26.r,
         backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.05),
-        backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+        backgroundImage: imageUrl != null && imageUrl.isNotEmpty
+            ? NetworkImage(imageUrl)
+            : null,
         child: (imageUrl == null || imageUrl.isEmpty)
             ? Text(
                 initials,
@@ -223,7 +234,11 @@ class BookingCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 12.sp, color: AppColors.greyText.withValues(alpha: 0.6)),
+            Icon(
+              icon,
+              size: 12.sp,
+              color: AppColors.greyText.withValues(alpha: 0.6),
+            ),
             SizedBox(width: 4.w),
             Text(
               label.toUpperCase(),
@@ -273,12 +288,18 @@ class BookingCard extends StatelessWidget {
 
   Color _getStatusColor() {
     switch (booking.status) {
-      case BookingStatus.confirmed: return AppColors.primaryBlue;
-      case BookingStatus.pending: return Colors.orange;
-      case BookingStatus.checkedIn: return const Color(0xFF12B76A);
-      case BookingStatus.checkedOut: return Colors.grey;
-      case BookingStatus.cancelled: return Colors.red;
-      default: return AppColors.greyText;
+      case BookingStatus.confirmed:
+        return AppColors.primaryBlue;
+      case BookingStatus.pending:
+        return Colors.orange;
+      case BookingStatus.checkedIn:
+        return const Color(0xFF12B76A);
+      case BookingStatus.checkedOut:
+        return Colors.grey;
+      case BookingStatus.cancelled:
+        return Colors.red;
+      default:
+        return AppColors.greyText;
     }
   }
 
@@ -293,7 +314,11 @@ class BookingCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline_rounded, color: const Color(0xFFB54708), size: 12.sp),
+          Icon(
+            Icons.error_outline_rounded,
+            color: const Color(0xFFB54708),
+            size: 12.sp,
+          ),
           SizedBox(width: 4.w),
           Text(
             StringUtils.translate('kyc_pending', context: context),
@@ -335,22 +360,36 @@ class BookingCard extends StatelessWidget {
   }
 
   Widget _buildActions(BuildContext context) {
-    if (booking.status == BookingStatus.checkedOut || booking.status == BookingStatus.cancelled) {
+    if (booking.status == BookingStatus.checkedOut ||
+        booking.status == BookingStatus.cancelled) {
       return Container(
         width: double.infinity,
         padding: EdgeInsets.symmetric(vertical: 12.h),
         decoration: BoxDecoration(
-          color: booking.status == BookingStatus.cancelled ? Colors.red.shade50 : Colors.grey.shade50,
+          color: booking.status == BookingStatus.cancelled
+              ? Colors.red.shade50
+              : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: booking.status == BookingStatus.cancelled ? Colors.red.shade100 : Colors.grey.shade200),
+          border: Border.all(
+            color: booking.status == BookingStatus.cancelled
+                ? Colors.red.shade100
+                : Colors.grey.shade200,
+          ),
         ),
         child: Center(
           child: Text(
-            booking.status == BookingStatus.cancelled ? StringUtils.translate('booking_cancelled_status', context: context) : StringUtils.translate('stay_completed', context: context),
+            booking.status == BookingStatus.cancelled
+                ? StringUtils.translate(
+                    'booking_cancelled_status',
+                    context: context,
+                  )
+                : StringUtils.translate('stay_completed', context: context),
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w900,
-              color: booking.status == BookingStatus.cancelled ? Colors.red.shade700 : AppColors.greyText,
+              color: booking.status == BookingStatus.cancelled
+                  ? Colors.red.shade700
+                  : AppColors.greyText,
               letterSpacing: 1,
             ),
           ),
@@ -427,9 +466,19 @@ class BookingCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text(StringUtils.translate('reject_booking_title', context: context)),
-        content: Text(StringUtils.translate('reject_booking_confirm', context: context, namedArgs: {'name': booking.tenantName})),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        title: Text(
+          StringUtils.translate('reject_booking_title', context: context),
+        ),
+        content: Text(
+          StringUtils.translate(
+            'reject_booking_confirm',
+            context: context,
+            namedArgs: {'name': booking.tenantName},
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -440,7 +489,13 @@ class BookingCard extends StatelessWidget {
               Navigator.pop(dialogContext);
               context.read<BookingsCubit>().cancelBooking(booking.id);
             },
-            child: Text(StringUtils.translate('reject', context: context), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text(
+              StringUtils.translate('reject', context: context),
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -451,9 +506,19 @@ class BookingCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text(StringUtils.translate('confirm_checkout_title', context: context)),
-        content: Text(StringUtils.translate('confirm_checkout_desc', context: context, namedArgs: {'name': booking.tenantName})),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        title: Text(
+          StringUtils.translate('confirm_checkout_title', context: context),
+        ),
+        content: Text(
+          StringUtils.translate(
+            'confirm_checkout_desc',
+            context: context,
+            namedArgs: {'name': booking.tenantName},
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -466,9 +531,17 @@ class BookingCard extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
             ),
-            child: Text(StringUtils.translate('checkout', context: context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(
+              StringUtils.translate('checkout', context: context),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -476,9 +549,10 @@ class BookingCard extends StatelessWidget {
   }
 
   Widget _buildCompactView(BuildContext context) {
-    
     final imageUrl = ApiConstants.getImageUrl(booking.tenantAvatar);
-    final initials = booking.tenantName.isNotEmpty ? booking.tenantName[0].toUpperCase() : 'T';
+    final initials = booking.tenantName.isNotEmpty
+        ? booking.tenantName[0].toUpperCase()
+        : 'T';
 
     return InkWell(
       onTap: () {
@@ -498,16 +572,27 @@ class BookingCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.4)),
+          border: Border.all(
+            color: AppColors.roomCardBorder.withValues(alpha: 0.4),
+          ),
         ),
         child: Row(
           children: [
             CircleAvatar(
               radius: 20.r,
               backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.05),
-              backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+              backgroundImage: imageUrl != null && imageUrl.isNotEmpty
+                  ? NetworkImage(imageUrl)
+                  : null,
               child: (imageUrl == null || imageUrl.isEmpty)
-                  ? Text(initials, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue))
+                  ? Text(
+                      initials,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryBlue,
+                      ),
+                    )
                   : null,
             ),
             SizedBox(width: 12.w),
@@ -517,20 +602,32 @@ class BookingCard extends StatelessWidget {
                 children: [
                   Text(
                     booking.tenantName,
-                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.darkText,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 2.h),
                   Text(
                     '${booking.tenantPhone}  •  ${DateFormatter.formatISO(booking.checkInDate)}',
-                    style: TextStyle(fontSize: 12.sp, color: AppColors.greyText.withValues(alpha: 0.8), fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppColors.greyText.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             ),
             _buildStatusBadge(),
             SizedBox(width: 8.w),
-            Icon(Icons.chevron_right_rounded, color: AppColors.greyText.withValues(alpha: 0.4), size: 20.sp),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.greyText.withValues(alpha: 0.4),
+              size: 20.sp,
+            ),
           ],
         ),
       ),

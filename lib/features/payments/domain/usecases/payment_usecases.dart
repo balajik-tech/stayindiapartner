@@ -6,8 +6,16 @@ class GetPaymentsUseCase {
   final PaymentRepository repository;
   GetPaymentsUseCase(this.repository);
 
-  Future<HostelPaymentSummary> call({String? hostelId, String? month, String? status}) {
-    return repository.getPayments(hostelId: hostelId, month: month, status: status);
+  Future<HostelPaymentSummary> call({
+    String? hostelId,
+    String? month,
+    String? status,
+  }) {
+    return repository.getPayments(
+      hostelId: hostelId,
+      month: month,
+      status: status,
+    );
   }
 }
 
@@ -112,7 +120,10 @@ class GetBillsUseCase {
   final PaymentRepository repository;
   GetBillsUseCase(this.repository);
 
-  Future<Map<String, dynamic>> call({required String tenantId, required String hostelId}) {
+  Future<Map<String, dynamic>> call({
+    required String tenantId,
+    required String hostelId,
+  }) {
     return repository.getBills(tenantId: tenantId, hostelId: hostelId);
   }
 }

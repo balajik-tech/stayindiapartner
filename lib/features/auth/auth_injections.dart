@@ -30,7 +30,6 @@ void registerAuthFeature(GetIt sl) {
     ),
   );
 
-  
   sl.registerLazySingleton(() => RequestOtpUseCase(sl()));
   sl.registerLazySingleton(() => VerifyOtpUseCase(sl()));
   sl.registerLazySingleton(() => GetCurrentOwnerUseCase(sl()));
@@ -39,15 +38,10 @@ void registerAuthFeature(GetIt sl) {
   sl.registerLazySingleton(() => HasActiveSessionUseCase(sl()));
   sl.registerLazySingleton(() => DeleteAccountUseCase(sl()));
 
-  
   sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(
-      remote: sl(),
-      tokenStorage: sl(),
-    ),
+    () => AuthRepositoryImpl(remote: sl(), tokenStorage: sl()),
   );
 
-  
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(
       dio: sl<Dio>(),

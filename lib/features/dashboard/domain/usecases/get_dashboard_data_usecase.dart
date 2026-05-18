@@ -10,6 +10,5 @@ class GetDashboardDataUseCase {
     return repository.getDashboardData(hostelId);
   }
 
-  
   Future<DashboardData> call(String hostelId) => execute(hostelId);
 }

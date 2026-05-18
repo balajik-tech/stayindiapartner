@@ -3,7 +3,11 @@ import '../../domain/entities/guest_request.dart';
 
 abstract class GuestRemoteDataSource {
   Future<List<GuestRequest>> getHostelGuestRequests(String hostelId);
-  Future<GuestRequest> updateGuestRequestStatus(String requestId, String status, {String? rejectionReason});
+  Future<GuestRequest> updateGuestRequestStatus(
+    String requestId,
+    String status, {
+    String? rejectionReason,
+  });
 }
 
 class GuestRemoteDataSourceImpl implements GuestRemoteDataSource {
@@ -23,14 +27,16 @@ class GuestRemoteDataSourceImpl implements GuestRemoteDataSource {
   }
 
   @override
-  Future<GuestRequest> updateGuestRequestStatus(String requestId, String status, {String? rejectionReason}) async {
-    final Map<String, dynamic> data = {
-      'status': status,
-    };
+  Future<GuestRequest> updateGuestRequestStatus(
+    String requestId,
+    String status, {
+    String? rejectionReason,
+  }) async {
+    final Map<String, dynamic> data = {'status': status};
     if (rejectionReason != null) {
       data['rejectionReason'] = rejectionReason;
     }
-    
+
     final response = await dio.patch('/guests/$requestId/status', data: data);
 
     if (response.statusCode == 200) {

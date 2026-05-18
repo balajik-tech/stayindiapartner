@@ -8,35 +8,58 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 class TenantCubit extends Cubit<TenantState> {
   final GetTenantsUseCase _getTenants;
   Timer? _searchDebounce;
-  
-  TenantCubit({
-    required GetTenantsUseCase getTenantsUseCase,
-  })  : _getTenants = getTenantsUseCase,
-        super(TenantInitial());
 
-  Future<void> loadTenants(String hostelId, {String? search, String status = 'CHECKED_IN'}) async {
+  TenantCubit({required GetTenantsUseCase getTenantsUseCase})
+    : _getTenants = getTenantsUseCase,
+      super(TenantInitial());
+
+  Future<void> loadTenants(
+    String hostelId, {
+    String? search,
+    String status = 'CHECKED_IN',
+  }) async {
     if (isClosed) return;
     emit(TenantLoading());
     try {
-      final tenants = await _getTenants(search: search, status: status, page: 1, limit: 10, hostelId: hostelId);
+      final tenants = await _getTenants(
+        search: search,
+        status: status,
+        page: 1,
+        limit: 10,
+        hostelId: hostelId,
+      );
       if (isClosed) return;
       if (tenants.isEmpty) {
-        emit(TenantEmpty(message: status == 'CHECKED_OUT' ? 'No history found' : 'No active tenants found'));
+        emit(
+          TenantEmpty(
+            message: status == 'CHECKED_OUT'
+                ? 'No history found'
+                : 'No active tenants found',
+          ),
+        );
       } else {
-        emit(TenantLoaded(
-          tenants: tenants,
-          searchQuery: search,
-          page: 1,
-          hasMore: tenants.length >= 10,
-        ));
+        emit(
+          TenantLoaded(
+            tenants: tenants,
+            searchQuery: search,
+            page: 1,
+            hasMore: tenants.length >= 10,
+          ),
+        );
       }
     } catch (e) {
       AppLogger.error('loadTenants failed', e);
-      if (!isClosed) emit(TenantError(message: ErrorHelper.toFriendlyMessage(e)));
+      if (!isClosed) {
+        emit(TenantError(message: ErrorHelper.toFriendlyMessage(e)));
+      }
     }
   }
 
-  Future<void> loadMoreTenants(String hostelId, {String? search, String status = 'CHECKED_IN'}) async {
+  Future<void> loadMoreTenants(
+    String hostelId, {
+    String? search,
+    String status = 'CHECKED_IN',
+  }) async {
     if (isClosed) return;
     final currentState = state;
     if (currentState is! TenantLoaded) return;
@@ -45,27 +68,36 @@ class TenantCubit extends Cubit<TenantState> {
     emit(currentState.copyWith(isLoadMore: true));
     try {
       final nextPage = currentState.page + 1;
-      final newTenants = await _getTenants(search: search, status: status, page: nextPage, limit: 10, hostelId: hostelId);
+      final newTenants = await _getTenants(
+        search: search,
+        status: status,
+        page: nextPage,
+        limit: 10,
+        hostelId: hostelId,
+      );
       if (isClosed) return;
 
-      emit(currentState.copyWith(
-        tenants: [...currentState.tenants, ...newTenants],
-        page: nextPage,
-        hasMore: newTenants.length >= 10,
-        isLoadMore: false,
-      ));
+      emit(
+        currentState.copyWith(
+          tenants: [...currentState.tenants, ...newTenants],
+          page: nextPage,
+          hasMore: newTenants.length >= 10,
+          isLoadMore: false,
+        ),
+      );
     } catch (e) {
       AppLogger.error('loadMoreTenants failed', e);
       if (!isClosed) {
-        emit(currentState.copyWith(
-          isLoadMore: false,
-          errorMessage: ErrorHelper.toFriendlyMessage(e),
-        ));
+        emit(
+          currentState.copyWith(
+            isLoadMore: false,
+            errorMessage: ErrorHelper.toFriendlyMessage(e),
+          ),
+        );
       }
     }
   }
 
-  
   void searchTenants(String hostelId, String query) {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 400), () {
@@ -83,10 +115,9 @@ class TenantCubit extends Cubit<TenantState> {
 class TenantDetailCubit extends Cubit<TenantDetailState> {
   final GetTenantDetailUseCase _getDetail;
 
-  TenantDetailCubit({
-    required GetTenantDetailUseCase getTenantDetailUseCase,
-  })  : _getDetail = getTenantDetailUseCase,
-        super(TenantDetailInitial());
+  TenantDetailCubit({required GetTenantDetailUseCase getTenantDetailUseCase})
+    : _getDetail = getTenantDetailUseCase,
+      super(TenantDetailInitial());
 
   Future<void> loadDetail(String tenantId, String hostelId) async {
     emit(TenantDetailLoading());

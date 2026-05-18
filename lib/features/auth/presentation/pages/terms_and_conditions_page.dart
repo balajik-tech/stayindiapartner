@@ -35,7 +35,12 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
           if (state is AuthAuthenticated && state.owner.hasAcceptedPolicy) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(StringUtils.translate('agreement_accepted_msg', context: context)),
+                content: Text(
+                  StringUtils.translate(
+                    'agreement_accepted_msg',
+                    context: context,
+                  ),
+                ),
                 backgroundColor: Colors.green,
               ),
             );
@@ -44,10 +49,11 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
             } else if (widget.readOnly) {
               Navigator.pop(context);
             } else {
-
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => const MainNavigationPage()),
+                MaterialPageRoute(
+                  builder: (context) => const MainNavigationPage(),
+                ),
                 (route) => false,
               );
             }
@@ -67,10 +73,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
               _buildHeader(),
               Expanded(
                 child: Stack(
-                  children: [
-                    _buildContent(),
-                    _buildScrollIndicator(),
-                  ],
+                  children: [_buildContent(), _buildScrollIndicator()],
                 ),
               ),
               if (!widget.readOnly) _buildBottomAction(),
@@ -114,7 +117,10 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  StringUtils.translate('service_agreement_title', context: context),
+                  StringUtils.translate(
+                    'service_agreement_title',
+                    context: context,
+                  ),
                   style: GoogleFonts.dmSans(
                     fontSize: 24.sp,
                     fontWeight: FontWeight.w900,
@@ -124,7 +130,10 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  StringUtils.translate('master_service_agreement_subtitle', context: context),
+                  StringUtils.translate(
+                    'master_service_agreement_subtitle',
+                    context: context,
+                  ),
                   style: GoogleFonts.dmSans(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
@@ -144,38 +153,61 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
       controller: _scrollController,
       padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 40.h),
       children: [
-        _buildSectionTitle(StringUtils.translate('welcome_stay_india', context: context)),
+        _buildSectionTitle(
+          StringUtils.translate('welcome_stay_india', context: context),
+        ),
         _buildSectionBody(
-            StringUtils.translate('welcome_stay_india_desc', context: context)),
+          StringUtils.translate('welcome_stay_india_desc', context: context),
+        ),
         SizedBox(height: 32.h),
-        _buildPolicySection(StringUtils.translate('pan_india_services_title', context: context), 
-            StringUtils.translate('pan_india_services_desc', context: context)),
-        _buildPolicySection(StringUtils.translate('saas_liability_title', context: context), 
-            StringUtils.translate('saas_liability_desc', context: context)),
-        _buildPolicySection(StringUtils.translate('data_privacy_title', context: context), 
-            StringUtils.translate('data_privacy_desc', context: context)),
-        _buildPolicySection(StringUtils.translate('payments_methods_title', context: context), 
-            StringUtils.translate('payments_methods_desc', context: context)),
-        _buildPolicySection(StringUtils.translate('tenant_conduct_title', context: context), 
-            StringUtils.translate('tenant_conduct_desc', context: context)),
-        _buildPolicySection(StringUtils.translate('app_support_title', context: context), 
-            StringUtils.translate('app_support_desc', context: context)),
-        _buildPolicySection(StringUtils.translate('validity_changes_title', context: context), 
-            StringUtils.translate('validity_changes_desc', context: context)),
-        
+        _buildPolicySection(
+          StringUtils.translate('pan_india_services_title', context: context),
+          StringUtils.translate('pan_india_services_desc', context: context),
+        ),
+        _buildPolicySection(
+          StringUtils.translate('saas_liability_title', context: context),
+          StringUtils.translate('saas_liability_desc', context: context),
+        ),
+        _buildPolicySection(
+          StringUtils.translate('data_privacy_title', context: context),
+          StringUtils.translate('data_privacy_desc', context: context),
+        ),
+        _buildPolicySection(
+          StringUtils.translate('payments_methods_title', context: context),
+          StringUtils.translate('payments_methods_desc', context: context),
+        ),
+        _buildPolicySection(
+          StringUtils.translate('tenant_conduct_title', context: context),
+          StringUtils.translate('tenant_conduct_desc', context: context),
+        ),
+        _buildPolicySection(
+          StringUtils.translate('app_support_title', context: context),
+          StringUtils.translate('app_support_desc', context: context),
+        ),
+        _buildPolicySection(
+          StringUtils.translate('validity_changes_title', context: context),
+          StringUtils.translate('validity_changes_desc', context: context),
+        ),
+
         SizedBox(height: 16.h),
         Divider(color: Colors.grey.shade200),
         SizedBox(height: 24.h),
-        
-        _buildSectionTitle(StringUtils.translate('contact_us_title', context: context)),
+
+        _buildSectionTitle(
+          StringUtils.translate('contact_us_title', context: context),
+        ),
         SizedBox(height: 12.h),
         _buildContactRow(Icons.email_outlined, 'support@stayindia.in'),
         SizedBox(height: 8.h),
         _buildContactRow(Icons.phone_outlined, '+91 9888936836'),
-        
+
         SizedBox(height: 32.h),
         Text(
-          StringUtils.translate('last_updated', namedArgs: {'date': 'May 2024'}, context: context),
+          StringUtils.translate(
+            'last_updated',
+            namedArgs: {'date': 'May 2024'},
+            context: context,
+          ),
           style: GoogleFonts.dmSans(
             fontSize: 11.sp,
             color: AppColors.greyText.withValues(alpha: 0.5),
@@ -243,16 +275,18 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
       right: 0,
       top: 0,
       bottom: 0,
-      child: Container(
-        width: 3.w,
-        color: Colors.grey.withValues(alpha: 0.05),
-      ),
+      child: Container(width: 3.w, color: Colors.grey.withValues(alpha: 0.05)),
     );
   }
 
   Widget _buildBottomAction() {
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, MediaQuery.of(context).padding.bottom + 16.h),
+      padding: EdgeInsets.fromLTRB(
+        24.w,
+        16.h,
+        24.w,
+        MediaQuery.of(context).padding.bottom + 16.h,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -278,7 +312,9 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                     color: _isAccepted ? AppColors.primaryBlue : Colors.white,
                     borderRadius: BorderRadius.circular(6.r),
                     border: Border.all(
-                      color: _isAccepted ? AppColors.primaryBlue : Colors.grey.shade300,
+                      color: _isAccepted
+                          ? AppColors.primaryBlue
+                          : Colors.grey.shade300,
                       width: 2,
                     ),
                   ),
@@ -289,7 +325,10 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
-                    StringUtils.translate('agree_terms_checkbox', context: context),
+                    StringUtils.translate(
+                      'agree_terms_checkbox',
+                      context: context,
+                    ),
                     style: GoogleFonts.dmSans(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -305,22 +344,28 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
             builder: (context, state) {
               final isLoading = state is AuthLoading;
               return BouncingWrapper(
-                onTap: (_isAccepted && !isLoading) 
-                    ? () => context.read<AuthCubit>().acceptPolicy() 
+                onTap: (_isAccepted && !isLoading)
+                    ? () => context.read<AuthCubit>().acceptPolicy()
                     : null,
                 child: Container(
                   width: double.infinity,
                   height: 54.h,
                   decoration: BoxDecoration(
-                    color: _isAccepted ? AppColors.primaryBlue : Colors.grey.shade200,
+                    color: _isAccepted
+                        ? AppColors.primaryBlue
+                        : Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: _isAccepted ? [
-                      BoxShadow(
-                        color: AppColors.primaryBlue.withValues(alpha: 0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                    ] : null,
+                    boxShadow: _isAccepted
+                        ? [
+                            BoxShadow(
+                              color: AppColors.primaryBlue.withValues(
+                                alpha: 0.3,
+                              ),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Center(
                     child: isLoading
@@ -333,11 +378,16 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                             ),
                           )
                         : Text(
-                            StringUtils.translate('accept_continue_button', context: context),
+                            StringUtils.translate(
+                              'accept_continue_button',
+                              context: context,
+                            ),
                             style: GoogleFonts.dmSans(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w800,
-                              color: _isAccepted ? Colors.white : Colors.grey.shade500,
+                              color: _isAccepted
+                                  ? Colors.white
+                                  : Colors.grey.shade500,
                             ),
                           ),
                   ),

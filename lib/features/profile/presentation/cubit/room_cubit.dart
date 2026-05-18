@@ -64,20 +64,20 @@ class RoomCubit extends Cubit<RoomState> {
     required GetBedHistoryUseCase getBedHistoryUseCase,
     required BulkCreateRoomsUseCase bulkCreateRoomsUseCase,
     required BulkUpsertRoomsUseCase bulkUpsertRoomsUseCase,
-  })  : _getOccupancy = getOccupancyUseCase,
-      _getFloorWiseRooms = getFloorWiseRoomsUseCase,
-      _getRooms = getRoomsUseCase,
-      _getFloors = getFloorsUseCase,
-      _getRoomsByFloor = getRoomsByFloorUseCase,
-      _getFreeBeds = getFreeBedsUseCase,
-      _createRoom = createRoomUseCase,
-      _updateRoom = updateRoomUseCase,
-      _deleteRoom = deleteRoomUseCase,
-      _getBedDetail = getBedDetailUseCase,
-      _getBedHistory = getBedHistoryUseCase,
-      _bulkCreateRooms = bulkCreateRoomsUseCase,
-      _bulkUpsertRooms = bulkUpsertRoomsUseCase,
-      super(RoomInitial());
+  }) : _getOccupancy = getOccupancyUseCase,
+       _getFloorWiseRooms = getFloorWiseRoomsUseCase,
+       _getRooms = getRoomsUseCase,
+       _getFloors = getFloorsUseCase,
+       _getRoomsByFloor = getRoomsByFloorUseCase,
+       _getFreeBeds = getFreeBedsUseCase,
+       _createRoom = createRoomUseCase,
+       _updateRoom = updateRoomUseCase,
+       _deleteRoom = deleteRoomUseCase,
+       _getBedDetail = getBedDetailUseCase,
+       _getBedHistory = getBedHistoryUseCase,
+       _bulkCreateRooms = bulkCreateRoomsUseCase,
+       _bulkUpsertRooms = bulkUpsertRoomsUseCase,
+       super(RoomInitial());
 
   Future<void> getRooms({bool? isMaster, String? hostelId}) async {
     if (hostelId != null) {
@@ -85,7 +85,10 @@ class RoomCubit extends Cubit<RoomState> {
     }
     emit(RoomLoading());
     try {
-      final rooms = await _getRooms(isMaster: isMaster, hostelId: hostelId ?? _lastHostelId);
+      final rooms = await _getRooms(
+        isMaster: isMaster,
+        hostelId: hostelId ?? _lastHostelId,
+      );
       emit(RoomLoaded(rooms));
     } catch (e) {
       emit(RoomError(ErrorHandler.getErrorMessage(e)));
@@ -108,7 +111,6 @@ class RoomCubit extends Cubit<RoomState> {
   }) async {
     if (state is RoomLoading) return;
 
-    
     if (hostelId.isEmpty) {
       emit(RoomError('No hostel selected. Please select a hostel first.'));
       throw Exception('hostelId is empty');
@@ -117,9 +119,11 @@ class RoomCubit extends Cubit<RoomState> {
       emit(RoomError('Owner session expired. Please login again.'));
       throw Exception('ownerId is empty');
     }
-    
+
     if (hostelId.length != 24) {
-      emit(RoomError('Invalid hostel ID. Please try logging out and in again.'));
+      emit(
+        RoomError('Invalid hostel ID. Please try logging out and in again.'),
+      );
       throw Exception('hostelId is invalid: $hostelId');
     }
 
@@ -153,11 +157,16 @@ class RoomCubit extends Cubit<RoomState> {
 
   int _mapSharingToCapacity(String sharing) {
     switch (sharing.toUpperCase()) {
-      case 'SINGLE': return 1;
-      case 'DOUBLE': return 2;
-      case 'TRIPLE': return 3;
-      case 'QUADRUPLE': return 4;
-      case 'QUINTUPLE': return 5;
+      case 'SINGLE':
+        return 1;
+      case 'DOUBLE':
+        return 2;
+      case 'TRIPLE':
+        return 3;
+      case 'QUADRUPLE':
+        return 4;
+      case 'QUINTUPLE':
+        return 5;
       default:
         final digits = RegExp(r'\d+').firstMatch(sharing)?.group(0);
         if (digits != null) {
@@ -169,7 +178,7 @@ class RoomCubit extends Cubit<RoomState> {
 
   Future<void> updateRoom(RoomDetail room) async {
     if (state is RoomLoading) return;
-    
+
     emit(RoomLoading());
     try {
       await _updateRoom(room);
@@ -289,11 +298,15 @@ class RoomCubit extends Cubit<RoomState> {
     try {
       int floorNumber = 0;
       final nameUpper = floorName.toUpperCase().trim();
-      if (nameUpper == 'GROUND_FLOOR' || nameUpper == 'GROUND FLOOR' || nameUpper == 'G' || nameUpper == '0') {
+      if (nameUpper == 'GROUND_FLOOR' ||
+          nameUpper == 'GROUND FLOOR' ||
+          nameUpper == 'G' ||
+          nameUpper == '0') {
         floorNumber = 0;
       } else if (nameUpper == 'BASEMENT' || nameUpper == 'B') {
         floorNumber = -1;
-      } else if (nameUpper.startsWith('BASEMENT') || nameUpper.startsWith('B')) {
+      } else if (nameUpper.startsWith('BASEMENT') ||
+          nameUpper.startsWith('B')) {
         final numStr = nameUpper.replaceAll(RegExp(r'[^0-9]'), '');
         final parsed = int.tryParse(numStr);
         if (parsed != null) {
@@ -302,11 +315,15 @@ class RoomCubit extends Cubit<RoomState> {
           floorNumber = -1;
         }
       } else {
-        floorNumber = int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        floorNumber =
+            int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
       }
-      
+
       final List<RoomDetail> rooms = [];
-      final isBasement = floorNumber < 0 || nameUpper.contains('BASEMENT') || nameUpper.startsWith('B');
+      final isBasement =
+          floorNumber < 0 ||
+          nameUpper.contains('BASEMENT') ||
+          nameUpper.startsWith('B');
 
       for (int i = 1; i <= roomCount; i++) {
         String roomNoStr;
@@ -318,25 +335,29 @@ class RoomCubit extends Cubit<RoomState> {
           final roomNo = (floorNumber * 100) + i;
           roomNoStr = roomNo.toString();
         }
-        
-        rooms.add(RoomDetail(
-          id: '',
-          hostelId: hostelId,
-          roomTypename: roomNoStr,
-          floor: floorNumber,
-          sharingType: _mapCapacityToSharing(bedsPerRoom),
-          roomType: 'NON-AC',
-          rent: 0,
-          deposit: 0,
-          maintenance: 0,
-          isActive: true,
-          isMaster: false,
-          capacity: bedsPerRoom,
-        ));
+
+        rooms.add(
+          RoomDetail(
+            id: '',
+            hostelId: hostelId,
+            roomTypename: roomNoStr,
+            floor: floorNumber,
+            sharingType: _mapCapacityToSharing(bedsPerRoom),
+            roomType: 'NON-AC',
+            rent: 0,
+            deposit: 0,
+            maintenance: 0,
+            isActive: true,
+            isMaster: false,
+            capacity: bedsPerRoom,
+          ),
+        );
       }
-      
+
       await _bulkCreateRooms(rooms, ownerId);
-      emit(RoomOperationSuccess('Floor $floorName added with $roomCount rooms'));
+      emit(
+        RoomOperationSuccess('Floor $floorName added with $roomCount rooms'),
+      );
     } catch (e) {
       emit(RoomError(ErrorHandler.getErrorMessage(e)));
     }
@@ -344,12 +365,18 @@ class RoomCubit extends Cubit<RoomState> {
 
   String _mapCapacityToSharing(int capacity) {
     switch (capacity) {
-      case 1: return 'SINGLE';
-      case 2: return 'DOUBLE';
-      case 3: return 'TRIPLE';
-      case 4: return 'QUADRUPLE';
-      case 5: return 'QUINTUPLE';
-      default: return '$capacity Sharing';
+      case 1:
+        return 'SINGLE';
+      case 2:
+        return 'DOUBLE';
+      case 3:
+        return 'TRIPLE';
+      case 4:
+        return 'QUADRUPLE';
+      case 5:
+        return 'QUINTUPLE';
+      default:
+        return '$capacity Sharing';
     }
   }
 }

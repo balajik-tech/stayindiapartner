@@ -11,13 +11,16 @@ abstract class RentDueState extends Equatable {
 }
 
 class RentDueInitial extends RentDueState {}
+
 class RentDueLoading extends RentDueState {}
+
 class RentDueLoaded extends RentDueState {
   final RentDueDetails details;
   const RentDueLoaded({required this.details});
   @override
   List<Object?> get props => [details];
 }
+
 class RentDueError extends RentDueState {
   final String message;
   const RentDueError({required this.message});
@@ -29,8 +32,8 @@ class RentDueCubit extends Cubit<RentDueState> {
   final GetRentDueDetailsUseCase _getRentDueDetails;
 
   RentDueCubit({required GetRentDueDetailsUseCase getRentDueDetails})
-      : _getRentDueDetails = getRentDueDetails,
-        super(RentDueInitial());
+    : _getRentDueDetails = getRentDueDetails,
+      super(RentDueInitial());
 
   Future<void> fetchRentDueDetails(String hostelId) async {
     emit(RentDueLoading());

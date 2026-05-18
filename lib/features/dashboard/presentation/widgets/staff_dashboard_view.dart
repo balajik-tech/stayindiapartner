@@ -20,7 +20,10 @@ class StaffDashboardView extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           '${role.toUpperCase()} DASHBOARD',
-          style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: AppColors.darkText,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -38,7 +41,11 @@ class StaffDashboardView extends StatelessWidget {
                   color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.shield_rounded, size: 64.sp, color: AppColors.primaryBlue),
+                child: Icon(
+                  Icons.shield_rounded,
+                  size: 64.sp,
+                  color: AppColors.primaryBlue,
+                ),
               ),
               SizedBox(height: 24.h),
               Text(
@@ -69,14 +76,16 @@ class StaffDashboardView extends StatelessWidget {
       );
     } else if (role == 'cleaning_staff') {
       return ElevatedButton.icon(
-        onPressed: () => _showComingSoon(context, 'Assigned Room Cleaning List'),
+        onPressed: () =>
+            _showComingSoon(context, 'Assigned Room Cleaning List'),
         icon: const Icon(Icons.cleaning_services_rounded, color: Colors.white),
         label: const Text('Assigned Room Cleaning List'),
         style: _buttonStyle(),
       );
     } else if (role == 'security') {
       return ElevatedButton.icon(
-        onPressed: () => _showComingSoon(context, 'Visitor Logs & Verification'),
+        onPressed: () =>
+            _showComingSoon(context, 'Visitor Logs & Verification'),
         icon: const Icon(Icons.security_rounded, color: Colors.white),
         label: const Text('Visitor Logs & Verification'),
         style: _buttonStyle(),
@@ -95,8 +104,8 @@ class StaffDashboardView extends StatelessWidget {
   }
 
   void _showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opening $feature...')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Opening $feature...')));
   }
 }

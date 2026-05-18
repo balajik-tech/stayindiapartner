@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
 class ResponsiveBreakpoints {
   static const double xs = 320.0;
   static const double sm = 360.0;
@@ -16,8 +15,6 @@ class ResponsiveBreakpoints {
     return MediaQuery.of(context).size.width <= xs;
   }
 }
-
-
 
 class ResponsiveText extends StatelessWidget {
   final String text;
@@ -47,16 +44,19 @@ class ResponsiveText extends StatelessWidget {
   Widget build(BuildContext context) {
     final double textScaleFactor = MediaQuery.textScalerOf(context).scale(1.0);
     final double screenWidth = MediaQuery.of(context).size.width;
-    
+
     double baseFontSize = style?.fontSize ?? 14.sp;
-    
-    
+
     double widthScale = screenWidth < 360 ? 0.9 : 1.0;
-    
-    
-    double adjustedScale = textScaleFactor > 1.3 ? (1.3 / textScaleFactor) : 1.0;
-    
-    double finalFontSize = (baseFontSize * widthScale * adjustedScale).clamp(minFontSize, maxFontSize);
+
+    double adjustedScale = textScaleFactor > 1.3
+        ? (1.3 / textScaleFactor)
+        : 1.0;
+
+    double finalFontSize = (baseFontSize * widthScale * adjustedScale).clamp(
+      minFontSize,
+      maxFontSize,
+    );
 
     return Text(
       text,
@@ -65,14 +65,10 @@ class ResponsiveText extends StatelessWidget {
       softWrap: softWrap,
       overflow: overflow ?? (maxLines != null ? TextOverflow.ellipsis : null),
       maxLines: maxLines,
-      style: (style ?? const TextStyle()).copyWith(
-        fontSize: finalFontSize,
-      ),
+      style: (style ?? const TextStyle()).copyWith(fontSize: finalFontSize),
     );
   }
 }
-
-
 
 class AdaptiveActionRow extends StatelessWidget {
   final List<Widget> children;
@@ -93,7 +89,6 @@ class AdaptiveActionRow extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final textScale = MediaQuery.textScalerOf(context).scale(1.0);
 
-    
     if ((forceStackOnSmall && screenWidth <= 360.0) || textScale >= 1.3) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -110,7 +105,6 @@ class AdaptiveActionRow extends StatelessWidget {
       );
     }
 
-    
     return Row(
       children: children.asMap().entries.map((entry) {
         final index = entry.key;
@@ -126,8 +120,6 @@ class AdaptiveActionRow extends StatelessWidget {
     );
   }
 }
-
-
 
 class ResponsiveButton extends StatelessWidget {
   final String label;
@@ -150,7 +142,7 @@ class ResponsiveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     final double verticalPadding = screenWidth <= 320 ? 10.0 : 14.0;
     final double horizontalPadding = screenWidth <= 320 ? 12.0 : 16.0;
 
@@ -161,10 +153,7 @@ class ResponsiveButton extends StatelessWidget {
 
     final Widget textWidget = FittedBox(
       fit: BoxFit.scaleDown,
-      child: Text(
-        label,
-        style: buttonTextStyle,
-      ),
+      child: Text(label, style: buttonTextStyle),
     );
 
     final Widget content = icon != null
@@ -172,21 +161,25 @@ class ResponsiveButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: (screenWidth <= 320 ? 14.sp : 16.sp).clamp(12.0, 18.0)),
+              Icon(
+                icon,
+                size: (screenWidth <= 320 ? 14.sp : 16.sp).clamp(12.0, 18.0),
+              ),
               SizedBox(width: 6.w),
               Flexible(child: textWidget),
             ],
           )
         : textWidget;
 
-    
     final double minHeight = (height ?? 48.0).clamp(48.0, 60.0);
 
     if (isPrimary) {
       return ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isDestructive ? Colors.redAccent : const Color(0xFF1E3A8A),
+          backgroundColor: isDestructive
+              ? Colors.redAccent
+              : const Color(0xFF1E3A8A),
           foregroundColor: Colors.white,
           elevation: 0,
           minimumSize: Size(double.infinity, minHeight),
@@ -205,7 +198,9 @@ class ResponsiveButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        foregroundColor: isDestructive ? Colors.red.shade700 : const Color(0xFF0F172A),
+        foregroundColor: isDestructive
+            ? Colors.red.shade700
+            : const Color(0xFF0F172A),
         side: BorderSide(
           color: isDestructive ? Colors.red.shade200 : const Color(0xFFE2E8F0),
         ),
@@ -222,7 +217,6 @@ class ResponsiveButton extends StatelessWidget {
     );
   }
 }
-
 
 class ResponsiveTabBar extends StatelessWidget implements PreferredSizeWidget {
   final TabController? controller;
@@ -289,11 +283,11 @@ class ResponsiveTabBar extends StatelessWidget implements PreferredSizeWidget {
     for (var tab in tabs) {
       totalTextLength += _getWidgetTextLength(tab);
     }
-    
+
     final screenWidth = MediaQuery.of(context).size.width;
     final double estimatedTextWidth = totalTextLength * 8.5;
     final double totalRequiredWidth = estimatedTextWidth + (tabs.length * 32);
-    
+
     return totalRequiredWidth > (screenWidth - 32);
   }
 
@@ -306,14 +300,19 @@ class ResponsiveTabBar extends StatelessWidget implements PreferredSizeWidget {
       isScrollable: shouldScroll,
       tabAlignment: shouldScroll ? TabAlignment.start : TabAlignment.fill,
       onTap: onTap,
-      indicator: indicator ?? BoxDecoration(
-        color: const Color(0xFF1E3A8A),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
+      indicator:
+          indicator ??
+          BoxDecoration(
+            color: const Color(0xFF1E3A8A),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
       labelColor: labelColor ?? Colors.white,
       unselectedLabelColor: unselectedLabelColor ?? const Color(0xFF64748B),
-      labelStyle: labelStyle ?? TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
-      unselectedLabelStyle: unselectedLabelStyle ?? TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+      labelStyle:
+          labelStyle ?? TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
+      unselectedLabelStyle:
+          unselectedLabelStyle ??
+          TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
       indicatorSize: indicatorSize ?? TabBarIndicatorSize.tab,
       dividerColor: Colors.transparent,
       tabs: tabs,
@@ -323,7 +322,6 @@ class ResponsiveTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(48.0);
 }
-
 
 class MultilingualSafeCard extends StatelessWidget {
   final Widget child;
@@ -346,9 +344,10 @@ class MultilingualSafeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
-    final double calculatedPadding = padding ?? (screenWidth <= 320 ? 12.0 : 16.0);
-    
+
+    final double calculatedPadding =
+        padding ?? (screenWidth <= 320 ? 12.0 : 16.0);
+
     return Container(
       margin: EdgeInsets.only(bottom: margin ?? 16.h),
       padding: EdgeInsets.all(calculatedPadding),
@@ -369,11 +368,13 @@ class MultilingualSafeCard extends StatelessWidget {
   }
 }
 
-
 class ResponsiveSpacing {
   static Widget vertical(double height, BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-    double calculated = (height * (screenHeight / 844.0)).clamp(4.0, height * 1.2);
+    double calculated = (height * (screenHeight / 844.0)).clamp(
+      4.0,
+      height * 1.2,
+    );
     return SizedBox(height: calculated);
   }
 

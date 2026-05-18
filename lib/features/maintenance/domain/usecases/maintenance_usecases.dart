@@ -5,8 +5,16 @@ class GetMaintenanceIssuesUseCase {
   final MaintenanceRepository repository;
   GetMaintenanceIssuesUseCase(this.repository);
 
-  Future<TicketSummary> call({String? hostelId, String? status, String? search}) {
-    return repository.getIssues(hostelId: hostelId, status: status, search: search);
+  Future<TicketSummary> call({
+    String? hostelId,
+    String? status,
+    String? search,
+  }) {
+    return repository.getIssues(
+      hostelId: hostelId,
+      status: status,
+      search: search,
+    );
   }
 }
 

@@ -1,3 +1,4 @@
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:stayindia_owner/core/services/token_storage.dart';
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
 import 'package:stayindia_owner/features/auth/domain/repositories/auth_repository.dart';
@@ -10,18 +11,55 @@ class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl({
     required AuthRemoteDataSource remote,
     required TokenStorage tokenStorage,
-  })  : _remote = remote,
-        _tokenStorage = tokenStorage;
+  }) : _remote = remote,
+       _tokenStorage = tokenStorage;
 
   @override
   Future<String?> requestOtp(String phone) => _remote.requestOtp(phone);
 
   @override
   Future<({OwnerEntity owner, bool isNewUser})> verifyOtp(
-      String phone, String otp) async {
-    final result = await _remote.verifyOtp(phone, otp);
-    
+    String phone,
+    String otp, {
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? avatar,
+  }) async {
+    final result = await _remote.verifyOtp(
+      phone,
+      otp,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      avatar: avatar,
+    );
+
     return (owner: result.owner as OwnerEntity, isNewUser: result.isNewUser);
+  }
+
+  @override
+  Future<Map<String, dynamic>> loginWithGoogle(String role) async {
+    final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+    try {
+      final account = await googleSignIn.signIn();
+      if (account == null) {
+        throw Exception('Google Sign-In was cancelled by the user.');
+      }
+      final name = account.displayName ?? 'Owner';
+      final email = account.email;
+      final avatar = account.photoUrl ?? '';
+
+      final result = await _remote.googleLogin(
+        email: email,
+        name: name,
+        avatar: avatar,
+        role: role,
+      );
+      return result;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
@@ -49,12 +87,11 @@ class AuthRepositoryImpl implements AuthRepository {
     required String pushToken,
     required String platform,
     String? deviceId,
-  }) =>
-      _remote.updateDeviceToken(
-        pushToken: pushToken,
-        platform: platform,
-        deviceId: deviceId,
-      );
+  }) => _remote.updateDeviceToken(
+    pushToken: pushToken,
+    platform: platform,
+    deviceId: deviceId,
+  );
 
   @override
   Future<OwnerEntity> acceptPolicy({String version = '1.0'}) =>

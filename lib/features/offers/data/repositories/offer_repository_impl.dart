@@ -8,8 +8,14 @@ class OfferRepositoryImpl implements OfferRepository {
   OfferRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<OfferEntity>> getOffers({String? hostelId, String? createdBy}) async {
-    return await remoteDataSource.getOffers(hostelId: hostelId, createdBy: createdBy);
+  Future<List<OfferEntity>> getOffers({
+    String? hostelId,
+    String? createdBy,
+  }) async {
+    return await remoteDataSource.getOffers(
+      hostelId: hostelId,
+      createdBy: createdBy,
+    );
   }
 
   @override
@@ -18,7 +24,10 @@ class OfferRepositoryImpl implements OfferRepository {
   }
 
   @override
-  Future<OfferEntity> updateOffer(String id, Map<String, dynamic> updateData) async {
+  Future<OfferEntity> updateOffer(
+    String id,
+    Map<String, dynamic> updateData,
+  ) async {
     return await remoteDataSource.updateOffer(id, updateData);
   }
 

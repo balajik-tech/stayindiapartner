@@ -33,7 +33,7 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
   final TextEditingController _floorsController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  String _selectedType = "men"; 
+  String _selectedType = "men";
 
   double? _latitude;
   double? _longitude;
@@ -79,13 +79,13 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
               listener: (context, state) {
                 if (state is HostelOperationSuccess) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
                 } else if (state is HostelError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
                 }
               },
             ),
@@ -95,119 +95,129 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
                   setState(() {
                     _latitude = state.latitude;
                     _longitude = state.longitude;
-                    if (_addressController.text.isEmpty) _addressController.text = state.address;
-                    if (_cityController.text.isEmpty) _cityController.text = state.city;
-                    if (_stateController.text.isEmpty) _stateController.text = state.state;
-                    if (_areaController.text.isEmpty) _areaController.text = state.area;
+                    if (_addressController.text.isEmpty) {
+                      _addressController.text = state.address;
+                    }
+                    if (_cityController.text.isEmpty) {
+                      _cityController.text = state.city;
+                    }
+                    if (_stateController.text.isEmpty) {
+                      _stateController.text = state.state;
+                    }
+                    if (_areaController.text.isEmpty) {
+                      _areaController.text = state.area;
+                    }
                   });
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Location fetched successfully'), backgroundColor: Colors.green),
+                    const SnackBar(
+                      content: Text('Location fetched successfully'),
+                      backgroundColor: Colors.green,
+                    ),
                   );
                 } else if (state is LocationError) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message), backgroundColor: Colors.redAccent),
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.redAccent,
+                    ),
                   );
                 }
               },
             ),
           ],
-      child: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildLabel('Hostel Name *'),
-                    _buildTextField(
-                      controller: _nameController,
-                      hint: 'Enter hostel name',
-                    ),
-                    SizedBox(height: 20.h),
-                    _buildLabel('Address *'),
-                    _buildTextField(
-                      controller: _addressController,
-                      hint: 'Enter full address',
-                      maxLines: 3,
-                    ),
-                    SizedBox(height: 20.h),
-                    _buildLabel('City *'),
-                    _buildTextField(
-                      controller: _cityController,
-                      hint: 'e.g. Mumbai',
-                    ),
-                    SizedBox(height: 20.h),
-                    _buildLabel('State *'),
-                    _buildTextField(
-                      controller: _stateController,
-                      hint: 'e.g. Maharashtra',
-                    ),
-                    SizedBox(height: 20.h),
-                    _buildLabel('Area *'),
-                    _buildTextField(
-                      controller: _areaController,
-                      hint: 'e.g. Madhapur',
-                    ),
-                    SizedBox(height: 20.h),
-                    _buildLocationPicker(),
-                    SizedBox(height: 20.h),
-                    _buildLabel('Number of Floors *'),
-                    _buildTextField(
-                      controller: _floorsController,
-                      hint: 'e.g. 3',
-                      keyboardType: TextInputType.number,
-                    ),
-                    SizedBox(height: 20.h),
-                    _buildLabel('Contact Phone *'),
-                    _buildTextField(
-                      controller: _contactController,
-                      hint: 'e.g. +91 9876543210',
-                      keyboardType: TextInputType.phone,
-                    ),
-                    SizedBox(height: 20.h),
-                    _buildLabel('Hostel Description'),
-                    _buildTextField(
-                      controller: _descriptionController,
-                      hint: 'Briefly describe your hostel...',
-                      maxLines: 4,
-                    ),
-                    SizedBox(height: 24.h),
-                    _buildLabel('Hostel Type *'),
-                    SizedBox(height: 12.h),
-                    Row(
+          child: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(24.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildTypeCard(
-                          "Men",
-                          "men",
-                          Icons.people_outlined,
+                        _buildLabel('Hostel Name *'),
+                        _buildTextField(
+                          controller: _nameController,
+                          hint: 'Enter hostel name',
                         ),
-                        SizedBox(width: 12.w),
-                        _buildTypeCard(
-                          "Women",
-                          "women",
-                          Icons.person_outline,
+                        SizedBox(height: 20.h),
+                        _buildLabel('Address *'),
+                        _buildTextField(
+                          controller: _addressController,
+                          hint: 'Enter full address',
+                          maxLines: 3,
                         ),
-                        SizedBox(width: 12.w),
-                        _buildTypeCard(
-                          "Co-ed",
-                          "co-ed",
-                          Icons.apartment_outlined,
+                        SizedBox(height: 20.h),
+                        _buildLabel('City *'),
+                        _buildTextField(
+                          controller: _cityController,
+                          hint: 'e.g. Mumbai',
                         ),
+                        SizedBox(height: 20.h),
+                        _buildLabel('State *'),
+                        _buildTextField(
+                          controller: _stateController,
+                          hint: 'e.g. Maharashtra',
+                        ),
+                        SizedBox(height: 20.h),
+                        _buildLabel('Area *'),
+                        _buildTextField(
+                          controller: _areaController,
+                          hint: 'e.g. Madhapur',
+                        ),
+                        SizedBox(height: 20.h),
+                        _buildLocationPicker(),
+                        SizedBox(height: 20.h),
+                        _buildLabel('Number of Floors *'),
+                        _buildTextField(
+                          controller: _floorsController,
+                          hint: 'e.g. 3',
+                          keyboardType: TextInputType.number,
+                        ),
+                        SizedBox(height: 20.h),
+                        _buildLabel('Contact Phone *'),
+                        _buildTextField(
+                          controller: _contactController,
+                          hint: 'e.g. +91 9876543210',
+                          keyboardType: TextInputType.phone,
+                        ),
+                        SizedBox(height: 20.h),
+                        _buildLabel('Hostel Description'),
+                        _buildTextField(
+                          controller: _descriptionController,
+                          hint: 'Briefly describe your hostel...',
+                          maxLines: 4,
+                        ),
+                        SizedBox(height: 24.h),
+                        _buildLabel('Hostel Type *'),
+                        SizedBox(height: 12.h),
+                        Row(
+                          children: [
+                            _buildTypeCard("Men", "men", Icons.people_outlined),
+                            SizedBox(width: 12.w),
+                            _buildTypeCard(
+                              "Women",
+                              "women",
+                              Icons.person_outline,
+                            ),
+                            SizedBox(width: 12.w),
+                            _buildTypeCard(
+                              "Co-ed",
+                              "co-ed",
+                              Icons.apartment_outlined,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 40.h),
+                        _buildAddButton(),
                       ],
                     ),
-                    SizedBox(height: 40.h),
-                    _buildAddButton(),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-      ),
       ),
     );
   }
@@ -337,7 +347,11 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
         children: [
           Row(
             children: [
-              Icon(Icons.location_on_outlined, color: AppColors.primaryBlue, size: 20.sp),
+              Icon(
+                Icons.location_on_outlined,
+                color: AppColors.primaryBlue,
+                size: 20.sp,
+              ),
               SizedBox(width: 8.w),
               Text(
                 'Hostel Live Location',
@@ -367,19 +381,32 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
               return SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: isGettingLocation ? null : () => _locationCubit.fetchCurrentLocation(),
-                  icon: isGettingLocation 
+                  onPressed: isGettingLocation
+                      ? null
+                      : () => _locationCubit.fetchCurrentLocation(),
+                  icon: isGettingLocation
                       ? SizedBox(
                           height: 16.w,
                           width: 16.w,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryBlue,
+                          ),
                         )
                       : const Icon(Icons.my_location),
-                  label: Text(isGettingLocation ? 'Fetching...' : (_latitude == null ? 'Get Current Location' : 'Update Location')),
+                  label: Text(
+                    isGettingLocation
+                        ? 'Fetching...'
+                        : (_latitude == null
+                              ? 'Get Current Location'
+                              : 'Update Location'),
+                  ),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 12.h),
                     side: BorderSide(color: AppColors.primaryBlue),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
                     foregroundColor: AppColors.primaryBlue,
                   ),
                 ),
@@ -408,24 +435,26 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
                         _floorsController.text.isEmpty ||
                         _contactController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill all required fields')),
+                        const SnackBar(
+                          content: Text('Please fill all required fields'),
+                        ),
                       );
                       return;
                     }
 
                     context.read<HostelCubit>().createHostel(
-                          name: _nameController.text,
-                          address: _addressController.text,
-                          city: _cityController.text,
-                          stateName: _stateController.text,
-                          area: _areaController.text,
-                          floors: int.tryParse(_floorsController.text) ?? 1,
-                          hostelType: _selectedType,
-                          contactNumber: _contactController.text,
-                          description: _descriptionController.text,
-                          lat: _latitude,
-                          lng: _longitude,
-                        );
+                      name: _nameController.text,
+                      address: _addressController.text,
+                      city: _cityController.text,
+                      stateName: _stateController.text,
+                      area: _areaController.text,
+                      floors: int.tryParse(_floorsController.text) ?? 1,
+                      hostelType: _selectedType,
+                      contactNumber: _contactController.text,
+                      description: _descriptionController.text,
+                      lat: _latitude,
+                      lng: _longitude,
+                    );
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,

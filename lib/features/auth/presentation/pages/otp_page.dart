@@ -12,16 +12,30 @@ import '../widgets/auth_widgets.dart';
 class OtpPage extends StatefulWidget {
   final String phone;
   final String? devOtp;
+  final String? email;
+  final String? firstName;
+  final String? lastName;
+  final String? avatar;
 
-  const OtpPage({super.key, required this.phone, this.devOtp});
+  const OtpPage({
+    super.key,
+    required this.phone,
+    this.devOtp,
+    this.email,
+    this.firstName,
+    this.lastName,
+    this.avatar,
+  });
 
   @override
   State<OtpPage> createState() => _OtpPageState();
 }
 
 class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
-  final List<TextEditingController> _controllers =
-      List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   int _countdown = 30;
@@ -48,13 +62,13 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.05),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _entranceController,
-      curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _entranceController.forward();
   }
@@ -90,13 +104,23 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     if (_otp.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please enter the 6-digit OTP.', style: GoogleFonts.outfit()),
+          content: Text(
+            'Please enter the 6-digit OTP.',
+            style: GoogleFonts.outfit(),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
-    context.read<AuthCubit>().verifyOtp(widget.phone, _otp);
+    context.read<AuthCubit>().verifyOtp(
+      widget.phone,
+      _otp,
+      email: widget.email,
+      firstName: widget.firstName,
+      lastName: widget.lastName,
+      avatar: widget.avatar,
+    );
   }
 
   void _onResend(BuildContext context) {
@@ -111,7 +135,9 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return BlocListener<AuthCubit, AuthState>(
       listenWhen: (_, current) =>
-          current is AuthOtpSent || current is AuthError || current is AuthAuthenticated,
+          current is AuthOtpSent ||
+          current is AuthError ||
+          current is AuthAuthenticated,
       listener: (context, state) {
         if (state is AuthAuthenticated) {
           Navigator.popUntil(context, (route) => route.isFirst);
@@ -120,17 +146,22 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           setState(() => _currentDevOtp = state.devOtp);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('OTP resent successfully.', style: GoogleFonts.outfit()),
+              content: Text(
+                'OTP resent successfully.',
+                style: GoogleFonts.outfit(),
+              ),
               behavior: SnackBarBehavior.floating,
             ),
           );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(
-              content: Text(state.message, style: GoogleFonts.outfit()),
-              behavior: SnackBarBehavior.floating,
-            ));
+            ..showSnackBar(
+              SnackBar(
+                content: Text(state.message, style: GoogleFonts.outfit()),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
         }
       },
       child: BlocBuilder<AuthCubit, AuthState>(
@@ -140,7 +171,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             backgroundColor: AppColors.backgroundGrey,
             body: Stack(
               children: [
-                
                 Container(
                   height: 0.4.sh,
                   width: double.infinity,
@@ -164,11 +194,18 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                         child: Column(
                           children: [
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 8.h,
+                              ),
                               child: Align(
                                 alignment: Alignment.centerLeft,
                                 child: IconButton(
-                                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
+                                  icon: const Icon(
+                                    Icons.arrow_back_ios_new_rounded,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
                                   onPressed: () => Navigator.pop(context),
                                 ),
                               ),
@@ -187,7 +224,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                   ),
                 ),
 
-                
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: SlideTransition(
@@ -197,7 +233,10 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                       child: Container(
                         height: 0.65.sh,
                         width: double.infinity,
-                        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 36.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24.w,
+                          vertical: 36.h,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.only(
@@ -232,27 +271,32 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                                 'Enter the code sent to +91 ${widget.phone}',
                                 style: GoogleFonts.outfit(
                                   fontSize: 16.sp,
-                                  color: AppColors.greyText.withValues(alpha: 0.8),
+                                  color: AppColors.greyText.withValues(
+                                    alpha: 0.8,
+                                  ),
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
-                              
-                              if (_currentDevOtp != null && _currentDevOtp!.isNotEmpty) ...[
+
+                              if (_currentDevOtp != null &&
+                                  _currentDevOtp!.isNotEmpty) ...[
                                 SizedBox(height: 24.h),
                                 _DevOtpBanner(otp: _currentDevOtp!),
                               ],
-                              
+
                               SizedBox(height: 48.h),
 
                               _OtpInputGrid(
                                 controllers: _controllers,
                                 focusNodes: _focusNodes,
                               ),
-                              
+
                               SizedBox(height: 40.h),
 
                               AuthPrimaryButton(
-                                label: isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE',
+                                label: isLoading
+                                    ? 'VERIFYING...'
+                                    : 'VERIFY & CONTINUE',
                                 isLoading: isLoading,
                                 onPressed: () => _onVerify(context),
                               ),
@@ -287,8 +331,16 @@ class _HeroPatternPainter extends CustomPainter {
       ..strokeWidth = 1.5;
 
     for (var i = 0; i < 5; i++) {
-      canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.1), 50.0 + (i * 40), paint);
-      canvas.drawCircle(Offset(size.width * 0.1, size.height * 0.8), 30.0 + (i * 30), paint);
+      canvas.drawCircle(
+        Offset(size.width * 0.9, size.height * 0.1),
+        50.0 + (i * 40),
+        paint,
+      );
+      canvas.drawCircle(
+        Offset(size.width * 0.1, size.height * 0.8),
+        30.0 + (i * 30),
+        paint,
+      );
     }
   }
 
@@ -296,16 +348,11 @@ class _HeroPatternPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-
-
 class _OtpInputGrid extends StatefulWidget {
   final List<TextEditingController> controllers;
   final List<FocusNode> focusNodes;
 
-  const _OtpInputGrid({
-    required this.controllers,
-    required this.focusNodes,
-  });
+  const _OtpInputGrid({required this.controllers, required this.focusNodes});
 
   @override
   State<_OtpInputGrid> createState() => _OtpInputGridState();
@@ -341,10 +388,14 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeOutCubic,
                 decoration: BoxDecoration(
-                  color: _focusedIndex == i ? Colors.white : AppColors.backgroundGrey.withValues(alpha: 0.4),
+                  color: _focusedIndex == i
+                      ? Colors.white
+                      : AppColors.backgroundGrey.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
-                    color: _focusedIndex == i ? AppColors.primaryBlue : Colors.grey.shade200,
+                    color: _focusedIndex == i
+                        ? AppColors.primaryBlue
+                        : Colors.grey.shade200,
                     width: _focusedIndex == i ? 2 : 1.5,
                   ),
                   boxShadow: [

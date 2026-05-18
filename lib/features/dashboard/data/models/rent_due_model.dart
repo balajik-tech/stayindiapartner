@@ -1,18 +1,17 @@
 import 'package:stayindia_owner/features/dashboard/domain/entities/rent_due_details.dart';
 
 class RentDueDetailsModel extends RentDueDetails {
-  const RentDueDetailsModel({
-    required super.overdue,
-    required super.upcoming,
-  });
+  const RentDueDetailsModel({required super.overdue, required super.upcoming});
 
   factory RentDueDetailsModel.fromJson(Map<String, dynamic> json) {
     return RentDueDetailsModel(
-      overdue: (json['overdue'] as List?)
+      overdue:
+          (json['overdue'] as List?)
               ?.map((e) => RentPaymentModel.fromJson(e))
               .toList() ??
           [],
-      upcoming: (json['upcoming'] as List?)
+      upcoming:
+          (json['upcoming'] as List?)
               ?.map((e) => RentPaymentModel.fromJson(e))
               .toList() ??
           [],
@@ -36,11 +35,12 @@ class RentPaymentModel extends RentPayment {
     final Map<String, dynamic> tenant = (tenantObj is Map<String, dynamic>)
         ? tenantObj
         : (tenantObj is Map)
-            ? Map<String, dynamic>.from(tenantObj)
-            : {};
+        ? Map<String, dynamic>.from(tenantObj)
+        : {};
     return RentPaymentModel(
       id: json['_id'] ?? '',
-      tenantName: '${tenant['firstName'] ?? ''} ${tenant['lastName'] ?? ''}'.trim(),
+      tenantName: '${tenant['firstName'] ?? ''} ${tenant['lastName'] ?? ''}'
+          .trim(),
       tenantMobile: tenant['mobile'] ?? '',
       tenantAvatar: tenant['avatar'] ?? '',
       amount: (json['dueAmount'] ?? json['totalAmount'] ?? 0).toDouble(),

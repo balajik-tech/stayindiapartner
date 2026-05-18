@@ -32,7 +32,11 @@ class NotificationsView extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.darkText,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -69,9 +73,16 @@ class NotificationsView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline_rounded, color: Colors.red.shade300, size: 48.sp),
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.red.shade300,
+                    size: 48.sp,
+                  ),
                   SizedBox(height: 16.h),
-                  Text(state.message, style: GoogleFonts.outfit(color: AppColors.greyText)),
+                  Text(
+                    state.message,
+                    style: GoogleFonts.outfit(color: AppColors.greyText),
+                  ),
                 ],
               ),
             );
@@ -83,7 +94,8 @@ class NotificationsView extends StatelessWidget {
             }
 
             return RefreshIndicator(
-              onRefresh: () => context.read<NotificationCubit>().fetchNotifications(),
+              onRefresh: () =>
+                  context.read<NotificationCubit>().fetchNotifications(),
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 itemCount: state.notifications.length,
@@ -107,7 +119,11 @@ class NotificationsView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_off_rounded, size: 64.sp, color: Colors.grey.shade200),
+          Icon(
+            Icons.notifications_off_rounded,
+            size: 64.sp,
+            color: Colors.grey.shade200,
+          ),
           SizedBox(height: 16.h),
           Text(
             'No notifications yet',
@@ -138,7 +154,7 @@ class _NotificationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSOS = notification.type == 'SOS_ALERT';
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -162,11 +178,18 @@ class _NotificationItem extends StatelessWidget {
             children: [
               Container(
                 width: 4.w,
-                color: isSOS ? AppColors.sosRed : (notification.isRead ? Colors.transparent : AppColors.primaryBlue),
+                color: isSOS
+                    ? AppColors.sosRed
+                    : (notification.isRead
+                          ? Colors.transparent
+                          : AppColors.primaryBlue),
               ),
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 14.w,
+                    vertical: 12.h,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -179,7 +202,9 @@ class _NotificationItem extends StatelessWidget {
                               style: GoogleFonts.outfit(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 13.5.sp,
-                                color: isSOS ? AppColors.sosRed : AppColors.darkText,
+                                color: isSOS
+                                    ? AppColors.sosRed
+                                    : AppColors.darkText,
                               ),
                             ),
                           ),

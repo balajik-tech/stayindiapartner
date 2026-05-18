@@ -19,7 +19,7 @@ class FoodItem {
 
 class FoodMenu {
   final String hostelId;
-  final String day; 
+  final String day;
   final List<FoodItem> breakfast;
   final List<FoodItem> lunch;
   final List<FoodItem> dinner;

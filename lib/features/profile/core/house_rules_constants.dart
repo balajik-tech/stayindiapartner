@@ -1,5 +1,11 @@
 class HouseRulesConstants {
-  static Map<String, String> t(String en, {String? hi, String? te, String? ta, String? kn}) {
+  static Map<String, String> t(
+    String en, {
+    String? hi,
+    String? te,
+    String? ta,
+    String? kn,
+  }) {
     return {
       'en': en,
       'hi': hi ?? en,

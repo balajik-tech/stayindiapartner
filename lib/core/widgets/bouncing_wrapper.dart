@@ -33,8 +33,10 @@ class _BouncingWrapperState extends State<BouncingWrapper>
       vsync: this,
       duration: widget.animationDuration,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleFactor)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: widget.scaleFactor,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -68,7 +70,9 @@ class _BouncingWrapperState extends State<BouncingWrapper>
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
-        onLongPress: widget.onLongPress != null ? () => widget.onLongPress!() : null,
+        onLongPress: widget.onLongPress != null
+            ? () => widget.onLongPress!()
+            : null,
         behavior: HitTestBehavior.opaque,
         child: AnimatedBuilder(
           animation: _scaleAnimation,

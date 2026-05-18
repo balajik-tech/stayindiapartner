@@ -22,14 +22,14 @@ class PaymentCubit extends Cubit<PaymentState> {
     required SendBulkPaymentReminderUseCase sendBulkPaymentReminderUseCase,
     required GetReminderHistoryUseCase getReminderHistoryUseCase,
     required GetBillsUseCase getBillsUseCase,
-  })  : _getPayments = getPaymentsUseCase,
-        _createPayment = createPaymentUseCase,
-        _markPaid = markPaymentPaidUseCase,
-        _sendReminder = sendPaymentReminderUseCase,
-        _sendBulkReminder = sendBulkPaymentReminderUseCase,
-        _getReminderHistory = getReminderHistoryUseCase,
-        _getBills = getBillsUseCase,
-        super(PaymentInitial());
+  }) : _getPayments = getPaymentsUseCase,
+       _createPayment = createPaymentUseCase,
+       _markPaid = markPaymentPaidUseCase,
+       _sendReminder = sendPaymentReminderUseCase,
+       _sendBulkReminder = sendBulkPaymentReminderUseCase,
+       _getReminderHistory = getReminderHistoryUseCase,
+       _getBills = getBillsUseCase,
+       super(PaymentInitial());
 
   Future<void> loadPayments(
     String hostelId, {
@@ -79,7 +79,12 @@ class PaymentCubit extends Cubit<PaymentState> {
         transactionId: transactionId,
         notes: notes,
       );
-      emit(PaymentSuccess(message: 'Payment created successfully', shouldRefresh: true));
+      emit(
+        PaymentSuccess(
+          message: 'Payment created successfully',
+          shouldRefresh: true,
+        ),
+      );
     } catch (e) {
       emit(PaymentError(message: ErrorHelper.toFriendlyMessage(e)));
     }
@@ -103,7 +108,12 @@ class PaymentCubit extends Cubit<PaymentState> {
         paymentDate: paymentDate,
         notes: notes,
       );
-      emit(PaymentSuccess(message: 'Payment recorded successfully', shouldRefresh: true));
+      emit(
+        PaymentSuccess(
+          message: 'Payment recorded successfully',
+          shouldRefresh: true,
+        ),
+      );
     } catch (e) {
       emit(PaymentError(message: ErrorHelper.toFriendlyMessage(e)));
     }
@@ -116,12 +126,13 @@ class PaymentCubit extends Cubit<PaymentState> {
   }) async {
     emit(PaymentReminding());
     try {
-      await _sendReminder(
-        id: id,
-        channel: channel,
-        message: message,
+      await _sendReminder(id: id, channel: channel, message: message);
+      emit(
+        PaymentSuccess(
+          message: 'Reminder sent successfully',
+          shouldRefresh: true,
+        ),
       );
-      emit(PaymentSuccess(message: 'Reminder sent successfully', shouldRefresh: true));
     } catch (e) {
       emit(PaymentError(message: ErrorHelper.toFriendlyMessage(e)));
     }
@@ -143,7 +154,12 @@ class PaymentCubit extends Cubit<PaymentState> {
         channel: channel,
         message: message,
       );
-      emit(PaymentSuccess(message: 'Bulk reminders sent successfully', shouldRefresh: true));
+      emit(
+        PaymentSuccess(
+          message: 'Bulk reminders sent successfully',
+          shouldRefresh: true,
+        ),
+      );
     } catch (e) {
       emit(PaymentError(message: ErrorHelper.toFriendlyMessage(e)));
     }

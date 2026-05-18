@@ -15,11 +15,14 @@ class CacheService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = "${packageInfo.version}+${packageInfo.buildNumber}";
+      final currentVersion =
+          "${packageInfo.version}+${packageInfo.buildNumber}";
       final lastVersion = prefs.getString(_lastVersionKey);
 
       if (lastVersion != null && lastVersion != currentVersion) {
-        AppLogger.warning('App updated from $lastVersion to $currentVersion. Flushing all local data...');
+        AppLogger.warning(
+          'App updated from $lastVersion to $currentVersion. Flushing all local data...',
+        );
         await flushAllCache();
       }
 
@@ -31,9 +34,8 @@ class CacheService {
 
   Future<void> flushAllCache() async {
     AppLogger.info('Wiping all local application data...');
-    
+
     try {
-      
       final prefs = await SharedPreferences.getInstance();
       final String? locale = prefs.getString('locale');
       final String? appVersion = prefs.getString(_lastVersionKey);
@@ -47,12 +49,10 @@ class CacheService {
       if (appVersion != null) {
         await prefs.setString(_lastVersionKey, appVersion);
       }
-      
-      
+
       await _tokenStorage.clearAll();
       AppLogger.debug('Secure storage cleared.');
-      
-      
+
       try {
         await HydratedBloc.storage.clear();
         AppLogger.debug('HydratedBloc storage fully cleared.');
@@ -60,14 +60,13 @@ class CacheService {
         AppLogger.error('Failed to clear HydratedBloc storage: $e');
       }
 
-      
       try {
         await Hive.deleteFromDisk();
         AppLogger.debug('Hive storage deleted from disk.');
       } catch (e) {
         AppLogger.error('Failed to delete Hive from disk: $e');
       }
-      
+
       AppLogger.success('All local data flushed successfully.');
     } catch (e) {
       AppLogger.error('Critical failure during data flush: $e');

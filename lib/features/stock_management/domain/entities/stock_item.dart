@@ -31,16 +31,16 @@ class StockItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        propertyId,
-        name,
-        category,
-        unit,
-        currentQuantity,
-        minimumThreshold,
-        pricePerUnit,
-        createdBy,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    propertyId,
+    name,
+    category,
+    unit,
+    currentQuantity,
+    minimumThreshold,
+    pricePerUnit,
+    createdBy,
+    createdAt,
+    updatedAt,
+  ];
 }

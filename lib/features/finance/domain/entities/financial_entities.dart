@@ -19,13 +19,13 @@ class FinancialStats extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalRevenue,
-        thisMonthRevenue,
-        occupancyRate,
-        totalBeds,
-        occupiedBeds,
-        pendingPayments,
-      ];
+    totalRevenue,
+    thisMonthRevenue,
+    occupancyRate,
+    totalBeds,
+    occupiedBeds,
+    pendingPayments,
+  ];
 }
 
 class RevenueTrend extends Equatable {

@@ -37,9 +37,11 @@ class LocationService {
         throw Exception('Location permissions are denied');
       }
     }
-    
+
     if (permission == LocationPermission.deniedForever) {
-      throw Exception('Location permissions are permanently denied, we cannot request permissions.');
+      throw Exception(
+        'Location permissions are permanently denied, we cannot request permissions.',
+      );
     }
 
     Position position = await Geolocator.getCurrentPosition(
@@ -51,7 +53,12 @@ class LocationService {
       position.longitude,
     );
 
-    String? street, subLocality, locality, administrativeArea, subAdministrativeArea, pincode;
+    String? street,
+        subLocality,
+        locality,
+        administrativeArea,
+        subAdministrativeArea,
+        pincode;
 
     if (placemarks.isNotEmpty) {
       Placemark place = placemarks.first;

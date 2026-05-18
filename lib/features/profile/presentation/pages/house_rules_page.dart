@@ -69,7 +69,6 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return BlocListener<SettingsCubit, SettingsState>(
@@ -79,15 +78,22 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
           _entryTimeController.text = r.entryTime;
           _visitorPolicyController.text = r.visitorPolicy;
           _penaltyDate = r.penaltyDate;
-          
+
           setState(() {
-             _customRules = r.customRules.map((e) => CustomRuleItem(
-              controller: TextEditingController(text: e.text),
-            )).toList();
+            _customRules = r.customRules
+                .map(
+                  (e) => CustomRuleItem(
+                    controller: TextEditingController(text: e.text),
+                  ),
+                )
+                .toList();
           });
         } else if (state is SettingsSaveSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.green,
+            ),
           );
           Navigator.pop(context);
         } else if (state is SettingsError) {
@@ -136,12 +142,20 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20.sp),
+        icon: Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: AppColors.darkText,
+          size: 20.sp,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
         StringUtils.translate('house_rules_settings', context: context),
-        style: TextStyle(color: AppColors.darkText, fontSize: 18.sp, fontWeight: FontWeight.w900),
+        style: TextStyle(
+          color: AppColors.darkText,
+          fontSize: 18.sp,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     );
   }
@@ -154,7 +168,11 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 15, offset: const Offset(0, 5)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
         ],
       ),
       child: Column(
@@ -162,19 +180,40 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.gavel_rounded, color: AppColors.primaryBlue, size: 20.sp),
+              Icon(
+                Icons.gavel_rounded,
+                color: AppColors.primaryBlue,
+                size: 20.sp,
+              ),
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
-                  StringUtils.translate('stay_india_standard_rules', context: context),
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                  StringUtils.translate(
+                    'stay_india_standard_rules',
+                    context: context,
+                  ),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkText,
+                  ),
                 ),
               ),
               SizedBox(width: 8.w),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(10.r)),
-                child: Text(StringUtils.translate('fixed_tag', context: context), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF64748B))),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Text(
+                  StringUtils.translate('fixed_tag', context: context),
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
               ),
             ],
           ),
@@ -193,13 +232,21 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
                     margin: EdgeInsets.only(top: 6.h),
                     width: 6.w,
                     height: 6.w,
-                    decoration: const BoxDecoration(color: Color(0xFFCBD5E1), shape: BoxShape.circle),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFCBD5E1),
+                      shape: BoxShape.circle,
+                    ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       rule[context.locale.languageCode] ?? rule['en'] ?? '',
-                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B), height: 1.5, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: const Color(0xFF64748B),
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
@@ -218,7 +265,11 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 15, offset: const Offset(0, 5)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
         ],
       ),
       child: Column(
@@ -226,17 +277,39 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         children: [
           Text(
             StringUtils.translate('hostel_timings_penalty', context: context),
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w900,
+              color: AppColors.darkText,
+            ),
           ),
           SizedBox(height: 20.h),
-          _buildLabel(StringUtils.translate('entry_gate_closing_time', context: context)),
-          _buildTextField(_entryTimeController, hint: 'e.g. 10:00 PM', icon: Icons.access_time_rounded),
+          _buildLabel(
+            StringUtils.translate('entry_gate_closing_time', context: context),
+          ),
+          _buildTextField(
+            _entryTimeController,
+            hint: 'e.g. 10:00 PM',
+            icon: Icons.access_time_rounded,
+          ),
           SizedBox(height: 20.h),
-          _buildLabel(StringUtils.translate('late_payment_penalty_date', context: context)),
+          _buildLabel(
+            StringUtils.translate(
+              'late_payment_penalty_date',
+              context: context,
+            ),
+          ),
           _buildPenaltyDatePicker(),
           SizedBox(height: 20.h),
-          _buildLabel(StringUtils.translate('visitor_policy', context: context)),
-          _buildTextField(_visitorPolicyController, hint: 'Enter visitor policy...', maxLines: 2, icon: Icons.people_outline_rounded),
+          _buildLabel(
+            StringUtils.translate('visitor_policy', context: context),
+          ),
+          _buildTextField(
+            _visitorPolicyController,
+            hint: 'Enter visitor policy...',
+            maxLines: 2,
+            icon: Icons.people_outline_rounded,
+          ),
         ],
       ),
     );
@@ -254,13 +327,27 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         child: DropdownButton<int>(
           value: _penaltyDate,
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Color(0xFF64748B),
+          ),
           items: List.generate(28, (index) => index + 1).map((day) {
             return DropdownMenuItem(
               value: day,
               child: Text(
-                StringUtils.translate('every_month_ordinal', namedArgs: {'day': day.toString(), 'ordinal': _getOrdinal(day)}, context: context),
-                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                StringUtils.translate(
+                  'every_month_ordinal',
+                  namedArgs: {
+                    'day': day.toString(),
+                    'ordinal': _getOrdinal(day),
+                  },
+                  context: context,
+                ),
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
               ),
             );
           }).toList(),
@@ -273,10 +360,14 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
   String _getOrdinal(int day) {
     if (day >= 11 && day <= 13) return 'th';
     switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
     }
   }
 
@@ -290,7 +381,11 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
             Expanded(
               child: Text(
                 StringUtils.translate('custom_house_rules', context: context),
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.darkText,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -298,12 +393,26 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
               onTap: _addCustomRule,
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(color: AppColors.primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10.r)),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
                 child: Row(
                   children: [
-                    Icon(Icons.add_rounded, color: AppColors.primaryBlue, size: 16.sp),
+                    Icon(
+                      Icons.add_rounded,
+                      color: AppColors.primaryBlue,
+                      size: 16.sp,
+                    ),
                     SizedBox(width: 4.w),
-                    Text(StringUtils.translate('add_rule', context: context), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: AppColors.primaryBlue)),
+                    Text(
+                      StringUtils.translate('add_rule', context: context),
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -317,7 +426,11 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
               padding: EdgeInsets.symmetric(vertical: 20.h),
               child: Text(
                 StringUtils.translate('no_custom_rules_yet', context: context),
-                style: TextStyle(fontSize: 14.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           )
@@ -341,7 +454,11 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
@@ -353,16 +470,27 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
                 child: TextField(
                   controller: rule.controller,
                   maxLines: 2,
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
+                  ),
                   decoration: InputDecoration(
-                    hintText: StringUtils.translate('type_custom_rule_hint', context: context),
+                    hintText: StringUtils.translate(
+                      'type_custom_rule_hint',
+                      context: context,
+                    ),
                     border: InputBorder.none,
                     hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                   ),
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20.sp),
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.redAccent,
+                  size: 20.sp,
+                ),
                 onPressed: () => _removeCustomRule(index),
               ),
             ],
@@ -377,12 +505,21 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
       padding: EdgeInsets.only(bottom: 8.h),
       child: Text(
         label,
-        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B)),
+        style: TextStyle(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF64748B),
+        ),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, {required String hint, int maxLines = 1, required IconData icon}) {
+  Widget _buildTextField(
+    TextEditingController controller, {
+    required String hint,
+    int maxLines = 1,
+    required IconData icon,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
@@ -392,12 +529,19 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
       child: TextField(
         controller: controller,
         maxLines: maxLines,
-        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.bold,
+          color: AppColors.darkText,
+        ),
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 18.sp),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 12.h,
+          ),
         ),
       ),
     );
@@ -413,7 +557,11 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
           ],
         ),
         child: BouncingWrapper(
@@ -425,13 +573,34 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
               color: AppColors.primaryBlue,
               borderRadius: BorderRadius.circular(18.r),
               boxShadow: [
-                BoxShadow(color: AppColors.primaryBlue.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 5)),
+                BoxShadow(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
               ],
             ),
             child: Center(
               child: _isSaving
-                  ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                  : Text(StringUtils.translate('save_rules_timings', context: context), style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w900)),
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 3,
+                      ),
+                    )
+                  : Text(
+                      StringUtils.translate(
+                        'save_rules_timings',
+                        context: context,
+                      ),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -450,17 +619,16 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
       final List<CustomRule> updatedCustomRules = [];
 
       for (var rule in _customRules) {
-        updatedCustomRules.add(CustomRule(
-          text: rule.controller.text,
-          photo: "", 
-        ));
+        updatedCustomRules.add(
+          CustomRule(text: rule.controller.text, photo: ""),
+        );
       }
 
       await cubit.updateHouseRules(
         hostelId,
         entryTime: _entryTimeController.text,
         visitorPolicy: _visitorPolicyController.text,
-        otherRules: "", 
+        otherRules: "",
         penaltyDate: _penaltyDate,
         customRules: updatedCustomRules,
       );

@@ -30,7 +30,11 @@ class RentDuePage extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20.sp),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppColors.darkText,
+              size: 20.sp,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -40,7 +44,12 @@ class RentDuePage extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
             if (state is RentDueError) {
-              return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+              return Center(
+                child: Text(
+                  state.message,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
             }
             if (state is RentDueLoaded) {
               return DefaultTabController(
@@ -54,7 +63,10 @@ class RentDuePage extends StatelessWidget {
                         unselectedLabelColor: AppColors.greyText,
                         indicatorColor: AppColors.primaryBlue,
                         indicatorWeight: 3.h,
-                        labelStyle: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+                        labelStyle: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
                         tabs: const [
                           Tab(text: 'Overdue'),
                           Tab(text: 'Upcoming'),
@@ -64,8 +76,14 @@ class RentDuePage extends StatelessWidget {
                     Expanded(
                       child: TabBarView(
                         children: [
-                          _RentList(payments: state.details.overdue, isOverdue: true),
-                          _RentList(payments: state.details.upcoming, isOverdue: false),
+                          _RentList(
+                            payments: state.details.overdue,
+                            isOverdue: true,
+                          ),
+                          _RentList(
+                            payments: state.details.upcoming,
+                            isOverdue: false,
+                          ),
                         ],
                       ),
                     ),
@@ -94,11 +112,19 @@ class _RentList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline_rounded, size: 64.sp, color: Colors.green.shade200),
+            Icon(
+              Icons.check_circle_outline_rounded,
+              size: 64.sp,
+              color: Colors.green.shade200,
+            ),
             SizedBox(height: 16.h),
             Text(
               isOverdue ? 'No overdue rents!' : 'No upcoming rents!',
-              style: TextStyle(fontSize: 16.sp, color: AppColors.greyText, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: AppColors.greyText,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -134,7 +160,9 @@ class _RentList extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  isOverdue ? Icons.priority_high_rounded : Icons.calendar_today_rounded,
+                  isOverdue
+                      ? Icons.priority_high_rounded
+                      : Icons.calendar_today_rounded,
                   color: isOverdue ? Colors.red : Colors.blue,
                   size: 24.sp,
                 ),
@@ -146,11 +174,18 @@ class _RentList extends StatelessWidget {
                   children: [
                     Text(
                       payment.tenantName,
-                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkText,
+                      ),
                     ),
                     Text(
                       'Due: ${DateFormat('dd MMM yyyy').format(payment.dueDate)}',
-                      style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: AppColors.greyText,
+                      ),
                     ),
                   ],
                 ),
@@ -160,11 +195,19 @@ class _RentList extends StatelessWidget {
                 children: [
                   Text(
                     '${payment.amount.toInt()}',
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                    ),
                   ),
                   Text(
                     payment.month,
-                    style: TextStyle(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppColors.greyText,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),

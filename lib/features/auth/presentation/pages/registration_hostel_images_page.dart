@@ -21,10 +21,13 @@ class RegistrationHostelImagesPage extends StatefulWidget {
   const RegistrationHostelImagesPage({super.key, required this.hostelId});
 
   @override
-  State<RegistrationHostelImagesPage> createState() => _RegistrationHostelImagesPageState();
+  State<RegistrationHostelImagesPage> createState() =>
+      _RegistrationHostelImagesPageState();
 }
 
-class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesPage> with SingleTickerProviderStateMixin {
+class _RegistrationHostelImagesPageState
+    extends State<RegistrationHostelImagesPage>
+    with SingleTickerProviderStateMixin {
   final List<File> _selectedImages = [];
   final int _maxImages = 10;
 
@@ -38,7 +41,10 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _fadeAnimation = CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic);
+    _fadeAnimation = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutCubic,
+    );
     _animController.forward();
   }
 
@@ -74,10 +80,15 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
         _selectedImages.addAll(newFiles.take(remaining));
       });
 
-      if (newFiles.length > (_maxImages - (_selectedImages.length - newFiles.length))) {
+      if (newFiles.length >
+          (_maxImages - (_selectedImages.length - newFiles.length))) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Only $_maxImages images can be uploaded. Some were skipped.')),
+            SnackBar(
+              content: Text(
+                'Only $_maxImages images can be uploaded. Some were skipped.',
+              ),
+            ),
           );
         }
       }
@@ -119,7 +130,8 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
   Widget build(BuildContext context) {
     return BlocListener<HostelCubit, HostelState>(
       listener: (context, state) {
-        if (state is HostelOperationSuccess && state.message.contains('Images uploaded successfully')) {
+        if (state is HostelOperationSuccess &&
+            state.message.contains('Images uploaded successfully')) {
           _navigateToDocuments();
         } else if (state is HostelError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +139,9 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
               content: Text(state.message, style: GoogleFonts.outfit()),
               backgroundColor: Colors.red.shade400,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
             ),
           );
         }
@@ -141,7 +155,10 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 8.h,
+                  ),
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: Column(
@@ -155,7 +172,9 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
                         SizedBox(height: 48.h),
                         _buildProgressHeader(),
                         SizedBox(height: 48.h),
-                        _selectedImages.isEmpty ? _buildEmptyState() : _buildImageGrid(),
+                        _selectedImages.isEmpty
+                            ? _buildEmptyState()
+                            : _buildImageGrid(),
                         SizedBox(height: 40.h),
                       ],
                     ),
@@ -189,7 +208,11 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
               ),
             ],
           ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 16),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black,
+            size: 16,
+          ),
         ),
       ),
     );
@@ -244,7 +267,9 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
         builder: (context, state) {
           final isLoading = state is HostelLoading;
           return AuthPrimaryButton(
-            label: _selectedImages.isEmpty ? 'Skip for Now' : 'Upload & Continue',
+            label: _selectedImages.isEmpty
+                ? 'Skip for Now'
+                : 'Upload & Continue',
             isLoading: isLoading,
             onPressed: _handleContinue,
           );
@@ -262,7 +287,10 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
         decoration: BoxDecoration(
           color: AppColors.primaryBlue.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(24.r),
-          border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.1), width: 1.5),
+          border: Border.all(
+            color: AppColors.primaryBlue.withValues(alpha: 0.1),
+            width: 1.5,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -273,12 +301,20 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
                 color: AppColors.primaryBlue.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.add_a_photo_rounded, size: 40.sp, color: AppColors.primaryBlue),
+              child: Icon(
+                Icons.add_a_photo_rounded,
+                size: 40.sp,
+                color: AppColors.primaryBlue,
+              ),
             ),
             SizedBox(height: 24.h),
             Text(
               'Add Property Photos',
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.darkText,
+              ),
             ),
             SizedBox(height: 8.h),
             Text(
@@ -304,58 +340,64 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
             mainAxisSpacing: 12.h,
             childAspectRatio: 1,
           ),
-          itemCount: _selectedImages.length + (_selectedImages.length < _maxImages ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == _selectedImages.length) {
-                return _buildAddMoreButton();
-              }
+          itemCount:
+              _selectedImages.length +
+              (_selectedImages.length < _maxImages ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == _selectedImages.length) {
+              return _buildAddMoreButton();
+            }
 
-              return Stack(
-                children: [
-                  Positioned.fill(
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16.r),
+                      child: Image.file(
+                        _selectedImages[index],
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                        cacheWidth: 200,
+                        cacheHeight: 200,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: BouncingWrapper(
+                    onTap: () => _removeImage(index),
                     child: Container(
+                      padding: EdgeInsets.all(4.w),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: Colors.black.withValues(alpha: 0.6),
+                        shape: BoxShape.circle,
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16.r),
-                        child: Image.file(
-                          _selectedImages[index],
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                          cacheWidth: 200,
-                          cacheHeight: 200,
-                        ),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 14.sp,
+                        color: Colors.white,
                       ),
                     ),
                   ),
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: BouncingWrapper(
-                      onTap: () => _removeImage(index),
-                      child: Container(
-                        padding: EdgeInsets.all(4.w),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.close_rounded, size: 14.sp, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
+        ),
         SizedBox(height: 16.h),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -365,7 +407,11 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
           ),
           child: Text(
             '${_selectedImages.length} / $_maxImages Selected',
-            style: TextStyle(color: AppColors.darkText, fontSize: 13.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.darkText,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
@@ -379,14 +425,28 @@ class _RegistrationHostelImagesPageState extends State<RegistrationHostelImagesP
         decoration: BoxDecoration(
           color: Colors.grey.shade50,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: Colors.grey.shade200, style: BorderStyle.solid),
+          border: Border.all(
+            color: Colors.grey.shade200,
+            style: BorderStyle.solid,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_photo_alternate_rounded, color: AppColors.primaryBlue, size: 28.sp),
+            Icon(
+              Icons.add_photo_alternate_rounded,
+              color: AppColors.primaryBlue,
+              size: 28.sp,
+            ),
             SizedBox(height: 4.h),
-            Text('Add', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue)),
+            Text(
+              'Add',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryBlue,
+              ),
+            ),
           ],
         ),
       ),

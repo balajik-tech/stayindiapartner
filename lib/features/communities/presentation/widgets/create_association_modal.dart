@@ -26,8 +26,7 @@ class CreateAssociationModal extends StatefulWidget {
   });
 
   @override
-  State<CreateAssociationModal> createState() =>
-      CreateAssociationModalState();
+  State<CreateAssociationModal> createState() => CreateAssociationModalState();
 }
 
 class CreateAssociationModalState extends State<CreateAssociationModal> {
@@ -126,7 +125,9 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
         24.w,
         12.h,
         24.w,
-        MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h,
+        MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            24.h,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -168,7 +169,11 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
                       radius: 40.r,
                       backgroundColor: Colors.grey[100],
                       backgroundImage: _imageFile != null
-                          ? ResizeImage(FileImage(_imageFile!), width: 160, height: 160)
+                          ? ResizeImage(
+                              FileImage(_imageFile!),
+                              width: 160,
+                              height: 160,
+                            )
                           : null,
                       child: _imageFile == null
                           ? Icon(
@@ -444,7 +449,7 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
-      isDense: false, 
+      isDense: false,
       contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16.r),

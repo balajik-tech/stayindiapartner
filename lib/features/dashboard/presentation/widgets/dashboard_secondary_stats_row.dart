@@ -17,7 +17,9 @@ class DashboardSecondaryStatsRow extends StatelessWidget {
             themeColor: const Color(0xFF22C55E),
             backgroundColor: const Color(0xFFE8F8F0),
             textColor: const Color(0xFF16A34A),
-            selector: (state) => state is DashboardLoaded ? state.data.occupancyStatus.inside : 0,
+            selector: (state) => state is DashboardLoaded
+                ? state.data.occupancyStatus.inside
+                : 0,
           ),
         ),
         SizedBox(width: 8.w),
@@ -28,7 +30,9 @@ class DashboardSecondaryStatsRow extends StatelessWidget {
             themeColor: const Color(0xFFEF4444),
             backgroundColor: const Color(0xFFFFEAEA),
             textColor: const Color(0xFFDC2626),
-            selector: (state) => state is DashboardLoaded ? state.data.occupancyStatus.outside : 0,
+            selector: (state) => state is DashboardLoaded
+                ? state.data.occupancyStatus.outside
+                : 0,
           ),
         ),
         SizedBox(width: 8.w),
@@ -39,7 +43,8 @@ class DashboardSecondaryStatsRow extends StatelessWidget {
             themeColor: const Color(0xFFF59E0B),
             backgroundColor: const Color(0xFFFFF4E5),
             textColor: const Color(0xFFD97706),
-            selector: (state) => state is DashboardLoaded ? state.data.occupancy.awayBeds : 0,
+            selector: (state) =>
+                state is DashboardLoaded ? state.data.occupancy.awayBeds : 0,
           ),
         ),
         SizedBox(width: 8.w),
@@ -50,10 +55,10 @@ class DashboardSecondaryStatsRow extends StatelessWidget {
             themeColor: const Color(0xFF3B82F6),
             backgroundColor: const Color(0xFFEAF3FF),
             textColor: const Color(0xFF2563EB),
-            selector: (state) => state is DashboardLoaded ? state.data.dailyOperations.todayCheckIns : 0,
-            onTap: () {
-              
-            },
+            selector: (state) => state is DashboardLoaded
+                ? state.data.dailyOperations.todayCheckIns
+                : 0,
+            onTap: () {},
           ),
         ),
       ],

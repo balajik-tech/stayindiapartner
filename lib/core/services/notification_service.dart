@@ -14,7 +14,8 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final Set<String> _processedDeliveryIds = {};
   static const int _maxCacheSize = 100;
@@ -25,16 +26,17 @@ class NotificationService {
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-      requestCriticalPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+          requestCriticalPermission: true,
+        );
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsIOS,
+        );
 
     await _notificationsPlugin.initialize(
       settings: initializationSettings,
@@ -52,15 +54,18 @@ class NotificationService {
     );
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      AppLogger.info('Received foreground message: ${message.notification?.title}');
-      
-      
+      AppLogger.info(
+        'Received foreground message: ${message.notification?.title}',
+      );
+
       final deliveryId = message.data['idempotencyKey'];
       if (deliveryId != null) {
         if (_processedDeliveryIds.contains(deliveryId)) return;
         _processedDeliveryIds.add(deliveryId);
-        if (_processedDeliveryIds.length > _maxCacheSize) _processedDeliveryIds.remove(_processedDeliveryIds.first);
-        
+        if (_processedDeliveryIds.length > _maxCacheSize) {
+          _processedDeliveryIds.remove(_processedDeliveryIds.first);
+        }
+
         trackInteraction(deliveryId, 'RECEIVED');
         trackInteraction(deliveryId, 'DISPLAYED');
       }
@@ -92,7 +97,7 @@ class NotificationService {
     final RemoteMessage? initial = await _fcm.getInitialMessage();
     if (initial != null) {
       AppLogger.info('Terminated state notification: ${initial.data}');
-      
+
       Future.delayed(const Duration(milliseconds: 800), () {
         _handleNotificationTap(initial.data);
       });
@@ -104,10 +109,10 @@ class NotificationService {
       final getIt = GetIt.instance;
       if (getIt.isRegistered<Dio>()) {
         final dio = getIt<Dio>();
-        await dio.post('/notifications/interact', data: {
-          'idempotencyKey': idempotencyKey,
-          'action': action,
-        });
+        await dio.post(
+          '/notifications/interact',
+          data: {'idempotencyKey': idempotencyKey, 'action': action},
+        );
       }
     } catch (e) {
       AppLogger.error('Failed to track interaction: $e');
@@ -136,7 +141,9 @@ class NotificationService {
       case 'CHECK_IN_REQUEST':
       case 'STAY_EXPIRING':
         navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainNavigationPage(initialIndex: 1)),
+          MaterialPageRoute(
+            builder: (_) => const MainNavigationPage(initialIndex: 1),
+          ),
           (route) => false,
         );
         break;
@@ -147,7 +154,9 @@ class NotificationService {
       case 'COMPLAINT':
       case 'MAINTENANCE':
         navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainNavigationPage(initialIndex: 2)), 
+          MaterialPageRoute(
+            builder: (_) => const MainNavigationPage(initialIndex: 2),
+          ),
           (route) => false,
         );
         break;
@@ -157,14 +166,18 @@ class NotificationService {
       case 'TEMP_LEAVE':
       case 'AWAY_STATUS':
         navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainNavigationPage(initialIndex: 3)),
+          MaterialPageRoute(
+            builder: (_) => const MainNavigationPage(initialIndex: 3),
+          ),
           (route) => false,
         );
         break;
       case 'GUEST_REQUEST':
       case 'GUEST_STATUS':
         navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainNavigationPage(initialIndex: 0)), 
+          MaterialPageRoute(
+            builder: (_) => const MainNavigationPage(initialIndex: 0),
+          ),
           (route) => false,
         );
         break;
@@ -185,7 +198,6 @@ class NotificationService {
   }
 
   Future<void> requestPermissions() async {
-    
     NotificationSettings settings = await _fcm.requestPermission(
       alert: true,
       badge: true,
@@ -194,10 +206,11 @@ class NotificationService {
     );
     AppLogger.info('User granted permission: ${settings.authorizationStatus}');
 
-    
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+        _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
 
     if (androidImplementation != null) {
       await androidImplementation.requestNotificationsPermission();
@@ -210,18 +223,19 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'sos_alerts_channel',
-      'Emergency Alerts',
-      channelDescription: 'High priority emergency and SOS alerts',
-      importance: Importance.max,
-      priority: Priority.high,
-      showWhen: true,
-      color: Color(0xFFFF0000),
-      icon: '@mipmap/ic_launcher',
-      enableVibration: true,
-      fullScreenIntent: true,
-    );
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'sos_alerts_channel',
+          'Emergency Alerts',
+          channelDescription: 'High priority emergency and SOS alerts',
+          importance: Importance.max,
+          priority: Priority.high,
+          showWhen: true,
+          color: Color(0xFFFF0000),
+          icon: '@mipmap/ic_launcher',
+          enableVibration: true,
+          fullScreenIntent: true,
+        );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
       presentAlert: true,

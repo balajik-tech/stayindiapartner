@@ -14,7 +14,6 @@ class AppLogger {
 
   static final Map<String, dynamic> _crashContext = {};
 
-  
   static void setContext(String key, dynamic value) {
     _crashContext[key] = value;
   }
@@ -42,8 +41,8 @@ class AppLogger {
   static void debug(String message) {
     _logger.d(message);
   }
-  
+
   static void purple(String message) {
-     _logger.t(message); 
+    _logger.t(message);
   }
 }

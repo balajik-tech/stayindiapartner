@@ -52,8 +52,10 @@ class NoticeRemoteDataSourceImpl implements NoticeRemoteDataSource {
   }
 
   @override
-  Future<List<NoticeModel>> getNotices(
-      {String? hostelId, String? status}) async {
+  Future<List<NoticeModel>> getNotices({
+    String? hostelId,
+    String? status,
+  }) async {
     try {
       final queryParams = <String, dynamic>{};
       if (hostelId != null) queryParams['hostelId'] = hostelId;
@@ -69,7 +71,8 @@ class NoticeRemoteDataSourceImpl implements NoticeRemoteDataSource {
         final List<dynamic> data;
         if (rawData is List) {
           data = rawData;
-        } else if (rawData is Map && (rawData.containsKey('results') || rawData.containsKey('items'))) {
+        } else if (rawData is Map &&
+            (rawData.containsKey('results') || rawData.containsKey('items'))) {
           data = rawData['results'] ?? rawData['items'];
         } else {
           data = [];

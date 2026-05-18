@@ -70,8 +70,10 @@ class TenantHistoryPage extends StatelessWidget {
 
   Widget _buildSummaryRow() {
     final double totalPaid = payments.fold(0, (sum, p) => sum + p.paidAmount);
-    final String totalPaidStr = totalPaid >= 1000 ? '${(totalPaid / 1000).toStringAsFixed(1)}K' : totalPaid.toStringAsFixed(0);
-    
+    final String totalPaidStr = totalPaid >= 1000
+        ? '${(totalPaid / 1000).toStringAsFixed(1)}K'
+        : totalPaid.toStringAsFixed(0);
+
     String days = '';
     if (checkInDate != null) {
       try {
@@ -113,7 +115,9 @@ class TenantHistoryPage extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16.h),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+        ),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
@@ -164,8 +168,18 @@ class TenantHistoryPage extends StatelessWidget {
     try {
       final dt = DateTime.parse(isoDate).toLocal();
       const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
       ];
       return '${months[dt.month - 1]} ${dt.day}${_getDaySuffix(dt.day)}, ${dt.year}';
     } catch (_) {
@@ -176,10 +190,14 @@ class TenantHistoryPage extends StatelessWidget {
   String _getDaySuffix(int day) {
     if (day >= 11 && day <= 13) return 'th';
     switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
     }
   }
 
@@ -187,8 +205,18 @@ class TenantHistoryPage extends StatelessWidget {
     try {
       final parts = monthStr.split('-');
       const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
       ];
       final m = int.parse(parts[1]) - 1;
       return '${months[m]} ${parts[0]}';

@@ -59,10 +59,7 @@ class _RentPaymentsPageState extends State<RentPaymentsPage> {
             ),
             Text(
               DateFormat('MMM yyyy').format(DateTime.now()),
-              style: TextStyle(
-                color: AppColors.greyText,
-                fontSize: 12.sp,
-              ),
+              style: TextStyle(color: AppColors.greyText, fontSize: 12.sp),
             ),
           ],
         ),
@@ -72,7 +69,10 @@ class _RentPaymentsPageState extends State<RentPaymentsPage> {
             child: BouncingWrapper(
               onTap: () {
                 if (_hostelId != null) {
-                  context.read<PaymentCubit>().sendBulkReminder(_hostelId!, bucket: 'OVERDUE');
+                  context.read<PaymentCubit>().sendBulkReminder(
+                    _hostelId!,
+                    bucket: 'OVERDUE',
+                  );
                 }
               },
               child: Container(
@@ -101,47 +101,55 @@ class _RentPaymentsPageState extends State<RentPaymentsPage> {
         ],
       ),
       body: BlocListener<HostelCubit, HostelState>(
-        listenWhen: (prev, curr) => 
-          (prev is! HostelLoaded && curr is HostelLoaded) || 
-          (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+        listenWhen: (prev, curr) =>
+            (prev is! HostelLoaded && curr is HostelLoaded) ||
+            (prev is HostelLoaded &&
+                curr is HostelLoaded &&
+                prev.selectedHostelIndex != curr.selectedHostelIndex),
         listener: (context, state) => _loadData(),
         child: BlocListener<PaymentCubit, PaymentState>(
-        listener: (context, state) {
-          if (state is PaymentSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.green),
-            );
-            if (state.shouldRefresh && _hostelId != null) {
-              context.read<PaymentCubit>().loadPayments(_hostelId!);
-            }
-          } else if (state is PaymentError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-        },
-        child: RefreshIndicator(
-          onRefresh: () async {
-            if (_hostelId != null) {
-              await context.read<PaymentCubit>().loadPayments(_hostelId!);
+          listener: (context, state) {
+            if (state is PaymentSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              if (state.shouldRefresh && _hostelId != null) {
+                context.read<PaymentCubit>().loadPayments(_hostelId!);
+              }
+            } else if (state is PaymentError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
             }
           },
-          child: BlocBuilder<PaymentCubit, PaymentState>(
-            builder: (context, state) {
-              if (state is PaymentLoading && state is! PaymentLoaded) {
-                return const _RentPaymentsLoading();
+          child: RefreshIndicator(
+            onRefresh: () async {
+              if (_hostelId != null) {
+                await context.read<PaymentCubit>().loadPayments(_hostelId!);
               }
-              if (state is PaymentLoaded) {
-                return _RentPaymentsContent(summary: state.summary);
-              }
-              if (state is PaymentError) {
-                return Center(child: Text(state.message));
-              }
-              return const SizedBox.shrink();
             },
+            child: BlocBuilder<PaymentCubit, PaymentState>(
+              builder: (context, state) {
+                if (state is PaymentLoading && state is! PaymentLoaded) {
+                  return const _RentPaymentsLoading();
+                }
+                if (state is PaymentLoaded) {
+                  return _RentPaymentsContent(summary: state.summary);
+                }
+                if (state is PaymentError) {
+                  return Center(child: Text(state.message));
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -196,7 +204,7 @@ class _RentPaymentsContent extends StatelessWidget {
             ),
           ),
         ),
-        
+
         if (summary.overdue.isNotEmpty) ...[
           SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -212,7 +220,10 @@ class _RentPaymentsContent extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => _PaymentCard(payment: summary.overdue[index], isOverdue: true),
+                (context, index) => _PaymentCard(
+                  payment: summary.overdue[index],
+                  isOverdue: true,
+                ),
                 childCount: summary.overdue.length,
               ),
             ),
@@ -223,17 +234,15 @@ class _RentPaymentsContent extends StatelessWidget {
           SliverPadding(
             padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 0),
             sliver: SliverToBoxAdapter(
-              child: _SectionHeader(
-                title: 'Due Today',
-                color: Colors.orange,
-              ),
+              child: _SectionHeader(title: 'Due Today', color: Colors.orange),
             ),
           ),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => _PaymentCard(payment: summary.dueToday[index]),
+                (context, index) =>
+                    _PaymentCard(payment: summary.dueToday[index]),
                 childCount: summary.dueToday.length,
               ),
             ),
@@ -244,23 +253,21 @@ class _RentPaymentsContent extends StatelessWidget {
           SliverPadding(
             padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 0),
             sliver: SliverToBoxAdapter(
-              child: _SectionHeader(
-                title: 'Upcoming',
-                color: Colors.grey,
-              ),
+              child: _SectionHeader(title: 'Upcoming', color: Colors.grey),
             ),
           ),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => _PaymentCard(payment: summary.upcoming[index]),
+                (context, index) =>
+                    _PaymentCard(payment: summary.upcoming[index]),
                 childCount: summary.upcoming.length,
               ),
             ),
           ),
         ],
-        
+
         SliverToBoxAdapter(child: SizedBox(height: 40.h)),
       ],
     );
@@ -371,11 +378,7 @@ class _SectionHeader extends StatelessWidget {
   final IconData? icon;
   final Color color;
 
-  const _SectionHeader({
-    required this.title,
-    this.icon,
-    required this.color,
-  });
+  const _SectionHeader({required this.title, this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -402,15 +405,13 @@ class _PaymentCard extends StatelessWidget {
   final Payment payment;
   final bool isOverdue;
 
-  const _PaymentCard({
-    required this.payment,
-    this.isOverdue = false,
-  });
+  const _PaymentCard({required this.payment, this.isOverdue = false});
 
   @override
   Widget build(BuildContext context) {
     final dueDate = DateTime.tryParse(payment.dueDate);
-    final isToday = dueDate != null &&
+    final isToday =
+        dueDate != null &&
         dueDate.day == DateTime.now().day &&
         dueDate.month == DateTime.now().month &&
         dueDate.year == DateTime.now().year;
@@ -455,10 +456,7 @@ class _PaymentCard extends StatelessWidget {
           SizedBox(height: 4.h),
           Text(
             'Room ${payment.roomName ?? ''}  Bed ${payment.bedNumber}',
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: AppColors.greyText,
-            ),
+            style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
           ),
           if (payment.lastReminderAt != null) ...[
             SizedBox(height: 4.h),
@@ -473,10 +471,7 @@ class _PaymentCard extends StatelessWidget {
           SizedBox(height: 16.h),
           Text(
             'Amount Due',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: AppColors.greyText,
-            ),
+            style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -489,7 +484,11 @@ class _PaymentCard extends StatelessWidget {
                   color: AppColors.darkText,
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, size: 16.sp, color: AppColors.greyText),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16.sp,
+                color: AppColors.greyText,
+              ),
             ],
           ),
           SizedBox(height: 16.h),
@@ -498,12 +497,17 @@ class _PaymentCard extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    context.read<PaymentCubit>().markPaid(payment.id, payment.dueAmount);
+                    context.read<PaymentCubit>().markPaid(
+                      payment.id,
+                      payment.dueAmount,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryBlue,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
                     elevation: 0,
                     padding: EdgeInsets.symmetric(vertical: 12.h),
                   ),
@@ -528,7 +532,11 @@ class _PaymentCard extends StatelessWidget {
                     border: Border.all(color: AppColors.roomCardBorder),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Icon(Icons.notifications_none_rounded, color: AppColors.darkText, size: 24.sp),
+                  child: Icon(
+                    Icons.notifications_none_rounded,
+                    color: AppColors.darkText,
+                    size: 24.sp,
+                  ),
                 ),
               ),
             ],

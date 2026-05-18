@@ -82,8 +82,9 @@ class BedDetailsSheet extends StatefulWidget {
         providers: [
           BlocProvider.value(value: bookingsCubit),
           BlocProvider(
-            create: (context) => sl<TenantDetailCubit>()
-              ..loadDetail(state.tenantId ?? '', state.hostelId ?? ''),
+            create: (context) =>
+                sl<TenantDetailCubit>()
+                  ..loadDetail(state.tenantId ?? '', state.hostelId ?? ''),
           ),
         ],
         child: BedDetailsSheet(state: state),
@@ -107,7 +108,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
   String _formatReturnDate(String? rawDate) {
     if (rawDate == null || rawDate.isEmpty) {
-      return 'no_return_date'.tr() == 'no_return_date' ? 'No Return Date Set' : 'no_return_date'.tr();
+      return 'no_return_date'.tr() == 'no_return_date'
+          ? 'No Return Date Set'
+          : 'no_return_date'.tr();
     }
     try {
       final parsed = DateTime.tryParse(rawDate);
@@ -120,34 +123,52 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
   Color get _statusColor {
     switch (_currentStatus) {
-      case BedStatus.free:        return const Color(0xFF87CEEB);
-      case BedStatus.occupied:    return const Color(0xFFFF8600);
-      case BedStatus.notice:      return const Color(0xFFFFB300);
-      case BedStatus.away:        return const Color(0xFFE91E63);
-      case BedStatus.booked:      return const Color(0xFF9C27B0);
-      case BedStatus.maintenance: return const Color(0xFFCBD5E1);
+      case BedStatus.free:
+        return const Color(0xFF87CEEB);
+      case BedStatus.occupied:
+        return const Color(0xFFFF8600);
+      case BedStatus.notice:
+        return const Color(0xFFFFB300);
+      case BedStatus.away:
+        return const Color(0xFFE91E63);
+      case BedStatus.booked:
+        return const Color(0xFF9C27B0);
+      case BedStatus.maintenance:
+        return const Color(0xFFCBD5E1);
     }
   }
 
   Color get _statusBgColor {
     switch (_currentStatus) {
-      case BedStatus.free:        return const Color(0xFFD6EEF8);
-      case BedStatus.occupied:    return const Color(0xFFFFEDD5);
-      case BedStatus.notice:      return const Color(0xFFFFF3CD);
-      case BedStatus.away:        return const Color(0xFFFFE4EE);
-      case BedStatus.booked:      return const Color(0xFFF3E8FF);
-      case BedStatus.maintenance: return const Color(0xFFF1F5F9);
+      case BedStatus.free:
+        return const Color(0xFFD6EEF8);
+      case BedStatus.occupied:
+        return const Color(0xFFFFEDD5);
+      case BedStatus.notice:
+        return const Color(0xFFFFF3CD);
+      case BedStatus.away:
+        return const Color(0xFFFFE4EE);
+      case BedStatus.booked:
+        return const Color(0xFFF3E8FF);
+      case BedStatus.maintenance:
+        return const Color(0xFFF1F5F9);
     }
   }
 
   Color get _statusTextColor {
     switch (_currentStatus) {
-      case BedStatus.free:        return const Color(0xFF1A6F8A);
-      case BedStatus.occupied:    return const Color(0xFF8B4000);
-      case BedStatus.notice:      return const Color(0xFF7A5800);
-      case BedStatus.away:        return const Color(0xFF9C0040);
-      case BedStatus.booked:      return const Color(0xFF6A0080);
-      case BedStatus.maintenance: return const Color(0xFF475569);
+      case BedStatus.free:
+        return const Color(0xFF1A6F8A);
+      case BedStatus.occupied:
+        return const Color(0xFF8B4000);
+      case BedStatus.notice:
+        return const Color(0xFF7A5800);
+      case BedStatus.away:
+        return const Color(0xFF9C0040);
+      case BedStatus.booked:
+        return const Color(0xFF6A0080);
+      case BedStatus.maintenance:
+        return const Color(0xFF475569);
     }
   }
 
@@ -158,7 +179,8 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
     return BlocConsumer<BookingsCubit, BookingsState>(
       listener: (context, bookingsState) {
-        if (bookingsState.status == BookingsStatus.success && bookingsState.successMessage != null) {
+        if (bookingsState.status == BookingsStatus.success &&
+            bookingsState.successMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(bookingsState.successMessage!),
@@ -166,7 +188,8 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
             ),
           );
           Navigator.pop(context);
-        } else if (bookingsState.status == BookingsStatus.failure && bookingsState.errorMessage != null) {
+        } else if (bookingsState.status == BookingsStatus.failure &&
+            bookingsState.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(bookingsState.errorMessage!),
@@ -236,9 +259,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 child: Container(
                   color: Colors.black.withValues(alpha: 0.15),
                   child: const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF0F172A),
-                    ),
+                    child: CircularProgressIndicator(color: Color(0xFF0F172A)),
                   ),
                 ),
               ),
@@ -267,7 +288,12 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               children: [
                 Text(
                   "${'bed'.tr()} ${widget.state.bedNumber}".toUpperCase(),
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: -0.5),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF0F172A),
+                    letterSpacing: -0.5,
+                  ),
                 ),
                 Text(
                   _currentStatus == BedStatus.maintenance
@@ -276,7 +302,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
-                    color: _currentStatus == BedStatus.maintenance ? const Color(0xFF475569) : const Color(0xFF94A3B8),
+                    color: _currentStatus == BedStatus.maintenance
+                        ? const Color(0xFF475569)
+                        : const Color(0xFF94A3B8),
                   ),
                 ),
               ],
@@ -323,17 +351,19 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                       color: _statusColor.withValues(alpha: 0.25),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
-                    )
+                    ),
                   ],
                 ),
                 child: Text(
-                  _currentStatus == BedStatus.maintenance 
-                      ? 'MAINTENANCE' 
-                      : (_currentStatus == BedStatus.free ? 'AVAILABLE' : 'ACCESS PASS'),
+                  _currentStatus == BedStatus.maintenance
+                      ? 'MAINTENANCE'
+                      : (_currentStatus == BedStatus.free
+                            ? 'AVAILABLE'
+                            : 'ACCESS PASS'),
                   style: TextStyle(
-                    fontSize: 9.sp, 
-                    fontWeight: FontWeight.w900, 
-                    color: _statusTextColor, 
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w900,
+                    color: _statusTextColor,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -370,7 +400,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     if (state != null && state.trim().isNotEmpty) {
       addressParts.add(state.trim());
     }
-    final String fullAddress = addressParts.isNotEmpty ? addressParts.join(', ') : 'india'.tr();
+    final String fullAddress = addressParts.isNotEmpty
+        ? addressParts.join(', ')
+        : 'india'.tr();
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -380,9 +412,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
             (name ?? 'app_name'.tr()).toUpperCase(),
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16.sp, 
-              fontWeight: FontWeight.w900, 
-              color: const Color(0xFF0F172A), 
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF0F172A),
               letterSpacing: 1.0,
             ),
           ),
@@ -390,7 +422,11 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.location_on_rounded, color: const Color(0xFFCBD5E1), size: 12.sp),
+              Icon(
+                Icons.location_on_rounded,
+                color: const Color(0xFFCBD5E1),
+                size: 12.sp,
+              ),
               SizedBox(width: 4.w),
               Flexible(
                 child: Text(
@@ -399,8 +435,8 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 11.sp, 
-                    fontWeight: FontWeight.w600, 
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
                     color: const Color(0xFF94A3B8),
                   ),
                 ),
@@ -426,7 +462,13 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24.r),
         border: Border.all(color: statusColor.withValues(alpha: 0.5), width: 2),
-        boxShadow: [BoxShadow(color: statusColor.withValues(alpha: 0.05), blurRadius: 16, spreadRadius: 1)],
+        boxShadow: [
+          BoxShadow(
+            color: statusColor.withValues(alpha: 0.05),
+            blurRadius: 16,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -441,7 +483,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                     width: 64.r,
                     height: 64.r,
                     decoration: BoxDecoration(
-                      color: statusBgColor, 
+                      color: statusBgColor,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -451,12 +493,23 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                         ),
                       ],
                     ),
-                    child: Center(child: Icon(Icons.qr_code_scanner_rounded, color: statusTextColor, size: 32.sp)),
+                    child: Center(
+                      child: Icon(
+                        Icons.qr_code_scanner_rounded,
+                        color: statusTextColor,
+                        size: 32.sp,
+                      ),
+                    ),
                   ),
                   SizedBox(height: 10.h),
                   Text(
                     'scan_to_checkin'.tr(),
-                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: statusTextColor, letterSpacing: 0.5),
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w900,
+                      color: statusTextColor,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ],
               ),
@@ -468,19 +521,37 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 Container(
                   width: 64.r,
                   height: 64.r,
-                  decoration: BoxDecoration(color: statusBgColor, shape: BoxShape.circle),
-                  child: Center(child: Icon(Icons.handyman_rounded, color: statusTextColor, size: 28.sp)),
+                  decoration: BoxDecoration(
+                    color: statusBgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.handyman_rounded,
+                      color: statusTextColor,
+                      size: 28.sp,
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10.h),
                 Text(
                   'UNDER MAINTENANCE',
-                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: statusTextColor, letterSpacing: 0.5),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w900,
+                    color: statusTextColor,
+                    letterSpacing: 0.5,
+                  ),
                 ),
                 SizedBox(height: 2.h),
                 Text(
                   'Blocked for maintenance.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                  ),
                 ),
               ],
             )
@@ -491,20 +562,37 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 Container(
                   width: 64.r,
                   height: 64.r,
-                  decoration: BoxDecoration(color: statusBgColor, shape: BoxShape.circle),
-                  child: Center(child: Icon(Icons.directions_walk_rounded, color: statusTextColor, size: 28.sp)),
+                  decoration: BoxDecoration(
+                    color: statusBgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.directions_walk_rounded,
+                      color: statusTextColor,
+                      size: 28.sp,
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10.h),
                 Text(
                   'AWAY'.toUpperCase(),
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: statusTextColor),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w900,
+                    color: statusTextColor,
+                  ),
                 ),
                 SizedBox(height: 2.h),
                 Text(
                   widget.state.awayReturnDate != null
                       ? "Returning: ${_formatReturnDate(widget.state.awayReturnDate)}"
                       : 'No Return Date Set',
-                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)),
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF64748B),
+                  ),
                 ),
               ],
             )
@@ -517,23 +605,45 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                   version: QrVersions.auto,
                   size: 110.r,
                   padding: EdgeInsets.all(4.r),
-                  eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F172A)),
-                  dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Color(0xFF0F172A)),
+                  eyeStyle: const QrEyeStyle(
+                    eyeShape: QrEyeShape.square,
+                    color: Color(0xFF0F172A),
+                  ),
+                  dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color: Color(0xFF0F172A),
+                  ),
                 ),
               ],
             ),
           ..._buildCornerAccents(statusColor),
-          ],
-        ),
-      );
+        ],
+      ),
+    );
   }
 
   List<Widget> _buildCornerAccents(Color color) {
     return [
-      Positioned(top: 0, left: 0, child: _accent(color, isTop: true, isLeft: true)),
-      Positioned(top: 0, right: 0, child: _accent(color, isTop: true, isLeft: false)),
-      Positioned(bottom: 0, left: 0, child: _accent(color, isTop: false, isLeft: true)),
-      Positioned(bottom: 0, right: 0, child: _accent(color, isTop: false, isLeft: false)),
+      Positioned(
+        top: 0,
+        left: 0,
+        child: _accent(color, isTop: true, isLeft: true),
+      ),
+      Positioned(
+        top: 0,
+        right: 0,
+        child: _accent(color, isTop: true, isLeft: false),
+      ),
+      Positioned(
+        bottom: 0,
+        left: 0,
+        child: _accent(color, isTop: false, isLeft: true),
+      ),
+      Positioned(
+        bottom: 0,
+        right: 0,
+        child: _accent(color, isTop: false, isLeft: false),
+      ),
     ];
   }
 
@@ -543,10 +653,18 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
       height: 20.w,
       decoration: BoxDecoration(
         border: Border(
-          top: isTop ? BorderSide(color: color.withValues(alpha: 0.4), width: 3) : BorderSide.none,
-          bottom: !isTop ? BorderSide(color: color.withValues(alpha: 0.4), width: 3) : BorderSide.none,
-          left: isLeft ? BorderSide(color: color.withValues(alpha: 0.4), width: 3) : BorderSide.none,
-          right: !isLeft ? BorderSide(color: color.withValues(alpha: 0.4), width: 3) : BorderSide.none,
+          top: isTop
+              ? BorderSide(color: color.withValues(alpha: 0.4), width: 3)
+              : BorderSide.none,
+          bottom: !isTop
+              ? BorderSide(color: color.withValues(alpha: 0.4), width: 3)
+              : BorderSide.none,
+          left: isLeft
+              ? BorderSide(color: color.withValues(alpha: 0.4), width: 3)
+              : BorderSide.none,
+          right: !isLeft
+              ? BorderSide(color: color.withValues(alpha: 0.4), width: 3)
+              : BorderSide.none,
         ),
       ),
     );
@@ -554,7 +672,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
   Widget _buildRoomDetailsCard(BuildContext context) {
     final roomType = widget.state.roomType ?? 'NON-AC';
-    final isAc = roomType.toUpperCase().contains('AC') && !roomType.toUpperCase().contains('NON');
+    final isAc =
+        roomType.toUpperCase().contains('AC') &&
+        !roomType.toUpperCase().contains('NON');
 
     return Container(
       width: double.infinity,
@@ -581,10 +701,14 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: isAc ? const Color(0xFFE0F2FE) : const Color(0xFFF1F5F9),
+                  color: isAc
+                      ? const Color(0xFFE0F2FE)
+                      : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(
-                    color: isAc ? const Color(0xFFBAE6FD) : const Color(0xFFE2E8F0),
+                    color: isAc
+                        ? const Color(0xFFBAE6FD)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Row(
@@ -593,7 +717,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                     Icon(
                       isAc ? Icons.ac_unit_rounded : Icons.mode_fan_off_rounded,
                       size: 13.sp,
-                      color: isAc ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                      color: isAc
+                          ? const Color(0xFF0284C7)
+                          : const Color(0xFF64748B),
                     ),
                     SizedBox(width: 4.w),
                     Text(
@@ -601,7 +727,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w900,
-                        color: isAc ? const Color(0xFF0369A1) : const Color(0xFF475569),
+                        color: isAc
+                            ? const Color(0xFF0369A1)
+                            : const Color(0xFF475569),
                       ),
                     ),
                   ],
@@ -658,7 +786,12 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     );
   }
 
-  Widget _buildDetailGridItem(IconData icon, String label, String value, Color valueColor) {
+  Widget _buildDetailGridItem(
+    IconData icon,
+    String label,
+    String value,
+    Color valueColor,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
@@ -698,7 +831,8 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   }
 
   Widget _buildMaintenanceToggle(BuildContext context) {
-    if (_currentStatus != BedStatus.free && _currentStatus != BedStatus.maintenance) {
+    if (_currentStatus != BedStatus.free &&
+        _currentStatus != BedStatus.maintenance) {
       return const SizedBox.shrink();
     }
 
@@ -711,18 +845,22 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         onPressed: _isTogglingMaintenance
             ? null
             : () => _updateBedStatus(
-                  context,
-                  isMaintenance ? 'FREE' : 'MAINTENANCE',
-                ),
+                context,
+                isMaintenance ? 'FREE' : 'MAINTENANCE',
+              ),
         style: OutlinedButton.styleFrom(
           side: BorderSide(
-            color: isMaintenance ? const Color(0xFFCBD5E1) : const Color(0xFFCBD5E1),
+            color: isMaintenance
+                ? const Color(0xFFCBD5E1)
+                : const Color(0xFFCBD5E1),
             width: 1.5,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
-          backgroundColor: isMaintenance ? const Color(0xFFF1F5F9) : Colors.transparent,
+          backgroundColor: isMaintenance
+              ? const Color(0xFFF1F5F9)
+              : Colors.transparent,
         ),
         icon: _isTogglingMaintenance
             ? SizedBox(
@@ -736,21 +874,28 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
             : Icon(
                 isMaintenance ? Icons.handyman_rounded : Icons.build_rounded,
                 size: 18.sp,
-                color: isMaintenance ? const Color(0xFF475569) : const Color(0xFF64748B),
+                color: isMaintenance
+                    ? const Color(0xFF475569)
+                    : const Color(0xFF64748B),
               ),
         label: Text(
           isMaintenance ? 'Restore Bed to Available' : 'Put Under Maintenance',
           style: TextStyle(
             fontSize: 13.sp,
             fontWeight: FontWeight.w800,
-            color: isMaintenance ? const Color(0xFF475569) : const Color(0xFF475569),
+            color: isMaintenance
+                ? const Color(0xFF475569)
+                : const Color(0xFF475569),
           ),
         ),
       ),
     );
   }
 
-  Future<void> _updateBedStatus(BuildContext context, String newStatusStr) async {
+  Future<void> _updateBedStatus(
+    BuildContext context,
+    String newStatusStr,
+  ) async {
     final rId = widget.state.roomId;
     if (rId == null || rId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -763,18 +908,26 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     }
 
     final fullBedNum = widget.state.bedNumber;
-    final cleanBedNum = fullBedNum.contains('-') ? fullBedNum.split('-').last : fullBedNum;
+    final cleanBedNum = fullBedNum.contains('-')
+        ? fullBedNum.split('-').last
+        : fullBedNum;
 
     setState(() {
       _isTogglingMaintenance = true;
     });
 
     try {
-      await sl<RoomRemoteDataSource>().updateBedStatus(rId, cleanBedNum, newStatusStr);
-      
+      await sl<RoomRemoteDataSource>().updateBedStatus(
+        rId,
+        cleanBedNum,
+        newStatusStr,
+      );
+
       if (context.mounted) {
         setState(() {
-          _currentStatus = newStatusStr == 'MAINTENANCE' ? BedStatus.maintenance : BedStatus.free;
+          _currentStatus = newStatusStr == 'MAINTENANCE'
+              ? BedStatus.maintenance
+              : BedStatus.free;
           _isTogglingMaintenance = false;
         });
 
@@ -782,14 +935,15 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           SnackBar(
             content: Text(
               newStatusStr == 'MAINTENANCE'
-                ? 'Bed is now marked as Under Maintenance!'
-                : 'Bed is now marked as Available!',
+                  ? 'Bed is now marked as Under Maintenance!'
+                  : 'Bed is now marked as Available!',
             ),
-            backgroundColor: newStatusStr == 'MAINTENANCE' ? const Color(0xFF475569) : Colors.green,
+            backgroundColor: newStatusStr == 'MAINTENANCE'
+                ? const Color(0xFF475569)
+                : Colors.green,
           ),
         );
 
-        // Refresh dashboard!
         final hostelId = widget.state.hostelId;
         if (hostelId != null && hostelId.isNotEmpty) {
           context.read<DashboardCubit>().fetchDashboardData(hostelId);
@@ -827,9 +981,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
             child: const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF0F172A),
-              ),
+              child: CircularProgressIndicator(color: Color(0xFF0F172A)),
             ),
           );
         }
@@ -899,9 +1051,15 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               onTap: () {
                 final tId = detail?.id ?? widget.state.tenantId;
                 final hId = widget.state.hostelId;
-                final rNum = detail?.stay?.roomTypename ?? widget.state.roomNumber ?? 'N/A';
-                
-                if (tId != null && tId.isNotEmpty && hId != null && hId.isNotEmpty) {
+                final rNum =
+                    detail?.stay?.roomTypename ??
+                    widget.state.roomNumber ??
+                    'N/A';
+
+                if (tId != null &&
+                    tId.isNotEmpty &&
+                    hId != null &&
+                    hId.isNotEmpty) {
                   TenantDetailsSheet.show(
                     context,
                     name: name,
@@ -1063,10 +1221,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         icon: Icon(icon, size: 14.sp),
         label: Text(
           label,
-          style: TextStyle(
-            fontSize: 11.sp,
-            fontWeight: FontWeight.w900,
-          ),
+          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900),
         ),
       ),
     );
@@ -1081,7 +1236,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         title: Row(
           children: [
             Text(icon, style: TextStyle(fontSize: 24.sp)),
@@ -1111,19 +1268,34 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
             SizedBox(height: 16.h),
             TextField(
               controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               autofocus: true,
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
               decoration: InputDecoration(
                 prefixText: '₹ ',
-                prefixStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: const Color(0xFF0F172A)),
+                prefixStyle: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF0F172A),
+                ),
                 labelText: 'Amount',
-                labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
+                labelStyle: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF64748B),
+                ),
                 hintText: '0.00',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: const BorderSide(color: Color(0xFF0F172A), width: 2),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF0F172A),
+                    width: 2,
+                  ),
                 ),
               ),
             ),
@@ -1146,7 +1318,11 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               final double? amt = double.tryParse(amountController.text);
               if (amt == null || amt <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please enter a valid amount greater than 0.')),
+                  const SnackBar(
+                    content: Text(
+                      'Please enter a valid amount greater than 0.',
+                    ),
+                  ),
                 );
                 return;
               }
@@ -1155,7 +1331,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF0F172A),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             ),
             child: Text(
@@ -1172,7 +1350,11 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     );
   }
 
-  Future<void> _sendBill(BuildContext context, String billType, double amount) async {
+  Future<void> _sendBill(
+    BuildContext context,
+    String billType,
+    double amount,
+  ) async {
     final tId = widget.state.tenantId;
     if (tId == null || tId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1206,7 +1388,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('${billType.toUpperCase() == 'PARKING' ? 'Parking' : 'Electricity'} bill sent successfully!'),
+              content: Text(
+                '${billType.toUpperCase() == 'PARKING' ? 'Parking' : 'Electricity'} bill sent successfully!',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -1216,7 +1400,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
       }
     } catch (e) {
       if (context.mounted) Navigator.pop(context);
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1245,7 +1429,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
       bookingId: detail.stay?.bookingId ?? widget.state.tenantId ?? '',
       securityDeposit: detail.stay?.deposit ?? 0.0,
       onCheckoutConfirmed: () {
-        context.read<BookingsCubit>().checkoutBooking(detail.stay?.bookingId ?? widget.state.tenantId ?? '');
+        context.read<BookingsCubit>().checkoutBooking(
+          detail.stay?.bookingId ?? widget.state.tenantId ?? '',
+        );
       },
     );
   }
@@ -1257,7 +1443,10 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     );
 
     if (result != null && context.mounted) {
-      context.read<BookingsCubit>().scanBooking(result, hostelId: widget.state.hostelId);
+      context.read<BookingsCubit>().scanBooking(
+        result,
+        hostelId: widget.state.hostelId,
+      );
     }
   }
 
@@ -1269,15 +1458,29 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         onPressed: () => Navigator.pop(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF0F172A),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
           elevation: 0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline_rounded, color: _statusTextColor, size: 20.sp),
+            Icon(
+              Icons.check_circle_outline_rounded,
+              color: _statusTextColor,
+              size: 20.sp,
+            ),
             SizedBox(width: 8.w),
-            Text('done'.tr(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+            Text(
+              'done'.tr(),
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 1.0,
+              ),
+            ),
           ],
         ),
       ),

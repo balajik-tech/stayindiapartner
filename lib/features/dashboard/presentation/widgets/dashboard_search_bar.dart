@@ -53,12 +53,16 @@ class _DashboardSearchBarState extends State<DashboardSearchBar> {
                     color: _isFocused ? Colors.white : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(18.r),
                     border: Border.all(
-                      color: _isFocused ? AppColors.primaryBlue : AppColors.border.withValues(alpha: 0.5),
+                      color: _isFocused
+                          ? AppColors.primaryBlue
+                          : AppColors.border.withValues(alpha: 0.5),
                       width: _isFocused ? 1.8 : 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF0F172A).withValues(alpha: _isFocused ? 0.08 : 0.04),
+                        color: const Color(
+                          0xFF0F172A,
+                        ).withValues(alpha: _isFocused ? 0.08 : 0.04),
                         blurRadius: _isFocused ? 16 : 8,
                         offset: const Offset(0, 4),
                       ),
@@ -69,25 +73,34 @@ class _DashboardSearchBarState extends State<DashboardSearchBar> {
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
                         child: Icon(
-                          Icons.search_rounded, 
-                          color: _isFocused ? AppColors.primaryBlue : AppColors.textSecondary.withValues(alpha: 0.7), 
-                          size: 24.sp
+                          Icons.search_rounded,
+                          color: _isFocused
+                              ? AppColors.primaryBlue
+                              : AppColors.textSecondary.withValues(alpha: 0.7),
+                          size: 24.sp,
                         ),
                       ),
                       Expanded(
                         child: TextField(
                           focusNode: _focusNode,
-                          onChanged: (value) => context.read<DashboardCubit>().updateSearchQuery(value),
+                          onChanged: (value) => context
+                              .read<DashboardCubit>()
+                              .updateSearchQuery(value),
                           style: TextStyle(
-                            fontSize: 15.sp, 
-                            fontWeight: FontWeight.w700, 
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
                             letterSpacing: -0.3,
                           ),
                           decoration: InputDecoration(
-                            hintText: StringUtils.translate('search_room_tenant', context: context),
+                            hintText: StringUtils.translate(
+                              'search_room_tenant',
+                              context: context,
+                            ),
                             hintStyle: TextStyle(
-                              color: AppColors.textSecondary.withValues(alpha: 0.5), 
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w500,
                             ),
@@ -96,20 +109,31 @@ class _DashboardSearchBarState extends State<DashboardSearchBar> {
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                            ),
                           ),
                         ),
                       ),
                       if (state.searchQuery.isNotEmpty)
                         Semantics(
-                          label: StringUtils.translate('clear_search', context: context),
+                          label: StringUtils.translate(
+                            'clear_search',
+                            context: context,
+                          ),
                           button: true,
                           child: GestureDetector(
                             onTap: () {
-                              context.read<DashboardCubit>().updateSearchQuery('');
+                              context.read<DashboardCubit>().updateSearchQuery(
+                                '',
+                              );
                               _focusNode.unfocus();
                             },
-                            child: Icon(Icons.close_rounded, color: AppColors.textSecondary, size: 20.sp),
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: AppColors.textSecondary,
+                              size: 20.sp,
+                            ),
                           ),
                         ),
                     ],
@@ -120,7 +144,8 @@ class _DashboardSearchBarState extends State<DashboardSearchBar> {
             SizedBox(width: 12.w),
             ViewModeToggle(
               isGridView: state.isGridView,
-              onChanged: (isGrid) => context.read<DashboardCubit>().toggleViewType(isGrid),
+              onChanged: (isGrid) =>
+                  context.read<DashboardCubit>().toggleViewType(isGrid),
             ),
           ],
         );
@@ -166,7 +191,9 @@ class ViewModeToggle extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isGridView ? const Color(0xFF0F172A) : Colors.transparent,
+                    color: isGridView
+                        ? const Color(0xFF0F172A)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Icon(
@@ -192,7 +219,9 @@ class ViewModeToggle extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: !isGridView ? const Color(0xFF0F172A) : Colors.transparent,
+                    color: !isGridView
+                        ? const Color(0xFF0F172A)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Icon(

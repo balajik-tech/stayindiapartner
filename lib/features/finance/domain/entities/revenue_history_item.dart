@@ -29,16 +29,16 @@ class RevenueHistoryItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        tenantName,
-        hostelName,
-        rent,
-        maintenance,
-        deposit,
-        total,
-        totalPaid,
-        paymentDate,
-        month,
-        paymentType,
-      ];
+    id,
+    tenantName,
+    hostelName,
+    rent,
+    maintenance,
+    deposit,
+    total,
+    totalPaid,
+    paymentDate,
+    month,
+    paymentType,
+  ];
 }

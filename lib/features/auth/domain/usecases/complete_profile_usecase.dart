@@ -1,7 +1,6 @@
 import '../entities/owner_entity.dart';
 import '../repositories/auth_repository.dart';
 
-
 class ProfileParams {
   final String firstName;
   final String lastName;
@@ -20,16 +19,14 @@ class ProfileParams {
   });
 
   Map<String, dynamic> toJson() => {
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-        'phone': phone,
-        'address': address,
-        if (avatarPath != null) 'avatar': avatarPath,
-      };
+    'firstName': firstName,
+    'lastName': lastName,
+    'email': email,
+    'phone': phone,
+    'address': address,
+    if (avatarPath != null) 'avatar': avatarPath,
+  };
 }
-
-
 
 class CompleteProfileUseCase {
   final AuthRepository repository;

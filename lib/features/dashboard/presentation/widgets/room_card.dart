@@ -4,10 +4,10 @@ import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart' as entity;
+import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart'
+    as entity;
 import 'bed_card.dart';
 import 'bed_details_sheet.dart';
-
 
 class RoomCard extends StatefulWidget {
   final entity.Room room;
@@ -52,7 +52,9 @@ class _RoomCardState extends State<RoomCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: widget.isGridView ? EdgeInsets.zero : EdgeInsets.only(bottom: 16.h),
+      margin: widget.isGridView
+          ? EdgeInsets.zero
+          : EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.85),
@@ -77,7 +79,6 @@ class _RoomCardState extends State<RoomCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           if (widget.isGridView) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -94,7 +95,10 @@ class _RoomCardState extends State<RoomCard> {
                         if (absNum > 1) {
                           return '${StringUtils.translate('basement', context: context)} $absNum';
                         }
-                        return StringUtils.translate('basement', context: context);
+                        return StringUtils.translate(
+                          'basement',
+                          context: context,
+                        );
                       }
                       return StringUtils.translate(
                         fName == 'ground_floor' ? 'ground_floor' : 'floor_n',
@@ -114,13 +118,20 @@ class _RoomCardState extends State<RoomCard> {
                 ),
                 SizedBox(width: 4.w),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 5.h,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
-                    StringUtils.formatSharingType(widget.sharingType, context, widget.beds.length),
+                    StringUtils.formatSharingType(
+                      widget.sharingType,
+                      context,
+                      widget.beds.length,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -153,7 +164,8 @@ class _RoomCardState extends State<RoomCard> {
                 _buildRoomTypeBadge(widget.roomType, context),
               ],
             ),
-            if ((widget.rent != null && widget.rent! > 0) || (widget.dailyRent != null && widget.dailyRent! > 0)) ...[
+            if ((widget.rent != null && widget.rent! > 0) ||
+                (widget.dailyRent != null && widget.dailyRent! > 0)) ...[
               SizedBox(height: 8.h),
               Text(
                 widget.rent != null && widget.rent! > 0
@@ -184,10 +196,15 @@ class _RoomCardState extends State<RoomCard> {
                             if (absNum > 1) {
                               return '${StringUtils.translate('basement', context: context)} $absNum';
                             }
-                            return StringUtils.translate('basement', context: context);
+                            return StringUtils.translate(
+                              'basement',
+                              context: context,
+                            );
                           }
                           return StringUtils.translate(
-                            fName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                            fName == 'ground_floor'
+                                ? 'ground_floor'
+                                : 'floor_n',
                             context: context,
                             namedArgs: {'n': clean},
                           );
@@ -238,7 +255,8 @@ class _RoomCardState extends State<RoomCard> {
                         ),
                       ),
                       SizedBox(width: 8.w),
-                    ] else if (widget.dailyRent != null && widget.dailyRent! > 0) ...[
+                    ] else if (widget.dailyRent != null &&
+                        widget.dailyRent! > 0) ...[
                       Text(
                         '₹${widget.dailyRent!.toInt()}${StringUtils.translate('per_day', context: context)}',
                         style: TextStyle(
@@ -250,13 +268,20 @@ class _RoomCardState extends State<RoomCard> {
                       SizedBox(width: 8.w),
                     ],
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 5.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
-                        StringUtils.formatSharingType(widget.sharingType, null, widget.beds.length),
+                        StringUtils.formatSharingType(
+                          widget.sharingType,
+                          null,
+                          widget.beds.length,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -271,18 +296,19 @@ class _RoomCardState extends State<RoomCard> {
               ],
             ),
           ],
-          
+
           Padding(
             padding: EdgeInsets.symmetric(vertical: 12.h),
             child: Divider(color: const Color(0xFFF1F5F9), thickness: 1.5),
           ),
-          
 
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
             alignment: WrapAlignment.start,
-            children: widget.beds.map((bed) => _buildBedItem(context, bed)).toList(),
+            children: widget.beds
+                .map((bed) => _buildBedItem(context, bed))
+                .toList(),
           ),
         ],
       ),
@@ -296,11 +322,13 @@ class _RoomCardState extends State<RoomCard> {
       isAwayField: bed.isAway,
       tenantName: bed.tenantName,
       tenantAvatar: bed.tenantAvatar,
-      isSelected: widget.isPreAllocated && bed.bedNumber == widget.preAllocatedBedNumber,
+      isSelected:
+          widget.isPreAllocated &&
+          bed.bedNumber == widget.preAllocatedBedNumber,
       isSmall: widget.isGridView,
       onTap: () {
         final bedStatus = _mapStatus(bed.status);
-        
+
         if (widget.onBedTap != null && bedStatus == BedStatus.free) {
           widget.onBedTap!(widget.roomNumber, bed.bedNumber);
           return;
@@ -372,11 +400,7 @@ class _RoomCardState extends State<RoomCard> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 11.sp,
-            color: color,
-          ),
+          Icon(icon, size: 11.sp, color: color),
           SizedBox(width: 4.w),
           Text(
             StringUtils.translate(cleanType.toLowerCase(), context: context),

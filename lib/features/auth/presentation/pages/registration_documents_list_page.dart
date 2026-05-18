@@ -17,25 +17,25 @@ class RegistrationDocumentsListPage extends StatelessWidget {
         'title': 'Trade License',
         'subtitle': 'TL-2024-BLR-00456',
         'expiry': 'Exp: 2025-12-31',
-        'image': 'https://via.placeholder.com/150'
+        'image': 'https://via.placeholder.com/150',
       },
       {
         'title': 'Fire Safety Certificate',
         'subtitle': 'FS-KA-2024-1122',
         'expiry': 'Exp: 2025-06-15',
-        'image': 'https://via.placeholder.com/150'
+        'image': 'https://via.placeholder.com/150',
       },
       {
         'title': 'FSSAI License',
         'subtitle': 'FSSAI-10024000012345',
         'expiry': 'Exp: 2026-03-01',
-        'image': 'https://via.placeholder.com/150'
+        'image': 'https://via.placeholder.com/150',
       },
       {
         'title': 'Police NOC',
         'subtitle': 'NOC-BLR-2023-789',
         'expiry': 'Exp: 2025-01-31',
-        'image': 'https://via.placeholder.com/150'
+        'image': 'https://via.placeholder.com/150',
       },
     ];
 
@@ -96,7 +96,10 @@ class RegistrationDocumentsListPage extends StatelessWidget {
                     SizedBox(height: 8.h),
                     Text(
                       'Upload a business license or certificate',
-                      style: TextStyle(fontSize: 16.sp, color: AppColors.greyText),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        color: AppColors.greyText,
+                      ),
                     ),
                     SizedBox(height: 32.h),
                     ...documents.map((doc) => _buildDocumentCard(doc)),
@@ -124,12 +127,18 @@ class RegistrationDocumentsListPage extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryBlue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     elevation: 0,
                   ),
                   child: Text(
                     'Continue',
-                    style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -157,7 +166,9 @@ class RegistrationDocumentsListPage extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.r),
               image: const DecorationImage(
-                image: NetworkImage('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=200'),
+                image: NetworkImage(
+                  'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=200',
+                ),
                 fit: BoxFit.cover,
               ),
             ),
@@ -169,7 +180,11 @@ class RegistrationDocumentsListPage extends StatelessWidget {
               children: [
                 Text(
                   doc['title']!,
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
                 ),
                 SizedBox(height: 4.h),
                 Text(
@@ -179,18 +194,29 @@ class RegistrationDocumentsListPage extends StatelessWidget {
                 SizedBox(height: 4.h),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 12.sp, color: AppColors.greyText),
+                    Icon(
+                      Icons.calendar_today,
+                      size: 12.sp,
+                      color: AppColors.greyText,
+                    ),
                     SizedBox(width: 4.w),
                     Text(
                       doc['expiry']!,
-                      style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: AppColors.greyText,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          Icon(Icons.visibility_outlined, color: AppColors.greyText, size: 20.sp),
+          Icon(
+            Icons.visibility_outlined,
+            color: AppColors.greyText,
+            size: 20.sp,
+          ),
         ],
       ),
     );

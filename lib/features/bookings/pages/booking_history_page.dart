@@ -47,7 +47,7 @@ class BookingHistoryPage extends StatelessWidget {
           }
 
           final groupedBookings = <String, List<Booking>>{};
-          
+
           for (final booking in state.bookings) {
             try {
               final date = DateTime.parse(booking.checkInDate ?? '');
@@ -79,13 +79,12 @@ class BookingHistoryPage extends StatelessWidget {
                 children: [
                   _buildMonthHeader(month),
                   SizedBox(height: 12.h),
-                  ...items.map((b) => Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: BookingCard(
-                      booking: b,
-                      isCompact: true,
+                  ...items.map(
+                    (b) => Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: BookingCard(booking: b, isCompact: true),
                     ),
-                  )),
+                  ),
                   SizedBox(height: 12.h),
                 ],
               );

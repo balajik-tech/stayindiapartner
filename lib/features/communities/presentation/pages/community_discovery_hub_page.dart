@@ -20,7 +20,8 @@ class CommunityDiscoveryHubPage extends StatefulWidget {
   });
 
   @override
-  State<CommunityDiscoveryHubPage> createState() => _CommunityDiscoveryHubPageState();
+  State<CommunityDiscoveryHubPage> createState() =>
+      _CommunityDiscoveryHubPageState();
 }
 
 class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
@@ -48,7 +49,9 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
       }
 
       setState(() => _isSearching = true);
-      final results = await context.read<AssociationCubit>().searchAssociations(query);
+      final results = await context.read<AssociationCubit>().searchAssociations(
+        query,
+      );
       if (mounted) {
         setState(() {
           _searchResults = results;
@@ -57,7 +60,6 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
       }
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -199,12 +201,20 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
         children: [
           Text(
             'quick_search_label'.tr(),
-            style: GoogleFonts.dmSans(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+            style: GoogleFonts.dmSans(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.darkText,
+            ),
           ),
           SizedBox(height: 4.h),
           Text(
             'quick_search_desc'.tr(),
-            style: GoogleFonts.dmSans(fontSize: 13.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+            style: GoogleFonts.dmSans(
+              fontSize: 13.sp,
+              color: AppColors.greyText,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           SizedBox(height: 16.h),
           Container(
@@ -214,20 +224,38 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(color: Colors.grey.shade100),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
               ],
             ),
             child: TextField(
               controller: _searchController,
               onChanged: _onSearchChanged,
-              style: GoogleFonts.dmSans(fontSize: 15.sp, fontWeight: FontWeight.w600),
+              style: GoogleFonts.dmSans(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+              ),
               decoration: InputDecoration(
                 hintText: 'search_location_hint'.tr(),
-                hintStyle: GoogleFonts.dmSans(color: Colors.grey[400], fontSize: 14.sp),
-                prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryBlue, size: 22.sp),
+                hintStyle: GoogleFonts.dmSans(
+                  color: Colors.grey[400],
+                  fontSize: 14.sp,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 22.sp,
+                ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.close_rounded, color: Colors.grey[400], size: 18.sp),
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: Colors.grey[400],
+                          size: 18.sp,
+                        ),
                         onPressed: () {
                           _searchController.clear();
                           setState(() => _searchResults = []);
@@ -257,7 +285,8 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
       physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
       itemCount: _searchResults.length,
-      separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade100),
+      separatorBuilder: (context, index) =>
+          Divider(height: 1, color: Colors.grey.shade100),
       itemBuilder: (context, index) {
         final item = _searchResults[index];
         return ListTile(
@@ -270,20 +299,34 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(
-              item['level'] == 'DISTRICT' ? Icons.location_city_rounded : Icons.location_on_rounded,
+              item['level'] == 'DISTRICT'
+                  ? Icons.location_city_rounded
+                  : Icons.location_on_rounded,
               color: AppColors.primaryBlue,
               size: 20.sp,
             ),
           ),
           title: Text(
             item['name'] ?? '',
-            style: GoogleFonts.dmSans(fontWeight: FontWeight.w700, color: AppColors.darkText, fontSize: 15.sp),
+            style: GoogleFonts.dmSans(
+              fontWeight: FontWeight.w700,
+              color: AppColors.darkText,
+              fontSize: 15.sp,
+            ),
           ),
           subtitle: Text(
             item['displayPath'] ?? '',
-            style: GoogleFonts.dmSans(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+            style: GoogleFonts.dmSans(
+              fontSize: 12.sp,
+              color: AppColors.greyText,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: Colors.grey.shade300),
+          trailing: Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 14.sp,
+            color: Colors.grey.shade300,
+          ),
         );
       },
     );
@@ -306,8 +349,12 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
             parentId: state['_id'] ?? state['id'],
             parentName: state['name'],
             initialLevel: item['level'],
-            initialDistrictId: item['level'] == 'DISTRICT' ? item['id'] : item['districtId'],
-            initialDistrictName: item['level'] == 'DISTRICT' ? item['name'] : item['district'],
+            initialDistrictId: item['level'] == 'DISTRICT'
+                ? item['id']
+                : item['districtId'],
+            initialDistrictName: item['level'] == 'DISTRICT'
+                ? item['name']
+                : item['district'],
             initialWardId: item['level'] == 'WARD' ? item['id'] : null,
             initialWardName: item['level'] == 'WARD' ? item['name'] : null,
           ),
@@ -432,7 +479,11 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.visibility_outlined, color: AppColors.accentOrange, size: 20.sp),
+              Icon(
+                Icons.visibility_outlined,
+                color: AppColors.accentOrange,
+                size: 20.sp,
+              ),
               SizedBox(width: 12.w),
               Text(
                 'our_vision'.tr(),
@@ -461,25 +512,16 @@ class _CommunityDiscoveryHubPageState extends State<CommunityDiscoveryHubPage> {
 
   Widget _buildFeaturesSection(BuildContext context) {
     final List<Map<String, dynamic>> features = [
-      {
-        'title': 'feature_unified_national'.tr(),
-        'icon': Icons.hub_outlined
-      },
+      {'title': 'feature_unified_national'.tr(), 'icon': Icons.hub_outlined},
       {
         'title': 'feature_local_leadership'.tr(),
-        'icon': Icons.face_retouching_natural_outlined
+        'icon': Icons.face_retouching_natural_outlined,
       },
-      {
-        'title': 'feature_legal_support'.tr(),
-        'icon': Icons.gavel_rounded
-      },
-      {
-        'title': 'feature_safety_network'.tr(),
-        'icon': Icons.security_rounded
-      },
+      {'title': 'feature_legal_support'.tr(), 'icon': Icons.gavel_rounded},
+      {'title': 'feature_safety_network'.tr(), 'icon': Icons.security_rounded},
       {
         'title': 'feature_verified_tenant'.tr(),
-        'icon': Icons.verified_user_outlined
+        'icon': Icons.verified_user_outlined,
       },
     ];
 
@@ -615,7 +657,11 @@ class _FeatureItem extends StatelessWidget {
               ),
             ),
           ),
-          Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey[400], size: 20.sp),
+          Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.grey[400],
+            size: 20.sp,
+          ),
         ],
       ),
     );

@@ -20,11 +20,10 @@ class CommunityCubit extends Cubit<CommunityState> {
   final GetOwnerDiscussionsUseCase _getDiscussions;
   final CreateOwnerDiscussionUseCase _createDiscussion;
   final SocketService _socketService;
-  
+
   StreamSubscription? _messageSubscription;
   String? _activeHostelId;
 
-  
   final Map<String, List<CommunityMessageEntity>> _messagesCache = {};
   final Map<String, CommunityDetailsEntity> _detailsCache = {};
   final Map<String, List<AnnouncementEntity>> _announcementsCache = {};
@@ -41,16 +40,16 @@ class CommunityCubit extends Cubit<CommunityState> {
     required GetOwnerDiscussionsUseCase getOwnerDiscussionsUseCase,
     required CreateOwnerDiscussionUseCase createOwnerDiscussionUseCase,
     required SocketService socketService,
-  })  : _getDetails = getCommunityDetailsUseCase,
-        _getMessages = getCommunityMessagesUseCase,
-        _sendMessage = sendCommunityMessageUseCase,
-        _sendImage = sendCommunityImageUseCase,
-        _getAnnouncements = getAnnouncementsUseCase,
-        _postAnnouncement = postAnnouncementUseCase,
-        _getDiscussions = getOwnerDiscussionsUseCase,
-        _createDiscussion = createOwnerDiscussionUseCase,
-        _socketService = socketService,
-        super(CommunityInitial()) {
+  }) : _getDetails = getCommunityDetailsUseCase,
+       _getMessages = getCommunityMessagesUseCase,
+       _sendMessage = sendCommunityMessageUseCase,
+       _sendImage = sendCommunityImageUseCase,
+       _getAnnouncements = getAnnouncementsUseCase,
+       _postAnnouncement = postAnnouncementUseCase,
+       _getDiscussions = getOwnerDiscussionsUseCase,
+       _createDiscussion = createOwnerDiscussionUseCase,
+       _socketService = socketService,
+       super(CommunityInitial()) {
     _initSocketListener();
   }
 
@@ -59,21 +58,25 @@ class CommunityCubit extends Cubit<CommunityState> {
     _messageSubscription = _socketService.messageStream.listen((data) {
       final newMessage = CommunityMessageModel.fromJson(data);
       final roomId = newMessage.roomId ?? _activeHostelId;
-      
+
       if (roomId != null) {
-        
         final currentMessages = _messagesCache[roomId] ?? [];
-        
-        
+
         if (!currentMessages.any((m) => m.id == newMessage.id)) {
-          final updatedMessages = currentMessages.where((m) => 
-            !(m.id.startsWith('temp_') && m.text == newMessage.text)
-          ).toList();
-          
+          final updatedMessages = currentMessages
+              .where(
+                (m) => !(m.id.startsWith('temp_') && m.text == newMessage.text),
+              )
+              .toList();
+
           _messagesCache[roomId] = [...updatedMessages, newMessage];
-          
+
           if (roomId == _activeHostelId && state is CommunityLoaded) {
-            emit((state as CommunityLoaded).copyWith(messages: _messagesCache[roomId]));
+            emit(
+              (state as CommunityLoaded).copyWith(
+                messages: _messagesCache[roomId],
+              ),
+            );
           }
         }
       }
@@ -82,27 +85,27 @@ class CommunityCubit extends Cubit<CommunityState> {
 
   Future<void> loadCommunityData(String hostelId) async {
     if (isClosed) return;
-    
+
     _activeHostelId = hostelId;
 
-    
     if (_messagesCache.containsKey(hostelId)) {
-      emit(CommunityLoaded(
-        details: _detailsCache[hostelId],
-        messages: _messagesCache[hostelId]!,
-        announcements: _announcementsCache[hostelId] ?? [],
-        discussions: _discussionsCache[hostelId] ?? [],
-        hasMoreMessages: _hasMoreMessagesCache[hostelId] ?? true,
-      ));
+      emit(
+        CommunityLoaded(
+          details: _detailsCache[hostelId],
+          messages: _messagesCache[hostelId]!,
+          announcements: _announcementsCache[hostelId] ?? [],
+          discussions: _discussionsCache[hostelId] ?? [],
+          hasMoreMessages: _hasMoreMessagesCache[hostelId] ?? true,
+        ),
+      );
     } else {
       emit(CommunityLoading());
     }
 
-    
     try {
       final results = await Future.wait([
         _getDetails(hostelId),
-        _getMessages(hostelId, limit: 50), 
+        _getMessages(hostelId, limit: 50),
         _getAnnouncements(hostelId),
         _getDiscussions(hostelId),
       ]);
@@ -114,27 +117,28 @@ class CommunityCubit extends Cubit<CommunityState> {
       final announcements = results[2] as List<AnnouncementEntity>;
       final discussions = results[3] as List<OwnerDiscussionEntity>;
 
-      
       _detailsCache[hostelId] = details;
       _messagesCache[hostelId] = messages;
       _announcementsCache[hostelId] = announcements;
       _discussionsCache[hostelId] = discussions;
       _hasMoreMessagesCache[hostelId] = messages.length >= 50;
 
-      
       if (_activeHostelId == hostelId) {
-        emit(CommunityLoaded(
-          details: details,
-          messages: messages,
-          announcements: announcements,
-          discussions: discussions,
-          hasMoreMessages: _hasMoreMessagesCache[hostelId]!,
-        ));
+        emit(
+          CommunityLoaded(
+            details: details,
+            messages: messages,
+            announcements: announcements,
+            discussions: discussions,
+            hasMoreMessages: _hasMoreMessagesCache[hostelId]!,
+          ),
+        );
       }
     } catch (e) {
       AppLogger.error('loadCommunityData failed', e);
-      
-      if (_activeHostelId == hostelId && !_messagesCache.containsKey(hostelId)) {
+
+      if (_activeHostelId == hostelId &&
+          !_messagesCache.containsKey(hostelId)) {
         emit(CommunityError(message: ErrorHelper.toFriendlyMessage(e)));
       }
     }
@@ -144,7 +148,7 @@ class CommunityCubit extends Cubit<CommunityState> {
     try {
       final messages = await _getMessages(hostelId, limit: 50);
       _messagesCache[hostelId] = messages;
-      
+
       if (_activeHostelId == hostelId && state is CommunityLoaded) {
         emit((state as CommunityLoaded).copyWith(messages: messages));
       }
@@ -155,25 +159,29 @@ class CommunityCubit extends Cubit<CommunityState> {
 
   Future<void> loadOlderMessages(String hostelId) async {
     final s = state;
-    if (s is! CommunityLoaded || !s.hasMoreMessages || s.isLoadingMoreMessages) return;
+    if (s is! CommunityLoaded || !s.hasMoreMessages || s.isLoadingMoreMessages) {
+      return;
+    }
 
     emit(s.copyWith(isLoadingMoreMessages: true));
     try {
       final oldestId = s.messages.isNotEmpty ? s.messages.first.id : null;
       final older = await _getMessages(hostelId, limit: 50, before: oldestId);
-      
+
       if (isClosed) return;
-      
+
       final updatedMessages = [...older, ..._messagesCache[hostelId]!];
       _messagesCache[hostelId] = updatedMessages;
       _hasMoreMessagesCache[hostelId] = older.length >= 50;
 
       if (_activeHostelId == hostelId) {
-        emit(s.copyWith(
-          messages: updatedMessages,
-          hasMoreMessages: _hasMoreMessagesCache[hostelId]!,
-          isLoadingMoreMessages: false,
-        ));
+        emit(
+          s.copyWith(
+            messages: updatedMessages,
+            hasMoreMessages: _hasMoreMessagesCache[hostelId]!,
+            isLoadingMoreMessages: false,
+          ),
+        );
       }
     } catch (e) {
       AppLogger.error('loadOlderMessages failed', e);
@@ -186,16 +194,17 @@ class CommunityCubit extends Cubit<CommunityState> {
   Future<void> joinCommunity(String hostelId, String userId) async {
     _activeHostelId = hostelId;
     _socketService.joinCommunity(hostelId, userId);
-    
   }
 
-  Future<void> leaveCommunity() async {
-    
-    
-    
-  }
+  Future<void> leaveCommunity() async {}
 
-  Future<void> sendMessage(String hostelId, String text, {String? senderId, String? senderName, String? senderAvatar}) async {
+  Future<void> sendMessage(
+    String hostelId,
+    String text, {
+    String? senderId,
+    String? senderName,
+    String? senderAvatar,
+  }) async {
     final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final optimisticMessage = CommunityMessageEntity(
       id: tempId,
@@ -229,7 +238,13 @@ class CommunityCubit extends Cubit<CommunityState> {
     }
   }
 
-  Future<void> sendImageMessage(String hostelId, String imagePath, {String? senderId, String? senderName, String? senderAvatar}) async {
+  Future<void> sendImageMessage(
+    String hostelId,
+    String imagePath, {
+    String? senderId,
+    String? senderName,
+    String? senderAvatar,
+  }) async {
     final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final optimisticMessage = CommunityMessageEntity(
       id: tempId,
@@ -263,12 +278,16 @@ class CommunityCubit extends Cubit<CommunityState> {
     }
   }
 
-  Future<void> postAnnouncement(String hostelId, String title, String content) async {
+  Future<void> postAnnouncement(
+    String hostelId,
+    String title,
+    String content,
+  ) async {
     try {
       await _postAnnouncement(hostelId, title, content);
       final announcements = await _getAnnouncements(hostelId);
       _announcementsCache[hostelId] = announcements;
-      
+
       if (_activeHostelId == hostelId && state is CommunityLoaded) {
         emit((state as CommunityLoaded).copyWith(announcements: announcements));
       }
@@ -293,7 +312,7 @@ class CommunityCubit extends Cubit<CommunityState> {
       );
       final discussions = await _getDiscussions(hostelId);
       _discussionsCache[hostelId] = discussions;
-      
+
       if (_activeHostelId == hostelId && state is CommunityLoaded) {
         emit((state as CommunityLoaded).copyWith(discussions: discussions));
       }

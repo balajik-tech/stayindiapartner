@@ -4,7 +4,7 @@ enum BookingStatus {
   checkedIn,
   checkedOut,
   cancelled,
-  unknown
+  unknown,
 }
 
 class Booking {

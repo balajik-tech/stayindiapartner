@@ -10,24 +10,22 @@ import 'presentation/cubit/revenue_history_cubit.dart';
 final sl = GetIt.instance;
 
 void initFinanceInjections() {
-  
-  sl.registerFactory(() => FinanceCubit(
-        getFinancialStatsUseCase: sl(),
-        getRevenueAnalyticsUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => FinanceCubit(
+      getFinancialStatsUseCase: sl(),
+      getRevenueAnalyticsUseCase: sl(),
+    ),
+  );
   sl.registerFactory(() => RevenueHistoryCubit(getRevenueHistory: sl()));
 
-  
   sl.registerLazySingleton(() => GetFinancialStatsUseCase(sl()));
   sl.registerLazySingleton(() => GetRevenueAnalyticsUseCase(sl()));
   sl.registerLazySingleton(() => GetRevenueHistoryUseCase(repository: sl()));
 
-  
   sl.registerLazySingleton<FinanceRepository>(
     () => FinanceRepositoryImpl(remoteDataSource: sl()),
   );
 
-  
   sl.registerLazySingleton<FinanceRemoteDataSource>(
     () => FinanceRemoteDataSourceImpl(dio: sl()),
   );

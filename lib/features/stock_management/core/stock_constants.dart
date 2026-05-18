@@ -408,12 +408,7 @@ class StockConstants {
       "ta": "பூண்டு",
       "kn": "ಬೆಳ್ಳುಳ್ಳಿ",
     },
-    "Ginger Fresh": {
-      "te": "అల్లం",
-      "hi": "अदरक",
-      "ta": "இஞ்சி",
-      "kn": "ಶುಂಠಿ",
-    },
+    "Ginger Fresh": {"te": "అల్లం", "hi": "अदरक", "ta": "இஞ்சி", "kn": "ಶುಂಠಿ"},
     "Green Chillies": {
       "te": "పచ్చిమిర్చి",
       "hi": "हरी मिर्च",
@@ -1316,7 +1311,10 @@ class StockConstants {
     },
   };
 
-  static String getLocalizedNameForString(String englishName, [String? langCode]) {
+  static String getLocalizedNameForString(
+    String englishName, [
+    String? langCode,
+  ]) {
     if (langCode == null || langCode == 'en') return englishName;
     final map = stockTranslations[englishName];
     if (map != null && map[langCode] != null) {
@@ -1333,10 +1331,18 @@ class StockConstants {
   }
 
   static String getLocalizedName(Map<String, String> item, [String? langCode]) {
-    if (langCode == 'te' && item['nameTelugu'] != null) return item['nameTelugu']!;
-    if (langCode == 'hi' && item['nameHindi'] != null) return item['nameHindi']!;
-    if (langCode == 'ta' && item['nameTamil'] != null) return item['nameTamil']!;
-    if (langCode == 'kn' && item['nameKannada'] != null) return item['nameKannada']!;
+    if (langCode == 'te' && item['nameTelugu'] != null) {
+      return item['nameTelugu']!;
+    }
+    if (langCode == 'hi' && item['nameHindi'] != null) {
+      return item['nameHindi']!;
+    }
+    if (langCode == 'ta' && item['nameTamil'] != null) {
+      return item['nameTamil']!;
+    }
+    if (langCode == 'kn' && item['nameKannada'] != null) {
+      return item['nameKannada']!;
+    }
     final name = item['name'] ?? '';
     return getLocalizedNameForString(name, langCode);
   }

@@ -11,16 +11,28 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import '../models/owner_model.dart';
 
 abstract class AuthRemoteDataSource {
-  
   Future<String?> requestOtp(String phone);
 
-  Future<({OwnerModel owner, bool isNewUser})> verifyOtp(String phone, String otp);
+  Future<({OwnerModel owner, bool isNewUser})> verifyOtp(
+    String phone,
+    String otp, {
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? avatar,
+  });
+
+  Future<Map<String, dynamic>> googleLogin({
+    required String email,
+    required String name,
+    required String avatar,
+    required String role,
+  });
 
   Future<OwnerModel> getCurrentOwner();
 
   Future<OwnerModel> completeProfile(Map<String, dynamic> data);
 
-  
   Future<OwnerModel> updateProfile(Map<String, dynamic> data);
 
   Future<void> logout();
@@ -35,8 +47,6 @@ abstract class AuthRemoteDataSource {
   Future<OwnerModel> staffLogin(String phone, String password);
 }
 
-
-
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio _dio;
   final TokenStorage _tokenStorage;
@@ -44,8 +54,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({
     required Dio dio,
     required TokenStorage tokenStorage,
-  })  : _dio = dio,
-        _tokenStorage = tokenStorage;
+  }) : _dio = dio,
+       _tokenStorage = tokenStorage;
 
   String _sanitizePhone(String phone) =>
       phone.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^91'), '');
@@ -57,14 +67,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final data = responseData.containsKey('data') && responseData['data'] is Map
         ? responseData['data'] as Map<String, dynamic>
         : responseData as Map<String, dynamic>;
-    
+
     if (data.containsKey('user') && data['user'] is Map) {
       return data['user'] as Map<String, dynamic>;
     }
     return data;
   }
-
-  
 
   @override
   Future<String?> requestOtp(String phone) async {
@@ -93,20 +101,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<({OwnerModel owner, bool isNewUser})> verifyOtp(
-      String phone, String otp) async {
+    String phone,
+    String otp, {
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? avatar,
+  }) async {
     final sanitized = _sanitizePhone(phone);
     AppLogger.info('Verifying OTP for: $sanitized');
 
-    final response = await _dio.post(
-      ApiConstants.verifyOtp,
-      data: {'phone': sanitized, 'otp': otp, 'role': 'OWNER'},
-    );
+    final Map<String, dynamic> payload = {
+      'phone': sanitized,
+      'otp': otp,
+      'role': 'OWNER',
+    };
+    if (email != null) payload['email'] = email;
+    if (firstName != null) payload['firstName'] = firstName;
+    if (lastName != null) payload['lastName'] = lastName;
+    if (avatar != null) payload['avatar'] = avatar;
+
+    final response = await _dio.post(ApiConstants.verifyOtp, data: payload);
 
     if (response.statusCode != 200) {
-      final message =
-          (response.data is Map && response.data['message'] != null)
-              ? response.data['message'].toString()
-              : 'OTP verification failed.';
+      final message = (response.data is Map && response.data['message'] != null)
+          ? response.data['message'].toString()
+          : 'OTP verification failed.';
       throw AuthException(message: message);
     }
 
@@ -114,7 +134,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ? response.data['data'] as Map<String, dynamic>
         : response.data as Map<String, dynamic>;
 
-    
     final token = raw['token'] as String? ?? raw['accessToken'] as String?;
     if (token != null && token.isNotEmpty) {
       await _tokenStorage.saveToken(token);
@@ -127,8 +146,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ? raw['user'] as Map<String, dynamic>
         : <String, dynamic>{};
 
-    
-    
     OwnerModel owner;
     if (userJson.isNotEmpty) {
       owner = OwnerModel.fromJson(
@@ -142,6 +159,42 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     AppLogger.success('OTP verified. isNewUser=$isNewUser');
     return (owner: owner, isNewUser: isNewUser);
+  }
+
+  @override
+  Future<Map<String, dynamic>> googleLogin({
+    required String email,
+    required String name,
+    required String avatar,
+    required String role,
+  }) async {
+    AppLogger.info('Sending Google login for: $email, role: $role');
+    final response = await _dio.post(
+      ApiConstants.googleLogin,
+      data: {'email': email, 'name': name, 'avatar': avatar, 'role': role},
+    );
+
+    if (response.statusCode != 200) {
+      final message = (response.data is Map && response.data['message'] != null)
+          ? response.data['message'].toString()
+          : 'Google login failed.';
+      throw AuthException(message: message);
+    }
+
+    final raw = response.data is Map && response.data.containsKey('data')
+        ? response.data['data'] as Map<String, dynamic>
+        : response.data as Map<String, dynamic>;
+
+    final token = raw['token'] as String? ?? raw['accessToken'] as String?;
+    if (token != null && token.isNotEmpty) {
+      await _tokenStorage.saveToken(token);
+      if (raw['user'] != null && raw['user']['phone'] != null) {
+        await _tokenStorage.savePhone(raw['user']['phone'].toString());
+      }
+      AppLogger.success('Google Login: Token saved securely.');
+    }
+
+    return raw;
   }
 
   @override
@@ -170,20 +223,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (avatarPath != null && avatarPath.isNotEmpty) {
       final formData = FormData.fromMap(payload);
       final compressedPath = await _compressImage(avatarPath);
-      formData.files.add(MapEntry(
-        'avatar',
-        await MultipartFile.fromFile(compressedPath ?? avatarPath),
-      ));
+      formData.files.add(
+        MapEntry(
+          'avatar',
+          await MultipartFile.fromFile(compressedPath ?? avatarPath),
+        ),
+      );
       response = await _dio.post(
         ApiConstants.userCompleteProfile,
         data: formData,
         options: Options(headers: {'x-upload-folder': 'profiles'}),
       );
     } else {
-      response = await _dio.post(ApiConstants.userCompleteProfile, data: payload);
+      response = await _dio.post(
+        ApiConstants.userCompleteProfile,
+        data: payload,
+      );
     }
 
-    final isSuccess = response.statusCode == 200 ||
+    final isSuccess =
+        response.statusCode == 200 ||
         response.statusCode == 201 ||
         response.statusCode == 409;
 
@@ -194,7 +253,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     }
 
-    
     return getCurrentOwner();
   }
 
@@ -281,10 +339,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     );
 
     if (response.statusCode != 200) {
-      final message =
-          (response.data is Map && response.data['message'] != null)
-              ? response.data['message'].toString()
-              : 'Staff login failed.';
+      final message = (response.data is Map && response.data['message'] != null)
+          ? response.data['message'].toString()
+          : 'Staff login failed.';
       throw AuthException(message: message);
     }
 
@@ -318,10 +375,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return owner;
   }
 
-  
-
-  
-  
   Future<String?> _compressImage(String imagePath) async {
     try {
       final tmpDir = await getTemporaryDirectory();

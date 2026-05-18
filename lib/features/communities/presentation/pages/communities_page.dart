@@ -17,7 +17,8 @@ class CommunitiesPage extends StatefulWidget {
   State<CommunitiesPage> createState() => _CommunitiesPageState();
 }
 
-class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProviderStateMixin {
+class _CommunitiesPageState extends State<CommunitiesPage>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
   late final Animation<double> _fadeAnimation;
 
@@ -28,11 +29,12 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _fadeAnimation = CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic);
+    _fadeAnimation = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutCubic,
+    );
     _animController.forward();
   }
-
-
 
   String _getHostelId() {
     final hostelState = context.read<HostelCubit>().state;
@@ -81,9 +83,17 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
                   indicatorWeight: 3,
                   indicatorSize: TabBarIndicatorSize.label,
                   labelColor: AppColors.darkText,
-                  unselectedLabelColor: AppColors.greyText.withValues(alpha: 0.5),
-                  labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w800, fontSize: 16.sp),
-                  unselectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16.sp),
+                  unselectedLabelColor: AppColors.greyText.withValues(
+                    alpha: 0.5,
+                  ),
+                  labelStyle: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16.sp,
+                  ),
+                  unselectedLabelStyle: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16.sp,
+                  ),
                   padding: EdgeInsets.zero,
                   labelPadding: EdgeInsets.only(right: 32.w),
                   tabs: const [
@@ -97,12 +107,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
         ),
         body: FadeTransition(
           opacity: _fadeAnimation,
-          child: TabBarView(
-            children: [
-              _buildOwnersTab(),
-              _buildTenantsTab(),
-            ],
-          ),
+          child: TabBarView(children: [_buildOwnersTab(), _buildTenantsTab()]),
         ),
       ),
     );
@@ -130,7 +135,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
                   color: AppColors.darkText,
                 ),
               ),
-              Icon(Icons.auto_awesome_rounded, color: Colors.amber, size: 18.sp),
+              Icon(
+                Icons.auto_awesome_rounded,
+                color: Colors.amber,
+                size: 18.sp,
+              ),
             ],
           ),
           SizedBox(height: 20.h),
@@ -169,7 +178,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
               color: AppColors.primaryBlue.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primaryBlue, size: 40.sp),
+            child: Icon(
+              Icons.chat_bubble_outline_rounded,
+              color: AppColors.primaryBlue,
+              size: 40.sp,
+            ),
           ),
           SizedBox(height: 32.h),
           Text(
@@ -260,7 +273,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
             ),
           ),
           const Spacer(),
-          Icon(Icons.chevron_right_rounded, color: AppColors.greyText.withValues(alpha: 0.3), size: 20.sp),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.greyText.withValues(alpha: 0.3),
+            size: 20.sp,
+          ),
         ],
       ),
     );
@@ -279,7 +296,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)], 
+            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -299,15 +316,24 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 5.h,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.auto_awesome, color: Colors.amber, size: 12.sp),
+                      Icon(
+                        Icons.auto_awesome,
+                        color: Colors.amber,
+                        size: 12.sp,
+                      ),
                       SizedBox(width: 6.w),
                       Text(
                         'OWNER EXCLUSIVE',
@@ -321,7 +347,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_outward_rounded, color: Colors.white.withValues(alpha: 0.4), size: 20.sp),
+                Icon(
+                  Icons.arrow_outward_rounded,
+                  color: Colors.white.withValues(alpha: 0.4),
+                  size: 20.sp,
+                ),
               ],
             ),
             SizedBox(height: 24.h),
@@ -372,9 +402,6 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
     );
   }
 
-
-
-
   Widget _buildInfoCard() {
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -384,7 +411,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline_rounded, color: AppColors.primaryBlue, size: 20.sp),
+          Icon(
+            Icons.info_outline_rounded,
+            color: AppColors.primaryBlue,
+            size: 20.sp,
+          ),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
@@ -422,7 +453,9 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: const Color(0xFF2C5990).withValues(alpha: 0.1)),
+          border: Border.all(
+            color: const Color(0xFF2C5990).withValues(alpha: 0.1),
+          ),
         ),
         child: Row(
           children: [
@@ -432,7 +465,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
                 color: Color(0xFF2C5990),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.handshake_rounded, color: Colors.white, size: 20.sp),
+              child: Icon(
+                Icons.handshake_rounded,
+                color: Colors.white,
+                size: 20.sp,
+              ),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -458,7 +495,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> with SingleTickerProv
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, color: const Color(0xFF2C5990).withValues(alpha: 0.3), size: 14.sp),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: const Color(0xFF2C5990).withValues(alpha: 0.3),
+              size: 14.sp,
+            ),
           ],
         ),
       ),

@@ -23,7 +23,8 @@ class FloorAccordion extends StatefulWidget {
   State<FloorAccordion> createState() => _FloorAccordionState();
 }
 
-class _FloorAccordionState extends State<FloorAccordion> with SingleTickerProviderStateMixin {
+class _FloorAccordionState extends State<FloorAccordion>
+    with SingleTickerProviderStateMixin {
   late bool _isExpanded;
 
   @override
@@ -57,7 +58,10 @@ class _FloorAccordionState extends State<FloorAccordion> with SingleTickerProvid
                   }
                 },
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -82,9 +86,7 @@ class _FloorAccordionState extends State<FloorAccordion> with SingleTickerProvid
                         ),
                       ),
                       SizedBox(width: 12.w),
-                      Flexible(
-                        child: _buildBedInfo(widget.bedInfo),
-                      ),
+                      Flexible(child: _buildBedInfo(widget.bedInfo)),
                       const Spacer(),
                       Container(
                         padding: EdgeInsets.all(4.r),
@@ -106,8 +108,7 @@ class _FloorAccordionState extends State<FloorAccordion> with SingleTickerProvid
               ),
             ),
           ),
-          
-          
+
           if (_isExpanded && widget.itemCount > 0)
             RepaintBoundary(
               child: Padding(
@@ -125,7 +126,9 @@ class _FloorAccordionState extends State<FloorAccordion> with SingleTickerProvid
                           }
 
                           final double spacing = 16.w;
-                          final double itemWidth = (width - (crossAxisCount - 1) * spacing) / crossAxisCount;
+                          final double itemWidth =
+                              (width - (crossAxisCount - 1) * spacing) /
+                              crossAxisCount;
 
                           return Wrap(
                             spacing: spacing,
@@ -156,24 +159,21 @@ class _FloorAccordionState extends State<FloorAccordion> with SingleTickerProvid
 
   Widget _buildBedInfo(String info) {
     if (info.isEmpty) return const SizedBox.shrink();
-    
+
     final parts = info.split('/');
     if (parts.length < 2) {
       return FittedBox(
         fit: BoxFit.scaleDown,
         child: Text(
           info,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: const Color(0xFF64748B),
-          ),
+          style: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B)),
         ),
       );
     }
-    
+
     final currentCount = parts[0].trim();
-    final remaining = parts[1].trim(); 
-    
+    final remaining = parts[1].trim();
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(

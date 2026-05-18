@@ -38,8 +38,15 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
             return _buildErrorState(state.message);
           } else if (state is HostelLoaded) {
             final filteredHostels = state.hostels
-                .where((h) => h.name.toLowerCase().contains(_searchQuery.toLowerCase()) || 
-                             h.address.toLowerCase().contains(_searchQuery.toLowerCase()))
+                .where(
+                  (h) =>
+                      h.name.toLowerCase().contains(
+                        _searchQuery.toLowerCase(),
+                      ) ||
+                      h.address.toLowerCase().contains(
+                        _searchQuery.toLowerCase(),
+                      ),
+                )
                 .toList();
 
             if (filteredHostels.isEmpty && _searchQuery.isEmpty) {
@@ -51,34 +58,31 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
               color: AppColors.primaryBlue,
               strokeWidth: 3,
               child: CustomScrollView(
-                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
                 slivers: [
                   SliverToBoxAdapter(child: _buildSearchBar()),
                   SliverPadding(
                     padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 100.h),
                     sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final hostel = filteredHostels[index];
-                          return _StaggeredEntry(
-                            delayMs: index * 100,
-                            child: Padding(
-                              padding: EdgeInsets.only(bottom: 20.h),
-                              child: _PremiumHostelCard(
-                                name: hostel.name,
-                                address: hostel.address,
-                                floors: hostel.floors,
-                                occupied: hostel.occupiedBeds ?? 0,
-                                total: hostel.totalBeds ?? 0,
-                                onTap: () {
-                                  
-                                },
-                              ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final hostel = filteredHostels[index];
+                        return _StaggeredEntry(
+                          delayMs: index * 100,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 20.h),
+                            child: _PremiumHostelCard(
+                              name: hostel.name,
+                              address: hostel.address,
+                              floors: hostel.floors,
+                              occupied: hostel.occupiedBeds ?? 0,
+                              total: hostel.totalBeds ?? 0,
+                              onTap: () {},
                             ),
-                          );
-                        },
-                        childCount: filteredHostels.length,
-                      ),
+                          ),
+                        );
+                      }, childCount: filteredHostels.length),
                     ),
                   ),
                 ],
@@ -97,7 +101,11 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20),
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: AppColors.darkText,
+          size: 20,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -133,17 +141,24 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
           onChanged: (val) => setState(() => _searchQuery = val),
           decoration: InputDecoration(
             hintText: 'Search by name or area...',
-            hintStyle: TextStyle(color: AppColors.greyText.withValues(alpha: 0.6), fontSize: 14.sp),
+            hintStyle: TextStyle(
+              color: AppColors.greyText.withValues(alpha: 0.6),
+              fontSize: 14.sp,
+            ),
             border: InputBorder.none,
-            icon: Icon(Icons.search_rounded, color: AppColors.primaryBlue, size: 20.sp),
-            suffixIcon: _searchQuery.isNotEmpty 
+            icon: Icon(
+              Icons.search_rounded,
+              color: AppColors.primaryBlue,
+              size: 20.sp,
+            ),
+            suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 18), 
+                    icon: const Icon(Icons.close_rounded, size: 18),
                     onPressed: () {
                       _searchController.clear();
                       setState(() => _searchQuery = '');
-                    }
-                  ) 
+                    },
+                  )
                 : null,
           ),
         ),
@@ -164,9 +179,16 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 48.sp),
+          Icon(
+            Icons.error_outline_rounded,
+            color: Colors.redAccent,
+            size: 48.sp,
+          ),
           SizedBox(height: 16.h),
-          Text(message, style: TextStyle(color: AppColors.greyText, fontSize: 14.sp)),
+          Text(
+            message,
+            style: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
+          ),
           TextButton(
             onPressed: () => context.read<HostelCubit>().getHostels(),
             child: const Text('Retry'),
@@ -187,12 +209,20 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
               color: AppColors.primaryBlue.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.apartment_rounded, size: 64.sp, color: AppColors.primaryBlue.withValues(alpha: 0.3)),
+            child: Icon(
+              Icons.apartment_rounded,
+              size: 64.sp,
+              color: AppColors.primaryBlue.withValues(alpha: 0.3),
+            ),
           ),
           SizedBox(height: 24.h),
           Text(
             'No Hostels Registered',
-            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w900,
+              color: AppColors.darkText,
+            ),
           ),
           SizedBox(height: 8.h),
           Padding(
@@ -200,25 +230,35 @@ class _MyHostelsPageState extends State<MyHostelsPage> {
             child: Text(
               'Register your first property to start managing floors, rooms and tenants.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, height: 1.5),
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: AppColors.greyText,
+                height: 1.5,
+              ),
             ),
           ),
           SizedBox(height: 32.h),
           ElevatedButton.icon(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PropertySetupStepperPage())),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PropertySetupStepperPage(),
+              ),
+            ),
             icon: const Icon(Icons.add_rounded, color: Colors.white),
             label: const Text('Add My First Hostel'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25.r),
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
 }
 
 class _PremiumHostelCard extends StatelessWidget {
@@ -241,12 +281,12 @@ class _PremiumHostelCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double occupancyRate = total > 0 ? (occupied / total) : 0;
-    
-    Color occupancyColor = const Color(0xFF099268); 
+
+    Color occupancyColor = const Color(0xFF099268);
     if (occupancyRate >= 0.9) {
-      occupancyColor = const Color(0xFFE03131); 
+      occupancyColor = const Color(0xFFE03131);
     } else if (occupancyRate >= 0.6) {
-      occupancyColor = const Color(0xFFF08C00); 
+      occupancyColor = const Color(0xFFF08C00);
     }
 
     return BouncingWrapper(
@@ -297,14 +337,20 @@ class _PremiumHostelCard extends StatelessWidget {
                       SizedBox(height: 4.h),
                       Row(
                         children: [
-                          Icon(Icons.location_on_rounded, size: 12.sp, color: AppColors.greyText.withValues(alpha: 0.6)),
+                          Icon(
+                            Icons.location_on_rounded,
+                            size: 12.sp,
+                            color: AppColors.greyText.withValues(alpha: 0.6),
+                          ),
                           SizedBox(width: 4.w),
                           Expanded(
                             child: Text(
                               address,
                               style: TextStyle(
                                 fontSize: 12.sp,
-                                color: AppColors.greyText.withValues(alpha: 0.7),
+                                color: AppColors.greyText.withValues(
+                                  alpha: 0.7,
+                                ),
                                 fontWeight: FontWeight.w500,
                               ),
                               maxLines: 1,
@@ -316,7 +362,6 @@ class _PremiumHostelCard extends StatelessWidget {
                     ],
                   ),
                 ),
-
               ],
             ),
             SizedBox(height: 20.h),
@@ -353,7 +398,11 @@ class _PremiumHostelCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isColored ? color.withValues(alpha: 0.08) : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: isColored ? color.withValues(alpha: 0.1) : Colors.grey.shade100),
+        border: Border.all(
+          color: isColored
+              ? color.withValues(alpha: 0.1)
+              : Colors.grey.shade100,
+        ),
       ),
       child: Row(
         children: [

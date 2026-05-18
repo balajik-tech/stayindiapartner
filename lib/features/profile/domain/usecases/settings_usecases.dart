@@ -63,6 +63,7 @@ class UploadHostelSettingsImagesUseCase {
     return repository.uploadHostelImages(hostelId, filePaths);
   }
 }
+
 class UploadSingleImageUseCase {
   final SettingsRepository repository;
   UploadSingleImageUseCase(this.repository);

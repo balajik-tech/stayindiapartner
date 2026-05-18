@@ -55,37 +55,43 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       icon: '🛠️',
       label: 'Maintenance',
       title: 'Scheduled Maintenance Work',
-      content: 'Please note that scheduled maintenance work will be carried out today. Water supply/electricity may be briefly interrupted. We apologize for any inconvenience caused.',
+      content:
+          'Please note that scheduled maintenance work will be carried out today. Water supply/electricity may be briefly interrupted. We apologize for any inconvenience caused.',
     ),
     NoticeTemplate(
       icon: '💰',
       label: 'Rent Reminder',
       title: 'Rent Payment Due Reminder',
-      content: 'Dear Tenants, this is a friendly reminder that your monthly rent is due. Kindly make the payment and upload/share the receipt as soon as possible.',
+      content:
+          'Dear Tenants, this is a friendly reminder that your monthly rent is due. Kindly make the payment and upload/share the receipt as soon as possible.',
     ),
     NoticeTemplate(
       icon: '📶',
       label: 'WiFi Downtime',
       title: 'Internet Connection Maintenance',
-      content: 'Our internet service provider is conducting emergency maintenance. The WiFi services will be temporarily unavailable for the next 2 hours.',
+      content:
+          'Our internet service provider is conducting emergency maintenance. The WiFi services will be temporarily unavailable for the next 2 hours.',
     ),
     NoticeTemplate(
       icon: '🧹',
       label: 'Cleanliness',
       title: 'Common Area Cleanliness',
-      content: 'Please help keep our PG clean and hygienic. Kindly throw garbage only in the designated bins and keep the common areas tidy after use.',
+      content:
+          'Please help keep our PG clean and hygienic. Kindly throw garbage only in the designated bins and keep the common areas tidy after use.',
     ),
     NoticeTemplate(
       icon: '🔑',
       label: 'Gate Timing',
       title: 'Important Late Entry Update',
-      content: 'For safety and security reasons, the main gate will be locked at 10:30 PM. Please coordinate with the warden/security guard in case of any late arrivals.',
+      content:
+          'For safety and security reasons, the main gate will be locked at 10:30 PM. Please coordinate with the warden/security guard in case of any late arrivals.',
     ),
     NoticeTemplate(
       icon: '👥',
       label: 'Guest Policy',
       title: 'Revised Guest Policy Notice',
-      content: 'Tenants are requested to register all visitors/guests at the front desk before entry. Overnight guest stays are not permitted without prior written approval.',
+      content:
+          'Tenants are requested to register all visitors/guests at the front desk before entry. Overnight guest stays are not permitted without prior written approval.',
     ),
   ];
 
@@ -94,13 +100,15 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       icon: '💼',
       label: 'Job Relocation',
       title: '',
-      content: 'Relocating to a new city/office location for employment reasons.',
+      content:
+          'Relocating to a new city/office location for employment reasons.',
     ),
     NoticeTemplate(
       icon: '🎓',
       label: 'Studies',
       title: '',
-      content: 'Moving out to pursue higher education / university courses elsewhere.',
+      content:
+          'Moving out to pursue higher education / university courses elsewhere.',
     ),
     NoticeTemplate(
       icon: '📜',
@@ -112,19 +120,22 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       icon: '🏡',
       label: 'Personal Reason',
       title: '',
-      content: 'Returning to hometown / relocating due to personal or health-related reasons.',
+      content:
+          'Returning to hometown / relocating due to personal or health-related reasons.',
     ),
     NoticeTemplate(
       icon: '⚠️',
       label: 'Rent Overdue',
       title: '',
-      content: 'Requested to vacate due to outstanding rent dues and continuous non-payment despite reminders.',
+      content:
+          'Requested to vacate due to outstanding rent dues and continuous non-payment despite reminders.',
     ),
     NoticeTemplate(
       icon: '🚫',
       label: 'Behavior Issue',
       title: '',
-      content: 'Requested to vacate due to continuous behavioral issues and violation of PG/hostel guidelines.',
+      content:
+          'Requested to vacate due to continuous behavioral issues and violation of PG/hostel guidelines.',
     ),
   ];
 
@@ -142,8 +153,9 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
     try {
       final hostelState = context.read<HostelCubit>().state;
       if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-        final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-        
+        final hostelId =
+            hostelState.hostels[hostelState.selectedHostelIndex].id;
+
         final tenants = await sl<GetTenantsForHostelUseCase>()(hostelId);
         if (!mounted) return;
         setState(() {
@@ -183,51 +195,73 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
           ),
           title: Text(
             'Give Notice',
-            style: TextStyle(color: AppColors.darkText, fontSize: 20.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.darkText,
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      body: BlocListener<NoticeCubit, NoticeState>(
-        listener: (context, state) {
-          if (state is NoticeSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Notice submitted successfully'), backgroundColor: Colors.green),
-            );
-            Navigator.pop(context);
-          } else if (state is NoticeSubmitError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-        },
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, MediaQuery.of(context).padding.bottom + 24.h),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTypeToggle(),
-                SizedBox(height: 32.h),
-                
-                if (_noticeType == NoticeType.general) ...[
-                  _buildGeneralNoticeSection(),
-                ] else ...[
-                  _buildVacantNoticeSection(),
+        body: BlocListener<NoticeCubit, NoticeState>(
+          listener: (context, state) {
+            if (state is NoticeSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Notice submitted successfully'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              Navigator.pop(context);
+            } else if (state is NoticeSubmitError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              24.w,
+              24.h,
+              24.w,
+              MediaQuery.of(context).padding.bottom + 24.h,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTypeToggle(),
+                  SizedBox(height: 32.h),
+
+                  if (_noticeType == NoticeType.general) ...[
+                    _buildGeneralNoticeSection(),
+                  ] else ...[
+                    _buildVacantNoticeSection(),
+                  ],
+
+                  SizedBox(height: 48.h),
+                  _buildSubmitButton(context),
                 ],
-                
-                SizedBox(height: 48.h),
-                _buildSubmitButton(context),
-              ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildSectionTitle(String title) {
-    return Text(title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue));
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.bold,
+        color: AppColors.primaryBlue,
+      ),
+    );
   }
 
   Widget _buildTenantSelector() {
@@ -238,8 +272,17 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
           decoration: InputDecoration(
             hintText: 'Search tenant by name or phone',
             prefixIcon: const Icon(Icons.search),
-            suffixIcon: _isLoadingTenants ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : null,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
+            suffixIcon: _isLoadingTenants
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.roomCardBorder),
+            ),
           ),
           onChanged: _filterTenants,
         ),
@@ -285,39 +328,84 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       ),
       child: Row(
         children: [
-          CircleAvatar(backgroundColor: AppColors.primaryBlue, child: Text(_selectedTenant!.firstName[0], style: const TextStyle(color: Colors.white))),
+          CircleAvatar(
+            backgroundColor: AppColors.primaryBlue,
+            child: Text(
+              _selectedTenant!.firstName[0],
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
           SizedBox(width: 12.w),
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(_selectedTenant!.fullName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp)),
-              Text('${_selectedTenant!.roomTypename}  Bed: ${_selectedTenant!.bedNumber}', style: TextStyle(color: AppColors.greyText, fontSize: 13.sp)),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _selectedTenant!.fullName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
+                  ),
+                ),
+                Text(
+                  '${_selectedTenant!.roomTypename}  Bed: ${_selectedTenant!.bedNumber}',
+                  style: TextStyle(color: AppColors.greyText, fontSize: 13.sp),
+                ),
+              ],
+            ),
           ),
-          IconButton(icon: const Icon(Icons.close, color: Colors.red), onPressed: () => setState(() => _selectedTenant = null)),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.red),
+            onPressed: () => setState(() => _selectedTenant = null),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDatePicker(String label, DateTime selectedDate, Function(DateTime) onSelected) {
+  Widget _buildDatePicker(
+    String label,
+    DateTime selectedDate,
+    Function(DateTime) onSelected,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 13.sp, color: AppColors.greyText)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+        ),
         SizedBox(height: 8.h),
         InkWell(
           onTap: () async {
-            final date = await showDatePicker(context: context, initialDate: selectedDate, firstDate: DateTime(2025), lastDate: DateTime(2030));
+            final date = await showDatePicker(
+              context: context,
+              initialDate: selectedDate,
+              firstDate: DateTime(2025),
+              lastDate: DateTime(2030),
+            );
             if (date != null) onSelected(date);
           },
           child: Container(
             padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(border: Border.all(color: AppColors.roomCardBorder), borderRadius: BorderRadius.circular(12.r)),
-            child: Row(children: [
-              Icon(Icons.calendar_today, size: 16.sp, color: AppColors.primaryBlue),
-              SizedBox(width: 8.w),
-              Text(DateFormat('dd MMM yyyy').format(selectedDate), style: const TextStyle(fontWeight: FontWeight.w500)),
-            ]),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.roomCardBorder),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 16.sp,
+                  color: AppColors.primaryBlue,
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  DateFormat('dd MMM yyyy').format(selectedDate),
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -351,7 +439,13 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
             color: isSelected ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(8.r),
             boxShadow: isSelected
-                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))]
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
                 : null,
           ),
           child: Text(
@@ -378,7 +472,10 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
             _buildSectionTitle('Recipients'),
             Row(
               children: [
-                Text('All Tenants', style: TextStyle(fontSize: 13.sp, color: AppColors.greyText)),
+                Text(
+                  'All Tenants',
+                  style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+                ),
                 Switch(
                   value: _sendToAllTenants,
                   onChanged: (val) => setState(() => _sendToAllTenants = val),
@@ -405,9 +502,13 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
           controller: _titleController,
           decoration: InputDecoration(
             hintText: 'e.g. Water Maintenance Update',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.roomCardBorder),
+            ),
           ),
-          validator: (val) => val == null || val.isEmpty ? 'Please enter a title' : null,
+          validator: (val) =>
+              val == null || val.isEmpty ? 'Please enter a title' : null,
         ),
         SizedBox(height: 24.h),
         _buildSectionTitle('Message Content'),
@@ -417,9 +518,14 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
           maxLines: 4,
           decoration: InputDecoration(
             hintText: 'Type your message here...',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.roomCardBorder),
+            ),
           ),
-          validator: (val) => val == null || val.isEmpty ? 'Please enter message content' : null,
+          validator: (val) => val == null || val.isEmpty
+              ? 'Please enter message content'
+              : null,
         ),
       ],
     );
@@ -441,9 +547,21 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
         SizedBox(height: 16.h),
         Row(
           children: [
-            Expanded(child: _buildDatePicker('Notice Date', _noticeDate, (d) => setState(() => _noticeDate = d))),
+            Expanded(
+              child: _buildDatePicker(
+                'Notice Date',
+                _noticeDate,
+                (d) => setState(() => _noticeDate = d),
+              ),
+            ),
             SizedBox(width: 16.w),
-            Expanded(child: _buildDatePicker('Vacating Date', _vacatingDate, (d) => setState(() => _vacatingDate = d))),
+            Expanded(
+              child: _buildDatePicker(
+                'Vacating Date',
+                _vacatingDate,
+                (d) => setState(() => _vacatingDate = d),
+              ),
+            ),
           ],
         ),
         _buildTemplatesSection(_vacantTemplates),
@@ -455,8 +573,14 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
           maxLines: 3,
           decoration: InputDecoration(
             hintText: 'e.g. Relocating for work',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColors.roomCardBorder)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.roomCardBorder),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.roomCardBorder),
+            ),
           ),
         ),
       ],
@@ -467,7 +591,7 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
     return BlocBuilder<NoticeCubit, NoticeState>(
       builder: (context, state) {
         final isLoading = state is NoticeSubmitting;
-        final isReady = _noticeType == NoticeType.general 
+        final isReady = _noticeType == NoticeType.general
             ? (_sendToAllTenants || _selectedTenant != null)
             : (_selectedTenant != null);
 
@@ -478,11 +602,27 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
               padding: EdgeInsets.symmetric(vertical: 18.h),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
             ),
             child: isLoading
-                ? SizedBox(height: 20.h, width: 20.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : Text('Confirm Notice', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+                ? SizedBox(
+                    height: 20.h,
+                    width: 20.h,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Confirm Notice',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         );
       },
@@ -516,7 +656,9 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
                   ),
                   backgroundColor: const Color(0xFFF1F5F9),
                   side: const BorderSide(color: Color(0xFFE2E8F0)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
                   onPressed: () {
                     setState(() {
                       if (_noticeType == NoticeType.general) {
@@ -539,7 +681,7 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
 
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is! HostelLoaded || hostelState.hostels.isEmpty) return;
-    
+
     final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
 
     if (_noticeType == NoticeType.general) {
@@ -551,13 +693,13 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
     } else {
       if (_selectedTenant != null) {
         context.read<NoticeCubit>().createNotice(
-              hostelId: hostelId,
-              tenantId: _selectedTenant!.id,
-              roomId: _selectedTenant!.roomId,
-              bedNumber: _selectedTenant!.bedNumber,
-              vacatingDate: DateFormat('yyyy-MM-dd').format(_vacatingDate),
-              reason: _reasonController.text,
-            );
+          hostelId: hostelId,
+          tenantId: _selectedTenant!.id,
+          roomId: _selectedTenant!.roomId,
+          bedNumber: _selectedTenant!.bedNumber,
+          vacatingDate: DateFormat('yyyy-MM-dd').format(_vacatingDate),
+          reason: _reasonController.text,
+        );
       }
     }
   }

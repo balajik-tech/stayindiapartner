@@ -16,7 +16,6 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   Future<List<NotificationEntity>> getNotifications() async {
     final response = await _dio.get(ApiConstants.notifications);
     if (response.statusCode == 200) {
-      
       final dynamic responseData = response.data['data'];
       final List results = (responseData is Map)
           ? (responseData['items'] ?? responseData['results'] ?? [])

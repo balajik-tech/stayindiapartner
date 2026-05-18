@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 class StockTransaction extends Equatable {
   final String id;
   final String stockItemId;
-  final String type; 
+  final String type;
   final double quantity;
   final double pricePerUnit;
   final double totalCost;
@@ -29,13 +29,13 @@ class StockTransaction extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        stockItemId,
-        type,
-        quantity,
-        totalCost,
-        note,
-        createdBy,
-        createdAt,
-      ];
+    id,
+    stockItemId,
+    type,
+    quantity,
+    totalCost,
+    note,
+    createdBy,
+    createdAt,
+  ];
 }

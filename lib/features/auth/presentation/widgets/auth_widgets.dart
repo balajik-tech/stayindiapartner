@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 
-
 class AuthTextField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
@@ -73,7 +72,9 @@ class _AuthTextFieldState extends State<AuthTextField> {
           style: GoogleFonts.outfit(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
-            color: _isFocused ? AppColors.primaryBlue : AppColors.darkText.withValues(alpha: 0.8),
+            color: _isFocused
+                ? AppColors.primaryBlue
+                : AppColors.darkText.withValues(alpha: 0.8),
           ),
         ),
         SizedBox(height: 8.h),
@@ -115,7 +116,10 @@ class _AuthTextFieldState extends State<AuthTextField> {
               prefixIcon: widget.prefix,
               filled: true,
               fillColor: _isFocused ? Colors.white : Colors.grey.shade50,
-              contentPadding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 18.w,
+                vertical: 16.h,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
                 borderSide: BorderSide(color: Colors.grey.shade200),
@@ -126,7 +130,10 @@ class _AuthTextFieldState extends State<AuthTextField> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
-                borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.8),
+                borderSide: const BorderSide(
+                  color: AppColors.primaryBlue,
+                  width: 1.8,
+                ),
               ),
             ),
           ),
@@ -135,7 +142,6 @@ class _AuthTextFieldState extends State<AuthTextField> {
     );
   }
 }
-
 
 class AuthPrimaryButton extends StatelessWidget {
   final String? id;
@@ -207,7 +213,6 @@ class AuthPrimaryButton extends StatelessWidget {
   }
 }
 
-
 class AuthLogoBadge extends StatelessWidget {
   const AuthLogoBadge({super.key});
 
@@ -216,7 +221,6 @@ class AuthLogoBadge extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        
         Container(
           width: 140.w,
           height: 140.w,
@@ -269,7 +273,6 @@ class AuthLogoBadge extends StatelessWidget {
   }
 }
 
-
 class AuthDropdown<T> extends StatelessWidget {
   final String label;
   final T value;
@@ -303,11 +306,17 @@ class AuthDropdown<T> extends StatelessWidget {
           initialValue: value,
           items: items,
           onChanged: onChanged,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.greyText),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: AppColors.greyText,
+          ),
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.grey.shade50,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 14.h,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: Colors.grey.shade200),
@@ -318,7 +327,10 @@ class AuthDropdown<T> extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primaryBlue,
+                width: 1.5,
+              ),
             ),
           ),
         ),
@@ -326,7 +338,6 @@ class AuthDropdown<T> extends StatelessWidget {
     );
   }
 }
-
 
 class AuthDatePicker extends StatelessWidget {
   final String label;
@@ -364,10 +375,17 @@ class AuthDatePicker extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15.sp),
-            suffixIcon: const Icon(Icons.calendar_today_outlined, size: 20, color: AppColors.greyText),
+            suffixIcon: const Icon(
+              Icons.calendar_today_outlined,
+              size: 20,
+              color: AppColors.greyText,
+            ),
             filled: true,
             fillColor: Colors.grey.shade50,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 14.h,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: Colors.grey.shade200),
@@ -378,7 +396,10 @@ class AuthDatePicker extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primaryBlue,
+                width: 1.5,
+              ),
             ),
           ),
         ),
@@ -386,6 +407,7 @@ class AuthDatePicker extends StatelessWidget {
     );
   }
 }
+
 class AuthStepProgress extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
@@ -418,8 +440,8 @@ class AuthStepProgress extends StatelessWidget {
                   color: isActive
                       ? AppColors.primaryBlue
                       : isCurrent
-                          ? AppColors.primaryBlue.withValues(alpha: 0.3)
-                          : Colors.grey.shade200,
+                      ? AppColors.primaryBlue.withValues(alpha: 0.3)
+                      : Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
@@ -436,7 +458,9 @@ class AuthStepProgress extends StatelessWidget {
               style: GoogleFonts.outfit(
                 fontSize: 12.sp,
                 fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w500,
-                color: isCurrent ? AppColors.primaryBlue : AppColors.greyText.withValues(alpha: 0.6),
+                color: isCurrent
+                    ? AppColors.primaryBlue
+                    : AppColors.greyText.withValues(alpha: 0.6),
               ),
             );
           }),

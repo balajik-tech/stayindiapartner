@@ -54,6 +54,7 @@ class DateFormatter {
       return dateStr;
     }
   }
+
   static String formatTimeAgo(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {

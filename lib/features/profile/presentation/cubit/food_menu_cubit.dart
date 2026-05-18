@@ -38,9 +38,9 @@ class FoodMenuCubit extends Cubit<FoodMenuState> {
   FoodMenuCubit({
     required GetFoodMenuUseCase getFoodMenuUseCase,
     required SaveFoodMenuUseCase saveFoodMenuUseCase,
-  })  : _getFoodMenu = getFoodMenuUseCase,
-        _saveFoodMenu = saveFoodMenuUseCase,
-        super(FoodMenuInitial());
+  }) : _getFoodMenu = getFoodMenuUseCase,
+       _saveFoodMenu = saveFoodMenuUseCase,
+       super(FoodMenuInitial());
 
   Future<void> loadMenu(String hostelId, String day) async {
     emit(FoodMenuLoading());

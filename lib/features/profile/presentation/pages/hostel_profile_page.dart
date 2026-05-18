@@ -34,7 +34,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   double? _lat;
   double? _lng;
   String _hostelType = 'men';
@@ -57,7 +57,9 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final hostelId = _hostelId(context);
-      if (hostelId.isNotEmpty) context.read<SettingsCubit>().loadSettings(hostelId);
+      if (hostelId.isNotEmpty) {
+        context.read<SettingsCubit>().loadSettings(hostelId);
+      }
     });
   }
 
@@ -79,19 +81,24 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   Future<void> _fetchCurrentLocation() async {
     setState(() => _isFetchingLocation = true);
     HapticFeedback.mediumImpact();
-    
+
     try {
       final locationResult = await LocationService().getCurrentLocation();
-      
+
       setState(() {
         _lat = locationResult.latitude;
         _lng = locationResult.longitude;
         _stateController.text = locationResult.administrativeArea ?? "";
         _districtController.text = locationResult.subAdministrativeArea ?? "";
-        _villageController.text = locationResult.locality ?? locationResult.subLocality ?? "";
-        _areaController.text = "${locationResult.street ?? ""}, ${locationResult.subLocality ?? ""}".trim();
+        _villageController.text =
+            locationResult.locality ?? locationResult.subLocality ?? "";
+        _areaController.text =
+            "${locationResult.street ?? ""}, ${locationResult.subLocality ?? ""}"
+                .trim();
         _pincodeController.text = locationResult.pincode ?? "";
-        _addressController.text = "${locationResult.street ?? ''}, ${locationResult.subLocality ?? ''}, ${locationResult.locality ?? ''}, ${locationResult.administrativeArea ?? ''}".trim();
+        _addressController.text =
+            "${locationResult.street ?? ''}, ${locationResult.subLocality ?? ''}, ${locationResult.locality ?? ''}, ${locationResult.administrativeArea ?? ''}"
+                .trim();
       });
       HapticFeedback.heavyImpact();
     } catch (e) {
@@ -117,12 +124,14 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
             },
           );
         }
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-          action: action,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            action: action,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isFetchingLocation = false);
@@ -133,131 +142,266 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   Widget build(BuildContext context) {
     return BlocListener<SettingsCubit, SettingsState>(
       listener: (context, state) {
-          if (state is SettingsLoaded) {
-            final p = state.settings.profile;
-            _nameController.text = p.name;
-            _stateController.text = p.state;
-            _districtController.text = p.district;
-            _villageController.text = p.village.isNotEmpty ? p.village : p.city;
-            _areaController.text = p.area;
-            _pincodeController.text = p.pincode;
-            _addressController.text = p.address;
-            _phoneController.text = p.contactNumber;
-            _emailController.text = p.contactEmail;
-            _images = state.settings.images ?? [];
-            _descriptionController.text = p.description;
-            _lat = p.lat;
-            _lng = p.lng;
-            _hostelType = p.hostelType;
-            _propertyTag = p.propertyTag ?? 'PG';
-            if (mounted) setState(() {});
-          } else if (state is SettingsSaveSuccess) {
-            context.read<HostelCubit>().getHostels();
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-        },
-        child: Scaffold(
+        if (state is SettingsLoaded) {
+          final p = state.settings.profile;
+          _nameController.text = p.name;
+          _stateController.text = p.state;
+          _districtController.text = p.district;
+          _villageController.text = p.village.isNotEmpty ? p.village : p.city;
+          _areaController.text = p.area;
+          _pincodeController.text = p.pincode;
+          _addressController.text = p.address;
+          _phoneController.text = p.contactNumber;
+          _emailController.text = p.contactEmail;
+          _images = state.settings.images ?? [];
+          _descriptionController.text = p.description;
+          _lat = p.lat;
+          _lng = p.lng;
+          _hostelType = p.hostelType;
+          _propertyTag = p.propertyTag ?? 'PG';
+          if (mounted) setState(() {});
+        } else if (state is SettingsSaveSuccess) {
+          context.read<HostelCubit>().getHostels();
+          Navigator.pop(context);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        appBar: AppBar(
           backgroundColor: const Color(0xFFF8F9FA),
-          appBar: AppBar(
-            backgroundColor: const Color(0xFFF8F9FA),
-            elevation: 0,
-            centerTitle: true,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20),
-              onPressed: () => Navigator.pop(context),
+          elevation: 0,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppColors.darkText,
+              size: 20,
             ),
-            title: Text(
-              StringUtils.translate('hostel_profile_title', context: context),
-              style: TextStyle(color: AppColors.darkText, fontSize: 18.sp, fontWeight: FontWeight.w900),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            StringUtils.translate('hostel_profile_title', context: context),
+            style: TextStyle(
+              color: AppColors.darkText,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          body: BlocBuilder<SettingsCubit, SettingsState>(
-            builder: (context, state) {
-              if (state is SettingsLoading) return const Center(child: CircularProgressIndicator());
-              return Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildPremiumImageSection(state),
-                          SizedBox(height: 12.h),
-                          _buildSection(
-                            title: StringUtils.translate('basic_info', context: context),
-                            icon: Icons.business_rounded,
-                            children: [
-                              _buildInputField(label: StringUtils.translate('hostel_name', context: context), controller: _nameController, hint: 'e.g. Stay India Premium'),
-                              SizedBox(height: 20.h),
-                              Row(
-                                children: [
-                                  Expanded(child: _buildDropdownField(label: StringUtils.translate('hostel_type', context: context), value: _hostelType, items: ['men', 'women', 'co-ed'], onChanged: (v) => setState(() => _hostelType = v!))),
-                                  SizedBox(width: 16.w),
-                                  Expanded(child: _buildDropdownField(label: StringUtils.translate('category', context: context), value: _propertyTag, items: ['PG', 'BOYS', 'GIRLS', 'CO_LIVING'], onChanged: (v) => setState(() => _propertyTag = v!))),
-                                ],
+        ),
+        body: BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, state) {
+            if (state is SettingsLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildPremiumImageSection(state),
+                        SizedBox(height: 12.h),
+                        _buildSection(
+                          title: StringUtils.translate(
+                            'basic_info',
+                            context: context,
+                          ),
+                          icon: Icons.business_rounded,
+                          children: [
+                            _buildInputField(
+                              label: StringUtils.translate(
+                                'hostel_name',
+                                context: context,
                               ),
-                            ],
+                              controller: _nameController,
+                              hint: 'e.g. Stay India Premium',
+                            ),
+                            SizedBox(height: 20.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    label: StringUtils.translate(
+                                      'hostel_type',
+                                      context: context,
+                                    ),
+                                    value: _hostelType,
+                                    items: ['men', 'women', 'co-ed'],
+                                    onChanged: (v) =>
+                                        setState(() => _hostelType = v!),
+                                  ),
+                                ),
+                                SizedBox(width: 16.w),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    label: StringUtils.translate(
+                                      'category',
+                                      context: context,
+                                    ),
+                                    value: _propertyTag,
+                                    items: ['PG', 'BOYS', 'GIRLS', 'CO_LIVING'],
+                                    onChanged: (v) =>
+                                        setState(() => _propertyTag = v!),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        _buildSection(
+                          title: StringUtils.translate(
+                            'location_details',
+                            context: context,
                           ),
-                          _buildSection(
-                            title: StringUtils.translate('location_details', context: context),
-                            icon: Icons.location_on_rounded,
-                            action: _buildGPSButton(),
-                            children: [
-                              if (_lat != null) _buildCoordinatesPill(),
-                              SizedBox(height: 16.h),
-                              Row(
-                                children: [
-                                  Expanded(child: _buildInputField(label: StringUtils.translate('state', context: context), controller: _stateController, hint: 'State')),
-                                  SizedBox(width: 16.w),
-                                  Expanded(child: _buildInputField(label: StringUtils.translate('district', context: context), controller: _districtController, hint: 'District')),
-                                ],
+                          icon: Icons.location_on_rounded,
+                          action: _buildGPSButton(),
+                          children: [
+                            if (_lat != null) _buildCoordinatesPill(),
+                            SizedBox(height: 16.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildInputField(
+                                    label: StringUtils.translate(
+                                      'state',
+                                      context: context,
+                                    ),
+                                    controller: _stateController,
+                                    hint: 'State',
+                                  ),
+                                ),
+                                SizedBox(width: 16.w),
+                                Expanded(
+                                  child: _buildInputField(
+                                    label: StringUtils.translate(
+                                      'district',
+                                      context: context,
+                                    ),
+                                    controller: _districtController,
+                                    hint: 'District',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20.h),
+                            _buildInputField(
+                              label: StringUtils.translate(
+                                'city_village',
+                                context: context,
                               ),
-                              SizedBox(height: 20.h),
-                              _buildInputField(label: StringUtils.translate('city_village', context: context), controller: _villageController, hint: 'City name'),
-                              SizedBox(height: 20.h),
-                              _buildInputField(label: StringUtils.translate('area_landmark', context: context), controller: _areaController, hint: 'Street, near XYZ...'),
-                              SizedBox(height: 20.h),
-                              _buildInputField(label: StringUtils.translate('pincode', context: context), controller: _pincodeController, hint: '6-digit code', keyboardType: TextInputType.number),
-                              SizedBox(height: 20.h),
-                              _buildInputField(label: StringUtils.translate('full_address_hint', context: context), controller: _addressController, hint: 'Fetched from GPS', maxLines: 2, readOnly: true),
-                            ],
+                              controller: _villageController,
+                              hint: 'City name',
+                            ),
+                            SizedBox(height: 20.h),
+                            _buildInputField(
+                              label: StringUtils.translate(
+                                'area_landmark',
+                                context: context,
+                              ),
+                              controller: _areaController,
+                              hint: 'Street, near XYZ...',
+                            ),
+                            SizedBox(height: 20.h),
+                            _buildInputField(
+                              label: StringUtils.translate(
+                                'pincode',
+                                context: context,
+                              ),
+                              controller: _pincodeController,
+                              hint: '6-digit code',
+                              keyboardType: TextInputType.number,
+                            ),
+                            SizedBox(height: 20.h),
+                            _buildInputField(
+                              label: StringUtils.translate(
+                                'full_address_hint',
+                                context: context,
+                              ),
+                              controller: _addressController,
+                              hint: 'Fetched from GPS',
+                              maxLines: 2,
+                              readOnly: true,
+                            ),
+                          ],
+                        ),
+                        _buildSection(
+                          title: StringUtils.translate(
+                            'contact_description',
+                            context: context,
                           ),
-                          _buildSection(
-                            title: StringUtils.translate('contact_description', context: context),
-                            icon: Icons.contact_phone_rounded,
-                            children: [
-                              _buildInputField(label: StringUtils.translate('contact_number', context: context), controller: _phoneController, hint: '9988776655', keyboardType: TextInputType.phone),
-                              SizedBox(height: 20.h),
-                              _buildInputField(label: StringUtils.translate('official_email', context: context), controller: _emailController, hint: 'hostel@email.com', keyboardType: TextInputType.emailAddress),
-                              SizedBox(height: 20.h),
-                              _buildInputField(label: StringUtils.translate('about_hostel', context: context), controller: _descriptionController, hint: 'Tell tenants about your hostel...', maxLines: 4, keyboardType: TextInputType.multiline),
-                            ],
-                          ),
-                          _buildDocumentsTile(),
-                          SizedBox(height: 120.h),
-                        ],
-                      ),
+                          icon: Icons.contact_phone_rounded,
+                          children: [
+                            _buildInputField(
+                              label: StringUtils.translate(
+                                'contact_number',
+                                context: context,
+                              ),
+                              controller: _phoneController,
+                              hint: '9988776655',
+                              keyboardType: TextInputType.phone,
+                            ),
+                            SizedBox(height: 20.h),
+                            _buildInputField(
+                              label: StringUtils.translate(
+                                'official_email',
+                                context: context,
+                              ),
+                              controller: _emailController,
+                              hint: 'hostel@email.com',
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            SizedBox(height: 20.h),
+                            _buildInputField(
+                              label: StringUtils.translate(
+                                'about_hostel',
+                                context: context,
+                              ),
+                              controller: _descriptionController,
+                              hint: 'Tell tenants about your hostel...',
+                              maxLines: 4,
+                              keyboardType: TextInputType.multiline,
+                            ),
+                          ],
+                        ),
+                        _buildDocumentsTile(),
+                        SizedBox(height: 120.h),
+                      ],
                     ),
                   ),
-                  _buildStickyBottomBar(context, state),
-                ],
-              );
-            },
-          ),
+                ),
+                _buildStickyBottomBar(context, state),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildSection({required String title, required IconData icon, Widget? action, required List<Widget> children}) {
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    Widget? action,
+    required List<Widget> children,
+  }) {
     return Container(
       margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 15, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,10 +421,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                   ),
                 ),
               ),
-              if (action != null) ...[
-                SizedBox(width: 8.w),
-                action,
-              ],
+              if (action != null) ...[SizedBox(width: 8.w), action],
             ],
           ),
           SizedBox(height: 20.h),
@@ -290,48 +431,114 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     );
   }
 
-  Widget _buildInputField({required String label, required TextEditingController controller, required String hint, int maxLines = 1, bool readOnly = false, TextInputType? keyboardType}) {
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    int maxLines = 1,
+    bool readOnly = false,
+    TextInputType? keyboardType,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.darkText.withValues(alpha: 0.8))),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.darkText.withValues(alpha: 0.8),
+          ),
+        ),
         SizedBox(height: 8.h),
         TextField(
           controller: controller,
           maxLines: maxLines,
           readOnly: readOnly,
           keyboardType: keyboardType,
-          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: readOnly ? AppColors.greyText : AppColors.darkText),
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w600,
+            color: readOnly ? AppColors.greyText : AppColors.darkText,
+          ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: AppColors.greyText.withValues(alpha: 0.4), fontSize: 14.sp),
+            hintStyle: TextStyle(
+              color: AppColors.greyText.withValues(alpha: 0.4),
+              fontSize: 14.sp,
+            ),
             filled: true,
-            fillColor: readOnly ? const Color(0xFFF1F3F5) : const Color(0xFFF8F9FA),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide(color: AppColors.primaryBlue.withValues(alpha: 0.5), width: 1.5)),
+            fillColor: readOnly
+                ? const Color(0xFFF1F3F5)
+                : const Color(0xFFF8F9FA),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 14.h,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide(
+                color: AppColors.primaryBlue.withValues(alpha: 0.5),
+                width: 1.5,
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDropdownField({required String label, required String value, required List<String> items, required void Function(String?) onChanged}) {
+  Widget _buildDropdownField({
+    required String label,
+    required String value,
+    required List<String> items,
+    required void Function(String?) onChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.darkText.withValues(alpha: 0.8))),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.darkText.withValues(alpha: 0.8),
+          ),
+        ),
         SizedBox(height: 8.h),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
-          decoration: BoxDecoration(color: const Color(0xFFF8F9FA), borderRadius: BorderRadius.circular(16.r)),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FA),
+            borderRadius: BorderRadius.circular(16.r),
+          ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: value,
               isExpanded: true,
               icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              items: items.map((e) => DropdownMenuItem(value: e, child: Text(e.toLowerCase().tr().toUpperCase(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)))).toList(),
+              items: items
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(
+                        e.toLowerCase().tr().toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
               onChanged: onChanged,
             ),
           ),
@@ -345,15 +552,38 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
       onTap: _isFetchingLocation ? null : _fetchCurrentLocation,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-        decoration: BoxDecoration(color: AppColors.primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20.r)),
+        decoration: BoxDecoration(
+          color: AppColors.primaryBlue.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20.r),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _isFetchingLocation 
-              ? SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue))
-              : Icon(Icons.my_location_rounded, size: 14.sp, color: AppColors.primaryBlue),
+            _isFetchingLocation
+                ? SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primaryBlue,
+                    ),
+                  )
+                : Icon(
+                    Icons.my_location_rounded,
+                    size: 14.sp,
+                    color: AppColors.primaryBlue,
+                  ),
             SizedBox(width: 6.w),
-            Text(_isFetchingLocation ? StringUtils.translate('fetching', context: context) : StringUtils.translate('gps_fetch', context: context), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppColors.primaryBlue)),
+            Text(
+              _isFetchingLocation
+                  ? StringUtils.translate('fetching', context: context)
+                  : StringUtils.translate('gps_fetch', context: context),
+              style: TextStyle(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primaryBlue,
+              ),
+            ),
           ],
         ),
       ),
@@ -363,18 +593,37 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   Widget _buildCoordinatesPill() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: BoxDecoration(color: const Color(0xFFE7F5FF), borderRadius: BorderRadius.circular(12.r), border: Border.all(color: const Color(0xFFD0EBFF))),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE7F5FF),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFD0EBFF)),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle_rounded, color: Color(0xFF228BE6), size: 16),
+          const Icon(
+            Icons.check_circle_rounded,
+            color: Color(0xFF228BE6),
+            size: 16,
+          ),
           SizedBox(width: 8.w),
           Flexible(
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                StringUtils.translate('location_verified', namedArgs: {'coords': '${_lat!.toStringAsFixed(4)}, ${_lng!.toStringAsFixed(4)}'}, context: context),
-                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1971C2)),
+                StringUtils.translate(
+                  'location_verified',
+                  namedArgs: {
+                    'coords':
+                        '${_lat!.toStringAsFixed(4)}, ${_lng!.toStringAsFixed(4)}',
+                  },
+                  context: context,
+                ),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1971C2),
+                ),
               ),
             ),
           ),
@@ -384,8 +633,11 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   }
 
   Widget _buildPremiumImageSection(SettingsState state) {
-    final allImages = [..._images.map((e) => {'path': e, 'remote': true}), ..._localImagePaths.map((e) => {'path': e, 'remote': false})];
-    
+    final allImages = [
+      ..._images.map((e) => {'path': e, 'remote': true}),
+      ..._localImagePaths.map((e) => {'path': e, 'remote': false}),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -399,16 +651,50 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24.r),
                   child: allImages[0]['remote'] as bool
-                    ? CachedNetworkImage(imageUrl: ApiConstants.getPlaceholderImageUrl(allImages[0]['path'] as String), width: double.infinity, fit: BoxFit.cover)
-                    : Image.file(
-                        File(allImages[0]['path'] as String),
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        cacheWidth: 600,
-                      ),
+                      ? CachedNetworkImage(
+                          imageUrl: ApiConstants.getPlaceholderImageUrl(
+                            allImages[0]['path'] as String,
+                          ),
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          File(allImages[0]['path'] as String),
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          cacheWidth: 600,
+                        ),
                 ),
-                Positioned(top: 12, right: 12, child: _buildImageDeleteBtn(0, allImages[0]['remote'] as bool)),
-                Positioned(bottom: 12, left: 12, child: Container(padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h), decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(12.r)), child: Text('Cover Photo', style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w800)))),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: _buildImageDeleteBtn(
+                    0,
+                    allImages[0]['remote'] as bool,
+                  ),
+                ),
+                Positioned(
+                  bottom: 12,
+                  left: 12,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Text(
+                      'Cover Photo',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -426,8 +712,38 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                   padding: EdgeInsets.only(right: 12.w),
                   child: Stack(
                     children: [
-                      Container(width: 80.w, decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.r), border: Border.all(color: Colors.white, width: 2)), child: ClipRRect(borderRadius: BorderRadius.circular(14.r), child: img['remote'] as bool ? CachedNetworkImage(imageUrl: ApiConstants.getPlaceholderImageUrl(img['path'] as String), fit: BoxFit.cover) : Image.file(File(img['path'] as String), fit: BoxFit.cover, cacheWidth: 160, cacheHeight: 160))),
-                      Positioned(top: 4, right: 4, child: _buildImageDeleteBtn(index, img['remote'] as bool, small: true)),
+                      Container(
+                        width: 80.w,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14.r),
+                          child: img['remote'] as bool
+                              ? CachedNetworkImage(
+                                  imageUrl: ApiConstants.getPlaceholderImageUrl(
+                                    img['path'] as String,
+                                  ),
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  File(img['path'] as String),
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 160,
+                                  cacheHeight: 160,
+                                ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: _buildImageDeleteBtn(
+                          index,
+                          img['remote'] as bool,
+                          small: true,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -442,8 +758,36 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
             onTap: _pickImages,
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 14.h),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r), border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2), style: BorderStyle.solid)),
-              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add_photo_alternate_rounded, color: AppColors.primaryBlue, size: 20.sp), SizedBox(width: 8.w), Text(StringUtils.translate('add_hostel_photos', context: context), style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.w800, fontSize: 14.sp))]),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate_rounded,
+                    color: AppColors.primaryBlue,
+                    size: 20.sp,
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    StringUtils.translate(
+                      'add_hostel_photos',
+                      context: context,
+                    ),
+                    style: TextStyle(
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -456,32 +800,98 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
       height: 180.h,
       width: double.infinity,
       margin: EdgeInsets.symmetric(horizontal: 20.w),
-      decoration: BoxDecoration(color: const Color(0xFFF1F3F5), borderRadius: BorderRadius.circular(24.r)),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.image_search_rounded, size: 48.sp, color: AppColors.greyText.withValues(alpha: 0.3)), SizedBox(height: 12.h), Text(StringUtils.translate('no_images', context: context), style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.w600, fontSize: 14.sp))]),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F3F5),
+        borderRadius: BorderRadius.circular(24.r),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.image_search_rounded,
+            size: 48.sp,
+            color: AppColors.greyText.withValues(alpha: 0.3),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            StringUtils.translate('no_images', context: context),
+            style: TextStyle(
+              color: AppColors.greyText,
+              fontWeight: FontWeight.w600,
+              fontSize: 14.sp,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildImageDeleteBtn(int index, bool isRemote, {bool small = false}) {
     return GestureDetector(
-      onTap: () => setState(() => isRemote ? _images.removeAt(index) : _localImagePaths.removeAt(index - _images.length)),
-      child: Container(padding: EdgeInsets.all(small ? 4 : 6), decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), child: Icon(Icons.close_rounded, color: Colors.white, size: small ? 12 : 16)),
+      onTap: () => setState(
+        () => isRemote
+            ? _images.removeAt(index)
+            : _localImagePaths.removeAt(index - _images.length),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(small ? 4 : 6),
+        decoration: const BoxDecoration(
+          color: Colors.black54,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.close_rounded,
+          color: Colors.white,
+          size: small ? 12 : 16,
+        ),
+      ),
     );
   }
 
   Widget _buildStickyBottomBar(BuildContext context, SettingsState state) {
     final isSaving = state is SettingsSaving;
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, MediaQuery.of(context).padding.bottom + 16.h),
-      decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, -5))]),
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        16.h,
+        20.w,
+        MediaQuery.of(context).padding.bottom + 16.h,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
       child: SizedBox(
         width: double.infinity,
         height: 56.h,
         child: ElevatedButton(
           onPressed: isSaving ? null : _handleSave,
-          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)), elevation: 0),
-          child: isSaving 
-            ? const CircularProgressIndicator(color: Colors.white) 
-            : Text(StringUtils.translate('save_property_profile', context: context), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.r),
+            ),
+            elevation: 0,
+          ),
+          child: isSaving
+              ? const CircularProgressIndicator(color: Colors.white)
+              : Text(
+                  StringUtils.translate(
+                    'save_property_profile',
+                    context: context,
+                  ),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );
@@ -491,24 +901,78 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     final hostelId = _hostelId(context);
     if (hostelId.isEmpty) return;
     HapticFeedback.mediumImpact();
-    context.read<SettingsCubit>().updateFullProfile(hostelId, name: _nameController.text, address: _addressController.text, city: _villageController.text, village: _villageController.text, district: _districtController.text, area: _areaController.text, state: _stateController.text, pincode: _pincodeController.text, contactNumber: _phoneController.text, contactEmail: _emailController.text, description: _descriptionController.text, hostelType: _hostelType, propertyTag: _propertyTag, lat: _lat, lng: _lng, newImagePaths: _localImagePaths.isEmpty ? null : _localImagePaths, existingImages: _images);
+    context.read<SettingsCubit>().updateFullProfile(
+      hostelId,
+      name: _nameController.text,
+      address: _addressController.text,
+      city: _villageController.text,
+      village: _villageController.text,
+      district: _districtController.text,
+      area: _areaController.text,
+      state: _stateController.text,
+      pincode: _pincodeController.text,
+      contactNumber: _phoneController.text,
+      contactEmail: _emailController.text,
+      description: _descriptionController.text,
+      hostelType: _hostelType,
+      propertyTag: _propertyTag,
+      lat: _lat,
+      lng: _lng,
+      newImagePaths: _localImagePaths.isEmpty ? null : _localImagePaths,
+      existingImages: _images,
+    );
   }
 
   Future<void> _pickImages() async {
-    final result = await FilePicker.pickFiles(type: FileType.image, allowMultiple: true);
-    if (result != null && result.paths.isNotEmpty) setState(() => _localImagePaths.addAll(result.paths.whereType<String>()));
+    final result = await FilePicker.pickFiles(
+      type: FileType.image,
+      allowMultiple: true,
+    );
+    if (result != null && result.paths.isNotEmpty) {
+      setState(() => _localImagePaths.addAll(result.paths.whereType<String>()));
+    }
   }
 
   Widget _buildDocumentsTile() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24.r), border: Border.all(color: Colors.grey.shade100)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
       child: ListTile(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HostelDocumentsPage(hostelId: _hostelId(context)))),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                HostelDocumentsPage(hostelId: _hostelId(context)),
+          ),
+        ),
         contentPadding: EdgeInsets.all(16.r),
-        leading: Container(padding: EdgeInsets.all(10.r), decoration: BoxDecoration(color: const Color(0xFFFFF4E6), borderRadius: BorderRadius.circular(12.r)), child: const Icon(Icons.description_rounded, color: Color(0xFFF08C00))),
-        title: Text(StringUtils.translate('property_documents', context: context), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: AppColors.darkText)),
-        subtitle: Text(StringUtils.translate('manage_docs_sub', context: context), style: TextStyle(fontSize: 12.sp, color: AppColors.greyText)),
+        leading: Container(
+          padding: EdgeInsets.all(10.r),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF4E6),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: const Icon(
+            Icons.description_rounded,
+            color: Color(0xFFF08C00),
+          ),
+        ),
+        title: Text(
+          StringUtils.translate('property_documents', context: context),
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.darkText,
+          ),
+        ),
+        subtitle: Text(
+          StringUtils.translate('manage_docs_sub', context: context),
+          style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+        ),
         trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
       ),
     );

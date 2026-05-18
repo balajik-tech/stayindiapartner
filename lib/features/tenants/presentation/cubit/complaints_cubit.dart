@@ -33,9 +33,9 @@ class ComplaintsCubit extends Cubit<ComplaintsState> {
   ComplaintsCubit({
     required GetComplaintsUseCase getComplaintsUseCase,
     required UpdateComplaintStatusUseCase updateStatusUseCase,
-  })  : _getComplaints = getComplaintsUseCase,
-        _updateStatus = updateStatusUseCase,
-        super(ComplaintsInitial());
+  }) : _getComplaints = getComplaintsUseCase,
+       _updateStatus = updateStatusUseCase,
+       super(ComplaintsInitial());
 
   Future<void> loadComplaints(String hostelId) async {
     emit(ComplaintsLoading());

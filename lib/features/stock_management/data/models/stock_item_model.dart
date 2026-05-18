@@ -28,8 +28,12 @@ class StockItemModel extends StockItem {
       minimumThreshold: (json['minimumThreshold'] ?? 0).toDouble(),
       pricePerUnit: (json['pricePerUnit'] ?? 0).toDouble(),
       createdBy: json['createdBy'] ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
     );
   }
 

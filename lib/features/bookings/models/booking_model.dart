@@ -1,7 +1,6 @@
 import 'package:stayindia_owner/features/bookings/domain/booking.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 
-
 class BookingModel extends Booking {
   BookingModel({
     required super.id,
@@ -34,7 +33,9 @@ class BookingModel extends Booking {
     final lastName = tenant['lastName'] as String? ?? '';
     final fullName = [firstName, lastName].where((s) => s.isNotEmpty).join(' ');
 
-    final statusStr = (json['status']?.toString() ?? json['paymentStatus']?.toString() ?? '').toUpperCase();
+    final statusStr =
+        (json['status']?.toString() ?? json['paymentStatus']?.toString() ?? '')
+            .toUpperCase();
     BookingStatus status;
     if (['CONFIRMED', 'IDLE'].contains(statusStr)) {
       status = BookingStatus.confirmed;
@@ -55,14 +56,21 @@ class BookingModel extends Booking {
       tenantName: fullName.isNotEmpty ? fullName : 'Unknown',
       tenantPhone: tenant['mobile']?.toString() ?? '',
       hostelName: hostel['name']?.toString() ?? '',
-      roomTypeName: StringUtils.formatRoomNumber(room['roomTypename']?.toString() ?? ''),
+      roomTypeName: StringUtils.formatRoomNumber(
+        room['roomTypename']?.toString() ?? '',
+      ),
       bedNumber: json['bedNumber']?.toString() ?? '',
       status: status,
-      checkInDate: json['checkInDate']?.toString() ?? json['startDate']?.toString() ?? '',
+      checkInDate:
+          json['checkInDate']?.toString() ??
+          json['startDate']?.toString() ??
+          '',
       isKycVerified: safeMap(tenant['kyc'])['verified'] as bool? ?? false,
       sharingType: json['sharingType']?.toString(),
       hostelId: hostel['_id']?.toString() ?? json['hostel']?.toString(),
-      tenantAvatar: tenant['avatar']?.toString() ?? tenant['userProfile']?['avatar']?.toString(),
+      tenantAvatar:
+          tenant['avatar']?.toString() ??
+          tenant['userProfile']?['avatar']?.toString(),
       tenantId: tenant['_id']?.toString() ?? '',
       createdAt: json['createdAt']?.toString() ?? '',
     );
@@ -143,7 +151,9 @@ class ScanBookingResponseModel extends ScanBookingResponse {
       status: json['status'] ?? '',
       bookingStatus: json['bookingStatus'] ?? '',
       roomId: json['roomId'],
-      roomTypename: StringUtils.formatRoomNumber(json['roomTypename']?.toString() ?? ''),
+      roomTypename: StringUtils.formatRoomNumber(
+        json['roomTypename']?.toString() ?? '',
+      ),
       bedNumber: json['bedNumber'],
     );
   }

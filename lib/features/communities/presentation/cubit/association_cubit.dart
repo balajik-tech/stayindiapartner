@@ -71,12 +71,12 @@ class AssociationCubit extends Cubit<AssociationState> {
     required JoinAssociationUseCase joinAssociationUseCase,
     required CreateAssociationUseCase createAssociationUseCase,
     required ProfileCubit profileCubit,
-  })  : _getAssociations = getAssociationsUseCase,
-        _searchAssociations = searchAssociationsUseCase,
-        _joinAssociation = joinAssociationUseCase,
-        _createAssociation = createAssociationUseCase,
-        _profileCubit = profileCubit,
-        super(AssociationInitial());
+  }) : _getAssociations = getAssociationsUseCase,
+       _searchAssociations = searchAssociationsUseCase,
+       _joinAssociation = joinAssociationUseCase,
+       _createAssociation = createAssociationUseCase,
+       _profileCubit = profileCubit,
+       super(AssociationInitial());
 
   Future<List<Map<String, dynamic>>> searchAssociations(String query) async {
     try {
@@ -93,12 +93,8 @@ class AssociationCubit extends Cubit<AssociationState> {
   }) async {
     emit(AssociationLoading());
     try {
-      await _createAssociation(
-        name: name,
-        level: level,
-        parentId: parentId,
-      );
-      
+      await _createAssociation(name: name, level: level, parentId: parentId);
+
       if (level == 'STATE') {
         await loadStates();
       } else if (level == 'DISTRICT' && parentId != null) {
@@ -128,8 +124,18 @@ class AssociationCubit extends Cubit<AssociationState> {
     if (currentState is AssociationLoaded) {
       emit(currentState.copyWith(isSubLoading: true));
       try {
-        final districts = await _getAssociations(parentId: stateId, level: 'DISTRICT');
-        emit(currentState.copyWith(districts: districts, wards: [], locals: [], isSubLoading: false));
+        final districts = await _getAssociations(
+          parentId: stateId,
+          level: 'DISTRICT',
+        );
+        emit(
+          currentState.copyWith(
+            districts: districts,
+            wards: [],
+            locals: [],
+            isSubLoading: false,
+          ),
+        );
       } catch (e) {
         emit(AssociationError(GlobalErrorMapper.map(e).message));
       }
@@ -141,8 +147,13 @@ class AssociationCubit extends Cubit<AssociationState> {
     if (currentState is AssociationLoaded) {
       emit(currentState.copyWith(isSubLoading: true));
       try {
-        final wards = await _getAssociations(parentId: districtId, level: 'WARD');
-        emit(currentState.copyWith(wards: wards, locals: [], isSubLoading: false));
+        final wards = await _getAssociations(
+          parentId: districtId,
+          level: 'WARD',
+        );
+        emit(
+          currentState.copyWith(wards: wards, locals: [], isSubLoading: false),
+        );
       } catch (e) {
         emit(AssociationError(GlobalErrorMapper.map(e).message));
       }
@@ -166,7 +177,7 @@ class AssociationCubit extends Cubit<AssociationState> {
     emit(AssociationLoading());
     try {
       await _joinAssociation(associationId);
-      await _profileCubit.loadProfile(); 
+      await _profileCubit.loadProfile();
       emit(AssociationSuccess());
     } catch (e) {
       emit(AssociationError(GlobalErrorMapper.map(e).message));

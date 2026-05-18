@@ -27,11 +27,8 @@ class AddFoodItemSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => AddFoodItemSheet(
-        day: day,
-        mealType: mealType,
-        onSave: onSave,
-      ),
+      builder: (context) =>
+          AddFoodItemSheet(day: day, mealType: mealType, onSave: onSave),
     );
   }
 
@@ -71,35 +68,39 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
     if (queryWords.isEmpty) return;
 
     final List<Map<String, dynamic>> allMatches = [];
-    
-    
+
     FoodConstants.foodLibrary.forEach((category, items) {
       for (final item in items) {
         final nameMap = item['name'] as Map<String, dynamic>;
         final descMap = (item['desc'] ?? {}) as Map<String, dynamic>;
-        
-        
+
         bool matches = true;
         for (final word in queryWords) {
           bool wordFound = false;
-          
-          if (nameMap.values.any((val) => val.toString().toLowerCase().contains(word))) {
+
+          if (nameMap.values.any(
+            (val) => val.toString().toLowerCase().contains(word),
+          )) {
             wordFound = true;
           }
-          
-          if (!wordFound && descMap.values.any((val) => val.toString().toLowerCase().contains(word))) {
+
+          if (!wordFound &&
+              descMap.values.any(
+                (val) => val.toString().toLowerCase().contains(word),
+              )) {
             wordFound = true;
           }
-          
+
           if (!wordFound) {
             matches = false;
             break;
           }
         }
-        
+
         if (matches) {
-          
-          final isDuplicate = allMatches.any((m) => m['name']['en'] == nameMap['en']);
+          final isDuplicate = allMatches.any(
+            (m) => m['name']['en'] == nameMap['en'],
+          );
           if (!isDuplicate) {
             allMatches.add({...item, 'originalCategory': category});
           }
@@ -107,17 +108,24 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
       }
     });
 
-    
     allMatches.sort((a, b) {
-      if (a['originalCategory'] == widget.mealType && b['originalCategory'] != widget.mealType) return -1;
-      if (a['originalCategory'] != widget.mealType && b['originalCategory'] == widget.mealType) return 1;
+      if (a['originalCategory'] == widget.mealType &&
+          b['originalCategory'] != widget.mealType) {
+        return -1;
+      }
+      if (a['originalCategory'] != widget.mealType &&
+          b['originalCategory'] == widget.mealType) {
+        return 1;
+      }
       return 0;
     });
 
     setState(() {
-      _suggestions = allMatches.take(10).toList(); 
+      _suggestions = allMatches.take(10).toList();
       _showSuggestions = _suggestions.isNotEmpty;
-      debugPrint('Food Search Universal: query="$query", matches=${allMatches.length}, show=$_showSuggestions');
+      debugPrint(
+        'Food Search Universal: query="$query", matches=${allMatches.length}, show=$_showSuggestions',
+      );
     });
   }
 
@@ -133,8 +141,10 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
       _nameTranslations = Map<String, String>.from(item['name']);
       _descTranslations = Map<String, String>.from(item['desc'] ?? {});
       final locale = context.locale.languageCode;
-      _nameController.text = _nameTranslations[locale] ?? _nameTranslations['en'] ?? '';
-      _descController.text = _descTranslations[locale] ?? _descTranslations['en'] ?? '';
+      _nameController.text =
+          _nameTranslations[locale] ?? _nameTranslations['en'] ?? '';
+      _descController.text =
+          _descTranslations[locale] ?? _descTranslations['en'] ?? '';
       _isVeg = item['isVeg'] ?? true;
     });
   }
@@ -162,25 +172,55 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 12.h),
-                      _buildLabel(StringUtils.translate('dish_name_label', context: context)),
+                      _buildLabel(
+                        StringUtils.translate(
+                          'dish_name_label',
+                          context: context,
+                        ),
+                      ),
                       CompositedTransformTarget(
                         link: _layerLink,
-                        child: _buildTextField(_nameController, hint: StringUtils.translate('dish_name_hint', context: context)),
+                        child: _buildTextField(
+                          _nameController,
+                          hint: StringUtils.translate(
+                            'dish_name_hint',
+                            context: context,
+                          ),
+                        ),
                       ),
                       SizedBox(height: 20.h),
-                      _buildLabel(StringUtils.translate('dish_description_label', context: context)),
+                      _buildLabel(
+                        StringUtils.translate(
+                          'dish_description_label',
+                          context: context,
+                        ),
+                      ),
                       _buildTextField(
                         _descController,
-                        hint: StringUtils.translate('dish_description_hint', context: context),
+                        hint: StringUtils.translate(
+                          'dish_description_hint',
+                          context: context,
+                        ),
                         maxLines: 2,
                       ),
                       SizedBox(height: 20.h),
-                      _buildLabel(StringUtils.translate('dish_category_label', context: context)),
+                      _buildLabel(
+                        StringUtils.translate(
+                          'dish_category_label',
+                          context: context,
+                        ),
+                      ),
                       Row(
                         children: [
-                          _buildCategoryOption(StringUtils.translate('veg', context: context), true),
+                          _buildCategoryOption(
+                            StringUtils.translate('veg', context: context),
+                            true,
+                          ),
                           SizedBox(width: 12.w),
-                          _buildCategoryOption(StringUtils.translate('non_veg', context: context), false),
+                          _buildCategoryOption(
+                            StringUtils.translate('non_veg', context: context),
+                            false,
+                          ),
                         ],
                       ),
                       SizedBox(height: 48.h),
@@ -203,14 +243,19 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                          border: Border.all(
+                            color: const Color(0xFFE2E8F0),
+                            width: 1.5,
+                          ),
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16.r),
                           child: SingleChildScrollView(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: _suggestions.map((item) => _buildSuggestionTile(item)).toList(),
+                              children: _suggestions
+                                  .map((item) => _buildSuggestionTile(item))
+                                  .toList(),
                             ),
                           ),
                         ),
@@ -256,7 +301,11 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
                   ),
                 ),
               ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 12.sp, color: const Color(0xFFCBD5E1)),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 12.sp,
+                color: const Color(0xFFCBD5E1),
+              ),
             ],
           ),
         ),
@@ -300,9 +349,9 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
         ),
         child: Row(
           children: [
-             _buildVegIndicator(isVeg),
-             SizedBox(width: 8.w),
-             Text(
+            _buildVegIndicator(isVeg),
+            SizedBox(width: 8.w),
+            Text(
               label,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -382,14 +431,17 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
     return TextField(
       controller: controller,
       maxLines: maxLines,
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.bold,
+        color: AppColors.darkText,
+      ),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 14.sp),
         filled: true,
         fillColor: const Color(0xFFF8FAFC),
-        contentPadding:
-            EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14.r),
           borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -417,16 +469,24 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
 
           if (name.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(StringUtils.translate('please_enter_dish_name', context: context))),
+              SnackBar(
+                content: Text(
+                  StringUtils.translate(
+                    'please_enter_dish_name',
+                    context: context,
+                  ),
+                ),
+              ),
             );
             return;
           }
 
-          
           if (_nameTranslations.isEmpty) _nameTranslations = {'en': name};
           _nameTranslations[locale] = name;
-          
-          if (_descTranslations.isEmpty && desc.isNotEmpty) _descTranslations = {'en': desc};
+
+          if (_descTranslations.isEmpty && desc.isNotEmpty) {
+            _descTranslations = {'en': desc};
+          }
           if (desc.isNotEmpty) _descTranslations[locale] = desc;
 
           Navigator.pop(context);

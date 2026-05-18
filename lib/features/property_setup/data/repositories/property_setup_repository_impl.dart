@@ -109,9 +109,14 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
     }
 
     if (images.isNotEmpty) {
-      final localPaths = images.where((path) => !path.startsWith('http')).toList();
+      final localPaths = images
+          .where((path) => !path.startsWith('http'))
+          .toList();
       if (localPaths.isNotEmpty) {
-        createdHostel = await hostelRemoteDataSource.uploadHostelImages(createdHostel.id, localPaths);
+        createdHostel = await hostelRemoteDataSource.uploadHostelImages(
+          createdHostel.id,
+          localPaths,
+        );
       }
     }
 
@@ -143,39 +148,48 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
     }
 
     final List<RoomDetailModel> roomModels = [];
-    
+
     for (var roomData in rooms) {
       final features = roomData['features'] as Map<String, dynamic>? ?? {};
       final isAC = features['isAC'] == true;
-      
+
       String type = isAC ? 'AC' : 'NON-AC';
-      
+
       final sharing = (roomData['sharingType'] ?? 2).toString();
-      
+
       final typePricing = masterPricing[type] as Map<String, dynamic>? ?? {};
       final config = typePricing[sharing] as Map<String, dynamic>?;
-      
+
       if (config == null) {
         AppLogger.error("Missing pricing for type=$type sharing=$sharing");
       }
 
-      final rent = ((double.tryParse(roomData['rent']?.toString() ?? '0') ?? 0.0) > 0)
+      final rent =
+          ((double.tryParse(roomData['rent']?.toString() ?? '0') ?? 0.0) > 0)
           ? (double.tryParse(roomData['rent']?.toString() ?? '0') ?? 0.0)
           : (config?['rent'] ?? 0.0).toDouble();
 
-      final deposit = ((double.tryParse(roomData['deposit']?.toString() ?? '0') ?? 0.0) > 0)
+      final deposit =
+          ((double.tryParse(roomData['deposit']?.toString() ?? '0') ?? 0.0) > 0)
           ? (double.tryParse(roomData['deposit']?.toString() ?? '0') ?? 0.0)
           : (config?['deposit'] ?? 0.0).toDouble();
 
-      final maintenance = ((double.tryParse(roomData['maintenance']?.toString() ?? '0') ?? 0.0) > 0)
+      final maintenance =
+          ((double.tryParse(roomData['maintenance']?.toString() ?? '0') ??
+                  0.0) >
+              0)
           ? (double.tryParse(roomData['maintenance']?.toString() ?? '0') ?? 0.0)
           : (config?['maintenance'] ?? 0.0).toDouble();
 
-      final dailyRent = ((double.tryParse(roomData['dailyRent']?.toString() ?? '0') ?? 0.0) > 0)
+      final dailyRent =
+          ((double.tryParse(roomData['dailyRent']?.toString() ?? '0') ?? 0.0) >
+              0)
           ? (double.tryParse(roomData['dailyRent']?.toString() ?? '0') ?? 0.0)
           : (config?['dailyRent'] ?? 0.0).toDouble();
-      
-      AppLogger.debug("FINAL_SAVE:\nRoom: ${roomData['roomNumber']}\nType: $type\nSharing: $sharing\nPricing: $config");
+
+      AppLogger.debug(
+        "FINAL_SAVE:\nRoom: ${roomData['roomNumber']}\nType: $type\nSharing: $sharing\nPricing: $config",
+      );
 
       int floorNum = 1;
       final roomNo = roomData['roomNumber']?.toString() ?? '';
@@ -187,62 +201,86 @@ class PropertySetupRepositoryImpl implements PropertySetupRepository {
         floorNum = int.tryParse(roomNo.substring(0, 1)) ?? 1;
       }
 
-      roomModels.add(RoomDetailModel(
-        id: '',
-        hostelId: createdHostel.id,
-        roomTypename: 'Room $roomNo',
-        floor: floorNum,
-        sharingType: sharing == '1'
-            ? 'SINGLE'
-            : sharing == '2'
-                ? 'DOUBLE'
-                : sharing == '3'
-                    ? 'TRIPLE'
-                    : sharing == '4'
-                        ? 'QUADRUPLE'
-                        : sharing == '5'
-                            ? 'QUINTUPLE'
-                            : 'DORMITORY',
-        roomType: type.toUpperCase(),
-        rent: rent,
-        deposit: deposit,
-        maintenance: maintenance,
-        dailyRent: dailyRent,
-        isActive: true,
-        isMaster: false,
-        capacity: int.tryParse(sharing) ?? 2,
-        beds: (roomData['beds'] as List? ?? []).map((b) => BedInfo(
-          bedNumber: b['bedNumber']?.toString() ?? '',
-          status: 'FREE',
-        )).toList(),
-      ));
+      roomModels.add(
+        RoomDetailModel(
+          id: '',
+          hostelId: createdHostel.id,
+          roomTypename: 'Room $roomNo',
+          floor: floorNum,
+          sharingType: sharing == '1'
+              ? 'SINGLE'
+              : sharing == '2'
+              ? 'DOUBLE'
+              : sharing == '3'
+              ? 'TRIPLE'
+              : sharing == '4'
+              ? 'QUADRUPLE'
+              : sharing == '5'
+              ? 'QUINTUPLE'
+              : 'DORMITORY',
+          roomType: type.toUpperCase(),
+          rent: rent,
+          deposit: deposit,
+          maintenance: maintenance,
+          dailyRent: dailyRent,
+          isActive: true,
+          isMaster: false,
+          capacity: int.tryParse(sharing) ?? 2,
+          beds: (roomData['beds'] as List? ?? [])
+              .map(
+                (b) => BedInfo(
+                  bedNumber: b['bedNumber']?.toString() ?? '',
+                  status: 'FREE',
+                ),
+              )
+              .toList(),
+        ),
+      );
     }
 
     if (roomCategories != null) {
       for (var cat in roomCategories) {
         final isAC = cat['isAC'] == true;
         final sharing = (cat['sharingType'] ?? 2).toString();
-        final rent = double.tryParse(cat['monthlyRent']?.toString() ?? '0') ?? 0.0;
-        final deposit = double.tryParse(cat['securityDeposit']?.toString() ?? '0') ?? 0.0;
-        final maintenance = double.tryParse(cat['maintenance']?.toString() ?? '0') ?? 0.0;
-        final dailyRent = double.tryParse(cat['dailyRent']?.toString() ?? '0') ?? 0.0;
+        final rent =
+            double.tryParse(cat['monthlyRent']?.toString() ?? '0') ?? 0.0;
+        final deposit =
+            double.tryParse(cat['securityDeposit']?.toString() ?? '0') ?? 0.0;
+        final maintenance =
+            double.tryParse(cat['maintenance']?.toString() ?? '0') ?? 0.0;
+        final dailyRent =
+            double.tryParse(cat['dailyRent']?.toString() ?? '0') ?? 0.0;
 
-        roomModels.add(RoomDetailModel(
-          id: '',
-          hostelId: createdHostel.id,
-          roomTypename: cat['name']?.toString().isNotEmpty == true ? cat['name'].toString() : '$sharing Sharing ${isAC ? "AC" : "NON-AC"}',
-          floor: 0,
-          sharingType: sharing == '1' ? 'SINGLE' : sharing == '2' ? 'DOUBLE' : sharing == '3' ? 'TRIPLE' : sharing == '4' ? 'QUADRUPLE' : sharing == '5' ? 'QUINTUPLE' : 'DORMITORY',
-          roomType: isAC ? 'AC' : 'NON-AC',
-          rent: rent,
-          deposit: deposit,
-          maintenance: maintenance,
-          dailyRent: dailyRent,
-          isActive: true,
-          isMaster: true,
-          capacity: int.tryParse(sharing) ?? 2,
-          beds: [],
-        ));
+        roomModels.add(
+          RoomDetailModel(
+            id: '',
+            hostelId: createdHostel.id,
+            roomTypename: cat['name']?.toString().isNotEmpty == true
+                ? cat['name'].toString()
+                : '$sharing Sharing ${isAC ? "AC" : "NON-AC"}',
+            floor: 0,
+            sharingType: sharing == '1'
+                ? 'SINGLE'
+                : sharing == '2'
+                ? 'DOUBLE'
+                : sharing == '3'
+                ? 'TRIPLE'
+                : sharing == '4'
+                ? 'QUADRUPLE'
+                : sharing == '5'
+                ? 'QUINTUPLE'
+                : 'DORMITORY',
+            roomType: isAC ? 'AC' : 'NON-AC',
+            rent: rent,
+            deposit: deposit,
+            maintenance: maintenance,
+            dailyRent: dailyRent,
+            isActive: true,
+            isMaster: true,
+            capacity: int.tryParse(sharing) ?? 2,
+            beds: [],
+          ),
+        );
       }
     }
 

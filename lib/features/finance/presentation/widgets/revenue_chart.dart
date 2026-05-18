@@ -25,8 +25,12 @@ class RevenueChart extends StatelessWidget {
         gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
           show: true,
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -40,7 +44,10 @@ class RevenueChart extends StatelessWidget {
                     meta: meta,
                     child: Text(
                       date.substring(date.length - 2),
-                      style: TextStyle(color: AppColors.greyText, fontSize: 10.sp),
+                      style: TextStyle(
+                        color: AppColors.greyText,
+                        fontSize: 10.sp,
+                      ),
                     ),
                   );
                 }
@@ -56,8 +63,13 @@ class RevenueChart extends StatelessWidget {
                 return SideTitleWidget(
                   meta: meta,
                   child: Text(
-                    value >= 1000 ? '${(value / 1000).toStringAsFixed(1)}k' : value.toStringAsFixed(0),
-                    style: TextStyle(color: AppColors.greyText, fontSize: 10.sp),
+                    value >= 1000
+                        ? '${(value / 1000).toStringAsFixed(1)}k'
+                        : value.toStringAsFixed(0),
+                    style: TextStyle(
+                      color: AppColors.greyText,
+                      fontSize: 10.sp,
+                    ),
                   ),
                 );
               },
@@ -67,7 +79,11 @@ class RevenueChart extends StatelessWidget {
         borderData: FlBorderData(show: false),
         lineBarsData: [
           LineChartBarData(
-            spots: trends.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.revenue)).toList(),
+            spots: trends
+                .asMap()
+                .entries
+                .map((e) => FlSpot(e.key.toDouble(), e.value.revenue))
+                .toList(),
             isCurved: true,
             color: AppColors.primaryBlue,
             barWidth: 3,

@@ -22,7 +22,9 @@ class ChatMessageBubble extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
@@ -36,7 +38,9 @@ class ChatMessageBubble extends StatelessWidget {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isMe
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 if (!isMe)
                   Padding(
@@ -51,7 +55,10 @@ class ChatMessageBubble extends StatelessWidget {
                     ),
                   ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                   constraints: BoxConstraints(maxWidth: 0.7.sw),
                   decoration: BoxDecoration(
                     color: isMe ? AppColors.primaryBlue : Colors.white,
@@ -68,12 +75,15 @@ class ChatMessageBubble extends StatelessWidget {
                         offset: const Offset(0, 4),
                       ),
                     ],
-                    border: isMe ? null : Border.all(color: const Color(0xFFE2E8F0)),
+                    border: isMe
+                        ? null
+                        : Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (message.imageUrl != null && message.imageUrl!.isNotEmpty) ...[
+                      if (message.imageUrl != null &&
+                          message.imageUrl!.isNotEmpty) ...[
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12.r),
                           child: CachedNetworkImage(
@@ -82,9 +92,12 @@ class ChatMessageBubble extends StatelessWidget {
                               height: 150.h,
                               width: double.infinity,
                               color: Colors.grey[200],
-                              child: const Center(child: CircularProgressIndicator()),
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
                             ),
-                            errorWidget: (context, url, error) => const Icon(Icons.error),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -109,8 +122,8 @@ class ChatMessageBubble extends StatelessWidget {
                             style: GoogleFonts.outfit(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w500,
-                              color: isMe 
-                                  ? Colors.white.withValues(alpha: 0.7) 
+                              color: isMe
+                                  ? Colors.white.withValues(alpha: 0.7)
                                   : AppColors.greyText,
                             ),
                           ),
@@ -130,7 +143,7 @@ class ChatMessageBubble extends StatelessWidget {
               ],
             ),
           ),
-          if (isMe) SizedBox(width: 12.w), 
+          if (isMe) SizedBox(width: 12.w),
         ],
       ),
     );
@@ -158,7 +171,9 @@ class ChatMessageBubble extends StatelessWidget {
   }
 
   String _formatTime(DateTime date) {
-    final h = date.hour > 12 ? date.hour - 12 : (date.hour == 0 ? 12 : date.hour);
+    final h = date.hour > 12
+        ? date.hour - 12
+        : (date.hour == 0 ? 12 : date.hour);
     final m = date.minute.toString().padLeft(2, '0');
     final period = date.hour >= 12 ? 'PM' : 'AM';
     return '$h:$m $period';

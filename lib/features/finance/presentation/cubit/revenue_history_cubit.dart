@@ -11,13 +11,16 @@ abstract class RevenueHistoryState extends Equatable {
 }
 
 class RevenueHistoryInitial extends RevenueHistoryState {}
+
 class RevenueHistoryLoading extends RevenueHistoryState {}
+
 class RevenueHistoryLoaded extends RevenueHistoryState {
   final List<RevenueHistoryItem> items;
   const RevenueHistoryLoaded({required this.items});
   @override
   List<Object?> get props => [items];
 }
+
 class RevenueHistoryError extends RevenueHistoryState {
   final String message;
   const RevenueHistoryError({required this.message});
@@ -29,8 +32,8 @@ class RevenueHistoryCubit extends Cubit<RevenueHistoryState> {
   final GetRevenueHistoryUseCase _getRevenueHistory;
 
   RevenueHistoryCubit({required GetRevenueHistoryUseCase getRevenueHistory})
-      : _getRevenueHistory = getRevenueHistory,
-        super(RevenueHistoryInitial());
+    : _getRevenueHistory = getRevenueHistory,
+      super(RevenueHistoryInitial());
 
   Future<void> fetchRevenueHistory({
     String? hostelId,

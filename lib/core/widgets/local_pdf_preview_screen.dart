@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 
-
 class LocalPdfPreviewScreen extends StatelessWidget {
   final String filePath;
   final String title;

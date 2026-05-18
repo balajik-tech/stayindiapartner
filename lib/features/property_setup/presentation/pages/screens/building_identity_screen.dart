@@ -11,7 +11,6 @@ import 'package:stayindia_owner/features/property_setup/presentation/cubit/prope
 import 'geofence_intro_screen.dart';
 import 'package:stayindia_owner/core/widgets/local_pdf_preview_screen.dart';
 
-
 class BuildingIdentityScreen extends StatefulWidget {
   const BuildingIdentityScreen({super.key});
 
@@ -34,7 +33,9 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     final cubit = context.read<PropertySetupCubit>();
     _nameController = TextEditingController(text: cubit.state.buildingName);
     _gstController = TextEditingController(text: cubit.state.gstNumber);
-    _addressController = TextEditingController(text: cubit.state.detailedAddress);
+    _addressController = TextEditingController(
+      text: cubit.state.detailedAddress,
+    );
     _areaController = TextEditingController(text: cubit.state.area);
     _cityController = TextEditingController(text: cubit.state.city);
     _stateController = TextEditingController(text: cubit.state.state);
@@ -56,16 +57,16 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<PropertySetupCubit, PropertySetupState>(
-      listenWhen: (prev, curr) => 
-        prev.buildingName != curr.buildingName || 
-        prev.gstNumber != curr.gstNumber ||
-        prev.detailedAddress != curr.detailedAddress ||
-        prev.area != curr.area ||
-        prev.city != curr.city ||
-        prev.state != curr.state ||
-        prev.pincode != curr.pincode ||
-        prev.error != curr.error ||
-        prev.isSaving != curr.isSaving,
+      listenWhen: (prev, curr) =>
+          prev.buildingName != curr.buildingName ||
+          prev.gstNumber != curr.gstNumber ||
+          prev.detailedAddress != curr.detailedAddress ||
+          prev.area != curr.area ||
+          prev.city != curr.city ||
+          prev.state != curr.state ||
+          prev.pincode != curr.pincode ||
+          prev.error != curr.error ||
+          prev.isSaving != curr.isSaving,
       listener: (context, state) {
         if (state.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -76,16 +77,29 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
             ),
           );
         }
-        if (state.isSaving) {
-        }
+        if (state.isSaving) {}
 
-        if (_nameController.text != state.buildingName) _nameController.text = state.buildingName;
-        if (_gstController.text != state.gstNumber) _gstController.text = state.gstNumber;
-        if (_addressController.text != state.detailedAddress) _addressController.text = state.detailedAddress;
-        if (_areaController.text != state.area) _areaController.text = state.area;
-        if (_cityController.text != state.city) _cityController.text = state.city;
-        if (_stateController.text != state.state) _stateController.text = state.state;
-        if (_pincodeController.text != state.pincode) _pincodeController.text = state.pincode;
+        if (_nameController.text != state.buildingName) {
+          _nameController.text = state.buildingName;
+        }
+        if (_gstController.text != state.gstNumber) {
+          _gstController.text = state.gstNumber;
+        }
+        if (_addressController.text != state.detailedAddress) {
+          _addressController.text = state.detailedAddress;
+        }
+        if (_areaController.text != state.area) {
+          _areaController.text = state.area;
+        }
+        if (_cityController.text != state.city) {
+          _cityController.text = state.city;
+        }
+        if (_stateController.text != state.state) {
+          _stateController.text = state.state;
+        }
+        if (_pincodeController.text != state.pincode) {
+          _pincodeController.text = state.pincode;
+        }
       },
       child: BlocBuilder<PropertySetupCubit, PropertySetupState>(
         builder: (context, state) {
@@ -106,277 +120,364 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                         letterSpacing: -0.5,
                       ),
                     ),
-                SizedBox(height: 8.h),
-                Text(
-                  'basic_details_sub'.tr(),
-                  style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: 24.h),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'basic_details_sub'.tr(),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
 
-                _buildSectionCard([
-                  _buildHostelTypeToggle(context, state),
-                  SizedBox(height: 24.h),
-                  _buildTextField(
-                    context,
-                    label: 'property_name'.tr(),
-                    hint: 'property_name_hint'.tr(),
-                    icon: Icons.business_rounded,
-                    controller: _nameController,
-                    onChanged: (val) => context.read<PropertySetupCubit>().updateBuildingName(val),
-                  ),
-                  SizedBox(height: 24.h),
-                  _buildTextField(
-                    context,
-                    label: 'gst_number'.tr(),
-                    hint: 'gst_number_hint'.tr(),
-                    icon: Icons.description_rounded,
-                    controller: _gstController,
-                    onChanged: (val) => context.read<PropertySetupCubit>().updateGstNumber(val),
-                  ),
-                ]),
-
-                SizedBox(height: 32.h),
-
-                Text(
-                  'location_details'.tr(),
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF1E3A8A),
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  'location_details_sub'.tr(),
-                  style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: 24.h),
-
-                _buildSectionCard([
-                  _buildTextField(
-                    context,
-                    label: 'location_on_map'.tr(),
-                    hint: 'location_hint'.tr(),
-                    icon: Icons.map_rounded,
-                    readOnly: true,
-                    onTap: () async {
-                      final cubit = context.read<PropertySetupCubit>();
-                      final ll.LatLng? result = await Navigator.push(
+                    _buildSectionCard([
+                      _buildHostelTypeToggle(context, state),
+                      SizedBox(height: 24.h),
+                      _buildTextField(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => GeofenceIntroScreen(
-                            initialLocation: cubit.state.lat != null 
-                                ? ll.LatLng(cubit.state.lat!, cubit.state.lng!) 
-                                : null,
+                        label: 'property_name'.tr(),
+                        hint: 'property_name_hint'.tr(),
+                        icon: Icons.business_rounded,
+                        controller: _nameController,
+                        onChanged: (val) => context
+                            .read<PropertySetupCubit>()
+                            .updateBuildingName(val),
+                      ),
+                      SizedBox(height: 24.h),
+                      _buildTextField(
+                        context,
+                        label: 'gst_number'.tr(),
+                        hint: 'gst_number_hint'.tr(),
+                        icon: Icons.description_rounded,
+                        controller: _gstController,
+                        onChanged: (val) => context
+                            .read<PropertySetupCubit>()
+                            .updateGstNumber(val),
+                      ),
+                    ]),
+
+                    SizedBox(height: 32.h),
+
+                    Text(
+                      'location_details'.tr(),
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E3A8A),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'location_details_sub'.tr(),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+
+                    _buildSectionCard([
+                      _buildTextField(
+                        context,
+                        label: 'location_on_map'.tr(),
+                        hint: 'location_hint'.tr(),
+                        icon: Icons.map_rounded,
+                        readOnly: true,
+                        onTap: () async {
+                          final cubit = context.read<PropertySetupCubit>();
+                          final ll.LatLng? result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GeofenceIntroScreen(
+                                initialLocation: cubit.state.lat != null
+                                    ? ll.LatLng(
+                                        cubit.state.lat!,
+                                        cubit.state.lng!,
+                                      )
+                                    : null,
+                              ),
+                            ),
+                          );
+
+                          if (result != null) {
+                            cubit.updateCoordinates(
+                              result.latitude,
+                              result.longitude,
+                            );
+                          }
+                        },
+                        initialValue: state.lat != null
+                            ? 'location_pinned'.tr(
+                                namedArgs: {
+                                  'lat': state.lat!.toStringAsFixed(4),
+                                  'lng': state.lng!.toStringAsFixed(4),
+                                },
+                              )
+                            : '',
+                      ),
+                      SizedBox(height: 24.h),
+                      _buildTextField(
+                        context,
+                        label: 'detailed_address'.tr(),
+                        hint: 'detailed_address_hint'.tr(),
+                        icon: Icons.location_on_rounded,
+                        controller: _addressController,
+                        onChanged: (val) => context
+                            .read<PropertySetupCubit>()
+                            .updateDetailedAddress(val),
+                      ),
+                      SizedBox(height: 24.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              context,
+                              label: 'area'.tr(),
+                              hint: 'area_hint'.tr(),
+                              icon: Icons.grid_view_rounded,
+                              controller: _areaController,
+                              onChanged: (val) => context
+                                  .read<PropertySetupCubit>()
+                                  .updateArea(val),
+                            ),
                           ),
-                        ),
-                      );
-                      
-                      if (result != null) {
-                        cubit.updateCoordinates(result.latitude, result.longitude);
-                      }
-                    },
-                    initialValue: state.lat != null ? 'location_pinned'.tr(namedArgs: {'lat': state.lat!.toStringAsFixed(4), 'lng': state.lng!.toStringAsFixed(4)}) : '',
-                  ),
-                  SizedBox(height: 24.h),
-                  _buildTextField(
-                    context,
-                    label: 'detailed_address'.tr(),
-                    hint: 'detailed_address_hint'.tr(),
-                    icon: Icons.location_on_rounded,
-                    controller: _addressController,
-                    onChanged: (val) => context.read<PropertySetupCubit>().updateDetailedAddress(val),
-                  ),
-                  SizedBox(height: 24.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          context,
-                          label: 'area'.tr(),
-                          hint: 'area_hint'.tr(),
-                          icon: Icons.grid_view_rounded,
-                          controller: _areaController,
-                          onChanged: (val) => context.read<PropertySetupCubit>().updateArea(val),
-                        ),
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            child: _buildTextField(
+                              context,
+                              label: 'city'.tr(),
+                              hint: 'city_hint'.tr(),
+                              icon: Icons.location_city_rounded,
+                              controller: _cityController,
+                              onChanged: (val) => context
+                                  .read<PropertySetupCubit>()
+                                  .updateCity(val),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: _buildTextField(
-                          context,
-                          label: 'city'.tr(),
-                          hint: 'city_hint'.tr(),
-                          icon: Icons.location_city_rounded,
-                          controller: _cityController,
-                          onChanged: (val) => context.read<PropertySetupCubit>().updateCity(val),
-                        ),
+                      SizedBox(height: 24.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              context,
+                              label: 'state_label'.tr(),
+                              hint: 'state_hint'.tr(),
+                              icon: Icons.public_rounded,
+                              controller: _stateController,
+                              onChanged: (val) => context
+                                  .read<PropertySetupCubit>()
+                                  .updateState(val),
+                            ),
+                          ),
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            child: _buildTextField(
+                              context,
+                              label: 'pin_code'.tr(),
+                              hint: 'pin_code_hint'.tr(),
+                              icon: Icons.pin_drop_rounded,
+                              controller: _pincodeController,
+                              onChanged: (val) => context
+                                  .read<PropertySetupCubit>()
+                                  .updatePincode(val),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 24.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          context,
-                          label: 'state_label'.tr(),
-                          hint: 'state_hint'.tr(),
-                          icon: Icons.public_rounded,
-                          controller: _stateController,
-                          onChanged: (val) => context.read<PropertySetupCubit>().updateState(val),
-                        ),
+                    ]),
+
+                    SizedBox(height: 32.h),
+
+                    Text(
+                      'property_images'.tr(),
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E3A8A),
+                        letterSpacing: -0.5,
                       ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: _buildTextField(
-                          context,
-                          label: 'pin_code'.tr(),
-                          hint: 'pin_code_hint'.tr(),
-                          icon: Icons.pin_drop_rounded,
-                          controller: _pincodeController,
-                          onChanged: (val) => context.read<PropertySetupCubit>().updatePincode(val),
-                          keyboardType: TextInputType.number,
-                        ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'property_images_sub'.tr(),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
                       ),
-                    ],
-                  ),
-                ]),
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildImageCategories(context, state),
 
-                SizedBox(height: 32.h),
+                    SizedBox(height: 32.h),
 
-                Text(
-                  'property_images'.tr(),
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF1E3A8A),
-                    letterSpacing: -0.5,
-                  ),
+                    Text(
+                      'compliance_docs'.tr(),
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E3A8A),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'compliance_docs_sub'.tr(),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    _buildSectionCard([
+                      _buildFilePicker(
+                        context,
+                        label: 'food_license'.tr(),
+                        filePath: state.foodLicense,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('food'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('food', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'hostel_license'.tr(),
+                        filePath: state.hostelLicense,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('hostel'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('hostel', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'trade_license'.tr(),
+                        filePath: state.tradeLicense,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('trade'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('trade', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'fire_safety'.tr(),
+                        filePath: state.fireSafety,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('fire'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('fire', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'police_noc'.tr(),
+                        filePath: state.policeNoc,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('police'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('police', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'shops_establishment'.tr(),
+                        filePath: state.shopsEstablishment,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('shops'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('shops', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'gst_registration'.tr(),
+                        filePath: state.gstRegistration,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('gst'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('gst', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'health_noc'.tr(),
+                        filePath: state.healthSanitation,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('health'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('health', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'utility_bill'.tr(),
+                        filePath: state.utilityBill,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('utility'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('utility', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'pollution_noc'.tr(),
+                        filePath: state.pollutionNoc,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('pollution'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('pollution', idx),
+                      ),
+                      SizedBox(height: 20.h),
+                      _buildFilePicker(
+                        context,
+                        label: 'resident_verification'.tr(),
+                        filePath: state.residentVerification,
+                        onTap: () => context
+                            .read<PropertySetupCubit>()
+                            .pickLicense('resident'),
+                        onRemoveIndex: (idx) => context
+                            .read<PropertySetupCubit>()
+                            .removeLicenseAtIndex('resident', idx),
+                      ),
+                    ]),
+                  ],
                 ),
-                SizedBox(height: 8.h),
-                Text(
-                  'property_images_sub'.tr(),
-                  style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: 16.h),
-                _buildImageCategories(context, state),
-
-                SizedBox(height: 32.h),
-
-                Text(
-                  'compliance_docs'.tr(),
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF1E3A8A),
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  'compliance_docs_sub'.tr(),
-                  style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: 24.h),
-                _buildSectionCard([
-                  _buildFilePicker(
-                    context,
-                    label: 'food_license'.tr(),
-                    filePath: state.foodLicense,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('food'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('food', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'hostel_license'.tr(),
-                    filePath: state.hostelLicense,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('hostel'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('hostel', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'trade_license'.tr(),
-                    filePath: state.tradeLicense,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('trade'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('trade', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'fire_safety'.tr(),
-                    filePath: state.fireSafety,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('fire'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('fire', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'police_noc'.tr(),
-                    filePath: state.policeNoc,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('police'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('police', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'shops_establishment'.tr(),
-                    filePath: state.shopsEstablishment,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('shops'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('shops', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'gst_registration'.tr(),
-                    filePath: state.gstRegistration,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('gst'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('gst', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'health_noc'.tr(),
-                    filePath: state.healthSanitation,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('health'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('health', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'utility_bill'.tr(),
-                    filePath: state.utilityBill,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('utility'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('utility', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'pollution_noc'.tr(),
-                    filePath: state.pollutionNoc,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('pollution'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('pollution', idx),
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildFilePicker(
-                    context,
-                    label: 'resident_verification'.tr(),
-                    filePath: state.residentVerification,
-                    onTap: () => context.read<PropertySetupCubit>().pickLicense('resident'),
-                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('resident', idx),
-                  ),
-                ]),
-              ],
-            ),
-          ),
-          _buildLoadingOverlay(state),
-        ],
-      );
-    },
-  ),
-);
+              ),
+              _buildLoadingOverlay(state),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildLoadingOverlay(PropertySetupState state) {
@@ -397,12 +498,19 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
               SizedBox(height: 16.h),
               Text(
                 'analyzing_image_quality'.tr(),
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1E293B),
+                ),
               ),
               SizedBox(height: 4.h),
               Text(
                 'ensuring_photos_clear'.tr(),
-                style: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B)),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: const Color(0xFF64748B),
+                ),
               ),
             ],
           ),
@@ -433,13 +541,16 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     );
   }
 
-  Widget _buildHostelTypeToggle(BuildContext context, PropertySetupState state) {
+  Widget _buildHostelTypeToggle(
+    BuildContext context,
+    PropertySetupState state,
+  ) {
     final types = [
       {'id': 'Boys', 'key': 'type_boys'},
       {'id': 'Girls', 'key': 'type_girls'},
-      {'id': 'Co-Living', 'key': 'type_coliving'}
+      {'id': 'Co-Living', 'key': 'type_coliving'},
     ];
-    
+
     final selectedIndex = types.indexWhere((t) => t['id'] == state.hostelType);
     final hasSelection = selectedIndex != -1;
 
@@ -448,7 +559,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
       children: [
         Text(
           'type_of_pg'.tr(),
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF1E293B),
+          ),
         ),
         SizedBox(height: 12.h),
         LayoutBuilder(
@@ -492,7 +607,9 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                         child: GestureDetector(
                           onTap: () {
                             HapticFeedback.lightImpact();
-                            context.read<PropertySetupCubit>().updateHostelType(type['id'] as String);
+                            context.read<PropertySetupCubit>().updateHostelType(
+                              type['id'] as String,
+                            );
                           },
                           child: Container(
                             alignment: Alignment.center,
@@ -501,8 +618,12 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                               duration: const Duration(milliseconds: 300),
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-                                color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
+                                fontWeight: isSelected
+                                    ? FontWeight.w900
+                                    : FontWeight.w700,
+                                color: isSelected
+                                    ? const Color(0xFF1E3A8A)
+                                    : const Color(0xFF64748B),
                                 fontFamily: 'Inter',
                               ),
                               child: Text((type['key'] as String).tr()),
@@ -538,7 +659,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF1E293B),
+          ),
         ),
         SizedBox(height: 12.h),
         GestureDetector(
@@ -555,30 +680,41 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                 Icon(icon, color: const Color(0xFF94A3B8), size: 24.sp),
                 SizedBox(width: 12.w),
                 Expanded(
-                  child: readOnly 
-                    ? Text(
-                        initialValue?.isNotEmpty == true ? initialValue! : hint,
-                        style: TextStyle(
-                          fontSize: 16.sp, 
-                          color: initialValue?.isNotEmpty == true ? const Color(0xFF1E293B) : const Color(0xFF94A3B8),
-                          fontWeight: FontWeight.w600,
+                  child: readOnly
+                      ? Text(
+                          initialValue?.isNotEmpty == true
+                              ? initialValue!
+                              : hint,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: initialValue?.isNotEmpty == true
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFF94A3B8),
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : TextFormField(
+                          controller: controller,
+                          onChanged: onChanged,
+                          keyboardType: keyboardType,
+                          decoration: InputDecoration(
+                            hintText: hint,
+                            hintStyle: TextStyle(
+                              color: const Color(0xFF94A3B8),
+                              fontSize: 16.sp,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1E293B),
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : TextFormField(
-                        controller: controller,
-                        onChanged: onChanged,
-                        keyboardType: keyboardType,
-                        decoration: InputDecoration(
-                          hintText: hint,
-                          hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 16.sp),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
-                      ),
                 ),
               ],
             ),
@@ -590,18 +726,46 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
 
   Widget _buildImageCategories(BuildContext context, PropertySetupState state) {
     final categories = [
-      {'id': 'Exterior', 'name': 'exterior_entrance'.tr(), 'icon': Icons.business_rounded},
-      {'id': 'Reception', 'name': 'reception_lobby'.tr(), 'icon': Icons.countertops_rounded},
+      {
+        'id': 'Exterior',
+        'name': 'exterior_entrance'.tr(),
+        'icon': Icons.business_rounded,
+      },
+      {
+        'id': 'Reception',
+        'name': 'reception_lobby'.tr(),
+        'icon': Icons.countertops_rounded,
+      },
       {'id': 'Rooms', 'name': 'rooms_bedrooms'.tr(), 'icon': Icons.bed_rounded},
       {'id': 'Dining', 'name': 'common_hall'.tr(), 'icon': Icons.chair_rounded},
-      {'id': 'Kitchen', 'name': 'kitchen_pantry'.tr(), 'icon': Icons.kitchen_rounded},
-      {'id': 'Bathrooms', 'name': 'bathrooms'.tr(), 'icon': Icons.bathtub_rounded},
+      {
+        'id': 'Kitchen',
+        'name': 'kitchen_pantry'.tr(),
+        'icon': Icons.kitchen_rounded,
+      },
+      {
+        'id': 'Bathrooms',
+        'name': 'bathrooms'.tr(),
+        'icon': Icons.bathtub_rounded,
+      },
       {'id': 'Balcony', 'name': 'balcony'.tr(), 'icon': Icons.balcony_rounded},
       {'id': 'TV', 'name': 'tv_area'.tr(), 'icon': Icons.tv_rounded},
       {'id': 'Gym', 'name': 'gym'.tr(), 'icon': Icons.fitness_center_rounded},
-      {'id': 'Laundry', 'name': 'laundry'.tr(), 'icon': Icons.local_laundry_service_rounded},
-      {'id': 'Parking', 'name': 'parking'.tr(), 'icon': Icons.local_parking_rounded},
-      {'id': 'Corridors', 'name': 'corridors'.tr(), 'icon': Icons.stairs_rounded},
+      {
+        'id': 'Laundry',
+        'name': 'laundry'.tr(),
+        'icon': Icons.local_laundry_service_rounded,
+      },
+      {
+        'id': 'Parking',
+        'name': 'parking'.tr(),
+        'icon': Icons.local_parking_rounded,
+      },
+      {
+        'id': 'Corridors',
+        'name': 'corridors'.tr(),
+        'icon': Icons.stairs_rounded,
+      },
     ];
 
     return SingleChildScrollView(
@@ -615,7 +779,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
           return GestureDetector(
             onTap: () {
               HapticFeedback.selectionClick();
-              _showImageSourceSheet(context, cat['id'] as String, cat['name'] as String);
+              _showImageSourceSheet(
+                context,
+                cat['id'] as String,
+                cat['name'] as String,
+              );
             },
             child: Container(
               width: 120.w,
@@ -624,9 +792,17 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: hasImage ? const Color(0xFFFF7A00).withValues(alpha: 0.3) : const Color(0xFFF1F5F9)),
+                border: Border.all(
+                  color: hasImage
+                      ? const Color(0xFFFF7A00).withValues(alpha: 0.3)
+                      : const Color(0xFFF1F5F9),
+                ),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               child: Column(
@@ -640,26 +816,45 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(16.r),
-                          image: hasImage ? DecorationImage(
-                            image: ResizeImage(FileImage(File(images.last)), width: 128, height: 128),
-                            fit: BoxFit.cover,
-                          ) : null,
+                          image: hasImage
+                              ? DecorationImage(
+                                  image: ResizeImage(
+                                    FileImage(File(images.last)),
+                                    width: 128,
+                                    height: 128,
+                                  ),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
                         ),
-                        child: !hasImage ? Icon(cat['icon'] as IconData, color: const Color(0xFF1E3A8A), size: 24.sp) : null,
+                        child: !hasImage
+                            ? Icon(
+                                cat['icon'] as IconData,
+                                color: const Color(0xFF1E3A8A),
+                                size: 24.sp,
+                              )
+                            : null,
                       ),
                       if (hasImage)
                         Positioned(
                           top: -6.r,
                           left: -6.r,
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 2.h,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFF7A00),
                               borderRadius: BorderRadius.circular(10.r),
                             ),
                             child: Text(
                               '${images.length}/5',
-                              style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -669,7 +864,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   Text(
                     cat['name'] as String,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1E293B),
+                    ),
                     maxLines: 2,
                   ),
                   SizedBox(height: 16.h),
@@ -677,14 +876,23 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        hasImage ? Icons.edit_rounded : Icons.add_circle_outline_rounded, 
-                        color: const Color(0xFFFF7A00), 
-                        size: 16.sp
+                        hasImage
+                            ? Icons.edit_rounded
+                            : Icons.add_circle_outline_rounded,
+                        color: const Color(0xFFFF7A00),
+                        size: 16.sp,
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        hasImage ? '${'btn_edit'.tr()} (${images.length})'.toUpperCase() : 'btn_add'.tr().toUpperCase(),
-                        style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFFFF7A00)),
+                        hasImage
+                            ? '${'btn_edit'.tr()} (${images.length})'
+                                  .toUpperCase()
+                            : 'btn_add'.tr().toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFFFF7A00),
+                        ),
                       ),
                     ],
                   ),
@@ -704,7 +912,8 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     required String? filePath,
     required Function(int) onRemoveIndex,
   }) {
-    final files = filePath?.split(',').where((f) => f.isNotEmpty).toList() ?? [];
+    final files =
+        filePath?.split(',').where((f) => f.isNotEmpty).toList() ?? [];
     final count = files.length;
     final hasFiles = files.isNotEmpty;
     final canAdd = count < 5;
@@ -717,12 +926,20 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
           children: [
             Text(
               label,
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF1E293B),
+              ),
             ),
             if (hasFiles)
               Text(
                 '$count/5 files',
-                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFFFF7A00)),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFFF7A00),
+                ),
               ),
           ],
         ),
@@ -745,9 +962,10 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   separatorBuilder: (context, index) => SizedBox(height: 12.h),
                   itemBuilder: (context, idx) {
                     final path = files[idx];
-                    final isImage = path.toLowerCase().endsWith('.jpg') || 
-                                    path.toLowerCase().endsWith('.jpeg') || 
-                                    path.toLowerCase().endsWith('.png');
+                    final isImage =
+                        path.toLowerCase().endsWith('.jpg') ||
+                        path.toLowerCase().endsWith('.jpeg') ||
+                        path.toLowerCase().endsWith('.png');
                     final fileName = path.split('/').last;
 
                     return Container(
@@ -767,9 +985,15 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                                 height: 44.r,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8.r),
-                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  border: Border.all(
+                                    color: const Color(0xFFE2E8F0),
+                                  ),
                                   image: DecorationImage(
-                                    image: ResizeImage(FileImage(File(path)), width: 120, height: 120),
+                                    image: ResizeImage(
+                                      FileImage(File(path)),
+                                      width: 120,
+                                      height: 120,
+                                    ),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -795,7 +1019,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                                   color: const Color(0xFFEFF6FF),
                                   borderRadius: BorderRadius.circular(8.r),
                                 ),
-                                child: Icon(Icons.file_present_rounded, color: const Color(0xFF1E3A8A), size: 22.sp),
+                                child: Icon(
+                                  Icons.file_present_rounded,
+                                  color: const Color(0xFF1E3A8A),
+                                  size: 22.sp,
+                                ),
                               ),
                             ),
                           SizedBox(width: 12.w),
@@ -808,10 +1036,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => LocalPdfPreviewScreen(
-                                        filePath: path,
-                                        title: label,
-                                      ),
+                                      builder: (context) =>
+                                          LocalPdfPreviewScreen(
+                                            filePath: path,
+                                            title: label,
+                                          ),
                                     ),
                                   );
                                 }
@@ -822,9 +1051,9 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                                   Text(
                                     fileName,
                                     style: TextStyle(
-                                      fontSize: 13.sp, 
-                                      color: const Color(0xFF1E293B), 
-                                      fontWeight: FontWeight.w800
+                                      fontSize: 13.sp,
+                                      color: const Color(0xFF1E293B),
+                                      fontWeight: FontWeight.w800,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -832,7 +1061,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                                   SizedBox(height: 2.h),
                                   Text(
                                     'click_to_view'.tr(),
-                                    style: TextStyle(fontSize: 10.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: const Color(0xFF94A3B8),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -844,7 +1077,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                               HapticFeedback.mediumImpact();
                               onRemoveIndex(idx);
                             },
-                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: Colors.redAccent,
+                              size: 20,
+                            ),
                             style: IconButton.styleFrom(
                               padding: EdgeInsets.all(6.r),
                               backgroundColor: Colors.red.shade50,
@@ -866,11 +1103,13 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        hasFiles ? 'Upload another document' : 'Select PDF or Image',
+                        hasFiles
+                            ? 'Upload another document'
+                            : 'Select PDF or Image',
                         style: TextStyle(
-                          fontSize: 13.sp, 
-                          color: const Color(0xFF64748B), 
-                          fontWeight: FontWeight.w600
+                          fontSize: 13.sp,
+                          color: const Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -880,16 +1119,26 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                         HapticFeedback.lightImpact();
                         onTap();
                       },
-                      icon: Icon(Icons.add_rounded, size: 18.sp, color: Colors.white),
+                      icon: Icon(
+                        Icons.add_rounded,
+                        size: 18.sp,
+                        color: Colors.white,
+                      ),
                       label: Text(
-                        hasFiles ? 'Add'.tr() : 'browse'.tr(), 
-                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900)
+                        hasFiles ? 'Add'.tr() : 'browse'.tr(),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2B5797),
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
                         ),
@@ -900,7 +1149,10 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
               else
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+                  padding: EdgeInsets.symmetric(
+                    vertical: 12.h,
+                    horizontal: 12.w,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(12.r),
@@ -908,11 +1160,19 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.info_outline_rounded, color: const Color(0xFF64748B), size: 18.sp),
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: const Color(0xFF64748B),
+                        size: 18.sp,
+                      ),
                       SizedBox(width: 6.w),
                       Text(
                         'Maximum 5 documents uploaded',
-                        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF64748B),
+                        ),
                       ),
                     ],
                   ),
@@ -934,7 +1194,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+            icon: const Icon(
+              Icons.close_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -958,7 +1222,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     );
   }
 
-  void _showImageSourceSheet(BuildContext context, String category, String categoryName) {
+  void _showImageSourceSheet(
+    BuildContext context,
+    String category,
+    String categoryName,
+  ) {
     final cubit = context.read<PropertySetupCubit>();
     showModalBottomSheet(
       context: context,
@@ -978,7 +1246,9 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                 padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(32.r),
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -994,12 +1264,20 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     SizedBox(height: 24.h),
                     Text(
                       '$categoryName ($count/5)',
-                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E3A8A)),
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E3A8A),
+                      ),
                     ),
                     SizedBox(height: 8.h),
                     Text(
                       'Upload up to 5 images to showcase this section.',
-                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     if (hasImages) ...[
                       SizedBox(height: 20.h),
@@ -1018,13 +1296,22 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                                 clipBehavior: Clip.none,
                                 children: [
                                   GestureDetector(
-                                    onTap: () => _showFullScreenImage(context, imgPath),
+                                    onTap: () =>
+                                        _showFullScreenImage(context, imgPath),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12.r),
-                                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
+                                        border: Border.all(
+                                          color: const Color(0xFFE2E8F0),
+                                        ),
                                         image: DecorationImage(
-                                          image: ResizeImage(FileImage(File(imgPath)), width: 180, height: 180),
+                                          image: ResizeImage(
+                                            FileImage(File(imgPath)),
+                                            width: 180,
+                                            height: 180,
+                                          ),
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -1036,7 +1323,10 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                                     child: GestureDetector(
                                       onTap: () {
                                         HapticFeedback.mediumImpact();
-                                        cubit.removeCategoryImage(category, idx);
+                                        cubit.removeCategoryImage(
+                                          category,
+                                          idx,
+                                        );
                                       },
                                       child: Container(
                                         padding: EdgeInsets.all(4.r),
@@ -1069,7 +1359,10 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                               icon: Icons.camera_alt_rounded,
                               label: 'camera'.tr(),
                               onTap: () {
-                                cubit.pickCategoryImage(category, source: ImageSource.camera);
+                                cubit.pickCategoryImage(
+                                  category,
+                                  source: ImageSource.camera,
+                                );
                               },
                             ),
                           ),
@@ -1080,7 +1373,10 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                               icon: Icons.photo_library_rounded,
                               label: 'gallery'.tr(),
                               onTap: () {
-                                cubit.pickCategoryImage(category, source: ImageSource.gallery);
+                                cubit.pickCategoryImage(
+                                  category,
+                                  source: ImageSource.gallery,
+                                );
                               },
                             ),
                           ),
@@ -1089,7 +1385,10 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                     ] else ...[
                       Container(
                         width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 16.h,
+                          horizontal: 16.w,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(16.r),
@@ -1097,11 +1396,19 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.info_outline_rounded, color: const Color(0xFF64748B), size: 20.sp),
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: const Color(0xFF64748B),
+                              size: 20.sp,
+                            ),
                             SizedBox(width: 8.w),
                             Text(
                               'max_images_reached'.tr(),
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)),
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF64748B),
+                              ),
                             ),
                           ],
                         ),
@@ -1117,7 +1424,12 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     );
   }
 
-  Widget _buildSourceButton(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildSourceButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1133,7 +1445,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
             SizedBox(height: 12.h),
             Text(
               label,
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF1E293B),
+              ),
             ),
           ],
         ),

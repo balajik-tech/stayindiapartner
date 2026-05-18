@@ -102,9 +102,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getReminderHistory({
-    String? hostelId,
-  }) {
+  Future<List<Map<String, dynamic>>> getReminderHistory({String? hostelId}) {
     return remoteDataSource.getReminderHistory(hostelId: hostelId);
   }
 

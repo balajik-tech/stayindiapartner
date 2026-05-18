@@ -34,7 +34,8 @@ class SendAnnouncementsPage extends StatefulWidget {
   State<SendAnnouncementsPage> createState() => _SendAnnouncementsPageState();
 }
 
-class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with SingleTickerProviderStateMixin {
+class _SendAnnouncementsPageState extends State<SendAnnouncementsPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _titleController = TextEditingController();
   final _messageController = TextEditingController();
@@ -57,36 +58,69 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
     return [
       AnnouncementTemplate(
         category: StringUtils.translate('category_food', context: context),
-        title: StringUtils.translate('template_today_menu_title', context: context),
-        description: StringUtils.translate('template_today_menu_desc', context: context),
+        title: StringUtils.translate(
+          'template_today_menu_title',
+          context: context,
+        ),
+        description: StringUtils.translate(
+          'template_today_menu_desc',
+          context: context,
+        ),
         icon: Icons.restaurant_rounded,
         color: Colors.orange,
       ),
       AnnouncementTemplate(
         category: StringUtils.translate('category_payments', context: context),
-        title: StringUtils.translate('template_rent_reminder_title', context: context),
-        description: StringUtils.translate('template_rent_reminder_desc', context: context),
+        title: StringUtils.translate(
+          'template_rent_reminder_title',
+          context: context,
+        ),
+        description: StringUtils.translate(
+          'template_rent_reminder_desc',
+          context: context,
+        ),
         icon: Icons.payments_rounded,
         color: Colors.green,
       ),
       AnnouncementTemplate(
-        category: StringUtils.translate('category_maintenance', context: context),
-        title: StringUtils.translate('template_water_update_title', context: context),
-        description: StringUtils.translate('template_water_update_desc', context: context),
+        category: StringUtils.translate(
+          'category_maintenance',
+          context: context,
+        ),
+        title: StringUtils.translate(
+          'template_water_update_title',
+          context: context,
+        ),
+        description: StringUtils.translate(
+          'template_water_update_desc',
+          context: context,
+        ),
         icon: Icons.water_drop_rounded,
         color: Colors.blue,
       ),
       AnnouncementTemplate(
         category: StringUtils.translate('category_rules', context: context),
-        title: StringUtils.translate('template_gate_timing_title', context: context),
-        description: StringUtils.translate('template_gate_timing_desc', context: context),
+        title: StringUtils.translate(
+          'template_gate_timing_title',
+          context: context,
+        ),
+        description: StringUtils.translate(
+          'template_gate_timing_desc',
+          context: context,
+        ),
         icon: Icons.door_front_door_rounded,
         color: Colors.red,
       ),
       AnnouncementTemplate(
         category: StringUtils.translate('category_events', context: context),
-        title: StringUtils.translate('template_movie_night_title', context: context),
-        description: StringUtils.translate('template_movie_night_desc', context: context),
+        title: StringUtils.translate(
+          'template_movie_night_title',
+          context: context,
+        ),
+        description: StringUtils.translate(
+          'template_movie_night_desc',
+          context: context,
+        ),
         icon: Icons.movie_rounded,
         color: Colors.purple,
       ),
@@ -128,11 +162,21 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
 
   List<AnnouncementTemplate> _getFilteredTemplates(BuildContext context) {
     final templates = _getLocalizedTemplates(context);
-    final allCategoryLabel = StringUtils.translate('category_all', context: context);
+    final allCategoryLabel = StringUtils.translate(
+      'category_all',
+      context: context,
+    );
     return templates.where((t) {
-      final matchesCategory = _selectedCategory == allCategoryLabel || t.category == _selectedCategory;
-      final matchesSearch = t.title.toLowerCase().contains(_searchController.text.toLowerCase()) ||
-          t.description.toLowerCase().contains(_searchController.text.toLowerCase());
+      final matchesCategory =
+          _selectedCategory == allCategoryLabel ||
+          t.category == _selectedCategory;
+      final matchesSearch =
+          t.title.toLowerCase().contains(
+            _searchController.text.toLowerCase(),
+          ) ||
+          t.description.toLowerCase().contains(
+            _searchController.text.toLowerCase(),
+          );
       return matchesCategory && matchesSearch;
     }).toList();
   }
@@ -140,12 +184,11 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
   @override
   Widget build(BuildContext context) {
     final hostelState = context.watch<HostelCubit>().state;
-    final hasNoProperty = hostelState is HostelLoaded && hostelState.hostels.isEmpty;
+    final hasNoProperty =
+        hostelState is HostelLoaded && hostelState.hostels.isEmpty;
 
     return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: _noticeCubit),
-      ],
+      providers: [BlocProvider.value(value: _noticeCubit)],
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
         body: hasNoProperty
@@ -154,12 +197,21 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                   backgroundColor: AppColors.primaryBlue,
                   elevation: 0,
                   leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                   title: Text(
-                    StringUtils.translate('announcements_title', context: context),
-                    style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, color: Colors.white),
+                    StringUtils.translate(
+                      'announcements_title',
+                      context: context,
+                    ),
+                    style: GoogleFonts.dmSans(
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
                 body: _buildNoPropertyPlaceholder(),
@@ -170,10 +222,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                 ],
                 body: TabBarView(
                   controller: _tabController,
-                  children: [
-                    _buildTemplatesView(),
-                    _buildHistoryView(),
-                  ],
+                  children: [_buildTemplatesView(), _buildHistoryView()],
                 ),
               ),
         bottomNavigationBar: hasNoProperty ? null : _buildWriteNewButton(),
@@ -211,7 +260,10 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
             ),
             SizedBox(height: 12.h),
             Text(
-              StringUtils.translate('start_by_adding_property_desc', context: context),
+              StringUtils.translate(
+                'start_by_adding_property_desc',
+                context: context,
+              ),
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
                 fontSize: 14.sp,
@@ -237,7 +289,10 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
       ),
       title: Text(
         StringUtils.translate('announcements_title', context: context),
-        style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, color: Colors.white),
+        style: GoogleFonts.dmSans(
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
       ),
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
@@ -245,7 +300,10 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.primaryBlue, AppColors.primaryBlue.withValues(alpha: 0.8)],
+              colors: [
+                AppColors.primaryBlue,
+                AppColors.primaryBlue.withValues(alpha: 0.8),
+              ],
             ),
           ),
           child: Stack(
@@ -253,7 +311,11 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
               Positioned(
                 right: -20.w,
                 top: -20.h,
-                child: Icon(Icons.campaign_rounded, size: 200.sp, color: Colors.white.withValues(alpha: 0.1)),
+                child: Icon(
+                  Icons.campaign_rounded,
+                  size: 200.sp,
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(24.w, 100.h, 24.w, 24.h),
@@ -271,7 +333,10 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                           }
                         }
                         return Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 6.h,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20.r),
@@ -279,9 +344,20 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.business_rounded, color: Colors.white, size: 14.sp),
+                              Icon(
+                                Icons.business_rounded,
+                                color: Colors.white,
+                                size: 14.sp,
+                              ),
                               SizedBox(width: 6.w),
-                              Text(hostelName, style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold)),
+                              Text(
+                                hostelName,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         );
@@ -289,12 +365,25 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                     ),
                     SizedBox(height: 12.h),
                     Text(
-                      StringUtils.translate('broadcasting_center_title', context: context),
-                      style: GoogleFonts.dmSans(fontSize: 24.sp, fontWeight: FontWeight.w900, color: Colors.white),
+                      StringUtils.translate(
+                        'broadcasting_center_title',
+                        context: context,
+                      ),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
                     ),
                     Text(
-                      StringUtils.translate('broadcasting_center_desc', context: context),
-                      style: GoogleFonts.dmSans(fontSize: 13.sp, color: Colors.white.withValues(alpha: 0.8)),
+                      StringUtils.translate(
+                        'broadcasting_center_desc',
+                        context: context,
+                      ),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 13.sp,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
                     ),
                     SizedBox(height: 32.h),
                   ],
@@ -317,10 +406,20 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
             indicatorWeight: 4,
             labelColor: AppColors.primaryBlue,
             unselectedLabelColor: AppColors.greyText,
-            labelStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 14.sp),
+            labelStyle: GoogleFonts.dmSans(
+              fontWeight: FontWeight.w800,
+              fontSize: 14.sp,
+            ),
             tabs: [
-              Tab(text: StringUtils.translate('templates_tab', context: context)),
-              Tab(text: StringUtils.translate('recent_sent_tab', context: context)),
+              Tab(
+                text: StringUtils.translate('templates_tab', context: context),
+              ),
+              Tab(
+                text: StringUtils.translate(
+                  'recent_sent_tab',
+                  context: context,
+                ),
+              ),
             ],
           ),
         ),
@@ -336,7 +435,10 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
         _buildCategoryFilter(context),
         Expanded(
           child: filteredTemplates.isEmpty
-              ? _buildEmptyState(StringUtils.translate('no_templates_found', context: context), Icons.search_off_rounded)
+              ? _buildEmptyState(
+                  StringUtils.translate('no_templates_found', context: context),
+                  Icons.search_off_rounded,
+                )
               : GridView.builder(
                   padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 100.h),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -345,7 +447,8 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                     mainAxisSpacing: 16.h,
                   ),
                   itemCount: filteredTemplates.length,
-                  itemBuilder: (context, index) => _buildTemplateCard(filteredTemplates[index]),
+                  itemBuilder: (context, index) =>
+                      _buildTemplateCard(filteredTemplates[index]),
                 ),
         ),
       ],
@@ -360,19 +463,26 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
           return const Center(child: CircularProgressIndicator());
         }
         if (state is NoticesLoaded) {
-            final announcements = state.announcements;
-            if (announcements.isEmpty) {
-              return _buildEmptyState("No announcements sent yet", Icons.history_rounded);
-            }
-            return ListView.builder(
-              padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 100.h),
-              itemCount: announcements.length,
-              itemBuilder: (context, index) => _buildHistoryCard(announcements[index]),
+          final announcements = state.announcements;
+          if (announcements.isEmpty) {
+            return _buildEmptyState(
+              "No announcements sent yet",
+              Icons.history_rounded,
             );
           }
-          return _buildEmptyState("Failed to load history", Icons.error_outline_rounded);
-        },
-      );
+          return ListView.builder(
+            padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 100.h),
+            itemCount: announcements.length,
+            itemBuilder: (context, index) =>
+                _buildHistoryCard(announcements[index]),
+          );
+        }
+        return _buildEmptyState(
+          "Failed to load history",
+          Icons.error_outline_rounded,
+        );
+      },
+    );
   }
 
   Widget _buildSearchBar(BuildContext context) {
@@ -381,16 +491,33 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: TextField(
         controller: _searchController,
         onChanged: (v) => setState(() {}),
         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
-          hintText: StringUtils.translate('search_templates_hint', context: context),
-          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp, fontWeight: FontWeight.w500),
-          prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryBlue, size: 20.sp),
+          hintText: StringUtils.translate(
+            'search_templates_hint',
+            context: context,
+          ),
+          hintStyle: TextStyle(
+            color: Colors.grey.shade400,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: AppColors.primaryBlue,
+            size: 20.sp,
+          ),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
@@ -402,9 +529,11 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
 
   Widget _buildCategoryFilter(BuildContext context) {
     final categories = _getLocalizedCategories(context);
-    final allCategoryLabel = StringUtils.translate('category_all', context: context);
-    
-    
+    final allCategoryLabel = StringUtils.translate(
+      'category_all',
+      context: context,
+    );
+
     if (_selectedCategory == 'All') _selectedCategory = allCategoryLabel;
 
     return Container(
@@ -426,7 +555,15 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primaryBlue : Colors.white,
                 borderRadius: BorderRadius.circular(18.r),
-                boxShadow: isSelected ? [BoxShadow(color: AppColors.primaryBlue.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))] : null,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
               ),
               child: Text(
                 cat,
@@ -448,7 +585,13 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -457,7 +600,9 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
             height: double.infinity,
             decoration: BoxDecoration(
               color: template.color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.horizontal(left: Radius.circular(24.r)),
+              borderRadius: BorderRadius.horizontal(
+                left: Radius.circular(24.r),
+              ),
             ),
             child: Icon(template.icon, color: template.color, size: 32.sp),
           ),
@@ -470,17 +615,47 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(template.category.toUpperCase(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: template.color, letterSpacing: 1)),
+                      Text(
+                        template.category.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w900,
+                          color: template.color,
+                          letterSpacing: 1,
+                        ),
+                      ),
                       BouncingWrapper(
-                        onTap: () => _confirmAndSend(template.title, template.description),
-                        child: Icon(Icons.send_rounded, color: AppColors.primaryBlue, size: 20.sp),
+                        onTap: () => _confirmAndSend(
+                          template.title,
+                          template.description,
+                        ),
+                        child: Icon(
+                          Icons.send_rounded,
+                          color: AppColors.primaryBlue,
+                          size: 20.sp,
+                        ),
                       ),
                     ],
                   ),
                   SizedBox(height: 4.h),
-                  Text(template.title, style: GoogleFonts.dmSans(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.darkText)),
+                  Text(
+                    template.title,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.darkText,
+                    ),
+                  ),
                   SizedBox(height: 4.h),
-                  Text(template.description, style: TextStyle(fontSize: 13.sp, color: AppColors.greyText), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(
+                    template.description,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.greyText,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
@@ -493,7 +668,9 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
   Widget _buildHistoryCard(dynamic announcement) {
     final title = announcement.title ?? 'No Title';
     final content = announcement.content ?? '';
-    final createdAt = announcement.createdAt != null ? DateFormat('MMM dd, hh:mm a').format(announcement.createdAt) : '';
+    final createdAt = announcement.createdAt != null
+        ? DateFormat('MMM dd, hh:mm a').format(announcement.createdAt)
+        : '';
 
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
@@ -509,14 +686,39 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(createdAt, style: TextStyle(fontSize: 11.sp, color: AppColors.greyText, fontWeight: FontWeight.w600)),
-              Icon(Icons.check_circle_rounded, color: Colors.green, size: 14.sp),
+              Text(
+                createdAt,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: AppColors.greyText,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Icon(
+                Icons.check_circle_rounded,
+                color: Colors.green,
+                size: 14.sp,
+              ),
             ],
           ),
           SizedBox(height: 8.h),
-          Text(title, style: GoogleFonts.dmSans(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.darkText)),
+          Text(
+            title,
+            style: GoogleFonts.dmSans(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.darkText,
+            ),
+          ),
           SizedBox(height: 6.h),
-          Text(content, style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, height: 1.4)),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: AppColors.greyText,
+              height: 1.4,
+            ),
+          ),
         ],
       ),
     );
@@ -529,28 +731,61 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
         children: [
           Icon(icon, size: 64.sp, color: Colors.grey.shade300),
           SizedBox(height: 16.h),
-          Text(message, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey.shade400)),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade400,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  void _confirmAndSend(String title, String content, {VoidCallback? onConfirmed}) {
+  void _confirmAndSend(
+    String title,
+    String content, {
+    VoidCallback? onConfirmed,
+  }) {
     if (title.trim().isEmpty || content.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please provide both subject and message.'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please provide both subject and message.'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text(StringUtils.translate('confirm_broadcast_title', context: context), style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 18.sp)),
-        content: Text(StringUtils.translate('confirm_broadcast_desc', context: context), style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        title: Text(
+          StringUtils.translate('confirm_broadcast_title', context: context),
+          style: GoogleFonts.dmSans(
+            fontWeight: FontWeight.w800,
+            fontSize: 18.sp,
+          ),
+        ),
+        content: Text(
+          StringUtils.translate('confirm_broadcast_desc', context: context),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(StringUtils.translate('cancel', context: context), style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.bold)),
+            child: Text(
+              StringUtils.translate('cancel', context: context),
+              style: TextStyle(
+                color: AppColors.greyText,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -560,9 +795,17 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
             ),
-            child: Text(StringUtils.translate('send', context: context), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(
+              StringUtils.translate('send', context: context),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -575,24 +818,53 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
       final idx = hostelState.selectedHostelIndex;
       if (idx >= 0 && idx < hostelState.hostels.length) {
         final hostelId = hostelState.hostels[idx].id;
-        _noticeCubit.postAnnouncement(
-          hostelId: hostelId,
-          title: title,
-          content: content,
-        ).then((_) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(StringUtils.translate('announcement_sent_msg', context: context)), backgroundColor: Colors.green));
-          
-          _titleController.clear();
-          _messageController.clear();
-          
-          _loadHistory();
-        });
+        _noticeCubit
+            .postAnnouncement(
+              hostelId: hostelId,
+              title: title,
+              content: content,
+            )
+            .then((_) {
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    StringUtils.translate(
+                      'announcement_sent_msg',
+                      context: context,
+                    ),
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              );
+
+              _titleController.clear();
+              _messageController.clear();
+
+              _loadHistory();
+            });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(StringUtils.translate('select_property_err', context: context)), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              StringUtils.translate('select_property_err', context: context),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(StringUtils.translate('no_property_data_available', context: context)), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            StringUtils.translate(
+              'no_property_data_available',
+              context: context,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -610,7 +882,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                 color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, -4),
-              )
+              ),
             ],
           ),
           child: BouncingWrapper(
@@ -627,7 +899,10 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
                   Icon(Icons.edit_document, color: Colors.white, size: 20.sp),
                   SizedBox(width: 12.w),
                   Text(
-                    StringUtils.translate('write_custom_announcement', context: context),
+                    StringUtils.translate(
+                      'write_custom_announcement',
+                      context: context,
+                    ),
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -652,9 +927,13 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
         titleController: _titleController,
         messageController: _messageController,
         onSend: (title, content) {
-          _confirmAndSend(title, content, onConfirmed: () {
-            Navigator.pop(context);
-          });
+          _confirmAndSend(
+            title,
+            content,
+            onConfirmed: () {
+              Navigator.pop(context);
+            },
+          );
         },
       ),
     );
@@ -675,7 +954,11 @@ class _WriteNewSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.only(
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
@@ -690,20 +973,51 @@ class _WriteNewSheet extends StatelessWidget {
               child: Container(
                 width: 40.w,
                 height: 4.h,
-                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2.r)),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
               ),
             ),
             SizedBox(height: 24.h),
-            Text(StringUtils.translate('create_announcement_title', context: context), style: GoogleFonts.dmSans(fontSize: 22.sp, fontWeight: FontWeight.w900)),
+            Text(
+              StringUtils.translate(
+                'create_announcement_title',
+                context: context,
+              ),
+              style: GoogleFonts.dmSans(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
             SizedBox(height: 8.h),
-            Text(StringUtils.translate('create_announcement_desc', context: context), style: TextStyle(color: AppColors.greyText, fontSize: 13.sp)),
+            Text(
+              StringUtils.translate(
+                'create_announcement_desc',
+                context: context,
+              ),
+              style: TextStyle(color: AppColors.greyText, fontSize: 13.sp),
+            ),
             SizedBox(height: 32.h),
-            _buildTextField(StringUtils.translate('subject_label', context: context), "e.g., WiFi Maintenance Update", titleController, 1),
+            _buildTextField(
+              StringUtils.translate('subject_label', context: context),
+              "e.g., WiFi Maintenance Update",
+              titleController,
+              1,
+            ),
             SizedBox(height: 20.h),
-            _buildTextField(StringUtils.translate('message_label', context: context), "Type your announcement details here...", messageController, 5),
+            _buildTextField(
+              StringUtils.translate('message_label', context: context),
+              "Type your announcement details here...",
+              messageController,
+              5,
+            ),
             SizedBox(height: 40.h),
             BouncingWrapper(
-              onTap: () => onSend(titleController.text.trim(), messageController.text.trim()),
+              onTap: () => onSend(
+                titleController.text.trim(),
+                messageController.text.trim(),
+              ),
               child: Container(
                 height: 56.h,
                 width: double.infinity,
@@ -712,7 +1026,14 @@ class _WriteNewSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 alignment: Alignment.center,
-                child: Text(StringUtils.translate('broadcast_now_btn', context: context), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16.sp)),
+                child: Text(
+                  StringUtils.translate('broadcast_now_btn', context: context),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16.sp,
+                  ),
+                ),
               ),
             ),
             SizedBox(height: 12.h),
@@ -722,11 +1043,24 @@ class _WriteNewSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String label, String hint, TextEditingController controller, int lines) {
+  Widget _buildTextField(
+    String label,
+    String hint,
+    TextEditingController controller,
+    int lines,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: AppColors.textSecondary, letterSpacing: 1.2)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w900,
+            color: AppColors.textSecondary,
+            letterSpacing: 1.2,
+          ),
+        ),
         SizedBox(height: 12.h),
         TextField(
           controller: controller,
@@ -748,7 +1082,10 @@ class _WriteNewSheet extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16.r),
-              borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primaryBlue,
+                width: 1.5,
+              ),
             ),
           ),
         ),

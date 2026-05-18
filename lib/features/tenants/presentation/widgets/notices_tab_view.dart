@@ -10,6 +10,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/notices/domain/entities/notice.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
+
 class NoticesTabView extends StatefulWidget {
   const NoticesTabView({super.key});
 
@@ -26,7 +27,8 @@ class _NoticesTabViewState extends State<NoticesTabView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final hostelState = context.read<HostelCubit>().state;
       if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-        final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+        final hostelId =
+            hostelState.hostels[hostelState.selectedHostelIndex].id;
         _lastLoadedHostelId = hostelId;
         context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
       }
@@ -38,7 +40,8 @@ class _NoticesTabViewState extends State<NoticesTabView> {
     return BlocConsumer<HostelCubit, HostelState>(
       listener: (context, hostelState) {
         if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-          final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+          final hostelId =
+              hostelState.hostels[hostelState.selectedHostelIndex].id;
           if (hostelId != _lastLoadedHostelId) {
             _lastLoadedHostelId = hostelId;
             context.read<NoticeCubit>().loadNotices(hostelId: hostelId);
@@ -46,7 +49,8 @@ class _NoticesTabViewState extends State<NoticesTabView> {
         }
       },
       builder: (context, hostelState) {
-        final hasNoProperty = hostelState is HostelLoaded && hostelState.hostels.isEmpty;
+        final hasNoProperty =
+            hostelState is HostelLoaded && hostelState.hostels.isEmpty;
         if (hasNoProperty) {
           return _buildNoPropertyPlaceholder();
         }
@@ -62,12 +66,17 @@ class _NoticesTabViewState extends State<NoticesTabView> {
                 itemBuilder: (context, index) => const TenantCardSkeleton(),
               );
             } else if (state is NoticeLoadError) {
-              return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+              return Center(
+                child: Text(
+                  state.message,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
             } else if (state is NoticesLoaded) {
               final notices = state.notices;
               final announcements = state.announcements;
               final hasData = notices.isNotEmpty || announcements.isNotEmpty;
-              
+
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                 child: Column(
@@ -105,7 +114,10 @@ class _NoticesTabViewState extends State<NoticesTabView> {
                   ],
                 ),
               );
-            } else if (state is NoticeSubmitting || state is NoticeUpdating || state is NoticeSuccess || state is NoticeUpdateSuccess) {
+            } else if (state is NoticeSubmitting ||
+                state is NoticeUpdating ||
+                state is NoticeSuccess ||
+                state is NoticeUpdateSuccess) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -209,7 +221,11 @@ class _NoticesTabViewState extends State<NoticesTabView> {
               color: const Color(0xFFFEF0C7),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.info_outline, color: const Color(0xFFB54708), size: 24.sp),
+            child: Icon(
+              Icons.info_outline,
+              color: const Color(0xFFB54708),
+              size: 24.sp,
+            ),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -218,12 +234,24 @@ class _NoticesTabViewState extends State<NoticesTabView> {
               children: [
                 Text(
                   'upcoming_vacancies'.tr(),
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: const Color(0xFFB54708)),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFB54708),
+                  ),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'beds_free_soon'.tr(namedArgs: {'count': notices.length.toString(), 'days': daysToNext >= 0 ? daysToNext.toString() : '---'}),
-                  style: TextStyle(fontSize: 13.sp, color: const Color(0xFFB54708).withValues(alpha: 0.8)),
+                  'beds_free_soon'.tr(
+                    namedArgs: {
+                      'count': notices.length.toString(),
+                      'days': daysToNext >= 0 ? daysToNext.toString() : '---',
+                    },
+                  ),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: const Color(0xFFB54708).withValues(alpha: 0.8),
+                  ),
                 ),
               ],
             ),
@@ -266,10 +294,18 @@ class _NoticesTabViewState extends State<NoticesTabView> {
                   children: [
                     CircleAvatar(
                       radius: 18.r,
-                      backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.primaryBlue.withValues(
+                        alpha: 0.1,
+                      ),
                       child: Text(
-                        (notice.tenantName?.isNotEmpty == true ? notice.tenantName![0] : 'T'),
-                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                        (notice.tenantName?.isNotEmpty == true
+                            ? notice.tenantName![0]
+                            : 'T'),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryBlue,
+                        ),
                       ),
                     ),
                     SizedBox(width: 12.w),
@@ -279,13 +315,20 @@ class _NoticesTabViewState extends State<NoticesTabView> {
                         children: [
                           Text(
                             notice.tenantName ?? 'unknown_tenant'.tr(),
-                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkText,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             notice.roomTypename ?? notice.roomId,
-                            style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: AppColors.greyText,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -298,18 +341,31 @@ class _NoticesTabViewState extends State<NoticesTabView> {
               SizedBox(width: 8.w),
               if (daysLeft >= 0)
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
-                    color: daysLeft <= 7 ? const Color(0xFFFEF3F2) : const Color(0xFFF9FAFB),
+                    color: daysLeft <= 7
+                        ? const Color(0xFFFEF3F2)
+                        : const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(20.r),
-                    border: Border.all(color: daysLeft <= 7 ? const Color(0xFFFECDCA) : AppColors.roomCardBorder),
+                    border: Border.all(
+                      color: daysLeft <= 7
+                          ? const Color(0xFFFECDCA)
+                          : AppColors.roomCardBorder,
+                    ),
                   ),
                   child: Text(
-                    'days_left_label'.tr(namedArgs: {'count': daysLeft.toString()}),
+                    'days_left_label'.tr(
+                      namedArgs: {'count': daysLeft.toString()},
+                    ),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
-                      color: daysLeft <= 7 ? const Color(0xFFB42318) : AppColors.greyText,
+                      color: daysLeft <= 7
+                          ? const Color(0xFFB42318)
+                          : AppColors.greyText,
                     ),
                   ),
                 ),
@@ -324,7 +380,10 @@ class _NoticesTabViewState extends State<NoticesTabView> {
             ),
             child: Row(
               children: [
-                _buildDateColumn('notice_given'.tr(), notice.noticeDate ?? notice.createdAt ?? ''),
+                _buildDateColumn(
+                  'notice_given'.tr(),
+                  notice.noticeDate ?? notice.createdAt ?? '',
+                ),
                 Container(width: 1, height: 30, color: Colors.grey[200]),
                 _buildDateColumn('vacating_on'.tr(), notice.vacatingDate),
               ],
@@ -335,12 +394,20 @@ class _NoticesTabViewState extends State<NoticesTabView> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline, size: 14.sp, color: AppColors.greyText),
+                Icon(
+                  Icons.info_outline,
+                  size: 14.sp,
+                  color: AppColors.greyText,
+                ),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     notice.reason!,
-                    style: TextStyle(fontSize: 13.sp, color: AppColors.greyText, height: 1.4),
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.greyText,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -361,9 +428,19 @@ class _NoticesTabViewState extends State<NoticesTabView> {
     return Expanded(
       child: Column(
         children: [
-          Text(label, style: TextStyle(fontSize: 10.sp, color: AppColors.greyText)),
+          Text(
+            label,
+            style: TextStyle(fontSize: 10.sp, color: AppColors.greyText),
+          ),
           SizedBox(height: 4.h),
-          Text(formattedDate, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+          Text(
+            formattedDate,
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkText,
+            ),
+          ),
         ],
       ),
     );
@@ -408,17 +485,34 @@ class _NoticesTabViewState extends State<NoticesTabView> {
               ),
               Text(
                 DateFormat('MMM dd, yyyy').format(announcement.createdAt),
-                style: TextStyle(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.greyText,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
           SizedBox(height: 12.h),
-          Text(announcement.title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+          Text(
+            announcement.title,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkText,
+            ),
+          ),
           SizedBox(height: 6.h),
-          Text(announcement.content, style: TextStyle(fontSize: 13.sp, color: AppColors.greyText, height: 1.4)),
+          Text(
+            announcement.content,
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: AppColors.greyText,
+              height: 1.4,
+            ),
+          ),
         ],
       ),
     );
   }
 }
-

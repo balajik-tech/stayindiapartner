@@ -21,12 +21,12 @@ class StaffCubit extends Cubit<StaffState> {
     required UpdateStaffUseCase updateStaffUseCase,
     required LogStaffActivityUseCase logStaffActivityUseCase,
     required GetStaffByIdUseCase getStaffByIdUseCase,
-  })  : _getStaffList = getStaffListUseCase,
-        _createStaff = createStaffUseCase,
-        _updateStaff = updateStaffUseCase,
-        _logActivity = logStaffActivityUseCase,
-        _getStaffById = getStaffByIdUseCase,
-        super(StaffInitial());
+  }) : _getStaffList = getStaffListUseCase,
+       _createStaff = createStaffUseCase,
+       _updateStaff = updateStaffUseCase,
+       _logActivity = logStaffActivityUseCase,
+       _getStaffById = getStaffByIdUseCase,
+       super(StaffInitial());
 
   Future<void> loadStaff(String? hostelId) async {
     emit(StaffLoading());

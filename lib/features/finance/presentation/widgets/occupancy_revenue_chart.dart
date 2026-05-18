@@ -8,7 +8,11 @@ class OccupancyRevenueChart extends StatelessWidget {
   final int occupied;
   final int total;
 
-  const OccupancyRevenueChart({super.key, required this.occupied, required this.total});
+  const OccupancyRevenueChart({
+    super.key,
+    required this.occupied,
+    required this.total,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +31,11 @@ class OccupancyRevenueChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                const style = TextStyle(color: AppColors.greyText, fontWeight: FontWeight.bold, fontSize: 12);
+                const style = TextStyle(
+                  color: AppColors.greyText,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                );
                 String text;
                 switch (value.toInt()) {
                   case 0:
@@ -40,13 +48,23 @@ class OccupancyRevenueChart extends StatelessWidget {
                     text = '';
                     break;
                 }
-                return SideTitleWidget(meta: meta, space: 4, child: Text(text, style: style));
+                return SideTitleWidget(
+                  meta: meta,
+                  space: 4,
+                  child: Text(text, style: style),
+                );
               },
             ),
           ),
-          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),

@@ -6,7 +6,7 @@ class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final appException = GlobalErrorMapper.map(err);
-    
+
     AppLogger.error(
       '[NETWORK ERROR] ${err.requestOptions.method} ${err.requestOptions.uri}\n'
       'Mapped to: ${appException.runtimeType}: ${appException.message}',
@@ -14,12 +14,14 @@ class ErrorInterceptor extends Interceptor {
       err.stackTrace,
     );
 
-    handler.next(DioException(
-      requestOptions: err.requestOptions,
-      response: err.response,
-      type: err.type,
-      error: appException,
-      stackTrace: err.stackTrace,
-    ));
+    handler.next(
+      DioException(
+        requestOptions: err.requestOptions,
+        response: err.response,
+        type: err.type,
+        error: appException,
+        stackTrace: err.stackTrace,
+      ),
+    );
   }
 }

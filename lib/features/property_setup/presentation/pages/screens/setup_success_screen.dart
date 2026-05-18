@@ -38,7 +38,11 @@ class SetupSuccessScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  Icon(Icons.check_circle_rounded, color: const Color(0xFF16A34A), size: 100.sp),
+                  Icon(
+                    Icons.check_circle_rounded,
+                    color: const Color(0xFF16A34A),
+                    size: 100.sp,
+                  ),
                 ],
               ),
               SizedBox(height: 48.h),
@@ -92,7 +96,8 @@ class _PremiumActionButton extends StatefulWidget {
   State<_PremiumActionButton> createState() => _PremiumActionButtonState();
 }
 
-class _PremiumActionButtonState extends State<_PremiumActionButton> with SingleTickerProviderStateMixin {
+class _PremiumActionButtonState extends State<_PremiumActionButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scale;
 
@@ -103,9 +108,10 @@ class _PremiumActionButtonState extends State<_PremiumActionButton> with SingleT
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override

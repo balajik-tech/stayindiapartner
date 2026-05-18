@@ -37,15 +37,18 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
   @override
   Widget build(BuildContext context) {
     final hostelState = context.watch<HostelCubit>().state;
-    final hasNoProperty = hostelState is HostelLoaded && hostelState.hostels.isEmpty;
+    final hasNoProperty =
+        hostelState is HostelLoaded && hostelState.hostels.isEmpty;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFE),
       appBar: _buildAppBar(),
       body: BlocListener<HostelCubit, HostelState>(
-        listenWhen: (prev, curr) => 
-          (prev is! HostelLoaded && curr is HostelLoaded) || 
-          (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+        listenWhen: (prev, curr) =>
+            (prev is! HostelLoaded && curr is HostelLoaded) ||
+            (prev is HostelLoaded &&
+                curr is HostelLoaded &&
+                prev.selectedHostelIndex != curr.selectedHostelIndex),
         listener: (context, state) => _refreshData(),
         child: hasNoProperty
             ? _buildNoPropertyPlaceholder()
@@ -59,12 +62,15 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                       child: BlocBuilder<StaffCubit, StaffState>(
                         builder: (context, state) {
                           if (state is StaffLoading) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
                           } else if (state is StaffError) {
                             return _buildErrorState(state.message);
                           } else if (state is StaffLoaded) {
                             final staff = state.staffList.where((s) {
-                              final query = _searchController.text.toLowerCase();
+                              final query = _searchController.text
+                                  .toLowerCase();
                               return s.name.toLowerCase().contains(query) ||
                                   s.role.toLowerCase().contains(query) ||
                                   s.phone.contains(query);
@@ -75,9 +81,15 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                             }
 
                             return ListView.builder(
-                              padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 100.h),
+                              padding: EdgeInsets.fromLTRB(
+                                20.w,
+                                10.h,
+                                20.w,
+                                100.h,
+                              ),
                               physics: const AlwaysScrollableScrollPhysics(
-                                  parent: BouncingScrollPhysics()),
+                                parent: BouncingScrollPhysics(),
+                              ),
                               itemCount: staff.length,
                               itemBuilder: (context, index) => StaffCard(
                                 staff: staff[index],
@@ -133,7 +145,10 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
             ),
             SizedBox(height: 12.h),
             Text(
-              StringUtils.translate('start_by_adding_property_desc', context: context),
+              StringUtils.translate(
+                'start_by_adding_property_desc',
+                context: context,
+              ),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -198,14 +213,19 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                 controller: _searchController,
                 onChanged: (value) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: StringUtils.translate('search_staff_hint', context: context),
+                  hintText: StringUtils.translate(
+                    'search_staff_hint',
+                    context: context,
+                  ),
                   hintStyle: TextStyle(
                     color: AppColors.greyText.withValues(alpha: 0.5),
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                   ),
-                  prefixIcon: Icon(Icons.search_rounded,
-                      color: AppColors.greyText.withValues(alpha: 0.5)),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: AppColors.greyText.withValues(alpha: 0.5),
+                  ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 14.h),
                 ),
@@ -228,8 +248,11 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
               color: AppColors.primaryBlue.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.people_outline_rounded,
-                size: 64.sp, color: AppColors.primaryBlue.withValues(alpha: 0.5)),
+            child: Icon(
+              Icons.people_outline_rounded,
+              size: 64.sp,
+              color: AppColors.primaryBlue.withValues(alpha: 0.5),
+            ),
           ),
           SizedBox(height: 24.h),
           Text(
@@ -286,14 +309,22 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
       onPressed: () {
         final hostelState = context.read<HostelCubit>().state;
         if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-          final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-          AddStaffSheet.show(context, hostelId: hostelId, onAdded: _refreshData);
+          final hostelId =
+              hostelState.hostels[hostelState.selectedHostelIndex].id;
+          AddStaffSheet.show(
+            context,
+            hostelId: hostelId,
+            onAdded: _refreshData,
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 StringUtils.translate('add_property_first', context: context),
-                style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
               ),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,

@@ -9,7 +9,6 @@ import 'presentation/cubit/association_cubit.dart';
 import 'presentation/cubit/social_feed_cubit.dart';
 
 void registerCommunityFeature(GetIt sl) {
-  
   sl.registerFactory(
     () => CommunityCubit(
       getCommunityDetailsUseCase: sl(),
@@ -56,7 +55,6 @@ void registerCommunityFeature(GetIt sl) {
     ),
   );
 
-  
   sl.registerLazySingleton(() => GetCommunityDetailsUseCase(sl()));
   sl.registerLazySingleton(() => GetCommunityMessagesUseCase(sl()));
   sl.registerLazySingleton(() => SendCommunityMessageUseCase(sl()));
@@ -85,12 +83,10 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerLazySingleton(() => VotePollUseCase(sl()));
   sl.registerLazySingleton(() => DeleteSocialPostUseCase(sl()));
 
-  
   sl.registerLazySingleton<CommunityRepository>(
     () => CommunityRepositoryImpl(remote: sl()),
   );
 
-  
   sl.registerLazySingleton<CommunityRemoteDataSource>(
     () => CommunityRemoteDataSourceImpl(dio: sl()),
   );

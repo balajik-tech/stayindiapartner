@@ -59,9 +59,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
   Future<void> _pickAndUploadImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-    );
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null && mounted) {
       final croppedFile = await ImageCropper().cropImage(
@@ -75,16 +73,12 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             initAspectRatio: CropAspectRatioPreset.square,
             lockAspectRatio: true,
             cropStyle: CropStyle.circle,
-            aspectRatioPresets: [
-              CropAspectRatioPreset.square,
-            ],
+            aspectRatioPresets: [CropAspectRatioPreset.square],
           ),
           IOSUiSettings(
             title: 'Crop Profile Photo',
             cropStyle: CropStyle.circle,
-            aspectRatioPresets: [
-              CropAspectRatioPreset.square,
-            ],
+            aspectRatioPresets: [CropAspectRatioPreset.square],
             aspectRatioLockEnabled: true,
           ),
         ],
@@ -99,11 +93,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   void _saveProfile() {
     HapticFeedback.mediumImpact();
     context.read<ProfileCubit>().updateProfile(
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
-          email: _emailController.text.trim(),
-          address: _addressController.text.trim(),
-        );
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      email: _emailController.text.trim(),
+      address: _addressController.text.trim(),
+    );
   }
 
   @override
@@ -116,14 +110,20 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             _currentProfile = state.profile;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('update_success'.tr()), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text('update_success'.tr()),
+              backgroundColor: Colors.green,
+            ),
           );
           context.read<AuthCubit>().refreshProfile();
           Navigator.pop(context);
         }
         if (state is ProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.redAccent),
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.redAccent,
+            ),
           );
         }
       },
@@ -153,19 +153,27 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         children: [
                           _buildAnimatedHeader(profile),
                           SizedBox(height: 32.h),
-                          _buildSectionLabel('personal_info'.tr().toUpperCase()),
+                          _buildSectionLabel(
+                            'personal_info'.tr().toUpperCase(),
+                          ),
                           _buildEditableBlock([
                             _EditableRow(
                               label: 'first_name'.tr(),
                               value: _firstNameController.text,
                               icon: Icons.person_rounded,
-                              onTap: () => _showEditSheet('first_name'.tr(), _firstNameController),
+                              onTap: () => _showEditSheet(
+                                'first_name'.tr(),
+                                _firstNameController,
+                              ),
                             ),
                             _EditableRow(
                               label: 'last_name'.tr(),
                               value: _lastNameController.text,
                               icon: Icons.person_rounded,
-                              onTap: () => _showEditSheet('last_name'.tr(), _lastNameController),
+                              onTap: () => _showEditSheet(
+                                'last_name'.tr(),
+                                _lastNameController,
+                              ),
                             ),
                             _EditableRow(
                               label: 'phone_number'.tr(),
@@ -177,7 +185,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                               label: 'email_address'.tr(),
                               value: _emailController.text,
                               icon: Icons.email_rounded,
-                              onTap: () => _showEditSheet('email_address'.tr(), _emailController, inputType: TextInputType.emailAddress),
+                              onTap: () => _showEditSheet(
+                                'email_address'.tr(),
+                                _emailController,
+                                inputType: TextInputType.emailAddress,
+                              ),
                             ),
                           ]),
                           SizedBox(height: 24.h),
@@ -187,7 +199,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                               label: 'current_address'.tr(),
                               value: _addressController.text,
                               icon: Icons.location_on_rounded,
-                              onTap: () => _showEditSheet('address'.tr(), _addressController, isLongText: true),
+                              onTap: () => _showEditSheet(
+                                'address'.tr(),
+                                _addressController,
+                                isLongText: true,
+                              ),
                             ),
                           ]),
                           SizedBox(height: 32.h),
@@ -217,7 +233,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 20),
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: AppColors.darkText,
+          size: 20,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -281,7 +301,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 2),
                           ),
-                          child: Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18.sp),
+                          child: Icon(
+                            Icons.camera_alt_rounded,
+                            color: Colors.white,
+                            size: 18.sp,
+                          ),
                         ),
                       ),
                     ),
@@ -290,11 +314,19 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 SizedBox(height: 16.h),
                 Text(
                   name,
-                  style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkText,
+                  ),
                 ),
                 Text(
                   '+91 ${_phoneController.text}',
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.greyText),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.greyText,
+                  ),
                 ),
               ],
             ),
@@ -371,12 +403,28 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
               minimumSize: Size(double.infinity, 56.h),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28.r),
+              ),
               elevation: 0,
             ),
             child: isUpdating
-                ? SizedBox(height: 24.h, width: 24.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                : Text('save_changes'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+                ? SizedBox(
+                    height: 24.h,
+                    width: 24.h,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
+                    ),
+                  )
+                : Text(
+                    'save_changes'.tr(),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),
@@ -403,15 +451,26 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('delete_account'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        title: Text(
+          'delete_account'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
         content: Text('delete_account_confirm'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('cancel'.tr())),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('cancel'.tr()),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('delete_permanently'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              'delete_permanently'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -426,14 +485,26 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     }
   }
 
-  void _showEditSheet(String title, TextEditingController controller, {TextInputType inputType = TextInputType.text, bool isLongText = false}) {
+  void _showEditSheet(
+    String title,
+    TextEditingController controller, {
+    TextInputType inputType = TextInputType.text,
+    bool isLongText = false,
+  }) {
     HapticFeedback.selectionClick();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h),
+        padding: EdgeInsets.fromLTRB(
+          20.w,
+          20.h,
+          20.w,
+          MediaQuery.of(context).viewInsets.bottom +
+              MediaQuery.of(context).padding.bottom +
+              24.h,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
@@ -442,11 +513,24 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2.r)))),
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+            ),
             SizedBox(height: 24.h),
             Text(
               'update_field'.tr(namedArgs: {'field': title}),
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w900,
+                color: AppColors.darkText,
+              ),
             ),
             SizedBox(height: 16.h),
             TextField(
@@ -458,7 +542,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: const Color(0xFFF8F9FA),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.r),
+                  borderSide: BorderSide.none,
+                ),
                 contentPadding: EdgeInsets.all(16.w),
               ),
             ),
@@ -471,9 +558,17 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
                 minimumSize: Size(double.infinity, 56.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28.r),
+                ),
               ),
-              child: Text('confirm'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text(
+                'confirm'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -501,15 +596,22 @@ class _EditableRow extends StatefulWidget {
   State<_EditableRow> createState() => _EditableRowState();
 }
 
-class _EditableRowState extends State<_EditableRow> with SingleTickerProviderStateMixin {
+class _EditableRowState extends State<_EditableRow>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -538,7 +640,11 @@ class _EditableRowState extends State<_EditableRow> with SingleTickerProviderSta
                   color: AppColors.primaryBlue.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(widget.icon, color: AppColors.primaryBlue, size: 20.sp),
+                child: Icon(
+                  widget.icon,
+                  color: AppColors.primaryBlue,
+                  size: 20.sp,
+                ),
               ),
               SizedBox(width: 16.w),
               Expanded(
@@ -547,27 +653,43 @@ class _EditableRowState extends State<_EditableRow> with SingleTickerProviderSta
                   children: [
                     Text(
                       widget.label,
-                      style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppColors.greyText.withValues(alpha: 0.6), letterSpacing: 0.5),
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.greyText.withValues(alpha: 0.6),
+                        letterSpacing: 0.5,
+                      ),
                     ),
                     SizedBox(height: 2.h),
                     Text(
                       widget.value.isEmpty ? 'not_set'.tr() : widget.value,
                       style: TextStyle(
-                        fontSize: 15.sp, 
-                        fontWeight: FontWeight.w700, 
-                        color: widget.isLocked ? AppColors.darkText.withValues(alpha: 0.5) : AppColors.darkText
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                        color: widget.isLocked
+                            ? AppColors.darkText.withValues(alpha: 0.5)
+                            : AppColors.darkText,
                       ),
                     ),
                     if (widget.isLocked)
                       Padding(
                         padding: EdgeInsets.only(top: 2.h),
-                        child: Text('cannot_be_changed'.tr(), style: TextStyle(fontSize: 10.sp, color: Colors.orange.shade700, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          'cannot_be_changed'.tr(),
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: Colors.orange.shade700,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                   ],
                 ),
               ),
               Icon(
-                widget.isLocked ? Icons.lock_outline_rounded : Icons.edit_rounded,
+                widget.isLocked
+                    ? Icons.lock_outline_rounded
+                    : Icons.edit_rounded,
                 color: AppColors.greyText.withValues(alpha: 0.3),
                 size: 16.sp,
               ),

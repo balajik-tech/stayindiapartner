@@ -16,20 +16,25 @@ class UnifiedHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HostelCubit, HostelState>(
       builder: (context, state) {
-        String selectedHostelName = StringUtils.translate("select_property", context: context);
+        String selectedHostelName = StringUtils.translate(
+          "select_property",
+          context: context,
+        );
         if (state is HostelLoaded && state.hostels.isNotEmpty) {
           if (state.selectedHostelIndices.length > 1) {
-            selectedHostelName = "${state.selectedHostelIndices.length} ${StringUtils.translate("properties", context: context)}";
+            selectedHostelName =
+                "${state.selectedHostelIndices.length} ${StringUtils.translate("properties", context: context)}";
           } else {
-            final index = state.selectedHostelIndices.isNotEmpty 
-                ? state.selectedHostelIndices.first 
+            final index = state.selectedHostelIndices.isNotEmpty
+                ? state.selectedHostelIndices.first
                 : state.selectedHostelIndex;
-            
+
             if (index < state.hostels.length) {
               selectedHostelName = state.hostels[index].name;
 
               if (selectedHostelName.length > 12) {
-                selectedHostelName = "${selectedHostelName.substring(0, 9).trim()}...";
+                selectedHostelName =
+                    "${selectedHostelName.substring(0, 9).trim()}...";
               }
             }
           }
@@ -41,7 +46,6 @@ class UnifiedHeader extends StatelessWidget {
           color: Colors.white,
           child: Row(
             children: [
-
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
                 decoration: BoxDecoration(
@@ -72,18 +76,24 @@ class UnifiedHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               SizedBox(width: 16.w),
-              
 
               Semantics(
-                label: StringUtils.translate('switch_property', context: context),
-                hint: '${StringUtils.translate('current_property', context: context)}: $selectedHostelName',
+                label: StringUtils.translate(
+                  'switch_property',
+                  context: context,
+                ),
+                hint:
+                    '${StringUtils.translate('current_property', context: context)}: $selectedHostelName',
                 button: true,
                 child: GestureDetector(
                   onTap: () => _showSwitchHostelSheet(context),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(12.r),
@@ -92,7 +102,11 @@ class UnifiedHeader extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.apartment_rounded, color: const Color(0xFFFF7000), size: 18.sp),
+                        Icon(
+                          Icons.apartment_rounded,
+                          color: const Color(0xFFFF7000),
+                          size: 18.sp,
+                        ),
                         SizedBox(width: 8.w),
                         Flexible(
                           child: FittedBox(
@@ -109,7 +123,11 @@ class UnifiedHeader extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: 4.w),
-                        Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF64748B), size: 18.sp),
+                        Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: const Color(0xFF64748B),
+                          size: 18.sp,
+                        ),
                       ],
                     ),
                   ),
@@ -118,18 +136,22 @@ class UnifiedHeader extends StatelessWidget {
 
               const Spacer(),
 
-
               Semantics(
                 label: StringUtils.translate('notifications', context: context),
                 button: true,
                 child: Tooltip(
-                  message: StringUtils.translate('notifications', context: context),
+                  message: StringUtils.translate(
+                    'notifications',
+                    context: context,
+                  ),
                   child: BouncingWrapper(
                     onTap: () {
                       HapticFeedback.lightImpact();
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const NotificationsPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsPage(),
+                        ),
                       );
                     },
                     child: Container(
@@ -140,9 +162,9 @@ class UnifiedHeader extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Icon(
-                        Icons.notifications_none_rounded, 
-                        color: const Color(0xFF3B71CA), 
-                        size: 24.sp
+                        Icons.notifications_none_rounded,
+                        color: const Color(0xFF3B71CA),
+                        size: 24.sp,
                       ),
                     ),
                   ),
@@ -163,7 +185,7 @@ class UnifiedHeader extends StatelessWidget {
       builder: (context) => BlocBuilder<HostelCubit, HostelState>(
         builder: (context, state) {
           if (state is! HostelLoaded) return const SizedBox.shrink();
-          
+
           return Container(
             padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
             decoration: BoxDecoration(
@@ -202,19 +224,27 @@ class UnifiedHeader extends StatelessWidget {
                     itemCount: state.hostels.length,
                     itemBuilder: (context, index) {
                       final hostel = state.hostels[index];
-                      final isSelected = state.selectedHostelIndices.contains(index);
+                      final isSelected = state.selectedHostelIndices.contains(
+                        index,
+                      );
                       return BouncingWrapper(
                         onTap: () {
-                          context.read<HostelCubit>().toggleHostelSelection(index);
+                          context.read<HostelCubit>().toggleHostelSelection(
+                            index,
+                          );
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           margin: EdgeInsets.only(bottom: 12.h),
                           padding: EdgeInsets.all(16.r),
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.05) : Colors.transparent,
+                            color: isSelected
+                                ? AppColors.primaryBlue.withValues(alpha: 0.05)
+                                : Colors.transparent,
                             border: Border.all(
-                              color: isSelected ? AppColors.primaryBlue : AppColors.border,
+                              color: isSelected
+                                  ? AppColors.primaryBlue
+                                  : AppColors.border,
                               width: isSelected ? 2 : 1,
                             ),
                             borderRadius: BorderRadius.circular(16.r),
@@ -224,12 +254,18 @@ class UnifiedHeader extends StatelessWidget {
                               Container(
                                 padding: EdgeInsets.all(10.r),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.1) : AppColors.backgroundSecondary,
+                                  color: isSelected
+                                      ? AppColors.primaryBlue.withValues(
+                                          alpha: 0.1,
+                                        )
+                                      : AppColors.backgroundSecondary,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  Icons.apartment_rounded, 
-                                  color: isSelected ? AppColors.primaryBlue : AppColors.textSecondary,
+                                  Icons.apartment_rounded,
+                                  color: isSelected
+                                      ? AppColors.primaryBlue
+                                      : AppColors.textSecondary,
                                   size: 22.sp,
                                 ),
                               ),
@@ -239,13 +275,21 @@ class UnifiedHeader extends StatelessWidget {
                                   hostel.name,
                                   style: TextStyle(
                                     fontSize: 16.sp,
-                                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                    color: isSelected ? AppColors.primaryBlue : AppColors.textPrimary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w800
+                                        : FontWeight.w600,
+                                    color: isSelected
+                                        ? AppColors.primaryBlue
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
                               ),
                               if (isSelected)
-                                Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 24.sp),
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  color: AppColors.primaryBlue,
+                                  size: 24.sp,
+                                ),
                             ],
                           ),
                         ),

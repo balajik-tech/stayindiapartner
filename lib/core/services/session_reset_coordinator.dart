@@ -15,7 +15,6 @@ class SessionResetCoordinator {
     AppLogger.warning('🚨 Starting Atomic Owner Session Reset Lifecycle...');
 
     try {
-      
       try {
         if (di.sl.isRegistered<SocketService>()) {
           AppLogger.info('Disconnecting and clearing Socket.io instances...');
@@ -25,7 +24,6 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to disconnect socket: $e');
       }
 
-      
       try {
         AppLogger.info('Deleting FCM token registry on device...');
         await FirebaseMessaging.instance.deleteToken();
@@ -34,7 +32,6 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to reset FCM token registry: $e');
       }
 
-      
       try {
         if (di.sl.isRegistered<OfflineQueueService>()) {
           AppLogger.info('Wiping pending offline mutation queues...');
@@ -44,7 +41,6 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to clear Hive offline queue: $e');
       }
 
-      
       try {
         if (di.sl.isRegistered<CacheService>()) {
           AppLogger.info('Invoking CacheService selective cache flush...');
@@ -54,7 +50,6 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to flush CacheService: $e');
       }
 
-      
       try {
         AppLogger.info('Evicting in-memory Image Caches...');
         PaintingBinding.instance.imageCache.clear();
@@ -63,13 +58,16 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to clear image cache: $e');
       }
 
-      
       AppLogger.info('Recalibrating dependency injection container (GetIt)...');
       await di.resetInjections();
 
       AppLogger.success('🚀 Atomic Owner Session Reset Complete.');
     } catch (e, stack) {
-      AppLogger.error('Critical crash during session reset execution', e, stack);
+      AppLogger.error(
+        'Critical crash during session reset execution',
+        e,
+        stack,
+      );
     }
   }
 
@@ -77,7 +75,9 @@ class SessionResetCoordinator {
     try {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
-          AppLogger.warning('🧹 Post-Logout Cache Cleanup: Wiping HydratedBloc and Hive storage...');
+          AppLogger.warning(
+            '🧹 Post-Logout Cache Cleanup: Wiping HydratedBloc and Hive storage...',
+          );
           await HydratedBloc.storage.clear();
           await Hive.deleteFromDisk();
           AppLogger.success('🧹 Post-Logout Cache Cleanup complete!');
@@ -86,9 +86,10 @@ class SessionResetCoordinator {
         }
       });
     } catch (_) {
-      
       try {
-        AppLogger.warning('🧹 Post-Logout Cache Cleanup (Immediate): Wiping HydratedBloc and Hive storage...');
+        AppLogger.warning(
+          '🧹 Post-Logout Cache Cleanup (Immediate): Wiping HydratedBloc and Hive storage...',
+        );
         HydratedBloc.storage.clear();
         Hive.deleteFromDisk();
       } catch (e) {

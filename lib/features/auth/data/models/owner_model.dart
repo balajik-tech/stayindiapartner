@@ -18,7 +18,6 @@ class OwnerModel extends OwnerEntity {
   });
 
   factory OwnerModel.fromJson(Map<String, dynamic> json) {
-    
     final firstName = (json['firstName'] ?? '').toString().trim();
     final lastName = (json['lastName'] ?? '').toString().trim();
     final fullName = (json['name'] ?? json['fullName'] ?? '').toString().trim();
@@ -26,7 +25,9 @@ class OwnerModel extends OwnerEntity {
         ? fullName
         : [firstName, lastName].where((s) => s.isNotEmpty).join(' ');
 
-    final ownerProfile = json['ownerProfile'] is Map ? json['ownerProfile'] as Map : {};
+    final ownerProfile = json['ownerProfile'] is Map
+        ? json['ownerProfile'] as Map
+        : {};
     final subscription = ownerProfile['subscription'] is Map
         ? ownerProfile['subscription'] as Map
         : {};
@@ -46,7 +47,8 @@ class OwnerModel extends OwnerEntity {
       email: json['email']?.toString(),
       avatar: json['avatar']?.toString(),
       isProfileComplete:
-          json['isProfileComplete'] == true || json['is_profile_complete'] == true,
+          json['isProfileComplete'] == true ||
+          json['is_profile_complete'] == true,
       bedLimit: bedLimit,
       plan: subscription['plan']?.toString() ?? 'free',
       hasAcceptedPolicy: json['hasAcceptedPolicy'] == true,
@@ -58,35 +60,34 @@ class OwnerModel extends OwnerEntity {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'phone': phone,
-        if (email != null) 'email': email,
-        if (avatar != null) 'avatar': avatar,
-        'isProfileComplete': isProfileComplete,
-        'bedLimit': bedLimit,
-        'plan': plan,
-        'hasAcceptedPolicy': hasAcceptedPolicy,
-        'role': role,
-        if (verificationBadge != null) 'verificationBadge': verificationBadge,
-        if (staffPropertyId != null) 'propertyId': staffPropertyId,
-        'permissions': permissions,
-      };
+    'id': id,
+    'name': name,
+    'phone': phone,
+    if (email != null) 'email': email,
+    if (avatar != null) 'avatar': avatar,
+    'isProfileComplete': isProfileComplete,
+    'bedLimit': bedLimit,
+    'plan': plan,
+    'hasAcceptedPolicy': hasAcceptedPolicy,
+    'role': role,
+    if (verificationBadge != null) 'verificationBadge': verificationBadge,
+    if (staffPropertyId != null) 'propertyId': staffPropertyId,
+    'permissions': permissions,
+  };
 
-  
   factory OwnerModel.fromEntity(OwnerEntity entity) => OwnerModel(
-        id: entity.id,
-        name: entity.name,
-        phone: entity.phone,
-        email: entity.email,
-        avatar: entity.avatar,
-        isProfileComplete: entity.isProfileComplete,
-        bedLimit: entity.bedLimit,
-        plan: entity.plan,
-        hasAcceptedPolicy: entity.hasAcceptedPolicy,
-        role: entity.role,
-        verificationBadge: entity.verificationBadge,
-        staffPropertyId: entity.staffPropertyId,
-        permissions: entity.permissions,
-      );
+    id: entity.id,
+    name: entity.name,
+    phone: entity.phone,
+    email: entity.email,
+    avatar: entity.avatar,
+    isProfileComplete: entity.isProfileComplete,
+    bedLimit: entity.bedLimit,
+    plan: entity.plan,
+    hasAcceptedPolicy: entity.hasAcceptedPolicy,
+    role: entity.role,
+    verificationBadge: entity.verificationBadge,
+    staffPropertyId: entity.staffPropertyId,
+    permissions: entity.permissions,
+  );
 }

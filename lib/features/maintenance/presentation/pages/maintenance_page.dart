@@ -16,7 +16,8 @@ class MaintenancePage extends StatefulWidget {
   State<MaintenancePage> createState() => _MaintenancePageState();
 }
 
-class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProviderStateMixin {
+class _MaintenancePageState extends State<MaintenancePage>
+    with SingleTickerProviderStateMixin {
   late final MaintenanceCubit _cubit;
   late TabController _tabController;
 
@@ -57,7 +58,11 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
           ),
           title: Text(
             'Maintenance',
-            style: TextStyle(color: AppColors.darkText, fontSize: 20.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.darkText,
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           actions: [
             IconButton(
@@ -69,14 +74,21 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
         body: BlocBuilder<MaintenanceCubit, MaintenanceState>(
           builder: (context, state) {
             final summary = state.summary;
-            
+
             if (summary == null) {
               if (state is MaintenanceLoading || state is MaintenanceSaving) {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is MaintenanceError) {
-                return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                return Center(
+                  child: Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
               }
-              return const Center(child: Text("No maintenance data available."));
+              return const Center(
+                child: Text("No maintenance data available."),
+              );
             }
 
             return Column(
@@ -89,8 +101,16 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildTicketList(summary.items.where((i) => i.status.toUpperCase() != 'RESOLVED').toList()),
-                      _buildTicketList(summary.items.where((i) => i.status.toUpperCase() == 'RESOLVED').toList()),
+                      _buildTicketList(
+                        summary.items
+                            .where((i) => i.status.toUpperCase() != 'RESOLVED')
+                            .toList(),
+                      ),
+                      _buildTicketList(
+                        summary.items
+                            .where((i) => i.status.toUpperCase() == 'RESOLVED')
+                            .toList(),
+                      ),
                     ],
                   ),
                 ),
@@ -113,11 +133,29 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
       padding: EdgeInsets.all(20.w),
       child: Row(
         children: [
-          Expanded(child: _buildSummaryCard('Total', summary.total.toString(), AppColors.primaryBlue)),
+          Expanded(
+            child: _buildSummaryCard(
+              'Total',
+              summary.total.toString(),
+              AppColors.primaryBlue,
+            ),
+          ),
           SizedBox(width: 12.w),
-          Expanded(child: _buildSummaryCard('Open', summary.open.toString(), const Color(0xFFF04438))),
+          Expanded(
+            child: _buildSummaryCard(
+              'Open',
+              summary.open.toString(),
+              const Color(0xFFF04438),
+            ),
+          ),
           SizedBox(width: 12.w),
-          Expanded(child: _buildSummaryCard('Resolved', summary.resolved.toString(), const Color(0xFF12B76A))),
+          Expanded(
+            child: _buildSummaryCard(
+              'Resolved',
+              summary.resolved.toString(),
+              const Color(0xFF12B76A),
+            ),
+          ),
         ],
       ),
     );
@@ -133,9 +171,19 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
       ),
       child: Column(
         children: [
-          Text(count, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: color)),
+          Text(
+            count,
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
           SizedBox(height: 2.h),
-          Text(label, style: TextStyle(fontSize: 12.sp, color: AppColors.greyText)),
+          Text(
+            label,
+            style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+          ),
         ],
       ),
     );
@@ -164,9 +212,16 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.assignment_turned_in_outlined, size: 64.sp, color: Colors.grey.shade300),
+            Icon(
+              Icons.assignment_turned_in_outlined,
+              size: 64.sp,
+              color: Colors.grey.shade300,
+            ),
             SizedBox(height: 16.h),
-            Text('No tickets found', style: TextStyle(fontSize: 16.sp, color: Colors.grey)),
+            Text(
+              'No tickets found',
+              style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+            ),
           ],
         ),
       );
@@ -204,7 +259,11 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
                 ),
                 child: Text(
                   'TICKET #${ticket.id.substring(ticket.id.length - 4).toUpperCase()}',
-                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryBlue,
+                  ),
                 ),
               ),
               _buildStatusBadge(ticket.status),
@@ -213,7 +272,11 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
           SizedBox(height: 12.h),
           Text(
             ticket.title,
-            style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+            style: TextStyle(
+              fontSize: 17.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkText,
+            ),
           ),
           if (ticket.description != null) ...[
             SizedBox(height: 4.h),
@@ -229,17 +292,27 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
           SizedBox(height: 12.h),
           Row(
             children: [
-              Icon(Icons.calendar_today, size: 14.sp, color: AppColors.greyText),
+              Icon(
+                Icons.calendar_today,
+                size: 14.sp,
+                color: AppColors.greyText,
+              ),
               SizedBox(width: 4.w),
               Text(
-                DateFormat('dd MMM, hh:mm a').format(DateTime.parse(ticket.createdAt)),
+                DateFormat(
+                  'dd MMM, hh:mm a',
+                ).format(DateTime.parse(ticket.createdAt)),
                 style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
               ),
               const Spacer(),
               if (ticket.roomId != null)
                 Text(
                   'Room ${ticket.roomId}',
-                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
                 ),
             ],
           ),
@@ -251,9 +324,17 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
                 onPressed: () => _showStatusUpdateSheet(ticket),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: AppColors.primaryBlue),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
                 ),
-                child: Text('Update Status', style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'Update Status',
+                  style: TextStyle(
+                    color: AppColors.primaryBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -265,39 +346,71 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
   Widget _buildStatusBadge(String status) {
     Color color;
     switch (status.toUpperCase()) {
-      case 'OPEN': color = const Color(0xFFF04438); break;
-      case 'IN_PROGRESS': color = const Color(0xFFF79009); break;
-      case 'RESOLVED': color = const Color(0xFF12B76A); break;
-      default: color = AppColors.greyText;
+      case 'OPEN':
+        color = const Color(0xFFF04438);
+        break;
+      case 'IN_PROGRESS':
+        color = const Color(0xFFF79009);
+        break;
+      case 'RESOLVED':
+        color = const Color(0xFF12B76A);
+        break;
+      default:
+        color = AppColors.greyText;
     }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20.r)),
-      child: Text(status.replaceAll('_', ' '), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: color)),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Text(
+        status.replaceAll('_', ' '),
+        style: TextStyle(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
     );
   }
 
   void _showStatusUpdateSheet(Maintenance ticket) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
       builder: (context) => Container(
         padding: EdgeInsets.all(24.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Update Ticket Status', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            Text(
+              'Update Ticket Status',
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            ),
             SizedBox(height: 24.h),
-            _buildStatusOption('IN_PROGRESS', 'Mark as In-Progress', Icons.auto_mode),
-            _buildStatusOption('RESOLVED', 'Mark as Resolved', Icons.check_circle_outline),
+            _buildStatusOption(
+              'IN_PROGRESS',
+              'Mark as In-Progress',
+              Icons.auto_mode,
+            ),
+            _buildStatusOption(
+              'RESOLVED',
+              'Mark as Resolved',
+              Icons.check_circle_outline,
+            ),
             SizedBox(height: 24.h),
           ],
         ),
       ),
     ).then((status) {
       if (status != null) {
-        _cubit.updateIssue(ticket.id, status: status).then((_) => _loadIssues());
+        _cubit
+            .updateIssue(ticket.id, status: status)
+            .then((_) => _loadIssues());
       }
     });
   }
@@ -313,7 +426,7 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
   void _buildCreateTicketDialog() {
     final titleController = TextEditingController();
     final descController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -321,26 +434,39 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
-            TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description')),
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               final hostelState = this.context.read<HostelCubit>().state;
               if (hostelState is HostelLoaded) {
-                _cubit.createIssue(
-                  hostelId: hostelState.hostels[hostelState.selectedHostelIndex].id,
-                  title: titleController.text,
-                  description: descController.text,
-                  status: 'OPEN',
-                ).then((_) {
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-                  _loadIssues();
-                });
+                _cubit
+                    .createIssue(
+                      hostelId: hostelState
+                          .hostels[hostelState.selectedHostelIndex]
+                          .id,
+                      title: titleController.text,
+                      description: descController.text,
+                      status: 'OPEN',
+                    )
+                    .then((_) {
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                      _loadIssues();
+                    });
               }
             },
             child: const Text('Create'),

@@ -25,7 +25,11 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.darkText, size: 18),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.darkText,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -38,13 +42,20 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline_rounded, color: AppColors.darkText, size: 22),
+            icon: const Icon(
+              Icons.help_outline_rounded,
+              color: AppColors.darkText,
+              size: 22,
+            ),
             onPressed: () => _showExplanationDialog(),
           ),
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(1.h),
-          child: Divider(height: 1, color: Colors.black.withValues(alpha: 0.05)),
+          child: Divider(
+            height: 1,
+            color: Colors.black.withValues(alpha: 0.05),
+          ),
         ),
       ),
       body: SafeArea(
@@ -99,9 +110,12 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
       width: double.infinity,
       height: 240.h,
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A), // Dark slate premium card background
+        color: const Color(0xFF0F172A),
         borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.15),
@@ -114,12 +128,8 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
         borderRadius: BorderRadius.circular(22.r),
         child: Stack(
           children: [
-            Positioned.fill(
-              child: CustomPaint(
-                painter: MapGridPainter(),
-              ),
-            ),
-            // Geofence Radius visual (150m boundary)
+            Positioned.fill(child: CustomPaint(painter: MapGridPainter())),
+
             Center(
               child: Container(
                 width: 150.r,
@@ -134,7 +144,7 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
                 ),
               ),
             ),
-            // Outer radar pulse
+
             Center(
               child: Container(
                 width: 200.r,
@@ -148,7 +158,7 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
                 ),
               ),
             ),
-            // Central property location pin
+
             Center(
               child: Container(
                 padding: EdgeInsets.all(10.r),
@@ -170,14 +180,14 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
                 ),
               ),
             ),
-            // Walking tenant representing crossing the boundary
+
             Positioned(
               left: MediaQuery.of(context).size.width * 0.5 - 75.r,
               top: 80.h,
               child: Container(
                 padding: EdgeInsets.all(5.r),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF007AFF), // Premium blue
+                  color: const Color(0xFF007AFF),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -208,9 +218,8 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
             final result = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => MapPickerScreen(
-                  initialLocation: widget.initialLocation,
-                ),
+                builder: (context) =>
+                    MapPickerScreen(initialLocation: widget.initialLocation),
               ),
             );
             if (!mounted) return;
@@ -251,7 +260,9 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
         title: Text('geofence_help_title'.tr()),
         content: Text('geofence_help_content'.tr()),
         actions: [
@@ -281,7 +292,12 @@ class MapGridPainter extends CustomPainter {
       ..moveTo(0, size.height * 0.8)
       ..lineTo(size.width, size.height * 0.2)
       ..moveTo(size.width * 0.15, size.height * 0.9)
-      ..quadraticBezierTo(size.width * 0.5, size.height * 0.5, size.width * 0.85, size.height * 0.1);
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        size.height * 0.5,
+        size.width * 0.85,
+        size.height * 0.1,
+      );
 
     canvas.drawPath(path, paint);
 

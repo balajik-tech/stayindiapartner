@@ -27,24 +27,38 @@ class BookingsCubit extends Cubit<BookingsState> {
     required this.getOccupancyUseCase,
   }) : super(const BookingsState());
 
-  Future<void> fetchBookings({String? kycStatus, String? roomType, String? hostelId}) async {
+  Future<void> fetchBookings({
+    String? kycStatus,
+    String? roomType,
+    String? hostelId,
+  }) async {
     if (isClosed) return;
-    
-    final newKycStatus = kycStatus == null ? state.kycStatus : (kycStatus.isEmpty ? null : kycStatus);
-    final newRoomType = roomType == null ? state.roomType : (roomType.isEmpty ? null : roomType);
+
+    final newKycStatus = kycStatus == null
+        ? state.kycStatus
+        : (kycStatus.isEmpty ? null : kycStatus);
+    final newRoomType = roomType == null
+        ? state.roomType
+        : (roomType.isEmpty ? null : roomType);
     final newHostelId = hostelId ?? state.hostelId;
 
-    emit(state.copyWith(
-      status: BookingsStatus.loading,
-      page: 1,
-      hasMore: true,
-      bookings: [],
-      errorMessage: null,
-      successMessage: null,
-      kycStatus: kycStatus == null ? state.kycStatus : (kycStatus.isEmpty ? null : kycStatus),
-      roomType: roomType == null ? state.roomType : (roomType.isEmpty ? null : roomType),
-      hostelId: newHostelId,
-    ));
+    emit(
+      state.copyWith(
+        status: BookingsStatus.loading,
+        page: 1,
+        hasMore: true,
+        bookings: [],
+        errorMessage: null,
+        successMessage: null,
+        kycStatus: kycStatus == null
+            ? state.kycStatus
+            : (kycStatus.isEmpty ? null : kycStatus),
+        roomType: roomType == null
+            ? state.roomType
+            : (roomType.isEmpty ? null : roomType),
+        hostelId: newHostelId,
+      ),
+    );
     try {
       final bookings = await getBookingsUseCase.execute(
         page: 1,
@@ -53,17 +67,21 @@ class BookingsCubit extends Cubit<BookingsState> {
         hostelId: newHostelId,
       );
       if (isClosed) return;
-      emit(state.copyWith(
-        status: BookingsStatus.success,
-        bookings: bookings,
-        hasMore: bookings.length >= 10,
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.success,
+          bookings: bookings,
+          hasMore: bookings.length >= 10,
+        ),
+      );
     } catch (e) {
       if (!isClosed) {
-        emit(state.copyWith(
-          status: BookingsStatus.failure,
-          errorMessage: ErrorHelper.toFriendlyMessage(e),
-        ));
+        emit(
+          state.copyWith(
+            status: BookingsStatus.failure,
+            errorMessage: ErrorHelper.toFriendlyMessage(e),
+          ),
+        );
       }
     }
   }
@@ -82,19 +100,23 @@ class BookingsCubit extends Cubit<BookingsState> {
         hostelId: state.hostelId,
       );
       if (isClosed) return;
-      emit(state.copyWith(
-        status: BookingsStatus.success,
-        bookings: [...state.bookings, ...newBookings],
-        page: nextPage,
-        hasMore: newBookings.length >= 10,
-        isLoadMore: false,
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.success,
+          bookings: [...state.bookings, ...newBookings],
+          page: nextPage,
+          hasMore: newBookings.length >= 10,
+          isLoadMore: false,
+        ),
+      );
     } catch (e) {
       if (!isClosed) {
-        emit(state.copyWith(
-          isLoadMore: false,
-          errorMessage: 'Could not load more bookings',
-        ));
+        emit(
+          state.copyWith(
+            isLoadMore: false,
+            errorMessage: 'Could not load more bookings',
+          ),
+        );
       }
     }
   }
@@ -103,63 +125,98 @@ class BookingsCubit extends Cubit<BookingsState> {
     fetchBookings(kycStatus: kycStatus, roomType: roomType);
   }
 
-  Future<void> scanBooking(String token, {String? hostelId, String? bookingId}) async {
-    emit(state.copyWith(
+  Future<void> scanBooking(
+    String token, {
+    String? hostelId,
+    String? bookingId,
+  }) async {
+    emit(
+      state.copyWith(
         status: BookingsStatus.loading,
         errorMessage: null,
         successMessage: null,
-      ));
+      ),
+    );
     try {
-      final response = await scanBookingUseCase.execute(token, hostelId: hostelId, bookingId: bookingId);
-      emit(state.copyWith(
-        status: BookingsStatus.success,
-        scannedBooking: response,
-      ));
+      final response = await scanBookingUseCase.execute(
+        token,
+        hostelId: hostelId,
+        bookingId: bookingId,
+      );
+      emit(
+        state.copyWith(
+          status: BookingsStatus.success,
+          scannedBooking: response,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: BookingsStatus.failure,
-        errorMessage: ErrorHelper.toFriendlyMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.failure,
+          errorMessage: ErrorHelper.toFriendlyMessage(e),
+        ),
+      );
     }
   }
 
-  Future<void> manualCheckin(String accessCode, {String? hostelId, String? bookingId}) async {
-    emit(state.copyWith(
-      status: BookingsStatus.loading,
-      errorMessage: null,
-      successMessage: null,
-    ));
+  Future<void> manualCheckin(
+    String accessCode, {
+    String? hostelId,
+    String? bookingId,
+  }) async {
+    emit(
+      state.copyWith(
+        status: BookingsStatus.loading,
+        errorMessage: null,
+        successMessage: null,
+      ),
+    );
     try {
-      final response = await scanBookingUseCase.execute(accessCode, hostelId: hostelId, bookingId: bookingId, isManual: true);
-      emit(state.copyWith(
-        status: BookingsStatus.success,
-        scannedBooking: response,
-      ));
+      final response = await scanBookingUseCase.execute(
+        accessCode,
+        hostelId: hostelId,
+        bookingId: bookingId,
+        isManual: true,
+      );
+      emit(
+        state.copyWith(
+          status: BookingsStatus.success,
+          scannedBooking: response,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: BookingsStatus.failure,
-        errorMessage: ErrorHelper.toFriendlyMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.failure,
+          errorMessage: ErrorHelper.toFriendlyMessage(e),
+        ),
+      );
     }
   }
 
   Future<void> fetchOccupancy(String hostelId) async {
-    emit(state.copyWith(
-      status: BookingsStatus.loading,
-      errorMessage: null,
-      successMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: BookingsStatus.loading,
+        errorMessage: null,
+        successMessage: null,
+      ),
+    );
     try {
       final summary = await getOccupancyUseCase(hostelId);
-      emit(state.copyWith(
-        status: BookingsStatus.success,
-        occupancy: summary as OccupancyModel,
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.success,
+          occupancy: summary as OccupancyModel,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: BookingsStatus.failure,
-        errorMessage: ErrorHelper.toFriendlyMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.failure,
+          errorMessage: ErrorHelper.toFriendlyMessage(e),
+        ),
+      );
     }
   }
 
@@ -171,11 +228,13 @@ class BookingsCubit extends Cubit<BookingsState> {
     List<Map<String, String>>? documents,
   }) async {
     if (isClosed) return;
-    emit(state.copyWith(
-      status: BookingsStatus.loading,
-      errorMessage: null,
-      successMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: BookingsStatus.loading,
+        errorMessage: null,
+        successMessage: null,
+      ),
+    );
     try {
       await finalizeCheckinUseCase.execute(
         bookingId: bookingId,
@@ -185,17 +244,27 @@ class BookingsCubit extends Cubit<BookingsState> {
         documents: documents,
       );
       if (isClosed) return;
-      emit(state.copyWith(
-        status: BookingsStatus.success,
-        successMessage: 'Check-in finalized successfully!',
-        bookings: state.bookings.map((b) => b.id == bookingId ? b.copyWith(status: BookingStatus.checkedIn) : b).toList(),
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.success,
+          successMessage: 'Check-in finalized successfully!',
+          bookings: state.bookings
+              .map(
+                (b) => b.id == bookingId
+                    ? b.copyWith(status: BookingStatus.checkedIn)
+                    : b,
+              )
+              .toList(),
+        ),
+      );
     } catch (e) {
       if (!isClosed) {
-        emit(state.copyWith(
-          status: BookingsStatus.failure,
-          errorMessage: ErrorHelper.toFriendlyMessage(e),
-        ));
+        emit(
+          state.copyWith(
+            status: BookingsStatus.failure,
+            errorMessage: ErrorHelper.toFriendlyMessage(e),
+          ),
+        );
       }
     }
   }
@@ -206,17 +275,27 @@ class BookingsCubit extends Cubit<BookingsState> {
     try {
       await checkoutBookingUseCase.execute(bookingId);
       if (isClosed) return;
-      emit(state.copyWith(
-        status: BookingsStatus.success,
-        successMessage: 'Checked out successfully!',
-        bookings: state.bookings.map((b) => b.id == bookingId ? b.copyWith(status: BookingStatus.checkedOut) : b).toList(),
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.success,
+          successMessage: 'Checked out successfully!',
+          bookings: state.bookings
+              .map(
+                (b) => b.id == bookingId
+                    ? b.copyWith(status: BookingStatus.checkedOut)
+                    : b,
+              )
+              .toList(),
+        ),
+      );
     } catch (e) {
       if (!isClosed) {
-        emit(state.copyWith(
-          status: BookingsStatus.failure,
-          errorMessage: ErrorHelper.toFriendlyMessage(e),
-        ));
+        emit(
+          state.copyWith(
+            status: BookingsStatus.failure,
+            errorMessage: ErrorHelper.toFriendlyMessage(e),
+          ),
+        );
       }
     }
   }
@@ -227,17 +306,27 @@ class BookingsCubit extends Cubit<BookingsState> {
     try {
       await cancelBookingUseCase.execute(bookingId);
       if (isClosed) return;
-      emit(state.copyWith(
-        status: BookingsStatus.success,
-        successMessage: 'Booking cancelled successfully!',
-        bookings: state.bookings.map((b) => b.id == bookingId ? b.copyWith(status: BookingStatus.cancelled) : b).toList(),
-      ));
+      emit(
+        state.copyWith(
+          status: BookingsStatus.success,
+          successMessage: 'Booking cancelled successfully!',
+          bookings: state.bookings
+              .map(
+                (b) => b.id == bookingId
+                    ? b.copyWith(status: BookingStatus.cancelled)
+                    : b,
+              )
+              .toList(),
+        ),
+      );
     } catch (e) {
       if (!isClosed) {
-        emit(state.copyWith(
-          status: BookingsStatus.failure,
-          errorMessage: ErrorHelper.toFriendlyMessage(e),
-        ));
+        emit(
+          state.copyWith(
+            status: BookingsStatus.failure,
+            errorMessage: ErrorHelper.toFriendlyMessage(e),
+          ),
+        );
       }
     }
   }

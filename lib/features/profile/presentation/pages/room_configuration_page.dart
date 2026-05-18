@@ -64,17 +64,26 @@ class _RoomConfigurationView extends StatelessWidget {
             child: Center(
               child: ElevatedButton.icon(
                 onPressed: () {
-                  final ownerId = context.read<AuthCubit>().currentOwner?.id ?? '';
+                  final ownerId =
+                      context.read<AuthCubit>().currentOwner?.id ?? '';
                   final hostelId = _hostelId(context);
                   if (ownerId.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Owner session expired. Please login again.')),
+                      const SnackBar(
+                        content: Text(
+                          'Owner session expired. Please login again.',
+                        ),
+                      ),
                     );
                     return;
                   }
                   if (hostelId.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No hostel found. Please complete your hostel profile first.')),
+                      const SnackBar(
+                        content: Text(
+                          'No hostel found. Please complete your hostel profile first.',
+                        ),
+                      ),
                     );
                     return;
                   }
@@ -83,20 +92,21 @@ class _RoomConfigurationView extends StatelessWidget {
                     roomCubit: context.read<RoomCubit>(),
                     onSave: (data) async {
                       final hostelId = _hostelId(context);
-                      final ownerId = context.read<AuthCubit>().currentOwner?.id ?? '';
+                      final ownerId =
+                          context.read<AuthCubit>().currentOwner?.id ?? '';
                       await context.read<RoomCubit>().createRoom(
-                            hostelId: hostelId,
-                            ownerId: ownerId,
-                            roomTypename: data['roomTypename'],
-                            floor: data['floor'],
-                            sharingType: data['sharingType'],
-                            roomType: data['roomType'],
-                            rent: data['rent'],
-                            dailyRent: data['dailyRent'],
-                            deposit: data['deposit'],
-                            maintenance: data['maintenance'],
-                            isMaster: false,
-                          );
+                        hostelId: hostelId,
+                        ownerId: ownerId,
+                        roomTypename: data['roomTypename'],
+                        floor: data['floor'],
+                        sharingType: data['sharingType'],
+                        roomType: data['roomType'],
+                        rent: data['rent'],
+                        dailyRent: data['dailyRent'],
+                        deposit: data['deposit'],
+                        maintenance: data['maintenance'],
+                        isMaster: false,
+                      );
                     },
                   );
                 },
@@ -135,17 +145,17 @@ class _RoomConfigurationView extends StatelessWidget {
       body: BlocConsumer<RoomCubit, RoomState>(
         listener: (context, state) {
           if (state is RoomOperationSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
             final hostelId = _hostelId(context);
             if (hostelId.isNotEmpty) {
               context.read<DashboardCubit>().fetchDashboardData(hostelId);
             }
           } else if (state is RoomError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
@@ -154,12 +164,14 @@ class _RoomConfigurationView extends StatelessWidget {
           }
           if (state is RoomError) {
             return Center(
-              child: Text(state.message,
-                  style: const TextStyle(color: Colors.red)),
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Colors.red),
+              ),
             );
           }
-           final allRooms = state is RoomLoaded ? state.rooms : <RoomDetail>[];
-           final rooms = allRooms.where((r) => !r.isMaster).toList();
+          final allRooms = state is RoomLoaded ? state.rooms : <RoomDetail>[];
+          final rooms = allRooms.where((r) => !r.isMaster).toList();
           if (rooms.isEmpty) {
             return Center(
               child: Text(
@@ -183,8 +195,7 @@ class _RoomConfigurationView extends StatelessWidget {
   }
 
   Widget _buildRoomCard(BuildContext context, RoomDetail room) {
-    final floorLabel =
-        room.floor == 0 ? 'Ground Floor' : 'Floor ${room.floor}';
+    final floorLabel = room.floor == 0 ? 'Ground Floor' : 'Floor ${room.floor}';
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -258,7 +269,7 @@ class _RoomConfigurationView extends StatelessWidget {
                             maintenance: data['maintenance'],
                             isActive: room.isActive,
                             isMaster: false,
-                            capacity: room.capacity, 
+                            capacity: room.capacity,
                             beds: room.beds,
                           );
                           await context.read<RoomCubit>().updateRoom(updated);
@@ -324,8 +335,7 @@ class _RoomConfigurationView extends StatelessWidget {
       children: [
         Text(
           label,
-          style:
-              TextStyle(fontSize: 12.sp, color: const Color(0xFF667085)),
+          style: TextStyle(fontSize: 12.sp, color: const Color(0xFF667085)),
         ),
         Text(
           value,
@@ -344,8 +354,9 @@ class _RoomConfigurationView extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Room'),
-        content:
-            Text('Are you sure you want to delete "${room.roomTypename}"?'),
+        content: Text(
+          'Are you sure you want to delete "${room.roomTypename}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -356,8 +367,7 @@ class _RoomConfigurationView extends StatelessWidget {
               Navigator.pop(dialogContext);
               context.read<RoomCubit>().deleteRoom(room.id, isMaster: false);
             },
-            child:
-                const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

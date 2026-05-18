@@ -40,7 +40,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   final _rulesController = TextEditingController();
   final _fullNameController = TextEditingController();
   final _phoneController = TextEditingController();
-  
+
   File? _profileImage;
   File? _coverImage;
   File? _govtCertificate;
@@ -77,21 +77,33 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     if (pickedFile != null) {
       final croppedFile = await cropper.ImageCropper().cropImage(
         sourcePath: pickedFile.path,
-        aspectRatio: isCover ? const cropper.CropAspectRatio(ratioX: 16, ratioY: 9) : const cropper.CropAspectRatio(ratioX: 1, ratioY: 1),
+        aspectRatio: isCover
+            ? const cropper.CropAspectRatio(ratioX: 16, ratioY: 9)
+            : const cropper.CropAspectRatio(ratioX: 1, ratioY: 1),
         uiSettings: [
           cropper.AndroidUiSettings(
-            toolbarTitle: isCover ? 'crop_cover_photo'.tr() : 'crop_profile_photo'.tr(),
+            toolbarTitle: isCover
+                ? 'crop_cover_photo'.tr()
+                : 'crop_profile_photo'.tr(),
             toolbarColor: AppColors.primaryBlue,
             toolbarWidgetColor: Colors.white,
-            initAspectRatio: isCover ? cropper.CropAspectRatioPreset.ratio16x9 : cropper.CropAspectRatioPreset.square,
+            initAspectRatio: isCover
+                ? cropper.CropAspectRatioPreset.ratio16x9
+                : cropper.CropAspectRatioPreset.square,
             lockAspectRatio: true,
-            cropStyle: isCover ? cropper.CropStyle.rectangle : cropper.CropStyle.circle,
+            cropStyle: isCover
+                ? cropper.CropStyle.rectangle
+                : cropper.CropStyle.circle,
           ),
           cropper.IOSUiSettings(
-            title: isCover ? 'crop_cover_photo'.tr() : 'crop_profile_photo'.tr(),
+            title: isCover
+                ? 'crop_cover_photo'.tr()
+                : 'crop_profile_photo'.tr(),
             aspectRatioLockEnabled: true,
             resetAspectRatioEnabled: false,
-            cropStyle: isCover ? cropper.CropStyle.rectangle : cropper.CropStyle.circle,
+            cropStyle: isCover
+                ? cropper.CropStyle.rectangle
+                : cropper.CropStyle.circle,
           ),
         ],
       );
@@ -116,7 +128,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     if (pickedFile != null) {
       final croppedFile = await cropper.ImageCropper().cropImage(
         sourcePath: pickedFile.path,
-        aspectRatio: const cropper.CropAspectRatio(ratioX: 1, ratioY: 1.41), 
+        aspectRatio: const cropper.CropAspectRatio(ratioX: 1, ratioY: 1.41),
         uiSettings: [
           cropper.AndroidUiSettings(
             toolbarTitle: 'crop_certificate'.tr(),
@@ -125,9 +137,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             initAspectRatio: cropper.CropAspectRatioPreset.original,
             lockAspectRatio: false,
           ),
-          cropper.IOSUiSettings(
-            title: 'crop_certificate'.tr(),
-          ),
+          cropper.IOSUiSettings(title: 'crop_certificate'.tr()),
         ],
       );
 
@@ -158,9 +168,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           initAspectRatio: cropper.CropAspectRatioPreset.original,
           lockAspectRatio: false,
         ),
-        cropper.IOSUiSettings(
-          title: 'crop_certificate'.tr(),
-        ),
+        cropper.IOSUiSettings(title: 'crop_certificate'.tr()),
       ],
     );
 
@@ -184,18 +192,18 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           children: [
             Center(
               child: InteractiveViewer(
-                child: Image.file(
-                  file,
-                  fit: BoxFit.contain,
-                  cacheWidth: 1080,
-                ),
+                child: Image.file(file, fit: BoxFit.contain, cacheWidth: 1080),
               ),
             ),
             Positioned(
               top: 40,
               left: 20,
               child: IconButton(
-                icon: const Icon(Icons.close_rounded, color: Colors.white, size: 32),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -215,11 +223,14 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('community_created_success'.tr())),
             );
-            Navigator.pop(context); 
-            Navigator.pop(context); 
+            Navigator.pop(context);
+            Navigator.pop(context);
           } else if (state is OwnerCommunityError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -276,20 +287,23 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
               ),
             ),
             child: _coverImage != null
-                ? Image.file(
-                    _coverImage!,
-                    fit: BoxFit.cover,
-                    cacheWidth: 600,
-                  )
+                ? Image.file(_coverImage!, fit: BoxFit.cover, cacheWidth: 600)
                 : Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add_a_photo_rounded, color: Colors.white.withValues(alpha: 0.6), size: 32.sp),
+                        Icon(
+                          Icons.add_a_photo_rounded,
+                          color: Colors.white.withValues(alpha: 0.6),
+                          size: 32.sp,
+                        ),
                         SizedBox(height: 8.h),
                         Text(
                           'add_cover_photo'.tr(),
-                          style: GoogleFonts.outfit(color: Colors.white.withValues(alpha: 0.8), fontWeight: FontWeight.w600),
+                          style: GoogleFonts.outfit(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
@@ -311,13 +325,25 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           bottom: 20,
           left: 24.w,
           child: Text(
-            'create_community_title'.tr(namedArgs: {'level': widget.level.toLowerCase() == 'state' ? 'level_state'.tr() : (widget.level.toLowerCase() == 'district' ? 'level_district'.tr() : 'level_ward'.tr())}),
+            'create_community_title'.tr(
+              namedArgs: {
+                'level': widget.level.toLowerCase() == 'state'
+                    ? 'level_state'.tr()
+                    : (widget.level.toLowerCase() == 'district'
+                          ? 'level_district'.tr()
+                          : 'level_ward'.tr()),
+              },
+            ),
             style: GoogleFonts.outfit(
               color: Colors.white,
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
               shadows: [
-                Shadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 2)),
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
           ),
@@ -353,15 +379,26 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                             cacheHeight: 160,
                           ),
                         )
-                      : Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 36.sp),
+                      : Icon(
+                          Icons.groups_rounded,
+                          color: AppColors.primaryBlue,
+                          size: 36.sp,
+                        ),
                 ),
                 Positioned(
                   bottom: 0,
                   right: 0,
                   child: Container(
                     padding: EdgeInsets.all(4.w),
-                    decoration: const BoxDecoration(color: AppColors.primaryBlue, shape: BoxShape.circle),
-                    child: Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14.sp),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryBlue,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.camera_alt_rounded,
+                      color: Colors.white,
+                      size: 14.sp,
+                    ),
                   ),
                 ),
               ],
@@ -382,7 +419,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       ),
       child: Row(
         children: [
-          Icon(Icons.location_on_rounded, color: AppColors.primaryBlue, size: 20.sp),
+          Icon(
+            Icons.location_on_rounded,
+            color: AppColors.primaryBlue,
+            size: 20.sp,
+          ),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -390,11 +431,19 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
               children: [
                 Text(
                   'community_location'.tr(),
-                  style: GoogleFonts.outfit(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.greyText),
+                  style: GoogleFonts.outfit(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.greyText,
+                  ),
                 ),
                 Text(
                   widget.locationSummary,
-                  style: GoogleFonts.outfit(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+                  style: GoogleFonts.outfit(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
+                  ),
                 ),
               ],
             ),
@@ -440,7 +489,10 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           maxLines: 3,
         ),
         SizedBox(height: 32.h),
-        _buildSectionHeader('exec_verification_title'.tr(), 'exec_verification_desc'.tr()),
+        _buildSectionHeader(
+          'exec_verification_title'.tr(),
+          'exec_verification_desc'.tr(),
+        ),
         SizedBox(height: 20.h),
         _buildDropdownField(
           label: 'designated_role_label'.tr(),
@@ -478,7 +530,9 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           validator: (val) {
             if (val == null || val.isEmpty) return 'phone_len_err'.tr();
             if (val.length != 10) return 'phone_len_err'.tr();
-            if (!RegExp(r'^[6-9]').hasMatch(val)) return 'phone_invalid_err'.tr();
+            if (!RegExp(r'^[6-9]').hasMatch(val)) {
+              return 'phone_invalid_err'.tr();
+            }
             return null;
           },
         ),
@@ -509,7 +563,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             padding: EdgeInsets.only(top: 12.h, left: 4.w),
             child: Text(
               'certs_mandatory_msg'.tr(),
-              style: GoogleFonts.outfit(fontSize: 11.sp, color: Colors.red.shade400, fontWeight: FontWeight.w600),
+              style: GoogleFonts.outfit(
+                fontSize: 11.sp,
+                color: Colors.red.shade400,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
       ],
@@ -522,13 +580,21 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       children: [
         Text(
           title,
-          style: GoogleFonts.outfit(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+          style: GoogleFonts.outfit(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.darkText,
+          ),
         ),
         if (desc.isNotEmpty) ...[
           SizedBox(height: 4.h),
           Text(
             desc,
-            style: GoogleFonts.outfit(fontSize: 13.sp, color: AppColors.greyText, height: 1.4),
+            style: GoogleFonts.outfit(
+              fontSize: 13.sp,
+              color: AppColors.greyText,
+              height: 1.4,
+            ),
           ),
         ],
       ],
@@ -547,30 +613,52 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
+          style: GoogleFonts.outfit(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkText,
+          ),
         ),
         SizedBox(height: 8.h),
         DropdownButtonFormField<String>(
           isExpanded: true,
           initialValue: value,
-          items: items.map((role) => DropdownMenuItem(
-            value: role,
-            child: Text(
-              role,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: GoogleFonts.outfit(fontSize: 15.sp, fontWeight: FontWeight.w500, color: AppColors.darkText),
-            ),
-          )).toList(),
+          items: items
+              .map(
+                (role) => DropdownMenuItem(
+                  value: role,
+                  child: Text(
+                    role,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: GoogleFonts.outfit(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.darkText,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
           onChanged: onChanged,
           validator: validator,
           decoration: InputDecoration(
             filled: true,
             fillColor: const Color(0xFFF1F5F9),
             hintText: 'select_role_hint'.tr(),
-            hintStyle: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 14.sp),
-            prefixIcon: Icon(Icons.badge_rounded, color: Colors.grey.shade400, size: 20.sp),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+            hintStyle: GoogleFonts.outfit(
+              color: Colors.grey.shade400,
+              fontSize: 14.sp,
+            ),
+            prefixIcon: Icon(
+              Icons.badge_rounded,
+              color: Colors.grey.shade400,
+              size: 20.sp,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
             contentPadding: EdgeInsets.all(16.w),
           ),
           dropdownColor: Colors.white,
@@ -595,7 +683,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
+          style: GoogleFonts.outfit(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkText,
+          ),
         ),
         SizedBox(height: 8.h),
         TextFormField(
@@ -604,14 +696,23 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           validator: validator,
-          style: GoogleFonts.outfit(fontSize: 15.sp, fontWeight: FontWeight.w500),
+          style: GoogleFonts.outfit(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w500,
+          ),
           decoration: InputDecoration(
             filled: true,
             fillColor: const Color(0xFFF1F5F9),
             hintText: hint,
-            hintStyle: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 14.sp),
+            hintStyle: GoogleFonts.outfit(
+              color: Colors.grey.shade400,
+              fontSize: 14.sp,
+            ),
             prefixIcon: Icon(icon, color: Colors.grey.shade400, size: 20.sp),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16.r),
+              borderSide: BorderSide.none,
+            ),
             contentPadding: EdgeInsets.all(16.w),
             errorStyle: GoogleFonts.outfit(fontSize: 12.sp, color: Colors.red),
           ),
@@ -628,7 +729,9 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     return Column(
       children: [
         GestureDetector(
-          onTap: file != null ? () => _viewFullScreen(file) : () => _pickCertificate(isGovt),
+          onTap: file != null
+              ? () => _viewFullScreen(file)
+              : () => _pickCertificate(isGovt),
           child: Container(
             height: 140.h,
             width: double.infinity,
@@ -636,23 +739,27 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
               color: file != null ? Colors.white : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
-                color: file != null ? AppColors.primaryBlue.withValues(alpha: 0.2) : Colors.transparent,
+                color: file != null
+                    ? AppColors.primaryBlue.withValues(alpha: 0.2)
+                    : Colors.transparent,
                 width: 1.5,
               ),
-              boxShadow: file != null ? [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
-              ] : [],
+              boxShadow: file != null
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : [],
             ),
             clipBehavior: Clip.antiAlias,
             child: file != null
                 ? Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.file(
-                        file,
-                        fit: BoxFit.cover,
-                        cacheWidth: 300,
-                      ),
+                      Image.file(file, fit: BoxFit.cover, cacheWidth: 300),
                       Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -667,7 +774,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                         ),
                       ),
                       Center(
-                        child: Icon(Icons.fullscreen_rounded, color: Colors.white, size: 28.sp),
+                        child: Icon(
+                          Icons.fullscreen_rounded,
+                          color: Colors.white,
+                          size: 28.sp,
+                        ),
                       ),
                     ],
                   )
@@ -680,12 +791,20 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                           color: AppColors.primaryBlue.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.upload_file_rounded, color: AppColors.primaryBlue, size: 24.sp),
+                        child: Icon(
+                          Icons.upload_file_rounded,
+                          color: AppColors.primaryBlue,
+                          size: 24.sp,
+                        ),
                       ),
                       SizedBox(height: 12.h),
                       Text(
                         'tap_to_upload'.tr(),
-                        style: GoogleFonts.outfit(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.primaryBlue),
+                        style: GoogleFonts.outfit(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryBlue,
+                        ),
                       ),
                     ],
                   ),
@@ -695,7 +814,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: GoogleFonts.outfit(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+          style: GoogleFonts.outfit(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.darkText,
+          ),
         ),
         if (file != null) ...[
           SizedBox(height: 8.h),
@@ -740,7 +863,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             SizedBox(width: 4.w),
             Text(
               label,
-              style: GoogleFonts.outfit(fontSize: 11.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
+              style: GoogleFonts.outfit(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkText,
+              ),
             ),
           ],
         ),
@@ -754,11 +881,20 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         final isLoading = state is OwnerCommunityLoaded && state.isCreating;
 
         return Container(
-          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, MediaQuery.of(context).padding.bottom + 12.h),
+          padding: EdgeInsets.fromLTRB(
+            24.w,
+            12.h,
+            24.w,
+            MediaQuery.of(context).padding.bottom + 12.h,
+          ),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, -5)),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
             ],
           ),
           child: BouncingWrapper(
@@ -769,15 +905,30 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                 color: AppColors.primaryBlue,
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
-                  BoxShadow(color: AppColors.primaryBlue.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4)),
+                  BoxShadow(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               child: Center(
                 child: isLoading
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : Text(
                         'submit_for_verification'.tr(),
-                        style: GoogleFonts.outfit(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w800),
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
               ),
             ),
@@ -789,9 +940,13 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
   void _handleCreate() {
     if (!_formKey.currentState!.validate()) return;
-    
+
     if (_govtCertificate == null || _associationCertificate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Both certificates are required for verification')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Both certificates are required for verification'),
+        ),
+      );
       return;
     }
 
@@ -816,5 +971,6 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 }
 
 extension StringExtension on String {
-  String capitalize() => "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
+  String capitalize() =>
+      "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
 }

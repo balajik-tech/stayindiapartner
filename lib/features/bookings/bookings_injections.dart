@@ -10,14 +10,16 @@ import 'domain/usecases/cancel_booking_usecase.dart';
 import 'cubit/bookings_cubit.dart';
 
 void registerBookingsFeature(GetIt sl) {
-  sl.registerFactory(() => BookingsCubit(
-        getBookingsUseCase: sl(),
-        scanBookingUseCase: sl(),
-        finalizeCheckinUseCase: sl(),
-        checkoutBookingUseCase: sl(),
-        cancelBookingUseCase: sl(),
-        getOccupancyUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => BookingsCubit(
+      getBookingsUseCase: sl(),
+      scanBookingUseCase: sl(),
+      finalizeCheckinUseCase: sl(),
+      checkoutBookingUseCase: sl(),
+      cancelBookingUseCase: sl(),
+      getOccupancyUseCase: sl(),
+    ),
+  );
 
   sl.registerLazySingleton(() => GetBookingsUseCase(repository: sl()));
   sl.registerLazySingleton(() => ScanBookingUseCase(repository: sl()));

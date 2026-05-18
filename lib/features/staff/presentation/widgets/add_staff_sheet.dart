@@ -23,13 +23,18 @@ class AddStaffSheet extends StatefulWidget {
     required this.onAdded,
   });
 
-  static void show(BuildContext context,
-      {required String hostelId, Staff? staff, required VoidCallback onAdded}) {
+  static void show(
+    BuildContext context, {
+    required String hostelId,
+    Staff? staff,
+    required VoidCallback onAdded,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => AddStaffSheet(hostelId: hostelId, staff: staff, onAdded: onAdded),
+      builder: (context) =>
+          AddStaffSheet(hostelId: hostelId, staff: staff, onAdded: onAdded),
     );
   }
 
@@ -44,8 +49,7 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _salaryController = TextEditingController();
-  
-  
+
   final _upiController = TextEditingController();
   final _bankNameController = TextEditingController();
   final _accountNoController = TextEditingController();
@@ -83,13 +87,14 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
       _emailController.text = widget.staff!.email ?? '';
       _salaryController.text = widget.staff!.salary.toString();
       _photoUrl = widget.staff!.photo;
-      
+
       if (widget.staff!.paymentDetails != null) {
         _upiController.text = widget.staff!.paymentDetails!.upiId;
         _bankNameController.text = widget.staff!.paymentDetails!.bankName;
         _accountNoController.text = widget.staff!.paymentDetails!.accountNumber;
         _ifscController.text = widget.staff!.paymentDetails!.ifscCode;
-        _beneficiaryController.text = widget.staff!.paymentDetails!.beneficiaryName;
+        _beneficiaryController.text =
+            widget.staff!.paymentDetails!.beneficiaryName;
       }
 
       final reverseRoleMap = {
@@ -106,8 +111,11 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
   Future<void> _pickImage() async {
     final staffCubit = context.read<StaffCubit>();
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
     if (pickedFile != null) {
       setState(() {
         _localImage = File(pickedFile.path);
@@ -127,7 +135,11 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
         if (!mounted) return;
         setState(() => _isUploading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(StringUtils.translate('upload_failed_msg', context: context))),
+          SnackBar(
+            content: Text(
+              StringUtils.translate('upload_failed_msg', context: context),
+            ),
+          ),
         );
       }
     }
@@ -141,7 +153,17 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
           Navigator.pop(context);
           widget.onAdded();
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(StringUtils.translate(widget.staff != null ? 'staff_updated_msg' : 'staff_added_msg', context: context)), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text(
+                StringUtils.translate(
+                  widget.staff != null
+                      ? 'staff_updated_msg'
+                      : 'staff_added_msg',
+                  context: context,
+                ),
+              ),
+              backgroundColor: Colors.green,
+            ),
           );
         } else if (state is StaffError) {
           AppLogger.error('AddStaffSheet error: ${state.message}');
@@ -161,7 +183,14 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
             _buildHandle(),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h),
+                padding: EdgeInsets.fromLTRB(
+                  24.w,
+                  8.h,
+                  24.w,
+                  MediaQuery.of(context).viewInsets.bottom +
+                      MediaQuery.of(context).padding.bottom +
+                      24.h,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -171,39 +200,84 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
                       SizedBox(height: 32.h),
                       _buildPhotoUploader(),
                       SizedBox(height: 32.h),
-                      _buildSectionTitle(StringUtils.translate('personal_info_section', context: context)),
+                      _buildSectionTitle(
+                        StringUtils.translate(
+                          'personal_info_section',
+                          context: context,
+                        ),
+                      ),
                       SizedBox(height: 16.h),
                       _buildTextField(
                         controller: _nameController,
-                        label: StringUtils.translate('full_name_label', context: context),
-                        hint: StringUtils.translate('enter_staff_name_hint', context: context),
+                        label: StringUtils.translate(
+                          'full_name_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'enter_staff_name_hint',
+                          context: context,
+                        ),
                         icon: Icons.person_rounded,
-                        validator: (v) => v?.isEmpty == true ? StringUtils.translate('name_required_error', context: context) : null,
+                        validator: (v) => v?.isEmpty == true
+                            ? StringUtils.translate(
+                                'name_required_error',
+                                context: context,
+                              )
+                            : null,
                       ),
                       SizedBox(height: 20.h),
                       _buildTextField(
                         controller: _phoneController,
-                        label: StringUtils.translate('phone_number_label', context: context),
-                        hint: StringUtils.translate('mobile_hint', context: context),
+                        label: StringUtils.translate(
+                          'phone_number_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'mobile_hint',
+                          context: context,
+                        ),
                         icon: Icons.phone_rounded,
                         keyboardType: TextInputType.phone,
                         validator: (v) {
-                          if (v == null || v.isEmpty) return StringUtils.translate('phone_required_error', context: context);
-                          if (v.length != 10) return StringUtils.translate('phone_invalid_error', context: context);
+                          if (v == null || v.isEmpty) {
+                            return StringUtils.translate(
+                              'phone_required_error',
+                              context: context,
+                            );
+                          }
+                          if (v.length != 10) {
+                            return StringUtils.translate(
+                              'phone_invalid_error',
+                              context: context,
+                            );
+                          }
                           return null;
                         },
                       ),
                       SizedBox(height: 20.h),
                       _buildTextField(
                         controller: _emailController,
-                        label: StringUtils.translate('email_optional_label', context: context),
-                        hint: StringUtils.translate('email_hint', context: context),
+                        label: StringUtils.translate(
+                          'email_optional_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'email_hint',
+                          context: context,
+                        ),
                         icon: Icons.email_rounded,
                         keyboardType: TextInputType.emailAddress,
                         validator: (v) {
                           if (v != null && v.isNotEmpty) {
-                            final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                            if (!emailRegExp.hasMatch(v)) return StringUtils.translate('email_invalid_error', context: context);
+                            final emailRegExp = RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            );
+                            if (!emailRegExp.hasMatch(v)) {
+                              return StringUtils.translate(
+                                'email_invalid_error',
+                                context: context,
+                              );
+                            }
                           }
                           return null;
                         },
@@ -211,74 +285,155 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
                       SizedBox(height: 20.h),
                       _buildTextField(
                         controller: _salaryController,
-                        label: StringUtils.translate('monthly_salary_label', context: context),
-                        hint: StringUtils.translate('salary_hint', context: context),
+                        label: StringUtils.translate(
+                          'monthly_salary_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'salary_hint',
+                          context: context,
+                        ),
                         icon: Icons.currency_rupee_rounded,
                         keyboardType: TextInputType.number,
                       ),
-                      
+
                       SizedBox(height: 32.h),
-                      _buildSectionTitle(StringUtils.translate('access_credentials_section', context: context)),
+                      _buildSectionTitle(
+                        StringUtils.translate(
+                          'access_credentials_section',
+                          context: context,
+                        ),
+                      ),
                       SizedBox(height: 16.h),
                       _buildTextField(
                         controller: _passwordController,
-                        label: widget.staff != null ? StringUtils.translate('new_password_optional_label', context: context) : StringUtils.translate('password_label', context: context),
-                        hint: widget.staff != null ? StringUtils.translate('leave_blank_hint', context: context) : StringUtils.translate('password_hint', context: context),
+                        label: widget.staff != null
+                            ? StringUtils.translate(
+                                'new_password_optional_label',
+                                context: context,
+                              )
+                            : StringUtils.translate(
+                                'password_label',
+                                context: context,
+                              ),
+                        hint: widget.staff != null
+                            ? StringUtils.translate(
+                                'leave_blank_hint',
+                                context: context,
+                              )
+                            : StringUtils.translate(
+                                'password_hint',
+                                context: context,
+                              ),
                         icon: Icons.lock_rounded,
                         obscureText: _obscurePassword,
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                            _obscurePassword
+                                ? Icons.visibility_rounded
+                                : Icons.visibility_off_rounded,
                             color: AppColors.greyText,
                           ),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                         validator: (v) => widget.staff == null
-                            ? (v == null || v.length < 6 ? StringUtils.translate('password_short_error', context: context) : null)
-                            : (v != null && v.isNotEmpty && v.length < 6 ? StringUtils.translate('password_short_error', context: context) : null),
+                            ? (v == null || v.length < 6
+                                  ? StringUtils.translate(
+                                      'password_short_error',
+                                      context: context,
+                                    )
+                                  : null)
+                            : (v != null && v.isNotEmpty && v.length < 6
+                                  ? StringUtils.translate(
+                                      'password_short_error',
+                                      context: context,
+                                    )
+                                  : null),
                       ),
-                      
+
                       SizedBox(height: 32.h),
-                      _buildSectionTitle(StringUtils.translate('payment_details_section', context: context)),
+                      _buildSectionTitle(
+                        StringUtils.translate(
+                          'payment_details_section',
+                          context: context,
+                        ),
+                      ),
                       SizedBox(height: 16.h),
                       _buildTextField(
                         controller: _upiController,
-                        label: StringUtils.translate('upi_label', context: context),
-                        hint: StringUtils.translate('upi_hint', context: context),
+                        label: StringUtils.translate(
+                          'upi_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'upi_hint',
+                          context: context,
+                        ),
                         icon: Icons.account_balance_wallet_rounded,
                       ),
                       SizedBox(height: 20.h),
                       _buildTextField(
                         controller: _bankNameController,
-                        label: StringUtils.translate('bank_name_label', context: context),
-                        hint: StringUtils.translate('bank_name_hint', context: context),
+                        label: StringUtils.translate(
+                          'bank_name_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'bank_name_hint',
+                          context: context,
+                        ),
                         icon: Icons.account_balance_rounded,
                       ),
                       SizedBox(height: 20.h),
                       _buildTextField(
                         controller: _accountNoController,
-                        label: StringUtils.translate('account_number_label', context: context),
-                        hint: StringUtils.translate('account_number_hint', context: context),
+                        label: StringUtils.translate(
+                          'account_number_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'account_number_hint',
+                          context: context,
+                        ),
                         icon: Icons.numbers_rounded,
                         keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 20.h),
                       _buildTextField(
                         controller: _ifscController,
-                        label: StringUtils.translate('ifsc_code_label', context: context),
-                        hint: StringUtils.translate('ifsc_hint', context: context),
+                        label: StringUtils.translate(
+                          'ifsc_code_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'ifsc_hint',
+                          context: context,
+                        ),
                         icon: Icons.code_rounded,
                       ),
                       SizedBox(height: 20.h),
                       _buildTextField(
                         controller: _beneficiaryController,
-                        label: StringUtils.translate('beneficiary_name_label', context: context),
-                        hint: StringUtils.translate('beneficiary_hint', context: context),
+                        label: StringUtils.translate(
+                          'beneficiary_name_label',
+                          context: context,
+                        ),
+                        hint: StringUtils.translate(
+                          'beneficiary_hint',
+                          context: context,
+                        ),
                         icon: Icons.badge_rounded,
                       ),
 
                       SizedBox(height: 32.h),
-                      _buildSectionTitle(StringUtils.translate('designated_role_section', context: context)),
+                      _buildSectionTitle(
+                        StringUtils.translate(
+                          'designated_role_section',
+                          context: context,
+                        ),
+                      ),
                       SizedBox(height: 16.h),
                       _buildRoleSelector(),
                       SizedBox(height: 48.h),
@@ -299,15 +454,32 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.staff != null ? StringUtils.translate('edit_staff_details', context: context) : StringUtils.translate('add_new_staff', context: context),
-          style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w900, color: AppColors.darkText, letterSpacing: -0.5),
+          widget.staff != null
+              ? StringUtils.translate('edit_staff_details', context: context)
+              : StringUtils.translate('add_new_staff', context: context),
+          style: TextStyle(
+            fontSize: 24.sp,
+            fontWeight: FontWeight.w900,
+            color: AppColors.darkText,
+            letterSpacing: -0.5,
+          ),
         ),
         SizedBox(height: 8.h),
         Text(
           widget.staff != null
-              ? StringUtils.translate('update_staff_info_desc', context: context)
-              : StringUtils.translate('enter_staff_details_desc', context: context),
-          style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, height: 1.4),
+              ? StringUtils.translate(
+                  'update_staff_info_desc',
+                  context: context,
+                )
+              : StringUtils.translate(
+                  'enter_staff_details_desc',
+                  context: context,
+                ),
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: AppColors.greyText,
+            height: 1.4,
+          ),
         ),
       ],
     );
@@ -323,29 +495,46 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2), width: 4),
+              border: Border.all(
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                width: 4,
+              ),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
               ],
             ),
             child: ClipOval(
               child: _isUploading
                   ? const Center(child: CircularProgressIndicator())
                   : (_localImage != null
-                      ? Image.file(
-                          _localImage!,
-                          fit: BoxFit.cover,
-                          cacheWidth: 200,
-                          cacheHeight: 200,
-                        )
-                      : (_photoUrl != null && _photoUrl!.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: _photoUrl!,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                              errorWidget: (context, url, error) => Icon(Icons.person_rounded, size: 50.sp, color: const Color(0xFFCBD5E1)),
-                            )
-                          : Icon(Icons.person_rounded, size: 50.sp, color: const Color(0xFFCBD5E1)))),
+                        ? Image.file(
+                            _localImage!,
+                            fit: BoxFit.cover,
+                            cacheWidth: 200,
+                            cacheHeight: 200,
+                          )
+                        : (_photoUrl != null && _photoUrl!.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: _photoUrl!,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                  errorWidget: (context, url, error) => Icon(
+                                    Icons.person_rounded,
+                                    size: 50.sp,
+                                    color: const Color(0xFFCBD5E1),
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.person_rounded,
+                                  size: 50.sp,
+                                  color: const Color(0xFFCBD5E1),
+                                ))),
             ),
           ),
           Positioned(
@@ -355,8 +544,16 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
               onTap: _pickImage,
               child: Container(
                 padding: EdgeInsets.all(8.r),
-                decoration: BoxDecoration(color: AppColors.primaryBlue, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                child: Icon(Icons.camera_alt_rounded, color: Colors.white, size: 16.sp),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: Icon(
+                  Icons.camera_alt_rounded,
+                  color: Colors.white,
+                  size: 16.sp,
+                ),
               ),
             ),
           ),
@@ -368,7 +565,12 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText, letterSpacing: -0.3),
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w900,
+        color: AppColors.darkText,
+        letterSpacing: -0.3,
+      ),
     );
   }
 
@@ -377,7 +579,10 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
       margin: EdgeInsets.symmetric(vertical: 12.h),
       width: 40.w,
       height: 4.h,
-      decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(2.r)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE2E8F0),
+        borderRadius: BorderRadius.circular(2.r),
+      ),
     );
   }
 
@@ -394,7 +599,14 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B))),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF64748B),
+          ),
+        ),
         SizedBox(height: 8.h),
         Container(
           decoration: BoxDecoration(
@@ -410,11 +622,18 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
             style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 14.sp, fontWeight: FontWeight.w500),
+              hintStyle: TextStyle(
+                color: const Color(0xFF94A3B8),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+              ),
               prefixIcon: Icon(icon, color: AppColors.primaryBlue, size: 20.sp),
               suffixIcon: suffixIcon,
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 16.h,
+              ),
             ),
           ),
         ),
@@ -436,12 +655,31 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
             decoration: BoxDecoration(
               color: isSelected ? AppColors.primaryBlue : Colors.white,
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: isSelected ? AppColors.primaryBlue : const Color(0xFFE2E8F0)),
-              boxShadow: isSelected ? [BoxShadow(color: AppColors.primaryBlue.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 4))] : [],
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primaryBlue
+                    : const Color(0xFFE2E8F0),
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : [],
             ),
             child: Text(
-              StringUtils.translate(role.toLowerCase().replaceAll(' ', '_'), context: context),
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: isSelected ? Colors.white : const Color(0xFF64748B)),
+              StringUtils.translate(
+                role.toLowerCase().replaceAll(' ', '_'),
+                context: context,
+              ),
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w800,
+                color: isSelected ? Colors.white : const Color(0xFF64748B),
+              ),
             ),
           ),
         );
@@ -461,14 +699,28 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
               onPressed: isLoading ? null : _handleSubmit,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.r),
+                ),
                 elevation: 0,
               ),
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text(
-                      widget.staff != null ? StringUtils.translate('update_staff_button', context: context) : StringUtils.translate('create_staff_button', context: context),
-                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white),
+                      widget.staff != null
+                          ? StringUtils.translate(
+                              'update_staff_button',
+                              context: context,
+                            )
+                          : StringUtils.translate(
+                              'create_staff_button',
+                              context: context,
+                            ),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
                     ),
             ),
           ),
@@ -502,27 +754,17 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
         }
         context.read<StaffCubit>().updateStaff(widget.staff!.id, data);
       } else {
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         context.read<StaffCubit>().createStaff(
-              hostelId: widget.hostelId,
-              name: _nameController.text.trim(),
-              phone: _phoneController.text.trim(),
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-              role: _roleMap[_selectedRole] ?? _selectedRole,
-              salary: double.tryParse(_salaryController.text) ?? 0.0,
-              photo: _photoUrl ?? '',
-              paymentDetails: paymentDetails,
-            );
+          hostelId: widget.hostelId,
+          name: _nameController.text.trim(),
+          phone: _phoneController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          role: _roleMap[_selectedRole] ?? _selectedRole,
+          salary: double.tryParse(_salaryController.text) ?? 0.0,
+          photo: _photoUrl ?? '',
+          paymentDetails: paymentDetails,
+        );
       }
     }
   }

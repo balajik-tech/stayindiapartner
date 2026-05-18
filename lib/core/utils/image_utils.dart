@@ -5,8 +5,6 @@ import 'package:path/path.dart' as p;
 import 'logger.dart';
 
 class ImageUtils {
-  
-  
   static Future<File?> compressImage(File file, {int quality = 80}) async {
     try {
       final tempDir = await getTemporaryDirectory();
@@ -22,17 +20,18 @@ class ImageUtils {
       );
 
       if (result == null) return null;
-      
-      
+
       return File(result.path);
     } catch (e) {
       AppLogger.error('Image compression failed', e);
-      return file; 
+      return file;
     }
   }
 
-  
-  static Future<List<String>> compressImages(List<String> paths, {int quality = 80}) async {
+  static Future<List<String>> compressImages(
+    List<String> paths, {
+    int quality = 80,
+  }) async {
     final List<String> compressedPaths = [];
     for (final path in paths) {
       final compressedFile = await compressImage(File(path), quality: quality);

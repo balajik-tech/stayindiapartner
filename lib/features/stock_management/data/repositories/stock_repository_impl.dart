@@ -10,14 +10,22 @@ class StockRepositoryImpl implements StockRepository {
   StockRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<StockItem>> getStockItems(String propertyId, {String? category, String? search}) {
-    return remoteDataSource.getStockItems(propertyId, category: category, search: search);
+  Future<List<StockItem>> getStockItems(
+    String propertyId, {
+    String? category,
+    String? search,
+  }) {
+    return remoteDataSource.getStockItems(
+      propertyId,
+      category: category,
+      search: search,
+    );
   }
 
   @override
   Future<StockItem> createStockItem(StockItem stockItem) {
-    final model = stockItem is StockItemModel 
-        ? stockItem 
+    final model = stockItem is StockItemModel
+        ? stockItem
         : StockItemModel(
             id: stockItem.id,
             propertyId: stockItem.propertyId,
@@ -46,8 +54,24 @@ class StockRepositoryImpl implements StockRepository {
   }
 
   @override
-  Future<StockItem> addStock(String id, double quantity, double pricePerUnit, double totalCost, String paymentMode, DateTime entryDate, String? note) {
-    return remoteDataSource.addStock(id, quantity, pricePerUnit, totalCost, paymentMode, entryDate, note);
+  Future<StockItem> addStock(
+    String id,
+    double quantity,
+    double pricePerUnit,
+    double totalCost,
+    String paymentMode,
+    DateTime entryDate,
+    String? note,
+  ) {
+    return remoteDataSource.addStock(
+      id,
+      quantity,
+      pricePerUnit,
+      totalCost,
+      paymentMode,
+      entryDate,
+      note,
+    );
   }
 
   @override

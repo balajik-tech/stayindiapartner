@@ -34,7 +34,8 @@ class DocumentRemoteDataSourceImpl implements DocumentRemoteDataSource {
         final data = (raw is Map && raw['data'] is Map)
             ? raw['data'] as Map<String, dynamic>
             : raw as Map<String, dynamic>;
-        final items = data['items'] as List<dynamic>? ??
+        final items =
+            data['items'] as List<dynamic>? ??
             (raw['data'] is List ? raw['data'] as List : []);
         return items
             .map((d) => DocumentModel.fromJson(d as Map<String, dynamic>))
@@ -56,22 +57,28 @@ class DocumentRemoteDataSourceImpl implements DocumentRemoteDataSource {
   }) async {
     try {
       String uploadPath = filePath;
-      
+
       final String ext = p.extension(filePath).toLowerCase();
       if (['.jpg', '.jpeg', '.png', '.heic', '.heif', '.webp'].contains(ext)) {
         try {
           final tempDir = await getTemporaryDirectory();
-          final targetPath = p.join(tempDir.path, "temp_doc_${DateTime.now().millisecondsSinceEpoch}.jpg");
-          
-          AppLogger.info('Compressing document image: $filePath -> $targetPath');
-          
-          final XFile? compressedFile = await FlutterImageCompress.compressAndGetFile(
-            filePath,
-            targetPath,
-            quality: 50,
-            minWidth: 1024,
-            minHeight: 1024,
+          final targetPath = p.join(
+            tempDir.path,
+            "temp_doc_${DateTime.now().millisecondsSinceEpoch}.jpg",
           );
+
+          AppLogger.info(
+            'Compressing document image: $filePath -> $targetPath',
+          );
+
+          final XFile? compressedFile =
+              await FlutterImageCompress.compressAndGetFile(
+                filePath,
+                targetPath,
+                quality: 50,
+                minWidth: 1024,
+                minHeight: 1024,
+              );
 
           if (compressedFile != null) {
             uploadPath = compressedFile.path;
@@ -87,19 +94,18 @@ class DocumentRemoteDataSourceImpl implements DocumentRemoteDataSource {
         'licenseNumber': licenseNumber,
         'expiryDate': ?expiryDate,
       });
-      formData.files.add(MapEntry(
-        'document',
-        await MultipartFile.fromFile(
-          uploadPath,
-          contentType: DioMediaType('image', 'jpeg'),
+      formData.files.add(
+        MapEntry(
+          'document',
+          await MultipartFile.fromFile(
+            uploadPath,
+            contentType: DioMediaType('image', 'jpeg'),
+          ),
         ),
-      ));
-      
-      final response = await dio.post(
-        ApiConstants.documents,
-        data: formData,
       );
-      
+
+      final response = await dio.post(ApiConstants.documents, data: formData);
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data['data'] ?? response.data;
         return DocumentModel.fromJson(data);

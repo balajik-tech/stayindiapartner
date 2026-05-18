@@ -61,17 +61,18 @@ class SettingsCubit extends Cubit<SettingsState> {
     required UpdateHostelHouseRulesUseCase updateHostelHouseRulesUseCase,
     required UpdateHostelNotificationsUseCase updateHostelNotificationsUseCase,
     required UpdateHostelRoomConfigUseCase updateHostelRoomConfigUseCase,
-    required UploadHostelSettingsImagesUseCase uploadHostelSettingsImagesUseCase,
+    required UploadHostelSettingsImagesUseCase
+    uploadHostelSettingsImagesUseCase,
     required UploadSingleImageUseCase uploadSingleImageUseCase,
-  })  : _getSettings = getHostelSettingsUseCase,
-        _updateProfile = updateHostelProfileUseCase,
-        _updateAmenities = updateHostelAmenitiesUseCase,
-        _updateHouseRules = updateHostelHouseRulesUseCase,
-        _updateNotifications = updateHostelNotificationsUseCase,
-        _updateRoomConfig = updateHostelRoomConfigUseCase,
-        _uploadImages = uploadHostelSettingsImagesUseCase,
-        _uploadSingleImage = uploadSingleImageUseCase,
-        super(SettingsInitial());
+  }) : _getSettings = getHostelSettingsUseCase,
+       _updateProfile = updateHostelProfileUseCase,
+       _updateAmenities = updateHostelAmenitiesUseCase,
+       _updateHouseRules = updateHostelHouseRulesUseCase,
+       _updateNotifications = updateHostelNotificationsUseCase,
+       _updateRoomConfig = updateHostelRoomConfigUseCase,
+       _uploadImages = uploadHostelSettingsImagesUseCase,
+       _uploadSingleImage = uploadSingleImageUseCase,
+       super(SettingsInitial());
 
   Future<void> loadSettings(String hostelId) async {
     emit(SettingsLoading());
@@ -132,7 +133,10 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
   }
 
-  Future<void> updateAmenities(String hostelId, List<String> enabledAmenities) async {
+  Future<void> updateAmenities(
+    String hostelId,
+    List<String> enabledAmenities,
+  ) async {
     emit(SettingsSaving());
     try {
       await _updateAmenities(hostelId, enabledAmenities);
@@ -153,10 +157,9 @@ class SettingsCubit extends Cubit<SettingsState> {
   }) async {
     emit(SettingsSaving());
     try {
-      final List<Map<String, dynamic>> customRulesData = customRules.map((e) => {
-        'text': e.text,
-        'photo': e.photo,
-      }).toList();
+      final List<Map<String, dynamic>> customRulesData = customRules
+          .map((e) => {'text': e.text, 'photo': e.photo})
+          .toList();
 
       await _updateHouseRules(hostelId, {
         'entryTime': entryTime,
@@ -172,7 +175,10 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
   }
 
-  Future<void> updateNotifications(String hostelId, Map<String, dynamic> data) async {
+  Future<void> updateNotifications(
+    String hostelId,
+    Map<String, dynamic> data,
+  ) async {
     emit(SettingsSaving());
     try {
       await _updateNotifications(hostelId, data);
@@ -183,7 +189,10 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
   }
 
-  Future<void> updateRoomConfiguration(String hostelId, Map<String, dynamic> data) async {
+  Future<void> updateRoomConfiguration(
+    String hostelId,
+    Map<String, dynamic> data,
+  ) async {
     emit(SettingsSaving());
     try {
       await _updateRoomConfig(hostelId, data);
@@ -246,14 +255,19 @@ class SettingsCubit extends Cubit<SettingsState> {
         await _uploadImages(hostelId, compressedPaths);
       }
 
-      emit(SettingsSaveSuccess(message: 'Profile and images updated successfully'));
+      emit(
+        SettingsSaveSuccess(message: 'Profile and images updated successfully'),
+      );
       await loadSettings(hostelId);
     } catch (e) {
       emit(SettingsError(message: ErrorHandler.getErrorMessage(e)));
     }
   }
 
-  Future<void> uploadHostelImages(String hostelId, List<String> filePaths) async {
+  Future<void> uploadHostelImages(
+    String hostelId,
+    List<String> filePaths,
+  ) async {
     emit(SettingsSaving());
     try {
       final compressedPaths = await ImageUtils.compressImages(filePaths);

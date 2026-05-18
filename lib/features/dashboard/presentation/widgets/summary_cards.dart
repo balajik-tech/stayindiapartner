@@ -32,11 +32,15 @@ class SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool useWhiteStyle = isBordered || color == Colors.white;
     final Color backgroundColor = useWhiteStyle ? Colors.white : color;
-    
-    final bool isLightBackground = useWhiteStyle || 
-                                  ThemeData.estimateBrightnessForColor(backgroundColor) == Brightness.light;
-    
-    final Color contentColor = isLightBackground ? const Color(0xFF0F172A) : Colors.white;
+
+    final bool isLightBackground =
+        useWhiteStyle ||
+        ThemeData.estimateBrightnessForColor(backgroundColor) ==
+            Brightness.light;
+
+    final Color contentColor = isLightBackground
+        ? const Color(0xFF0F172A)
+        : Colors.white;
 
     return Semantics(
       label: '$label: $count',
@@ -53,13 +57,22 @@ class SummaryCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(11.r),
-            border: isSelected 
-              ? Border.all(color: Colors.white.withValues(alpha: 0.8), width: 2.0)
-              : (useWhiteStyle ? Border.all(color: const Color(0xFF3B71CA), width: 1.2) : null),
+            border: isSelected
+                ? Border.all(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    width: 2.0,
+                  )
+                : (useWhiteStyle
+                      ? Border.all(color: const Color(0xFF3B71CA), width: 1.2)
+                      : null),
             boxShadow: [
               if (isSelected)
                 BoxShadow(
-                  color: (useWhiteStyle ? const Color(0xFF3B71CA) : backgroundColor).withValues(alpha: 0.4),
+                  color:
+                      (useWhiteStyle
+                              ? const Color(0xFF3B71CA)
+                              : backgroundColor)
+                          .withValues(alpha: 0.4),
                   blurRadius: 10,
                   spreadRadius: 1,
                   offset: const Offset(0, 0),
@@ -78,11 +91,7 @@ class SummaryCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(
-                    icon,
-                    color: contentColor,
-                    size: 16.sp,
-                  ),
+                  Icon(icon, color: contentColor, size: 16.sp),
                   SizedBox(width: 4.w),
                   Text(
                     count,
@@ -125,7 +134,9 @@ class SummaryCardsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hostelState = context.watch<HostelCubit>().state;
-    final totalProperties = hostelState is HostelLoaded ? hostelState.hostels.length : 0;
+    final totalProperties = hostelState is HostelLoaded
+        ? hostelState.hostels.length
+        : 0;
     final authState = context.watch<AuthCubit>().state;
     final owner = authState is AuthAuthenticated ? authState.owner : null;
     final role = owner?.role.toLowerCase() ?? 'owner';
@@ -145,17 +156,98 @@ class SummaryCardsSection extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             children: [
-              _buildCard(context, 'properties', '$totalProperties', 'total_properties'.tr(), Colors.white, Icons.apartment_rounded, state.selectedMetric, isBordered: true),
-              _buildCard(context, 'total', isLoading ? '...' : (occupancy?.totalBeds.toString() ?? '0'), 'total_beds'.tr(), const Color(0xFF2C599D), Icons.bed_rounded, state.selectedMetric),
+              _buildCard(
+                context,
+                'properties',
+                '$totalProperties',
+                'total_properties'.tr(),
+                Colors.white,
+                Icons.apartment_rounded,
+                state.selectedMetric,
+                isBordered: true,
+              ),
+              _buildCard(
+                context,
+                'total',
+                isLoading ? '...' : (occupancy?.totalBeds.toString() ?? '0'),
+                'total_beds'.tr(),
+                const Color(0xFF2C599D),
+                Icons.bed_rounded,
+                state.selectedMetric,
+              ),
               if (role != 'warden')
-                _buildCard(context, 'overdue', isLoading ? '...' : (ops?.overdueRent.count.toString() ?? '0'), 'payment_dues'.tr(), const Color(0xFF800000), Icons.payments_rounded, state.selectedMetric),
-              _buildCard(context, 'occupied', isLoading ? '...' : (occupancy?.occupiedBeds.toString() ?? '0'), 'occupied'.tr(), const Color(0xFFFF8600), Icons.person_pin_rounded, state.selectedMetric),
-              _buildCard(context, 'free', isLoading ? '...' : (occupancy?.freeBeds.toString() ?? '0'), 'vacant_beds'.tr(), const Color(0xFF87CEEB), Icons.add_box_rounded, state.selectedMetric),
-              _buildCard(context, 'reserved', isLoading ? '...' : (occupancy?.reservedBeds.toString() ?? '0'), 'pre_booked'.tr(), const Color(0xFF9C27B0), Icons.event_available_rounded, state.selectedMetric),
-              _buildCard(context, 'notice', isLoading ? '...' : (occupancy?.noticeBeds.toString() ?? '0'), 'move_out_notice'.tr(), const Color(0xFFFFB300), Icons.notifications_active_rounded, state.selectedMetric),
-              _buildAttendanceCard(context, isLoading ? '...' : (status?.inside.toString() ?? '0'), isLoading ? '...' : (status?.outside.toString() ?? '0')),
-              _buildCard(context, 'away', isLoading ? '...' : (status?.unknown.toString() ?? '0'), 'away'.tr(), const Color(0xFFE91E63), Icons.luggage_rounded, state.selectedMetric),
-              _buildCard(context, 'repair', isLoading ? '...' : (occupancy?.maintenanceBeds.toString() ?? '0'), 'minor_repair'.tr(), const Color(0xFFCBD5E1), Icons.handyman_rounded, state.selectedMetric),
+                _buildCard(
+                  context,
+                  'overdue',
+                  isLoading
+                      ? '...'
+                      : (ops?.overdueRent.count.toString() ?? '0'),
+                  'payment_dues'.tr(),
+                  const Color(0xFF800000),
+                  Icons.payments_rounded,
+                  state.selectedMetric,
+                ),
+              _buildCard(
+                context,
+                'occupied',
+                isLoading ? '...' : (occupancy?.occupiedBeds.toString() ?? '0'),
+                'occupied'.tr(),
+                const Color(0xFFFF8600),
+                Icons.person_pin_rounded,
+                state.selectedMetric,
+              ),
+              _buildCard(
+                context,
+                'free',
+                isLoading ? '...' : (occupancy?.freeBeds.toString() ?? '0'),
+                'vacant_beds'.tr(),
+                const Color(0xFF87CEEB),
+                Icons.add_box_rounded,
+                state.selectedMetric,
+              ),
+              _buildCard(
+                context,
+                'reserved',
+                isLoading ? '...' : (occupancy?.reservedBeds.toString() ?? '0'),
+                'pre_booked'.tr(),
+                const Color(0xFF9C27B0),
+                Icons.event_available_rounded,
+                state.selectedMetric,
+              ),
+              _buildCard(
+                context,
+                'notice',
+                isLoading ? '...' : (occupancy?.noticeBeds.toString() ?? '0'),
+                'move_out_notice'.tr(),
+                const Color(0xFFFFB300),
+                Icons.notifications_active_rounded,
+                state.selectedMetric,
+              ),
+              _buildAttendanceCard(
+                context,
+                isLoading ? '...' : (status?.inside.toString() ?? '0'),
+                isLoading ? '...' : (status?.outside.toString() ?? '0'),
+              ),
+              _buildCard(
+                context,
+                'away',
+                isLoading ? '...' : (status?.unknown.toString() ?? '0'),
+                'away'.tr(),
+                const Color(0xFFE91E63),
+                Icons.luggage_rounded,
+                state.selectedMetric,
+              ),
+              _buildCard(
+                context,
+                'repair',
+                isLoading
+                    ? '...'
+                    : (occupancy?.maintenanceBeds.toString() ?? '0'),
+                'minor_repair'.tr(),
+                const Color(0xFFCBD5E1),
+                Icons.handyman_rounded,
+                state.selectedMetric,
+              ),
             ],
           ),
         );
@@ -163,7 +255,11 @@ class SummaryCardsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildAttendanceCard(BuildContext context, String inCount, String outCount) {
+  Widget _buildAttendanceCard(
+    BuildContext context,
+    String inCount,
+    String outCount,
+  ) {
     return BouncingWrapper(
       onTap: () {},
       scaleFactor: 0.97,
@@ -187,13 +283,13 @@ class SummaryCardsSection extends StatelessWidget {
           children: [
             Column(
               children: [
-                SizedBox(height: 18.h), 
+                SizedBox(height: 18.h),
                 Expanded(
                   child: Row(
                     children: [
                       Expanded(
                         child: Container(
-                          color: const Color(0xFF34A853), 
+                          color: const Color(0xFF34A853),
                           child: _buildAttendanceStat(
                             label: 'presence_in'.tr(),
                             count: inCount,
@@ -204,7 +300,7 @@ class SummaryCardsSection extends StatelessWidget {
                       ),
                       Expanded(
                         child: Container(
-                          color: const Color(0xFF94A3B8), 
+                          color: const Color(0xFF94A3B8),
                           child: _buildAttendanceStat(
                             label: 'presence_out'.tr(),
                             count: outCount,
@@ -218,7 +314,7 @@ class SummaryCardsSection extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             Positioned(
               top: 4.h,
               left: 0,
@@ -229,7 +325,10 @@ class SummaryCardsSection extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20.r),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 0.5),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      width: 0.5,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -311,7 +410,16 @@ class SummaryCardsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(BuildContext context, String id, String count, String label, Color color, IconData icon, String? selectedMetric, {bool isBordered = false}) {
+  Widget _buildCard(
+    BuildContext context,
+    String id,
+    String count,
+    String label,
+    Color color,
+    IconData icon,
+    String? selectedMetric, {
+    bool isBordered = false,
+  }) {
     return SummaryCard(
       count: count,
       label: label,
@@ -331,7 +439,8 @@ class _BlinkingDot extends StatefulWidget {
   State<_BlinkingDot> createState() => _BlinkingDotState();
 }
 
-class _BlinkingDotState extends State<_BlinkingDot> with SingleTickerProviderStateMixin {
+class _BlinkingDotState extends State<_BlinkingDot>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -363,4 +472,4 @@ class _BlinkingDotState extends State<_BlinkingDot> with SingleTickerProviderSta
       ),
     );
   }
-  }
+}

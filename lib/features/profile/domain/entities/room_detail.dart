@@ -5,7 +5,7 @@ class RoomDetail {
   final int floor;
   final List<int> floors;
   final String sharingType;
-  final String roomType; 
+  final String roomType;
   final double rent;
   final double dailyRent;
   final double deposit;
@@ -38,7 +38,7 @@ class RoomDetail {
 
 class BedInfo {
   final String bedNumber;
-  final String status; 
+  final String status;
 
   BedInfo({required this.bedNumber, required this.status});
 }

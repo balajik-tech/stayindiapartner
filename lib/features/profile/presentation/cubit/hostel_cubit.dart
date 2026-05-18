@@ -22,13 +22,13 @@ class HostelCubit extends HydratedCubit<HostelState> {
     required DeleteHostelUseCase deleteHostelUseCase,
     required UploadHostelImagesUseCase uploadHostelImagesUseCase,
     required UpdateHostelLocationUseCase updateHostelLocationUseCase,
-  })  : _getHostels = getHostelsUseCase,
-        _createHostel = createHostelUseCase,
-        _updateHostel = updateHostelUseCase,
-        _deleteHostel = deleteHostelUseCase,
-        _uploadHostelImages = uploadHostelImagesUseCase,
-        _updateHostelLocation = updateHostelLocationUseCase,
-        super(const HostelInitial());
+  }) : _getHostels = getHostelsUseCase,
+       _createHostel = createHostelUseCase,
+       _updateHostel = updateHostelUseCase,
+       _deleteHostel = deleteHostelUseCase,
+       _uploadHostelImages = uploadHostelImagesUseCase,
+       _updateHostelLocation = updateHostelLocationUseCase,
+       super(const HostelInitial());
 
   Future<void> getHostels({bool forceRefresh = false}) async {
     if (isClosed) return;
@@ -36,28 +36,36 @@ class HostelCubit extends HydratedCubit<HostelState> {
       return;
     }
 
-    final int currentIndex = state is HostelLoaded ? (state as HostelLoaded).selectedHostelIndex : 0;
-    
+    final int currentIndex = state is HostelLoaded
+        ? (state as HostelLoaded).selectedHostelIndex
+        : 0;
+
     if (state is! HostelLoaded) {
       emit(HostelLoading(lastFetched: state.lastFetched));
     }
-    
+
     try {
       final hostels = await _getHostels();
       if (isClosed) return;
-      
-      List<int> indices = state is HostelLoaded ? (state as HostelLoaded).selectedHostelIndices : [0];
+
+      List<int> indices = state is HostelLoaded
+          ? (state as HostelLoaded).selectedHostelIndices
+          : [0];
       indices = indices.where((i) => i < hostels.length).toList();
       if (indices.isEmpty && hostels.isNotEmpty) indices = [0];
 
-      emit(HostelLoaded(
-        hostels: hostels,
-        selectedHostelIndex: currentIndex < hostels.length ? currentIndex : 0,
-        selectedHostelIndices: indices,
-        lastFetched: DateTime.now(),
-      ));
+      emit(
+        HostelLoaded(
+          hostels: hostels,
+          selectedHostelIndex: currentIndex < hostels.length ? currentIndex : 0,
+          selectedHostelIndices: indices,
+          lastFetched: DateTime.now(),
+        ),
+      );
     } catch (e) {
-      if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      if (!isClosed) {
+        emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      }
     }
   }
 
@@ -65,12 +73,14 @@ class HostelCubit extends HydratedCubit<HostelState> {
     if (state is HostelLoaded) {
       final loadedState = state as HostelLoaded;
       if (index >= 0 && index < loadedState.hostels.length) {
-        emit(HostelLoaded(
-          hostels: loadedState.hostels,
-          selectedHostelIndex: index,
-          selectedHostelIndices: [index],
-          lastFetched: loadedState.lastFetched,
-        ));
+        emit(
+          HostelLoaded(
+            hostels: loadedState.hostels,
+            selectedHostelIndex: index,
+            selectedHostelIndices: [index],
+            lastFetched: loadedState.lastFetched,
+          ),
+        );
       }
     }
   }
@@ -87,13 +97,15 @@ class HostelCubit extends HydratedCubit<HostelState> {
         } else {
           newIndices.add(index);
         }
-        
-        emit(HostelLoaded(
-          hostels: loadedState.hostels,
-          selectedHostelIndex: newIndices.first,
-          selectedHostelIndices: newIndices,
-          lastFetched: loadedState.lastFetched,
-        ));
+
+        emit(
+          HostelLoaded(
+            hostels: loadedState.hostels,
+            selectedHostelIndex: newIndices.first,
+            selectedHostelIndices: newIndices,
+            lastFetched: loadedState.lastFetched,
+          ),
+        );
       }
     }
   }
@@ -142,13 +154,17 @@ class HostelCubit extends HydratedCubit<HostelState> {
       );
       final createdHostel = await _createHostel(hostel);
       if (isClosed) return;
-      emit(HostelOperationSuccess(
-        message: 'Hostel created successfully',
-        hostelId: createdHostel.id,
-      ));
+      emit(
+        HostelOperationSuccess(
+          message: 'Hostel created successfully',
+          hostelId: createdHostel.id,
+        ),
+      );
       await getHostels(forceRefresh: true);
     } catch (e) {
-      if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      if (!isClosed) {
+        emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      }
     }
   }
 
@@ -161,7 +177,9 @@ class HostelCubit extends HydratedCubit<HostelState> {
       emit(HostelOperationSuccess(message: 'Hostel updated successfully'));
       await getHostels(forceRefresh: true);
     } catch (e) {
-      if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      if (!isClosed) {
+        emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      }
     }
   }
 
@@ -177,7 +195,9 @@ class HostelCubit extends HydratedCubit<HostelState> {
       emit(HostelOperationSuccess(message: 'Images uploaded successfully'));
       await getHostels(forceRefresh: true);
     } catch (e) {
-      if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      if (!isClosed) {
+        emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      }
     }
   }
 
@@ -190,7 +210,9 @@ class HostelCubit extends HydratedCubit<HostelState> {
       emit(HostelOperationSuccess(message: 'Hostel deleted successfully'));
       await getHostels(forceRefresh: true);
     } catch (e) {
-      if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      if (!isClosed) {
+        emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      }
     }
   }
 
@@ -204,10 +226,16 @@ class HostelCubit extends HydratedCubit<HostelState> {
     try {
       await _updateHostelLocation(id, lat, lng);
       if (isClosed) return;
-      emit(HostelOperationSuccess(message: 'Property location updated successfully'));
+      emit(
+        HostelOperationSuccess(
+          message: 'Property location updated successfully',
+        ),
+      );
       await getHostels(forceRefresh: true);
     } catch (e) {
-      if (!isClosed) emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      if (!isClosed) {
+        emit(HostelError(message: ErrorHandler.getErrorMessage(e)));
+      }
     }
   }
 
@@ -215,25 +243,33 @@ class HostelCubit extends HydratedCubit<HostelState> {
   HostelState? fromJson(Map<String, dynamic> json) {
     try {
       final lastFetchedStr = json['lastFetched'] as String?;
-      final lastFetched = lastFetchedStr != null ? DateTime.parse(lastFetchedStr) : null;
-      
+      final lastFetched = lastFetchedStr != null
+          ? DateTime.parse(lastFetchedStr)
+          : null;
+
       final hostelsJson = json['hostels'] as List<dynamic>?;
       final hostels = hostelsJson?.map((e) => HostelModel.fromJson(e)).toList();
-      
+
       if (hostels != null && hostels.isNotEmpty) {
         final selectedHostelIndex = json['selectedHostelIndex'] as int? ?? 0;
-        final selectedHostelIndices = (json['selectedHostelIndices'] as List<dynamic>?)
-            ?.map((e) => e as int)
-            .toList() ?? [0];
+        final selectedHostelIndices =
+            (json['selectedHostelIndices'] as List<dynamic>?)
+                ?.map((e) => e as int)
+                .toList() ??
+            [0];
 
         return HostelLoaded(
           hostels: hostels,
-          selectedHostelIndex: selectedHostelIndex < hostels.length ? selectedHostelIndex : 0,
-          selectedHostelIndices: selectedHostelIndices.where((i) => i < hostels.length).toList(),
+          selectedHostelIndex: selectedHostelIndex < hostels.length
+              ? selectedHostelIndex
+              : 0,
+          selectedHostelIndices: selectedHostelIndices
+              .where((i) => i < hostels.length)
+              .toList(),
           lastFetched: lastFetched,
         );
       }
-      
+
       return HostelInitial(lastFetched: lastFetched);
     } catch (_) {
       return null;
@@ -245,7 +281,9 @@ class HostelCubit extends HydratedCubit<HostelState> {
     if (state is HostelLoaded) {
       return {
         'lastFetched': state.lastFetched?.toIso8601String(),
-        'hostels': state.hostels.map((e) => (e as HostelModel).toJson()).toList(),
+        'hostels': state.hostels
+            .map((e) => (e as HostelModel).toJson())
+            .toList(),
         'selectedHostelIndex': state.selectedHostelIndex,
         'selectedHostelIndices': state.selectedHostelIndices,
       };

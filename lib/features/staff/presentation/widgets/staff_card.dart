@@ -10,11 +10,7 @@ class StaffCard extends StatelessWidget {
   final Staff staff;
   final VoidCallback onTap;
 
-  const StaffCard({
-    super.key,
-    required this.staff,
-    required this.onTap,
-  });
+  const StaffCard({super.key, required this.staff, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +76,14 @@ class StaffCard extends StatelessWidget {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10.w,
+                                  vertical: 4.h,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                                  color: AppColors.primaryBlue.withValues(
+                                    alpha: 0.08,
+                                  ),
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                                 child: Text(

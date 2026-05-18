@@ -8,28 +8,58 @@ class BookingsRepositoryImpl implements BookingsRepository {
   BookingsRepositoryImpl({required this.remote});
 
   @override
-  Future<List<Booking>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId}) {
-    return remote.getOwnerBookings(page: page, limit: limit, kycStatus: kycStatus, roomType: roomType, hostelId: hostelId);
+  Future<List<Booking>> getOwnerBookings({
+    int page = 1,
+    int limit = 10,
+    String? kycStatus,
+    String? roomType,
+    String? hostelId,
+  }) {
+    return remote.getOwnerBookings(
+      page: page,
+      limit: limit,
+      kycStatus: kycStatus,
+      roomType: roomType,
+      hostelId: hostelId,
+    );
   }
 
   @override
-  Future<List<PendingBooking>> getConfirmedBookings({int page = 1, int limit = 10}) {
+  Future<List<PendingBooking>> getConfirmedBookings({
+    int page = 1,
+    int limit = 10,
+  }) {
     return remote.getConfirmedBookings(page: page, limit: limit);
   }
 
   @override
-  Future<List<PendingBooking>> getPendingBookings({int page = 1, int limit = 10}) {
+  Future<List<PendingBooking>> getPendingBookings({
+    int page = 1,
+    int limit = 10,
+  }) {
     return remote.getPendingBookings(page: page, limit: limit);
   }
 
   @override
-  Future<ScanBookingResponse> scanBooking(String token, {String? hostelId, String? bookingId}) {
+  Future<ScanBookingResponse> scanBooking(
+    String token, {
+    String? hostelId,
+    String? bookingId,
+  }) {
     return remote.scanBooking(token, hostelId: hostelId, bookingId: bookingId);
   }
 
   @override
-  Future<ScanBookingResponse> manualCheckin(String accessCode, {String? hostelId, String? bookingId}) {
-    return remote.manualCheckin(accessCode, hostelId: hostelId, bookingId: bookingId);
+  Future<ScanBookingResponse> manualCheckin(
+    String accessCode, {
+    String? hostelId,
+    String? bookingId,
+  }) {
+    return remote.manualCheckin(
+      accessCode,
+      hostelId: hostelId,
+      bookingId: bookingId,
+    );
   }
 
   @override
@@ -38,10 +68,18 @@ class BookingsRepositoryImpl implements BookingsRepository {
   }
 
   @override
-  Future<void> confirmBooking(String bookingId, String razorpayOrderId,
-      String razorpayPaymentId, String razorpaySignature) {
+  Future<void> confirmBooking(
+    String bookingId,
+    String razorpayOrderId,
+    String razorpayPaymentId,
+    String razorpaySignature,
+  ) {
     return remote.confirmBooking(
-        bookingId, razorpayOrderId, razorpayPaymentId, razorpaySignature);
+      bookingId,
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+    );
   }
 
   @override

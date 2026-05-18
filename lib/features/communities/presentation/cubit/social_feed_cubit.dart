@@ -42,7 +42,12 @@ class SocialFeedLoaded extends SocialFeedState {
   }
 
   @override
-  List<Object?> get props => [posts, isCreatingPost, isFetchingMore, hasReachedMax];
+  List<Object?> get props => [
+    posts,
+    isCreatingPost,
+    isFetchingMore,
+    hasReachedMax,
+  ];
 }
 
 class SocialFeedError extends SocialFeedState {
@@ -67,13 +72,13 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
     required AddPostCommentUseCase addPostCommentUseCase,
     required VotePollUseCase votePollUseCase,
     required DeleteSocialPostUseCase deleteSocialPostUseCase,
-  })  : _getSocialFeed = getSocialFeedUseCase,
-        _createSocialPost = createSocialPostUseCase,
-        _togglePostLike = togglePostLikeUseCase,
-        _addPostComment = addPostCommentUseCase,
-        _votePoll = votePollUseCase,
-        _deleteSocialPost = deleteSocialPostUseCase,
-        super(SocialFeedInitial());
+  }) : _getSocialFeed = getSocialFeedUseCase,
+       _createSocialPost = createSocialPostUseCase,
+       _togglePostLike = togglePostLikeUseCase,
+       _addPostComment = addPostCommentUseCase,
+       _votePoll = votePollUseCase,
+       _deleteSocialPost = deleteSocialPostUseCase,
+       super(SocialFeedInitial());
 
   Future<void> loadFeed({bool isRefresh = false}) async {
     final s = state;
@@ -87,10 +92,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       if (state is SocialFeedLoaded && isRefresh) {
         emit((state as SocialFeedLoaded).copyWith(posts: posts));
       } else {
-        emit(SocialFeedLoaded(
-          posts: posts,
-          hasReachedMax: posts.length < 20,
-        ));
+        emit(SocialFeedLoaded(posts: posts, hasReachedMax: posts.length < 20));
       }
     } catch (e) {
       emit(SocialFeedError(message: ErrorHelper.toFriendlyMessage(e)));
@@ -103,11 +105,13 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       emit(s.copyWith(isFetchingMore: true));
       try {
         final nextPosts = await _getSocialFeed(limit: 20, skip: s.posts.length);
-        emit(s.copyWith(
-          posts: [...s.posts, ...nextPosts],
-          isFetchingMore: false,
-          hasReachedMax: nextPosts.length < 20,
-        ));
+        emit(
+          s.copyWith(
+            posts: [...s.posts, ...nextPosts],
+            isFetchingMore: false,
+            hasReachedMax: nextPosts.length < 20,
+          ),
+        );
       } catch (e) {
         emit(s.copyWith(isFetchingMore: false));
       }
@@ -132,10 +136,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
           pollOptions: pollOptions,
           location: location,
         );
-        emit(s.copyWith(
-          posts: [newPost, ...s.posts],
-          isCreatingPost: false,
-        ));
+        emit(s.copyWith(posts: [newPost, ...s.posts], isCreatingPost: false));
       } catch (e) {
         emit(SocialFeedError(message: ErrorHelper.toFriendlyMessage(e)));
       }
@@ -207,10 +208,17 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       final updatedPosts = s.posts.map((p) {
         if (p.id == postId && p.poll != null) {
           final opts = List<dynamic>.from(p.poll!['options'] ?? []);
-          final newOpts = opts.map((opt) => Map<String, dynamic>.from(opt)).toList();
+          final newOpts = opts
+              .map((opt) => Map<String, dynamic>.from(opt))
+              .toList();
 
           if (optionIndex >= 0 && optionIndex < newOpts.length) {
-            final newCount = ((newOpts[optionIndex]['votesCount'] ?? newOpts[optionIndex]['votes'] ?? 0) as num).toInt();
+            final newCount =
+                ((newOpts[optionIndex]['votesCount'] ??
+                            newOpts[optionIndex]['votes'] ??
+                            0)
+                        as num)
+                    .toInt();
             newOpts[optionIndex]['votesCount'] = newCount + 1;
           }
 

@@ -5,12 +5,36 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import '../../models/booking_model.dart';
 
 abstract class BookingsRemoteDataSource {
-  Future<List<BookingModel>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId});
-  Future<List<PendingBookingModel>> getPendingBookings({int page = 1, int limit = 10});
-  Future<List<PendingBookingModel>> getConfirmedBookings({int page = 1, int limit = 10});
-  Future<ScanBookingResponseModel> scanBooking(String token, {String? hostelId, String? bookingId});
-  Future<ScanBookingResponseModel> manualCheckin(String accessCode, {String? hostelId, String? bookingId});
-  Future<ScanBookingResponseModel> getCheckinData({String? bookingId, String? accessCode, String? hostelId});
+  Future<List<BookingModel>> getOwnerBookings({
+    int page = 1,
+    int limit = 10,
+    String? kycStatus,
+    String? roomType,
+    String? hostelId,
+  });
+  Future<List<PendingBookingModel>> getPendingBookings({
+    int page = 1,
+    int limit = 10,
+  });
+  Future<List<PendingBookingModel>> getConfirmedBookings({
+    int page = 1,
+    int limit = 10,
+  });
+  Future<ScanBookingResponseModel> scanBooking(
+    String token, {
+    String? hostelId,
+    String? bookingId,
+  });
+  Future<ScanBookingResponseModel> manualCheckin(
+    String accessCode, {
+    String? hostelId,
+    String? bookingId,
+  });
+  Future<ScanBookingResponseModel> getCheckinData({
+    String? bookingId,
+    String? accessCode,
+    String? hostelId,
+  });
   Future<void> assignRoom(String bookingId, String roomId, String bedNumber);
   Future<void> finalizeCheckin({
     required String bookingId,
@@ -27,8 +51,12 @@ abstract class BookingsRemoteDataSource {
     required String idempotencyKey,
     String? referenceId,
   });
-  Future<void> confirmBooking(String bookingId, String razorpayOrderId,
-      String razorpayPaymentId, String razorpaySignature);
+  Future<void> confirmBooking(
+    String bookingId,
+    String razorpayOrderId,
+    String razorpayPaymentId,
+    String razorpaySignature,
+  );
   Future<BookingModel> getBookingById(String id);
   Future<void> checkoutBooking(String bookingId);
   Future<void> cancelBooking(String bookingId);
@@ -40,12 +68,15 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   BookingsRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<List<BookingModel>> getOwnerBookings({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId}) async {
+  Future<List<BookingModel>> getOwnerBookings({
+    int page = 1,
+    int limit = 10,
+    String? kycStatus,
+    String? roomType,
+    String? hostelId,
+  }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'limit': limit,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'limit': limit};
       if (kycStatus != null) queryParams['kycStatus'] = kycStatus;
       if (roomType != null) queryParams['sharingType'] = roomType;
       if (hostelId != null) queryParams['hostelId'] = hostelId;
@@ -55,9 +86,13 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
       );
       if (response.statusCode == 200) {
         final rawData = response.data['data'];
-        final List<dynamic> data = rawData is Map ? (rawData['results'] ?? []) : rawData;
+        final List<dynamic> data = rawData is Map
+            ? (rawData['results'] ?? [])
+            : rawData;
         AppLogger.debug('[BOOKINGS] Fetched owner bookings: ${data.length}');
-        return await Isolate.run(() => data.map((json) => BookingModel.fromJson(json)).toList());
+        return await Isolate.run(
+          () => data.map((json) => BookingModel.fromJson(json)).toList(),
+        );
       }
       throw Exception('Failed to fetch bookings');
     } catch (e) {
@@ -67,7 +102,10 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<List<PendingBookingModel>> getConfirmedBookings({int page = 1, int limit = 10}) async {
+  Future<List<PendingBookingModel>> getConfirmedBookings({
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
       final response = await dio.get(
         ApiConstants.bookingsConfirmed,
@@ -75,9 +113,15 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
       );
       if (response.statusCode == 200) {
         final raw = response.data['data'];
-        final List<dynamic> list = raw is Map ? (raw['results'] ?? []) : (raw is List ? raw : []);
-        AppLogger.debug('[BOOKINGS] Fetched confirmed bookings: ${list.length}');
-        return await Isolate.run(() => list.map((j) => PendingBookingModel.fromJson(j)).toList());
+        final List<dynamic> list = raw is Map
+            ? (raw['results'] ?? [])
+            : (raw is List ? raw : []);
+        AppLogger.debug(
+          '[BOOKINGS] Fetched confirmed bookings: ${list.length}',
+        );
+        return await Isolate.run(
+          () => list.map((j) => PendingBookingModel.fromJson(j)).toList(),
+        );
       }
       throw Exception('Failed to fetch confirmed bookings');
     } catch (e) {
@@ -87,7 +131,10 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<List<PendingBookingModel>> getPendingBookings({int page = 1, int limit = 10}) async {
+  Future<List<PendingBookingModel>> getPendingBookings({
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
       final response = await dio.get(
         ApiConstants.pendingBookings,
@@ -95,9 +142,13 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
       );
       if (response.statusCode == 200) {
         final raw = response.data['data'];
-        final List<dynamic> list = raw is Map ? (raw['results'] ?? []) : (raw is List ? raw : []);
+        final List<dynamic> list = raw is Map
+            ? (raw['results'] ?? [])
+            : (raw is List ? raw : []);
         AppLogger.debug('[BOOKINGS] Fetched pending bookings: ${list.length}');
-        return await Isolate.run(() => list.map((json) => PendingBookingModel.fromJson(json)).toList());
+        return await Isolate.run(
+          () => list.map((json) => PendingBookingModel.fromJson(json)).toList(),
+        );
       }
       throw Exception('Failed to fetch pending bookings');
     } catch (e) {
@@ -107,7 +158,11 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<ScanBookingResponseModel> scanBooking(String token, {String? hostelId, String? bookingId}) async {
+  Future<ScanBookingResponseModel> scanBooking(
+    String token, {
+    String? hostelId,
+    String? bookingId,
+  }) async {
     try {
       final response = await dio.post(
         ApiConstants.scanBooking,
@@ -125,11 +180,19 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<ScanBookingResponseModel> manualCheckin(String accessCode, {String? hostelId, String? bookingId}) async {
+  Future<ScanBookingResponseModel> manualCheckin(
+    String accessCode, {
+    String? hostelId,
+    String? bookingId,
+  }) async {
     try {
       final response = await dio.post(
         ApiConstants.manualCheckin,
-        data: {'accessCode': accessCode, 'hostelId': hostelId, 'bookingId': bookingId},
+        data: {
+          'accessCode': accessCode,
+          'hostelId': hostelId,
+          'bookingId': bookingId,
+        },
       );
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
@@ -143,7 +206,11 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<void> assignRoom(String bookingId, String roomId, String bedNumber) async {
+  Future<void> assignRoom(
+    String bookingId,
+    String roomId,
+    String bedNumber,
+  ) async {
     try {
       await dio.post(
         ApiConstants.assignRoom,
@@ -183,8 +250,12 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<void> confirmBooking(String bookingId, String razorpayOrderId,
-      String razorpayPaymentId, String razorpaySignature) async {
+  Future<void> confirmBooking(
+    String bookingId,
+    String razorpayOrderId,
+    String razorpayPaymentId,
+    String razorpaySignature,
+  ) async {
     try {
       await dio.post(
         '${ApiConstants.confirmBooking}/$bookingId',

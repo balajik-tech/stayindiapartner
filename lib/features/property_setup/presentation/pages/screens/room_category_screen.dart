@@ -30,29 +30,28 @@ class RoomCategoryScreen extends StatefulWidget {
 }
 
 class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
-  String _selectedType = 'AC'; 
+  String _selectedType = 'AC';
   late List<int> _activeSharingTypes;
 
   late Map<String, Map<int, Map<String, TextEditingController>>> _controllers;
   late Map<String, Map<int, Map<String, FocusNode>>> _focusNodes;
 
-  final Map<String, Set<int>> _customizedDeposits = {
-    'AC': {},
-    'NON_AC': {},
-  };
+  final Map<String, Set<int>> _customizedDeposits = {'AC': {}, 'NON_AC': {}};
   final Map<String, Set<int>> _customizedMaintenances = {
     'AC': {},
     'NON_AC': {},
   };
 
-  final Map<String, Set<int>> _customizedDailies = {
-    'AC': {},
-    'NON_AC': {},
-  };
+  final Map<String, Set<int>> _customizedDailies = {'AC': {}, 'NON_AC': {}};
 
   bool _isPropagating = false;
 
-  void _propagateValue(String type, int sourceSharing, String field, String value) {
+  void _propagateValue(
+    String type,
+    int sourceSharing,
+    String field,
+    String value,
+  ) {
     if (_isPropagating) return;
     _isPropagating = true;
 
@@ -83,16 +82,9 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
 
     final Set<int> initialSharingTypes = {1, 2, 3, 4};
 
-    // Initialize controllers and focus nodes for 10 rows of both AC and NON_AC
-    _controllers = {
-      'AC': {},
-      'NON_AC': {},
-    };
+    _controllers = {'AC': {}, 'NON_AC': {}};
 
-    _focusNodes = {
-      'AC': {},
-      'NON_AC': {},
-    };
+    _focusNodes = {'AC': {}, 'NON_AC': {}};
 
     for (final type in ['AC', 'NON_AC']) {
       for (int s = 1; s <= 10; s++) {
@@ -112,8 +104,10 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       }
     }
 
-    // Prefill data from current cubit categories
-    final currentCategories = context.read<PropertySetupCubit>().state.roomCategories;
+    final currentCategories = context
+        .read<PropertySetupCubit>()
+        .state
+        .roomCategories;
     for (final cat in currentCategories) {
       final int sharing = cat['sharingType'] ?? 2;
       if (sharing >= 1 && sharing <= 10) {
@@ -141,7 +135,6 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
 
     _activeSharingTypes = initialSharingTypes.toList()..sort();
 
-    // Attach listeners for auto-calculation, validation, and smart propagation
     for (final type in ['AC', 'NON_AC']) {
       for (int s = 1; s <= 10; s++) {
         final rentCtrl = _controllers[type]![s]!['rent']!;
@@ -162,7 +155,6 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
           }
         });
 
-        // Propagation listeners: only propagate value changes when user is actively editing the first field (s == 1)
         depositCtrl.addListener(() {
           if (depositFocus.hasFocus) {
             final val = depositCtrl.text.trim();
@@ -196,7 +188,6 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
           }
         });
 
-        // Silently sync matrix changes into the cubit state without triggering heavy UI rebuilds
         rentCtrl.addListener(_silentSyncToCubit);
         depositCtrl.addListener(_silentSyncToCubit);
         maintCtrl.addListener(_silentSyncToCubit);
@@ -245,7 +236,9 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
             'roomSize': '',
             'roomCount': 0,
             'monthlyRent': rent,
-            'dailyRent': daily.isNotEmpty ? daily : (double.parse(rent) / 30).round().toString(),
+            'dailyRent': daily.isNotEmpty
+                ? daily
+                : (double.parse(rent) / 30).round().toString(),
             'securityDeposit': deposit.isNotEmpty ? deposit : '0',
             'maintenance': maint.isNotEmpty ? maint : '0',
             'securityDepositCustomized': true,
@@ -293,9 +286,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildLeftStaticPanel(),
-                        Expanded(
-                          child: _buildRightScrollablePanel(),
-                        ),
+                        Expanded(child: _buildRightScrollablePanel()),
                       ],
                     ),
                   ),
@@ -436,7 +427,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
             color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             spreadRadius: 1,
-            offset: const Offset(3, 0), // Creates beautiful 3D elevation casting shadow to the right
+            offset: const Offset(3, 0),
           ),
         ],
         border: const Border(
@@ -477,18 +468,95 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       height: 52.h,
       decoration: BoxDecoration(
         color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
-        border: const Border(
-          bottom: BorderSide(color: Color(0xFFF1F5F9)),
-        ),
+        border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
       ),
-      alignment: Alignment.center,
-      child: Text(
-        '$sharing Sharing',
-        style: TextStyle(
-          color: const Color(0xFF0F172A),
-          fontSize: 13.sp,
-          fontWeight: FontWeight.w800,
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '$sharing Sharing',
+            style: TextStyle(
+              color: const Color(0xFF0F172A),
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _deleteSharingType(sharing),
+            child: Icon(
+              Icons.delete_outline_rounded,
+              color: const Color(0xFFEF4444),
+              size: 18.sp,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteSharingType(int sharing) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
         ),
+        title: Text(
+          'Delete Sharing Option',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFFEF4444),
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete the pricing for $sharing Sharing?',
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: const Color(0xFF64748B),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() {
+                _activeSharingTypes.remove(sharing);
+                for (final type in ['AC', 'NON_AC']) {
+                  _controllers[type]?[sharing]?.forEach((field, controller) {
+                    controller.clear();
+                  });
+                }
+              });
+              _silentSyncToCubit();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: const Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -500,9 +568,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         height: 48.h,
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(
-            bottom: BorderSide(color: Color(0xFFF1F5F9)),
-          ),
+          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         ),
         padding: EdgeInsets.only(left: 12.w),
         alignment: Alignment.centerLeft,
@@ -533,12 +599,14 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: SizedBox(
-        width: 400.w, // 4 columns * 100.w
+        width: 400.w,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildScrollableHeader(),
-            ..._activeSharingTypes.map((sharing) => _buildScrollableRow(sharing)),
+            ..._activeSharingTypes.map(
+              (sharing) => _buildScrollableRow(sharing),
+            ),
             _buildScrollableAddRowPlaceholder(),
           ],
         ),
@@ -567,9 +635,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       height: 52.h,
       decoration: BoxDecoration(
         color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
-        border: const Border(
-          bottom: BorderSide(color: Color(0xFFF1F5F9)),
-        ),
+        border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
       ),
       child: Row(
         children: [
@@ -589,9 +655,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         height: 48.h,
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(
-            bottom: BorderSide(color: Color(0xFFF1F5F9)),
-          ),
+          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         ),
         padding: EdgeInsets.only(left: 12.w),
         alignment: Alignment.centerLeft,
@@ -636,7 +700,8 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         controller: controller,
         focusNode: focusNode,
         keyboardType: TextInputType.number,
-        textInputAction: (field == 'daily' && sharing == _activeSharingTypes.last)
+        textInputAction:
+            (field == 'daily' && sharing == _activeSharingTypes.last)
             ? TextInputAction.done
             : TextInputAction.next,
         inputFormatters: [
@@ -647,12 +712,14 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
           if (field == 'rent') {
             _focusNodes[_selectedType]![sharing]!['deposit']!.requestFocus();
           } else if (field == 'deposit') {
-            _focusNodes[_selectedType]![sharing]!['maintenance']!.requestFocus();
+            _focusNodes[_selectedType]![sharing]!['maintenance']!
+                .requestFocus();
           } else if (field == 'maintenance') {
             _focusNodes[_selectedType]![sharing]!['daily']!.requestFocus();
           } else if (field == 'daily') {
             final currentIndex = _activeSharingTypes.indexOf(sharing);
-            if (currentIndex != -1 && currentIndex < _activeSharingTypes.length - 1) {
+            if (currentIndex != -1 &&
+                currentIndex < _activeSharingTypes.length - 1) {
               final nextSharing = _activeSharingTypes[currentIndex + 1];
               _focusNodes[_selectedType]![nextSharing]!['rent']!.requestFocus();
             }
@@ -696,7 +763,9 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
           title: Text(
             'Add Custom Sharing',
             style: TextStyle(
@@ -722,20 +791,27 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                 controller: controller,
                 keyboardType: TextInputType.number,
                 autofocus: true,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   hintText: 'Sharing number',
-                  hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 13.sp),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  hintStyle: TextStyle(
+                    color: const Color(0xFF94A3B8),
+                    fontSize: 13.sp,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.r),
                     borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.r),
-                    borderSide: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF2B5797),
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -760,7 +836,9 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                 if (sharing == null || sharing < 1 || sharing > 10) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please enter a sharing number between 1 and 10'),
+                      content: Text(
+                        'Please enter a sharing number between 1 and 10',
+                      ),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -783,7 +861,9 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2B5797),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
               ),
               child: const Text(
                 'Add',

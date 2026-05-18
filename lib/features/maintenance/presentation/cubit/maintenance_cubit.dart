@@ -17,11 +17,11 @@ class MaintenanceCubit extends Cubit<MaintenanceState> {
     required CreateMaintenanceIssueUseCase createIssueUseCase,
     required UpdateMaintenanceIssueUseCase updateIssueUseCase,
     required GetMaintenanceIssueByIdUseCase getIssueByIdUseCase,
-  })  : _getIssues = getIssuesUseCase,
-        _createIssue = createIssueUseCase,
-        _updateIssue = updateIssueUseCase,
-        _getIssueById = getIssueByIdUseCase,
-        super(MaintenanceInitial());
+  }) : _getIssues = getIssuesUseCase,
+       _createIssue = createIssueUseCase,
+       _updateIssue = updateIssueUseCase,
+       _getIssueById = getIssueByIdUseCase,
+       super(MaintenanceInitial());
 
   Future<void> loadIssues({
     String? hostelId,
@@ -37,7 +37,12 @@ class MaintenanceCubit extends Cubit<MaintenanceState> {
       );
       emit(MaintenanceLoaded(summary: summary));
     } catch (e) {
-      emit(MaintenanceError(message: ErrorHelper.toFriendlyMessage(e), summary: state.summary));
+      emit(
+        MaintenanceError(
+          message: ErrorHelper.toFriendlyMessage(e),
+          summary: state.summary,
+        ),
+      );
     }
   }
 
@@ -61,7 +66,12 @@ class MaintenanceCubit extends Cubit<MaintenanceState> {
       );
       emit(MaintenanceSuccess(summary: state.summary));
     } catch (e) {
-      emit(MaintenanceError(message: ErrorHelper.toFriendlyMessage(e), summary: state.summary));
+      emit(
+        MaintenanceError(
+          message: ErrorHelper.toFriendlyMessage(e),
+          summary: state.summary,
+        ),
+      );
     }
   }
 
@@ -83,7 +93,12 @@ class MaintenanceCubit extends Cubit<MaintenanceState> {
       await _updateIssue(id, data);
       emit(MaintenanceSuccess(summary: state.summary));
     } catch (e) {
-      emit(MaintenanceError(message: ErrorHelper.toFriendlyMessage(e), summary: state.summary));
+      emit(
+        MaintenanceError(
+          message: ErrorHelper.toFriendlyMessage(e),
+          summary: state.summary,
+        ),
+      );
     }
   }
 
@@ -91,7 +106,12 @@ class MaintenanceCubit extends Cubit<MaintenanceState> {
     try {
       await _getIssueById(id);
     } catch (e) {
-      emit(MaintenanceError(message: ErrorHelper.toFriendlyMessage(e), summary: state.summary));
+      emit(
+        MaintenanceError(
+          message: ErrorHelper.toFriendlyMessage(e),
+          summary: state.summary,
+        ),
+      );
     }
   }
 }

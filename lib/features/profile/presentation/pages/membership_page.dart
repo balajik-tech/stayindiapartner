@@ -12,7 +12,8 @@ class MembershipPage extends StatefulWidget {
   State<MembershipPage> createState() => _MembershipPageState();
 }
 
-class _MembershipPageState extends State<MembershipPage> with SingleTickerProviderStateMixin {
+class _MembershipPageState extends State<MembershipPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -42,11 +43,14 @@ class _MembershipPageState extends State<MembershipPage> with SingleTickerProvid
 
     final owner = authState.owner;
     final bool isGold = owner.verificationBadge == 'GOLD';
-    final int totalPGs = hostelState is HostelLoaded ? hostelState.hostels.length : 0;
+    final int totalPGs = hostelState is HostelLoaded
+        ? hostelState.hostels.length
+        : 0;
 
-    final int totalBranches = totalPGs; 
-    final String primaryHostelName = hostelState is HostelLoaded && hostelState.hostels.isNotEmpty 
-        ? hostelState.hostels.first.name 
+    final int totalBranches = totalPGs;
+    final String primaryHostelName =
+        hostelState is HostelLoaded && hostelState.hostels.isNotEmpty
+        ? hostelState.hostels.first.name
         : 'Stay India Member';
 
     return Scaffold(
@@ -79,17 +83,29 @@ class _MembershipPageState extends State<MembershipPage> with SingleTickerProvid
             if (isGold) ...[
               _buildBadge(),
               SizedBox(height: 24.h),
-              _buildGoldenCard(owner.name, primaryHostelName, totalPGs, totalBranches),
-            ] else 
+              _buildGoldenCard(
+                owner.name,
+                primaryHostelName,
+                totalPGs,
+                totalBranches,
+              ),
+            ] else
               Center(
                 child: Column(
                   children: [
                     SizedBox(height: 100.h),
-                    Icon(Icons.stars_rounded, size: 80.sp, color: Colors.grey.withValues(alpha: 0.3)),
+                    Icon(
+                      Icons.stars_rounded,
+                      size: 80.sp,
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
                     SizedBox(height: 16.h),
                     Text(
                       'Membership Benefits',
-                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     SizedBox(height: 8.h),
                     Text(
@@ -115,7 +131,11 @@ class _MembershipPageState extends State<MembershipPage> with SingleTickerProvid
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.workspace_premium_rounded, size: 14.sp, color: Colors.white),
+          Icon(
+            Icons.workspace_premium_rounded,
+            size: 14.sp,
+            color: Colors.white,
+          ),
           SizedBox(width: 4.w),
           Text(
             'GOLD',
@@ -140,7 +160,12 @@ class _MembershipPageState extends State<MembershipPage> with SingleTickerProvid
     );
   }
 
-  Widget _buildGoldenCard(String name, String hostelName, int pgs, int branches) {
+  Widget _buildGoldenCard(
+    String name,
+    String hostelName,
+    int pgs,
+    int branches,
+  ) {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -153,9 +178,9 @@ class _MembershipPageState extends State<MembershipPage> with SingleTickerProvid
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: const [
-                Color(0xFFEAB308), 
-                Color(0xFFCA8A04), 
-                Color(0xFF854D0E), 
+                Color(0xFFEAB308),
+                Color(0xFFCA8A04),
+                Color(0xFF854D0E),
               ],
               stops: const [0.1, 0.5, 0.9],
             ),
@@ -169,7 +194,6 @@ class _MembershipPageState extends State<MembershipPage> with SingleTickerProvid
           ),
           child: Stack(
             children: [
-
               Positioned.fill(
                 child: ShaderMask(
                   shaderCallback: (rect) {
@@ -219,7 +243,11 @@ class _MembershipPageState extends State<MembershipPage> with SingleTickerProvid
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.workspace_premium_rounded, size: 20.sp, color: Colors.white),
+                                Icon(
+                                  Icons.workspace_premium_rounded,
+                                  size: 20.sp,
+                                  color: Colors.white,
+                                ),
                                 SizedBox(width: 8.w),
                                 Text(
                                   'GOLDEN MEMBER',
@@ -263,7 +291,11 @@ class _MembershipPageState extends State<MembershipPage> with SingleTickerProvid
                           children: [
                             _buildStat('Total PGs', pgs),
                             SizedBox(width: 12.w),
-                            Container(width: 1.w, height: 16.h, color: Colors.white.withValues(alpha: 0.3)),
+                            Container(
+                              width: 1.w,
+                              height: 16.h,
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
                             SizedBox(width: 12.w),
                             _buildStat('Total Branches', branches),
                           ],

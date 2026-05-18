@@ -30,7 +30,7 @@ class HostelModel extends Hostel {
   factory HostelModel.fromJson(Map<String, dynamic> json) {
     final location = json['location'] as Map<String, dynamic>?;
     final coords = location?['coordinates'] as List<dynamic>?;
-    
+
     return HostelModel(
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
@@ -46,12 +46,17 @@ class HostelModel extends Hostel {
       state: json['state'] as String?,
       area: json['area'] as String?,
       pincode: json['pincode'] as String?,
-      lat: coords != null && coords.length >= 2 ? (coords[1] as num).toDouble() : null,
-      lng: coords != null && coords.length >= 2 ? (coords[0] as num).toDouble() : null,
+      lat: coords != null && coords.length >= 2
+          ? (coords[1] as num).toDouble()
+          : null,
+      lng: coords != null && coords.length >= 2
+          ? (coords[0] as num).toDouble()
+          : null,
       occupiedBeds: json['occupiedBeds'] ?? json['occupied'] ?? 0,
       totalBeds: json['totalBeds'] ?? json['total'] ?? 0,
-      images:
-          (json['images'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      images: (json['images'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
       coverImage: json['coverImage'] as String?,
       contactNumber: json['contactNumber'] as String?,
       description: json['description'] as String?,

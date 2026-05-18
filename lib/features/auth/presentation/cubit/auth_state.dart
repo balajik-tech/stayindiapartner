@@ -1,6 +1,5 @@
 part of 'auth_cubit.dart';
 
-
 abstract class AuthState extends Equatable {
   const AuthState();
 
@@ -8,32 +7,22 @@ abstract class AuthState extends Equatable {
   List<Object?> get props => [];
 }
 
-
 class AuthInitial extends AuthState {}
-
 
 class AuthLoading extends AuthState {}
 
 class AuthSessionRestoring extends AuthState {}
-
-
 
 class AuthOtpSent extends AuthState {
   final String phone;
   final String? devOtp;
   final bool isResend;
 
-  const AuthOtpSent({
-    required this.phone,
-    this.devOtp,
-    this.isResend = false,
-  });
+  const AuthOtpSent({required this.phone, this.devOtp, this.isResend = false});
 
   @override
   List<Object?> get props => [phone, devOtp, isResend];
 }
-
-
 
 class AuthAuthenticated extends AuthState {
   final OwnerEntity owner;
@@ -47,16 +36,11 @@ class AuthAuthenticated extends AuthState {
   List<Object?> get props => [owner.id, isNewUser, owner.isProfileComplete];
 }
 
-
-
 class AuthProfileCompleted extends AuthAuthenticated {
   const AuthProfileCompleted({required super.owner});
 }
 
-
 class AuthUnauthenticated extends AuthState {}
-
-
 
 class AuthSessionRestoreError extends AuthState {
   final String message;
@@ -67,7 +51,6 @@ class AuthSessionRestoreError extends AuthState {
   List<Object?> get props => [message];
 }
 
-
 class AuthError extends AuthState {
   final String message;
 
@@ -75,4 +58,21 @@ class AuthError extends AuthState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class AuthGoogleNeedsPhone extends AuthState {
+  final String email;
+  final String firstName;
+  final String lastName;
+  final String avatar;
+
+  const AuthGoogleNeedsPhone({
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.avatar,
+  });
+
+  @override
+  List<Object?> get props => [email, firstName, lastName, avatar];
 }

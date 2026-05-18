@@ -26,13 +26,8 @@ import 'core/services/app_bootstrapper.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    const AppBootstrapper(
-      child: StayIndiaOwnerApp(),
-    ),
-  );
+  runApp(const AppBootstrapper(child: StayIndiaOwnerApp()));
 }
-
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -43,9 +38,7 @@ class StayIndiaOwnerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => di.sl<AuthCubit>()..restoreSession(),
-        ),
+        BlocProvider(create: (context) => di.sl<AuthCubit>()..restoreSession()),
         BlocProvider(create: (context) => di.sl<ThemeCubit>()),
       ],
       child: ScreenUtilInit(
@@ -58,14 +51,16 @@ class StayIndiaOwnerApp extends StatelessWidget {
               return BlocListener<AuthCubit, AuthState>(
                 listener: (context, state) {
                   if (state is AuthUnauthenticated) {
-                    navigatorKey.currentState
-                        ?.popUntil((route) => route.isFirst);
+                    navigatorKey.currentState?.popUntil(
+                      (route) => route.isFirst,
+                    );
                   }
                 },
                 child: BlocBuilder<AuthCubit, AuthState>(
                   buildWhen: (prev, curr) {
-                    
-                    if (curr is AuthLoading || curr is AuthError || curr is AuthOtpSent) {
+                    if (curr is AuthLoading ||
+                        curr is AuthError ||
+                        curr is AuthOtpSent) {
                       return false;
                     }
                     final prevKey = prev is AuthAuthenticated
@@ -81,8 +76,6 @@ class StayIndiaOwnerApp extends StatelessWidget {
                         ? authState.owner.id
                         : 'unauthenticated';
 
-
-
                     return MultiBlocProvider(
                       key: ValueKey(sessionKey),
                       providers: [
@@ -96,22 +89,30 @@ class StayIndiaOwnerApp extends StatelessWidget {
                         BlocProvider(
                           create: (context) => di.sl<DashboardCubit>(),
                         ),
+                        BlocProvider(create: (context) => di.sl<TenantCubit>()),
                         BlocProvider(
-                          create: (context) => di.sl<TenantCubit>(),
+                          create: (context) => di.sl<MaintenanceCubit>(),
                         ),
-                        BlocProvider(
-                            create: (context) => di.sl<MaintenanceCubit>()),
                         BlocProvider(create: (context) => di.sl<NoticeCubit>()),
                         BlocProvider(create: (context) => di.sl<StaffCubit>()),
-                        BlocProvider(create: (context) => di.sl<PaymentCubit>()),
-                        BlocProvider(create: (context) => di.sl<ProfileCubit>()),
-                        BlocProvider(create: (context) => di.sl<SettingsCubit>()),
                         BlocProvider(
-                            create: (context) => di.sl<CommunityCubit>()),
+                          create: (context) => di.sl<PaymentCubit>(),
+                        ),
                         BlocProvider(
-                            create: (context) => di.sl<OwnerCommunityCubit>()),
+                          create: (context) => di.sl<ProfileCubit>(),
+                        ),
                         BlocProvider(
-                            create: (context) => di.sl<AssociationCubit>()),
+                          create: (context) => di.sl<SettingsCubit>(),
+                        ),
+                        BlocProvider(
+                          create: (context) => di.sl<CommunityCubit>(),
+                        ),
+                        BlocProvider(
+                          create: (context) => di.sl<OwnerCommunityCubit>(),
+                        ),
+                        BlocProvider(
+                          create: (context) => di.sl<AssociationCubit>(),
+                        ),
                       ],
                       child: MaterialApp(
                         navigatorKey: navigatorKey,
@@ -143,5 +144,3 @@ class StayIndiaOwnerApp extends StatelessWidget {
     );
   }
 }
-
-

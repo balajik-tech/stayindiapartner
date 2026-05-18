@@ -27,17 +27,15 @@ class ComplaintsRemoteDataSourceImpl implements ComplaintsRemoteDataSource {
     try {
       final response = await dio.get(
         ApiConstants.tickets,
-        queryParameters: {
-          'hostelId': hostelId,
-          'type': 'COMPLAINT',
-        },
+        queryParameters: {'hostelId': hostelId, 'type': 'COMPLAINT'},
       );
       if (response.statusCode == 200) {
         final raw = response.data;
         final data = (raw is Map && raw['data'] is Map)
             ? raw['data'] as Map<String, dynamic>
             : raw as Map<String, dynamic>;
-        final items = data['items'] as List<dynamic>? ??
+        final items =
+            data['items'] as List<dynamic>? ??
             (raw['data'] is List ? raw['data'] as List : []);
         return items
             .map((c) => ComplaintModel.fromJson(c as Map<String, dynamic>))

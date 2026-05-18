@@ -42,10 +42,7 @@ class PaginatedResponse<T> {
   final List<T> results;
   final PaginationModel pagination;
 
-  PaginatedResponse({
-    required this.results,
-    required this.pagination,
-  });
+  PaginatedResponse({required this.results, required this.pagination});
 
   factory PaginatedResponse.fromJson(
     Map<String, dynamic> json,
@@ -53,7 +50,9 @@ class PaginatedResponse<T> {
   ) {
     final resultsJson = json['results'] as List<dynamic>? ?? [];
     return PaginatedResponse(
-      results: resultsJson.map((item) => fromJsonT(item as Map<String, dynamic>)).toList(),
+      results: resultsJson
+          .map((item) => fromJsonT(item as Map<String, dynamic>))
+          .toList(),
       pagination: PaginationModel.fromJson(json['pagination'] ?? {}),
     );
   }

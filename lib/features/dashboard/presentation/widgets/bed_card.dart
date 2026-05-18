@@ -14,7 +14,7 @@ class BedCard extends StatelessWidget {
   final bool isSmall;
   final bool? isAwayField;
   final VoidCallback onTap;
-  
+
   const BedCard({
     super.key,
     required this.bedNumber,
@@ -79,7 +79,8 @@ class BedCard extends StatelessWidget {
     }
 
     return Semantics(
-      label: '${'bed'.tr()} $bedNumber, ${'status'.tr()}: $status${tenantName != null ? ', ${'tenant'.tr()}: $tenantName' : ''}',
+      label:
+          '${'bed'.tr()} $bedNumber, ${'status'.tr()}: $status${tenantName != null ? ', ${'tenant'.tr()}: $tenantName' : ''}',
       button: true,
       onTap: onTap,
       child: GestureDetector(
@@ -105,25 +106,32 @@ class BedCard extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: bgColor,
-                        borderRadius: BorderRadius.circular(isSmall ? 14.r : 18.r),
+                        borderRadius: BorderRadius.circular(
+                          isSmall ? 14.r : 18.r,
+                        ),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
                                   color: borderColor.withValues(alpha: 0.2),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
-                                )
+                                ),
                               ]
                             : null,
                       ),
                       child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: isSmall ? 8.h : 12.h, horizontal: 4.w),
+                        padding: EdgeInsets.symmetric(
+                          vertical: isSmall ? 8.h : 12.h,
+                          horizontal: 4.w,
+                        ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             if (tenantAvatar != null || tenantName != null)
                               CustomAvatar(
-                                imageUrl: ApiConstants.getImageUrl(tenantAvatar),
+                                imageUrl: ApiConstants.getImageUrl(
+                                  tenantAvatar,
+                                ),
                                 name: tenantName ?? 'T',
                                 size: isSmall ? 30.r : 42.r,
                                 fontSize: isSmall ? 14.sp : 18.sp,
@@ -131,22 +139,24 @@ class BedCard extends StatelessWidget {
                               )
                             else
                               Icon(
-                                isMaintenance ? Icons.build_rounded : Icons.bed_rounded,
+                                isMaintenance
+                                    ? Icons.build_rounded
+                                    : Icons.bed_rounded,
                                 size: isSmall ? 22.sp : 34.sp,
                                 color: textColor.withValues(alpha: 0.8),
                               ),
                             SizedBox(height: isSmall ? 4.h : 8.h),
-                             FittedBox(
-                                child: Text(
-                                  bedLabel,
-                                  style: TextStyle(
-                                    fontSize: isSmall ? 11.sp : 14.sp,
-                                    fontWeight: FontWeight.w900,
-                                    color: textColor.withValues(alpha: 0.6),
-                                    height: 1,
-                                  ),
+                            FittedBox(
+                              child: Text(
+                                bedLabel,
+                                style: TextStyle(
+                                  fontSize: isSmall ? 11.sp : 14.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: textColor.withValues(alpha: 0.6),
+                                  height: 1,
                                 ),
                               ),
+                            ),
                           ],
                         ),
                       ),
@@ -158,7 +168,10 @@ class BedCard extends StatelessWidget {
                     top: isSmall ? -4.h : -6.h,
                     left: isSmall ? 2.w : 4.w,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: isSmall ? 3.w : 4.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmall ? 3.w : 4.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE91E63),
                         borderRadius: BorderRadius.circular(4.r),
@@ -178,7 +191,10 @@ class BedCard extends StatelessWidget {
                     top: isSmall ? -4.h : -6.h,
                     right: isSmall ? 2.w : 4.w,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: isSmall ? 3.w : 4.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmall ? 3.w : 4.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFB300),
                         borderRadius: BorderRadius.circular(4.r),
@@ -199,7 +215,10 @@ class BedCard extends StatelessWidget {
                     top: isSmall ? -4.h : -6.h,
                     right: isSmall ? 2.w : 4.w,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: isSmall ? 3.w : 4.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmall ? 3.w : 4.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
                         color: borderColor,
                         borderRadius: BorderRadius.circular(4.r),
@@ -222,8 +241,8 @@ class BedCard extends StatelessWidget {
               isFree
                   ? StringUtils.translate('available', context: context)
                   : isMaintenance
-                      ? 'Maintenance'
-                      : (tenantName?.split(' ')[0] ?? upperStatus),
+                  ? 'Maintenance'
+                  : (tenantName?.split(' ')[0] ?? upperStatus),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -264,7 +283,12 @@ class _DottedBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(strokeWidth / 2, strokeWidth / 2, size.width - strokeWidth, size.height - strokeWidth),
+      Rect.fromLTWH(
+        strokeWidth / 2,
+        strokeWidth / 2,
+        size.width - strokeWidth,
+        size.height - strokeWidth,
+      ),
       Radius.circular(borderRadius),
     );
 
@@ -276,7 +300,10 @@ class _DottedBorderPainter extends CustomPainter {
       while (distance < metric.length) {
         final remaining = metric.length - distance;
         final currentDash = dashWidth < remaining ? dashWidth : remaining;
-        canvas.drawPath(metric.extractPath(distance, distance + currentDash), paint);
+        canvas.drawPath(
+          metric.extractPath(distance, distance + currentDash),
+          paint,
+        );
         distance += currentDash + dashSpace;
       }
     }

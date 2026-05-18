@@ -38,59 +38,68 @@ import 'package:stayindia_owner/features/profile/data/repositories/review_reposi
 import 'package:stayindia_owner/features/auth/presentation/cubit/document_cubit.dart';
 
 void registerProfileFeature(GetIt sl) {
-  sl.registerFactory(() => ProfileCubit(
-        getProfileUseCase: sl(),
-        updateProfileUseCase: sl(),
-        uploadAvatarUseCase: sl(),
-        deleteOwnerAccountUseCase: sl(),
-      ));
-  
-  sl.registerFactory(() => HostelCubit(
-        getHostelsUseCase: sl(),
-        createHostelUseCase: sl(),
-        updateHostelUseCase: sl(),
-        deleteHostelUseCase: sl(),
-        uploadHostelImagesUseCase: sl(),
-        updateHostelLocationUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => ProfileCubit(
+      getProfileUseCase: sl(),
+      updateProfileUseCase: sl(),
+      uploadAvatarUseCase: sl(),
+      deleteOwnerAccountUseCase: sl(),
+    ),
+  );
 
-  sl.registerFactory(() => RoomCubit(
-        getOccupancyUseCase: sl(),
-        getFloorWiseRoomsUseCase: sl(),
-        getRoomsUseCase: sl(),
-        getFloorsUseCase: sl(),
-        getRoomsByFloorUseCase: sl(),
-        getFreeBedsUseCase: sl(),
-        createRoomUseCase: sl(),
-        updateRoomUseCase: sl(),
-        deleteRoomUseCase: sl(),
-        getBedDetailUseCase: sl(),
-        getBedHistoryUseCase: sl(),
-        bulkCreateRoomsUseCase: sl(),
-        bulkUpsertRoomsUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => HostelCubit(
+      getHostelsUseCase: sl(),
+      createHostelUseCase: sl(),
+      updateHostelUseCase: sl(),
+      deleteHostelUseCase: sl(),
+      uploadHostelImagesUseCase: sl(),
+      updateHostelLocationUseCase: sl(),
+    ),
+  );
 
-  sl.registerFactory(() => FoodMenuCubit(
-        getFoodMenuUseCase: sl(),
-        saveFoodMenuUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => RoomCubit(
+      getOccupancyUseCase: sl(),
+      getFloorWiseRoomsUseCase: sl(),
+      getRoomsUseCase: sl(),
+      getFloorsUseCase: sl(),
+      getRoomsByFloorUseCase: sl(),
+      getFreeBedsUseCase: sl(),
+      createRoomUseCase: sl(),
+      updateRoomUseCase: sl(),
+      deleteRoomUseCase: sl(),
+      getBedDetailUseCase: sl(),
+      getBedHistoryUseCase: sl(),
+      bulkCreateRoomsUseCase: sl(),
+      bulkUpsertRoomsUseCase: sl(),
+    ),
+  );
 
-  sl.registerFactory(() => SettingsCubit(
-        getHostelSettingsUseCase: sl(),
-        updateHostelProfileUseCase: sl(),
-        updateHostelAmenitiesUseCase: sl(),
-        updateHostelHouseRulesUseCase: sl(),
-        updateHostelNotificationsUseCase: sl(),
-        updateHostelRoomConfigUseCase: sl(),
-        uploadHostelSettingsImagesUseCase: sl(),
-        uploadSingleImageUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => FoodMenuCubit(getFoodMenuUseCase: sl(), saveFoodMenuUseCase: sl()),
+  );
 
-  sl.registerFactory(() => DocumentCubit(
-        getDocumentsUseCase: sl(),
-        uploadDocumentUseCase: sl(),
-        deleteDocumentUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => SettingsCubit(
+      getHostelSettingsUseCase: sl(),
+      updateHostelProfileUseCase: sl(),
+      updateHostelAmenitiesUseCase: sl(),
+      updateHostelHouseRulesUseCase: sl(),
+      updateHostelNotificationsUseCase: sl(),
+      updateHostelRoomConfigUseCase: sl(),
+      uploadHostelSettingsImagesUseCase: sl(),
+      uploadSingleImageUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => DocumentCubit(
+      getDocumentsUseCase: sl(),
+      uploadDocumentUseCase: sl(),
+      deleteDocumentUseCase: sl(),
+    ),
+  );
 
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));

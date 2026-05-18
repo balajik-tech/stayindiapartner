@@ -7,26 +7,18 @@ import 'domain/usecases/get_rent_due_details_usecase.dart';
 import 'presentation/cubit/dashboard_cubit.dart';
 import 'presentation/cubit/rent_due_cubit.dart';
 
-
-
 void registerDashboardFeature(GetIt sl) {
-  
   sl.registerFactory(
-    () => DashboardCubit(
-      getDashboardDataUseCase: sl(),
-      deleteRoomUseCase: sl(),
-    ),
+    () =>
+        DashboardCubit(getDashboardDataUseCase: sl(), deleteRoomUseCase: sl()),
   );
 
-  
   sl.registerLazySingleton(() => GetDashboardDataUseCase(sl()));
 
-  
   sl.registerLazySingleton<DashboardRepository>(
     () => DashboardRepositoryImpl(remote: sl()),
   );
 
-  
   sl.registerLazySingleton<DashboardRemoteDataSource>(
     () => DashboardRemoteDataSourceImpl(dio: sl()),
   );

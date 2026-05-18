@@ -18,10 +18,19 @@ class GuestCubit extends Cubit<GuestState> {
     }
   }
 
-  Future<void> updateStatus(String requestId, String status, String hostelId, {String? rejectionReason}) async {
+  Future<void> updateStatus(
+    String requestId,
+    String status,
+    String hostelId, {
+    String? rejectionReason,
+  }) async {
     emit(GuestLoading());
     try {
-      final request = await repository.updateGuestRequestStatus(requestId, status, rejectionReason: rejectionReason);
+      final request = await repository.updateGuestRequestStatus(
+        requestId,
+        status,
+        rejectionReason: rejectionReason,
+      );
       emit(GuestStatusUpdated(request));
 
       await loadHostelRequests(hostelId);

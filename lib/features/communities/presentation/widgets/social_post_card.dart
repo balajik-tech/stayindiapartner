@@ -34,7 +34,9 @@ class SocialPostCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200, width: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,8 +56,14 @@ class SocialPostCard extends StatelessWidget {
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
       leading: CircleAvatar(
         radius: 20.r,
-        backgroundImage: post.userAvatar != null ? CachedNetworkImageProvider(ApiConstants.getImageUrl(post.userAvatar!)!) : null,
-        child: post.userAvatar == null ? Icon(Icons.person, size: 24.sp, color: Colors.grey[400]) : null,
+        backgroundImage: post.userAvatar != null
+            ? CachedNetworkImageProvider(
+                ApiConstants.getImageUrl(post.userAvatar!)!,
+              )
+            : null,
+        child: post.userAvatar == null
+            ? Icon(Icons.person, size: 24.sp, color: Colors.grey[400])
+            : null,
       ),
       title: Row(
         children: [
@@ -69,7 +77,11 @@ class SocialPostCard extends StatelessWidget {
           ),
           SizedBox(width: 4.w),
           if (post.type == 'UPDATE')
-            Icon(Icons.verified_rounded, size: 14.sp, color: AppColors.primaryBlue),
+            Icon(
+              Icons.verified_rounded,
+              size: 14.sp,
+              color: AppColors.primaryBlue,
+            ),
         ],
       ),
       subtitle: Text(
@@ -118,7 +130,9 @@ class SocialPostCard extends StatelessWidget {
           placeholder: (context, url) => Container(
             height: 200.h,
             color: Colors.grey[100],
-            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            child: const Center(
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
           ),
           errorWidget: (context, url, error) => const SizedBox(),
         ),
@@ -128,7 +142,10 @@ class SocialPostCard extends StatelessWidget {
 
   Widget _buildPoll() {
     final options = post.poll?['options'] as List? ?? [];
-    final int totalVotes = options.fold(0, (sum, opt) => sum + (opt['votes'] as int? ?? 0));
+    final int totalVotes = options.fold(
+      0,
+      (sum, opt) => sum + (opt['votes'] as int? ?? 0),
+    );
     final bool hasVoted = post.userVote != null;
 
     return Padding(
@@ -149,7 +166,9 @@ class SocialPostCard extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.r),
                 border: Border.all(
-                  color: isSelected ? AppColors.primaryBlue : Colors.grey.shade200,
+                  color: isSelected
+                      ? AppColors.primaryBlue
+                      : Colors.grey.shade200,
                   width: isSelected ? 1.5 : 1,
                 ),
               ),
@@ -160,7 +179,11 @@ class SocialPostCard extends StatelessWidget {
                       widthFactor: percentage,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: (isSelected ? AppColors.primaryBlue : Colors.grey.shade100).withValues(alpha: 0.1),
+                          color:
+                              (isSelected
+                                      ? AppColors.primaryBlue
+                                      : Colors.grey.shade100)
+                                  .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(7.r),
                         ),
                       ),
@@ -174,8 +197,12 @@ class SocialPostCard extends StatelessWidget {
                             optionText,
                             style: GoogleFonts.dmSans(
                               fontSize: 13.sp,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? AppColors.primaryBlue : AppColors.darkText,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? AppColors.primaryBlue
+                                  : AppColors.darkText,
                             ),
                           ),
                         ),
@@ -185,7 +212,9 @@ class SocialPostCard extends StatelessWidget {
                             style: GoogleFonts.dmSans(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w700,
-                              color: isSelected ? AppColors.primaryBlue : Colors.grey[600],
+                              color: isSelected
+                                  ? AppColors.primaryBlue
+                                  : Colors.grey[600],
                             ),
                           ),
                       ],
@@ -207,7 +236,9 @@ class SocialPostCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _ActionBarItem(
-            icon: post.isLiked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+            icon: post.isLiked
+                ? Icons.favorite_rounded
+                : Icons.favorite_outline_rounded,
             label: _formatCount(post.likesCount),
             isActive: post.isLiked,
             activeColor: Colors.redAccent,
@@ -264,7 +295,9 @@ class _ActionBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? (activeColor ?? AppColors.primaryBlue) : Colors.grey[600];
+    final color = isActive
+        ? (activeColor ?? AppColors.primaryBlue)
+        : Colors.grey[600];
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8.r),

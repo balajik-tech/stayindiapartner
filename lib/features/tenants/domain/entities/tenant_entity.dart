@@ -45,25 +45,25 @@ class TenantEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        bookingId,
-        hostelId,
-        roomId,
-        roomTypename,
-        floor,
-        bedNumber,
-        firstName,
-        lastName,
-        mobile,
-        email,
-        avatar,
-        kycVerified,
-        checkInDate,
-        checkOutDate,
-        parentMobile,
-        isAway,
-        awayMessage,
-      ];
+    id,
+    bookingId,
+    hostelId,
+    roomId,
+    roomTypename,
+    floor,
+    bedNumber,
+    firstName,
+    lastName,
+    mobile,
+    email,
+    avatar,
+    kycVerified,
+    checkInDate,
+    checkOutDate,
+    parentMobile,
+    isAway,
+    awayMessage,
+  ];
 }
 
 class TenantDetailEntity extends Equatable {
@@ -107,7 +107,9 @@ class TenantDetailEntity extends Equatable {
       floor: stay?.floor ?? 0,
       bedNumber: stay?.bedNumber ?? '',
       firstName: name.split(' ').first,
-      lastName: name.split(' ').length > 1 ? name.split(' ').sublist(1).join(' ') : '',
+      lastName: name.split(' ').length > 1
+          ? name.split(' ').sublist(1).join(' ')
+          : '',
       mobile: mobile,
       email: email,
       avatar: avatar,
@@ -121,20 +123,20 @@ class TenantDetailEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        mobile,
-        email,
-        avatar,
-        kycVerified,
-        aadharCardPhoto,
-        stay,
-        payments,
-        outstandingAmount,
-        parentMobile,
-        isAway,
-        awayMessage,
-      ];
+    id,
+    name,
+    mobile,
+    email,
+    avatar,
+    kycVerified,
+    aadharCardPhoto,
+    stay,
+    payments,
+    outstandingAmount,
+    parentMobile,
+    isAway,
+    awayMessage,
+  ];
 }
 
 class TenantStayDetailEntity extends Equatable {
@@ -166,18 +168,18 @@ class TenantStayDetailEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        bookingId,
-        roomId,
-        roomTypename,
-        floor,
-        bedNumber,
-        rent,
-        deposit,
-        checkInDate,
-        accessCode,
-        qrToken,
-        status,
-      ];
+    bookingId,
+    roomId,
+    roomTypename,
+    floor,
+    bedNumber,
+    rent,
+    deposit,
+    checkInDate,
+    accessCode,
+    qrToken,
+    status,
+  ];
 }
 
 class TenantPaymentItemEntity extends Equatable {
@@ -205,14 +207,14 @@ class TenantPaymentItemEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        month,
-        totalAmount,
-        paidAmount,
-        dueAmount,
-        status,
-        paymentType,
-        paymentDate,
-        dueDate,
-      ];
+    id,
+    month,
+    totalAmount,
+    paidAmount,
+    dueAmount,
+    status,
+    paymentType,
+    paymentDate,
+    dueDate,
+  ];
 }

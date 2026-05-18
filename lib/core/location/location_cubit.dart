@@ -13,17 +13,21 @@ class LocationCubit extends Cubit<LocationState> {
 
     try {
       final result = await _locationService.getCurrentLocation();
-      
-      emit(LocationFetched(
-        address: "${result.street ?? ''}, ${result.subLocality ?? ''}".trim().replaceAll(RegExp(r'^,\s*'), ''),
-        area: result.locality ?? result.subLocality ?? '',
-        city: result.locality ?? '',
-        state: result.administrativeArea ?? '',
-        district: result.subAdministrativeArea ?? '',
-        pincode: result.pincode ?? '',
-        latitude: result.latitude,
-        longitude: result.longitude,
-      ));
+
+      emit(
+        LocationFetched(
+          address: "${result.street ?? ''}, ${result.subLocality ?? ''}"
+              .trim()
+              .replaceAll(RegExp(r'^,\s*'), ''),
+          area: result.locality ?? result.subLocality ?? '',
+          city: result.locality ?? '',
+          state: result.administrativeArea ?? '',
+          district: result.subAdministrativeArea ?? '',
+          pincode: result.pincode ?? '',
+          latitude: result.latitude,
+          longitude: result.longitude,
+        ),
+      );
     } catch (e) {
       emit(LocationError(GlobalErrorMapper.map(e).message));
     }

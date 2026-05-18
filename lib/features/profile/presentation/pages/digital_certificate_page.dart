@@ -31,7 +31,9 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
     setState(() => _isLoading = true);
     try {
       final dio = sl<Dio>();
-      final response = await dio.get('${ApiConstants.baseUrl}/hostels/certifications/my');
+      final response = await dio.get(
+        '${ApiConstants.baseUrl}/hostels/certifications/my',
+      );
       if (response.statusCode == 200) {
         setState(() {
           _certifications = response.data['data'] ?? [];
@@ -79,12 +81,19 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
       appBar: AppBar(
         title: Text(
           StringUtils.translate('digital_certificate', context: context),
-          style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w800),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -98,7 +107,10 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                 Padding(
                   padding: EdgeInsets.all(20.w),
                   child: Text(
-                    StringUtils.translate('digital_certificate_instruction', context: context),
+                    StringUtils.translate(
+                      'digital_certificate_instruction',
+                      context: context,
+                    ),
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.grey.shade600,
@@ -113,7 +125,10 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                     itemBuilder: (context, index) {
                       final hostel = hostels[index];
                       final cert = _certifications.firstWhere(
-                        (c) => c['hostelId'] != null && (c['hostelId']['_id'] == hostel.id || c['hostelId'] == hostel.id),
+                        (c) =>
+                            c['hostelId'] != null &&
+                            (c['hostelId']['_id'] == hostel.id ||
+                                c['hostelId'] == hostel.id),
                         orElse: () => null,
                       );
 
@@ -137,10 +152,16 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
 
     if (cert != null) {
       final String rawStatus = cert['status'] ?? 'PENDING';
-      statusText = StringUtils.translate(rawStatus.toLowerCase(), context: context);
+      statusText = StringUtils.translate(
+        rawStatus.toLowerCase(),
+        context: context,
+      );
       canApply = rawStatus == 'REJECTED';
-      statusColor = rawStatus == 'APPROVED' ? Colors.green : 
-                   rawStatus == 'PENDING' ? Colors.orange : Colors.red;
+      statusColor = rawStatus == 'APPROVED'
+          ? Colors.green
+          : rawStatus == 'PENDING'
+          ? Colors.orange
+          : Colors.red;
     }
 
     return Container(
@@ -169,7 +190,11 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                   color: AppColors.backgroundSecondary,
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(Icons.business_rounded, color: AppColors.primaryBlue, size: 24.sp),
+                child: Icon(
+                  Icons.business_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 24.sp,
+                ),
               ),
               SizedBox(width: 16.w),
               Expanded(
@@ -178,7 +203,10 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                   children: [
                     Text(
                       hostel.name,
-                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     Text(
                       '${hostel.city}, ${hostel.state}',
@@ -216,12 +244,23 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Center(
-                  child: _isLoading 
-                    ? SizedBox(width: 16.w, height: 16.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text(
-                        StringUtils.translate('apply_now', context: context),
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13.sp),
-                      ),
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 16.w,
+                          height: 16.w,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          StringUtils.translate('apply_now', context: context),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13.sp,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -239,31 +278,54 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.verified_rounded, color: Colors.green, size: 20.sp),
+                      Icon(
+                        Icons.verified_rounded,
+                        color: Colors.green,
+                        size: 20.sp,
+                      ),
                       SizedBox(width: 8.w),
                       Text(
-                        StringUtils.translate('certification_secured', context: context),
-                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: Colors.green),
+                        StringUtils.translate(
+                          'certification_secured',
+                          context: context,
+                        ),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.green,
+                        ),
                       ),
                       const Spacer(),
                       Text(
                         cert['certificateId'],
                         style: TextStyle(
-                          fontSize: 11.sp, 
-                          fontWeight: FontWeight.bold, 
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.bold,
                           color: Colors.green.withValues(alpha: 0.7),
-                          letterSpacing: 1.2
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ],
                   ),
-                  Divider(height: 20.h, color: Colors.green.withValues(alpha: 0.1)),
+                  Divider(
+                    height: 20.h,
+                    color: Colors.green.withValues(alpha: 0.1),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildMetricTile(StringUtils.translate('trust_level', context: context), _getTrustLevelLabel(cert['trustLevel']), 
-                        cert['trustLevel'] == 'GOLDEN' ? Colors.orange : Colors.blue),
-                      _buildMetricTile(StringUtils.translate('audit_score', context: context), '${cert['auditScore']}/5.0', Colors.blue),
+                      _buildMetricTile(
+                        StringUtils.translate('trust_level', context: context),
+                        _getTrustLevelLabel(cert['trustLevel']),
+                        cert['trustLevel'] == 'GOLDEN'
+                            ? Colors.orange
+                            : Colors.blue,
+                      ),
+                      _buildMetricTile(
+                        StringUtils.translate('audit_score', context: context),
+                        '${cert['auditScore']}/5.0',
+                        Colors.blue,
+                      ),
                     ],
                   ),
                 ],
@@ -281,20 +343,33 @@ class _DigitalCertificatePageState extends State<DigitalCertificatePage> {
       children: [
         Text(
           label.toUpperCase(),
-          style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: Colors.grey, letterSpacing: 1),
+          style: TextStyle(
+            fontSize: 9.sp,
+            fontWeight: FontWeight.w900,
+            color: Colors.grey,
+            letterSpacing: 1,
+          ),
         ),
         SizedBox(height: 2.h),
         Text(
           value,
-          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: color),
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w900,
+            color: color,
+          ),
         ),
       ],
     );
   }
 
   String _getTrustLevelLabel(String? level) {
-    if (level == 'GOLDEN') return StringUtils.translate('golden_pg', context: context);
-    if (level == 'VERIFIED') return StringUtils.translate('stay_india_verified', context: context);
+    if (level == 'GOLDEN') {
+      return StringUtils.translate('golden_pg', context: context);
+    }
+    if (level == 'VERIFIED') {
+      return StringUtils.translate('stay_india_verified', context: context);
+    }
     return StringUtils.translate('standard_registry', context: context);
   }
 }

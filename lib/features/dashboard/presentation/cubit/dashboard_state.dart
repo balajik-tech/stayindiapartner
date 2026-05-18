@@ -14,7 +14,12 @@ abstract class DashboardState extends Equatable {
   });
 
   @override
-  List<Object?> get props => [selectedFloorIndex, searchQuery, isGridView, selectedMetric];
+  List<Object?> get props => [
+    selectedFloorIndex,
+    searchQuery,
+    isGridView,
+    selectedMetric,
+  ];
 }
 
 class DashboardInitial extends DashboardState {
@@ -47,7 +52,13 @@ class DashboardLoaded extends DashboardState {
   });
 
   @override
-  List<Object?> get props => [data, selectedFloorIndex, searchQuery, isGridView, selectedMetric];
+  List<Object?> get props => [
+    data,
+    selectedFloorIndex,
+    searchQuery,
+    isGridView,
+    selectedMetric,
+  ];
 
   DashboardLoaded copyWith({
     DashboardData? data,
@@ -62,7 +73,9 @@ class DashboardLoaded extends DashboardState {
       selectedFloorIndex: selectedFloorIndex ?? this.selectedFloorIndex,
       searchQuery: searchQuery ?? this.searchQuery,
       isGridView: isGridView ?? this.isGridView,
-      selectedMetric: clearMetric ? null : (selectedMetric ?? this.selectedMetric),
+      selectedMetric: clearMetric
+          ? null
+          : (selectedMetric ?? this.selectedMetric),
     );
   }
 }
@@ -79,5 +92,11 @@ class DashboardError extends DashboardState {
   });
 
   @override
-  List<Object?> get props => [message, selectedFloorIndex, searchQuery, isGridView, selectedMetric];
+  List<Object?> get props => [
+    message,
+    selectedFloorIndex,
+    searchQuery,
+    isGridView,
+    selectedMetric,
+  ];
 }

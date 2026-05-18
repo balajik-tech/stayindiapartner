@@ -64,7 +64,9 @@ class PropertySwitcherSheet extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const PropertySetupStepperPage()),
+                          builder: (context) =>
+                              const PropertySetupStepperPage(),
+                        ),
                       );
                     }
                   },
@@ -74,7 +76,11 @@ class PropertySwitcherSheet extends StatelessWidget {
                       color: Colors.orange.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.add_rounded, color: Colors.orange, size: 24.sp),
+                    child: Icon(
+                      Icons.add_rounded,
+                      color: Colors.orange,
+                      size: 24.sp,
+                    ),
                   ),
                 ),
               ],
@@ -90,10 +96,13 @@ class PropertySwitcherSheet extends StatelessWidget {
                     shrinkWrap: true,
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     itemCount: state.hostels.length,
-                    separatorBuilder: (context, index) => SizedBox(height: 12.h),
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 12.h),
                     itemBuilder: (context, index) {
                       final hostel = state.hostels[index];
-                      final isSelected = state.selectedHostelIndices.contains(index);
+                      final isSelected = state.selectedHostelIndices.contains(
+                        index,
+                      );
 
                       return BouncingWrapper(
                         onTap: () {
@@ -101,7 +110,9 @@ class PropertySwitcherSheet extends StatelessWidget {
                             onPropertySelected!(index);
                             Navigator.pop(context);
                           } else {
-                            context.read<HostelCubit>().toggleHostelSelection(index);
+                            context.read<HostelCubit>().toggleHostelSelection(
+                              index,
+                            );
                           }
                         },
                         child: Container(
@@ -128,14 +139,19 @@ class PropertySwitcherSheet extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12.r),
                                   image: hostel.coverImage != null
                                       ? DecorationImage(
-                                          image: NetworkImage(hostel.coverImage!),
+                                          image: NetworkImage(
+                                            hostel.coverImage!,
+                                          ),
                                           fit: BoxFit.cover,
                                         )
                                       : null,
                                 ),
                                 child: hostel.coverImage == null
-                                    ? Icon(Icons.apartment_rounded,
-                                        color: Colors.orange, size: 24.sp)
+                                    ? Icon(
+                                        Icons.apartment_rounded,
+                                        color: Colors.orange,
+                                        size: 24.sp,
+                                      )
                                     : null,
                               ),
                               SizedBox(width: 16.w),
@@ -163,8 +179,11 @@ class PropertySwitcherSheet extends StatelessWidget {
                                 ),
                               ),
                               if (isSelected)
-                                Icon(Icons.check_circle_rounded,
-                                    color: AppColors.primaryBlue, size: 24.sp),
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  color: AppColors.primaryBlue,
+                                  size: 24.sp,
+                                ),
                             ],
                           ),
                         ),

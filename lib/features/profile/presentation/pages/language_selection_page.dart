@@ -16,10 +16,7 @@ class LanguageSelectionPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('change_language'.tr()),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('change_language'.tr()), centerTitle: true),
       body: ListView.separated(
         padding: EdgeInsets.all(16.w),
         itemCount: languages.length,
@@ -34,11 +31,16 @@ class LanguageSelectionPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? Theme.of(context).primaryColor : Colors.black87,
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Colors.black87,
               ),
             ),
             trailing: isSelected
-                ? Icon(Icons.check_circle, color: Theme.of(context).primaryColor)
+                ? Icon(
+                    Icons.check_circle,
+                    color: Theme.of(context).primaryColor,
+                  )
                 : null,
             onTap: () async {
               if (isSelected) return;
@@ -57,13 +59,10 @@ class LanguageSelectionPage extends StatelessWidget {
                     ),
                   ),
                   content: Text(
-                    'change_language_confirm_msg'.tr(namedArgs: {
-                      'language': lang['name'],
-                    }),
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.black87,
+                    'change_language_confirm_msg'.tr(
+                      namedArgs: {'language': lang['name']},
                     ),
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                   ),
                   actions: [
                     TextButton(

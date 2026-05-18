@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import '../utils/logger.dart';
 
-
-
 class RetryInterceptor extends Interceptor {
   final Dio dio;
   final int maxRetries;
@@ -20,9 +18,9 @@ class RetryInterceptor extends Interceptor {
     final extra = err.requestOptions.extra;
     int retryCount = extra['retry_count'] ?? 0;
 
-    
     bool isIdempotent = err.requestOptions.method.toUpperCase() == 'GET';
-    bool isNetworkError = err.type == DioExceptionType.connectionTimeout ||
+    bool isNetworkError =
+        err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.sendTimeout ||
         err.type == DioExceptionType.receiveTimeout ||
         err.type == DioExceptionType.connectionError;
@@ -40,7 +38,6 @@ class RetryInterceptor extends Interceptor {
       await Future.delayed(Duration(milliseconds: delayMs));
 
       try {
-        
         final response = await dio.request(
           err.requestOptions.path,
           cancelToken: err.requestOptions.cancelToken,
@@ -55,7 +52,8 @@ class RetryInterceptor extends Interceptor {
             responseType: err.requestOptions.responseType,
             contentType: err.requestOptions.contentType,
             validateStatus: err.requestOptions.validateStatus,
-            receiveDataWhenStatusError: err.requestOptions.receiveDataWhenStatusError,
+            receiveDataWhenStatusError:
+                err.requestOptions.receiveDataWhenStatusError,
             followRedirects: err.requestOptions.followRedirects,
             maxRedirects: err.requestOptions.maxRedirects,
             requestEncoder: err.requestOptions.requestEncoder,
@@ -65,8 +63,9 @@ class RetryInterceptor extends Interceptor {
         );
         return handler.resolve(response);
       } catch (e) {
-        
-        AppLogger.error('[RETRY FAILED] ${err.requestOptions.path} after $retryCount retries.');
+        AppLogger.error(
+          '[RETRY FAILED] ${err.requestOptions.path} after $retryCount retries.',
+        );
       }
     }
 

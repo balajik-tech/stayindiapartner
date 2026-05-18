@@ -110,20 +110,23 @@ class ComplaintsHistoryPage extends StatelessWidget {
               children: [
                 Text(
                   complaint.title,
-                  style:
-                      TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 4.h),
                 if (complaint.tenantName != null)
                   Text(
                     complaint.tenantName!,
-                    style:
-                        TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.greyText,
+                    ),
                   ),
                 Text(
                   _formatDate(complaint.createdAt),
-                  style:
-                      TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+                  style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
                 ),
               ],
             ),
@@ -165,8 +168,18 @@ class ComplaintsHistoryPage extends StatelessWidget {
     try {
       final date = DateTime.parse(dateStr);
       final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
       ];
       return '${months[date.month - 1]} ${date.day}, ${date.year}';
     } catch (_) {

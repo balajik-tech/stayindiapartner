@@ -17,19 +17,20 @@ import '../cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/complete_profile_usecase.dart';
 import '../widgets/auth_widgets.dart';
 
-
 class RegistrationPersonalPage extends StatefulWidget {
   const RegistrationPersonalPage({super.key});
 
   @override
-  State<RegistrationPersonalPage> createState() => _RegistrationPersonalPageState();
+  State<RegistrationPersonalPage> createState() =>
+      _RegistrationPersonalPageState();
 }
 
-class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> with SingleTickerProviderStateMixin {
+class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
+    with SingleTickerProviderStateMixin {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
-  
+
   final _stateController = TextEditingController();
   final _districtController = TextEditingController();
   final _pincodeController = TextEditingController();
@@ -48,7 +49,10 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _fadeAnimation = CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic);
+    _fadeAnimation = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutCubic,
+    );
     _animController.forward();
   }
 
@@ -67,13 +71,11 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-    );
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       HapticFeedback.mediumImpact();
-      
+
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: pickedFile.path,
         compressQuality: 80,
@@ -97,7 +99,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
 
       if (croppedFile != null) {
         final file = File(croppedFile.path);
-        
+
         if (file.existsSync()) {
           setState(() {
             _selectedImage = file;
@@ -111,7 +113,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
     final email = _emailController.text.trim();
-    
+
     final stateStr = _stateController.text.trim();
     final district = _districtController.text.trim();
     final pincode = _pincodeController.text.trim();
@@ -119,7 +121,13 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
 
     final address = "$street, $district, $stateStr - $pincode";
 
-    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || stateStr.isEmpty || district.isEmpty || pincode.isEmpty || street.isEmpty) {
+    if (firstName.isEmpty ||
+        lastName.isEmpty ||
+        email.isEmpty ||
+        stateStr.isEmpty ||
+        district.isEmpty ||
+        pincode.isEmpty ||
+        street.isEmpty) {
       HapticFeedback.vibrate();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields')),
@@ -129,24 +137,26 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
 
     final authCubit = context.read<AuthCubit>();
     String phone = '';
-    
+
     final state = authCubit.state;
     if (state is AuthAuthenticated) {
       phone = state.owner.phone;
     }
-    
+
     if (phone.isEmpty) {
       phone = await sl<TokenStorage>().getPhone() ?? '';
     }
 
-    authCubit.completeProfile(ProfileParams(
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      phone: phone,
-      address: address,
-      avatarPath: _selectedImage?.path,
-    ));
+    authCubit.completeProfile(
+      ProfileParams(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+        address: address,
+        avatarPath: _selectedImage?.path,
+      ),
+    );
   }
 
   @override
@@ -159,13 +169,15 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
               content: Text(state.message, style: GoogleFonts.outfit()),
               behavior: SnackBarBehavior.floating,
               backgroundColor: Colors.red.shade400,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
             ),
           );
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC), 
+        backgroundColor: const Color(0xFFF8FAFC),
         resizeToAvoidBottomInset: true,
         appBar: _buildAppBar(context),
         body: SafeArea(
@@ -174,7 +186,10 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 8.h,
+                  ),
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: Column(
@@ -193,7 +208,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
                         _buildFormSection(),
                         SizedBox(height: 32.h),
                         _buildLoginRedirect(context),
-                        SizedBox(height: 100.h), 
+                        SizedBox(height: 100.h),
                       ],
                     ),
                   ),
@@ -233,7 +248,11 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
               ),
             ],
           ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 16),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black,
+            size: 16,
+          ),
         ),
       ),
     );
@@ -299,9 +318,19 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
                     child: CircleAvatar(
                       radius: 54.r,
                       backgroundColor: Colors.white,
-                      backgroundImage: _selectedImage != null ? ResizeImage(FileImage(_selectedImage!), width: 220, height: 220) : null,
+                      backgroundImage: _selectedImage != null
+                          ? ResizeImage(
+                              FileImage(_selectedImage!),
+                              width: 220,
+                              height: 220,
+                            )
+                          : null,
                       child: _selectedImage == null
-                          ? Icon(Icons.person_rounded, size: 54.sp, color: Colors.grey.shade200)
+                          ? Icon(
+                              Icons.person_rounded,
+                              size: 54.sp,
+                              color: Colors.grey.shade200,
+                            )
                           : null,
                     ),
                   ),
@@ -323,7 +352,11 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
                         ),
                       ],
                     ),
-                    child: Icon(Icons.camera_alt_rounded, size: 18.sp, color: Colors.white),
+                    child: Icon(
+                      Icons.camera_alt_rounded,
+                      size: 18.sp,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],
@@ -389,9 +422,17 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
               child: Row(
                 children: [
                   if (_isFetchingLocation)
-                    SizedBox(width: 12.sp, height: 12.sp, child: const CircularProgressIndicator(strokeWidth: 2))
+                    SizedBox(
+                      width: 12.sp,
+                      height: 12.sp,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    )
                   else
-                    Icon(Icons.my_location_rounded, size: 14.sp, color: AppColors.primaryBlue),
+                    Icon(
+                      Icons.my_location_rounded,
+                      size: 14.sp,
+                      color: AppColors.primaryBlue,
+                    ),
                   SizedBox(width: 4.w),
                   Text(
                     _isFetchingLocation ? 'Fetching...' : 'Fetch Location',
@@ -459,30 +500,34 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
           throw Exception('Location permissions are denied');
         }
       }
-      
+
       if (permission == LocationPermission.deniedForever) {
         throw Exception('Location permissions are permanently denied');
       }
 
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
       List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude, 
-        position.longitude
+        position.latitude,
+        position.longitude,
       );
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
-        
+
         setState(() {
-          _streetController.text = "${place.name ?? ''} ${place.subLocality ?? ''}".trim();
-          _districtController.text = place.locality ?? place.subAdministrativeArea ?? '';
+          _streetController.text =
+              "${place.name ?? ''} ${place.subLocality ?? ''}".trim();
+          _districtController.text =
+              place.locality ?? place.subAdministrativeArea ?? '';
           _stateController.text = place.administrativeArea ?? '';
           _pincodeController.text = place.postalCode ?? '';
         });
-        
+
         HapticFeedback.lightImpact();
       }
     } catch (e) {
@@ -491,7 +536,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
         if (errMsg.startsWith('Exception: ')) {
           errMsg = errMsg.substring(11);
         }
-        
+
         SnackBarAction? action;
         if (e.toString().contains('Location services are disabled')) {
           action = SnackBarAction(
@@ -501,7 +546,8 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
               await Geolocator.openLocationSettings();
             },
           );
-        } else if (e.toString().contains('permissions are denied') || e.toString().contains('permanently denied')) {
+        } else if (e.toString().contains('permissions are denied') ||
+            e.toString().contains('permanently denied')) {
           action = SnackBarAction(
             label: 'Settings',
             textColor: Colors.white,

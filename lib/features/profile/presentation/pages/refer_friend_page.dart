@@ -19,12 +19,18 @@ class ReferFriendPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           StringUtils.translate('refer_friend', context: context),
-          style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, color: Colors.black),
+          style: GoogleFonts.dmSans(
+            fontWeight: FontWeight.w800,
+            color: Colors.black,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -117,7 +123,11 @@ class ReferFriendPage extends StatelessWidget {
             onTap: () {
               Clipboard.setData(ClipboardData(text: code));
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(StringUtils.translate('code_copied', context: context))),
+                SnackBar(
+                  content: Text(
+                    StringUtils.translate('code_copied', context: context),
+                  ),
+                ),
               );
             },
             child: Container(
@@ -126,12 +136,19 @@ class ReferFriendPage extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                  ),
                 ],
               ),
               child: Text(
                 StringUtils.translate('copy', context: context),
-                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: AppColors.primaryBlue),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryBlue,
+                ),
               ),
             ),
           ),
@@ -162,11 +179,19 @@ class ReferFriendPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 24.sp),
+                Icon(
+                  Icons.chat_bubble_rounded,
+                  color: Colors.white,
+                  size: 24.sp,
+                ),
                 SizedBox(width: 12.w),
                 Text(
                   StringUtils.translate('share_whatsapp', context: context),
-                  style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ),
@@ -192,7 +217,11 @@ class ReferFriendPage extends StatelessWidget {
             child: Center(
               child: Text(
                 StringUtils.translate('share_referral_link', context: context),
-                style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),

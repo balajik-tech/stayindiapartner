@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
-
 class OwnerEntity extends Equatable {
   final String id;
   final String name;
@@ -40,7 +38,13 @@ class OwnerEntity extends Equatable {
   bool get isSecurity => role == 'security';
   bool get isCook => role == 'cook';
   bool get isCleaningStaff => role == 'cleaning_staff';
-  bool get isAnyStaff => ['manager', 'warden', 'security', 'cook', 'cleaning_staff'].contains(role);
+  bool get isAnyStaff => [
+    'manager',
+    'warden',
+    'security',
+    'cook',
+    'cleaning_staff',
+  ].contains(role);
 
   bool hasPermission(String permission) {
     if (role == 'owner' || role == 'manager') return true;
@@ -81,18 +85,18 @@ class OwnerEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        phone,
-        email,
-        avatar,
-        isProfileComplete,
-        bedLimit,
-        plan,
-        hasAcceptedPolicy,
-        role,
-        verificationBadge,
-        staffPropertyId,
-        permissions,
-      ];
+    id,
+    name,
+    phone,
+    email,
+    avatar,
+    isProfileComplete,
+    bedLimit,
+    plan,
+    hasAcceptedPolicy,
+    role,
+    verificationBadge,
+    staffPropertyId,
+    permissions,
+  ];
 }

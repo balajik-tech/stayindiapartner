@@ -36,12 +36,18 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           StringUtils.translate('reports_analytics_title', context: context),
-          style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, color: Colors.black),
+          style: GoogleFonts.dmSans(
+            fontWeight: FontWeight.w800,
+            color: Colors.black,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -54,7 +60,12 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionLabel(StringUtils.translate('select_report_type_label', context: context)),
+                  _buildSectionLabel(
+                    StringUtils.translate(
+                      'select_report_type_label',
+                      context: context,
+                    ),
+                  ),
                   SizedBox(height: 16.h),
                   _buildReportGrid(),
                   if (_previewData.isNotEmpty) ...[
@@ -62,7 +73,10 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
                     _buildPreviewSection(),
                   ],
                   SizedBox(height: 32.h),
-                  if (_isGenerating) _buildGeneratingState(context) else _buildExportOptions(context),
+                  if (_isGenerating)
+                    _buildGeneratingState(context)
+                  else
+                    _buildExportOptions(context),
                   SizedBox(height: 40.h),
                 ],
               ),
@@ -80,13 +94,19 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 5)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionLabel(StringUtils.translate('date_range_label', context: context)),
+          _buildSectionLabel(
+            StringUtils.translate('date_range_label', context: context),
+          ),
           SizedBox(height: 12.h),
           Row(
             children: [
@@ -96,7 +116,9 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
             ],
           ),
           SizedBox(height: 20.h),
-          _buildSectionLabel(StringUtils.translate('property_filter_label', context: context)),
+          _buildSectionLabel(
+            StringUtils.translate('property_filter_label', context: context),
+          ),
           SizedBox(height: 12.h),
           BlocBuilder<HostelCubit, HostelState>(
             builder: (context, state) {
@@ -111,11 +133,35 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
                   child: DropdownButton<String?>(
                     value: _selectedHostelId,
                     isExpanded: true,
-                    hint: Text(StringUtils.translate('all_properties_hint', context: context), style: GoogleFonts.dmSans(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                    style: GoogleFonts.dmSans(fontSize: 14.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                    hint: Text(
+                      StringUtils.translate(
+                        'all_properties_hint',
+                        context: context,
+                      ),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 14.sp,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
                     items: [
-                      DropdownMenuItem(value: null, child: Text(StringUtils.translate('all_properties_hint', context: context))),
-                      ...hostels.map((h) => DropdownMenuItem(value: h.id, child: Text(h.name))),
+                      DropdownMenuItem(
+                        value: null,
+                        child: Text(
+                          StringUtils.translate(
+                            'all_properties_hint',
+                            context: context,
+                          ),
+                        ),
+                      ),
+                      ...hostels.map(
+                        (h) =>
+                            DropdownMenuItem(value: h.id, child: Text(h.name)),
+                      ),
                     ],
                     onChanged: (val) {
                       setState(() => _selectedHostelId = val);
@@ -160,11 +206,19 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
         ),
         child: Row(
           children: [
-            Icon(Icons.calendar_today_rounded, size: 16.sp, color: AppColors.primaryBlue),
+            Icon(
+              Icons.calendar_today_rounded,
+              size: 16.sp,
+              color: AppColors.primaryBlue,
+            ),
             SizedBox(width: 10.w),
             Text(
               DateFormat('dd MMM, yyyy').format(date),
-              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
           ],
         ),
@@ -175,16 +229,42 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
   Widget _buildReportGrid() {
     return Row(
       children: [
-        Expanded(child: _buildReportCard(StringUtils.translate('payments_report', context: context), 'payments', Icons.payments_rounded, Colors.green)),
+        Expanded(
+          child: _buildReportCard(
+            StringUtils.translate('payments_report', context: context),
+            'payments',
+            Icons.payments_rounded,
+            Colors.green,
+          ),
+        ),
         SizedBox(width: 12.w),
-        Expanded(child: _buildReportCard(StringUtils.translate('tenants_report', context: context), 'tenants', Icons.people_alt_rounded, Colors.blue)),
+        Expanded(
+          child: _buildReportCard(
+            StringUtils.translate('tenants_report', context: context),
+            'tenants',
+            Icons.people_alt_rounded,
+            Colors.blue,
+          ),
+        ),
         SizedBox(width: 12.w),
-        Expanded(child: _buildReportCard(StringUtils.translate('bookings_report', context: context), 'bookings', Icons.event_available_rounded, Colors.orange)),
+        Expanded(
+          child: _buildReportCard(
+            StringUtils.translate('bookings_report', context: context),
+            'bookings',
+            Icons.event_available_rounded,
+            Colors.orange,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildReportCard(String title, String type, IconData icon, Color color) {
+  Widget _buildReportCard(
+    String title,
+    String type,
+    IconData icon,
+    Color color,
+  ) {
     final isSelected = _selectedReportType == type;
     return BouncingWrapper(
       onTap: () {
@@ -202,14 +282,21 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Column(
           children: [
             Container(
               padding: EdgeInsets.all(10.r),
-              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
               child: Icon(icon, color: color, size: 24.sp),
             ),
             SizedBox(height: 12.h),
@@ -234,10 +321,16 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionLabel(StringUtils.translate('data_preview_label', context: context)),
+            _buildSectionLabel(
+              StringUtils.translate('data_preview_label', context: context),
+            ),
             Text(
               StringUtils.translate('showing_latest_5', context: context),
-              style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -252,7 +345,10 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _previewData.length,
-            separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: AppColors.border.withValues(alpha: 0.5),
+            ),
             itemBuilder: (context, index) {
               final item = _previewData[index];
               return Padding(
@@ -265,18 +361,30 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
                         children: [
                           Text(
                             item['name'] ?? item['tenant'] ?? 'N/A',
-                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.sp),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14.sp,
+                            ),
                           ),
                           Text(
                             item['property'] ?? item['status'] ?? '',
-                            style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12.sp,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     Text(
-                      item['amount'] != null ? '₹${item['amount']}' : (item['date'] ?? item['checkIn'] ?? ''),
-                      style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.primaryBlue, fontSize: 13.sp),
+                      item['amount'] != null
+                          ? '₹${item['amount']}'
+                          : (item['date'] ?? item['checkIn'] ?? ''),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primaryBlue,
+                        fontSize: 13.sp,
+                      ),
                     ),
                   ],
                 ),
@@ -293,20 +401,44 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionLabel(StringUtils.translate('export_data_label', context: context)),
+        _buildSectionLabel(
+          StringUtils.translate('export_data_label', context: context),
+        ),
         SizedBox(height: 16.h),
         Row(
           children: [
-            Expanded(child: _buildExportButton(StringUtils.translate('excel_export', context: context), 'excel', Icons.table_view_rounded, const Color(0xFF1D6F42), canExport)),
+            Expanded(
+              child: _buildExportButton(
+                StringUtils.translate('excel_export', context: context),
+                'excel',
+                Icons.table_view_rounded,
+                const Color(0xFF1D6F42),
+                canExport,
+              ),
+            ),
             SizedBox(width: 12.w),
-            Expanded(child: _buildExportButton(StringUtils.translate('pdf_report', context: context), 'pdf', Icons.picture_as_pdf_rounded, const Color(0xFFD32F2F), canExport)),
+            Expanded(
+              child: _buildExportButton(
+                StringUtils.translate('pdf_report', context: context),
+                'pdf',
+                Icons.picture_as_pdf_rounded,
+                const Color(0xFFD32F2F),
+                canExport,
+              ),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildExportButton(String label, String format, IconData icon, Color color, bool enabled) {
+  Widget _buildExportButton(
+    String label,
+    String format,
+    IconData icon,
+    Color color,
+    bool enabled,
+  ) {
     return BouncingWrapper(
       onTap: enabled ? () => _handleExport(format) : null,
       child: AnimatedOpacity(
@@ -325,7 +457,11 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
               SizedBox(height: 8.h),
               Text(
                 label,
-                style: GoogleFonts.dmSans(fontSize: 13.sp, fontWeight: FontWeight.w800, color: color),
+                style: GoogleFonts.dmSans(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -336,13 +472,15 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
 
   Future<void> _fetchPreview() async {
     if (_selectedReportType == null) return;
-    
+
     setState(() => _isGenerating = true);
     try {
       final dio = sl<Dio>();
-      final String endpoint = _selectedReportType == 'payments' 
-          ? ApiConstants.reportsPayments 
-          : (_selectedReportType == 'tenants' ? ApiConstants.reportsTenants : ApiConstants.reportsBookings);
+      final String endpoint = _selectedReportType == 'payments'
+          ? ApiConstants.reportsPayments
+          : (_selectedReportType == 'tenants'
+                ? ApiConstants.reportsTenants
+                : ApiConstants.reportsBookings);
 
       final response = await dio.get(
         endpoint,
@@ -369,11 +507,11 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
     setState(() => _isGenerating = true);
     try {
       final dio = sl<Dio>();
-      final String endpoint = _selectedReportType == 'payments' 
-          ? ApiConstants.reportsPayments 
-          : (_selectedReportType == 'tenants' ? ApiConstants.reportsTenants : ApiConstants.reportsBookings);
-
-      
+      final String endpoint = _selectedReportType == 'payments'
+          ? ApiConstants.reportsPayments
+          : (_selectedReportType == 'tenants'
+                ? ApiConstants.reportsTenants
+                : ApiConstants.reportsBookings);
 
       final response = await dio.get(
         endpoint,
@@ -393,7 +531,14 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(StringUtils.translate('report_download_success', context: context))),
+                SnackBar(
+                  content: Text(
+                    StringUtils.translate(
+                      'report_download_success',
+                      context: context,
+                    ),
+                  ),
+                ),
               );
             }
           }
@@ -402,7 +547,11 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(StringUtils.translate('report_download_failed', context: context))),
+          SnackBar(
+            content: Text(
+              StringUtils.translate('report_download_failed', context: context),
+            ),
+          ),
         );
       }
     } finally {
@@ -424,11 +573,17 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
           SizedBox(height: 16.h),
           Text(
             StringUtils.translate('processing_request', context: context),
-            style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 16.sp),
+            style: GoogleFonts.dmSans(
+              fontWeight: FontWeight.w800,
+              fontSize: 16.sp,
+            ),
           ),
           Text(
             StringUtils.translate('crunching_numbers_msg', context: context),
-            style: GoogleFonts.dmSans(color: AppColors.textSecondary, fontSize: 13.sp),
+            style: GoogleFonts.dmSans(
+              color: AppColors.textSecondary,
+              fontSize: 13.sp,
+            ),
           ),
         ],
       ),

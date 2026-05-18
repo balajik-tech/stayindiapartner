@@ -6,7 +6,6 @@ import 'domain/repositories/stock_repository.dart';
 import 'presentation/cubit/stock_cubit.dart';
 
 void registerStockManagementFeature(GetIt sl) {
-  
   sl.registerFactory(() => StockCubit(repository: sl()));
 
   sl.registerLazySingleton<StockRepository>(

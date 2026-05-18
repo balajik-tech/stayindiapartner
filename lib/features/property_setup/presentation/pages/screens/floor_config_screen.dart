@@ -16,10 +16,14 @@ class FloorConfigScreen extends StatelessWidget {
 
   String _getFloorLabel(BuildContext context, String floor) {
     if (floor == 'B') {
-      return 'basement_floor'.tr() == 'basement_floor' ? 'Basement Floor' : 'basement_floor'.tr();
+      return 'basement_floor'.tr() == 'basement_floor'
+          ? 'Basement Floor'
+          : 'basement_floor'.tr();
     }
     if (floor == 'G') {
-      return 'ground_floor'.tr() == 'ground_floor' ? 'Ground Floor' : 'ground_floor'.tr();
+      return 'ground_floor'.tr() == 'ground_floor'
+          ? 'Ground Floor'
+          : 'ground_floor'.tr();
     }
     return 'floor_x'.tr(namedArgs: {'floor': floor});
   }
@@ -36,14 +40,18 @@ class FloorConfigScreen extends StatelessWidget {
             children: [
               _buildSectionHeader('floor_config'.tr(), 'floor_config_sub'.tr()),
               SizedBox(height: 12.h),
-              
+
               _PremiumCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'total_floors'.tr(),
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1E293B),
+                      ),
                     ),
                     SizedBox(height: 12.h),
                     _buildFloorCounter(context, state),
@@ -56,13 +64,27 @@ class FloorConfigScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _translate('include_basement', 'Include Basement Floor'),
-                                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+                                _translate(
+                                  'include_basement',
+                                  'Include Basement Floor',
+                                ),
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF1E293B),
+                                ),
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                _translate('include_basement_sub', 'Add rooms located in the basement level'),
-                                style: TextStyle(fontSize: 10.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
+                                _translate(
+                                  'include_basement_sub',
+                                  'Add rooms located in the basement level',
+                                ),
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: const Color(0xFF64748B),
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ],
                           ),
@@ -70,12 +92,16 @@ class FloorConfigScreen extends StatelessWidget {
                         Switch(
                           value: state.selectedFloors.contains('B'),
                           activeThumbColor: const Color(0xFF2B5797),
-                          activeTrackColor: const Color(0xFF2B5797).withValues(alpha: 0.2),
+                          activeTrackColor: const Color(
+                            0xFF2B5797,
+                          ).withValues(alpha: 0.2),
                           inactiveThumbColor: const Color(0xFF94A3B8),
                           inactiveTrackColor: const Color(0xFFE2E8F0),
                           onChanged: (val) {
                             HapticFeedback.selectionClick();
-                            context.read<PropertySetupCubit>().toggleBasement(val);
+                            context.read<PropertySetupCubit>().toggleBasement(
+                              val,
+                            );
                           },
                         ),
                       ],
@@ -83,7 +109,6 @@ class FloorConfigScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
 
               if (state.selectedFloors.isNotEmpty) ...[
                 SizedBox(height: 12.h),
@@ -95,23 +120,45 @@ class FloorConfigScreen extends StatelessWidget {
                       children: [
                         Text(
                           'rooms_per_floor'.tr(),
-                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w900,
+                            color: const Color(0xFF2B5797),
+                          ),
                         ),
                         Text(
                           'rooms_per_floor_sub'.tr(),
-                          style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: const Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF2B5797),
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
-                        'total_rooms_count'.tr(namedArgs: {'count': context.read<PropertySetupCubit>().totalRooms.toString()}),
-                        style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.w900),
+                        'total_rooms_count'.tr(
+                          namedArgs: {
+                            'count': context
+                                .read<PropertySetupCubit>()
+                                .totalRooms
+                                .toString(),
+                          },
+                        ),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ],
@@ -121,7 +168,9 @@ class FloorConfigScreen extends StatelessWidget {
                   spacing: 8.w,
                   runSpacing: 8.h,
                   alignment: WrapAlignment.end,
-                  children: [2, 4, 5, 10].map((count) => _buildQuickApplyButton(context, count)).toList(),
+                  children: [2, 4, 5, 10]
+                      .map((count) => _buildQuickApplyButton(context, count))
+                      .toList(),
                 ),
                 SizedBox(height: 8.h),
                 ListView.separated(
@@ -131,7 +180,11 @@ class FloorConfigScreen extends StatelessWidget {
                   separatorBuilder: (context, index) => SizedBox(height: 8.h),
                   itemBuilder: (context, index) {
                     final floor = state.selectedFloors[index];
-                    return _buildFloorRoomItem(context, floor, state.floorRoomCounts[floor] ?? 0);
+                    return _buildFloorRoomItem(
+                      context,
+                      floor,
+                      state.floorRoomCounts[floor] ?? 0,
+                    );
                   },
                 ),
               ],
@@ -170,7 +223,9 @@ class FloorConfigScreen extends StatelessWidget {
   }
 
   Widget _buildFloorCounter(BuildContext context, PropertySetupState state) {
-    final standardFloorCount = state.selectedFloors.where((f) => f != 'B').length;
+    final standardFloorCount = state.selectedFloors
+        .where((f) => f != 'B')
+        .length;
     return Container(
       padding: EdgeInsets.all(6.r),
       decoration: BoxDecoration(
@@ -186,7 +241,9 @@ class FloorConfigScreen extends StatelessWidget {
             onTap: () {
               if (standardFloorCount > 1) {
                 HapticFeedback.lightImpact();
-                context.read<PropertySetupCubit>().setTotalFloors(standardFloorCount - 1);
+                context.read<PropertySetupCubit>().setTotalFloors(
+                  standardFloorCount - 1,
+                );
               }
             },
           ),
@@ -194,11 +251,21 @@ class FloorConfigScreen extends StatelessWidget {
             children: [
               Text(
                 standardFloorCount.toString(),
-                style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B), height: 1.1),
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF1E293B),
+                  height: 1.1,
+                ),
               ),
               Text(
                 'floors_label'.tr(),
-                style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
+                style: TextStyle(
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF94A3B8),
+                  letterSpacing: 0.5,
+                ),
               ),
             ],
           ),
@@ -207,7 +274,9 @@ class FloorConfigScreen extends StatelessWidget {
             onTap: () {
               if (standardFloorCount < 15) {
                 HapticFeedback.mediumImpact();
-                context.read<PropertySetupCubit>().setTotalFloors(standardFloorCount + 1);
+                context.read<PropertySetupCubit>().setTotalFloors(
+                  standardFloorCount + 1,
+                );
               }
             },
           ),
@@ -216,7 +285,10 @@ class FloorConfigScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCounterButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildCounterButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -226,7 +298,11 @@ class FloorConfigScreen extends StatelessWidget {
           color: const Color(0xFF2B5797),
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
-            BoxShadow(color: const Color(0xFF2B5797).withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 3)),
+            BoxShadow(
+              color: const Color(0xFF2B5797).withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
         child: Icon(icon, color: Colors.white, size: 24.sp),
@@ -234,9 +310,11 @@ class FloorConfigScreen extends StatelessWidget {
     );
   }
 
-
-
-  Widget _buildFloorRoomItem(BuildContext context, String floor, int currentCount) {
+  Widget _buildFloorRoomItem(
+    BuildContext context,
+    String floor,
+    int currentCount,
+  ) {
     return Container(
       padding: EdgeInsets.all(10.r),
       decoration: BoxDecoration(
@@ -262,7 +340,11 @@ class FloorConfigScreen extends StatelessWidget {
             ),
             child: Text(
               floor,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white),
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              ),
             ),
           ),
           SizedBox(width: 12.w),
@@ -272,11 +354,21 @@ class FloorConfigScreen extends StatelessWidget {
               children: [
                 Text(
                   _getFloorLabel(context, floor),
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1E293B),
+                  ),
                 ),
                 Text(
-                  'rooms_planned'.tr(namedArgs: {'count': currentCount.toString()}),
-                  style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w600),
+                  'rooms_planned'.tr(
+                    namedArgs: {'count': currentCount.toString()},
+                  ),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: const Color(0xFF64748B),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -294,7 +386,10 @@ class FloorConfigScreen extends StatelessWidget {
                   onTap: () {
                     if (currentCount > 0) {
                       HapticFeedback.lightImpact();
-                      context.read<PropertySetupCubit>().updateFloorRoomCount(floor, currentCount - 1);
+                      context.read<PropertySetupCubit>().updateFloorRoomCount(
+                        floor,
+                        currentCount - 1,
+                      );
                     }
                   },
                 ),
@@ -303,7 +398,11 @@ class FloorConfigScreen extends StatelessWidget {
                   child: Text(
                     currentCount.toString(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF1E293B),
+                    ),
                   ),
                 ),
                 _buildSmallCounterButton(
@@ -311,7 +410,10 @@ class FloorConfigScreen extends StatelessWidget {
                   isPrimary: true,
                   onTap: () {
                     HapticFeedback.mediumImpact();
-                    context.read<PropertySetupCubit>().updateFloorRoomCount(floor, currentCount + 1);
+                    context.read<PropertySetupCubit>().updateFloorRoomCount(
+                      floor,
+                      currentCount + 1,
+                    );
                   },
                 ),
               ],
@@ -322,7 +424,11 @@ class FloorConfigScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSmallCounterButton({required IconData icon, required VoidCallback onTap, bool isPrimary = false}) {
+  Widget _buildSmallCounterButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    bool isPrimary = false,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -353,11 +459,19 @@ class FloorConfigScreen extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.bolt_rounded, size: 14.sp, color: const Color(0xFF2B5797)),
+            Icon(
+              Icons.bolt_rounded,
+              size: 14.sp,
+              color: const Color(0xFF2B5797),
+            ),
             SizedBox(width: 6.w),
             Text(
               'apply_x_to_all'.tr(namedArgs: {'count': count.toString()}),
-              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF2B5797),
+              ),
             ),
           ],
         ),

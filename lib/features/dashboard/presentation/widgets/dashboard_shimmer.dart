@@ -12,7 +12,6 @@ class DashboardShimmer extends StatelessWidget {
       highlightColor: Colors.grey[100]!,
       child: CustomScrollView(
         slivers: [
-
           SliverToBoxAdapter(
             child: Container(
               height: 60.h,
@@ -23,45 +22,48 @@ class DashboardShimmer extends StatelessWidget {
               ),
             ),
           ),
-          
 
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Row(
-                children: List.generate(2, (index) => Expanded(
-                  child: Container(
-                    height: 100.h,
-                    margin: EdgeInsets.only(right: index == 0 ? 12.w : 0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20.r),
+                children: List.generate(
+                  2,
+                  (index) => Expanded(
+                    child: Container(
+                      height: 100.h,
+                      margin: EdgeInsets.only(right: index == 0 ? 12.w : 0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
                     ),
                   ),
-                )),
+                ),
               ),
             ),
           ),
-
 
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
               child: Row(
-                children: List.generate(3, (index) => Expanded(
-                  child: Container(
-                    height: 80.h,
-                    margin: EdgeInsets.only(right: index < 2 ? 12.w : 0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
+                children: List.generate(
+                  3,
+                  (index) => Expanded(
+                    child: Container(
+                      height: 80.h,
+                      margin: EdgeInsets.only(right: index < 2 ? 12.w : 0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
                     ),
                   ),
-                )),
+                ),
               ),
             ),
           ),
-
 
           SliverToBoxAdapter(
             child: Container(

@@ -20,10 +20,12 @@ class _BookingsPageWithScroll extends StatefulWidget {
   const _BookingsPageWithScroll();
 
   @override
-  State<_BookingsPageWithScroll> createState() => _BookingsPageWithScrollState();
+  State<_BookingsPageWithScroll> createState() =>
+      _BookingsPageWithScrollState();
 }
 
-class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with SingleTickerProviderStateMixin {
+class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
@@ -38,7 +40,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
   void _refreshData() {
     final hostelCubit = context.read<HostelCubit>();
     final hostelState = hostelCubit.state;
-    
+
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
       final selectedId = hostelState.selectedHostelId;
       if (selectedId != null) {
@@ -59,92 +61,129 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
   @override
   Widget build(BuildContext context) {
     return BlocListener<HostelCubit, HostelState>(
-      listenWhen: (prev, curr) => 
-        (prev is! HostelLoaded && curr is HostelLoaded) || 
-        (prev is HostelLoaded && curr is HostelLoaded && prev.selectedHostelIndex != curr.selectedHostelIndex),
+      listenWhen: (prev, curr) =>
+          (prev is! HostelLoaded && curr is HostelLoaded) ||
+          (prev is HostelLoaded &&
+              curr is HostelLoaded &&
+              prev.selectedHostelIndex != curr.selectedHostelIndex),
       listener: (context, state) => _refreshData(),
       child: BlocListener<BookingsCubit, BookingsState>(
-      listener: (context, state) {
-        if (state.successMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.successMessage!),
-              backgroundColor: AppColors.success,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-            ),
-          );
-        }
-        if (state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage!),
-              backgroundColor: AppColors.error,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-            ),
-          );
-        }
-        if (state.status == BookingsStatus.success && state.scannedBooking != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BlocProvider.value(
-                value: context.read<BookingsCubit>(),
-                child: RoomSelectionPage(
-                  bookingId: state.scannedBooking!.bookingId,
-                  hostelId: state.scannedBooking!.hostelId,
-                  tenantName: state.scannedBooking!.tenantName,
-                  preAllocatedRoomId: state.scannedBooking!.roomId,
-                  preAllocatedBedNumber: state.scannedBooking!.bedNumber,
+        listener: (context, state) {
+          if (state.successMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.successMessage!),
+                backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
-            ),
-          );
-          context.read<BookingsCubit>().clearScannedBooking();
-        }
-      },
-      child: BlocBuilder<HostelCubit, HostelState>(
-        builder: (context, hostelState) {
-          if (hostelState is HostelLoaded && hostelState.hostels.isEmpty) {
-            return Column(
-              children: [
-                _buildPowerfulHeader(context, const BookingsState()),
-                Expanded(
-                  child: _buildEmptyState(
-                    StringUtils.translate('add_property_first', context: context), 
-                    StringUtils.translate('start_by_adding_property_desc', context: context)
-                  ),
-                ),
-              ],
             );
           }
-
-          return BlocBuilder<BookingsCubit, BookingsState>(
-            builder: (context, state) {
+          if (state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage!),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+              ),
+            );
+          }
+          if (state.status == BookingsStatus.success &&
+              state.scannedBooking != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider.value(
+                  value: context.read<BookingsCubit>(),
+                  child: RoomSelectionPage(
+                    bookingId: state.scannedBooking!.bookingId,
+                    hostelId: state.scannedBooking!.hostelId,
+                    tenantName: state.scannedBooking!.tenantName,
+                    preAllocatedRoomId: state.scannedBooking!.roomId,
+                    preAllocatedBedNumber: state.scannedBooking!.bedNumber,
+                  ),
+                ),
+              ),
+            );
+            context.read<BookingsCubit>().clearScannedBooking();
+          }
+        },
+        child: BlocBuilder<HostelCubit, HostelState>(
+          builder: (context, hostelState) {
+            if (hostelState is HostelLoaded && hostelState.hostels.isEmpty) {
               return Column(
                 children: [
-                  _buildPowerfulHeader(context, state),
-                  _buildSegmentedTabs(state),
+                  _buildPowerfulHeader(context, const BookingsState()),
                   Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildTabContent(context, state, state.requests, StringUtils.translate('no_pending_requests', context: context), StringUtils.translate('new_booking_requests_here', context: context)),
-                        _buildTabContent(context, state, state.checkIns, StringUtils.translate('no_active_residents', context: context), StringUtils.translate('manage_residents_subtitle', context: context)),
-                        _buildHistoryTab(context, state),
-                      ],
+                    child: _buildEmptyState(
+                      StringUtils.translate(
+                        'add_property_first',
+                        context: context,
+                      ),
+                      StringUtils.translate(
+                        'start_by_adding_property_desc',
+                        context: context,
+                      ),
                     ),
                   ),
                 ],
               );
-            },
-          );
-        },
+            }
+
+            return BlocBuilder<BookingsCubit, BookingsState>(
+              builder: (context, state) {
+                return Column(
+                  children: [
+                    _buildPowerfulHeader(context, state),
+                    _buildSegmentedTabs(state),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildTabContent(
+                            context,
+                            state,
+                            state.requests,
+                            StringUtils.translate(
+                              'no_pending_requests',
+                              context: context,
+                            ),
+                            StringUtils.translate(
+                              'new_booking_requests_here',
+                              context: context,
+                            ),
+                          ),
+                          _buildTabContent(
+                            context,
+                            state,
+                            state.checkIns,
+                            StringUtils.translate(
+                              'no_active_residents',
+                              context: context,
+                            ),
+                            StringUtils.translate(
+                              'manage_residents_subtitle',
+                              context: context,
+                            ),
+                          ),
+                          _buildHistoryTab(context, state),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildPowerfulHeader(BuildContext context, BookingsState state) {
     return Container(
@@ -172,7 +211,10 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                       ),
                     ),
                     Text(
-                      StringUtils.translate('bookings_subtitle', context: context),
+                      StringUtils.translate(
+                        'bookings_subtitle',
+                        context: context,
+                      ),
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.white.withValues(alpha: 0.5),
@@ -185,10 +227,18 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildHeaderAction(Icons.search_rounded, () => setState(() => _isSearching = !_isSearching)),
+                  _buildHeaderAction(
+                    Icons.search_rounded,
+                    () => setState(() => _isSearching = !_isSearching),
+                  ),
                   _buildHeaderAction(Icons.refresh_rounded, () {
-                    final hostelId = context.read<HostelCubit>().state.selectedHostelId;
-                    context.read<BookingsCubit>().fetchBookings(hostelId: hostelId);
+                    final hostelId = context
+                        .read<HostelCubit>()
+                        .state
+                        .selectedHostelId;
+                    context.read<BookingsCubit>().fetchBookings(
+                      hostelId: hostelId,
+                    );
                   }),
                 ],
               ),
@@ -207,14 +257,25 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
                 child: TextField(
                   controller: _searchController,
                   autofocus: true,
-                  onChanged: (value) => context.read<BookingsCubit>().searchBookings(value),
+                  onChanged: (value) =>
+                      context.read<BookingsCubit>().searchBookings(value),
                   style: TextStyle(color: Colors.white, fontSize: 14.sp),
                   decoration: InputDecoration(
                     hintText: 'Search by name, phone, room...',
-                    hintStyle: TextStyle(fontSize: 14.sp, color: Colors.white.withValues(alpha: 0.3)),
-                    prefixIcon: Icon(Icons.search_rounded, color: Colors.white.withValues(alpha: 0.5), size: 20.sp),
+                    hintStyle: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: Colors.white.withValues(alpha: 0.5),
+                      size: 20.sp,
+                    ),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
                   ),
                 ),
               ),
@@ -265,11 +326,22 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.textSecondary,
         labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800),
-        unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w600,
+        ),
         indicatorSize: TabBarIndicatorSize.tab,
         tabs: [
-          _buildTabItem(StringUtils.translate('tab_requests', context: context), state.requests.length, 0),
-          _buildTabItem(StringUtils.translate('tab_active', context: context), state.checkIns.length, 1),
+          _buildTabItem(
+            StringUtils.translate('tab_requests', context: context),
+            state.requests.length,
+            0,
+          ),
+          _buildTabItem(
+            StringUtils.translate('tab_active', context: context),
+            state.checkIns.length,
+            1,
+          ),
           Tab(text: StringUtils.translate('tab_history', context: context)),
         ],
       ),
@@ -288,7 +360,9 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withValues(alpha: 0.2) : AppColors.primaryBlue.withValues(alpha: 0.1),
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : AppColors.primaryBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Text(
@@ -306,9 +380,16 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
     );
   }
 
-  Widget _buildTabContent(BuildContext context, BookingsState state, List<Booking> items, String emptyTitle, String emptySubtitle, {bool isHistory = false}) {
+  Widget _buildTabContent(
+    BuildContext context,
+    BookingsState state,
+    List<Booking> items,
+    String emptyTitle,
+    String emptySubtitle, {
+    bool isHistory = false,
+  }) {
     final hostelId = context.read<HostelCubit>().state.selectedHostelId;
-    
+
     if (state.status == BookingsStatus.loading && state.bookings.isEmpty) {
       return ListView.builder(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -322,17 +403,24 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
     }
 
     return RefreshIndicator(
-      onRefresh: () => context.read<BookingsCubit>().fetchBookings(hostelId: hostelId),
+      onRefresh: () =>
+          context.read<BookingsCubit>().fetchBookings(hostelId: hostelId),
       color: AppColors.primaryBlue,
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
-          if (notification.metrics.pixels >= notification.metrics.maxScrollExtent - 200) {
+          if (notification.metrics.pixels >=
+              notification.metrics.maxScrollExtent - 200) {
             context.read<BookingsCubit>().loadMoreBookings();
           }
           return false;
         },
         child: ListView.builder(
-          padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, UIConstants.bottomPadding(context) + 20.h),
+          padding: EdgeInsets.fromLTRB(
+            20.w,
+            0,
+            20.w,
+            UIConstants.bottomPadding(context) + 20.h,
+          ),
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length + (state.isLoadMore ? 1 : 0),
           itemBuilder: (context, index) {
@@ -341,7 +429,12 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
             }
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue)),
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primaryBlue,
+                ),
+              ),
             );
           },
         ),
@@ -350,7 +443,14 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
   }
 
   Widget _buildHistoryTab(BuildContext context, BookingsState state) {
-    final historyBookings = state.bookings.where((b) => [BookingStatus.cancelled, BookingStatus.checkedOut].contains(b.status)).toList();
+    final historyBookings = state.bookings
+        .where(
+          (b) => [
+            BookingStatus.cancelled,
+            BookingStatus.checkedOut,
+          ].contains(b.status),
+        )
+        .toList();
     return _buildTabContent(
       context,
       state,
@@ -372,12 +472,20 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
               color: AppColors.backgroundSecondary,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.inbox_rounded, size: 64.sp, color: AppColors.textSecondary.withValues(alpha: 0.1)),
+            child: Icon(
+              Icons.inbox_rounded,
+              size: 64.sp,
+              color: AppColors.textSecondary.withValues(alpha: 0.1),
+            ),
           ),
           SizedBox(height: 24.h),
           Text(
             title,
-            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
           ),
           SizedBox(height: 8.h),
           Padding(
@@ -385,7 +493,11 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
             child: Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -402,9 +514,7 @@ class BookingsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
       body: PatternBackground(
-        child: SafeArea(
-          child: _BookingsPageWithScroll(),
-        ),
+        child: SafeArea(child: _BookingsPageWithScroll()),
       ),
     );
   }

@@ -29,7 +29,7 @@ class FinanceRemoteDataSourceImpl implements FinanceRemoteDataSource {
     try {
       final queryParams = <String, dynamic>{};
       if (hostelId != null) queryParams['hostelId'] = hostelId;
-      
+
       final response = await dio.get(
         ApiConstants.financeStats,
         queryParameters: queryParams,

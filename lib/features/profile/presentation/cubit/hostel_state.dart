@@ -7,7 +7,7 @@ abstract class HostelState extends Equatable {
 
   bool get isStale {
     if (lastFetched == null) return true;
-    return DateTime.now().difference(lastFetched!).inMinutes >= 5; 
+    return DateTime.now().difference(lastFetched!).inMinutes >= 5;
   }
 
   String? get selectedHostelId => null;
@@ -16,14 +16,11 @@ abstract class HostelState extends Equatable {
   List<Object?> get props => [lastFetched];
 
   Map<String, dynamic> toJson() {
-    return {
-      'lastFetched': lastFetched?.toIso8601String(),
-    };
+    return {'lastFetched': lastFetched?.toIso8601String()};
   }
 
   static HostelState? fromJson(Map<String, dynamic> json) {
-    
-    return null; 
+    return null;
   }
 }
 
@@ -39,9 +36,9 @@ class HostelLoaded extends HostelState {
   final List<Hostel> hostels;
   final int selectedHostelIndex;
   final List<int> selectedHostelIndices;
-  
+
   const HostelLoaded({
-    required this.hostels, 
+    required this.hostels,
     this.selectedHostelIndex = 0,
     this.selectedHostelIndices = const [0],
     super.lastFetched,
@@ -57,7 +54,12 @@ class HostelLoaded extends HostelState {
   }
 
   @override
-  List<Object?> get props => [hostels, selectedHostelIndex, selectedHostelIndices, lastFetched];
+  List<Object?> get props => [
+    hostels,
+    selectedHostelIndex,
+    selectedHostelIndices,
+    lastFetched,
+  ];
 
   @override
   Map<String, dynamic> toJson() {

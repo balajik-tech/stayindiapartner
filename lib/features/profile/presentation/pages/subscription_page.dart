@@ -24,7 +24,7 @@ class SubscriptionPage extends StatelessWidget {
         final authState = context.watch<AuthCubit>().state;
         int bedLimit = 10;
         String currentPlan = 'free';
-        
+
         if (authState is AuthAuthenticated) {
           bedLimit = authState.owner.bedLimit;
           currentPlan = authState.owner.plan;
@@ -53,11 +53,16 @@ class SubscriptionPage extends StatelessWidget {
             ),
           ),
           body: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, MediaQuery.of(context).padding.bottom + 24.h),
+            padding: EdgeInsets.fromLTRB(
+              24.w,
+              24.h,
+              24.w,
+              MediaQuery.of(context).padding.bottom + 24.h,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                 _buildCurrentPlanCard(totalBeds, bedLimit, currentPlan),
+                _buildCurrentPlanCard(totalBeds, bedLimit, currentPlan),
                 SizedBox(height: 32.h),
                 Text(
                   'Billing Breakdown',
@@ -70,7 +75,13 @@ class SubscriptionPage extends StatelessWidget {
                 SizedBox(height: 16.h),
                 ...hostels.map((hostel) => _buildHostelBillingRow(hostel)),
                 if (hostels.isEmpty)
-                   Text('No properties added yet.', style: TextStyle(color: AppColors.greyText, fontSize: 14.sp)),
+                  Text(
+                    'No properties added yet.',
+                    style: TextStyle(
+                      color: AppColors.greyText,
+                      fontSize: 14.sp,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -158,7 +169,7 @@ class SubscriptionPage extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -167,11 +178,19 @@ class SubscriptionPage extends StatelessWidget {
                 children: [
                   Text(
                     'Bed Capacity',
-                    style: TextStyle(fontSize: 14.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: AppColors.greyText,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   Text(
                     '$usage beds (Unlimited)',
-                    style: TextStyle(fontSize: 14.sp, color: AppColors.darkText, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: AppColors.darkText,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -182,14 +201,20 @@ class SubscriptionPage extends StatelessWidget {
                   value: 1.0,
                   minHeight: 8.h,
                   backgroundColor: AppColors.greyText.withValues(alpha: 0.1),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    Color(0xFF10B981),
+                  ),
                 ),
               ),
               Padding(
                 padding: EdgeInsets.only(top: 8.h),
                 child: Text(
                   'Active & fully unrestricted. Enjoy Stay India for free!',
-                  style: TextStyle(color: const Color(0xFF10B981), fontSize: 12.sp, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    color: const Color(0xFF10B981),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
@@ -243,7 +268,11 @@ class SubscriptionPage extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(Icons.business, color: const Color(0xFF10B981), size: 20.sp),
+            child: Icon(
+              Icons.business,
+              color: const Color(0xFF10B981),
+              size: 20.sp,
+            ),
           ),
           SizedBox(width: 12.w),
           Expanded(

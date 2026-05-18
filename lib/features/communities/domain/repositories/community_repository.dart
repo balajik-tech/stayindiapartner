@@ -1,7 +1,6 @@
 import '../entities/community_entity.dart';
 
 abstract class CommunityRepository {
-  
   Future<CommunityDetailsEntity> getCommunityDetails(String hostelId);
   Future<List<CommunityMessageEntity>> getMessages(
     String hostelId, {
@@ -10,12 +9,10 @@ abstract class CommunityRepository {
   });
   Future<void> sendMessage(String hostelId, String text);
   Future<void> sendImageMessage(String hostelId, String imagePath);
-  
-  
+
   Future<List<AnnouncementEntity>> getAnnouncements(String hostelId);
   Future<void> postAnnouncement(String hostelId, String title, String content);
-  
-  
+
   Future<List<OwnerDiscussionEntity>> getOwnerDiscussions(String hostelId);
   Future<void> createOwnerDiscussion({
     required String title,
@@ -24,9 +21,10 @@ abstract class CommunityRepository {
     String? hostelId,
   });
 
-  
   Future<List<CommunityDetailsEntity>> getJoinedOwnerCommunities();
-  Future<List<CommunityDetailsEntity>> getAvailableOwnerCommunities({Map<String, String>? filters});
+  Future<List<CommunityDetailsEntity>> getAvailableOwnerCommunities({
+    Map<String, String>? filters,
+  });
   Future<void> joinOwnerCommunity(String communityId);
   Future<List<Map<String, dynamic>>> getPendingJoinRequests();
   Future<void> handleJoinRequest({
@@ -53,8 +51,10 @@ abstract class CommunityRepository {
     String? associationCertificatePath,
   });
 
-  
-  Future<List<Map<String, dynamic>>> getAssociations({String? parentId, String? level});
+  Future<List<Map<String, dynamic>>> getAssociations({
+    String? parentId,
+    String? level,
+  });
   Future<void> joinAssociation(String associationId);
   Future<void> createAssociation({
     required String name,
@@ -84,15 +84,19 @@ abstract class CommunityRepository {
 
   Future<List<SocialPostEntity>> getSocialFeed({int limit = 20, int skip = 0});
   Future<SocialPostEntity> createSocialPost({
-    String? communityId, 
-    required String content, 
+    String? communityId,
+    required String content,
     String type = 'POST',
     String? imagePath,
     List<String>? pollOptions,
     Map<String, dynamic>? location,
   });
   Future<void> togglePostLike(String postId);
-  Future<List<Map<String, dynamic>>> getPostComments(String postId, {int limit = 20, int skip = 0});
+  Future<List<Map<String, dynamic>>> getPostComments(
+    String postId, {
+    int limit = 20,
+    int skip = 0,
+  });
   Future<void> addPostComment(String postId, String text);
   Future<void> votePoll(String postId, int optionIndex);
   Future<void> deleteSocialPost(String postId);

@@ -30,7 +30,9 @@ class MetricCard extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: AppColors.roomCardBorder.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,7 +1,6 @@
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 
-
 class OccupancyModel extends Occupancy {
   OccupancyModel({
     required super.totalBeds,
@@ -60,7 +59,14 @@ class FloorDataModel extends FloorData {
       totalBeds: totalBeds,
       freeBeds: freeBeds,
       bedInfo: 'beds_free_count',
-      rooms: roomsJson.map((r) => RoomModel.fromJson(r as Map<String, dynamic>, floorNum == 0 ? 'ground_floor' : 'floor_$floorNum')).toList(),
+      rooms: roomsJson
+          .map(
+            (r) => RoomModel.fromJson(
+              r as Map<String, dynamic>,
+              floorNum == 0 ? 'ground_floor' : 'floor_$floorNum',
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -84,8 +90,9 @@ class RoomModel extends Room {
 
   factory RoomModel.fromJson(Map<String, dynamic> json, [String? floorName]) {
     final bedsJson = json['beds'] as List<dynamic>? ?? [];
-    final occupied =
-        bedsJson.where((b) => (b as Map)['status'] != 'FREE').length;
+    final occupied = bedsJson
+        .where((b) => (b as Map)['status'] != 'FREE')
+        .length;
     final total = bedsJson.length;
 
     final List<BedInfo> beds = bedsJson.map((b) {
@@ -94,9 +101,9 @@ class RoomModel extends Room {
       final Map<String, dynamic>? tenant = (tenantObj is Map<String, dynamic>)
           ? tenantObj
           : (tenantObj is Map)
-              ? Map<String, dynamic>.from(tenantObj)
-              : null;
-      
+          ? Map<String, dynamic>.from(tenantObj)
+          : null;
+
       String? tenantName;
       if (tenant != null) {
         final firstName = tenant['firstName']?.toString() ?? '';
@@ -109,7 +116,9 @@ class RoomModel extends Room {
         bedNumber: map['bedNumber']?.toString() ?? '',
         status: map['status']?.toString() ?? 'FREE',
         tenantName: tenantName,
-        tenantAvatar: tenant?['avatar']?.toString() ?? tenant?['userProfile']?['avatar']?.toString(),
+        tenantAvatar:
+            tenant?['avatar']?.toString() ??
+            tenant?['userProfile']?['avatar']?.toString(),
         tenantId: tenant?['_id']?.toString() ?? tenant?['id']?.toString(),
         isAway: tenant?['isAway'] == true,
         awayReturnDate: tenant?['awayReturnDate']?.toString(),
@@ -124,17 +133,32 @@ class RoomModel extends Room {
 
     return RoomModel(
       id: json['_id'] ?? json['roomId'] ?? '',
-      roomNumber: StringUtils.formatRoomNumber(json['roomTypename']?.toString() ?? '', floorName),
+      roomNumber: StringUtils.formatRoomNumber(
+        json['roomTypename']?.toString() ?? '',
+        floorName,
+      ),
       sharingType: json['sharingType']?.toString() ?? '',
       roomType: json['roomType']?.toString() ?? '',
       occupancy: '$occupied/$total beds',
       tenantImages: tenantImages,
       beds: beds,
-      rent: json['rent'] != null ? double.tryParse(json['rent'].toString()) : null,
-      dailyRent: json['dailyRent'] != null ? double.tryParse(json['dailyRent'].toString()) : null,
-      maintenance: json['maintenance'] != null ? double.tryParse(json['maintenance'].toString()) : null,
-      deposit: json['deposit'] != null ? double.tryParse(json['deposit'].toString()) : null,
-      features: (json['features'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      rent: json['rent'] != null
+          ? double.tryParse(json['rent'].toString())
+          : null,
+      dailyRent: json['dailyRent'] != null
+          ? double.tryParse(json['dailyRent'].toString())
+          : null,
+      maintenance: json['maintenance'] != null
+          ? double.tryParse(json['maintenance'].toString())
+          : null,
+      deposit: json['deposit'] != null
+          ? double.tryParse(json['deposit'].toString())
+          : null,
+      features:
+          (json['features'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       floorName: floorName,
     );
   }

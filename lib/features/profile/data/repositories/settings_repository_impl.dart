@@ -18,8 +18,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<void> updateAmenities(
-      String hostelId, List<String> enabledAmenities) {
+  Future<void> updateAmenities(String hostelId, List<String> enabledAmenities) {
     return remoteDataSource.updateAmenities(hostelId, enabledAmenities);
   }
 
@@ -29,14 +28,15 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<void> updateNotifications(
-      String hostelId, Map<String, dynamic> data) {
+  Future<void> updateNotifications(String hostelId, Map<String, dynamic> data) {
     return remoteDataSource.updateNotifications(hostelId, data);
   }
 
   @override
   Future<void> updateRoomConfiguration(
-      String hostelId, Map<String, dynamic> data) {
+    String hostelId,
+    Map<String, dynamic> data,
+  ) {
     return remoteDataSource.updateRoomConfiguration(hostelId, data);
   }
 

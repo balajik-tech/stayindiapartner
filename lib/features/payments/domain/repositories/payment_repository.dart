@@ -46,9 +46,7 @@ abstract class PaymentRepository {
     String? message,
   });
 
-  Future<List<Map<String, dynamic>>> getReminderHistory({
-    String? hostelId,
-  });
+  Future<List<Map<String, dynamic>>> getReminderHistory({String? hostelId});
 
   Future<Map<String, dynamic>> getBills({
     required String tenantId,

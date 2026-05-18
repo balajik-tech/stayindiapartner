@@ -34,16 +34,25 @@ class RoomMasterSetupScreen extends StatelessWidget {
                       _showAddMasterDialog(context);
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 10.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF98125).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: const Color(0xFFF98125).withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: const Color(0xFFF98125).withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.add_circle_outline_rounded, color: const Color(0xFFF98125), size: 16.sp),
+                          Icon(
+                            Icons.add_circle_outline_rounded,
+                            color: const Color(0xFFF98125),
+                            size: 16.sp,
+                          ),
                           SizedBox(width: 6.w),
                           Text(
                             'Add New',
@@ -64,10 +73,14 @@ class RoomMasterSetupScreen extends StatelessWidget {
               child: state.roomMasters.isEmpty
                   ? _buildEmptyState(context)
                   : ListView.separated(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 16.h,
+                      ),
                       physics: const BouncingScrollPhysics(),
                       itemCount: state.roomMasters.length,
-                      separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 16.h),
                       itemBuilder: (context, index) {
                         final master = state.roomMasters[index];
                         return _buildMasterCard(context, index, master);
@@ -117,12 +130,20 @@ class RoomMasterSetupScreen extends StatelessWidget {
               color: const Color(0xFFF1F5F9),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.room_preferences_rounded, size: 48.sp, color: const Color(0xFF94A3B8)),
+            child: Icon(
+              Icons.room_preferences_rounded,
+              size: 48.sp,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
           SizedBox(height: 24.h),
           Text(
             'No Room Masters Added',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF1E293B),
+            ),
           ),
           SizedBox(height: 8.h),
           Padding(
@@ -130,7 +151,12 @@ class RoomMasterSetupScreen extends StatelessWidget {
             child: Text(
               'Add standard rooms (like Double Sharing AC) to automatically pre-populate rooms and prices in later steps.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500, height: 1.4),
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: const Color(0xFF64748B),
+                fontWeight: FontWeight.w500,
+                height: 1.4,
+              ),
             ),
           ),
           SizedBox(height: 24.h),
@@ -154,7 +180,11 @@ class RoomMasterSetupScreen extends StatelessWidget {
               ),
               child: Text(
                 'Add Room Master Template',
-                style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w900),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ),
@@ -163,7 +193,11 @@ class RoomMasterSetupScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMasterCard(BuildContext context, int index, Map<String, dynamic> master) {
+  Widget _buildMasterCard(
+    BuildContext context,
+    int index,
+    Map<String, dynamic> master,
+  ) {
     final int sharing = master['sharingType'] ?? 2;
     final String type = master['roomType'] ?? 'NON-AC';
     final double rent = (master['rent'] ?? 0.0).toDouble();
@@ -194,7 +228,9 @@ class RoomMasterSetupScreen extends StatelessWidget {
                     child: Icon(
                       isAC ? Icons.ac_unit_rounded : Icons.mode_fan_off_rounded,
                       size: 20.sp,
-                      color: isAC ? const Color(0xFF0EA5E9) : const Color(0xFF64748B),
+                      color: isAC
+                          ? const Color(0xFF0EA5E9)
+                          : const Color(0xFF64748B),
                     ),
                   ),
                   SizedBox(width: 14.w),
@@ -203,12 +239,20 @@ class RoomMasterSetupScreen extends StatelessWidget {
                     children: [
                       Text(
                         '$sharing Sharing',
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0F172A),
+                        ),
                       ),
                       SizedBox(height: 2.h),
                       Text(
                         isAC ? 'Air Conditioned (AC)' : 'Non-Air Conditioned',
-                        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: const Color(0xFF64748B)),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF64748B),
+                        ),
                       ),
                     ],
                   ),
@@ -219,7 +263,11 @@ class RoomMasterSetupScreen extends StatelessWidget {
                   HapticFeedback.mediumImpact();
                   context.read<PropertySetupCubit>().removeRoomMaster(index);
                 },
-                icon: Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 22.sp),
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.redAccent,
+                  size: 22.sp,
+                ),
               ),
             ],
           ),
@@ -289,12 +337,20 @@ class RoomMasterSetupScreen extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B)),
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF64748B),
+            ),
           ),
           SizedBox(height: 4.h),
           Text(
             value,
-            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: themeColor),
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w900,
+              color: themeColor,
+            ),
           ),
         ],
       ),
@@ -339,7 +395,14 @@ class RoomMasterSetupScreen extends StatelessWidget {
               ),
             ],
           ),
-          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h),
+          padding: EdgeInsets.fromLTRB(
+            20.w,
+            12.h,
+            20.w,
+            MediaQuery.of(context).viewInsets.bottom +
+                MediaQuery.of(context).padding.bottom +
+                24.h,
+          ),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
@@ -371,12 +434,23 @@ class RoomMasterSetupScreen extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(sheetContext),
-                      icon: Icon(Icons.close_rounded, color: const Color(0xFF64748B), size: 24.sp),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: const Color(0xFF64748B),
+                        size: 24.sp,
+                      ),
                     ),
                   ],
                 ),
                 SizedBox(height: 16.h),
-                Text('sharing_type_label'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B))),
+                Text(
+                  'sharing_type_label'.tr(),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
                 SizedBox(height: 8.h),
                 Container(
                   height: 52.h,
@@ -387,7 +461,8 @@ class RoomMasterSetupScreen extends StatelessWidget {
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final double toggleWidth = (constraints.maxWidth - 8.r) / 5;
+                      final double toggleWidth =
+                          (constraints.maxWidth - 8.r) / 5;
                       return Stack(
                         children: [
                           AnimatedPositioned(
@@ -424,11 +499,17 @@ class RoomMasterSetupScreen extends StatelessWidget {
                                     alignment: Alignment.center,
                                     color: Colors.transparent,
                                     child: AnimatedDefaultTextStyle(
-                                      duration: const Duration(milliseconds: 300),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
                                       style: TextStyle(
                                         fontSize: 14.sp,
-                                        fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-                                        color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
+                                        fontWeight: isSelected
+                                            ? FontWeight.w900
+                                            : FontWeight.w700,
+                                        color: isSelected
+                                            ? const Color(0xFF1E3A8A)
+                                            : const Color(0xFF64748B),
                                       ),
                                       child: Text('$s'),
                                     ),
@@ -443,7 +524,14 @@ class RoomMasterSetupScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 20.h),
-                Text('room_type_label'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B))),
+                Text(
+                  'room_type_label'.tr(),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
                 SizedBox(height: 8.h),
                 Container(
                   height: 52.h,
@@ -454,7 +542,8 @@ class RoomMasterSetupScreen extends StatelessWidget {
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final double toggleWidth = (constraints.maxWidth - 8.r) / 2;
+                      final double toggleWidth =
+                          (constraints.maxWidth - 8.r) / 2;
                       final bool isACSelected = selectedRoomType == 'AC';
                       return Stack(
                         children: [
@@ -485,17 +574,25 @@ class RoomMasterSetupScreen extends StatelessWidget {
                                 child: GestureDetector(
                                   onTap: () {
                                     HapticFeedback.lightImpact();
-                                    setSheetState(() => selectedRoomType = 'NON-AC');
+                                    setSheetState(
+                                      () => selectedRoomType = 'NON-AC',
+                                    );
                                   },
                                   child: Container(
                                     alignment: Alignment.center,
                                     color: Colors.transparent,
                                     child: AnimatedDefaultTextStyle(
-                                      duration: const Duration(milliseconds: 300),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
                                       style: TextStyle(
                                         fontSize: 14.sp,
-                                        fontWeight: !isACSelected ? FontWeight.w900 : FontWeight.w700,
-                                        color: !isACSelected ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
+                                        fontWeight: !isACSelected
+                                            ? FontWeight.w900
+                                            : FontWeight.w700,
+                                        color: !isACSelected
+                                            ? const Color(0xFF1E3A8A)
+                                            : const Color(0xFF64748B),
                                       ),
                                       child: Text('NON-AC'),
                                     ),
@@ -506,17 +603,25 @@ class RoomMasterSetupScreen extends StatelessWidget {
                                 child: GestureDetector(
                                   onTap: () {
                                     HapticFeedback.lightImpact();
-                                    setSheetState(() => selectedRoomType = 'AC');
+                                    setSheetState(
+                                      () => selectedRoomType = 'AC',
+                                    );
                                   },
                                   child: Container(
                                     alignment: Alignment.center,
                                     color: Colors.transparent,
                                     child: AnimatedDefaultTextStyle(
-                                      duration: const Duration(milliseconds: 300),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
                                       style: TextStyle(
                                         fontSize: 14.sp,
-                                        fontWeight: isACSelected ? FontWeight.w900 : FontWeight.w700,
-                                        color: isACSelected ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
+                                        fontWeight: isACSelected
+                                            ? FontWeight.w900
+                                            : FontWeight.w700,
+                                        color: isACSelected
+                                            ? const Color(0xFF1E3A8A)
+                                            : const Color(0xFF64748B),
                                       ),
                                       child: Text('AC'),
                                     ),
@@ -589,8 +694,13 @@ class RoomMasterSetupScreen extends StatelessWidget {
                         onPressed: () => Navigator.pop(sheetContext),
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 16.h),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-                          side: const BorderSide(color: Color(0xFF64748B), width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          side: const BorderSide(
+                            color: Color(0xFF64748B),
+                            width: 1.5,
+                          ),
                         ),
                         child: Text(
                           'Cancel',
@@ -606,14 +716,24 @@ class RoomMasterSetupScreen extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          final rent = double.tryParse(rentController.text) ?? 0.0;
-                          final dailyRent = double.tryParse(dailyRentController.text) ?? 0.0;
-                          final deposit = double.tryParse(depositController.text) ?? 0.0;
-                          final maintenance = double.tryParse(maintenanceController.text) ?? 0.0;
+                          final rent =
+                              double.tryParse(rentController.text) ?? 0.0;
+                          final dailyRent =
+                              double.tryParse(dailyRentController.text) ?? 0.0;
+                          final deposit =
+                              double.tryParse(depositController.text) ?? 0.0;
+                          final maintenance =
+                              double.tryParse(maintenanceController.text) ??
+                              0.0;
 
                           if (rent <= 0) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Monthly rent must be greater than 0'), backgroundColor: Colors.redAccent),
+                              const SnackBar(
+                                content: Text(
+                                  'Monthly rent must be greater than 0',
+                                ),
+                                backgroundColor: Colors.redAccent,
+                              ),
                             );
                             return;
                           }
@@ -625,23 +745,30 @@ class RoomMasterSetupScreen extends StatelessWidget {
                             'dailyRent': dailyRent,
                             'deposit': deposit,
                             'maintenance': maintenance,
-                            'roomSize': double.tryParse(roomSizeController.text) ?? 0.0,
+                            'roomSize':
+                                double.tryParse(roomSizeController.text) ?? 0.0,
                           });
 
                           Navigator.pop(sheetContext);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('Room Master Template Added!'),
+                              content: const Text(
+                                'Room Master Template Added!',
+                              ),
                               backgroundColor: const Color(0xFF10B981),
                               behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2C5990),
                           padding: EdgeInsets.symmetric(vertical: 16.h),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
                           elevation: 0,
                         ),
                         child: Text(
@@ -693,14 +820,22 @@ class _DialogTextField extends StatelessWidget {
         decoration: InputDecoration(
           icon: Icon(icon, color: const Color(0xFF94A3B8), size: 20.sp),
           labelText: label,
-          labelStyle: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w700),
+          labelStyle: TextStyle(
+            fontSize: 12.sp,
+            color: const Color(0xFF64748B),
+            fontWeight: FontWeight.w700,
+          ),
           hintText: hint,
           filled: false,
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
         ),
-        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF0F172A)),
+        style: TextStyle(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF0F172A),
+        ),
       ),
     );
   }

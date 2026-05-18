@@ -57,16 +57,28 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
-          final profile = state is ProfileLoaded ? state.profile : 
-                        (state is ProfileUpdateSuccess ? state.profile : null);
+          final profile = state is ProfileLoaded
+              ? state.profile
+              : (state is ProfileUpdateSuccess ? state.profile : null);
           final name = profile?.fullName ?? owner?.name ?? 'Owner';
-          final phone = profile != null ? '+91 ${profile.phone}' : (owner != null ? '+91 ${owner.phone}' : 'Stay India Member');
+          final phone = profile != null
+              ? '+91 ${profile.phone}'
+              : (owner != null ? '+91 ${owner.phone}' : 'Stay India Member');
 
           return CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(child: _buildProfileHeader(context, name, phone, profile?.avatar)),
-              SliverToBoxAdapter(child: _buildQuickActions(context, role, owner)),
+              SliverToBoxAdapter(
+                child: _buildProfileHeader(
+                  context,
+                  name,
+                  phone,
+                  profile?.avatar,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _buildQuickActions(context, role, owner),
+              ),
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
                 sliver: SliverList(
@@ -80,7 +92,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'account_settings_sub'.tr(),
                           iconBgColor: const Color(0xFFE0F2FE),
                           iconColor: const Color(0xFF0284C7),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AccountSettingsPage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.credit_card_rounded,
@@ -88,15 +105,26 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'subscription_sub'.tr(),
                           iconBgColor: const Color(0xFFF0FDF4),
                           iconColor: const Color(0xFF16A34A),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SubscriptionPage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.stars_rounded,
-                          title: 'membership_id'.tr() == 'membership_id' ? 'Membership ID' : 'membership_id'.tr(),
-                          subtitle: 'golden_pg_status'.tr() == 'golden_pg_status' ? 'Golden PG Status' : 'golden_pg_status'.tr(),
+                          title: 'membership_id'.tr() == 'membership_id'
+                              ? 'Membership ID'
+                              : 'membership_id'.tr(),
+                          subtitle:
+                              'golden_pg_status'.tr() == 'golden_pg_status'
+                              ? 'Golden PG Status'
+                              : 'golden_pg_status'.tr(),
                           iconBgColor: const Color(0xFFFEF9C3),
                           iconColor: const Color(0xFFCA8A04),
-                          onTap: () => _showMembershipCard(context, name, phone),
+                          onTap: () =>
+                              _showMembershipCard(context, name, phone),
                         ),
                         _ProfileTile(
                           icon: Icons.card_membership_rounded,
@@ -108,7 +136,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => BlocProvider(
-                                create: (context) => sl<HostelCubit>()..getHostels(),
+                                create: (context) =>
+                                    sl<HostelCubit>()..getHostels(),
                                 child: const DigitalCertificatePage(),
                               ),
                             ),
@@ -125,7 +154,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'account_settings_sub'.tr(),
                           iconBgColor: const Color(0xFFE0F2FE),
                           iconColor: const Color(0xFF0284C7),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AccountSettingsPage(),
+                            ),
+                          ),
                         ),
                       ]),
                       SizedBox(height: 32.h),
@@ -140,7 +174,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'hostel_profile_sub'.tr(),
                           iconBgColor: const Color(0xFFFFF1F2),
                           iconColor: const Color(0xFFE11D48),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HostelProfilePage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HostelProfilePage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.wifi_rounded,
@@ -148,7 +187,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'amenities_sub'.tr(),
                           iconBgColor: const Color(0xFFECFDF5),
                           iconColor: const Color(0xFF059669),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AmenitiesPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AmenitiesPage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.rule_rounded,
@@ -156,7 +200,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'house_rules_sub'.tr(),
                           iconBgColor: const Color(0xFFFFF7ED),
                           iconColor: const Color(0xFFEA580C),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HouseRulesPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HouseRulesPage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.restaurant_rounded,
@@ -164,7 +213,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'food_menu_sub'.tr(),
                           iconBgColor: const Color(0xFFFEF2F2),
                           iconColor: const Color(0xFFDC2626),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FoodMenuPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const FoodMenuPage(),
+                            ),
+                          ),
                         ),
                       ]),
                       SizedBox(height: 32.h),
@@ -211,7 +265,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'staff_management_sub'.tr(),
                           iconBgColor: const Color(0xFFF0FDFA),
                           iconColor: const Color(0xFF0D9488),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const StaffManagementPage(),
+                            ),
+                          ),
                         ),
                       ]),
                       SizedBox(height: 32.h),
@@ -236,7 +295,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const TermsAndConditionsPage(readOnly: true),
+                            builder: (context) =>
+                                const TermsAndConditionsPage(readOnly: true),
                           ),
                         ),
                       ),
@@ -247,7 +307,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'help_support_sub'.tr(),
                           iconBgColor: const Color(0xFFFFFBEB),
                           iconColor: const Color(0xFFD97706),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HelpSupportPage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.chat_bubble_rounded,
@@ -271,7 +336,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'refer_friend_sub'.tr(),
                           iconBgColor: const Color(0xFFFCE7F3),
                           iconColor: const Color(0xFFDB2777),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReferFriendPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ReferFriendPage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.star_rate_rounded,
@@ -289,7 +359,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           iconColor: const Color(0xFF16A34A),
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('App is up to date! (v1.0.4)')),
+                              const SnackBar(
+                                content: Text('App is up to date! (v1.0.4)'),
+                              ),
                             );
                           },
                         ),
@@ -299,7 +371,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'send_announcements_sub'.tr(),
                           iconBgColor: const Color(0xFFEFF6FF),
                           iconColor: const Color(0xFF2563EB),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SendAnnouncementsPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const SendAnnouncementsPage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.analytics_rounded,
@@ -307,7 +385,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'my_reports_sub'.tr(),
                           iconBgColor: const Color(0xFFECFDF5),
                           iconColor: const Color(0xFF059669),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportsDashboardPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const ReportsDashboardPage(),
+                            ),
+                          ),
                         ),
                         _ProfileTile(
                           icon: Icons.local_offer_rounded,
@@ -315,7 +399,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           subtitle: 'hostel_offers_sub'.tr(),
                           iconBgColor: const Color(0xFFFFF7ED),
                           iconColor: const Color(0xFFEA580C),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const OffersManagementPage())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const OffersManagementPage(),
+                            ),
+                          ),
                         ),
                       ]),
                       SizedBox(height: 32.h),
@@ -342,7 +432,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () => _handleLogout(context),
                       ),
                     ]),
-                    
+
                     SizedBox(height: 140.h),
                   ]),
                 ),
@@ -354,7 +444,12 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, String name, String phone, String? avatar) {
+  Widget _buildProfileHeader(
+    BuildContext context,
+    String name,
+    String phone,
+    String? avatar,
+  ) {
     return Container(
       margin: EdgeInsets.fromLTRB(20.w, 54.h, 20.w, 12.h),
       padding: EdgeInsets.all(16.r),
@@ -413,7 +508,12 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           BouncingWrapper(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AccountSettingsPage(),
+              ),
+            ),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
               decoration: BoxDecoration(
@@ -486,7 +586,12 @@ class _ProfilePageState extends State<ProfilePage> {
             _QuickActionCard(
               icon: Icons.people_alt_rounded,
               label: 'staff_quick'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const StaffManagementPage(),
+                ),
+              ),
             ),
         ],
       ),
@@ -531,7 +636,10 @@ class _ProfilePageState extends State<ProfilePage> {
               if (!isLast)
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
+                  child: Divider(
+                    height: 1,
+                    color: AppColors.border.withValues(alpha: 0.5),
+                  ),
                 ),
             ],
           );
@@ -544,13 +652,20 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
         backgroundColor: Colors.transparent,
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFBF953F), Color(0xFFFCF6BA), Color(0xFFB38728), Color(0xFFFBF5B7)],
+              colors: [
+                Color(0xFFBF953F),
+                Color(0xFFFCF6BA),
+                Color(0xFFB38728),
+                Color(0xFFFBF5B7),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -572,11 +687,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: EdgeInsets.symmetric(vertical: 20.h),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(24.r),
+                  ),
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.stars_rounded, color: const Color(0xFFFFD700), size: 48.sp),
+                    Icon(
+                      Icons.stars_rounded,
+                      color: const Color(0xFFFFD700),
+                      size: 48.sp,
+                    ),
                     SizedBox(height: 8.h),
                     Text(
                       'GOLDEN PG STATUS',
@@ -606,11 +727,17 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     SizedBox(height: 12.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 10.h,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: const Color(0xFFB38728), width: 1),
+                        border: Border.all(
+                          color: const Color(0xFFB38728),
+                          width: 1,
+                        ),
                       ),
                       child: Column(
                         children: [
@@ -640,7 +767,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.verified_rounded, color: const Color(0xFFB38728), size: 16.sp),
+                        Icon(
+                          Icons.verified_rounded,
+                          color: const Color(0xFFB38728),
+                          size: 16.sp,
+                        ),
                         SizedBox(width: 6.w),
                         Text(
                           'Verified Stay India Premium Partner',
@@ -659,8 +790,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         backgroundColor: Colors.black,
                         foregroundColor: const Color(0xFFFFD700),
                         elevation: 0,
-                        padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 32.w,
+                          vertical: 12.h,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
                       ),
                       child: const Text(
                         'Awesome',
@@ -681,7 +817,9 @@ class _ProfilePageState extends State<ProfilePage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24.r))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
       backgroundColor: Colors.white,
       builder: (context) {
         final currentLocale = context.locale.languageCode;
@@ -714,12 +852,20 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(height: 24.h),
                   Text(
                     'change_language'.tr(),
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   SizedBox(height: 4.h),
                   Text(
                     'language_sub'.tr(),
-                    style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   SizedBox(height: 20.h),
                   ...languages.map((lang) {
@@ -727,8 +873,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     return Container(
                       margin: EdgeInsets.only(bottom: 8.h),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.08) : Colors.white,
-                        border: Border.all(color: isSelected ? AppColors.primaryBlue : AppColors.border.withValues(alpha: 0.5)),
+                        color: isSelected
+                            ? AppColors.primaryBlue.withValues(alpha: 0.08)
+                            : Colors.white,
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primaryBlue
+                              : AppColors.border.withValues(alpha: 0.5),
+                        ),
                         borderRadius: BorderRadius.circular(16.r),
                       ),
                       child: ListTile(
@@ -736,18 +888,38 @@ class _ProfilePageState extends State<ProfilePage> {
                           final confirm = await showDialog<bool>(
                             context: context,
                             builder: (dialogContext) => AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-                              title: Text('change_language_confirm_title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
-                              content: Text('change_language_confirm_msg'.tr(namedArgs: {'language': lang['native']!})),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24.r),
+                              ),
+                              title: Text(
+                                'change_language_confirm_title'.tr(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              content: Text(
+                                'change_language_confirm_msg'.tr(
+                                  namedArgs: {'language': lang['native']!},
+                                ),
+                              ),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.pop(dialogContext, false),
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext, false),
                                   child: Text('cancel'.tr()),
                                 ),
                                 TextButton(
-                                  onPressed: () => Navigator.pop(dialogContext, true),
-                                  style: TextButton.styleFrom(foregroundColor: AppColors.primaryBlue),
-                                  child: Text('confirm'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext, true),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.primaryBlue,
+                                  ),
+                                  child: Text(
+                                    'confirm'.tr(),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -760,24 +932,53 @@ class _ProfilePageState extends State<ProfilePage> {
                             nav.pop();
                           }
                         },
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
                         leading: Container(
                           padding: EdgeInsets.all(8.r),
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primaryBlue : AppColors.backgroundSecondary,
+                            color: isSelected
+                                ? AppColors.primaryBlue
+                                : AppColors.backgroundSecondary,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.language_rounded, color: isSelected ? Colors.white : AppColors.primaryBlue, size: 20.sp),
+                          child: Icon(
+                            Icons.language_rounded,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.primaryBlue,
+                            size: 20.sp,
+                          ),
                         ),
                         title: Text(
                           lang['name']!,
-                          style: TextStyle(fontSize: 15.sp, fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600, color: isSelected ? AppColors.primaryBlue : AppColors.textPrimary),
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: isSelected
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: isSelected
+                                ? AppColors.primaryBlue
+                                : AppColors.textPrimary,
+                          ),
                         ),
                         subtitle: Text(
                           lang['native']!,
-                          style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary.withValues(alpha: 0.7)),
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.7,
+                            ),
+                          ),
                         ),
-                        trailing: isSelected ? Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 22.sp) : null,
+                        trailing: isSelected
+                            ? Icon(
+                                Icons.check_circle_rounded,
+                                color: AppColors.primaryBlue,
+                                size: 22.sp,
+                              )
+                            : null,
                       ),
                     );
                   }),
@@ -794,15 +995,26 @@ class _ProfilePageState extends State<ProfilePage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('logout_confirm_title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        title: Text(
+          'logout_confirm_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
         content: Text('logout_confirm_msg'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('cancel'.tr())),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('cancel'.tr()),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: Text('logout'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              'logout'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -845,7 +1057,11 @@ class _ProfileTile extends StatelessWidget {
                 color: iconBgColor ?? AppColors.backgroundSecondary,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor ?? AppColors.primaryBlue, size: 20.sp),
+              child: Icon(
+                icon,
+                color: iconColor ?? AppColors.primaryBlue,
+                size: 20.sp,
+              ),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -872,7 +1088,11 @@ class _ProfileTile extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.border, size: 20.sp),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.border,
+              size: 20.sp,
+            ),
           ],
         ),
       ),
@@ -885,7 +1105,11 @@ class _QuickActionCard extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _QuickActionCard({required this.icon, required this.label, required this.onTap});
+  const _QuickActionCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

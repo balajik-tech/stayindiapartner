@@ -6,7 +6,6 @@ import 'domain/repositories/guest_repository.dart';
 import 'presentation/cubit/guest_cubit.dart';
 
 void registerGuestFeature(GetIt sl) {
-
   sl.registerFactory(() => GuestCubit(repository: sl()));
 
   sl.registerLazySingleton<GuestRepository>(

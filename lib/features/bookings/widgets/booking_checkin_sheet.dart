@@ -77,7 +77,10 @@ class _BookingCheckInSheetState extends State<BookingCheckInSheet> {
       _isLoadingRooms = true;
     });
     try {
-      final rooms = await _roomRepository.getRoomsByFloor(widget.booking.hostelId, floor);
+      final rooms = await _roomRepository.getRoomsByFloor(
+        widget.booking.hostelId,
+        floor,
+      );
       if (mounted) {
         setState(() {
           _rooms = rooms;
@@ -141,7 +144,15 @@ class _BookingCheckInSheetState extends State<BookingCheckInSheet> {
                     _selectedFloor,
                     _onFloorChanged,
                     isLoading: _isLoadingFloors,
-                    label: (f) => f == 0 ? 'Ground' : '$f${f == 1 ? 'st' : f == 2 ? 'nd' : f == 3 ? 'rd' : 'th'} Floor',
+                    label: (f) => f == 0
+                        ? 'Ground'
+                        : '$f${f == 1
+                              ? 'st'
+                              : f == 2
+                              ? 'nd'
+                              : f == 3
+                              ? 'rd'
+                              : 'th'} Floor',
                   ),
                   SizedBox(height: 20.h),
                   _buildDropdown<RoomDetail>(
@@ -202,7 +213,9 @@ class _BookingCheckInSheetState extends State<BookingCheckInSheet> {
       decoration: BoxDecoration(
         color: const Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -233,10 +246,7 @@ class _BookingCheckInSheetState extends State<BookingCheckInSheet> {
                 ),
                 Text(
                   widget.booking.sharingType,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.greyText,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
                 ),
               ],
             ),
@@ -288,9 +298,16 @@ class _BookingCheckInSheetState extends State<BookingCheckInSheet> {
             child: DropdownButton<T>(
               isExpanded: true,
               value: value,
-              hint: isLoading 
-                ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : Text('Select Option', style: TextStyle(color: AppColors.greyText)),
+              hint: isLoading
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      'Select Option',
+                      style: TextStyle(color: AppColors.greyText),
+                    ),
               items: items.map((T item) {
                 return DropdownMenuItem<T>(
                   value: item,

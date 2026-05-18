@@ -23,7 +23,8 @@ class RoomMasterPage extends StatelessWidget {
       hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
     }
     return BlocProvider(
-      create: (_) => sl<RoomCubit>()..getRooms(isMaster: true, hostelId: hostelId),
+      create: (_) =>
+          sl<RoomCubit>()..getRooms(isMaster: true, hostelId: hostelId),
       child: const _RoomMasterView(),
     );
   }
@@ -130,10 +131,17 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           final bool isAC = room.roomType == 'AC';
           final typeKey = isAC ? 'AC' : 'NON_AC';
 
-          _controllers[typeKey]![sharing]!['rent']!.text = room.rent > 0 ? room.rent.toStringAsFixed(0) : '';
-          _controllers[typeKey]![sharing]!['deposit']!.text = room.deposit > 0 ? room.deposit.toStringAsFixed(0) : '';
-          _controllers[typeKey]![sharing]!['maintenance']!.text = room.maintenance > 0 ? room.maintenance.toStringAsFixed(0) : '';
-          _controllers[typeKey]![sharing]!['daily']!.text = room.dailyRent > 0 ? room.dailyRent.toStringAsFixed(0) : '';
+          _controllers[typeKey]![sharing]!['rent']!.text = room.rent > 0
+              ? room.rent.toStringAsFixed(0)
+              : '';
+          _controllers[typeKey]![sharing]!['deposit']!.text = room.deposit > 0
+              ? room.deposit.toStringAsFixed(0)
+              : '';
+          _controllers[typeKey]![sharing]!['maintenance']!.text =
+              room.maintenance > 0 ? room.maintenance.toStringAsFixed(0) : '';
+          _controllers[typeKey]![sharing]!['daily']!.text = room.dailyRent > 0
+              ? room.dailyRent.toStringAsFixed(0)
+              : '';
         }
       }
     }
@@ -188,15 +196,15 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
     final hostelId = _hostelId(context);
 
     if (ownerId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('owner_session_expired'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('owner_session_expired'.tr())));
       return;
     }
     if (hostelId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('no_hostel_found_profile'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('no_hostel_found_profile'.tr())));
       return;
     }
 
@@ -206,9 +214,12 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
       final bool isAC = typeKey == 'AC';
       for (final sharing in _activeSharingTypes) {
         final rentText = _controllers[typeKey]![sharing]!['rent']!.text.trim();
-        final depositText = _controllers[typeKey]![sharing]!['deposit']!.text.trim();
-        final maintText = _controllers[typeKey]![sharing]!['maintenance']!.text.trim();
-        final dailyText = _controllers[typeKey]![sharing]!['daily']!.text.trim();
+        final depositText = _controllers[typeKey]![sharing]!['deposit']!.text
+            .trim();
+        final maintText = _controllers[typeKey]![sharing]!['maintenance']!.text
+            .trim();
+        final dailyText = _controllers[typeKey]![sharing]!['daily']!.text
+            .trim();
 
         if (rentText.isNotEmpty) {
           final rent = double.tryParse(rentText) ?? 0.0;
@@ -216,28 +227,49 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           final maint = double.tryParse(maintText) ?? 0.0;
           final daily = double.tryParse(dailyText) ?? 0.0;
 
-          final matches = currentLoadedRooms.where((r) => r.isMaster && r.capacity == sharing && r.roomType == (isAC ? 'AC' : 'NON-AC'));
+          final matches = currentLoadedRooms.where(
+            (r) =>
+                r.isMaster &&
+                r.capacity == sharing &&
+                r.roomType == (isAC ? 'AC' : 'NON-AC'),
+          );
           final String existingId = matches.isNotEmpty ? matches.first.id : '';
-          final existingBeds = matches.isNotEmpty ? matches.first.beds : const <BedInfo>[];
-          final existingFloors = matches.isNotEmpty ? matches.first.floors : const <int>[0];
+          final existingBeds = matches.isNotEmpty
+              ? matches.first.beds
+              : const <BedInfo>[];
+          final existingFloors = matches.isNotEmpty
+              ? matches.first.floors
+              : const <int>[0];
 
-          roomsToSave.add(RoomDetail(
-            id: existingId,
-            hostelId: hostelId,
-            roomTypename: '$sharing Sharing ${isAC ? "AC" : "NON-AC"}',
-            floor: 0,
-            floors: existingFloors,
-            sharingType: sharing == 1 ? 'SINGLE' : sharing == 2 ? 'DOUBLE' : sharing == 3 ? 'TRIPLE' : sharing == 4 ? 'QUADRUPLE' : sharing == 5 ? 'QUINTUPLE' : 'DORMITORY',
-            roomType: isAC ? 'AC' : 'NON-AC',
-            rent: rent,
-            deposit: deposit,
-            maintenance: maint,
-            dailyRent: daily,
-            isActive: true,
-            isMaster: true,
-            capacity: sharing,
-            beds: existingBeds,
-          ));
+          roomsToSave.add(
+            RoomDetail(
+              id: existingId,
+              hostelId: hostelId,
+              roomTypename: '$sharing Sharing ${isAC ? "AC" : "NON-AC"}',
+              floor: 0,
+              floors: existingFloors,
+              sharingType: sharing == 1
+                  ? 'SINGLE'
+                  : sharing == 2
+                  ? 'DOUBLE'
+                  : sharing == 3
+                  ? 'TRIPLE'
+                  : sharing == 4
+                  ? 'QUADRUPLE'
+                  : sharing == 5
+                  ? 'QUINTUPLE'
+                  : 'DORMITORY',
+              roomType: isAC ? 'AC' : 'NON-AC',
+              rent: rent,
+              deposit: deposit,
+              maintenance: maint,
+              dailyRent: daily,
+              isActive: true,
+              isMaster: true,
+              capacity: sharing,
+              beds: existingBeds,
+            ),
+          );
         }
       }
     }
@@ -246,7 +278,10 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
       _isEditing = false;
     });
 
-    await context.read<RoomCubit>().bulkUpsertRooms(ownerId: ownerId, rooms: roomsToSave);
+    await context.read<RoomCubit>().bulkUpsertRooms(
+      ownerId: ownerId,
+      rooms: roomsToSave,
+    );
   }
 
   void _cancelEditing(List<RoomDetail> currentLoadedRooms) {
@@ -261,9 +296,9 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
     return BlocConsumer<RoomCubit, RoomState>(
       listener: (context, state) {
         if (state is RoomOperationSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
           final hostelId = _hostelId(context);
           if (hostelId.isNotEmpty) {
             context.read<DashboardCubit>().fetchDashboardData(hostelId);
@@ -279,7 +314,9 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         }
       },
       builder: (context, state) {
-        final currentLoadedRooms = state is RoomLoaded ? state.rooms : <RoomDetail>[];
+        final currentLoadedRooms = state is RoomLoaded
+            ? state.rooms
+            : <RoomDetail>[];
         final isLoading = state is RoomLoading;
 
         return Scaffold(
@@ -306,7 +343,11 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
             ),
           ),
           body: isLoading && !_initializedFromState
-              ? const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryBlue,
+                  ),
+                )
               : Column(
                   children: [
                     _buildHeaderSection(),
@@ -337,9 +378,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _buildLeftStaticPanel(),
-                                  Expanded(
-                                    child: _buildRightScrollablePanel(),
-                                  ),
+                                  Expanded(child: _buildRightScrollablePanel()),
                                 ],
                               ),
                             ),
@@ -514,18 +553,95 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
       height: 52.h,
       decoration: BoxDecoration(
         color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
-        border: const Border(
-          bottom: BorderSide(color: Color(0xFFF1F5F9)),
-        ),
+        border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
       ),
-      alignment: Alignment.center,
-      child: Text(
-        '$sharing Sharing',
-        style: TextStyle(
-          color: const Color(0xFF0F172A),
-          fontSize: 13.sp,
-          fontWeight: FontWeight.w800,
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '$sharing Sharing',
+            style: TextStyle(
+              color: const Color(0xFF0F172A),
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          if (_isEditing)
+            GestureDetector(
+              onTap: () => _deleteSharingType(sharing),
+              child: Icon(
+                Icons.delete_outline_rounded,
+                color: const Color(0xFFEF4444),
+                size: 18.sp,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteSharingType(int sharing) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
         ),
+        title: Text(
+          'Delete Sharing Option',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFFEF4444),
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete the pricing for $sharing Sharing?',
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: const Color(0xFF64748B),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() {
+                _activeSharingTypes.remove(sharing);
+                for (final type in ['AC', 'NON_AC']) {
+                  _controllers[type]?[sharing]?.forEach((field, controller) {
+                    controller.clear();
+                  });
+                }
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: const Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -537,9 +653,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         height: 48.h,
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(
-            bottom: BorderSide(color: Color(0xFFF1F5F9)),
-          ),
+          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         ),
         padding: EdgeInsets.only(left: 12.w),
         alignment: Alignment.centerLeft,
@@ -575,7 +689,9 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildScrollableHeader(),
-            ..._activeSharingTypes.map((sharing) => _buildScrollableRow(sharing)),
+            ..._activeSharingTypes.map(
+              (sharing) => _buildScrollableRow(sharing),
+            ),
             if (_isEditing) _buildScrollableAddRowPlaceholder(),
           ],
         ),
@@ -604,9 +720,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
       height: 52.h,
       decoration: BoxDecoration(
         color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
-        border: const Border(
-          bottom: BorderSide(color: Color(0xFFF1F5F9)),
-        ),
+        border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
       ),
       child: Row(
         children: [
@@ -626,9 +740,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         height: 48.h,
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(
-            bottom: BorderSide(color: Color(0xFFF1F5F9)),
-          ),
+          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         ),
         padding: EdgeInsets.only(left: 12.w),
         alignment: Alignment.centerLeft,
@@ -682,7 +794,9 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           style: TextStyle(
             fontSize: 13.sp,
             fontWeight: FontWeight.w700,
-            color: val.isNotEmpty ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
+            color: val.isNotEmpty
+                ? const Color(0xFF0F172A)
+                : const Color(0xFF94A3B8),
           ),
         ),
       );
@@ -696,7 +810,8 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         controller: controller,
         focusNode: focusNode,
         keyboardType: TextInputType.number,
-        textInputAction: (field == 'daily' && sharing == _activeSharingTypes.last)
+        textInputAction:
+            (field == 'daily' && sharing == _activeSharingTypes.last)
             ? TextInputAction.done
             : TextInputAction.next,
         inputFormatters: [
@@ -707,12 +822,14 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           if (field == 'rent') {
             _focusNodes[_selectedType]![sharing]!['deposit']!.requestFocus();
           } else if (field == 'deposit') {
-            _focusNodes[_selectedType]![sharing]!['maintenance']!.requestFocus();
+            _focusNodes[_selectedType]![sharing]!['maintenance']!
+                .requestFocus();
           } else if (field == 'maintenance') {
             _focusNodes[_selectedType]![sharing]!['daily']!.requestFocus();
           } else if (field == 'daily') {
             final currentIndex = _activeSharingTypes.indexOf(sharing);
-            if (currentIndex != -1 && currentIndex < _activeSharingTypes.length - 1) {
+            if (currentIndex != -1 &&
+                currentIndex < _activeSharingTypes.length - 1) {
               final nextSharing = _activeSharingTypes[currentIndex + 1];
               _focusNodes[_selectedType]![nextSharing]!['rent']!.requestFocus();
             }
@@ -756,7 +873,9 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
           title: Text(
             'Add Custom Sharing Option',
             style: TextStyle(
@@ -781,9 +900,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 controller: controller,
                 keyboardType: TextInputType.number,
                 autofocus: true,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   hintText: 'Capacity (1 - 30)',
                   border: OutlineInputBorder(
@@ -798,7 +915,10 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
               onPressed: () => Navigator.pop(ctx),
               child: Text(
                 'Cancel',
-                style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             ElevatedButton(
@@ -809,17 +929,26 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                   Navigator.pop(ctx);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a valid capacity between 1 and 30')),
+                    const SnackBar(
+                      content: Text(
+                        'Please enter a valid capacity between 1 and 30',
+                      ),
+                    ),
                   );
                 }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2B5797),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
               ),
               child: const Text(
                 'Add',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -834,7 +963,9 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border(top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h)),
+          border: Border(
+            top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h),
+          ),
         ),
         child: SizedBox(
           width: double.infinity,
@@ -848,11 +979,17 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
             icon: Icon(Icons.edit_rounded, color: Colors.white, size: 18.sp),
             label: Text(
               'Edit Standard Pricing',
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Colors.white),
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2B5797),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
               elevation: 2,
             ),
           ),
@@ -864,7 +1001,9 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h)),
+        border: Border(
+          top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h),
+        ),
       ),
       child: Row(
         children: [
@@ -875,11 +1014,17 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 onPressed: () => _cancelEditing(currentLoadedRooms),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFFCBD5E1)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
                 ),
                 child: Text(
                   'Cancel',
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B)),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF64748B),
+                  ),
                 ),
               ),
             ),
@@ -892,12 +1037,18 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 onPressed: () => _savePricing(currentLoadedRooms),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2B5797),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
                   elevation: 2,
                 ),
                 child: Text(
                   'Save Changes',
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Colors.white),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),

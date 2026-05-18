@@ -52,13 +52,12 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   @override
   void initState() {
     super.initState();
-    
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cubit = context.read<CommunityCubit>();
       final ownerId = context.read<AuthCubit>().currentOwner?.id;
       final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
-      
+
       if (ownerId != null) {
         cubit.loadCommunityData(page.hostelId);
         cubit.joinCommunity(page.hostelId, ownerId);
@@ -87,9 +86,9 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
     if (text.isNotEmpty) {
       final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
       final owner = context.read<AuthCubit>().currentOwner;
-      
+
       context.read<CommunityCubit>().sendMessage(
-        page.hostelId, 
+        page.hostelId,
         text,
         senderId: owner?.id,
         senderName: owner?.name,
@@ -115,21 +114,23 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   Future<void> _pickAndSendImage() async {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (image != null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Compressing and sending image...')),
       );
 
-      final compressedFile = await ImageCompressor.compressImage(File(image.path));
+      final compressedFile = await ImageCompressor.compressImage(
+        File(image.path),
+      );
       if (compressedFile != null) {
         if (!mounted) return;
         final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
         final owner = context.read<AuthCubit>().currentOwner;
-        
+
         context.read<CommunityCubit>().sendImageMessage(
-          page.hostelId, 
+          page.hostelId,
           compressedFile.path,
           senderId: owner?.id,
           senderName: owner?.name,
@@ -144,7 +145,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   Widget build(BuildContext context) {
     final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
     final isPending = page.status?.toUpperCase() == 'PENDING';
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: _buildAppBar(context, page),
@@ -161,7 +162,11 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                         color: Colors.orange.shade50,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.pending_actions_rounded, size: 64.sp, color: Colors.orange.shade700),
+                      child: Icon(
+                        Icons.pending_actions_rounded,
+                        size: 64.sp,
+                        color: Colors.orange.shade700,
+                      ),
                     ),
                     SizedBox(height: 24.h),
                     Text(
@@ -196,11 +201,12 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                       }
                       if (state is CommunityLoaded) {
                         final messages = state.messages;
-                        
-                        
+
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (_scrollController.hasClients) {
-                            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                            _scrollController.jumpTo(
+                              _scrollController.position.maxScrollExtent,
+                            );
                           }
                         });
 
@@ -209,30 +215,43 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.chat_bubble_outline_rounded, size: 64.sp, color: Colors.grey.shade300),
+                                Icon(
+                                  Icons.chat_bubble_outline_rounded,
+                                  size: 64.sp,
+                                  color: Colors.grey.shade300,
+                                ),
                                 SizedBox(height: 16.h),
                                 Text(
                                   'No messages yet',
-                                  style: GoogleFonts.outfit(fontSize: 16.sp, color: AppColors.greyText),
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 16.sp,
+                                    color: AppColors.greyText,
+                                  ),
                                 ),
                               ],
                             ),
                           );
                         }
 
-                        
-                        final itemCount = messages.length + 1; 
+                        final itemCount = messages.length + 1;
                         return ListView.builder(
                           controller: _scrollController,
                           padding: EdgeInsets.all(20.w),
                           itemCount: itemCount,
                           itemBuilder: (context, index) {
-                            
                             if (index == 0) {
                               if (state.isLoadingMoreMessages) {
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 12),
-                                  child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  ),
                                 );
                               }
                               if (!state.hasMoreMessages) {
@@ -241,7 +260,10 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                                   child: Center(
                                     child: Text(
                                       ' Beginning of conversation',
-                                      style: GoogleFonts.outfit(fontSize: 12.sp, color: AppColors.greyText),
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12.sp,
+                                        color: AppColors.greyText,
+                                      ),
                                     ),
                                   ),
                                 );
@@ -249,15 +271,18 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                               return const SizedBox.shrink();
                             }
 
-                            final message = messages[index - 1]; 
-                            
-                            final owner = context.read<AuthCubit>().currentOwner;
+                            final message = messages[index - 1];
+
+                            final owner = context
+                                .read<AuthCubit>()
+                                .currentOwner;
                             final currentOwnerId = owner?.id;
 
-                            final isMe = (currentOwnerId != null && 
-                                         message.senderId.isNotEmpty && 
-                                         message.senderId == currentOwnerId);
-                            
+                            final isMe =
+                                (currentOwnerId != null &&
+                                message.senderId.isNotEmpty &&
+                                message.senderId == currentOwnerId);
+
                             final updatedMessage = CommunityMessageEntity(
                               id: message.id,
                               senderId: message.senderId,
@@ -283,18 +308,29 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.error_outline_rounded, size: 48.sp, color: Colors.red.shade300),
+                                Icon(
+                                  Icons.error_outline_rounded,
+                                  size: 48.sp,
+                                  color: Colors.red.shade300,
+                                ),
                                 SizedBox(height: 16.h),
                                 Text(
                                   state.message,
                                   textAlign: TextAlign.center,
-                                  style: GoogleFonts.outfit(color: AppColors.greyText),
+                                  style: GoogleFonts.outfit(
+                                    color: AppColors.greyText,
+                                  ),
                                 ),
                                 SizedBox(height: 24.h),
                                 ElevatedButton(
                                   onPressed: () {
-                                    final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
-                                    context.read<CommunityCubit>().loadCommunityData(page.hostelId);
+                                    final page = context
+                                        .findAncestorWidgetOfExactType<
+                                          TenantsChatPage
+                                        >()!;
+                                    context
+                                        .read<CommunityCubit>()
+                                        .loadCommunityData(page.hostelId);
                                   },
                                   child: const Text('Retry'),
                                 ),
@@ -320,7 +356,11 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
       centerTitle: false,
       leading: BouncingWrapper(
         onTap: () => Navigator.pop(context),
-        child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 20),
+        child: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.black,
+          size: 20,
+        ),
       ),
       title: Row(
         children: [
@@ -338,7 +378,11 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                   : null,
             ),
             child: page.communityIcon == null
-                ? Icon(Icons.groups_rounded, color: AppColors.primaryBlue, size: 20.sp)
+                ? Icon(
+                    Icons.groups_rounded,
+                    color: AppColors.primaryBlue,
+                    size: 20.sp,
+                  )
                 : null,
           ),
           SizedBox(width: 12.w),
@@ -361,15 +405,15 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                   Padding(
                     padding: EdgeInsets.only(top: 2.h),
                     child: Text(
-                      page.status?.toUpperCase() == 'PENDING' 
-                        ? 'Verification Pending ⏳' 
-                        : 'Verified National Network',
+                      page.status?.toUpperCase() == 'PENDING'
+                          ? 'Verification Pending ⏳'
+                          : 'Verified National Network',
                       style: GoogleFonts.outfit(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
-                        color: page.status?.toUpperCase() == 'PENDING' 
-                          ? Colors.orange.shade700 
-                          : AppColors.primaryBlue,
+                        color: page.status?.toUpperCase() == 'PENDING'
+                            ? Colors.orange.shade700
+                            : AppColors.primaryBlue,
                       ),
                     ),
                   ),
@@ -387,7 +431,8 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => CommunityDetailPage(communityId: page.hostelId),
+                    builder: (_) =>
+                        CommunityDetailPage(communityId: page.hostelId),
                   ),
                 );
               },
@@ -397,7 +442,11 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                   color: AppColors.primaryBlue.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.info_outline_rounded, color: AppColors.primaryBlue, size: 22.sp),
+                child: Icon(
+                  Icons.info_outline_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 22.sp,
+                ),
               ),
             ),
           ),
@@ -407,7 +456,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
 
   Widget _buildInputSection(TenantsChatPage page) {
     return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h), 
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -429,7 +478,11 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                   color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.add_photo_alternate_rounded, color: AppColors.primaryBlue, size: 20),
+                child: const Icon(
+                  Icons.add_photo_alternate_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 20,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -446,7 +499,10 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                 decoration: InputDecoration(
                   hintText: 'Type a message...',
                   hintStyle: GoogleFonts.outfit(color: Colors.grey.shade500),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 12.h,
+                  ),
                   border: InputBorder.none,
                 ),
                 onSubmitted: (_) => _sendMessage(),
@@ -462,7 +518,11 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                 color: AppColors.primaryBlue,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.send_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
         ],

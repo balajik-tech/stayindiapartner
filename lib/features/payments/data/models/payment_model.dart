@@ -29,12 +29,15 @@ class PaymentModel extends Payment {
     final tenantName = tenant != null
         ? '${tenant['firstName'] ?? ''} ${tenant['lastName'] ?? ''}'.trim()
         : json['tenantName']?.toString();
-        
+
     final room = json['room'] as Map<String, dynamic>?;
-    final roomName = room != null ? (room['roomTypename'] ?? '').toString() : json['roomName']?.toString();
+    final roomName = room != null
+        ? (room['roomTypename'] ?? '').toString()
+        : json['roomName']?.toString();
 
     DateTime? lastReminderAt;
-    if (json['reminderHistory'] is List && (json['reminderHistory'] as List).isNotEmpty) {
+    if (json['reminderHistory'] is List &&
+        (json['reminderHistory'] as List).isNotEmpty) {
       final last = (json['reminderHistory'] as List).last;
       if (last['sentAt'] != null) {
         lastReminderAt = DateTime.tryParse(last['sentAt'].toString());
@@ -45,7 +48,9 @@ class PaymentModel extends Payment {
       id: (json['_id'] ?? '').toString(),
       tenantId: (json['tenantId'] ?? json['tenant']?['_id'] ?? '').toString(),
       tenantName: tenantName?.isEmpty == true ? null : tenantName,
-      hostelId: (json['hostelId'] ?? json['hostel']?['_id'] ?? json['hostel'] ?? '').toString(),
+      hostelId:
+          (json['hostelId'] ?? json['hostel']?['_id'] ?? json['hostel'] ?? '')
+              .toString(),
       roomId: (json['roomId'] ?? json['room']?['_id'] ?? '').toString(),
       roomName: roomName,
       bedNumber: (json['bedNumber'] ?? '').toString(),

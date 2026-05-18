@@ -37,7 +37,7 @@ class StockItemDetailLoaded extends StockState {
   final List<StockTransaction> history;
 
   const StockItemDetailLoaded({
-    required this.item, 
+    required this.item,
     required this.history,
     super.items,
     super.summary,

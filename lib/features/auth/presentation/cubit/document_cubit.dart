@@ -14,10 +14,10 @@ class DocumentCubit extends Cubit<DocumentState> {
     required GetDocumentsUseCase getDocumentsUseCase,
     required UploadDocumentUseCase uploadDocumentUseCase,
     required DeleteDocumentUseCase deleteDocumentUseCase,
-  })  : _getDocuments = getDocumentsUseCase,
-        _uploadDocument = uploadDocumentUseCase,
-        _deleteDocument = deleteDocumentUseCase,
-        super(DocumentInitial());
+  }) : _getDocuments = getDocumentsUseCase,
+       _uploadDocument = uploadDocumentUseCase,
+       _deleteDocument = deleteDocumentUseCase,
+       super(DocumentInitial());
 
   Future<void> getDocuments(String hostelId) async {
     emit(DocumentLoading());
@@ -40,7 +40,9 @@ class DocumentCubit extends Cubit<DocumentState> {
     try {
       String finalPath = filePath;
       final ext = filePath.toLowerCase();
-      if (ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png')) {
+      if (ext.endsWith('.jpg') ||
+          ext.endsWith('.jpeg') ||
+          ext.endsWith('.png')) {
         final compressed = await ImageUtils.compressImage(File(filePath));
         if (compressed != null) finalPath = compressed.path;
       }
@@ -52,10 +54,12 @@ class DocumentCubit extends Cubit<DocumentState> {
         expiryDate: expiryDate,
         filePath: finalPath,
       );
-      emit(DocumentOperationSuccess(
-        message: 'Document uploaded successfully',
-        document: document,
-      ));
+      emit(
+        DocumentOperationSuccess(
+          message: 'Document uploaded successfully',
+          document: document,
+        ),
+      );
     } catch (e) {
       emit(DocumentError(message: ErrorHandler.getErrorMessage(e)));
     }
@@ -65,9 +69,7 @@ class DocumentCubit extends Cubit<DocumentState> {
     emit(DocumentLoading());
     try {
       await _deleteDocument(documentId);
-      emit(DocumentOperationSuccess(
-        message: 'Document deleted successfully',
-      ));
+      emit(DocumentOperationSuccess(message: 'Document deleted successfully'));
       await getDocuments(hostelId);
     } catch (e) {
       emit(DocumentError(message: ErrorHandler.getErrorMessage(e)));

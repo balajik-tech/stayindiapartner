@@ -16,7 +16,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -31,12 +32,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 1500),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.5, curve: Curves.easeIn)),
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+      ),
     );
 
     _controller.forward();
@@ -56,7 +61,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     final authState = context.read<AuthCubit>().state;
     if (authState is AuthInitial || authState is AuthSessionRestoring) {
-      
       return;
     }
 
@@ -69,7 +73,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     Widget nextScreen;
     if (state is AuthAuthenticated || state is AuthProfileCompleted) {
-      final bool requiresRegistration = state is AuthAuthenticated ? state.requiresRegistration : false;
+      final bool requiresRegistration = state is AuthAuthenticated
+          ? state.requiresRegistration
+          : false;
       if (requiresRegistration) {
         nextScreen = const RegistrationPersonalPage();
       } else {
@@ -78,7 +84,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     } else if (state is AuthUnauthenticated || state is AuthOtpSent) {
       nextScreen = const LoginPage();
     } else {
-      
       nextScreen = AuthGate(
         dashboard: const MainNavigationPage(),
         registration: const RegistrationPersonalPage(),
@@ -161,4 +166,3 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
   }
 }
-

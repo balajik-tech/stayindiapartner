@@ -16,13 +16,13 @@ class DashboardCubit extends Cubit<DashboardState> {
   DashboardCubit({
     required GetDashboardDataUseCase getDashboardDataUseCase,
     required DeleteRoomUseCase deleteRoomUseCase,
-  })  : _getDashboardData = getDashboardDataUseCase,
-        _deleteRoom = deleteRoomUseCase,
-        super(const DashboardInitial());
+  }) : _getDashboardData = getDashboardDataUseCase,
+       _deleteRoom = deleteRoomUseCase,
+       super(const DashboardInitial());
 
   Future<void> fetchDashboardData(String hostelId) async {
     if (isClosed) return;
-    
+
     if (_isFetching) return;
     _isFetching = true;
 
@@ -31,35 +31,41 @@ class DashboardCubit extends Cubit<DashboardState> {
     final currentView = state.isGridView;
 
     if (state is! DashboardLoaded) {
-      emit(DashboardLoading(
-        selectedFloorIndex: currentIndex,
-        searchQuery: currentSearch,
-        isGridView: currentView,
-        selectedMetric: state.selectedMetric,
-      ));
-    }
-    
-    try {
-      final data = await _getDashboardData(hostelId);
-      if (isClosed) return;
-      emit(DashboardLoaded(
-        data: data,
-        selectedFloorIndex: currentIndex,
-        searchQuery: currentSearch,
-        isGridView: currentView,
-        selectedMetric: state.selectedMetric,
-      ));
-      AppLogger.success('Dashboard data loaded successfully');
-    } catch (e) {
-      AppLogger.error('fetchDashboardData failed', e);
-      if (!isClosed) {
-        emit(DashboardError(
-          message: ErrorHelper.toFriendlyMessage(e),
+      emit(
+        DashboardLoading(
           selectedFloorIndex: currentIndex,
           searchQuery: currentSearch,
           isGridView: currentView,
           selectedMetric: state.selectedMetric,
-        ));
+        ),
+      );
+    }
+
+    try {
+      final data = await _getDashboardData(hostelId);
+      if (isClosed) return;
+      emit(
+        DashboardLoaded(
+          data: data,
+          selectedFloorIndex: currentIndex,
+          searchQuery: currentSearch,
+          isGridView: currentView,
+          selectedMetric: state.selectedMetric,
+        ),
+      );
+      AppLogger.success('Dashboard data loaded successfully');
+    } catch (e) {
+      AppLogger.error('fetchDashboardData failed', e);
+      if (!isClosed) {
+        emit(
+          DashboardError(
+            message: ErrorHelper.toFriendlyMessage(e),
+            selectedFloorIndex: currentIndex,
+            searchQuery: currentSearch,
+            isGridView: currentView,
+            selectedMetric: state.selectedMetric,
+          ),
+        );
       }
     } finally {
       _isFetching = false;
@@ -72,11 +78,30 @@ class DashboardCubit extends Cubit<DashboardState> {
     if (s is DashboardLoaded) {
       emit(s.copyWith(selectedFloorIndex: index));
     } else if (s is DashboardLoading) {
-      emit(DashboardLoading(selectedFloorIndex: index, searchQuery: s.searchQuery, isGridView: s.isGridView));
+      emit(
+        DashboardLoading(
+          selectedFloorIndex: index,
+          searchQuery: s.searchQuery,
+          isGridView: s.isGridView,
+        ),
+      );
     } else if (s is DashboardError) {
-      emit(DashboardError(message: s.message, selectedFloorIndex: index, searchQuery: s.searchQuery, isGridView: s.isGridView));
+      emit(
+        DashboardError(
+          message: s.message,
+          selectedFloorIndex: index,
+          searchQuery: s.searchQuery,
+          isGridView: s.isGridView,
+        ),
+      );
     } else if (s is DashboardInitial) {
-      emit(DashboardInitial(selectedFloorIndex: index, searchQuery: s.searchQuery, isGridView: s.isGridView));
+      emit(
+        DashboardInitial(
+          selectedFloorIndex: index,
+          searchQuery: s.searchQuery,
+          isGridView: s.isGridView,
+        ),
+      );
     }
   }
 
@@ -86,11 +111,30 @@ class DashboardCubit extends Cubit<DashboardState> {
     if (s is DashboardLoaded) {
       emit(s.copyWith(searchQuery: query));
     } else if (s is DashboardLoading) {
-      emit(DashboardLoading(selectedFloorIndex: s.selectedFloorIndex, searchQuery: query, isGridView: s.isGridView));
+      emit(
+        DashboardLoading(
+          selectedFloorIndex: s.selectedFloorIndex,
+          searchQuery: query,
+          isGridView: s.isGridView,
+        ),
+      );
     } else if (s is DashboardError) {
-      emit(DashboardError(message: s.message, selectedFloorIndex: s.selectedFloorIndex, searchQuery: query, isGridView: s.isGridView));
+      emit(
+        DashboardError(
+          message: s.message,
+          selectedFloorIndex: s.selectedFloorIndex,
+          searchQuery: query,
+          isGridView: s.isGridView,
+        ),
+      );
     } else if (s is DashboardInitial) {
-      emit(DashboardInitial(selectedFloorIndex: s.selectedFloorIndex, searchQuery: query, isGridView: s.isGridView));
+      emit(
+        DashboardInitial(
+          selectedFloorIndex: s.selectedFloorIndex,
+          searchQuery: query,
+          isGridView: s.isGridView,
+        ),
+      );
     }
   }
 
@@ -100,11 +144,30 @@ class DashboardCubit extends Cubit<DashboardState> {
     if (s is DashboardLoaded) {
       emit(s.copyWith(isGridView: isGrid));
     } else if (s is DashboardLoading) {
-      emit(DashboardLoading(selectedFloorIndex: s.selectedFloorIndex, searchQuery: s.searchQuery, isGridView: isGrid));
+      emit(
+        DashboardLoading(
+          selectedFloorIndex: s.selectedFloorIndex,
+          searchQuery: s.searchQuery,
+          isGridView: isGrid,
+        ),
+      );
     } else if (s is DashboardError) {
-      emit(DashboardError(message: s.message, selectedFloorIndex: s.selectedFloorIndex, searchQuery: s.searchQuery, isGridView: isGrid));
+      emit(
+        DashboardError(
+          message: s.message,
+          selectedFloorIndex: s.selectedFloorIndex,
+          searchQuery: s.searchQuery,
+          isGridView: isGrid,
+        ),
+      );
     } else if (s is DashboardInitial) {
-      emit(DashboardInitial(selectedFloorIndex: s.selectedFloorIndex, searchQuery: s.searchQuery, isGridView: isGrid));
+      emit(
+        DashboardInitial(
+          selectedFloorIndex: s.selectedFloorIndex,
+          searchQuery: s.searchQuery,
+          isGridView: isGrid,
+        ),
+      );
     }
   }
 
@@ -115,16 +178,13 @@ class DashboardCubit extends Cubit<DashboardState> {
       AppLogger.success('Room deleted successfully');
     } catch (e) {
       AppLogger.error('deleteRoom failed', e);
-      
-      
-      
+
       rethrow;
     }
   }
 
   Future<void> deleteRoomsBulk(List<String> roomIds, String hostelId) async {
     try {
-      
       for (final roomId in roomIds) {
         await _deleteRoom(roomId);
       }

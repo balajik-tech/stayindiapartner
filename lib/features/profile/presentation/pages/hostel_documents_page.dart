@@ -65,10 +65,11 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
         ),
         body: BlocConsumer<DocumentCubit, DocumentState>(
           listener: (context, state) {
-            if (state is DocumentOperationSuccess && state.message.contains('deleted')) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
+            if (state is DocumentOperationSuccess &&
+                state.message.contains('deleted')) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
             }
           },
           builder: (context, state) {
@@ -81,7 +82,10 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Error loading documents', style: TextStyle(fontSize: 16.sp, color: Colors.red)),
+                    Text(
+                      'Error loading documents',
+                      style: TextStyle(fontSize: 16.sp, color: Colors.red),
+                    ),
                     SizedBox(height: 12.h),
                     ElevatedButton(
                       onPressed: () => _cubit.getDocuments(widget.hostelId),
@@ -98,11 +102,18 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.description_outlined, size: 48.sp, color: AppColors.greyText.withValues(alpha: 0.5)),
+                      Icon(
+                        Icons.description_outlined,
+                        size: 48.sp,
+                        color: AppColors.greyText.withValues(alpha: 0.5),
+                      ),
                       SizedBox(height: 16.h),
                       Text(
                         'No documents uploaded',
-                        style: TextStyle(fontSize: 16.sp, color: AppColors.greyText),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: AppColors.greyText,
+                        ),
                       ),
                     ],
                   ),
@@ -110,7 +121,12 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
               }
 
               return ListView.separated(
-                padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, MediaQuery.of(context).padding.bottom + 80.h),
+                padding: EdgeInsets.fromLTRB(
+                  24.w,
+                  24.h,
+                  24.w,
+                  MediaQuery.of(context).padding.bottom + 80.h,
+                ),
                 itemCount: state.documents.length,
                 separatorBuilder: (context, index) => SizedBox(height: 16.h),
                 itemBuilder: (context, index) {
@@ -128,18 +144,29 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
   }
 
   Widget _buildDocumentCard(dynamic doc) {
-    String title = doc.licenseType.toString().replaceAll('_', ' ').toUpperCase();
+    String title = doc.licenseType
+        .toString()
+        .replaceAll('_', ' ')
+        .toUpperCase();
     if (doc.licenseType == 'fssai') title = 'Food License (FSSAI)';
     if (doc.licenseType == 'hostel_license') title = 'Hostel / PG License';
     if (doc.licenseType == 'trade_license') title = 'Trade License';
     if (doc.licenseType == 'fire_safety') title = 'Fire Safety Certificate';
     if (doc.licenseType == 'police_noc') title = 'Police NOC';
-    if (doc.licenseType == 'shops_establishment') title = 'Shops & Establishment';
+    if (doc.licenseType == 'shops_establishment') {
+      title = 'Shops & Establishment';
+    }
     if (doc.licenseType == 'gst_registration') title = 'GST Registration';
-    if (doc.licenseType == 'health_sanitation') title = 'Health & Sanitation NOC';
-    if (doc.licenseType == 'commercial_utility') title = 'Commercial Utility Bill';
+    if (doc.licenseType == 'health_sanitation') {
+      title = 'Health & Sanitation NOC';
+    }
+    if (doc.licenseType == 'commercial_utility') {
+      title = 'Commercial Utility Bill';
+    }
     if (doc.licenseType == 'pollution_noc') title = 'Pollution Control NOC';
-    if (doc.licenseType == 'resident_verification') title = 'Resident Verification';
+    if (doc.licenseType == 'resident_verification') {
+      title = 'Resident Verification';
+    }
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -156,7 +183,11 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
               color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(Icons.description, color: AppColors.primaryBlue, size: 24.sp),
+            child: Icon(
+              Icons.description,
+              color: AppColors.primaryBlue,
+              size: 24.sp,
+            ),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -180,11 +211,18 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
                   SizedBox(height: 4.h),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 12.sp, color: AppColors.greyText),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 12.sp,
+                        color: AppColors.greyText,
+                      ),
                       SizedBox(width: 4.w),
                       Text(
                         'Exp: ${doc.expiryDate.toString().split('T').first}',
-                        style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.greyText,
+                        ),
                       ),
                     ],
                   ),

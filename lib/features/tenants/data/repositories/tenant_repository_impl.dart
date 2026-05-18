@@ -15,16 +15,18 @@ class TenantRepositoryImpl implements TenantRepository {
     String? search,
     String? hostelId,
   }) => remote.getTenants(
-        status: status,
-        page: page,
-        limit: limit,
-        search: search,
-        hostelId: hostelId,
-      );
+    status: status,
+    page: page,
+    limit: limit,
+    search: search,
+    hostelId: hostelId,
+  );
 
   @override
-  Future<TenantDetailEntity> getTenantDetail(String tenantId, String hostelId) =>
-      remote.getTenantDetail(tenantId, hostelId);
+  Future<TenantDetailEntity> getTenantDetail(
+    String tenantId,
+    String hostelId,
+  ) => remote.getTenantDetail(tenantId, hostelId);
 
   @override
   Future<void> addManualTenant({
@@ -41,17 +43,17 @@ class TenantRepositoryImpl implements TenantRepository {
     String? userPhotoPath,
     String? aadharPhotoPath,
   }) => remote.addManualTenant(
-        phone: phone,
-        hostelId: hostelId,
-        roomId: roomId,
-        bedNumber: bedNumber,
-        rent: rent,
-        firstName: firstName,
-        lastName: lastName,
-        sharingType: sharingType,
-        startDate: startDate,
-        deposit: deposit,
-        userPhotoPath: userPhotoPath,
-        aadharPhotoPath: aadharPhotoPath,
-      );
+    phone: phone,
+    hostelId: hostelId,
+    roomId: roomId,
+    bedNumber: bedNumber,
+    rent: rent,
+    firstName: firstName,
+    lastName: lastName,
+    sharingType: sharingType,
+    startDate: startDate,
+    deposit: deposit,
+    userPhotoPath: userPhotoPath,
+    aadharPhotoPath: aadharPhotoPath,
+  );
 }

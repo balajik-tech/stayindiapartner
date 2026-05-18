@@ -24,7 +24,7 @@ class Occupancy {
 
 class FloorData {
   final String floorName;
-  final String bedInfo; 
+  final String bedInfo;
   final int? floorNum;
   final int? totalBeds;
   final int? freeBeds;
@@ -45,7 +45,7 @@ class Room {
   final String roomNumber;
   final String sharingType;
   final String? roomType;
-  final String occupancy; 
+  final String occupancy;
   final List<String> tenantImages;
   final List<BedInfo> beds;
   final double? rent;
@@ -74,7 +74,7 @@ class Room {
 
 class BedInfo {
   final String bedNumber;
-  final String status; 
+  final String status;
   final String? tenantName;
   final String? tenantAvatar;
   final String? tenantId;

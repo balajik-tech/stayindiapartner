@@ -35,15 +35,24 @@ class AppDrawer extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
               physics: const BouncingScrollPhysics(),
               children: [
-                _buildSectionLabel(StringUtils.translate('property_section', context: context)),
+                _buildSectionLabel(
+                  StringUtils.translate('property_section', context: context),
+                ),
                 _buildPremiumMenuItem(
-                  context, 
-                  Icons.swap_horiz_rounded, 
+                  context,
+                  Icons.swap_horiz_rounded,
                   StringUtils.translate('switch_property', context: context),
                   onTap: () {
                     final authState = context.read<AuthCubit>().state;
-                    if (authState is AuthAuthenticated && authState.owner.role != 'owner') {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: Staff members cannot switch properties.')));
+                    if (authState is AuthAuthenticated &&
+                        authState.owner.role != 'owner') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Access Denied: Staff members cannot switch properties.',
+                          ),
+                        ),
+                      );
                       return;
                     }
                     Navigator.pop(context);
@@ -52,34 +61,58 @@ class AppDrawer extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 if (hasStaffPerm || hasReportsPerm)
-                  _buildSectionLabel(StringUtils.translate('management_section', context: context)),
+                  _buildSectionLabel(
+                    StringUtils.translate(
+                      'management_section',
+                      context: context,
+                    ),
+                  ),
                 if (hasStaffPerm)
                   _buildPremiumMenuItem(
-                    context, 
-                    Icons.people_alt_rounded, 
+                    context,
+                    Icons.people_alt_rounded,
                     StringUtils.translate('staff_management', context: context),
                     onTap: () {
                       final authState = context.read<AuthCubit>().state;
-                      if (authState is AuthAuthenticated && !authState.owner.hasPermission('staff')) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to manage staff.')));
+                      if (authState is AuthAuthenticated &&
+                          !authState.owner.hasPermission('staff')) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Access Denied: You do not have permission to manage staff.',
+                            ),
+                          ),
+                        );
                         return;
                       }
                       Navigator.pop(context);
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const StaffManagementPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const StaffManagementPage(),
+                        ),
                       );
                     },
                   ),
                 if (hasReportsPerm)
                   _buildPremiumMenuItem(
-                    context, 
-                    Icons.insights_rounded, 
-                    StringUtils.translate('financial_insights', context: context),
+                    context,
+                    Icons.insights_rounded,
+                    StringUtils.translate(
+                      'financial_insights',
+                      context: context,
+                    ),
                     onTap: () {
                       final authState = context.read<AuthCubit>().state;
-                      if (authState is AuthAuthenticated && !authState.owner.hasPermission('reports')) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied: You do not have permission to view financials.')));
+                      if (authState is AuthAuthenticated &&
+                          !authState.owner.hasPermission('reports')) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Access Denied: You do not have permission to view financials.',
+                            ),
+                          ),
+                        );
                         return;
                       }
                       Navigator.pop(context);
@@ -94,16 +127,45 @@ class AppDrawer extends StatelessWidget {
                       );
                     },
                   ),
-                _buildPremiumMenuItem(context, Icons.verified_user_rounded, StringUtils.translate('privacy_policy', context: context)),
-                _buildPremiumMenuItem(context, Icons.help_rounded, StringUtils.translate('help_support', context: context)),
-                _buildPremiumMenuItem(context, Icons.chat_bubble_rounded, StringUtils.translate('feedback', context: context)),
-                
+                _buildPremiumMenuItem(
+                  context,
+                  Icons.verified_user_rounded,
+                  StringUtils.translate('privacy_policy', context: context),
+                ),
+                _buildPremiumMenuItem(
+                  context,
+                  Icons.help_rounded,
+                  StringUtils.translate('help_support', context: context),
+                ),
+                _buildPremiumMenuItem(
+                  context,
+                  Icons.chat_bubble_rounded,
+                  StringUtils.translate('feedback', context: context),
+                ),
+
                 SizedBox(height: 32.h),
-                _buildSectionLabel(StringUtils.translate('application_section', context: context)),
-                _buildPremiumMenuItem(context, Icons.share_rounded, StringUtils.translate('share_app', context: context)),
-                _buildPremiumMenuItem(context, Icons.menu_book_rounded, StringUtils.translate('user_manual', context: context)),
-                _buildPremiumMenuItem(context, Icons.info_outline_rounded, '${StringUtils.translate('version', context: context)} 1.0.0'),
-                
+                _buildSectionLabel(
+                  StringUtils.translate(
+                    'application_section',
+                    context: context,
+                  ),
+                ),
+                _buildPremiumMenuItem(
+                  context,
+                  Icons.share_rounded,
+                  StringUtils.translate('share_app', context: context),
+                ),
+                _buildPremiumMenuItem(
+                  context,
+                  Icons.menu_book_rounded,
+                  StringUtils.translate('user_manual', context: context),
+                ),
+                _buildPremiumMenuItem(
+                  context,
+                  Icons.info_outline_rounded,
+                  '${StringUtils.translate('version', context: context)} 1.0.0',
+                ),
+
                 SizedBox(height: 40.h),
                 _buildLogoutButton(context),
               ],
@@ -131,7 +193,8 @@ class AppDrawer extends StatelessWidget {
             }
 
             if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-              final hostel = hostelState.hostels[hostelState.selectedHostelIndex];
+              final hostel =
+                  hostelState.hostels[hostelState.selectedHostelIndex];
               imageUrl = ApiConstants.getImageUrl(hostel.coverImage);
             }
 
@@ -139,7 +202,9 @@ class AppDrawer extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(20.w, 44.h, 20.w, 24.h),
               decoration: BoxDecoration(
                 color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(16.r),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +219,11 @@ class AppDrawer extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.close_rounded, size: 18.sp, color: Colors.white),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 18.sp,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -218,7 +287,12 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildPremiumMenuItem(BuildContext context, IconData icon, String title, {VoidCallback? onTap}) {
+  Widget _buildPremiumMenuItem(
+    BuildContext context,
+    IconData icon,
+    String title, {
+    VoidCallback? onTap,
+  }) {
     return Container(
       margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
@@ -229,11 +303,21 @@ class AppDrawer extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap ?? () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(StringUtils.translate('coming_soon', namedArgs: {'feature': title}, context: context))),
-            );
-          },
+          onTap:
+              onTap ??
+              () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      StringUtils.translate(
+                        'coming_soon',
+                        namedArgs: {'feature': title},
+                        context: context,
+                      ),
+                    ),
+                  ),
+                );
+              },
           borderRadius: BorderRadius.circular(10.r),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
@@ -282,7 +366,11 @@ class AppDrawer extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.logout_rounded, color: const Color(0xFFEF4444), size: 18.sp),
+                Icon(
+                  Icons.logout_rounded,
+                  color: const Color(0xFFEF4444),
+                  size: 18.sp,
+                ),
                 SizedBox(width: 8.w),
                 Text(
                   StringUtils.translate('logout', context: context),
@@ -304,9 +392,13 @@ class AppDrawer extends StatelessWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
         title: Text(StringUtils.translate('logout', context: context)),
-        content: Text(StringUtils.translate('logout_confirm_msg', context: context)),
+        content: Text(
+          StringUtils.translate('logout_confirm_msg', context: context),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -315,7 +407,10 @@ class AppDrawer extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(StringUtils.translate('logout', context: context), style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              StringUtils.translate('logout', context: context),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -335,7 +430,7 @@ class AppDrawer extends StatelessWidget {
         buildWhen: (previous, current) => previous != current,
         builder: (context, state) {
           if (state is! HostelLoaded) return const SizedBox.shrink();
-          
+
           return Container(
             padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
             decoration: BoxDecoration(
@@ -379,9 +474,13 @@ class AppDrawer extends StatelessWidget {
                       return Container(
                         margin: EdgeInsets.only(bottom: 8.h),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFF1F5F9) : Colors.white,
+                          color: isSelected
+                              ? const Color(0xFFF1F5F9)
+                              : Colors.white,
                           border: Border.all(
-                            color: isSelected ? AppColors.primaryBlue : const Color(0xFFE2E8F0),
+                            color: isSelected
+                                ? AppColors.primaryBlue
+                                : const Color(0xFFE2E8F0),
                           ),
                           borderRadius: BorderRadius.circular(10.r),
                         ),
@@ -391,16 +490,22 @@ class AppDrawer extends StatelessWidget {
                             Navigator.pop(context);
                           },
                           dense: true,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
                           leading: Container(
                             padding: EdgeInsets.all(8.r),
                             decoration: BoxDecoration(
-                              color: isSelected ? AppColors.primaryBlue : const Color(0xFFF1F5F9),
+                              color: isSelected
+                                  ? AppColors.primaryBlue
+                                  : const Color(0xFFF1F5F9),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              Icons.apartment_rounded, 
-                              color: isSelected ? Colors.white : const Color(0xFF64748B),
+                              Icons.apartment_rounded,
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF64748B),
                               size: 18.sp,
                             ),
                           ),
@@ -408,12 +513,20 @@ class AppDrawer extends StatelessWidget {
                             hostel.name,
                             style: TextStyle(
                               fontSize: 14.sp,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? AppColors.primaryBlue : AppColors.darkText,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? AppColors.primaryBlue
+                                  : AppColors.darkText,
                             ),
                           ),
-                          trailing: isSelected 
-                              ? Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 20.sp) 
+                          trailing: isSelected
+                              ? Icon(
+                                  Icons.check_circle_rounded,
+                                  color: AppColors.primaryBlue,
+                                  size: 20.sp,
+                                )
                               : null,
                         ),
                       );
@@ -429,4 +542,3 @@ class AppDrawer extends StatelessWidget {
     );
   }
 }
-

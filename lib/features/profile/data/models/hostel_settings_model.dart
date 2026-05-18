@@ -38,8 +38,12 @@ class SettingsProfileModel extends SettingsProfile {
       description: json['description'] ?? '',
       hostelType: hostelTypeRaw,
       propertyTag: json['propertyTag'] as String?,
-      lat: coords != null && coords.length >= 2 ? (coords[1] as num).toDouble() : null,
-      lng: coords != null && coords.length >= 2 ? (coords[0] as num).toDouble() : null,
+      lat: coords != null && coords.length >= 2
+          ? (coords[1] as num).toDouble()
+          : null,
+      lng: coords != null && coords.length >= 2
+          ? (coords[0] as num).toDouble()
+          : null,
     );
   }
 }
@@ -59,17 +63,11 @@ class CustomRuleModel extends CustomRule {
   const CustomRuleModel({required super.text, super.photo});
 
   factory CustomRuleModel.fromJson(Map<String, dynamic> json) {
-    return CustomRuleModel(
-      text: json['text'] ?? '',
-      photo: json['photo'],
-    );
+    return CustomRuleModel(text: json['text'] ?? '', photo: json['photo']);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'photo': photo,
-    };
+    return {'text': text, 'photo': photo};
   }
 }
 
@@ -85,7 +83,9 @@ class HouseRulesModel extends HouseRules {
   factory HouseRulesModel.fromJson(Map<String, dynamic> json) {
     return HouseRulesModel(
       entryTime: json['entryTime'] ?? '10:00 PM',
-      visitorPolicy: json['visitorPolicy'] ?? 'Visitors allowed in common areas until 8:00 PM.',
+      visitorPolicy:
+          json['visitorPolicy'] ??
+          'Visitors allowed in common areas until 8:00 PM.',
       otherRules: json['otherRules'] ?? '',
       penaltyDate: json['penaltyDate'] ?? 7,
       customRules: (json['customRules'] as List<dynamic>? ?? [])
@@ -115,7 +115,9 @@ class HostelSettingsModel extends HostelSettings {
           .map((a) => AmenityItemModel.fromJson(a as Map<String, dynamic>))
           .toList(),
       houseRules: HouseRulesModel.fromJson(houseRulesData),
-      images: (json['images'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      images: (json['images'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
       coverImage: json['coverImage'] as String?,
     );
   }

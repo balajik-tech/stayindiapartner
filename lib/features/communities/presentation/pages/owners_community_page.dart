@@ -22,7 +22,6 @@ import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart
 import 'package:easy_localization/easy_localization.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
-
   const OwnersCommunityPage({super.key});
 
   @override
@@ -45,7 +44,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   Future<void> _loadReadPostIds() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final List<String>? stored = prefs.getStringList('owner_community_read_post_ids');
+      final List<String>? stored = prefs.getStringList(
+        'owner_community_read_post_ids',
+      );
       if (stored != null) {
         setState(() {
           _readPostIds = stored.toSet();
@@ -63,7 +64,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       });
       try {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setStringList('owner_community_read_post_ids', _readPostIds.toList());
+        await prefs.setStringList(
+          'owner_community_read_post_ids',
+          _readPostIds.toList(),
+        );
       } catch (e) {
         AppLogger.error('Error saving read posts: $e');
       }
@@ -77,7 +81,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     });
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList('owner_community_read_post_ids', _readPostIds.toList());
+      await prefs.setStringList(
+        'owner_community_read_post_ids',
+        _readPostIds.toList(),
+      );
     } catch (e) {
       AppLogger.error('Error saving read posts: $e');
     }
@@ -95,7 +102,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     context.read<SocialFeedCubit>().loadFeed();
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         context.read<SocialFeedCubit>().loadMoreFeed();
       }
     });
@@ -137,17 +145,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             builder: (context, state) {
               return CustomScrollView(
                 controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
                 slivers: [
-                  SliverToBoxAdapter(
-                    child: _buildHeader(),
-                  ),
-                  SliverToBoxAdapter(
-                    child: _buildExploreSection(),
-                  ),
-                  SliverToBoxAdapter(
-                    child: _buildCreatePostBox(),
-                  ),
+                  SliverToBoxAdapter(child: _buildHeader()),
+                  SliverToBoxAdapter(child: _buildExploreSection()),
+                  SliverToBoxAdapter(child: _buildCreatePostBox()),
                   ..._buildFeedSlivers(state),
                 ],
               );
@@ -206,8 +210,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 onTap: () {
                   String hostelId = '';
                   final hostelState = context.read<HostelCubit>().state;
-                  if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                    hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+                  if (hostelState is HostelLoaded &&
+                      hostelState.hostels.isNotEmpty) {
+                    hostelId =
+                        hostelState.hostels[hostelState.selectedHostelIndex].id;
                   }
                   Navigator.push(
                     context,
@@ -225,7 +231,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     color: AppColors.primaryBlue.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.people_rounded, color: AppColors.primaryBlue, size: 24.sp),
+                  child: Icon(
+                    Icons.people_rounded,
+                    color: AppColors.primaryBlue,
+                    size: 24.sp,
+                  ),
                 ),
               ),
             ],
@@ -240,7 +250,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
         builder: (context, state) {
-          final communities = state is OwnerCommunityLoaded ? state.joinedCommunities : <CommunityDetailsEntity>[];
+          final communities = state is OwnerCommunityLoaded
+              ? state.joinedCommunities
+              : <CommunityDetailsEntity>[];
 
           return SizedBox(
             height: 80.h,
@@ -251,7 +263,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const ExploreCommunitiesPage()),
+                      MaterialPageRoute(
+                        builder: (_) => const ExploreCommunitiesPage(),
+                      ),
                     );
                   },
                   child: Column(
@@ -262,10 +276,17 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         height: 48.w,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.primaryBlue, width: 2),
+                          border: Border.all(
+                            color: AppColors.primaryBlue,
+                            width: 2,
+                          ),
                           color: Colors.white,
                         ),
-                        child: Icon(Icons.add, color: AppColors.primaryBlue, size: 24.sp),
+                        child: Icon(
+                          Icons.add,
+                          color: AppColors.primaryBlue,
+                          size: 24.sp,
+                        ),
                       ),
                       SizedBox(height: 6.h),
                       Text(
@@ -306,13 +327,25 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                             height: 48.w,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey.shade200, width: 2),
+                              border: Border.all(
+                                color: Colors.grey.shade200,
+                                width: 2,
+                              ),
                             ),
                             child: CircleAvatar(
                               radius: 22.w,
-                              backgroundImage: c.image != null ? CachedNetworkImageProvider(c.image!) : null,
-                              backgroundColor: AppColors.accentOrange.withValues(alpha: 0.1),
-                              child: c.image == null ? Icon(Icons.groups, color: AppColors.accentOrange, size: 24.sp) : null,
+                              backgroundImage: c.image != null
+                                  ? CachedNetworkImageProvider(c.image!)
+                                  : null,
+                              backgroundColor: AppColors.accentOrange
+                                  .withValues(alpha: 0.1),
+                              child: c.image == null
+                                  ? Icon(
+                                      Icons.groups,
+                                      color: AppColors.accentOrange,
+                                      size: 24.sp,
+                                    )
+                                  : null,
                             ),
                           ),
                           SizedBox(height: 6.h),
@@ -344,7 +377,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   }
 
   Widget _buildCreatePostBox() {
-    final validPollOptions = _pollOptionControllers.map((c) => c.text.trim()).where((t) => t.isNotEmpty).toList();
+    final validPollOptions = _pollOptionControllers
+        .map((c) => c.text.trim())
+        .where((t) => t.isNotEmpty)
+        .toList();
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -368,15 +404,24 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             children: [
               BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, authState) {
-                  final owner = authState is AuthAuthenticated ? authState.owner : null;
+                  final owner = authState is AuthAuthenticated
+                      ? authState.owner
+                      : null;
                   return CircleAvatar(
                     radius: 22.r,
-                    backgroundImage: (owner?.avatar != null && owner!.avatar!.isNotEmpty) 
-                        ? CachedNetworkImageProvider(ApiConstants.getImageUrl(owner.avatar)!) 
+                    backgroundImage:
+                        (owner?.avatar != null && owner!.avatar!.isNotEmpty)
+                        ? CachedNetworkImageProvider(
+                            ApiConstants.getImageUrl(owner.avatar)!,
+                          )
                         : null,
                     backgroundColor: Colors.grey.shade100,
                     child: (owner?.avatar == null || owner!.avatar!.isEmpty)
-                        ? Icon(Icons.person, color: Colors.grey.shade400, size: 28.sp)
+                        ? Icon(
+                            Icons.person,
+                            color: Colors.grey.shade400,
+                            size: 28.sp,
+                          )
                         : null,
                   );
                 },
@@ -389,8 +434,14 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   maxLines: 4,
                   minLines: 1,
                   decoration: InputDecoration(
-                    hintText: _isPoll ? 'ask_question'.tr() : 'share_your_thoughts'.tr(),
-                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16.sp, fontWeight: FontWeight.w500),
+                    hintText: _isPoll
+                        ? 'ask_question'.tr()
+                        : 'share_your_thoughts'.tr(),
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                     border: InputBorder.none,
                     counterText: '',
                   ),
@@ -442,14 +493,24 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('poll_options'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText)),
+                    Text(
+                      'poll_options'.tr(),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.darkText,
+                      ),
+                    ),
                     TextButton(
                       onPressed: () {
                         setState(() {
                           _isPoll = false;
                         });
                       },
-                      child: Text('cancel_poll'.tr(), style: TextStyle(fontSize: 12.sp, color: Colors.red)),
+                      child: Text(
+                        'cancel_poll'.tr(),
+                        style: TextStyle(fontSize: 12.sp, color: Colors.red),
+                      ),
                     ),
                   ],
                 ),
@@ -471,8 +532,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                             child: TextField(
                               controller: _pollOptionControllers[index],
                               decoration: InputDecoration(
-                                hintText: 'option_n'.tr(namedArgs: {'n': '${index + 1}'}),
-                                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
+                                hintText: 'option_n'.tr(
+                                  namedArgs: {'n': '${index + 1}'},
+                                ),
+                                hintStyle: TextStyle(
+                                  color: Colors.grey.shade400,
+                                  fontSize: 14.sp,
+                                ),
                                 border: InputBorder.none,
                               ),
                               onChanged: (_) => setState(() {}),
@@ -482,7 +548,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         if (_pollOptionControllers.length > 2) ...[
                           SizedBox(width: 8.w),
                           IconButton(
-                            icon: Icon(Icons.close, size: 20.sp, color: Colors.grey),
+                            icon: Icon(
+                              Icons.close,
+                              size: 20.sp,
+                              color: Colors.grey,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _pollOptionControllers[index].dispose();
@@ -502,8 +572,19 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         _pollOptionControllers.add(TextEditingController());
                       });
                     },
-                    icon: Icon(Icons.add, size: 18.sp, color: AppColors.primaryBlue),
-                    label: Text('add_option'.tr(), style: TextStyle(fontSize: 13.sp, color: AppColors.primaryBlue, fontWeight: FontWeight.w700)),
+                    icon: Icon(
+                      Icons.add,
+                      size: 18.sp,
+                      color: AppColors.primaryBlue,
+                    ),
+                    label: Text(
+                      'add_option'.tr(),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: AppColors.primaryBlue,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -516,15 +597,29 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 children: [
                   IconButton(
                     onPressed: _isPoll ? null : _pickImage,
-                    icon: Icon(Icons.image_outlined, color: _isPoll ? Colors.grey.shade300 : AppColors.primaryBlue, size: 24.sp),
+                    icon: Icon(
+                      Icons.image_outlined,
+                      color: _isPoll
+                          ? Colors.grey.shade300
+                          : AppColors.primaryBlue,
+                      size: 24.sp,
+                    ),
                   ),
                   IconButton(
-                    onPressed: _selectedImagePath != null ? null : () {
-                      setState(() {
-                        _isPoll = true;
-                      });
-                    },
-                    icon: Icon(Icons.poll_outlined, color: _selectedImagePath != null ? Colors.grey.shade300 : AppColors.primaryBlue, size: 24.sp),
+                    onPressed: _selectedImagePath != null
+                        ? null
+                        : () {
+                            setState(() {
+                              _isPoll = true;
+                            });
+                          },
+                    icon: Icon(
+                      Icons.poll_outlined,
+                      color: _selectedImagePath != null
+                          ? Colors.grey.shade300
+                          : AppColors.primaryBlue,
+                      size: 24.sp,
+                    ),
                   ),
                 ],
               ),
@@ -532,47 +627,70 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 children: [
                   Text(
                     '${_postController.text.length}/200',
-                    style: TextStyle(color: Colors.grey.shade400, fontSize: 13.sp, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   SizedBox(width: 16.w),
                   BlocBuilder<SocialFeedCubit, SocialFeedState>(
                     builder: (context, state) {
-                      final isCreating = state is SocialFeedLoaded && state.isCreatingPost;
-                      final canPost = _postController.text.trim().isNotEmpty &&
+                      final isCreating =
+                          state is SocialFeedLoaded && state.isCreatingPost;
+                      final canPost =
+                          _postController.text.trim().isNotEmpty &&
                           (!_isPoll || validPollOptions.length >= 2);
 
                       return ElevatedButton(
-                        onPressed: (!canPost || isCreating) ? null : () {
-                          context.read<SocialFeedCubit>().createPost(
-                            content: _postController.text.trim(),
-                            imagePath: _selectedImagePath,
-                            type: _isPoll ? 'POLL' : 'POST',
-                            pollOptions: _isPoll ? validPollOptions : null,
-                          );
-                          _postController.clear();
-                          _selectedImagePath = null;
-                          _isPoll = false;
-                          for (var c in _pollOptionControllers) {
-                            c.clear();
-                          }
-                          setState(() {});
-                        },
+                        onPressed: (!canPost || isCreating)
+                            ? null
+                            : () {
+                                context.read<SocialFeedCubit>().createPost(
+                                  content: _postController.text.trim(),
+                                  imagePath: _selectedImagePath,
+                                  type: _isPoll ? 'POLL' : 'POST',
+                                  pollOptions: _isPoll
+                                      ? validPollOptions
+                                      : null,
+                                );
+                                _postController.clear();
+                                _selectedImagePath = null;
+                                _isPoll = false;
+                                for (var c in _pollOptionControllers) {
+                                  c.clear();
+                                }
+                                setState(() {});
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryBlue,
-                          disabledBackgroundColor: AppColors.primaryBlue.withValues(alpha: 0.3),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-                          padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 12.h),
+                          disabledBackgroundColor: AppColors.primaryBlue
+                              .withValues(alpha: 0.3),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 28.w,
+                            vertical: 12.h,
+                          ),
                           elevation: 0,
                         ),
                         child: isCreating
                             ? SizedBox(
                                 width: 16.w,
                                 height: 16.w,
-                                child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: const CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
                               )
                             : Text(
                                 'post_btn'.tr(),
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.sp),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14.sp,
+                                ),
                               ),
                       );
                     },
@@ -606,17 +724,28 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 padding: EdgeInsets.symmetric(vertical: 60.h, horizontal: 32.w),
                 child: Column(
                   children: [
-                    Icon(Icons.feed_outlined, size: 64.sp, color: Colors.grey.shade300),
+                    Icon(
+                      Icons.feed_outlined,
+                      size: 64.sp,
+                      color: Colors.grey.shade300,
+                    ),
                     SizedBox(height: 16.h),
                     Text(
                       'no_posts_yet'.tr(),
-                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.darkText,
+                      ),
                     ),
                     SizedBox(height: 8.h),
                     Text(
                       'be_first_share'.tr(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: AppColors.greyText,
+                      ),
                     ),
                   ],
                 ),
@@ -629,21 +758,18 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         SliverPadding(
           padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final post = state.posts[index];
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) {
-                    _markPostAsRead(post.id);
-                  }
-                });
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 16.h),
-                  child: _PostCard(post: post),
-                );
-              },
-              childCount: state.posts.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final post = state.posts[index];
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _markPostAsRead(post.id);
+                }
+              });
+              return Padding(
+                padding: EdgeInsets.only(bottom: 16.h),
+                child: _PostCard(post: post),
+              );
+            }, childCount: state.posts.length),
           ),
         ),
         if (state.isFetchingMore)
@@ -680,7 +806,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   Widget _buildNotificationAction() {
     return BlocBuilder<SocialFeedCubit, SocialFeedState>(
       builder: (context, state) {
-        final posts = state is SocialFeedLoaded ? state.posts : <SocialPostEntity>[];
+        final posts = state is SocialFeedLoaded
+            ? state.posts
+            : <SocialPostEntity>[];
         final unreadCount = _getUnreadPostsCount(posts);
 
         return BouncingWrapper(
@@ -705,7 +833,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   top: -2.h,
                   right: -2.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 6.w,
+                      vertical: 4.h,
+                    ),
                     decoration: const BoxDecoration(
                       color: Colors.redAccent,
                       shape: BoxShape.circle,
@@ -796,10 +927,12 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     child: Row(
                       children: [
                         Icon(
-                          unreadCount > 0 
+                          unreadCount > 0
                               ? Icons.mark_chat_unread_rounded
                               : Icons.mark_chat_read_rounded,
-                          color: unreadCount > 0 ? AppColors.accentOrange : Colors.green,
+                          color: unreadCount > 0
+                              ? AppColors.accentOrange
+                              : Colors.green,
                           size: 24.sp,
                         ),
                         SizedBox(width: 12.w),
@@ -808,7 +941,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                unreadCount > 0 
+                                unreadCount > 0
                                     ? 'You have $unreadCount new posts'
                                     : 'You are all caught up!',
                                 style: GoogleFonts.dmSans(
@@ -912,11 +1045,19 @@ class _PostCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 20.r,
-                backgroundImage: (post.userAvatar != null && post.userAvatar!.isNotEmpty) 
-                    ? CachedNetworkImageProvider(ApiConstants.getImageUrl(post.userAvatar!)!) : null,
+                backgroundImage:
+                    (post.userAvatar != null && post.userAvatar!.isNotEmpty)
+                    ? CachedNetworkImageProvider(
+                        ApiConstants.getImageUrl(post.userAvatar!)!,
+                      )
+                    : null,
                 backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                 child: (post.userAvatar == null || post.userAvatar!.isEmpty)
-                    ? Icon(Icons.person, color: AppColors.primaryBlue, size: 24.sp)
+                    ? Icon(
+                        Icons.person,
+                        color: AppColors.primaryBlue,
+                        size: 24.sp,
+                      )
                     : null,
               ),
               SizedBox(width: 14.w),
@@ -927,7 +1068,9 @@ class _PostCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          post.userName.isNotEmpty ? post.userName : 'Unknown User',
+                          post.userName.isNotEmpty
+                              ? post.userName
+                              : 'Unknown User',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w800,
@@ -935,10 +1078,17 @@ class _PostCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: 8.w),
-                        Text('·', style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.w800)),
+                        Text(
+                          '·',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                         SizedBox(width: 8.w),
                         Text(
-                          post.visibility != null && post.visibility!.toUpperCase() == 'GLOBAL'
+                          post.visibility != null &&
+                                  post.visibility!.toUpperCase() == 'GLOBAL'
                               ? 'Global'
                               : 'Community',
                           style: TextStyle(
@@ -989,7 +1139,11 @@ class _PostCard extends StatelessWidget {
                 errorWidget: (context, url, error) => Container(
                   height: 180.h,
                   color: Colors.grey.shade100,
-                  child: Icon(Icons.broken_image_rounded, size: 32.sp, color: Colors.grey.shade400),
+                  child: Icon(
+                    Icons.broken_image_rounded,
+                    size: 32.sp,
+                    color: Colors.grey.shade400,
+                  ),
                 ),
               ),
             ),
@@ -1000,7 +1154,8 @@ class _PostCard extends StatelessWidget {
               final opt = pollOptionsList[i];
               if (opt is Map) {
                 final text = opt['text']?.toString() ?? '';
-                final count = ((opt['votesCount'] ?? opt['votes'] ?? 0) as num).toInt();
+                final count = ((opt['votesCount'] ?? opt['votes'] ?? 0) as num)
+                    .toInt();
                 final pct = totalVotes > 0 ? (count / totalVotes) : 0.0;
                 final isMyVote = post.userVote == i;
 
@@ -1014,10 +1169,14 @@ class _PostCard extends StatelessWidget {
                     margin: EdgeInsets.only(bottom: 8.h),
                     height: 44.h,
                     decoration: BoxDecoration(
-                      color: isMyVote ? AppColors.primaryBlue.withValues(alpha: 0.08) : Colors.grey.shade50,
+                      color: isMyVote
+                          ? AppColors.primaryBlue.withValues(alpha: 0.08)
+                          : Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
-                        color: isMyVote ? AppColors.primaryBlue : Colors.grey.shade200,
+                        color: isMyVote
+                            ? AppColors.primaryBlue
+                            : Colors.grey.shade200,
                         width: isMyVote ? 2 : 1,
                       ),
                     ),
@@ -1029,7 +1188,11 @@ class _PostCard extends StatelessWidget {
                             return Container(
                               width: constraints.maxWidth * pct,
                               decoration: BoxDecoration(
-                                color: isMyVote ? AppColors.primaryBlue.withValues(alpha: 0.15) : Colors.grey.shade200,
+                                color: isMyVote
+                                    ? AppColors.primaryBlue.withValues(
+                                        alpha: 0.15,
+                                      )
+                                    : Colors.grey.shade200,
                                 borderRadius: BorderRadius.circular(10.r),
                               ),
                             );
@@ -1045,10 +1208,15 @@ class _PostCard extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       if (isMyVote) ...[
-                                        Icon(Icons.check_circle_rounded, color: AppColors.primaryBlue, size: 18.sp),
+                                        Icon(
+                                          Icons.check_circle_rounded,
+                                          color: AppColors.primaryBlue,
+                                          size: 18.sp,
+                                        ),
                                         SizedBox(width: 8.w),
                                       ],
                                       Expanded(
@@ -1056,7 +1224,9 @@ class _PostCard extends StatelessWidget {
                                           text,
                                           style: TextStyle(
                                             fontSize: 14.sp,
-                                            fontWeight: isMyVote ? FontWeight.w800 : FontWeight.w600,
+                                            fontWeight: isMyVote
+                                                ? FontWeight.w800
+                                                : FontWeight.w600,
                                             color: AppColors.darkText,
                                           ),
                                         ),
@@ -1097,8 +1267,12 @@ class _PostCard extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      post.isLiked ? Icons.thumb_up_alt_rounded : Icons.thumb_up_off_alt_rounded,
-                      color: post.isLiked ? AppColors.primaryBlue : Colors.grey.shade400,
+                      post.isLiked
+                          ? Icons.thumb_up_alt_rounded
+                          : Icons.thumb_up_off_alt_rounded,
+                      color: post.isLiked
+                          ? AppColors.primaryBlue
+                          : Colors.grey.shade400,
                       size: 20.sp,
                     ),
                     SizedBox(width: 8.w),
@@ -1106,8 +1280,12 @@ class _PostCard extends StatelessWidget {
                       '${post.likesCount}',
                       style: TextStyle(
                         fontSize: 13.sp,
-                        fontWeight: post.isLiked ? FontWeight.w800 : FontWeight.w600,
-                        color: post.isLiked ? AppColors.primaryBlue : Colors.grey.shade500,
+                        fontWeight: post.isLiked
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                        color: post.isLiked
+                            ? AppColors.primaryBlue
+                            : Colors.grey.shade500,
                       ),
                     ),
                   ],

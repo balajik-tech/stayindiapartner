@@ -20,12 +20,7 @@ class Skeleton extends StatelessWidget {
   final double? height, width;
   final double borderRadius;
 
-  const Skeleton({
-    super.key,
-    this.height,
-    this.width,
-    this.borderRadius = 8,
-  });
+  const Skeleton({super.key, this.height, this.width, this.borderRadius = 8});
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +114,11 @@ class PropertyCardSkeleton extends StatelessWidget {
         ),
         child: Column(
           children: [
-            const Skeleton(height: 150, width: double.infinity, borderRadius: 16),
+            const Skeleton(
+              height: 150,
+              width: double.infinity,
+              borderRadius: 16,
+            ),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -157,7 +156,11 @@ class DetailsSkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Skeleton(height: 200, width: double.infinity, borderRadius: 16),
+            const Skeleton(
+              height: 200,
+              width: double.infinity,
+              borderRadius: 16,
+            ),
             const SizedBox(height: 24),
             const Skeleton(height: 28, width: 200),
             const SizedBox(height: 12),
@@ -165,10 +168,13 @@ class DetailsSkeleton extends StatelessWidget {
             const SizedBox(height: 32),
             const Skeleton(height: 20, width: 150),
             const SizedBox(height: 12),
-            ...List.generate(3, (index) => const Padding(
-              padding: EdgeInsets.only(bottom: 16),
-              child: Skeleton(height: 60, width: double.infinity),
-            )),
+            ...List.generate(
+              3,
+              (index) => const Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: Skeleton(height: 60, width: double.infinity),
+              ),
+            ),
           ],
         ),
       ),

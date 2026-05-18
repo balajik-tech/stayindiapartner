@@ -46,12 +46,16 @@ class CommunityMessageModel extends CommunityMessageEntity {
   });
 
   factory CommunityMessageModel.fromJson(Map<String, dynamic> json) {
-    
-    final senderData = json['sender'] is Map ? json['sender'] as Map<String, dynamic> : null;
-    final userData = json['user'] is Map ? json['user'] as Map<String, dynamic> : null;
-    final authorData = json['author'] is Map ? json['author'] as Map<String, dynamic> : null;
-    
-    
+    final senderData = json['sender'] is Map
+        ? json['sender'] as Map<String, dynamic>
+        : null;
+    final userData = json['user'] is Map
+        ? json['user'] as Map<String, dynamic>
+        : null;
+    final authorData = json['author'] is Map
+        ? json['author'] as Map<String, dynamic>
+        : null;
+
     String sId = '';
     if (json['senderId'] != null) {
       sId = json['senderId'].toString();
@@ -62,29 +66,34 @@ class CommunityMessageModel extends CommunityMessageEntity {
         sId = json['sender'].toString();
       }
     } else {
-      sId = (json['authorId'] ?? json['userId'] ?? json['user_id'] ?? '').toString();
+      sId = (json['authorId'] ?? json['userId'] ?? json['user_id'] ?? '')
+          .toString();
     }
-    
+
     final type = json['type']?.toString() ?? 'TEXT';
     return CommunityMessageModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       senderId: sId,
-      senderName: json['senderName']?.toString() ?? 
-                   senderData?['name']?.toString() ?? 
-                   userData?['name']?.toString() ?? 
-                   senderData?['firstName']?.toString() ??
-                   userData?['firstName']?.toString() ??
-                   authorData?['name']?.toString() ?? 'Unknown',
-      senderAvatar: json['senderAvatar']?.toString() ?? 
-                     senderData?['avatar']?.toString() ?? 
-                     userData?['avatar']?.toString() ?? 
-                     authorData?['avatar']?.toString() ??
-                     senderData?['image']?.toString() ?? json['avatar']?.toString(),
+      senderName:
+          json['senderName']?.toString() ??
+          senderData?['name']?.toString() ??
+          userData?['name']?.toString() ??
+          senderData?['firstName']?.toString() ??
+          userData?['firstName']?.toString() ??
+          authorData?['name']?.toString() ??
+          'Unknown',
+      senderAvatar:
+          json['senderAvatar']?.toString() ??
+          senderData?['avatar']?.toString() ??
+          userData?['avatar']?.toString() ??
+          authorData?['avatar']?.toString() ??
+          senderData?['image']?.toString() ??
+          json['avatar']?.toString(),
       text: json['text']?.toString() ?? '',
       imageUrl: json['image']?.toString(),
       roomId: json['roomId']?.toString(),
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'].toString()) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'].toString())
           : DateTime.now(),
       type: type,
       isSystem: type == 'SYSTEM',
@@ -107,8 +116,8 @@ class AnnouncementModel extends AnnouncementEntity {
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       content: json['content']?.toString() ?? '',
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'].toString()) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'].toString())
           : DateTime.now(),
       authorName: json['authorName']?.toString(),
     );
@@ -131,8 +140,8 @@ class OwnerDiscussionModel extends OwnerDiscussionEntity {
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       type: json['type']?.toString() ?? '',
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'].toString()) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'].toString())
           : DateTime.now(),
       authorName: json['authorName']?.toString(),
     );
@@ -162,38 +171,53 @@ class SocialPostModel extends SocialPostEntity {
 
   factory SocialPostModel.fromJson(Map<String, dynamic> json) {
     final userField = json['userId'];
-    final userData = userField is Map ? userField as Map<String, dynamic> : 
-                     (json['user'] is Map ? json['user'] as Map<String, dynamic> : null);
-    final authorData = json['author'] is Map ? json['author'] as Map<String, dynamic> : null;
-    
+    final userData = userField is Map
+        ? userField as Map<String, dynamic>
+        : (json['user'] is Map ? json['user'] as Map<String, dynamic> : null);
+    final authorData = json['author'] is Map
+        ? json['author'] as Map<String, dynamic>
+        : null;
+
     return SocialPostModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      userId: (userData?['_id'] ?? userData?['id'] ?? (userField is String ? userField : '')).toString(),
-      userName: (json['userName']?.toString().isNotEmpty == true) ? json['userName'] :
-                (userData?['name']?.toString().isNotEmpty == true) ? userData!['name'] :
-                (userData?['firstName']?.toString().isNotEmpty == true) ? 
-                  '${userData!['firstName']}${userData['lastName'] != null ? ' ${userData['lastName']}' : ''}' :
-                (authorData?['name']?.toString().isNotEmpty == true) ? authorData!['name'] : 'Unknown',
-      userAvatar: json['userAvatar']?.toString() ?? 
-                  userData?['avatar']?.toString() ?? 
-                  authorData?['avatar']?.toString(),
-      userRole: json['userRole']?.toString() ?? 
-                userData?['role']?.toString() ?? 
-                authorData?['role']?.toString(),
+      userId:
+          (userData?['_id'] ??
+                  userData?['id'] ??
+                  (userField is String ? userField : ''))
+              .toString(),
+      userName: (json['userName']?.toString().isNotEmpty == true)
+          ? json['userName']
+          : (userData?['name']?.toString().isNotEmpty == true)
+          ? userData!['name']
+          : (userData?['firstName']?.toString().isNotEmpty == true)
+          ? '${userData!['firstName']}${userData['lastName'] != null ? ' ${userData['lastName']}' : ''}'
+          : (authorData?['name']?.toString().isNotEmpty == true)
+          ? authorData!['name']
+          : 'Unknown',
+      userAvatar:
+          json['userAvatar']?.toString() ??
+          userData?['avatar']?.toString() ??
+          authorData?['avatar']?.toString(),
+      userRole:
+          json['userRole']?.toString() ??
+          userData?['role']?.toString() ??
+          authorData?['role']?.toString(),
       content: json['content']?.toString() ?? '',
       type: json['type']?.toString() ?? 'POST',
       likesCount: json['likesCount'] ?? json['likes_count'] ?? 0,
       commentsCount: json['commentsCount'] ?? json['comments_count'] ?? 0,
       isLiked: json['isLiked'] ?? json['is_liked'] ?? false,
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'].toString()) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'].toString())
           : DateTime.now(),
       visibility: json['visibility']?.toString(),
       poll: json['poll'] is Map ? json['poll'] as Map<String, dynamic> : null,
       userVote: json['userVote'] as int?,
       imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString(),
       videoUrl: json['video']?.toString() ?? json['videoUrl']?.toString(),
-      location: json['location'] is Map ? json['location'] as Map<String, dynamic> : null,
+      location: json['location'] is Map
+          ? json['location'] as Map<String, dynamic>
+          : null,
     );
   }
 }

@@ -23,7 +23,13 @@ class StockDashboardPage extends StatefulWidget {
 class _StockDashboardPageState extends State<StockDashboardPage> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategory = 'All';
-  final List<String> _categories = ['All', 'Grocery', 'Vegetables', 'Cleaning', 'Other'];
+  final List<String> _categories = [
+    'All',
+    'Grocery',
+    'Vegetables',
+    'Cleaning',
+    'Other',
+  ];
 
   @override
   void initState() {
@@ -42,10 +48,14 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
       final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
       context.read<StockCubit>().loadStocks(
-            hostelId,
-            search: search ?? (_searchController.text.isEmpty ? null : _searchController.text),
-            category: (category ?? _selectedCategory) == 'All' ? null : (category ?? _selectedCategory),
-          );
+        hostelId,
+        search:
+            search ??
+            (_searchController.text.isEmpty ? null : _searchController.text),
+        category: (category ?? _selectedCategory) == 'All'
+            ? null
+            : (category ?? _selectedCategory),
+      );
     }
   }
 
@@ -65,7 +75,8 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (state is! StockError) _buildSummaryCards(state.summary),
+                      if (state is! StockError)
+                        _buildSummaryCards(state.summary),
                       SizedBox(height: 24.h),
                       _buildSearchAndFilter(),
                       SizedBox(height: 16.h),
@@ -76,9 +87,13 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                 ),
               ),
               if (state is StockLoading)
-                const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+                const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                )
               else if (state is StockError)
-                SliverFillRemaining(child: Center(child: Text('Error: ${state.message}')))
+                SliverFillRemaining(
+                  child: Center(child: Text('Error: ${state.message}')),
+                )
               else if (state.items.isEmpty)
                 SliverFillRemaining(child: _buildEmptyState())
               else
@@ -86,7 +101,8 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                   padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildStockItemCard(state.items[index]),
+                      (context, index) =>
+                          _buildStockItemCard(state.items[index]),
                       childCount: state.items.length,
                     ),
                   ),
@@ -136,7 +152,10 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
         Expanded(
           child: _buildCompactMetricCard(
             StringUtils.translate('total_value', context: context),
-            NumberFormat.currency(symbol: '₹', decimalDigits: 0).format(summary['totalValue'] ?? 0),
+            NumberFormat.currency(
+              symbol: '₹',
+              decimalDigits: 0,
+            ).format(summary['totalValue'] ?? 0),
             Icons.account_balance_wallet_rounded,
             const Color(0xFF10B981),
           ),
@@ -154,21 +173,33 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
     );
   }
 
-  Widget _buildCompactMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildCompactMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(8.r),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, color: color, size: 18.sp),
           ),
           SizedBox(width: 12.w),
@@ -176,8 +207,22 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(value, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B))),
-                Text(title, style: TextStyle(fontSize: 11.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w600)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF1E293B),
+                  ),
+                ),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: const Color(0xFF64748B),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           ),
@@ -193,26 +238,37 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: TextField(
         controller: _searchController,
         onChanged: (val) => _loadStocks(search: val),
         decoration: InputDecoration(
-          hintText: StringUtils.translate('search_stock_hint', context: context),
+          hintText: StringUtils.translate(
+            'search_stock_hint',
+            context: context,
+          ),
           hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 14.sp),
-          prefixIcon: Icon(Icons.search_rounded, color: const Color(0xFF64748B), size: 22.sp),
-          suffixIcon: _searchController.text.isNotEmpty 
-            ? IconButton(
-                icon: Icon(Icons.close_rounded, size: 20.sp),
-                onPressed: () {
-                  _searchController.clear();
-                  _loadStocks(search: '');
-                  setState(() {});
-                },
-              ) 
-            : null,
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: const Color(0xFF64748B),
+            size: 22.sp,
+          ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.close_rounded, size: 20.sp),
+                  onPressed: () {
+                    _searchController.clear();
+                    _loadStocks(search: '');
+                    setState(() {});
+                  },
+                )
+              : null,
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 16.h),
         ),
@@ -230,7 +286,9 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
           return Padding(
             padding: EdgeInsets.only(right: 8.w),
             child: ChoiceChip(
-              label: Text(StringUtils.translate(cat.toLowerCase(), context: context)),
+              label: Text(
+                StringUtils.translate(cat.toLowerCase(), context: context),
+              ),
               selected: isSelected,
               onSelected: (selected) {
                 if (selected) {
@@ -249,7 +307,11 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
               pressElevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
-                side: BorderSide(color: isSelected ? Colors.transparent : const Color(0xFFE2E8F0)),
+                side: BorderSide(
+                  color: isSelected
+                      ? Colors.transparent
+                      : const Color(0xFFE2E8F0),
+                ),
               ),
             ),
           );
@@ -261,7 +323,7 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
   Widget _buildStockItemCard(StockItem item) {
     Color statusColor = const Color(0xFF10B981);
     String statusText = StringUtils.translate('in_stock', context: context);
-    
+
     if (item.currentQuantity <= 0) {
       statusColor = const Color(0xFFEF4444);
       statusText = StringUtils.translate('out_of_stock', context: context);
@@ -275,10 +337,12 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
         final stockCubit = context.read<StockCubit>();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => BlocProvider.value(
-            value: stockCubit,
-            child: StockDetailPage(item: item),
-          )),
+          MaterialPageRoute(
+            builder: (context) => BlocProvider.value(
+              value: stockCubit,
+              child: StockDetailPage(item: item),
+            ),
+          ),
         );
       },
       child: Container(
@@ -288,7 +352,11 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Row(
@@ -302,9 +370,11 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
               ),
               child: Center(
                 child: Icon(
-                  item.category == 'Vegetables' ? Icons.eco_rounded : 
-                  item.category == 'Cleaning' ? Icons.clean_hands_rounded : 
-                  Icons.inventory_2_rounded,
+                  item.category == 'Vegetables'
+                      ? Icons.eco_rounded
+                      : item.category == 'Cleaning'
+                      ? Icons.clean_hands_rounded
+                      : Icons.inventory_2_rounded,
                   color: statusColor,
                   size: 26.sp,
                 ),
@@ -316,19 +386,46 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    StockConstants.getLocalizedNameForEntity(item, context.locale.languageCode),
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+                    StockConstants.getLocalizedNameForEntity(
+                      item,
+                      context.locale.languageCode,
+                    ),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1E293B),
+                    ),
                   ),
                   SizedBox(height: 2.h),
                   Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                        decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(6.r)),
-                        child: Text(item.category, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B))),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          item.category,
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
                       ),
                       SizedBox(width: 8.w),
-                      Text('₹${item.pricePerUnit}/${item.unit}', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                      Text(
+                        '₹${item.pricePerUnit}/${item.unit}',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -341,12 +438,22 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: item.currentQuantity.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), ''),
-                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
+                        text: item.currentQuantity
+                            .toStringAsFixed(1)
+                            .replaceAll(RegExp(r'\.0$'), ''),
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF1E293B),
+                        ),
                       ),
                       TextSpan(
                         text: ' ${item.unit}',
-                        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF64748B),
+                        ),
                       ),
                     ],
                   ),
@@ -354,7 +461,11 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                 SizedBox(height: 4.h),
                 Text(
                   statusText,
-                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: statusColor),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w800,
+                    color: statusColor,
+                  ),
                 ),
               ],
             ),
@@ -369,14 +480,17 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
       onPressed: () {
         final hostelState = context.read<HostelCubit>().state;
         if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-           final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
-           final stockCubit = context.read<StockCubit>();
-           Navigator.push(
+          final hostelId =
+              hostelState.hostels[hostelState.selectedHostelIndex].id;
+          final stockCubit = context.read<StockCubit>();
+          Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => BlocProvider.value(
-              value: stockCubit,
-              child: AddStockItemPage(propertyId: hostelId),
-            )),
+            MaterialPageRoute(
+              builder: (context) => BlocProvider.value(
+                value: stockCubit,
+                child: AddStockItemPage(propertyId: hostelId),
+              ),
+            ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -396,7 +510,14 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
       },
       backgroundColor: const Color(0xFF2C5990),
       icon: const Icon(Icons.add_rounded, color: Colors.white),
-      label: Text(StringUtils.translate('new_item', context: context), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14.sp)),
+      label: Text(
+        StringUtils.translate('new_item', context: context),
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w900,
+          fontSize: 14.sp,
+        ),
+      ),
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
     );
@@ -407,16 +528,28 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off_rounded, size: 80.sp, color: const Color(0xFFCBD5E1)),
+          Icon(
+            Icons.search_off_rounded,
+            size: 80.sp,
+            color: const Color(0xFFCBD5E1),
+          ),
           SizedBox(height: 16.h),
           Text(
             StringUtils.translate('no_matching_items', context: context),
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF475569)),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF475569),
+            ),
           ),
           SizedBox(height: 8.h),
           Text(
             StringUtils.translate('adjust_search_filters', context: context),
-            style: TextStyle(fontSize: 14.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: const Color(0xFF94A3B8),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),

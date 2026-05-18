@@ -54,7 +54,10 @@ class ProfileTextField extends StatelessWidget {
             color: readOnly ? AppColors.greyText : AppColors.darkText,
           ),
           decoration: InputDecoration(
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 14.h,
+            ),
             filled: true,
             fillColor: readOnly ? Colors.grey[100] : Colors.grey[50],
             border: OutlineInputBorder(
@@ -68,7 +71,9 @@ class ProfileTextField extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(
-                color: readOnly ? AppColors.roomCardBorder : AppColors.primaryBlue,
+                color: readOnly
+                    ? AppColors.roomCardBorder
+                    : AppColors.primaryBlue,
               ),
             ),
           ),

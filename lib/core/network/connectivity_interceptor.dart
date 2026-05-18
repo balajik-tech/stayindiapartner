@@ -12,45 +12,48 @@ class ConnectivityInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     final connectivityResult = await Connectivity().checkConnectivity();
-    
-    final isLocalRequest = options.baseUrl.contains('localhost') || 
-                          options.baseUrl.contains('127.0.0.1');
 
-    if (connectivityResult.contains(ConnectivityResult.none) && !isLocalRequest) {
+    final isLocalRequest =
+        options.baseUrl.contains('localhost') ||
+        options.baseUrl.contains('127.0.0.1');
+
+    if (connectivityResult.contains(ConnectivityResult.none) &&
+        !isLocalRequest) {
       if (options.method != 'GET') {
-        
         try {
           final queueService = sl<OfflineQueueService>();
-          
-          
-          final idempotencyKey = options.headers['X-Idempotency-Key'] ?? 
+
+          final idempotencyKey =
+              options.headers['X-Idempotency-Key'] ??
               'idem-${DateTime.now().microsecondsSinceEpoch}-${options.path.hashCode}';
           options.headers['X-Idempotency-Key'] = idempotencyKey;
 
-          
           Map<String, dynamic> serializableData = {};
           if (options.data is Map<String, dynamic>) {
             serializableData = options.data as Map<String, dynamic>;
-          } else if (options.data is String) {
-            
-          }
+          } else if (options.data is String) {}
 
           final actionPayload = {
             'path': options.path,
             'method': options.method,
             'data': serializableData,
             'headers': Map<String, dynamic>.from(options.headers),
-            'queryParameters': Map<String, dynamic>.from(options.queryParameters),
+            'queryParameters': Map<String, dynamic>.from(
+              options.queryParameters,
+            ),
           };
 
           await queueService.enqueueAction('MUTATION', actionPayload);
-          AppLogger.info('[OFFLINE QUEUE] Interceptor queued offline mutation: ${options.method} ${options.path}');
+          AppLogger.info(
+            '[OFFLINE QUEUE] Interceptor queued offline mutation: ${options.method} ${options.path}',
+          );
 
           return handler.reject(
             DioException(
               requestOptions: options,
               error: NetworkException(
-                message: 'You are offline. Your request has been queued and will replay automatically when you reconnect.',
+                message:
+                    'You are offline. Your request has been queued and will replay automatically when you reconnect.',
                 code: 'OFFLINE_MUTATION_QUEUED',
               ),
               type: DioExceptionType.connectionError,
@@ -72,10 +75,9 @@ class ConnectivityInterceptor extends Interceptor {
         ),
       );
     }
-    
-    
+
     if (options.method != 'GET') {
-      options.headers['X-Idempotency-Key'] ??= 
+      options.headers['X-Idempotency-Key'] ??=
           'idem-${DateTime.now().microsecondsSinceEpoch}-${options.path.hashCode}';
     }
 

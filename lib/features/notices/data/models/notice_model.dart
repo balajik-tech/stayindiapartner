@@ -35,8 +35,10 @@ class NoticeModel extends Notice {
 
     return NoticeModel(
       id: json['_id']?.toString() ?? '',
-      hostelId: json['hostelId']?.toString() ?? json['hostel']?.toString() ?? '',
-      tenantId: (tenant is Map ? tenant['_id'] : json['tenantId'])?.toString() ?? '',
+      hostelId:
+          json['hostelId']?.toString() ?? json['hostel']?.toString() ?? '',
+      tenantId:
+          (tenant is Map ? tenant['_id'] : json['tenantId'])?.toString() ?? '',
       tenantName: tenantName,
       roomId: (room is Map ? room['_id'] : json['roomId'])?.toString() ?? '',
       roomTypename: roomTypename,

@@ -24,21 +24,30 @@ class DashboardRepositoryImpl implements DashboardRepository {
       final rawData = await remote.getBulkDashboardData(hostelIds);
 
       final result = await Isolate.run(() {
-        final allResults = rawData.map((item) {
-          try {
-            if (item['success'] == false) {
-              return null;
-            }
-            return DashboardData(
-              occupancy: OccupancyModel.fromJson(item['occupancy'] ?? {}),
-              dailyOperations: DailyOperationsModel.fromJson(item['dailyOperations'] ?? {}),
-              rentDueDetails: RentDueDetailsModel.fromJson(item['rentDueDetails'] ?? {}),
-              occupancyStatus: OccupancyStatusModel.fromJson(item['occupancyStatus'] ?? {}),
-            );
-          } catch (e) {
-            return null;
-          }
-        }).whereType<DashboardData>().toList();
+        final allResults = rawData
+            .map((item) {
+              try {
+                if (item['success'] == false) {
+                  return null;
+                }
+                return DashboardData(
+                  occupancy: OccupancyModel.fromJson(item['occupancy'] ?? {}),
+                  dailyOperations: DailyOperationsModel.fromJson(
+                    item['dailyOperations'] ?? {},
+                  ),
+                  rentDueDetails: RentDueDetailsModel.fromJson(
+                    item['rentDueDetails'] ?? {},
+                  ),
+                  occupancyStatus: OccupancyStatusModel.fromJson(
+                    item['occupancyStatus'] ?? {},
+                  ),
+                );
+              } catch (e) {
+                return null;
+              }
+            })
+            .whereType<DashboardData>()
+            .toList();
 
         if (allResults.isEmpty) {
           return null;
@@ -121,15 +130,32 @@ class DashboardRepositoryImpl implements DashboardRepository {
           dailyOperations: DailyOperations(
             todayCheckIns: todayCheckIns,
             todayCheckOuts: todayCheckOuts,
-            rentDueToday: RentStats(count: rentDueTodayCount, amount: rentDueTodayAmount),
-            overdueRent: RentStats(count: overdueRentCount, amount: overdueRentAmount),
+            rentDueToday: RentStats(
+              count: rentDueTodayCount,
+              amount: rentDueTodayAmount,
+            ),
+            overdueRent: RentStats(
+              count: overdueRentCount,
+              amount: overdueRentAmount,
+            ),
             pendingMaintenance: pendingMaintenance,
             pendingComplaints: pendingComplaints,
             pendingTickets: pendingTickets,
-            alertBanner: AlertBanner(count: pendingTickets, message: '$pendingTickets pending items requiring attention'),
+            alertBanner: AlertBanner(
+              count: pendingTickets,
+              message: '$pendingTickets pending items requiring attention',
+            ),
           ),
-          rentDueDetails: RentDueDetails(overdue: allOverdue, upcoming: allUpcoming),
-          occupancyStatus: OccupancyStatus(total: statusTotal, inside: statusInside, outside: statusOutside, unknown: statusUnknown),
+          rentDueDetails: RentDueDetails(
+            overdue: allOverdue,
+            upcoming: allUpcoming,
+          ),
+          occupancyStatus: OccupancyStatus(
+            total: statusTotal,
+            inside: statusInside,
+            outside: statusOutside,
+            unknown: statusUnknown,
+          ),
         );
       });
 

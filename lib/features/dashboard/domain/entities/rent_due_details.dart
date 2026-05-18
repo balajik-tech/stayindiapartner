@@ -4,10 +4,7 @@ class RentDueDetails extends Equatable {
   final List<RentPayment> overdue;
   final List<RentPayment> upcoming;
 
-  const RentDueDetails({
-    required this.overdue,
-    required this.upcoming,
-  });
+  const RentDueDetails({required this.overdue, required this.upcoming});
 
   @override
   List<Object?> get props => [overdue, upcoming];
@@ -33,5 +30,13 @@ class RentPayment extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, tenantName, tenantMobile, tenantAvatar, amount, dueDate, month];
+  List<Object?> get props => [
+    id,
+    tenantName,
+    tenantMobile,
+    tenantAvatar,
+    amount,
+    dueDate,
+    month,
+  ];
 }

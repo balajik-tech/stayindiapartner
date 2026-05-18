@@ -10,10 +10,7 @@ import 'qr_scanner_screen.dart';
 class QrCheckInDialog extends StatefulWidget {
   final Booking booking;
 
-  const QrCheckInDialog({
-    super.key,
-    required this.booking,
-  });
+  const QrCheckInDialog({super.key, required this.booking});
 
   @override
   State<QrCheckInDialog> createState() => _QrCheckInDialogState();
@@ -54,7 +51,7 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
                 ),
                 prefixIcon: const Icon(Icons.key_outlined),
               ),
-              keyboardType: TextInputType.text, 
+              keyboardType: TextInputType.text,
             ),
             SizedBox(height: 24.h),
             _buildActionButtons(context),
@@ -200,7 +197,7 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
       final date = DateTime.parse(dateStr).toLocal();
       return DateFormat('MMM dd, yyyy').format(date);
     } catch (e) {
-      return dateStr; 
+      return dateStr;
     }
   }
 
@@ -213,18 +210,24 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
             onPressed: () async {
               final String? result = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const QRScannerScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const QRScannerScreen(),
+                ),
               );
 
-
               if (result != null && result.isNotEmpty && context.mounted) {
-                context.read<BookingsCubit>().scanBooking(result, hostelId: widget.booking.hostelId, bookingId: widget.booking.id);
-                Navigator.pop(context); 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Processing scanned booking...')),
+                context.read<BookingsCubit>().scanBooking(
+                  result,
+                  hostelId: widget.booking.hostelId,
+                  bookingId: widget.booking.id,
                 );
-              } else {
-              }
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Processing scanned booking...'),
+                  ),
+                );
+              } else {}
             },
             icon: Icon(Icons.camera_alt_outlined, size: 20.sp),
             label: Text(
@@ -249,10 +252,16 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
             onPressed: () {
               final code = _accessCodeController.text.trim();
               if (code.isNotEmpty) {
-                context.read<BookingsCubit>().manualCheckin(code, hostelId: widget.booking.hostelId, bookingId: widget.booking.id);
+                context.read<BookingsCubit>().manualCheckin(
+                  code,
+                  hostelId: widget.booking.hostelId,
+                  bookingId: widget.booking.id,
+                );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Processing manual check-in...')),
+                  const SnackBar(
+                    content: Text('Processing manual check-in...'),
+                  ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -278,10 +287,16 @@ class _QrCheckInDialogState extends State<QrCheckInDialog> {
         SizedBox(height: 16.h),
         TextButton(
           onPressed: () {
-            context.read<BookingsCubit>().manualCheckin(widget.booking.id, hostelId: widget.booking.hostelId, bookingId: widget.booking.id);
+            context.read<BookingsCubit>().manualCheckin(
+              widget.booking.id,
+              hostelId: widget.booking.hostelId,
+              bookingId: widget.booking.id,
+            );
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Proceeding to direct allocation...')),
+              const SnackBar(
+                content: Text('Proceeding to direct allocation...'),
+              ),
             );
           },
           child: Text(

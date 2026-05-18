@@ -56,25 +56,27 @@ Future<void> init() async {
   sl.registerFactory(() => LocationCubit(sl()));
   sl.registerLazySingleton(() => LocationService());
 
-  sl.registerLazySingleton(() => TokenStorage(
-        storage: sl<FlutterSecureStorage>(),
-      ));
+  sl.registerLazySingleton(
+    () => TokenStorage(storage: sl<FlutterSecureStorage>()),
+  );
 
   sl.registerLazySingleton(() => CacheService(sl()));
 
   sl.registerLazySingleton<SocketService>(() {
-    final String socketBaseUrl = Uri.parse(ApiConstants.effectiveBaseUrl).origin;
+    final String socketBaseUrl = Uri.parse(
+      ApiConstants.effectiveBaseUrl,
+    ).origin;
     return SocketService(baseUrl: socketBaseUrl)..connect();
   });
 
   sl.registerLazySingleton(() => NotificationService());
   sl.registerLazySingleton(() => OfflineQueueService());
 
-  sl.registerLazySingleton(() => const FlutterSecureStorage(
-        aOptions: AndroidOptions(
-          encryptedSharedPreferences: false,
-        ),
-      ));
+  sl.registerLazySingleton(
+    () => const FlutterSecureStorage(
+      aOptions: AndroidOptions(encryptedSharedPreferences: false),
+    ),
+  );
 
   sl.registerLazySingleton(() {
     final dio = Dio(
@@ -86,7 +88,7 @@ Future<void> init() async {
       ),
     );
     dio.transformer = BackgroundTransformer();
-    
+
     dio.interceptors.addAll([
       ConnectivityInterceptor(),
       InterceptorsWrapper(
@@ -96,7 +98,7 @@ Future<void> init() async {
             options.headers['Authorization'] = 'Bearer $token';
           }
           options.headers['app-type'] = 'OWNER_APP';
-          
+
           if (options.data is FormData) {
             options.headers.remove('Content-Type');
           } else {
@@ -108,28 +110,42 @@ Future<void> init() async {
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          AppLogger.debug('[RESPONSE] ${response.requestOptions.method} ${response.requestOptions.uri} -> Status: ${response.statusCode}');
+          AppLogger.debug(
+            '[RESPONSE] ${response.requestOptions.method} ${response.requestOptions.uri} -> Status: ${response.statusCode}',
+          );
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
-          final isAuthPath = e.requestOptions.path.contains('/auth/') || 
-                            e.requestOptions.path.contains('/users/');
-          
-          final responseData = e.response?.data;
-          final isOwnerNotFound = responseData?.toString().contains('Owner not found') ?? false;
-          final isUserNotFound = responseData?.toString().contains('User not found') ?? false;
+          final isAuthPath =
+              e.requestOptions.path.contains('/auth/') ||
+              e.requestOptions.path.contains('/users/');
 
-          final isAuthError = e.response?.statusCode == 401 || isOwnerNotFound || isUserNotFound;
+          final responseData = e.response?.data;
+          final isOwnerNotFound =
+              responseData?.toString().contains('Owner not found') ?? false;
+          final isUserNotFound =
+              responseData?.toString().contains('User not found') ?? false;
+
+          final isAuthError =
+              e.response?.statusCode == 401 ||
+              isOwnerNotFound ||
+              isUserNotFound;
 
           if (isAuthError) {
             if (!isAuthPath || isUserNotFound || isOwnerNotFound) {
-              AppLogger.warning('Session expired or User not found on ${e.requestOptions.path}. Logging out...');
+              AppLogger.warning(
+                'Session expired or User not found on ${e.requestOptions.path}. Logging out...',
+              );
               sl<AuthCubit>().logout();
             } else {
-              AppLogger.debug('401 on auth path ${e.requestOptions.path}. Letting cubit handle it.');
+              AppLogger.debug(
+                '401 on auth path ${e.requestOptions.path}. Letting cubit handle it.',
+              );
             }
           } else if (e.response?.statusCode == 403) {
-            AppLogger.warning('Access forbidden (403). Possible permission issue.');
+            AppLogger.warning(
+              'Access forbidden (403). Possible permission issue.',
+            );
           }
           return handler.next(e);
         },
@@ -137,10 +153,9 @@ Future<void> init() async {
       ErrorInterceptor(),
       RetryInterceptor(dio: dio),
     ]);
-    
-    
+
     sl<OfflineQueueService>().startSyncListener(dio);
-    
+
     return dio;
   });
 }
@@ -161,7 +176,7 @@ Future<void> resetInjections() async {
 
   await sl.reset();
   await init();
-  
+
   if (authCubit != null) {
     sl.unregister<AuthCubit>();
     sl.registerSingleton<AuthCubit>(authCubit);

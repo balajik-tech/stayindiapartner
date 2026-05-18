@@ -15,15 +15,17 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
   @override
   Future<List<ReviewModel>> getReviews(String hostelId) async {
     try {
-      final response = await dio.get(
-        '${ApiConstants.reviewsHostel}/$hostelId',
-      );
+      final response = await dio.get('${ApiConstants.reviewsHostel}/$hostelId');
       if (response.statusCode == 200) {
         final raw = response.data;
         final data = (raw is Map && raw['data'] is Map)
             ? raw['data'] as Map<String, dynamic>
             : raw as Map<String, dynamic>;
-        final items = (data['results'] ?? data['items'] ?? (raw['data'] is List ? raw['data'] as List : [])) as List<dynamic>;
+        final items =
+            (data['results'] ??
+                    data['items'] ??
+                    (raw['data'] is List ? raw['data'] as List : []))
+                as List<dynamic>;
         return items
             .map((r) => ReviewModel.fromJson(r as Map<String, dynamic>))
             .toList();

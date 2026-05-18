@@ -31,9 +31,15 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
   Future<String> uploadStaffPhoto(String filePath) async {
     try {
       final formData = FormData.fromMap({
-        'image': await MultipartFile.fromFile(filePath, filename: filePath.split('/').last),
+        'image': await MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        ),
       });
-      final response = await dio.post(ApiConstants.offerUploadImage, data: formData);
+      final response = await dio.post(
+        ApiConstants.offerUploadImage,
+        data: formData,
+      );
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response.data['url'] ?? response.data['data']?['url'] ?? '';
       }
@@ -59,7 +65,8 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
         final data = (raw is Map && raw['data'] is Map)
             ? raw['data'] as Map<String, dynamic>
             : raw as Map<String, dynamic>;
-        final items = (data['results'] ?? data['items']) as List<dynamic>? ?? [];
+        final items =
+            (data['results'] ?? data['items']) as List<dynamic>? ?? [];
         return items
             .map((s) => StaffModel.fromJson(s as Map<String, dynamic>))
             .toList();
@@ -124,10 +131,7 @@ class StaffRemoteDataSourceImpl implements StaffRemoteDataSource {
   @override
   Future<void> updateStaff(String id, Map<String, dynamic> data) async {
     try {
-      final response = await dio.patch(
-        '${ApiConstants.staff}/$id',
-        data: data,
-      );
+      final response = await dio.patch('${ApiConstants.staff}/$id', data: data);
       if (response.statusCode != 200) {
         throw Exception('Failed to update staff');
       }

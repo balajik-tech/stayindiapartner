@@ -46,7 +46,13 @@ class OwnerCommunityLoaded extends OwnerCommunityState {
   }
 
   @override
-  List<Object?> get props => [joinedCommunities, availableCommunities, pendingRequests, isJoining, isCreating];
+  List<Object?> get props => [
+    joinedCommunities,
+    availableCommunities,
+    pendingRequests,
+    isJoining,
+    isCreating,
+  ];
 }
 
 class OwnerCommunityError extends OwnerCommunityState {
@@ -66,18 +72,19 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
 
   OwnerCommunityCubit({
     required GetJoinedOwnerCommunitiesUseCase getJoinedOwnerCommunitiesUseCase,
-    required GetAvailableOwnerCommunitiesUseCase getAvailableOwnerCommunitiesUseCase,
+    required GetAvailableOwnerCommunitiesUseCase
+    getAvailableOwnerCommunitiesUseCase,
     required JoinOwnerCommunityUseCase joinOwnerCommunityUseCase,
     required CreateOwnerCommunityUseCase createOwnerCommunityUseCase,
     required GetPendingJoinRequestsUseCase getPendingJoinRequestsUseCase,
     required HandleJoinRequestUseCase handleJoinRequestUseCase,
-  })  : _getJoined = getJoinedOwnerCommunitiesUseCase,
-        _getAvailable = getAvailableOwnerCommunitiesUseCase,
-        _join = joinOwnerCommunityUseCase,
-        _create = createOwnerCommunityUseCase,
-        _getPending = getPendingJoinRequestsUseCase,
-        _handleRequest = handleJoinRequestUseCase,
-        super(OwnerCommunityInitial());
+  }) : _getJoined = getJoinedOwnerCommunitiesUseCase,
+       _getAvailable = getAvailableOwnerCommunitiesUseCase,
+       _join = joinOwnerCommunityUseCase,
+       _create = createOwnerCommunityUseCase,
+       _getPending = getPendingJoinRequestsUseCase,
+       _handleRequest = handleJoinRequestUseCase,
+       super(OwnerCommunityInitial());
 
   Future<void> loadCommunities() async {
     emit(OwnerCommunityLoading());
@@ -87,17 +94,25 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
         _getAvailable(),
         _getPending(),
       ]);
-      emit(OwnerCommunityLoaded(
-        joinedCommunities: results[0] as List<CommunityDetailsEntity>,
-        availableCommunities: results[1] as List<CommunityDetailsEntity>,
-        pendingRequests: results[2] as List<Map<String, dynamic>>,
-      ));
+      emit(
+        OwnerCommunityLoaded(
+          joinedCommunities: results[0] as List<CommunityDetailsEntity>,
+          availableCommunities: results[1] as List<CommunityDetailsEntity>,
+          pendingRequests: results[2] as List<Map<String, dynamic>>,
+        ),
+      );
     } catch (e) {
       emit(OwnerCommunityError(message: ErrorHelper.toFriendlyMessage(e)));
     }
   }
 
-  Future<void> discoverCommunities({String? level, String? stateId, String? districtId, String? wardId, String? localityId}) async {
+  Future<void> discoverCommunities({
+    String? level,
+    String? stateId,
+    String? districtId,
+    String? wardId,
+    String? localityId,
+  }) async {
     final s = state;
     if (s is OwnerCommunityLoaded) {
       emit(OwnerCommunityLoading());
@@ -130,7 +145,11 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
     }
   }
 
-  Future<void> handleJoinRequest(String communityId, String requesterId, String action) async {
+  Future<void> handleJoinRequest(
+    String communityId,
+    String requesterId,
+    String action,
+  ) async {
     final s = state;
     if (s is OwnerCommunityLoaded) {
       try {
@@ -170,11 +189,13 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
       joined = s.joinedCommunities;
       available = s.availableCommunities;
     }
-    emit(OwnerCommunityLoaded(
-      joinedCommunities: joined,
-      availableCommunities: available,
-      isCreating: true,
-    ));
+    emit(
+      OwnerCommunityLoaded(
+        joinedCommunities: joined,
+        availableCommunities: available,
+        isCreating: true,
+      ),
+    );
     try {
       await _create(
         name: name,

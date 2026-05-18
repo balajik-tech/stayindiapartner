@@ -23,17 +23,22 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedLocation = widget.initialLocation ?? const LatLng(12.9716, 77.5946);
+    _selectedLocation =
+        widget.initialLocation ?? const LatLng(12.9716, 77.5946);
     _getAddress(_selectedLocation);
   }
 
   Future<void> _getAddress(LatLng location) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(location.latitude, location.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        location.latitude,
+        location.longitude,
+      );
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         setState(() {
-          _currentAddress = "${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}";
+          _currentAddress =
+              "${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}";
         });
       }
     } catch (e) {
@@ -55,10 +60,19 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+              ),
+            ],
           ),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1E3A8A), size: 18),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1E3A8A),
+              size: 18,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -142,7 +156,11 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   SizedBox(height: 12.h),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_rounded, color: Color(0xFF64748B), size: 20),
+                      const Icon(
+                        Icons.location_on_rounded,
+                        color: Color(0xFF64748B),
+                        size: 20,
+                      ),
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
@@ -167,12 +185,17 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF7A00),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
                         elevation: 0,
                       ),
                       child: Text(
                         'confirm_pin_location'.tr(),
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
@@ -189,16 +212,29 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded, color: Color(0xFF1E3A8A), size: 18),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    color: Color(0xFF1E3A8A),
+                    size: 18,
+                  ),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       'map_tap_hint'.tr(),
-                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF1E3A8A), fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: const Color(0xFF1E3A8A),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -214,12 +250,12 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               backgroundColor: Colors.white,
               foregroundColor: const Color(0xFF1E3A8A),
               elevation: 4,
-              child: _isLoadingLocation 
+              child: _isLoadingLocation
                   ? SizedBox(
-                      width: 18.sp, 
-                      height: 18.sp, 
+                      width: 18.sp,
+                      height: 18.sp,
                       child: const CircularProgressIndicator(
-                        strokeWidth: 2.5, 
+                        strokeWidth: 2.5,
                         color: Color(0xFF1E3A8A),
                       ),
                     )
@@ -298,7 +334,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
       Position position = await Geolocator.getCurrentPosition();
       final latLng = LatLng(position.latitude, position.longitude);
-      
+
       setState(() {
         _selectedLocation = latLng;
       });

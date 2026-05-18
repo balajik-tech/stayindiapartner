@@ -18,5 +18,10 @@ class DashboardData extends Equatable {
   });
 
   @override
-  List<Object?> get props => [occupancy, dailyOperations, occupancyStatus, rentDueDetails];
+  List<Object?> get props => [
+    occupancy,
+    dailyOperations,
+    occupancyStatus,
+    rentDueDetails,
+  ];
 }

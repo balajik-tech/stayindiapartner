@@ -53,7 +53,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final XFile? result = await FlutterImageCompress.compressAndGetFile(
         file.absolute.path,
         targetPath,
-        quality: 70, 
+        quality: 70,
         minWidth: 1024,
         minHeight: 1024,
       );
@@ -63,7 +63,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
       }
       return null;
     } catch (e) {
-      
       return null;
     }
   }

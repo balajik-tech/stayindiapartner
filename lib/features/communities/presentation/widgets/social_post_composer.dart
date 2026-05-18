@@ -54,8 +54,8 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
   }
 
   bool get _canPost =>
-      _controller.text.trim().isNotEmpty || 
-      widget.selectedImage != null || 
+      _controller.text.trim().isNotEmpty ||
+      widget.selectedImage != null ||
       widget.pollOptions.isNotEmpty;
 
   @override
@@ -111,7 +111,10 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
                       ),
                       filled: true,
                       fillColor: Colors.grey[50],
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide(color: Colors.grey.shade200),
@@ -122,7 +125,9 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: AppColors.primaryBlue.withValues(alpha: 0.5)),
+                        borderSide: BorderSide(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.5),
+                        ),
                       ),
                       counterStyle: GoogleFonts.dmSans(
                         fontSize: 11.sp,
@@ -165,14 +170,18 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
 
   Widget _buildPostButton() {
     return BouncingWrapper(
-      onTap: _canPost ? () {
-        widget.onPost(_controller.text);
-        _controller.clear();
-      } : null,
+      onTap: _canPost
+          ? () {
+              widget.onPost(_controller.text);
+              _controller.clear();
+            }
+          : null,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: _canPost ? AppColors.primaryBlue : AppColors.primaryBlue.withValues(alpha: 0.3),
+          color: _canPost
+              ? AppColors.primaryBlue
+              : AppColors.primaryBlue.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(20.r),
         ),
         child: Text(
@@ -239,11 +248,15 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
                 children: [
                   Expanded(
                     child: TextField(
-                      onChanged: (val) => widget.onPollOptionChanged(index, val),
+                      onChanged: (val) =>
+                          widget.onPollOptionChanged(index, val),
                       decoration: InputDecoration(
                         hintText: 'Option ${index + 1}',
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 10.h,
+                        ),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -255,7 +268,11 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
                   ),
                   if (widget.pollOptions.length > 2)
                     IconButton(
-                      icon: Icon(Icons.remove_circle_outline, color: Colors.red[300], size: 20.sp),
+                      icon: Icon(
+                        Icons.remove_circle_outline,
+                        color: Colors.red[300],
+                        size: 20.sp,
+                      ),
                       onPressed: () => widget.onRemovePollOption(index),
                     ),
                 ],
@@ -266,7 +283,13 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
             TextButton.icon(
               onPressed: widget.onAddPollOption,
               icon: Icon(Icons.add_circle_outline_rounded, size: 18.sp),
-              label: Text('Add Option', style: GoogleFonts.dmSans(fontSize: 13.sp, fontWeight: FontWeight.w600)),
+              label: Text(
+                'Add Option',
+                style: GoogleFonts.dmSans(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
         ],
       ),
@@ -285,20 +308,32 @@ class _SocialPostComposerState extends State<SocialPostComposer> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.location_on_rounded, size: 14.sp, color: AppColors.primaryBlue),
+            Icon(
+              Icons.location_on_rounded,
+              size: 14.sp,
+              color: AppColors.primaryBlue,
+            ),
             SizedBox(width: 4.w),
             Flexible(
               child: Text(
                 widget.selectedLocation!['address'] ?? '',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.dmSans(fontSize: 12.sp, color: AppColors.primaryBlue, fontWeight: FontWeight.w600),
+                style: GoogleFonts.dmSans(
+                  fontSize: 12.sp,
+                  color: AppColors.primaryBlue,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             SizedBox(width: 4.w),
             GestureDetector(
               onTap: widget.onRemoveLocation,
-              child: Icon(Icons.close, size: 14.sp, color: AppColors.primaryBlue),
+              child: Icon(
+                Icons.close,
+                size: 14.sp,
+                color: AppColors.primaryBlue,
+              ),
             ),
           ],
         ),

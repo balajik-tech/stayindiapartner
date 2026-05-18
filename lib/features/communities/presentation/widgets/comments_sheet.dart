@@ -61,7 +61,7 @@ class CommentsSheetState extends State<CommentsSheet> {
     try {
       await sl<AddPostCommentUseCase>().call(widget.post.id, text);
       _commentController.clear();
-      
+
       await _loadComments();
       if (mounted) {
         setState(() => _isPosting = false);
@@ -151,57 +151,57 @@ class CommentsSheetState extends State<CommentsSheet> {
                 border: Border(top: BorderSide(color: Colors.grey[100]!)),
               ),
               child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(24.r),
-                    ),
-                    child: TextField(
-                      controller: _commentController,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(24.r),
                       ),
-                      decoration: InputDecoration(
-                        hintText: 'write_comment_hint'.tr(),
-                        hintStyle: TextStyle(color: Colors.grey[400]),
-                        border: InputBorder.none,
+                      child: TextField(
+                        controller: _commentController,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'write_comment_hint'.tr(),
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          border: InputBorder.none,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(width: 12.w),
-                BouncingWrapper(
-                  onTap: _isPosting ? null : _addComment,
-                  child: Container(
-                    padding: EdgeInsets.all(12.r),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryBlue,
-                      shape: BoxShape.circle,
-                    ),
-                    child: _isPosting
-                        ? SizedBox(
-                            width: 18.r,
-                            height: 18.r,
-                            child: const CircularProgressIndicator(
+                  SizedBox(width: 12.w),
+                  BouncingWrapper(
+                    onTap: _isPosting ? null : _addComment,
+                    child: Container(
+                      padding: EdgeInsets.all(12.r),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBlue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: _isPosting
+                          ? SizedBox(
+                              width: 18.r,
+                              height: 18.r,
+                              child: const CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Icon(
+                              Icons.send_rounded,
                               color: Colors.white,
-                              strokeWidth: 2,
+                              size: 20.sp,
                             ),
-                          )
-                        : Icon(
-                            Icons.send_rounded,
-                            color: Colors.white,
-                            size: 20.sp,
-                          ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
         ],
       ),
     );
@@ -209,9 +209,11 @@ class CommentsSheetState extends State<CommentsSheet> {
 
   Widget _buildCommentItem(Map<String, dynamic> comment) {
     final userData = comment['userId'] is Map ? comment['userId'] : {};
-    final userName = (userData['name']?.toString().isNotEmpty == true) ? userData['name'] :
-                     (userData['firstName']?.toString().isNotEmpty == true) ? 
-                        '${userData['firstName']}${userData['lastName'] != null ? ' ${userData['lastName']}' : ''}' : 'User';
+    final userName = (userData['name']?.toString().isNotEmpty == true)
+        ? userData['name']
+        : (userData['firstName']?.toString().isNotEmpty == true)
+        ? '${userData['firstName']}${userData['lastName'] != null ? ' ${userData['lastName']}' : ''}'
+        : 'User';
     final userAvatar = userData['avatar']?.toString();
 
     return Padding(
@@ -303,9 +305,21 @@ class CommentsSheetState extends State<CommentsSheet> {
     try {
       final dt = DateTime.parse(date.toString());
       final diff = DateTime.now().difference(dt);
-      if (diff.inDays > 0) return 'time_day_short'.tr(namedArgs: {'count': diff.inDays.toString()});
-      if (diff.inHours > 0) return 'time_hour_short'.tr(namedArgs: {'count': diff.inHours.toString()});
-      if (diff.inMinutes > 0) return 'time_minute_short'.tr(namedArgs: {'count': diff.inMinutes.toString()});
+      if (diff.inDays > 0) {
+        return 'time_day_short'.tr(
+          namedArgs: {'count': diff.inDays.toString()},
+        );
+      }
+      if (diff.inHours > 0) {
+        return 'time_hour_short'.tr(
+          namedArgs: {'count': diff.inHours.toString()},
+        );
+      }
+      if (diff.inMinutes > 0) {
+        return 'time_minute_short'.tr(
+          namedArgs: {'count': diff.inMinutes.toString()},
+        );
+      }
       return 'time_now'.tr();
     } catch (e) {
       return '';

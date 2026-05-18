@@ -7,7 +7,8 @@ import 'package:flutter/services.dart';
 class GlobalActionSheet extends StatelessWidget {
   const GlobalActionSheet({super.key});
 
-  static Future<void> show(BuildContext context, {
+  static Future<void> show(
+    BuildContext context, {
     required VoidCallback onNewProperty,
     required VoidCallback onAddFloor,
     required VoidCallback onAddRoom,
@@ -92,7 +93,7 @@ class GlobalActionSheetContent extends StatelessWidget {
             ),
           ),
           SizedBox(height: 24.h),
-          
+
           _buildActionItem(
             context,
             icon: Icons.store_rounded,
@@ -219,7 +220,11 @@ class GlobalActionSheetContent extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: const Color(0xFFCBD5E1), size: 20.sp),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: const Color(0xFFCBD5E1),
+              size: 20.sp,
+            ),
           ],
         ),
       ),

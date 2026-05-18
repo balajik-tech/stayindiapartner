@@ -7,20 +7,22 @@ import '../utils/logger.dart';
 class SocketService {
   final String baseUrl;
   io.Socket? _socket;
-  
+
   final _messageController = StreamController<Map<String, dynamic>>.broadcast();
   final _typingController = StreamController<String>.broadcast();
   final _stopTypingController = StreamController<String>.broadcast();
   final _bookingController = StreamController<Map<String, dynamic>>.broadcast();
   final _noticeController = StreamController<Map<String, dynamic>>.broadcast();
-  final _dashboardRefreshController = StreamController<Map<String, dynamic>>.broadcast();
+  final _dashboardRefreshController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
   Stream<String> get typingStream => _typingController.stream;
   Stream<String> get stopTypingStream => _stopTypingController.stream;
   Stream<Map<String, dynamic>> get bookingStream => _bookingController.stream;
   Stream<Map<String, dynamic>> get noticeStream => _noticeController.stream;
-  Stream<Map<String, dynamic>> get dashboardRefreshStream => _dashboardRefreshController.stream;
+  Stream<Map<String, dynamic>> get dashboardRefreshStream =>
+      _dashboardRefreshController.stream;
 
   String? _lastRoomId;
   String? _lastUserId;
@@ -34,30 +36,36 @@ class SocketService {
 
     if (_socket != null) {
       if (_currentToken == token && _socket!.connected) {
-        AppLogger.debug(' Socket: Already connected with active token. Skipping.');
+        AppLogger.debug(
+          ' Socket: Already connected with active token. Skipping.',
+        );
         return;
       }
-      AppLogger.debug(' Socket: Token changed or socket disconnected. Re-initializing socket.');
+      AppLogger.debug(
+        ' Socket: Token changed or socket disconnected. Re-initializing socket.',
+      );
       _socket!.disconnect();
       _socket = null;
     }
 
     _currentToken = token;
-    AppLogger.debug(' Socket: Attempting to connect to $baseUrl with token: ${token != null}');
-    
-    _socket = io.io(baseUrl, io.OptionBuilder()
-      .setTransports(['websocket'])
-      .enableForceNew()
-      .disableMultiplex()
-      .setAuth({
-        'token': token,
-        'appType': 'OWNER_APP',
-      })
-      .enableAutoConnect()
-      .enableReconnection()
-      .setReconnectionDelay(2000)
-      .setReconnectionAttempts(20)
-      .build());
+    AppLogger.debug(
+      ' Socket: Attempting to connect to $baseUrl with token: ${token != null}',
+    );
+
+    _socket = io.io(
+      baseUrl,
+      io.OptionBuilder()
+          .setTransports(['websocket'])
+          .enableForceNew()
+          .disableMultiplex()
+          .setAuth({'token': token, 'appType': 'OWNER_APP'})
+          .enableAutoConnect()
+          .enableReconnection()
+          .setReconnectionDelay(2000)
+          .setReconnectionAttempts(20)
+          .build(),
+    );
 
     _socket!.connect();
 
@@ -82,7 +90,9 @@ class SocketService {
     });
 
     _socket!.on('joined_community', (data) {
-      AppLogger.success(' Socket: Successfully joined room ${data['hostelId']}');
+      AppLogger.success(
+        ' Socket: Successfully joined room ${data['hostelId']}',
+      );
     });
 
     _socket!.on('error', (data) {
@@ -117,23 +127,28 @@ class SocketService {
     });
 
     _socket!.on('user_stopped_typing', (data) {
-       if (data['userName'] != null) {
+      if (data['userName'] != null) {
         _stopTypingController.add(data['userName']);
       }
     });
 
-    _socket!.onDisconnect((_) => AppLogger.warning(' Socket: Disconnected from server'));
-    
+    _socket!.onDisconnect(
+      (_) => AppLogger.warning(' Socket: Disconnected from server'),
+    );
   }
 
   void joinCommunity(String hostelId, String userId, {String role = 'OWNER'}) {
     if (hostelId.isEmpty) {
-      AppLogger.warning(' Socket: Attempted to join room with empty hostelId. Ignoring.');
+      AppLogger.warning(
+        ' Socket: Attempted to join room with empty hostelId. Ignoring.',
+      );
       return;
     }
 
     if (_lastRoomId != null && _lastRoomId != hostelId) {
-      AppLogger.info(' Socket: Leaving previous room $_lastRoomId before joining $hostelId');
+      AppLogger.info(
+        ' Socket: Leaving previous room $_lastRoomId before joining $hostelId',
+      );
       leaveCommunity(_lastRoomId!);
     }
 
@@ -141,7 +156,9 @@ class SocketService {
     _lastUserId = userId;
     _lastRole = role;
 
-    AppLogger.debug(' Socket: Emitting join_community | Room: $hostelId, User: $userId, Role: $role');
+    AppLogger.debug(
+      ' Socket: Emitting join_community | Room: $hostelId, User: $userId, Role: $role',
+    );
     _socket?.emit('join_community', {
       'hostelId': hostelId,
       'userId': userId,
@@ -150,23 +167,15 @@ class SocketService {
   }
 
   void leaveCommunity(String hostelId) {
-    _socket?.emit('leave_community', {
-      'hostelId': hostelId,
-    });
+    _socket?.emit('leave_community', {'hostelId': hostelId});
   }
 
   void emitTyping(String hostelId, String userName) {
-    _socket?.emit('typing', {
-      'hostelId': hostelId,
-      'userName': userName,
-    });
+    _socket?.emit('typing', {'hostelId': hostelId, 'userName': userName});
   }
 
   void emitStopTyping(String hostelId, String userName) {
-    _socket?.emit('stop_typing', {
-      'hostelId': hostelId,
-      'userName': userName,
-    });
+    _socket?.emit('stop_typing', {'hostelId': hostelId, 'userName': userName});
   }
 
   void disconnect() {
@@ -177,8 +186,6 @@ class SocketService {
     _lastRole = null;
   }
 
-  
-  
   void dispose() {
     _messageController.close();
     _typingController.close();

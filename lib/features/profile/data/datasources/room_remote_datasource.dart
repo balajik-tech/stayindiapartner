@@ -10,10 +10,19 @@ abstract class RoomRemoteDataSource {
   Future<List<RoomDetailModel>> getRoomsByFloor(String hostelId, int floor);
   Future<List<String>> getFreeBeds(String roomId);
   Future<Map<String, dynamic>> getBedDetail(String roomId, String bedNumber);
-  Future<List<Map<String, dynamic>>> getBedHistory(String roomId, String bedNumber);
+  Future<List<Map<String, dynamic>>> getBedHistory(
+    String roomId,
+    String bedNumber,
+  );
   Future<RoomDetailModel> createRoom(RoomDetailModel room, String ownerId);
-  Future<List<RoomDetailModel>> bulkCreateRooms(List<RoomDetailModel> rooms, String ownerId);
-  Future<List<RoomDetailModel>> bulkUpsertRooms(List<RoomDetailModel> rooms, String ownerId);
+  Future<List<RoomDetailModel>> bulkCreateRooms(
+    List<RoomDetailModel> rooms,
+    String ownerId,
+  );
+  Future<List<RoomDetailModel>> bulkUpsertRooms(
+    List<RoomDetailModel> rooms,
+    String ownerId,
+  );
   Future<RoomDetailModel> updateRoom(RoomDetailModel room);
   Future<void> deleteRoom(String id);
   Future<void> updateBedStatus(String roomId, String bedNumber, String status);
@@ -30,7 +39,9 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
       throw Exception('Hostel ID is required to fetch occupancy');
     }
     try {
-      final response = await dio.get('${ApiConstants.roomsOccupancy}/$hostelId');
+      final response = await dio.get(
+        '${ApiConstants.roomsOccupancy}/$hostelId',
+      );
       if (response.statusCode == 200) {
         final raw = response.data;
         final dataMap = (raw is Map && raw['data'] is Map)
@@ -46,7 +57,10 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
   }
 
   @override
-  Future<List<RoomDetailModel>> getRooms({bool? isMaster, String? hostelId}) async {
+  Future<List<RoomDetailModel>> getRooms({
+    bool? isMaster,
+    String? hostelId,
+  }) async {
     try {
       final Map<String, dynamic> queryParams = {};
       if (isMaster != null) {
@@ -82,12 +96,15 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
         if (data is List) {
-          return data.map((e) {
-            if (e is Map) {
-              return int.tryParse(e['floor']?.toString() ?? '0') ?? 0;
-            }
-            return int.tryParse(e.toString()) ?? 0;
-          }).toSet().toList();
+          return data
+              .map((e) {
+                if (e is Map) {
+                  return int.tryParse(e['floor']?.toString() ?? '0') ?? 0;
+                }
+                return int.tryParse(e.toString()) ?? 0;
+              })
+              .toSet()
+              .toList();
         }
         return [];
       } else {
@@ -99,14 +116,14 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
   }
 
   @override
-  Future<List<RoomDetailModel>> getRoomsByFloor(String hostelId, int floor) async {
+  Future<List<RoomDetailModel>> getRoomsByFloor(
+    String hostelId,
+    int floor,
+  ) async {
     try {
       final response = await dio.get(
         ApiConstants.roomsByFloor,
-        queryParameters: {
-          'hostelId': hostelId,
-          'floor': floor,
-        },
+        queryParameters: {'hostelId': hostelId, 'floor': floor},
       );
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
@@ -145,7 +162,10 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
   }
 
   @override
-  Future<RoomDetailModel> createRoom(RoomDetailModel room, String ownerId) async {
+  Future<RoomDetailModel> createRoom(
+    RoomDetailModel room,
+    String ownerId,
+  ) async {
     try {
       final response = await dio.post(
         ApiConstants.rooms,
@@ -163,7 +183,10 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
   }
 
   @override
-  Future<List<RoomDetailModel>> bulkCreateRooms(List<RoomDetailModel> rooms, String ownerId) async {
+  Future<List<RoomDetailModel>> bulkCreateRooms(
+    List<RoomDetailModel> rooms,
+    String ownerId,
+  ) async {
     try {
       final response = await dio.post(
         '${ApiConstants.rooms}/bulk',
@@ -184,7 +207,10 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
   }
 
   @override
-  Future<List<RoomDetailModel>> bulkUpsertRooms(List<RoomDetailModel> rooms, String ownerId) async {
+  Future<List<RoomDetailModel>> bulkUpsertRooms(
+    List<RoomDetailModel> rooms,
+    String ownerId,
+  ) async {
     try {
       final response = await dio.post(
         '${ApiConstants.rooms}/bulk-upsert',
@@ -236,10 +262,13 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> getBedDetail(
-      String roomId, String bedNumber) async {
+    String roomId,
+    String bedNumber,
+  ) async {
     try {
-      final response = await dio
-          .get('${ApiConstants.roomBedDetail}/$roomId/$bedNumber');
+      final response = await dio.get(
+        '${ApiConstants.roomBedDetail}/$roomId/$bedNumber',
+      );
       if (response.statusCode == 200) {
         final raw = response.data;
         return (raw is Map && raw['data'] is Map)
@@ -254,10 +283,13 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
 
   @override
   Future<List<Map<String, dynamic>>> getBedHistory(
-      String roomId, String bedNumber) async {
+    String roomId,
+    String bedNumber,
+  ) async {
     try {
-      final response = await dio
-          .get('${ApiConstants.roomBedHistory}/$roomId/$bedNumber');
+      final response = await dio.get(
+        '${ApiConstants.roomBedHistory}/$roomId/$bedNumber',
+      );
       if (response.statusCode == 200) {
         final raw = response.data;
         final List<dynamic> list = raw['data'] is List
@@ -272,7 +304,11 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
   }
 
   @override
-  Future<void> updateBedStatus(String roomId, String bedNumber, String status) async {
+  Future<void> updateBedStatus(
+    String roomId,
+    String bedNumber,
+    String status,
+  ) async {
     try {
       final response = await dio.put(
         '${ApiConstants.rooms}/$roomId/beds/$bedNumber/status',

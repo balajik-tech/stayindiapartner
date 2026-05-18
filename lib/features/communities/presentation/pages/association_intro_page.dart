@@ -129,7 +129,10 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        StringUtils.translate('feed_updates_title', context: context),
+                        StringUtils.translate(
+                          'feed_updates_title',
+                          context: context,
+                        ),
                         style: GoogleFonts.dmSans(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w800,
@@ -144,13 +147,21 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(StringUtils.translate('all_posts_read_msg', context: context)),
+                                content: Text(
+                                  StringUtils.translate(
+                                    'all_posts_read_msg',
+                                    context: context,
+                                  ),
+                                ),
                                 duration: const Duration(seconds: 1),
                               ),
                             );
                           },
                           child: Text(
-                            StringUtils.translate('mark_all_read', context: context),
+                            StringUtils.translate(
+                              'mark_all_read',
+                              context: context,
+                            ),
                             style: TextStyle(
                               color: AppColors.primaryBlue,
                               fontWeight: FontWeight.w700,
@@ -171,10 +182,12 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                     child: Row(
                       children: [
                         Icon(
-                          unreadCount > 0 
+                          unreadCount > 0
                               ? Icons.mark_chat_unread_rounded
                               : Icons.mark_chat_read_rounded,
-                          color: unreadCount > 0 ? AppColors.accentOrange : Colors.green,
+                          color: unreadCount > 0
+                              ? AppColors.accentOrange
+                              : Colors.green,
                           size: 24.sp,
                         ),
                         SizedBox(width: 12.w),
@@ -183,9 +196,18 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                unreadCount > 0 
-                                    ? StringUtils.translate('new_posts_count', namedArgs: {'count': unreadCount.toString()}, context: context)
-                                    : StringUtils.translate('all_caught_up', context: context),
+                                unreadCount > 0
+                                    ? StringUtils.translate(
+                                        'new_posts_count',
+                                        namedArgs: {
+                                          'count': unreadCount.toString(),
+                                        },
+                                        context: context,
+                                      )
+                                    : StringUtils.translate(
+                                        'all_caught_up',
+                                        context: context,
+                                      ),
                                 style: GoogleFonts.dmSans(
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
@@ -195,8 +217,14 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                               SizedBox(height: 4.h),
                               Text(
                                 unreadCount > 0
-                                    ? StringUtils.translate('feed_scroll_msg', context: context)
-                                    : StringUtils.translate('no_unread_announcements', context: context),
+                                    ? StringUtils.translate(
+                                        'feed_scroll_msg',
+                                        context: context,
+                                      )
+                                    : StringUtils.translate(
+                                        'no_unread_announcements',
+                                        context: context,
+                                      ),
                                 style: GoogleFonts.dmSans(
                                   fontWeight: FontWeight.w500,
                                   color: AppColors.textSecondary,
@@ -243,7 +271,6 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
 
   @override
   void dispose() {
-
     _composerController.dispose();
     _composerFocusNode.dispose();
     super.dispose();
@@ -259,7 +286,6 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
   Future<void> _loadInitialData() async {
     setState(() => _isLoading = true);
     try {
-      
       final joinedResults = await sl<GetJoinedOwnerCommunitiesUseCase>().call();
 
       final results = await sl<GetAssociationsUseCase>().call(level: 'STATE');
@@ -385,7 +411,9 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(StringUtils.translate('failed_vote_err', context: context)),
+            content: Text(
+              StringUtils.translate('failed_vote_err', context: context),
+            ),
           ),
         );
       }
@@ -393,20 +421,31 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
   }
 
   Future<void> _deletePost(String postId) async {
-    
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(StringUtils.translate('delete_post_title', context: context), style: GoogleFonts.dmSans(fontWeight: FontWeight.bold)),
-        content: Text(StringUtils.translate('delete_post_confirm', context: context), style: GoogleFonts.dmSans()),
+        title: Text(
+          StringUtils.translate('delete_post_title', context: context),
+          style: GoogleFonts.dmSans(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          StringUtils.translate('delete_post_confirm', context: context),
+          style: GoogleFonts.dmSans(),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(StringUtils.translate('cancel', context: context), style: GoogleFonts.dmSans(color: Colors.grey)),
+            child: Text(
+              StringUtils.translate('cancel', context: context),
+              style: GoogleFonts.dmSans(color: Colors.grey),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(StringUtils.translate('remove', context: context), style: GoogleFonts.dmSans(color: Colors.red)),
+            child: Text(
+              StringUtils.translate('remove', context: context),
+              style: GoogleFonts.dmSans(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -435,7 +474,11 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
           _posts.insert(index, originalPost);
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(StringUtils.translate('failed_delete_post_err', context: context))),
+          SnackBar(
+            content: Text(
+              StringUtils.translate('failed_delete_post_err', context: context),
+            ),
+          ),
         );
       }
     }
@@ -469,7 +512,12 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(StringUtils.translate('location_services_disabled', context: context)),
+            content: Text(
+              StringUtils.translate(
+                'location_services_disabled',
+                context: context,
+              ),
+            ),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: StringUtils.translate('settings', context: context),
@@ -491,7 +539,12 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(StringUtils.translate('location_permission_denied', context: context)),
+              content: Text(
+                StringUtils.translate(
+                  'location_permission_denied',
+                  context: context,
+                ),
+              ),
               behavior: SnackBarBehavior.floating,
               action: SnackBarAction(
                 label: StringUtils.translate('settings', context: context),
@@ -511,7 +564,12 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(StringUtils.translate('location_permission_denied_forever', context: context)),
+            content: Text(
+              StringUtils.translate(
+                'location_permission_denied_forever',
+                context: context,
+              ),
+            ),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: StringUtils.translate('settings', context: context),
@@ -554,7 +612,9 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
   }
 
   Future<void> _createPost(String content, String type) async {
-    if (content.trim().isEmpty && _pollOptions.isEmpty && _selectedImage == null) {
+    if (content.trim().isEmpty &&
+        _pollOptions.isEmpty &&
+        _selectedImage == null) {
       return;
     }
 
@@ -729,13 +789,12 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            TenantsChatPage(
-                              hostelId: community.id,
-                              communityName: community.name,
-                              communityIcon: community.image,
-                              isOwnerChat: true,
-                            ),
+                        builder: (_) => TenantsChatPage(
+                          hostelId: community.id,
+                          communityName: community.name,
+                          communityIcon: community.image,
+                          isOwnerChat: true,
+                        ),
                       ),
                     );
                   },
@@ -743,7 +802,8 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
               ),
               SliverToBoxAdapter(
                 child: SocialPostComposer(
-                  userAvatar: context.read<AuthCubit>().currentOwner?.avatar ?? '',
+                  userAvatar:
+                      context.read<AuthCubit>().currentOwner?.avatar ?? '',
                   pollOptions: _pollOptions,
                   selectedImage: _selectedImage != null
                       ? File(_selectedImage!.path)
@@ -760,9 +820,11 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                   onRemoveImage: () => setState(() => _selectedImage = null),
                   onRemovePollOption: (index) =>
                       setState(() => _pollOptions.removeAt(index)),
-                  onPollOptionChanged: (index, val) => _pollOptions[index] = val,
+                  onPollOptionChanged: (index, val) =>
+                      _pollOptions[index] = val,
                   onAddPollOption: _addPollOption,
-                  onRemoveLocation: () => setState(() => _selectedLocation = null),
+                  onRemoveLocation: () =>
+                      setState(() => _selectedLocation = null),
                 ),
               ),
               _buildPostFeed(),
@@ -806,7 +868,10 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    StringUtils.translate('pg_owners_community', context: context),
+                    StringUtils.translate(
+                      'pg_owners_community',
+                      context: context,
+                    ),
                     style: GoogleFonts.dmSans(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -823,8 +888,10 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
               Icons.groups_rounded,
               onTap: () {
                 final hostelState = context.read<HostelCubit>().state;
-                if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                  final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+                if (hostelState is HostelLoaded &&
+                    hostelState.hostels.isNotEmpty) {
+                  final hostelId =
+                      hostelState.hostels[hostelState.selectedHostelIndex].id;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -836,7 +903,14 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(StringUtils.translate('select_property_err', context: context))),
+                    SnackBar(
+                      content: Text(
+                        StringUtils.translate(
+                          'select_property_err',
+                          context: context,
+                        ),
+                      ),
+                    ),
                   );
                 }
               },
@@ -876,10 +950,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
                   color: Colors.redAccent,
                   shape: BoxShape.circle,
                 ),
-                constraints: BoxConstraints(
-                  minWidth: 14.r,
-                  minHeight: 14.r,
-                ),
+                constraints: BoxConstraints(minWidth: 14.r, minHeight: 14.r),
                 child: Center(
                   child: Text(
                     unreadCount > 99 ? '99+' : '$unreadCount',
@@ -906,11 +977,7 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
           color: const Color(0xFFF1F5F9),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: AppColors.primaryBlue,
-          size: 16.sp,
-        ),
+        child: Icon(icon, color: AppColors.primaryBlue, size: 16.sp),
       ),
     );
   }
@@ -1468,7 +1535,8 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> {
     if (_selectedDistrictId == null) {
       return;
     }
-    if (_cachedWards != null && _lastDistrictIdForWards == _selectedDistrictId) {
+    if (_cachedWards != null &&
+        _lastDistrictIdForWards == _selectedDistrictId) {
       return;
     }
 
@@ -2095,7 +2163,6 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> {
   }
 
   Widget _buildCreateOption() {
-    
     bool canCreate = false;
     if (_currentLevel == 'STATE') {
       canCreate = true;

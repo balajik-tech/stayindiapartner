@@ -29,8 +29,12 @@ class OwnerModel extends Owner {
       phone: (json['phone'] ?? json['mobile'] ?? '').toString(),
       email: json['email']?.toString(),
       avatar: json['avatar']?.toString(),
-      isProfileComplete: json['isProfileComplete'] == true || json['is_profile_complete'] == true,
-      bedLimit: subscription['bedLimit'] is int ? subscription['bedLimit'] : int.tryParse(subscription['bedLimit']?.toString() ?? '') ?? 10,
+      isProfileComplete:
+          json['isProfileComplete'] == true ||
+          json['is_profile_complete'] == true,
+      bedLimit: subscription['bedLimit'] is int
+          ? subscription['bedLimit']
+          : int.tryParse(subscription['bedLimit']?.toString() ?? '') ?? 10,
       plan: subscription['plan']?.toString() ?? 'free',
     );
   }

@@ -1,7 +1,6 @@
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 
-
 class TenantModel extends TenantEntity {
   const TenantModel({
     required super.id,
@@ -28,20 +27,33 @@ class TenantModel extends TenantEntity {
     return TenantModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       bookingId: json['bookingId']?.toString() ?? '',
-      hostelId: (json['hostel'] is Map ? json['hostel']['_id'] : json['hostel'])?.toString() ?? '',
-      roomId: (json['roomId'] ?? (json['room'] is Map ? json['room']['_id'] : json['room']))?.toString() ?? '',
+      hostelId:
+          (json['hostel'] is Map ? json['hostel']['_id'] : json['hostel'])
+              ?.toString() ??
+          '',
+      roomId:
+          (json['roomId'] ??
+                  (json['room'] is Map ? json['room']['_id'] : json['room']))
+              ?.toString() ??
+          '',
       roomTypename: StringUtils.formatRoomNumber(
-        json['roomTypename']?.toString() ?? '', 
-        json['floor'] is int ? json['floor'] : int.tryParse(json['floor']?.toString() ?? '0') ?? 0,
+        json['roomTypename']?.toString() ?? '',
+        json['floor'] is int
+            ? json['floor']
+            : int.tryParse(json['floor']?.toString() ?? '0') ?? 0,
       ),
-      floor: json['floor'] is int ? json['floor'] : int.tryParse(json['floor']?.toString() ?? '0') ?? 0,
+      floor: json['floor'] is int
+          ? json['floor']
+          : int.tryParse(json['floor']?.toString() ?? '0') ?? 0,
       bedNumber: json['bedNumber']?.toString() ?? '',
       firstName: json['firstName']?.toString() ?? '',
       lastName: json['lastName']?.toString() ?? '',
       mobile: (json['mobile'] ?? json['phone'])?.toString() ?? '',
       email: json['email']?.toString(),
       avatar: json['avatar']?.toString(),
-      kycVerified: json['kycVerified'] == true || (json['kyc'] is Map && json['kyc']['verified'] == true),
+      kycVerified:
+          json['kycVerified'] == true ||
+          (json['kyc'] is Map && json['kyc']['verified'] == true),
       checkInDate: (json['checkInDate'] ?? json['createdAt'])?.toString(),
       checkOutDate: json['checkOutDate']?.toString(),
       parentMobile: json['parentMobile']?.toString(),
@@ -74,10 +86,12 @@ class TenantDetailModel extends TenantDetailEntity {
     final paymentsData = (json['payments'] as Map<String, dynamic>?) ?? {};
     final paymentItems = (paymentsData['items'] as List<dynamic>?) ?? [];
 
-    final name = tenantData['name']?.toString() ??
-        [tenantData['firstName'], tenantData['lastName']]
-            .where((e) => e != null && e.toString().isNotEmpty)
-            .join(' ');
+    final name =
+        tenantData['name']?.toString() ??
+        [
+          tenantData['firstName'],
+          tenantData['lastName'],
+        ].where((e) => e != null && e.toString().isNotEmpty).join(' ');
 
     final kycData = tenantData['kyc'] as Map<String, dynamic>?;
 
@@ -88,10 +102,14 @@ class TenantDetailModel extends TenantDetailEntity {
       email: tenantData['email']?.toString(),
       avatar: tenantData['avatar']?.toString(),
       kycVerified: kycData?['verified'] == true,
-      aadharCardPhoto: kycData?['aadharCardPhoto']?.toString() ?? kycData?['idPhotoFront']?.toString(),
+      aadharCardPhoto:
+          kycData?['aadharCardPhoto']?.toString() ??
+          kycData?['idPhotoFront']?.toString(),
       stay: stayData != null ? TenantStayDetailModel.fromJson(stayData) : null,
       payments: paymentItems
-          .map((p) => TenantPaymentItemModel.fromJson(p as Map<String, dynamic>))
+          .map(
+            (p) => TenantPaymentItemModel.fromJson(p as Map<String, dynamic>),
+          )
           .toList(),
       outstandingAmount: _toDouble(paymentsData['outstandingAmount']),
       parentMobile: tenantData['parentMobile']?.toString(),
@@ -120,19 +138,28 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
     final room = (json['room'] as Map<String, dynamic>?) ?? {};
     final floorRaw = room['floor'];
     return TenantStayDetailModel(
-      bookingId: (json['bookingId'] is Map
-              ? json['bookingId']['_id']
-              : json['bookingId'])
-          ?.toString() ?? '',
+      bookingId:
+          (json['bookingId'] is Map
+                  ? json['bookingId']['_id']
+                  : json['bookingId'])
+              ?.toString() ??
+          '',
       roomId: (room['_id'] ?? room['id'] ?? '').toString(),
       roomTypename: StringUtils.formatRoomNumber(
-        room['roomTypename']?.toString() ?? '', 
-        floorRaw is int ? floorRaw : int.tryParse(floorRaw?.toString() ?? '0') ?? 0,
+        room['roomTypename']?.toString() ?? '',
+        floorRaw is int
+            ? floorRaw
+            : int.tryParse(floorRaw?.toString() ?? '0') ?? 0,
       ),
       floor: floorRaw is int
           ? floorRaw
           : int.tryParse(floorRaw?.toString() ?? '0') ?? 0,
-      bedNumber: (json['bedNumber'] ?? room['bedNumber'] ?? json['bed']?.toString() ?? '').toString(),
+      bedNumber:
+          (json['bedNumber'] ??
+                  room['bedNumber'] ??
+                  json['bed']?.toString() ??
+                  '')
+              .toString(),
       rent: _toDouble(json['rent'] ?? room['rent']),
       deposit: _toDouble(json['deposit']),
       checkInDate: (json['checkInDate'] ?? json['startDate'])?.toString(),

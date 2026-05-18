@@ -6,7 +6,19 @@ class GetBookingsUseCase {
 
   GetBookingsUseCase({required this.repository});
 
-  Future<List<Booking>> execute({int page = 1, int limit = 10, String? kycStatus, String? roomType, String? hostelId}) {
-    return repository.getOwnerBookings(page: page, limit: limit, kycStatus: kycStatus, roomType: roomType, hostelId: hostelId);
+  Future<List<Booking>> execute({
+    int page = 1,
+    int limit = 10,
+    String? kycStatus,
+    String? roomType,
+    String? hostelId,
+  }) {
+    return repository.getOwnerBookings(
+      page: page,
+      limit: limit,
+      kycStatus: kycStatus,
+      roomType: roomType,
+      hostelId: hostelId,
+    );
   }
 }

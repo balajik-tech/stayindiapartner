@@ -22,8 +22,6 @@ class GetTenantsUseCase {
   }
 }
 
-
-
 class GetTenantsForHostelUseCase {
   final TenantRepository repository;
   GetTenantsForHostelUseCase(this.repository);

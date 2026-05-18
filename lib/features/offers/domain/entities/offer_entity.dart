@@ -33,20 +33,20 @@ class OfferEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        image,
-        code,
-        type,
-        value,
-        startDate,
-        endDate,
-        isActive,
-        createdBy,
-        hostelId,
-        hostelName,
-      ];
+    id,
+    title,
+    description,
+    image,
+    code,
+    type,
+    value,
+    startDate,
+    endDate,
+    isActive,
+    createdBy,
+    hostelId,
+    hostelName,
+  ];
 
   factory OfferEntity.fromJson(Map<String, dynamic> json) {
     String? hId;

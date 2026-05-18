@@ -8,7 +8,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
   CommunityRepositoryImpl({required this.remote});
 
   @override
-  Future<CommunityDetailsEntity> getCommunityDetails(String hostelId) => 
+  Future<CommunityDetailsEntity> getCommunityDetails(String hostelId) =>
       remote.getCommunityDetails(hostelId);
 
   @override
@@ -16,27 +16,29 @@ class CommunityRepositoryImpl implements CommunityRepository {
     String hostelId, {
     int limit = 50,
     String? before,
-  }) =>
-      remote.getMessages(hostelId, limit: limit, before: before);
+  }) => remote.getMessages(hostelId, limit: limit, before: before);
 
   @override
-  Future<void> sendMessage(String hostelId, String text) => 
+  Future<void> sendMessage(String hostelId, String text) =>
       remote.sendMessage(hostelId, text);
 
   @override
-  Future<void> sendImageMessage(String hostelId, String imagePath) => 
+  Future<void> sendImageMessage(String hostelId, String imagePath) =>
       remote.sendImageMessage(hostelId, imagePath);
 
   @override
-  Future<List<AnnouncementEntity>> getAnnouncements(String hostelId) => 
+  Future<List<AnnouncementEntity>> getAnnouncements(String hostelId) =>
       remote.getAnnouncements(hostelId);
 
   @override
-  Future<void> postAnnouncement(String hostelId, String title, String content) => 
-      remote.postAnnouncement(hostelId, title, content);
+  Future<void> postAnnouncement(
+    String hostelId,
+    String title,
+    String content,
+  ) => remote.postAnnouncement(hostelId, title, content);
 
   @override
-  Future<List<OwnerDiscussionEntity>> getOwnerDiscussions(String hostelId) => 
+  Future<List<OwnerDiscussionEntity>> getOwnerDiscussions(String hostelId) =>
       remote.getOwnerDiscussions(hostelId);
 
   @override
@@ -57,8 +59,9 @@ class CommunityRepositoryImpl implements CommunityRepository {
       remote.getJoinedOwnerCommunities();
 
   @override
-  Future<List<CommunityDetailsEntity>> getAvailableOwnerCommunities({Map<String, String>? filters}) =>
-      remote.getAvailableOwnerCommunities(filters: filters);
+  Future<List<CommunityDetailsEntity>> getAvailableOwnerCommunities({
+    Map<String, String>? filters,
+  }) => remote.getAvailableOwnerCommunities(filters: filters);
 
   @override
   Future<void> joinOwnerCommunity(String communityId) =>
@@ -73,8 +76,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
     required String communityId,
     required String requesterId,
     required String action,
-  }) =>
-      remote.handleJoinRequest(communityId, requesterId, action);
+  }) => remote.handleJoinRequest(communityId, requesterId, action);
 
   @override
   Future<Map<String, dynamic>> getCommunityInfo(String communityId) =>
@@ -97,28 +99,29 @@ class CommunityRepositoryImpl implements CommunityRepository {
     String? phoneNumber,
     String? govtCertificatePath,
     String? associationCertificatePath,
-  }) =>
-      remote.createOwnerCommunity(
-        name: name,
-        description: description,
-        imagePath: imagePath,
-        coverImagePath: coverImagePath,
-        level: level,
-        stateId: stateId,
-        districtId: districtId,
-        wardId: wardId,
-        localityId: localityId,
-        rules: rules,
-        executiveRole: executiveRole,
-        fullName: fullName,
-        phoneNumber: phoneNumber,
-        govtCertificatePath: govtCertificatePath,
-        associationCertificatePath: associationCertificatePath,
-      );
+  }) => remote.createOwnerCommunity(
+    name: name,
+    description: description,
+    imagePath: imagePath,
+    coverImagePath: coverImagePath,
+    level: level,
+    stateId: stateId,
+    districtId: districtId,
+    wardId: wardId,
+    localityId: localityId,
+    rules: rules,
+    executiveRole: executiveRole,
+    fullName: fullName,
+    phoneNumber: phoneNumber,
+    govtCertificatePath: govtCertificatePath,
+    associationCertificatePath: associationCertificatePath,
+  );
 
   @override
-  Future<List<Map<String, dynamic>>> getAssociations({String? parentId, String? level}) =>
-      remote.getAssociations(parentId: parentId, level: level);
+  Future<List<Map<String, dynamic>>> getAssociations({
+    String? parentId,
+    String? level,
+  }) => remote.getAssociations(parentId: parentId, level: level);
 
   @override
   Future<void> joinAssociation(String associationId) =>
@@ -130,13 +133,12 @@ class CommunityRepositoryImpl implements CommunityRepository {
     required String level,
     String? parentId,
     String? description,
-  }) =>
-      remote.createAssociation(
-        name: name,
-        level: level,
-        parentId: parentId,
-        description: description,
-      );
+  }) => remote.createAssociation(
+    name: name,
+    level: level,
+    parentId: parentId,
+    description: description,
+  );
 
   @override
   Future<List<Map<String, dynamic>>> searchAssociations(String query) =>
@@ -179,12 +181,15 @@ class CommunityRepositoryImpl implements CommunityRepository {
   );
 
   @override
-  Future<List<SocialPostEntity>> getSocialFeed({int limit = 20, int skip = 0}) => remote.getSocialFeed(limit: limit, skip: skip);
+  Future<List<SocialPostEntity>> getSocialFeed({
+    int limit = 20,
+    int skip = 0,
+  }) => remote.getSocialFeed(limit: limit, skip: skip);
 
   @override
   Future<SocialPostEntity> createSocialPost({
-    String? communityId, 
-    required String content, 
+    String? communityId,
+    required String content,
     String type = 'POST',
     String? imagePath,
     List<String>? pollOptions,
@@ -202,14 +207,21 @@ class CommunityRepositoryImpl implements CommunityRepository {
   Future<void> togglePostLike(String postId) => remote.togglePostLike(postId);
 
   @override
-  Future<List<Map<String, dynamic>>> getPostComments(String postId, {int limit = 20, int skip = 0}) => remote.getPostComments(postId, limit: limit, skip: skip);
+  Future<List<Map<String, dynamic>>> getPostComments(
+    String postId, {
+    int limit = 20,
+    int skip = 0,
+  }) => remote.getPostComments(postId, limit: limit, skip: skip);
 
   @override
-  Future<void> addPostComment(String postId, String text) => remote.addPostComment(postId, text);
+  Future<void> addPostComment(String postId, String text) =>
+      remote.addPostComment(postId, text);
 
   @override
-  Future<void> votePoll(String postId, int optionIndex) => remote.votePoll(postId, optionIndex);
+  Future<void> votePoll(String postId, int optionIndex) =>
+      remote.votePoll(postId, optionIndex);
 
   @override
-  Future<void> deleteSocialPost(String postId) => remote.deleteSocialPost(postId);
+  Future<void> deleteSocialPost(String postId) =>
+      remote.deleteSocialPost(postId);
 }

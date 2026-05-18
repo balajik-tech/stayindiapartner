@@ -13,8 +13,8 @@ import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class AssociationHierarchyPage extends StatefulWidget {
-  final String parentId; 
-  final String parentName; 
+  final String parentId;
+  final String parentName;
   final String? initialLevel;
   final String? initialDistrictId;
   final String? initialDistrictName;
@@ -33,14 +33,16 @@ class AssociationHierarchyPage extends StatefulWidget {
   });
 
   @override
-  State<AssociationHierarchyPage> createState() => _AssociationHierarchyPageState();
+  State<AssociationHierarchyPage> createState() =>
+      _AssociationHierarchyPageState();
 }
 
-class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> with SingleTickerProviderStateMixin {
+class _AssociationHierarchyPageState extends State<AssociationHierarchyPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  
+
   String? _selectedDistrictId;
   String? _selectedDistrictName;
   String? _selectedWardId;
@@ -53,9 +55,13 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
     if (widget.initialLevel == 'DISTRICT') initialIndex = 1;
     if (widget.initialLevel == 'WARD') initialIndex = 2;
 
-    _tabController = TabController(length: 3, vsync: this, initialIndex: initialIndex);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
     _tabController.addListener(_handleTabChange);
-    
+
     _selectedDistrictId = widget.initialDistrictId;
     _selectedDistrictName = widget.initialDistrictName;
     _selectedWardId = widget.initialWardId;
@@ -94,7 +100,6 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
       }
     } else if (level == 'WARD') {
       if (_selectedDistrictId == null) {
-        
       } else if (_selectedWardId == null) {
         context.read<AssociationCubit>().loadWards(_selectedDistrictId!);
       } else {
@@ -104,7 +109,9 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
   }
 
   String _getCurrentLevel() {
-    return _tabController.index == 0 ? 'STATE' : (_tabController.index == 1 ? 'DISTRICT' : 'WARD');
+    return _tabController.index == 0
+        ? 'STATE'
+        : (_tabController.index == 1 ? 'DISTRICT' : 'WARD');
   }
 
   void _loadStateCommunities() {
@@ -154,9 +161,10 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
             animation: _tabController,
             builder: (context, _) {
               final level = _getCurrentLevel();
-              final isSelecting = (level == 'DISTRICT' && _selectedDistrictId == null) || 
-                                 (level == 'WARD' && _selectedWardId == null);
-              
+              final isSelecting =
+                  (level == 'DISTRICT' && _selectedDistrictId == null) ||
+                  (level == 'WARD' && _selectedWardId == null);
+
               if (isSelecting) return const SizedBox();
               return _buildBottomCreateButton();
             },
@@ -185,7 +193,11 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
                 color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
             ),
           ),
           SizedBox(width: 16.w),
@@ -207,7 +219,11 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  StringUtils.translate('national_level_communities', namedArgs: {'name': widget.parentName}, context: context),
+                  StringUtils.translate(
+                    'national_level_communities',
+                    namedArgs: {'name': widget.parentName},
+                    context: context,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.dmSans(
@@ -241,9 +257,18 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
       ),
       child: Row(
         children: [
-          _buildTabItem(StringUtils.translate('level_state', context: context), 0),
-          _buildTabItem(StringUtils.translate('level_district', context: context), 1),
-          _buildTabItem(StringUtils.translate('level_ward', context: context), 2),
+          _buildTabItem(
+            StringUtils.translate('level_state', context: context),
+            0,
+          ),
+          _buildTabItem(
+            StringUtils.translate('level_district', context: context),
+            1,
+          ),
+          _buildTabItem(
+            StringUtils.translate('level_ward', context: context),
+            2,
+          ),
         ],
       ),
     );
@@ -276,17 +301,44 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
 
   Widget _buildLevelView(String level) {
     if (level == 'WARD' && _selectedDistrictId == null) {
-      return _buildSelectionRequiredView(StringUtils.translate('district_label', context: context));
+      return _buildSelectionRequiredView(
+        StringUtils.translate('district_label', context: context),
+      );
     }
 
-    final isSelecting = (level == 'DISTRICT' && _selectedDistrictId == null) || 
-                       (level == 'WARD' && _selectedWardId == null);
+    final isSelecting =
+        (level == 'DISTRICT' && _selectedDistrictId == null) ||
+        (level == 'WARD' && _selectedWardId == null);
 
-    final title = level == 'STATE' 
-        ? StringUtils.translate('state_level_communities', namedArgs: {'name': widget.parentName}, context: context)
-        : (level == 'DISTRICT' 
-            ? (_selectedDistrictId == null ? StringUtils.translate('explore_districts_in', namedArgs: {'name': widget.parentName}, context: context) : StringUtils.translate('communities_in', namedArgs: {'name': _selectedDistrictName!}, context: context))
-            : (_selectedWardId == null ? StringUtils.translate('explore_wards_in', namedArgs: {'name': _selectedDistrictName!}, context: context) : StringUtils.translate('communities_in', namedArgs: {'name': _selectedWardName!}, context: context)));
+    final title = level == 'STATE'
+        ? StringUtils.translate(
+            'state_level_communities',
+            namedArgs: {'name': widget.parentName},
+            context: context,
+          )
+        : (level == 'DISTRICT'
+              ? (_selectedDistrictId == null
+                    ? StringUtils.translate(
+                        'explore_districts_in',
+                        namedArgs: {'name': widget.parentName},
+                        context: context,
+                      )
+                    : StringUtils.translate(
+                        'communities_in',
+                        namedArgs: {'name': _selectedDistrictName!},
+                        context: context,
+                      ))
+              : (_selectedWardId == null
+                    ? StringUtils.translate(
+                        'explore_wards_in',
+                        namedArgs: {'name': _selectedDistrictName!},
+                        context: context,
+                      )
+                    : StringUtils.translate(
+                        'communities_in',
+                        namedArgs: {'name': _selectedWardName!},
+                        context: context,
+                      )));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,27 +357,37 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
         ),
         if (isSelecting) _buildSearchBar(level),
         if (level == 'DISTRICT' && _selectedDistrictId != null)
-          _buildSelectionChip(StringUtils.translate('district_label', context: context), _selectedDistrictName!, () {
-            setState(() {
-              _selectedDistrictId = null;
-              _selectedDistrictName = null;
-              _selectedWardId = null;
-              _selectedWardName = null;
-              context.read<AssociationCubit>().loadDistricts(widget.parentId);
-            });
-          }),
+          _buildSelectionChip(
+            StringUtils.translate('district_label', context: context),
+            _selectedDistrictName!,
+            () {
+              setState(() {
+                _selectedDistrictId = null;
+                _selectedDistrictName = null;
+                _selectedWardId = null;
+                _selectedWardName = null;
+                context.read<AssociationCubit>().loadDistricts(widget.parentId);
+              });
+            },
+          ),
         if (level == 'WARD' && _selectedWardId != null)
-          _buildSelectionChip(StringUtils.translate('ward_label', context: context), _selectedWardName!, () {
-            setState(() {
-              _selectedWardId = null;
-              _selectedWardName = null;
-              context.read<AssociationCubit>().loadWards(_selectedDistrictId!);
-            });
-          }),
+          _buildSelectionChip(
+            StringUtils.translate('ward_label', context: context),
+            _selectedWardName!,
+            () {
+              setState(() {
+                _selectedWardId = null;
+                _selectedWardName = null;
+                context.read<AssociationCubit>().loadWards(
+                  _selectedDistrictId!,
+                );
+              });
+            },
+          ),
         Expanded(
-          child: isSelecting 
-            ? _buildSelectionGrid(level)
-            : _buildCommunityListOrEmpty(level),
+          child: isSelecting
+              ? _buildSelectionGrid(level)
+              : _buildCommunityListOrEmpty(level),
         ),
       ],
     );
@@ -351,18 +413,45 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
         onChanged: (val) => setState(() => _searchQuery = val),
         style: GoogleFonts.dmSans(fontSize: 14.sp, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
-          hintText: StringUtils.translate('search_level_hint', namedArgs: {'level': level == 'STATE' ? StringUtils.translate('level_state', context: context) : (level == 'DISTRICT' ? StringUtils.translate('level_district', context: context) : StringUtils.translate('level_ward', context: context))}, context: context),
-          hintStyle: GoogleFonts.dmSans(color: Colors.grey[400], fontSize: 13.sp),
-          prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[400], size: 18.sp),
-          suffixIcon: _searchQuery.isNotEmpty 
-            ? IconButton(
-                icon: Icon(Icons.close_rounded, color: Colors.grey[400], size: 16.sp),
-                onPressed: () {
-                  _searchController.clear();
-                  setState(() => _searchQuery = '');
-                },
-              )
-            : null,
+          hintText: StringUtils.translate(
+            'search_level_hint',
+            namedArgs: {
+              'level': level == 'STATE'
+                  ? StringUtils.translate('level_state', context: context)
+                  : (level == 'DISTRICT'
+                        ? StringUtils.translate(
+                            'level_district',
+                            context: context,
+                          )
+                        : StringUtils.translate(
+                            'level_ward',
+                            context: context,
+                          )),
+            },
+            context: context,
+          ),
+          hintStyle: GoogleFonts.dmSans(
+            color: Colors.grey[400],
+            fontSize: 13.sp,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: Colors.grey[400],
+            size: 18.sp,
+          ),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: Colors.grey[400],
+                    size: 16.sp,
+                  ),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                )
+              : null,
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 12.h),
         ),
@@ -379,23 +468,37 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
         decoration: BoxDecoration(
           color: AppColors.primaryBlue.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.1)),
+          border: Border.all(
+            color: AppColors.primaryBlue.withValues(alpha: 0.1),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               '$label: ',
-              style: GoogleFonts.dmSans(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+              style: GoogleFonts.dmSans(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
             ),
             Text(
               name,
-              style: GoogleFonts.dmSans(fontSize: 12.sp, fontWeight: FontWeight.w800, color: AppColors.primaryBlue),
+              style: GoogleFonts.dmSans(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primaryBlue,
+              ),
             ),
             SizedBox(width: 8.w),
             GestureDetector(
               onTap: onRemove,
-              child: Icon(Icons.close_rounded, size: 14.sp, color: AppColors.primaryBlue),
+              child: Icon(
+                Icons.close_rounded,
+                size: 14.sp,
+                color: AppColors.primaryBlue,
+              ),
             ),
           ],
         ),
@@ -416,18 +519,34 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
                 color: AppColors.textSecondary.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.info_outline_rounded, size: 40.sp, color: AppColors.textSecondary.withValues(alpha: 0.3)),
+              child: Icon(
+                Icons.info_outline_rounded,
+                size: 40.sp,
+                color: AppColors.textSecondary.withValues(alpha: 0.3),
+              ),
             ),
             SizedBox(height: 24.h),
             Text(
               StringUtils.translate('selection_required', context: context),
-              style: GoogleFonts.dmSans(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              style: GoogleFonts.dmSans(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
             ),
             SizedBox(height: 8.h),
             Text(
-              StringUtils.translate('selection_required_desc', namedArgs: {'requirement': requirement}, context: context),
+              StringUtils.translate(
+                'selection_required_desc',
+                namedArgs: {'requirement': requirement},
+                context: context,
+              ),
               textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+              style: GoogleFonts.dmSans(
+                fontSize: 14.sp,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             SizedBox(height: 32.h),
             BouncingWrapper(
@@ -440,7 +559,10 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
                 ),
                 child: Text(
                   StringUtils.translate('go_to_district_tab', context: context),
-                  style: GoogleFonts.dmSans(color: Colors.white, fontWeight: FontWeight.w700),
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -453,13 +575,23 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
   Widget _buildSelectionGrid(String level) {
     return BlocBuilder<AssociationCubit, AssociationState>(
       builder: (context, state) {
-        if (state is AssociationLoading || (state is AssociationLoaded && state.isSubLoading)) {
+        if (state is AssociationLoading ||
+            (state is AssociationLoaded && state.isSubLoading)) {
           return const Center(child: CircularProgressIndicator());
         }
         if (state is AssociationLoaded) {
           final allItems = level == 'DISTRICT' ? state.districts : state.wards;
           if (allItems == null || allItems.isEmpty) {
-            return Center(child: Text(StringUtils.translate('no_level_items_found', namedArgs: {'level': level}, context: context), style: GoogleFonts.dmSans(color: AppColors.textSecondary)));
+            return Center(
+              child: Text(
+                StringUtils.translate(
+                  'no_level_items_found',
+                  namedArgs: {'level': level},
+                  context: context,
+                ),
+                style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+              ),
+            );
           }
 
           final filteredItems = allItems.where((item) {
@@ -468,7 +600,12 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
           }).toList();
 
           if (filteredItems.isEmpty) {
-            return Center(child: Text(StringUtils.translate('no_states_found', context: context), style: GoogleFonts.dmSans(color: AppColors.textSecondary)));
+            return Center(
+              child: Text(
+                StringUtils.translate('no_states_found', context: context),
+                style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+              ),
+            );
           }
 
           return GridView.builder(
@@ -484,7 +621,9 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
               final item = filteredItems[index];
               return _SelectionCard(
                 name: item['name'],
-                icon: level == 'DISTRICT' ? Icons.location_city_rounded : Icons.holiday_village_rounded,
+                icon: level == 'DISTRICT'
+                    ? Icons.location_city_rounded
+                    : Icons.holiday_village_rounded,
                 onTap: () {
                   setState(() {
                     if (level == 'DISTRICT') {
@@ -541,7 +680,8 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
           return ListView.builder(
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
             itemCount: communities.length,
-            itemBuilder: (context, index) => _CommunityCard(community: communities[index]),
+            itemBuilder: (context, index) =>
+                _CommunityCard(community: communities[index]),
           );
         }
         return _buildEmptyState(level);
@@ -550,7 +690,9 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
   }
 
   Widget _buildEmptyState(String level) {
-    final name = level == 'WARD' ? _selectedWardName : (level == 'DISTRICT' ? _selectedDistrictName : widget.parentName);
+    final name = level == 'WARD'
+        ? _selectedWardName
+        : (level == 'DISTRICT' ? _selectedDistrictName : widget.parentName);
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -578,15 +720,35 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
                 color: AppColors.textSecondary.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.groups_rounded, size: 50.sp, color: AppColors.textSecondary.withValues(alpha: 0.1)),
+              child: Icon(
+                Icons.groups_rounded,
+                size: 50.sp,
+                color: AppColors.textSecondary.withValues(alpha: 0.1),
+              ),
             ),
             SizedBox(height: 32.h),
             Text(
-              StringUtils.translate('no_communities_found_in', namedArgs: {'level': level.toLowerCase() == 'state' ? StringUtils.translate('level_state', context: context) : (level.toLowerCase() == 'district' ? StringUtils.translate('level_district', context: context) : StringUtils.translate('level_ward', context: context))}, context: context),
+              StringUtils.translate(
+                'no_communities_found_in',
+                namedArgs: {
+                  'level': level.toLowerCase() == 'state'
+                      ? StringUtils.translate('level_state', context: context)
+                      : (level.toLowerCase() == 'district'
+                            ? StringUtils.translate(
+                                'level_district',
+                                context: context,
+                              )
+                            : StringUtils.translate(
+                                'level_ward',
+                                context: context,
+                              )),
+                },
+                context: context,
+              ),
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
-                fontSize: 18.sp, 
-                fontWeight: FontWeight.w800, 
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
                 height: 1.2,
               ),
@@ -603,11 +765,15 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  StringUtils.translate('create_community_in', namedArgs: {'name': name ?? ''}, context: context),
+                  StringUtils.translate(
+                    'create_community_in',
+                    namedArgs: {'name': name ?? ''},
+                    context: context,
+                  ),
                   textAlign: TextAlign.center,
                   style: GoogleFonts.dmSans(
-                    fontWeight: FontWeight.w700, 
-                    color: Colors.white, 
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                     fontSize: 14.sp,
                     height: 1.3,
                   ),
@@ -622,8 +788,9 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
 
   Widget _buildBottomCreateButton() {
     final level = _getCurrentLevel();
-    final name = _selectedWardName ?? _selectedDistrictName ?? widget.parentName;
-    
+    final name =
+        _selectedWardName ?? _selectedDistrictName ?? widget.parentName;
+
     return Container(
       padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 32.h),
       child: BouncingWrapper(
@@ -634,17 +801,24 @@ class _AssociationHierarchyPageState extends State<AssociationHierarchyPage> wit
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3), width: 1.5),
+            border: Border.all(
+              color: AppColors.primaryBlue.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_circle_outline_rounded, color: AppColors.primaryBlue, size: 20.sp),
+              Icon(
+                Icons.add_circle_outline_rounded,
+                color: AppColors.primaryBlue,
+                size: 20.sp,
+              ),
               SizedBox(width: 10.w),
               Text(
                 StringUtils.translate('create_new_community', context: context),
                 style: GoogleFonts.dmSans(
-                  fontWeight: FontWeight.w800, 
+                  fontWeight: FontWeight.w800,
                   color: AppColors.primaryBlue,
                   fontSize: 14.sp,
                 ),
@@ -677,7 +851,11 @@ class _SelectionCard extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const _SelectionCard({required this.name, required this.icon, required this.onTap});
+  const _SelectionCard({
+    required this.name,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -705,11 +883,7 @@ class _SelectionCard extends StatelessWidget {
                 color: AppColors.accentOrange.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon, 
-                color: AppColors.accentOrange, 
-                size: 16.sp
-              ),
+              child: Icon(icon, color: AppColors.accentOrange, size: 16.sp),
             ),
             SizedBox(height: 6.h),
             Text(
@@ -772,13 +946,19 @@ class _CommunityCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12.r),
                 image: (community.image != null && community.image!.isNotEmpty)
                     ? DecorationImage(
-                        image: NetworkImage(ApiConstants.getImageUrl(community.image)!),
+                        image: NetworkImage(
+                          ApiConstants.getImageUrl(community.image)!,
+                        ),
                         fit: BoxFit.cover,
                       )
                     : null,
               ),
               child: community.image == null || community.image!.isEmpty
-                  ? Icon(Icons.groups_3_rounded, color: AppColors.primaryBlue, size: 26.sp)
+                  ? Icon(
+                      Icons.groups_3_rounded,
+                      color: AppColors.primaryBlue,
+                      size: 26.sp,
+                    )
                   : null,
             ),
             SizedBox(width: 16.w),
@@ -788,19 +968,31 @@ class _CommunityCard extends StatelessWidget {
                 children: [
                   Text(
                     community.name,
-                    style: GoogleFonts.dmSans(fontSize: 15.sp, fontWeight: FontWeight.w800, color: AppColors.darkText),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.darkText,
+                    ),
                   ),
                   SizedBox(height: 2.h),
                   Text(
                     community.description ?? '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.dmSans(fontSize: 12.sp, color: AppColors.greyText, fontWeight: FontWeight.w500),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 12.sp,
+                      color: AppColors.greyText,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: Colors.grey.shade300),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14.sp,
+              color: Colors.grey.shade300,
+            ),
           ],
         ),
       ),

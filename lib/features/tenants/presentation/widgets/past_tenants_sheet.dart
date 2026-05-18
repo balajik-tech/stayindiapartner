@@ -30,7 +30,8 @@ class PastTenantsSheet extends StatelessWidget {
         final cubit = sl<TenantCubit>();
         final hostelState = context.read<HostelCubit>().state;
         if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-          final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+          final hostelId =
+              hostelState.hostels[hostelState.selectedHostelIndex].id;
           cubit.loadTenants(hostelId, status: 'CHECKED_OUT');
         }
         return cubit;
@@ -116,7 +117,7 @@ class PastTenantsSheet extends StatelessWidget {
                       if (state is TenantLoading) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      
+
                       if (state is TenantEmpty) {
                         return Center(
                           child: Column(
@@ -141,7 +142,9 @@ class PastTenantsSheet extends StatelessWidget {
                                 'previous_tenant_records'.tr(),
                                 style: TextStyle(
                                   fontSize: 14.sp,
-                                  color: AppColors.greyText.withValues(alpha: 0.7),
+                                  color: AppColors.greyText.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                               ),
                             ],

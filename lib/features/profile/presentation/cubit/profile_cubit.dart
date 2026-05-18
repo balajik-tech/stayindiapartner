@@ -7,8 +7,6 @@ import 'package:stayindia_owner/core/utils/image_utils.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/profile_entity.dart';
 import 'package:stayindia_owner/features/profile/domain/usecases/profile_usecases.dart';
 
-
-
 abstract class ProfileState extends Equatable {
   const ProfileState();
   @override
@@ -31,7 +29,10 @@ class ProfileUpdating extends ProfileState {}
 class ProfileUpdateSuccess extends ProfileState {
   final ProfileEntity profile;
   final String message;
-  const ProfileUpdateSuccess(this.profile, {this.message = 'Profile updated successfully'});
+  const ProfileUpdateSuccess(
+    this.profile, {
+    this.message = 'Profile updated successfully',
+  });
   @override
   List<Object?> get props => [profile, message];
 }
@@ -42,8 +43,6 @@ class ProfileError extends ProfileState {
   @override
   List<Object?> get props => [message];
 }
-
-
 
 class ProfileCubit extends Cubit<ProfileState> {
   final GetProfileUseCase _getProfile;
@@ -56,11 +55,11 @@ class ProfileCubit extends Cubit<ProfileState> {
     required UpdateProfileUseCase updateProfileUseCase,
     required UploadAvatarUseCase uploadAvatarUseCase,
     required DeleteOwnerAccountUseCase deleteOwnerAccountUseCase,
-  })  : _getProfile = getProfileUseCase,
-        _updateProfile = updateProfileUseCase,
-        _uploadAvatar = uploadAvatarUseCase,
-        _deleteAccount = deleteOwnerAccountUseCase,
-        super(ProfileInitial());
+  }) : _getProfile = getProfileUseCase,
+       _updateProfile = updateProfileUseCase,
+       _uploadAvatar = uploadAvatarUseCase,
+       _deleteAccount = deleteOwnerAccountUseCase,
+       super(ProfileInitial());
 
   Future<void> loadProfile() async {
     emit(ProfileLoading());
@@ -116,7 +115,6 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(ProfileLoading());
     try {
       await _deleteAccount();
-      
     } catch (e) {
       AppLogger.error('deleteAccount failed', e);
       emit(ProfileError(ErrorHelper.toFriendlyMessage(e)));

@@ -11,10 +11,7 @@ import 'package:stayindia_owner/core/constants/api_constants.dart';
 class TenantCard extends StatelessWidget {
   final TenantEntity tenant;
 
-  const TenantCard({
-    super.key,
-    required this.tenant,
-  });
+  const TenantCard({super.key, required this.tenant});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +47,6 @@ class TenantCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24.r),
           child: Column(
             children: [
-              
               Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
                 child: Row(
@@ -77,7 +73,11 @@ class TenantCard extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(width: 8.w),
-                              _buildStatusIndicator(isActive, isPending, isNotice),
+                              _buildStatusIndicator(
+                                isActive,
+                                isPending,
+                                isNotice,
+                              ),
                             ],
                           ),
                           SizedBox(height: 2.h),
@@ -96,7 +96,6 @@ class TenantCard extends StatelessWidget {
                 ),
               ),
 
-              
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Container(
@@ -115,7 +114,11 @@ class TenantCard extends StatelessWidget {
                       _buildVerticalDivider(),
                       _buildInfoItem(
                         Icons.access_time_rounded,
-                        'since'.tr(namedArgs: {'date': _formatDate(tenant.checkInDate, context)}),
+                        'since'.tr(
+                          namedArgs: {
+                            'date': _formatDate(tenant.checkInDate, context),
+                          },
+                        ),
                         'duration'.tr(),
                       ),
                       if (isNotice) ...[
@@ -131,7 +134,6 @@ class TenantCard extends StatelessWidget {
                 ),
               ),
 
-              
               Padding(
                 padding: EdgeInsets.all(12.w),
                 child: Row(
@@ -151,7 +153,11 @@ class TenantCard extends StatelessWidget {
                         color: AppColors.primaryBlue,
                       ),
                     ),
-                    Icon(Icons.chevron_right_rounded, size: 18.sp, color: AppColors.primaryBlue),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18.sp,
+                      color: AppColors.primaryBlue,
+                    ),
                   ],
                 ),
               ),
@@ -260,7 +266,12 @@ class TenantCard extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickAction(IconData icon, String label, Color color, VoidCallback onTap) {
+  Widget _buildQuickAction(
+    IconData icon,
+    String label,
+    Color color,
+    VoidCallback onTap,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(

@@ -40,11 +40,11 @@ class FinanceState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        stats,
-        revenueTrends,
-        errorMessage,
-        selectedHostelId,
-        interval,
-      ];
+    status,
+    stats,
+    revenueTrends,
+    errorMessage,
+    selectedHostelId,
+    interval,
+  ];
 }

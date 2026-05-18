@@ -42,7 +42,9 @@ class GuestRequest extends Equatable {
       tenantId: tenant['_id'] ?? json['tenantId'] ?? '',
       tenantName: tenant['name'] ?? 'Unknown Tenant',
       tenantPhone: tenant['phoneNumber'] ?? '',
-      hostelId: json['hostel'] is Map ? json['hostel']['_id'] : (json['hostel'] ?? ''),
+      hostelId: json['hostel'] is Map
+          ? json['hostel']['_id']
+          : (json['hostel'] ?? ''),
       guestName: json['guestName'] ?? '',
       relationship: json['relationship'] ?? '',
       startDate: DateTime.parse(json['startDate']),

@@ -24,7 +24,8 @@ class AddFloorSheet extends StatefulWidget {
     required this.dashboardCubit,
   });
 
-  static Future<void> show(BuildContext context, {
+  static Future<void> show(
+    BuildContext context, {
     required String hostelId,
     required RoomCubit roomCubit,
     required DashboardCubit dashboardCubit,
@@ -78,7 +79,9 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
       for (var floor in dashboardState.data.occupancy.floors) {
         final name = floor.floorName.toLowerCase();
         final num = floor.floorNum;
-        if (name.contains('basement') || name == 'b' || (num != null && num < 0)) {
+        if (name.contains('basement') ||
+            name == 'b' ||
+            (num != null && num < 0)) {
           count++;
         }
       }
@@ -116,13 +119,17 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                   SizedBox(height: 32.h),
-                  
+
                   Text(
                     'capacity_config'.tr(),
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                    ),
                   ),
                   SizedBox(height: 16.h),
-                  
+
                   _buildCounterRow(
                     label: 'total_rooms'.tr(),
                     value: _roomCount,
@@ -139,7 +146,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                       }
                     },
                   ),
-                  
+
                   SizedBox(height: 48.h),
                   _buildAddButton(),
                 ],
@@ -179,9 +186,15 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                 decoration: BoxDecoration(
                   color: !_isBasement ? Colors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(12.r),
-                  boxShadow: !_isBasement ? [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))
-                  ] : [],
+                  boxShadow: !_isBasement
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
                 ),
                 alignment: Alignment.center,
                 child: Text(
@@ -189,7 +202,9 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
-                    color: !_isBasement ? AppColors.primaryBlue : AppColors.greyText,
+                    color: !_isBasement
+                        ? AppColors.primaryBlue
+                        : AppColors.greyText,
                   ),
                 ),
               ),
@@ -211,9 +226,15 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                 decoration: BoxDecoration(
                   color: _isBasement ? Colors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(12.r),
-                  boxShadow: _isBasement ? [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))
-                  ] : [],
+                  boxShadow: _isBasement
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
                 ),
                 alignment: Alignment.center,
                 child: Text(
@@ -221,7 +242,9 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
-                    color: _isBasement ? AppColors.primaryBlue : AppColors.greyText,
+                    color: _isBasement
+                        ? AppColors.primaryBlue
+                        : AppColors.greyText,
                   ),
                 ),
               ),
@@ -248,7 +271,11 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
           ),
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.close_rounded, color: AppColors.greyText, size: 24.sp),
+            icon: Icon(
+              Icons.close_rounded,
+              color: AppColors.greyText,
+              size: 24.sp,
+            ),
           ),
         ],
       ),
@@ -286,7 +313,11 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
         controller: controller,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,
-        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.darkText,
+        ),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
@@ -296,7 +327,12 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
     );
   }
 
-  Widget _buildCounterRow({required String label, required int value, required VoidCallback onDecrement, required VoidCallback onIncrement}) {
+  Widget _buildCounterRow({
+    required String label,
+    required int value,
+    required VoidCallback onDecrement,
+    required VoidCallback onIncrement,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -304,7 +340,11 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Row(
@@ -312,7 +352,11 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.darkText,
+            ),
           ),
           Container(
             decoration: BoxDecoration(
@@ -331,7 +375,11 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   alignment: Alignment.center,
                   child: Text(
                     value.toString(),
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.darkText,
+                    ),
                   ),
                 ),
                 _buildSmallIconButton(
@@ -347,7 +395,11 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
     );
   }
 
-  Widget _buildSmallIconButton({required IconData icon, required VoidCallback onTap, bool isPrimary = false}) {
+  Widget _buildSmallIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    bool isPrimary = false,
+  }) {
     return BouncingWrapper(
       onTap: onTap,
       child: Container(
@@ -356,11 +408,21 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
         decoration: BoxDecoration(
           color: isPrimary ? AppColors.primaryBlue : Colors.white,
           borderRadius: BorderRadius.circular(10.r),
-          boxShadow: isPrimary ? [
-            BoxShadow(color: AppColors.primaryBlue.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))
-          ] : [],
+          boxShadow: isPrimary
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
         ),
-        child: Icon(icon, color: isPrimary ? Colors.white : AppColors.primaryBlue, size: 20.sp),
+        child: Icon(
+          icon,
+          color: isPrimary ? Colors.white : AppColors.primaryBlue,
+          size: 20.sp,
+        ),
       ),
     );
   }
@@ -376,7 +438,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
               ? () {}
               : () {
                   final floorNameInput = _floorNameController.text.trim();
-                  
+
                   if (floorNameInput.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('please_enter_floor_name'.tr())),
@@ -387,26 +449,31 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   final hostelState = context.read<HostelCubit>().state;
                   Hostel? hostel;
                   if (hostelState is HostelLoaded) {
-                    hostel = hostelState.hostels[hostelState.selectedHostelIndex];
+                    hostel =
+                        hostelState.hostels[hostelState.selectedHostelIndex];
                   }
 
                   if (hostel != null) {
                     Navigator.pop(context);
-                    
+
                     final int parsedNum = int.tryParse(floorNameInput) ?? 1;
-                    final int floorNumCalculated = _isBasement ? -parsedNum : parsedNum;
-                    
+                    final int floorNumCalculated = _isBasement
+                        ? -parsedNum
+                        : parsedNum;
+
                     String formattedFloorName;
                     if (_isBasement) {
-                      formattedFloorName = parsedNum == 1 ? 'Basement' : 'Basement $parsedNum';
+                      formattedFloorName = parsedNum == 1
+                          ? 'Basement'
+                          : 'Basement $parsedNum';
                     } else {
-                      formattedFloorName = parsedNum == 1 
-                          ? '1st Floor' 
-                          : parsedNum == 2 
-                              ? '2nd Floor' 
-                              : parsedNum == 3 
-                                  ? '3rd Floor' 
-                                  : '${parsedNum}th Floor';
+                      formattedFloorName = parsedNum == 1
+                          ? '1st Floor'
+                          : parsedNum == 2
+                          ? '2nd Floor'
+                          : parsedNum == 3
+                          ? '3rd Floor'
+                          : '${parsedNum}th Floor';
                     }
 
                     Navigator.push(

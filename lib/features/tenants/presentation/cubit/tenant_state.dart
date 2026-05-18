@@ -47,7 +47,14 @@ class TenantLoaded extends TenantState {
   }
 
   @override
-  List<Object?> get props => [tenants, searchQuery, hasMore, isLoadMore, page, errorMessage];
+  List<Object?> get props => [
+    tenants,
+    searchQuery,
+    hasMore,
+    isLoadMore,
+    page,
+    errorMessage,
+  ];
 }
 
 class TenantEmpty extends TenantState {
@@ -64,8 +71,6 @@ class TenantError extends TenantState {
   List<Object?> get props => [message];
 }
 
-
-
 abstract class TenantDetailState extends Equatable {
   const TenantDetailState();
   @override
@@ -73,13 +78,16 @@ abstract class TenantDetailState extends Equatable {
 }
 
 class TenantDetailInitial extends TenantDetailState {}
+
 class TenantDetailLoading extends TenantDetailState {}
+
 class TenantDetailLoaded extends TenantDetailState {
   final TenantDetailEntity detail;
   const TenantDetailLoaded(this.detail);
   @override
   List<Object?> get props => [detail];
 }
+
 class TenantDetailError extends TenantDetailState {
   final String message;
   const TenantDetailError(this.message);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 class CustomAvatar extends StatelessWidget {
   final String? imageUrl;
@@ -30,33 +31,54 @@ class CustomAvatar extends StatelessWidget {
     final String initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
     final double effectiveSize = size.w;
     final double effectiveBorderRadius = borderRadius ?? 8.r;
-    final Color effectiveBgColor = backgroundColor ?? AppColors.primaryBlue.withValues(alpha: 0.1);
+    final Color effectiveBgColor =
+        backgroundColor ?? AppColors.primaryBlue.withValues(alpha: 0.1);
     final Color effectiveTextColor = textColor ?? AppColors.primaryBlue;
 
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
+    final String? resolvedUrl = ApiConstants.getImageUrl(imageUrl);
+
+    if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
       return CachedNetworkImage(
-        imageUrl: imageUrl!,
-        memCacheHeight: (effectiveSize * 2.5).toInt(), 
-        memCacheWidth: (effectiveSize * 2.5).toInt(),
+        imageUrl: resolvedUrl,
         imageBuilder: (context, imageProvider) => Container(
           width: effectiveSize,
           height: effectiveSize,
           decoration: BoxDecoration(
             shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
-            borderRadius: isCircle ? null : BorderRadius.circular(effectiveBorderRadius),
-            image: DecorationImage(
-              image: imageProvider,
-              fit: BoxFit.cover,
+            borderRadius: isCircle
+                ? null
+                : BorderRadius.circular(effectiveBorderRadius),
+            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+            border: Border.all(
+              color: AppColors.roomCardBorder.withValues(alpha: 0.5),
             ),
-            border: Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
           ),
         ),
-        placeholder: (context, url) => _buildInitial(initial, effectiveSize, effectiveBorderRadius, effectiveBgColor, effectiveTextColor, isLoading: true),
-        errorWidget: (context, url, error) => _buildInitial(initial, effectiveSize, effectiveBorderRadius, effectiveBgColor, effectiveTextColor),
+        placeholder: (context, url) => _buildInitial(
+          initial,
+          effectiveSize,
+          effectiveBorderRadius,
+          effectiveBgColor,
+          effectiveTextColor,
+          isLoading: true,
+        ),
+        errorWidget: (context, url, error) => _buildInitial(
+          initial,
+          effectiveSize,
+          effectiveBorderRadius,
+          effectiveBgColor,
+          effectiveTextColor,
+        ),
       );
     }
 
-    return _buildInitial(initial, effectiveSize, effectiveBorderRadius, effectiveBgColor, effectiveTextColor);
+    return _buildInitial(
+      initial,
+      effectiveSize,
+      effectiveBorderRadius,
+      effectiveBgColor,
+      effectiveTextColor,
+    );
   }
 
   Widget _buildInitial(
@@ -74,7 +96,9 @@ class CustomAvatar extends StatelessWidget {
         color: bgColor,
         shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
         borderRadius: isCircle ? null : BorderRadius.circular(radius),
-        border: Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+        ),
       ),
       alignment: Alignment.center,
       child: isLoading

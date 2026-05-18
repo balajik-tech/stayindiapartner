@@ -7,7 +7,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/widgets/local_pdf_preview_screen.dart';
 
-
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
@@ -22,7 +21,7 @@ import '../widgets/auth_widgets.dart';
 class RegistrationDocumentsPage extends StatefulWidget {
   final bool isFromProfile;
   final String? hostelId;
-  
+
   const RegistrationDocumentsPage({
     super.key,
     this.isFromProfile = false,
@@ -30,10 +29,12 @@ class RegistrationDocumentsPage extends StatefulWidget {
   });
 
   @override
-  State<RegistrationDocumentsPage> createState() => _RegistrationDocumentsPageState();
+  State<RegistrationDocumentsPage> createState() =>
+      _RegistrationDocumentsPageState();
 }
 
-class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> with SingleTickerProviderStateMixin {
+class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage>
+    with SingleTickerProviderStateMixin {
   final _licenseNumberController = TextEditingController();
   final _expiryDateController = TextEditingController();
   String? _selectedLicenseType;
@@ -51,7 +52,10 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _fadeAnimation = CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic);
+    _fadeAnimation = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutCubic,
+    );
     _animController.forward();
   }
 
@@ -80,7 +84,8 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
 
   void _onComplete() {
     final hostelState = context.read<HostelCubit>().state;
-    final String? finalHostelId = widget.hostelId ??
+    final String? finalHostelId =
+        widget.hostelId ??
         (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty
             ? hostelState.hostels.first.id
             : null);
@@ -89,7 +94,10 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
       HapticFeedback.vibrate();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No hostel found. Please create a hostel first.', style: GoogleFonts.outfit()),
+          content: Text(
+            'No hostel found. Please create a hostel first.',
+            style: GoogleFonts.outfit(),
+          ),
           backgroundColor: Colors.red.shade400,
           behavior: SnackBarBehavior.floating,
         ),
@@ -97,11 +105,16 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
       return;
     }
 
-    if (_selectedLicenseType == null || _filePath == null || _licenseNumberController.text.isEmpty) {
+    if (_selectedLicenseType == null ||
+        _filePath == null ||
+        _licenseNumberController.text.isEmpty) {
       HapticFeedback.vibrate();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please fill all fields and upload the document', style: GoogleFonts.outfit()),
+          content: Text(
+            'Please fill all fields and upload the document',
+            style: GoogleFonts.outfit(),
+          ),
           backgroundColor: Colors.red.shade400,
           behavior: SnackBarBehavior.floating,
         ),
@@ -110,12 +123,14 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
     }
 
     context.read<DocumentCubit>().uploadDocument(
-          hostelId: finalHostelId,
-          licenseType: _selectedLicenseType!,
-          licenseNumber: _licenseNumberController.text,
-          expiryDate: _expiryDateController.text.isNotEmpty ? _expiryDateController.text : null,
-          filePath: _filePath!,
-        );
+      hostelId: finalHostelId,
+      licenseType: _selectedLicenseType!,
+      licenseNumber: _licenseNumberController.text,
+      expiryDate: _expiryDateController.text.isNotEmpty
+          ? _expiryDateController.text
+          : null,
+      filePath: _filePath!,
+    );
   }
 
   @override
@@ -133,17 +148,20 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      widget.isFromProfile ? 'Document uploaded successfully' : 'Verification submitted successfully!',
+                      widget.isFromProfile
+                          ? 'Document uploaded successfully'
+                          : 'Verification submitted successfully!',
                       style: GoogleFonts.outfit(),
                     ),
                     behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                   ),
                 );
                 if (widget.isFromProfile) {
                   Navigator.pop(context);
                 } else {
-
                   final authState = context.read<AuthCubit>().state;
                   final hasAcceptedPolicy = authState is AuthAuthenticated
                       ? authState.owner.hasAcceptedPolicy
@@ -160,7 +178,9 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
                   } else {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainNavigationPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigationPage(),
+                      ),
                       (route) => false,
                     );
                   }
@@ -171,7 +191,9 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
                     content: Text(state.message, style: GoogleFonts.outfit()),
                     backgroundColor: Colors.red.shade400,
                     behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                   ),
                 );
               }
@@ -184,7 +206,10 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 8.h,
+                  ),
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: Column(
@@ -194,7 +219,11 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
                           const AuthStepProgress(
                             currentStep: 3,
                             totalSteps: 3,
-                            stepLabels: ['Personal', 'Property', 'Verification'],
+                            stepLabels: [
+                              'Personal',
+                              'Property',
+                              'Verification',
+                            ],
                           ),
                         SizedBox(height: 48.h),
                         _buildHeader(),
@@ -235,7 +264,11 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
               ),
             ],
           ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 16),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black,
+            size: 16,
+          ),
         ),
       ),
     );
@@ -255,7 +288,11 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.verified_user_rounded, size: 14.sp, color: Colors.green.shade700),
+              Icon(
+                Icons.verified_user_rounded,
+                size: 14.sp,
+                color: Colors.green.shade700,
+              ),
               SizedBox(width: 6.w),
               Text(
                 'Secure Verification',
@@ -298,17 +335,47 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
           label: 'License Type *',
           value: _selectedLicenseType,
           items: const [
-            DropdownMenuItem(value: 'fssai', child: Text('Food License (FSSAI)')),
-            DropdownMenuItem(value: 'hostel_license', child: Text('Hostel / PG License')),
-            DropdownMenuItem(value: 'trade_license', child: Text('Trade License')),
-            DropdownMenuItem(value: 'fire_safety', child: Text('Fire Safety Certificate')),
+            DropdownMenuItem(
+              value: 'fssai',
+              child: Text('Food License (FSSAI)'),
+            ),
+            DropdownMenuItem(
+              value: 'hostel_license',
+              child: Text('Hostel / PG License'),
+            ),
+            DropdownMenuItem(
+              value: 'trade_license',
+              child: Text('Trade License'),
+            ),
+            DropdownMenuItem(
+              value: 'fire_safety',
+              child: Text('Fire Safety Certificate'),
+            ),
             DropdownMenuItem(value: 'police_noc', child: Text('Police NOC')),
-            DropdownMenuItem(value: 'shops_establishment', child: Text('Shops & Establishment')),
-            DropdownMenuItem(value: 'gst_registration', child: Text('GST Registration')),
-            DropdownMenuItem(value: 'health_sanitation', child: Text('Health & Sanitation NOC')),
-            DropdownMenuItem(value: 'commercial_utility', child: Text('Commercial Utility Bill')),
-            DropdownMenuItem(value: 'pollution_noc', child: Text('Pollution Control NOC')),
-            DropdownMenuItem(value: 'resident_verification', child: Text('Resident Verification')),
+            DropdownMenuItem(
+              value: 'shops_establishment',
+              child: Text('Shops & Establishment'),
+            ),
+            DropdownMenuItem(
+              value: 'gst_registration',
+              child: Text('GST Registration'),
+            ),
+            DropdownMenuItem(
+              value: 'health_sanitation',
+              child: Text('Health & Sanitation NOC'),
+            ),
+            DropdownMenuItem(
+              value: 'commercial_utility',
+              child: Text('Commercial Utility Bill'),
+            ),
+            DropdownMenuItem(
+              value: 'pollution_noc',
+              child: Text('Pollution Control NOC'),
+            ),
+            DropdownMenuItem(
+              value: 'resident_verification',
+              child: Text('Resident Verification'),
+            ),
           ],
           onChanged: (val) => setState(() => _selectedLicenseType = val),
         ),
@@ -376,12 +443,14 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
             width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 24.w),
             decoration: BoxDecoration(
-              color: hasFile ? AppColors.primaryBlue.withValues(alpha: 0.02) : Colors.white,
+              color: hasFile
+                  ? AppColors.primaryBlue.withValues(alpha: 0.02)
+                  : Colors.white,
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
                 color: hasFile ? AppColors.primaryBlue : Colors.grey.shade300,
                 width: 1.5,
-                style: hasFile ? BorderStyle.solid : BorderStyle.solid, 
+                style: hasFile ? BorderStyle.solid : BorderStyle.solid,
               ),
               boxShadow: [
                 BoxShadow(
@@ -396,11 +465,15 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
                 Container(
                   padding: EdgeInsets.all(16.w),
                   decoration: BoxDecoration(
-                    color: hasFile ? AppColors.primaryBlue : AppColors.primaryBlue.withValues(alpha: 0.05),
+                    color: hasFile
+                        ? AppColors.primaryBlue
+                        : AppColors.primaryBlue.withValues(alpha: 0.05),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    hasFile ? Icons.check_circle_outline_rounded : Icons.cloud_upload_outlined,
+                    hasFile
+                        ? Icons.check_circle_outline_rounded
+                        : Icons.cloud_upload_outlined,
                     color: hasFile ? Colors.white : AppColors.primaryBlue,
                     size: 32.sp,
                   ),
@@ -435,7 +508,7 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
               onPressed: () {
                 final filePath = _filePath;
                 if (filePath == null) return;
-                
+
                 final isPdf = filePath.toLowerCase().endsWith('.pdf');
                 if (isPdf) {
                   Navigator.push(
@@ -451,7 +524,10 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
                   _showFullScreenImage(context, filePath);
                 }
               },
-              icon: const Icon(Icons.visibility_rounded, color: AppColors.primaryBlue),
+              icon: const Icon(
+                Icons.visibility_rounded,
+                color: AppColors.primaryBlue,
+              ),
               label: Text(
                 'Preview Uploaded Document',
                 style: GoogleFonts.outfit(
@@ -474,7 +550,11 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lock_outline_rounded, size: 14.sp, color: AppColors.greyText),
+            Icon(
+              Icons.lock_outline_rounded,
+              size: 14.sp,
+              color: AppColors.greyText,
+            ),
             SizedBox(width: 6.w),
             Text(
               'Your documents are securely encrypted',
@@ -513,7 +593,9 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
         builder: (context, state) {
           final isLoading = state is DocumentLoading;
           return AuthPrimaryButton(
-            label: widget.isFromProfile ? 'Upload Document' : 'Submit for Verification',
+            label: widget.isFromProfile
+                ? 'Upload Document'
+                : 'Submit for Verification',
             isLoading: isLoading,
             onPressed: _onComplete,
           );
@@ -532,7 +614,11 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+            icon: const Icon(
+              Icons.close_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -542,10 +628,7 @@ class _RegistrationDocumentsPageState extends State<RegistrationDocumentsPage> w
             boundaryMargin: const EdgeInsets.all(20),
             minScale: 0.5,
             maxScale: 4,
-            child: Image.file(
-              File(path),
-              fit: BoxFit.contain,
-            ),
+            child: Image.file(File(path), fit: BoxFit.contain),
           ),
         ),
       ),
