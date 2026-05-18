@@ -226,36 +226,40 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       ),
                     ),
                     SafeArea(
-                      child: Center(
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: SlideTransition(
-                            position: _slideAnimation,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const AuthLogoBadge(),
-                                SizedBox(height: 16.h),
-                                Text(
-                                  "STAY INDIA",
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 24.sp,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 4.0,
-                                    color: Colors.white,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 15.h),
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: SlideTransition(
+                              position: _slideAnimation,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const AuthLogoBadge(),
+                                  SizedBox(height: 12.h),
+                                  Text(
+                                    "STAY INDIA",
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 22.sp,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 4.0,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 4.h),
-                                Text(
-                                  "OWNER PORTAL",
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 13.sp,
-                                    color: Colors.white.withValues(alpha: 0.7),
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 1.5,
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    "OWNER PORTAL",
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 12.sp,
+                                      color: Colors.white.withValues(alpha: 0.7),
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1.5,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
