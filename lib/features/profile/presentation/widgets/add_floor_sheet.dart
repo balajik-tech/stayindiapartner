@@ -54,13 +54,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
   void initState() {
     super.initState();
     final nextStd = getNextStandardFloorNumber();
-    _floorNameController.text = nextStd == 1 
-        ? '1st Floor' 
-        : nextStd == 2 
-            ? '2nd Floor' 
-            : nextStd == 3 
-                ? '3rd Floor' 
-                : '${nextStd}th Floor';
+    _floorNameController.text = nextStd.toString();
   }
 
   int getNextStandardFloorNumber() {
@@ -115,7 +109,12 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                 children: [
                   _buildFloorTypeSelector(),
                   _buildLabel('floor_identity'.tr()),
-                  _buildPremiumTextField(_floorNameController, hint: 'floor_name_hint'.tr()),
+                  _buildPremiumTextField(
+                    _floorNameController,
+                    hint: 'floor_name_hint'.tr(),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
                   SizedBox(height: 32.h),
                   
                   Text(
@@ -171,7 +170,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   setState(() {
                     _isBasement = false;
                     final nextStd = getNextStandardFloorNumber();
-                    _floorNameController.text = nextStd == 1 ? '1st Floor' : nextStd == 2 ? '2nd Floor' : nextStd == 3 ? '3rd Floor' : '${nextStd}th Floor';
+                    _floorNameController.text = nextStd.toString();
                   });
                   HapticFeedback.lightImpact();
                 }
@@ -203,7 +202,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   setState(() {
                     _isBasement = true;
                     final nextB = getNextBasementNumber();
-                    _floorNameController.text = nextB == 1 ? 'Basement' : 'Basement $nextB';
+                    _floorNameController.text = nextB.toString();
                   });
                   HapticFeedback.lightImpact();
                 }
@@ -270,7 +269,12 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
     );
   }
 
-  Widget _buildPremiumTextField(TextEditingController controller, {required String hint, TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildPremiumTextField(
+    TextEditingController controller, {
+    required String hint,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -281,6 +285,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
         decoration: InputDecoration(
           hintText: hint,
@@ -370,9 +375,9 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
           onTap: isLoading
               ? () {}
               : () {
-                  final floorName = _floorNameController.text.trim();
+                  final floorNameInput = _floorNameController.text.trim();
                   
-                  if (floorName.isEmpty) {
+                  if (floorNameInput.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('please_enter_floor_name'.tr())),
                     );
@@ -388,13 +393,20 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                   if (hostel != null) {
                     Navigator.pop(context);
                     
-                    int floorNumCalculated;
+                    final int parsedNum = int.tryParse(floorNameInput) ?? 1;
+                    final int floorNumCalculated = _isBasement ? -parsedNum : parsedNum;
+                    
+                    String formattedFloorName;
                     if (_isBasement) {
-                      final numStr = floorName.replaceAll(RegExp(r'[^0-9]'), '');
-                      final parsed = int.tryParse(numStr);
-                      floorNumCalculated = parsed != null ? -parsed : -getNextBasementNumber();
+                      formattedFloorName = parsedNum == 1 ? 'Basement' : 'Basement $parsedNum';
                     } else {
-                      floorNumCalculated = int.tryParse(floorName.replaceAll(RegExp(r'[^0-9]'), '')) ?? getNextStandardFloorNumber();
+                      formattedFloorName = parsedNum == 1 
+                          ? '1st Floor' 
+                          : parsedNum == 2 
+                              ? '2nd Floor' 
+                              : parsedNum == 3 
+                                  ? '3rd Floor' 
+                                  : '${parsedNum}th Floor';
                     }
 
                     Navigator.push(
@@ -407,7 +419,7 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
                           ],
                           child: RoomManagementPage(
                             hostel: hostel!,
-                            floorName: floorName,
+                            floorName: formattedFloorName,
                             floorNum: floorNumCalculated,
                             isDraftMode: true,
                             draftRoomCount: _roomCount,

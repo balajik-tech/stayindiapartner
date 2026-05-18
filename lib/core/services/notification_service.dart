@@ -54,7 +54,7 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       AppLogger.info('Received foreground message: ${message.notification?.title}');
       
-      // Deduplication & Tracking
+      
       final deliveryId = message.data['idempotencyKey'];
       if (deliveryId != null) {
         if (_processedDeliveryIds.contains(deliveryId)) return;
@@ -92,7 +92,7 @@ class NotificationService {
     final RemoteMessage? initial = await _fcm.getInitialMessage();
     if (initial != null) {
       AppLogger.info('Terminated state notification: ${initial.data}');
-      // Delay slightly to ensure navigator is ready
+      
       Future.delayed(const Duration(milliseconds: 800), () {
         _handleNotificationTap(initial.data);
       });

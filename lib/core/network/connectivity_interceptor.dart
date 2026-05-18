@@ -18,21 +18,21 @@ class ConnectivityInterceptor extends Interceptor {
 
     if (connectivityResult.contains(ConnectivityResult.none) && !isLocalRequest) {
       if (options.method != 'GET') {
-        // Automatically serialize and enqueue mutation request
+        
         try {
           final queueService = sl<OfflineQueueService>();
           
-          // Generate or preserve dynamic X-Idempotency-Key for replay safety
+          
           final idempotencyKey = options.headers['X-Idempotency-Key'] ?? 
               'idem-${DateTime.now().microsecondsSinceEpoch}-${options.path.hashCode}';
           options.headers['X-Idempotency-Key'] = idempotencyKey;
 
-          // Safe data serialization
+          
           Map<String, dynamic> serializableData = {};
           if (options.data is Map<String, dynamic>) {
             serializableData = options.data as Map<String, dynamic>;
           } else if (options.data is String) {
-            // It could be a string payload
+            
           }
 
           final actionPayload = {
@@ -73,7 +73,7 @@ class ConnectivityInterceptor extends Interceptor {
       );
     }
     
-    // Attach an idempotency key to all outgoing mutations to ensure duplicate safety on backend
+    
     if (options.method != 'GET') {
       options.headers['X-Idempotency-Key'] ??= 
           'idem-${DateTime.now().microsecondsSinceEpoch}-${options.path.hashCode}';

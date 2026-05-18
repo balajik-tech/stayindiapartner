@@ -161,39 +161,11 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           _buildSharingSelector(context, index, room['sharingType'] ?? 2),
           SizedBox(height: 24.h),
           Text(
-            'amenities_label'.tr().toUpperCase(),
+            'ROOM TYPE',
             style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
           ),
-          SizedBox(height: 16.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildFeatureIcon(
-                icon: Icons.ac_unit_rounded,
-                label: 'amenity_ac'.tr(),
-                isSelected: features['isAC'] ?? false,
-                onTap: () => context.read<PropertySetupCubit>().updateRoomFeature(index, 'isAC', !(features['isAC'] ?? false)),
-              ),
-              _buildFeatureIcon(
-                icon: Icons.hot_tub_rounded,
-                label: 'amenity_geyser'.tr(),
-                isSelected: features['hasGeyser'] ?? false,
-                onTap: () => context.read<PropertySetupCubit>().updateRoomFeature(index, 'hasGeyser', !(features['hasGeyser'] ?? false)),
-              ),
-              _buildFeatureIcon(
-                icon: Icons.balcony_rounded,
-                label: 'amenity_balcony'.tr(),
-                isSelected: features['hasBalcony'] ?? false,
-                onTap: () => context.read<PropertySetupCubit>().updateRoomFeature(index, 'hasBalcony', !(features['hasBalcony'] ?? false)),
-              ),
-              _buildFeatureIcon(
-                icon: Icons.wc_rounded,
-                label: 'amenity_washroom'.tr(),
-                isSelected: features['hasAttachedWashroom'] ?? false,
-                onTap: () => context.read<PropertySetupCubit>().updateRoomFeature(index, 'hasAttachedWashroom', !(features['hasAttachedWashroom'] ?? false)),
-              ),
-            ],
-          ),
+          SizedBox(height: 12.h),
+          _buildAcToggle(context, index, features['isAC'] ?? false),
           SizedBox(height: 24.h),
           Text(
             'beds_config'.tr().toUpperCase(),
@@ -275,7 +247,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
       ),
       child: Stack(
         children: [
-          // Sliding Background Indicator
+          
           if (selectedIndex != -1)
             AnimatedAlign(
               duration: const Duration(milliseconds: 350),
@@ -301,7 +273,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                 ),
               ),
             ),
-          // Interactive Labels
+          
           Row(
             children: displayOptions.map((s) {
               final isSelected = selected == s;
@@ -346,43 +318,106 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
     );
   }
 
-  Widget _buildFeatureIcon({required IconData icon, required String label, required bool isSelected, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-      child: Column(
+  Widget _buildAcToggle(BuildContext context, int index, bool isAC) {
+    return Container(
+      height: 48.h,
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.all(16.r),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFEDF2F7) : const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: isSelected ? const Color(0xFF2B5797) : const Color(0xFFE2E8F0),
-                width: isSelected ? 2 : 1.5,
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (!isAC) {
+                  HapticFeedback.lightImpact();
+                  context.read<PropertySetupCubit>().updateRoomFeature(index, 'isAC', true);
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isAC ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: isAC
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.ac_unit_rounded,
+                        size: 16.sp,
+                        color: isAC ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'AC',
+                        style: TextStyle(
+                          color: isAC ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: const Color(0xFF2B5797).withValues(alpha: 0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      )
-                    ]
-                  : null,
             ),
-            child: Icon(icon, color: isSelected ? const Color(0xFF2B5797) : const Color(0xFF94A3B8), size: 28.sp),
           ),
-          SizedBox(height: 10.h),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
-              fontWeight: FontWeight.w800,
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (isAC) {
+                  HapticFeedback.lightImpact();
+                  context.read<PropertySetupCubit>().updateRoomFeature(index, 'isAC', false);
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: !isAC ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: !isAC
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.thermostat_rounded,
+                        size: 16.sp,
+                        color: !isAC ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'Non-AC',
+                        style: TextStyle(
+                          color: !isAC ? const Color(0xFF2B5797) : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],

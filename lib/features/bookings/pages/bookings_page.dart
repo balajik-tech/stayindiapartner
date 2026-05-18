@@ -306,7 +306,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
     );
   }
 
-  Widget _buildTabContent(BuildContext context, BookingsState state, List<Booking> items, String emptyTitle, String emptySubtitle) {
+  Widget _buildTabContent(BuildContext context, BookingsState state, List<Booking> items, String emptyTitle, String emptySubtitle, {bool isHistory = false}) {
     final hostelId = context.read<HostelCubit>().state.selectedHostelId;
     
     if (state.status == BookingsStatus.loading && state.bookings.isEmpty) {
@@ -337,7 +337,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
           itemCount: items.length + (state.isLoadMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index < items.length) {
-              return BookingCard(booking: items[index]);
+              return BookingCard(booking: items[index], isCompact: isHistory);
             }
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
@@ -351,7 +351,14 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll> with S
 
   Widget _buildHistoryTab(BuildContext context, BookingsState state) {
     final historyBookings = state.bookings.where((b) => [BookingStatus.cancelled, BookingStatus.checkedOut].contains(b.status)).toList();
-    return _buildTabContent(context, state, historyBookings, StringUtils.translate('no_history_found', context: context), StringUtils.translate('history_empty_subtitle', context: context));
+    return _buildTabContent(
+      context,
+      state,
+      historyBookings,
+      StringUtils.translate('no_history_found', context: context),
+      StringUtils.translate('history_empty_subtitle', context: context),
+      isHistory: true,
+    );
   }
 
   Widget _buildEmptyState(String title, String subtitle) {

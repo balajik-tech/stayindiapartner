@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     final authState = context.read<AuthCubit>().state;
     if (authState is AuthInitial || authState is AuthSessionRestoring) {
-      // Authentication is still in progress, wait for the state update
+      
       return;
     }
 
@@ -78,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     } else if (state is AuthUnauthenticated || state is AuthOtpSent) {
       nextScreen = const LoginPage();
     } else {
-      // If it is a session error or other error, fallback to AuthGate to handle retry
+      
       nextScreen = AuthGate(
         dashboard: const MainNavigationPage(),
         registration: const RegistrationPersonalPage(),

@@ -81,78 +81,40 @@ class _RoomCardState extends State<RoomCard> {
           if (widget.isGridView) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        (() {
-                          final fName = widget.room.floorName ?? '0';
-                          final clean = fName.replaceAll('floor_', '');
-                          final val = int.tryParse(clean);
-                          if (fName == 'basement' || (val != null && val < 0)) {
-                            final absNum = val != null ? val.abs() : 1;
-                            if (absNum > 1) {
-                              return '${StringUtils.translate('basement', context: context)} $absNum';
-                            }
-                            return StringUtils.translate('basement', context: context);
-                          }
-                          return StringUtils.translate(
-                            fName == 'ground_floor' ? 'ground_floor' : 'floor_n',
-                            context: context,
-                            namedArgs: {'n': clean},
-                          );
-                        })(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF94A3B8),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              widget.roomNumber,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w900,
-                                color: const Color(0xFF0F172A),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            child: Text(
-                              StringUtils.translate(widget.roomType?.toLowerCase() ?? 'ac', context: context),
-                              style: TextStyle(
-                                fontSize: 8.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                Flexible(
+                  child: Text(
+                    (() {
+                      final fName = widget.room.floorName ?? '0';
+                      final clean = fName.replaceAll('floor_', '');
+                      final val = int.tryParse(clean);
+                      if (fName == 'basement' || (val != null && val < 0)) {
+                        final absNum = val != null ? val.abs() : 1;
+                        if (absNum > 1) {
+                          return '${StringUtils.translate('basement', context: context)} $absNum';
+                        }
+                        return StringUtils.translate('basement', context: context);
+                      }
+                      return StringUtils.translate(
+                        fName == 'ground_floor' ? 'ground_floor' : 'floor_n',
+                        context: context,
+                        namedArgs: {'n': clean},
+                      );
+                    })(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF64748B),
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
                 SizedBox(width: 4.w),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(12.r),
@@ -162,12 +124,33 @@ class _RoomCardState extends State<RoomCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF64748B),
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF475569),
                     ),
                   ),
                 ),
+              ],
+            ),
+            SizedBox(height: 6.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    widget.roomNumber,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                _buildRoomTypeBadge(widget.roomType, context),
               ],
             ),
             if ((widget.rent != null && widget.rent! > 0) || (widget.dailyRent != null && widget.dailyRent! > 0)) ...[
@@ -212,13 +195,13 @@ class _RoomCardState extends State<RoomCard> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF94A3B8),
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF64748B),
                           letterSpacing: 0.5,
                         ),
                       ),
-                      SizedBox(height: 2.h),
+                      SizedBox(height: 4.h),
                       Row(
                         children: [
                           Flexible(
@@ -233,22 +216,8 @@ class _RoomCardState extends State<RoomCard> {
                               ),
                             ),
                           ),
-                          SizedBox(width: 4.w),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            child: Text(
-                              StringUtils.translate(widget.roomType?.toLowerCase() ?? 'ac', context: context),
-                              style: TextStyle(
-                                fontSize: 8.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          ),
+                          SizedBox(width: 6.w),
+                          _buildRoomTypeBadge(widget.roomType, context),
                         ],
                       ),
                     ],
@@ -281,7 +250,7 @@ class _RoomCardState extends State<RoomCard> {
                       SizedBox(width: 8.w),
                     ],
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(12.r),
@@ -291,9 +260,9 @@ class _RoomCardState extends State<RoomCard> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF64748B),
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF475569),
                         ),
                       ),
                     ),
@@ -350,9 +319,12 @@ class _RoomCardState extends State<RoomCard> {
             tenantId: bed.tenantId,
             hostelId: hId,
             roomNumber: widget.roomNumber,
-            rent: widget.rent,
-            dailyRent: widget.dailyRent,
+            roomId: widget.id,
+            rent: widget.rent ?? widget.room.rent,
+            dailyRent: widget.dailyRent ?? widget.room.dailyRent,
             maintenance: widget.room.maintenance,
+            deposit: widget.room.deposit,
+            roomType: widget.roomType ?? widget.room.roomType,
             amenities: widget.room.features,
             awayReturnDate: bed.awayReturnDate,
           ),
@@ -369,6 +341,8 @@ class _RoomCardState extends State<RoomCard> {
         return BedStatus.notice;
       case 'AWAY':
         return BedStatus.away;
+      case 'MAINTENANCE':
+        return BedStatus.maintenance;
       default:
         return BedStatus.occupied;
     }
@@ -380,5 +354,40 @@ class _RoomCardState extends State<RoomCard> {
       return state.hostels[state.selectedHostelIndex].id;
     }
     return null;
+  }
+
+  Widget _buildRoomTypeBadge(String? type, BuildContext context) {
+    final cleanType = type?.toUpperCase() ?? 'AC';
+    final isAc = cleanType == 'AC';
+    final icon = isAc ? Icons.ac_unit_rounded : Icons.thermostat_rounded;
+    final color = isAc ? const Color(0xFF0284C7) : const Color(0xFF64748B);
+    final bgColor = isAc ? const Color(0xFFE0F2FE) : const Color(0xFFF1F5F9);
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 11.sp,
+            color: color,
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            StringUtils.translate(cleanType.toLowerCase(), context: context),
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

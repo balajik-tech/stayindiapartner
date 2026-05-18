@@ -899,5 +899,13 @@
   "camera": "Camera",
   "gallery": "Gallery",
   "custom_dots": "Custom...",
-  "room_exists_title": "Room Already Exists"
+  "room_exists_title": "Room Already Exists",
+  "geofencing_title": "Geofencing",
+  "geofence_welcome_title": "Welcome to Use Geofencing",
+  "geofence_welcome_subtitle": "Stay India Geofencing automatically tracks tenant presence, automates in/out logs, and keeps parents informed in real-time when they cross the 150-meter hostel boundary.",
+  "enable_geofencing": "Enable Geofencing",
+  "not_now": "Not Now",
+  "geofence_help_title": "How Geofencing Works",
+  "geofence_help_content": "By pinning your property on the map, a virtual boundary of 150 meters is created. When checked-in tenants cross this boundary, the Stay India app automatically updates their status to Inside/Outside, allowing automated check-ins and logs without requiring manual register entries.",
+  "btn_ok": "Got It"
 }

@@ -34,7 +34,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
 
   void _syncMasters() {
     try {
-      context.read<RoomCubit>().getRooms(isMaster: true);
+      context.read<RoomCubit>().getRooms(isMaster: true, hostelId: widget.hostel.id);
 
       final roomState = context.read<RoomCubit>().state;
       if (roomState is RoomLoaded) {
@@ -269,6 +269,22 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
       dailyRent = (config['dailyRent'] ?? 0.0).toDouble();
     }
 
+    final isAC = type == 'AC';
+    final matches = state.roomMasters.where(
+      (m) => m['sharingType'] == sharing && m['isAC'] == isAC,
+    );
+    final matchingMaster = matches.isNotEmpty ? matches.first : null;
+    
+    final masterRent = matchingMaster != null ? (double.tryParse(matchingMaster['rent']?.toString() ?? '') ?? 0.0) : 0.0;
+    final masterDailyRent = matchingMaster != null ? (double.tryParse(matchingMaster['dailyRent']?.toString() ?? '') ?? 0.0) : 0.0;
+    final masterDeposit = matchingMaster != null ? (double.tryParse(matchingMaster['deposit']?.toString() ?? '') ?? 0.0) : 0.0;
+    final masterMaintenance = matchingMaster != null ? (double.tryParse(matchingMaster['maintenance']?.toString() ?? '') ?? 0.0) : 0.0;
+
+    final hasRentInMaster = masterRent > 0;
+    final hasDailyRentInMaster = masterDailyRent > 0;
+    final hasDepositInMaster = masterDeposit > 0;
+    final hasMaintenanceInMaster = masterMaintenance > 0;
+
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(20.r),
@@ -297,6 +313,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                 child: _PriceInput(
                   label: 'monthly_rent'.tr(),
                   initialValue: rent > 0 ? rent.toInt().toString() : '',
+                  enabled: !hasRentInMaster,
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
                     context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'rent', price);
@@ -308,6 +325,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                 child: _PriceInput(
                   label: 'daily_rent'.tr(),
                   initialValue: dailyRent > 0 ? dailyRent.toInt().toString() : '',
+                  enabled: !hasDailyRentInMaster,
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
                     context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'dailyRent', price);
@@ -323,6 +341,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                 child: _PriceInput(
                   label: 'security_deposit'.tr(),
                   initialValue: deposit > 0 ? deposit.toInt().toString() : '',
+                  enabled: !hasDepositInMaster,
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
                     context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'deposit', price);
@@ -334,6 +353,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
                 child: _PriceInput(
                   label: 'maintenance'.tr(),
                   initialValue: maintenance > 0 ? maintenance.toInt().toString() : '',
+                  enabled: !hasMaintenanceInMaster,
                   onChanged: (val) {
                     final price = double.tryParse(val) ?? 0.0;
                     context.read<PropertySetupCubit>().updatePricing(type, sharingStr, 'maintenance', price);
@@ -342,6 +362,7 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
               ),
             ],
           ),
+          SizedBox(height: 16.h),
         ],
       ),
     );
@@ -435,8 +456,15 @@ class _PriceInput extends StatefulWidget {
   final String label;
   final String initialValue;
   final Function(String) onChanged;
+  final bool enabled;
+  final String prefix = '₹';
 
-  const _PriceInput({required this.label, required this.initialValue, required this.onChanged});
+  const _PriceInput({
+    required this.label,
+    required this.initialValue,
+    required this.onChanged,
+    this.enabled = true,
+  });
 
   @override
   State<_PriceInput> createState() => _PriceInputState();
@@ -468,13 +496,15 @@ class _PriceInputState extends State<_PriceInput> {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = widget.enabled;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B))),
+        Text(widget.label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: isEnabled ? const Color(0xFF64748B) : const Color(0xFF94A3B8))),
         SizedBox(height: 6.h),
         Focus(
           onFocusChange: (hasFocus) {
+            if (!isEnabled) return;
             setState(() => _isFocused = hasFocus);
             if (!hasFocus) {
               if (_controller.text != widget.initialValue) {
@@ -485,9 +515,9 @@ class _PriceInputState extends State<_PriceInput> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
-              color: Colors.white, 
+              color: isEnabled ? Colors.white : const Color(0xFFF1F5F9), 
               borderRadius: BorderRadius.circular(12.r), 
-              border: Border.all(color: _isFocused ? const Color(0xFFF98125) : const Color(0xFFE2E8F0)),
+              border: Border.all(color: _isFocused && isEnabled ? const Color(0xFFF98125) : const Color(0xFFE2E8F0)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.02),
@@ -498,13 +528,16 @@ class _PriceInputState extends State<_PriceInput> {
             ),
             child: Row(
               children: [
-                Text('₹', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF64748B))),
-                SizedBox(width: 8.w),
+                if (widget.prefix.isNotEmpty) ...[
+                  Text(widget.prefix, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: _isFocused && isEnabled ? const Color(0xFFF98125) : const Color(0xFF64748B))),
+                  SizedBox(width: 8.w),
+                ],
                 Expanded(
                   child: TextFormField(
                     controller: _controller,
                     onChanged: widget.onChanged,
                     keyboardType: TextInputType.number,
+                    enabled: isEnabled,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -514,7 +547,11 @@ class _PriceInputState extends State<_PriceInput> {
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(vertical: 12),
                     ),
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w800,
+                      color: isEnabled ? const Color(0xFF334155) : const Color(0xFF94A3B8),
+                    ),
                   ),
                 ),
               ],

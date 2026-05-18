@@ -456,6 +456,81 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
           ),
         ],
       );
+    } else if (bed.status == 'MAINTENANCE') {
+      return Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(14.r),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(color: const Color(0xFFCBD5E1)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.handyman_rounded, color: const Color(0xFF475569), size: 18.sp),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    'Bed ${bed.bedNumber} is under maintenance.',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF475569),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 16.h),
+          SizedBox(
+            width: double.infinity,
+            height: 44.h,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                final bedStatus = _mapStatus(bed.status);
+                BedDetailsSheet.show(
+                  context,
+                  BedState(
+                    status: bedStatus,
+                    bedNumber: "${widget.room.roomNumber}-${bed.bedNumber}",
+                    tenantName: bed.tenantName,
+                    profileImage: bed.tenantAvatar,
+                    joiningDate: "01 May 2024",
+                    vacatingDate: null,
+                    tenantId: bed.tenantId,
+                    hostelId: widget.hostelId,
+                    roomNumber: widget.room.roomNumber,
+                    awayReturnDate: bed.awayReturnDate,
+                    roomId: widget.room.id,
+                    rent: widget.room.rent,
+                    dailyRent: widget.room.dailyRent,
+                    maintenance: widget.room.maintenance,
+                    deposit: widget.room.deposit,
+                    roomType: widget.room.roomType,
+                    amenities: widget.room.features,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFCBD5E1),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                elevation: 0,
+              ),
+              child: Text(
+                'VIEW DETAILS',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF475569),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
     } else {
       return Container(
         padding: EdgeInsets.all(14.r),
@@ -479,6 +554,10 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
         return BedStatus.free;
       case 'NOTICE':
         return BedStatus.notice;
+      case 'AWAY':
+        return BedStatus.away;
+      case 'MAINTENANCE':
+        return BedStatus.maintenance;
       default:
         return BedStatus.occupied;
     }

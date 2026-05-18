@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import '../utils/logger.dart';
 
-/// A smart retry interceptor that automatically retries failed GET requests 
-/// or network-related failures using exponential backoff.
+
+
 class RetryInterceptor extends Interceptor {
   final Dio dio;
   final int maxRetries;
@@ -20,7 +20,7 @@ class RetryInterceptor extends Interceptor {
     final extra = err.requestOptions.extra;
     int retryCount = extra['retry_count'] ?? 0;
 
-    // Only retry GET requests or specific network errors
+    
     bool isIdempotent = err.requestOptions.method.toUpperCase() == 'GET';
     bool isNetworkError = err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.sendTimeout ||
@@ -40,7 +40,7 @@ class RetryInterceptor extends Interceptor {
       await Future.delayed(Duration(milliseconds: delayMs));
 
       try {
-        // Attempt the request again
+        
         final response = await dio.request(
           err.requestOptions.path,
           cancelToken: err.requestOptions.cancelToken,
@@ -65,7 +65,7 @@ class RetryInterceptor extends Interceptor {
         );
         return handler.resolve(response);
       } catch (e) {
-        // If it fails again, let the interceptor chain continue
+        
         AppLogger.error('[RETRY FAILED] ${err.requestOptions.path} after $retryCount retries.');
       }
     }

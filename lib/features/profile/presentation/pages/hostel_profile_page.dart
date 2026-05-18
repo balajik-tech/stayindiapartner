@@ -471,7 +471,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   Widget _buildStickyBottomBar(BuildContext context, SettingsState state) {
     final isSaving = state is SettingsSaving;
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 32.h),
+      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, MediaQuery.of(context).padding.bottom + 16.h),
       decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, -5))]),
       child: SizedBox(
         width: double.infinity,

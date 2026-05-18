@@ -46,6 +46,11 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
   late String _selectedSharingType;
   late int _selectedFloor;
 
+  bool _hasMasterRent = false;
+  bool _hasMasterDailyRent = false;
+  bool _hasMasterDeposit = false;
+  bool _hasMasterMaintenance = false;
+
   static const Map<String, String> _sharingTypeMap = {
     'SINGLE': 'Single Sharing',
     'DOUBLE': '2 Sharing',
@@ -94,11 +99,9 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     _selectedFloor = widget.initialFloor ?? room?.floor ?? 0;
     
     
-    if (room == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _onMappingChanged();
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onMappingChanged();
+    });
 
     _rentController.addListener(_onRentChanged);
   }
@@ -148,19 +151,52 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
               r.sharingType == backendSharingType,
         );
 
+        final rentVal = template.rent;
+        final dailyVal = template.dailyRent;
+        final depositVal = template.deposit;
+        final maintVal = template.maintenance;
+
         setState(() {
-          _rentController.text = template.rent.toStringAsFixed(0);
-          _dailyRentController.text = template.dailyRent.toStringAsFixed(0);
-          _depositController.text = template.deposit.toStringAsFixed(0);
-          _maintenanceController.text = template.maintenance.toStringAsFixed(0);
+          if (rentVal > 0) {
+            _rentController.text = rentVal.toStringAsFixed(0);
+            _hasMasterRent = true;
+          } else {
+            _hasMasterRent = false;
+          }
+
+          if (dailyVal > 0) {
+            _dailyRentController.text = dailyVal.toStringAsFixed(0);
+            _hasMasterDailyRent = true;
+          } else {
+            _hasMasterDailyRent = false;
+          }
+
+          if (depositVal > 0) {
+            _depositController.text = depositVal.toStringAsFixed(0);
+            _hasMasterDeposit = true;
+          } else {
+            _hasMasterDeposit = false;
+          }
+
+          if (maintVal > 0) {
+            _maintenanceController.text = maintVal.toStringAsFixed(0);
+            _hasMasterMaintenance = true;
+          } else {
+            _hasMasterMaintenance = false;
+          }
         });
       } catch (e) {
-        
         setState(() {
-          _rentController.clear();
-          _dailyRentController.clear();
-          _depositController.clear();
-          _maintenanceController.clear();
+          if (widget.room == null) {
+            _rentController.clear();
+            _dailyRentController.clear();
+            _depositController.clear();
+            _maintenanceController.clear();
+          }
+          _hasMasterRent = false;
+          _hasMasterDailyRent = false;
+          _hasMasterDeposit = false;
+          _hasMasterMaintenance = false;
         });
       }
     }
@@ -184,7 +220,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
           _buildHeader(isEditing),
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 40.h),
+              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h),
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,21 +326,25 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                   _buildPriceInput(
                     label: 'Monthly Rent',
                     controller: _rentController,
+                    enabled: !_hasMasterRent,
                   ),
                   SizedBox(height: 12.h),
                   _buildPriceInput(
                     label: 'Daily Rent',
                     controller: _dailyRentController,
+                    enabled: !_hasMasterDailyRent,
                   ),
                   SizedBox(height: 12.h),
                   _buildPriceInput(
                     label: 'Security Deposit',
                     controller: _depositController,
+                    enabled: !_hasMasterDeposit,
                   ),
                   SizedBox(height: 12.h),
                   _buildPriceInput(
                     label: 'Maintenance',
                     controller: _maintenanceController,
+                    enabled: !_hasMasterMaintenance,
                   ),
                   
                   SizedBox(height: 40.h),
@@ -449,14 +489,14 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     );
   }
 
-  Widget _buildPriceInput({required String label, required TextEditingController controller}) {
+  Widget _buildPriceInput({required String label, required TextEditingController controller, bool enabled = true}) {
     return Row(
       children: [
         Expanded(
           flex: 2,
           child: Text(
             label,
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: enabled ? AppColors.darkText : AppColors.greyText),
           ),
         ),
         Expanded(
@@ -464,17 +504,18 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: enabled ? Colors.grey.shade50 : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: enabled ? Colors.grey.shade200 : const Color(0xFFE2E8F0)),
             ),
             child: Row(
               children: [
-                Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.primaryBlue)),
+                Text('₹', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: enabled ? AppColors.primaryBlue : const Color(0xFF94A3B8))),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: TextField(
                     controller: controller,
+                    enabled: enabled,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: '0',
@@ -483,7 +524,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.darkText),
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: enabled ? AppColors.darkText : const Color(0xFF64748B)),
                   ),
                 ),
               ],

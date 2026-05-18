@@ -106,7 +106,7 @@ class _FoodMenuPageState extends State<FoodMenuPage>
           if (state is FoodMenuLoaded) {
             _applyMenuToLocal(state.menu);
           } else if (state is FoodMenuSaved) {
-            // Success snackbar handled in specific cases
+            
           } else if (state is FoodMenuError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message), backgroundColor: Colors.red),

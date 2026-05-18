@@ -58,7 +58,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     _bookingSubscription = sl<SocketService>().bookingStream.listen(_onNewBooking);
     _noticeSubscription = sl<SocketService>().noticeStream.listen(_onNewNotice);
     
-    // Set up initial hostel if already loaded
+    
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
       final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
@@ -198,7 +198,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Register dependency on locale to force rebuild on language changes
+    
     final currentLocale = context.locale;
     AppLogger.info('Rebuilding MainNavigationPage with locale: $currentLocale');
     
@@ -433,7 +433,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       child: Container(
         width: 60.w,
         height: 60.w,
-        margin: EdgeInsets.only(bottom: 20.h, right: 8.w),
+        margin: EdgeInsets.only(
+                bottom: 16.h,
+                right: 8.w,
+              ),
         decoration: BoxDecoration(
           color: const Color(0xFFFF7000),
           borderRadius: BorderRadius.circular(20.r),
@@ -490,10 +493,12 @@ class _PremiumNavBar extends StatelessWidget {
     final bool hasBookings = owner?.hasPermission('bookings') ?? true;
     final bool hasCommunity = owner?.role == 'owner' || owner?.role == 'manager';
     final bool hasTenants = owner?.hasPermission('tenants') ?? true;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     if (!hasCommunity) {
       return Container(
-        height: 85.h,
+        height: 85.h + bottomPadding,
+        padding: EdgeInsets.only(bottom: bottomPadding),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -533,8 +538,8 @@ class _PremiumNavBar extends StatelessWidget {
             _NavBarItem(
               index: 4,
               currentIndex: currentIndex,
-              icon: Icons.account_circle_rounded,
-              label: 'profile'.tr(),
+              icon: Icons.menu_rounded,
+              label: 'More',
               onTap: onTap,
             ),
           ],
@@ -547,7 +552,8 @@ class _PremiumNavBar extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          height: 85.h,
+          height: 85.h + bottomPadding,
+          padding: EdgeInsets.only(bottom: bottomPadding),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
@@ -584,7 +590,7 @@ class _PremiumNavBar extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 70.w),
+              SizedBox(width: 96.w),
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -602,8 +608,8 @@ class _PremiumNavBar extends StatelessWidget {
                     _NavBarItem(
                       index: 4,
                       currentIndex: currentIndex,
-                      icon: Icons.account_circle_rounded,
-                      label: 'profile'.tr(),
+                      icon: Icons.menu_rounded,
+                      label: 'More',
                       onTap: onTap,
                     ),
                   ],

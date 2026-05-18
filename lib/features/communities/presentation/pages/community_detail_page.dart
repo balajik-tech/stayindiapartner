@@ -326,7 +326,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
-          padding: EdgeInsets.only(left: 24.w, right: 24.w, top: 24.w, bottom: MediaQuery.of(context).viewInsets.bottom + 24.w),
+          padding: EdgeInsets.only(left: 24.w, right: 24.w, top: 24.w, bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.w),
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(32.r))),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -641,7 +641,7 @@ class _RedAlertFormState extends State<_RedAlertForm> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 24.w, right: 24.w, top: 24.w, bottom: MediaQuery.of(context).viewInsets.bottom + 24.w),
+      padding: EdgeInsets.only(left: 24.w, right: 24.w, top: 24.w, bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),

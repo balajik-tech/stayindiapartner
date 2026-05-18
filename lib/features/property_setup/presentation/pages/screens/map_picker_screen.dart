@@ -82,6 +82,18 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.stayindia.owner',
               ),
+              CircleLayer(
+                circles: [
+                  CircleMarker(
+                    point: _selectedLocation,
+                    radius: 150,
+                    useRadiusInMeter: true,
+                    color: const Color(0xFFFF7A00).withValues(alpha: 0.15),
+                    borderColor: const Color(0xFFFF7A00).withValues(alpha: 0.5),
+                    borderStrokeWidth: 2,
+                  ),
+                ],
+              ),
               MarkerLayer(
                 markers: [
                   Marker(

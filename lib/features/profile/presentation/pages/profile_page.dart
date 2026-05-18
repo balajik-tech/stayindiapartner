@@ -54,7 +54,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final bool isStaff = role != 'owner' && role != 'manager';
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8FAFC),
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           final profile = state is ProfileLoaded ? state.profile : 
@@ -78,18 +78,32 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.person_rounded,
                           title: 'account_settings'.tr(),
                           subtitle: 'account_settings_sub'.tr(),
+                          iconBgColor: const Color(0xFFE0F2FE),
+                          iconColor: const Color(0xFF0284C7),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
                         ),
                         _ProfileTile(
                           icon: Icons.credit_card_rounded,
                           title: 'subscription'.tr(),
                           subtitle: 'subscription_sub'.tr(),
+                          iconBgColor: const Color(0xFFF0FDF4),
+                          iconColor: const Color(0xFF16A34A),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionPage())),
+                        ),
+                        _ProfileTile(
+                          icon: Icons.stars_rounded,
+                          title: 'membership_id'.tr() == 'membership_id' ? 'Membership ID' : 'membership_id'.tr(),
+                          subtitle: 'golden_pg_status'.tr() == 'golden_pg_status' ? 'Golden PG Status' : 'golden_pg_status'.tr(),
+                          iconBgColor: const Color(0xFFFEF9C3),
+                          iconColor: const Color(0xFFCA8A04),
+                          onTap: () => _showMembershipCard(context, name, phone),
                         ),
                         _ProfileTile(
                           icon: Icons.card_membership_rounded,
                           title: 'digital_certificate'.tr(),
                           subtitle: 'digital_certificate_sub'.tr(),
+                          iconBgColor: const Color(0xFFF5F3FF),
+                          iconColor: const Color(0xFF7C3AED),
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -109,6 +123,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.person_rounded,
                           title: 'account_settings'.tr(),
                           subtitle: 'account_settings_sub'.tr(),
+                          iconBgColor: const Color(0xFFE0F2FE),
+                          iconColor: const Color(0xFF0284C7),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsPage())),
                         ),
                       ]),
@@ -122,24 +138,32 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.business_rounded,
                           title: 'hostel_profile'.tr(),
                           subtitle: 'hostel_profile_sub'.tr(),
+                          iconBgColor: const Color(0xFFFFF1F2),
+                          iconColor: const Color(0xFFE11D48),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HostelProfilePage())),
                         ),
                         _ProfileTile(
                           icon: Icons.wifi_rounded,
                           title: 'amenities'.tr(),
                           subtitle: 'amenities_sub'.tr(),
+                          iconBgColor: const Color(0xFFECFDF5),
+                          iconColor: const Color(0xFF059669),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AmenitiesPage())),
                         ),
                         _ProfileTile(
                           icon: Icons.rule_rounded,
                           title: 'house_rules'.tr(),
                           subtitle: 'house_rules_sub'.tr(),
+                          iconBgColor: const Color(0xFFFFF7ED),
+                          iconColor: const Color(0xFFEA580C),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HouseRulesPage())),
                         ),
                         _ProfileTile(
                           icon: Icons.restaurant_rounded,
                           title: 'food_menu'.tr(),
                           subtitle: 'food_menu_sub'.tr(),
+                          iconBgColor: const Color(0xFFFEF2F2),
+                          iconColor: const Color(0xFFDC2626),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FoodMenuPage())),
                         ),
                       ]),
@@ -153,6 +177,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.insights_rounded,
                           title: 'financial_insights'.tr(),
                           subtitle: 'financial_insights_sub'.tr(),
+                          iconBgColor: const Color(0xFFEFF6FF),
+                          iconColor: const Color(0xFF2563EB),
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -167,6 +193,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.inventory_2_rounded,
                           title: 'stock_management'.tr(),
                           subtitle: 'stock_management_sub'.tr(),
+                          iconBgColor: const Color(0xFFFAF5FF),
+                          iconColor: const Color(0xFF9333EA),
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -181,6 +209,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.people_alt_rounded,
                           title: 'staff_management'.tr(),
                           subtitle: 'staff_management_sub'.tr(),
+                          iconBgColor: const Color(0xFFF0FDFA),
+                          iconColor: const Color(0xFF0D9488),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StaffManagementPage())),
                         ),
                       ]),
@@ -193,12 +223,16 @@ class _ProfilePageState extends State<ProfilePage> {
                         icon: Icons.language_rounded,
                         title: 'change_language'.tr(),
                         subtitle: 'language_sub'.tr(),
+                        iconBgColor: const Color(0xFFF1F5F9),
+                        iconColor: const Color(0xFF475569),
                         onTap: () => _showLanguagePicker(context),
                       ),
                       _ProfileTile(
                         icon: Icons.verified_user_rounded,
                         title: 'privacy_policy'.tr(),
                         subtitle: 'privacy_policy_sub'.tr(),
+                        iconBgColor: const Color(0xFFECFEFF),
+                        iconColor: const Color(0xFF0891B2),
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -211,12 +245,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.help_center_rounded,
                           title: 'help_support'.tr(),
                           subtitle: 'help_support_sub'.tr(),
+                          iconBgColor: const Color(0xFFFFFBEB),
+                          iconColor: const Color(0xFFD97706),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportPage())),
                         ),
                         _ProfileTile(
                           icon: Icons.chat_bubble_rounded,
                           title: 'feedback'.tr(),
                           subtitle: 'feedback_sub'.tr(),
+                          iconBgColor: const Color(0xFFFFF1F2),
+                          iconColor: const Color(0xFFE11D48),
                           onTap: () {},
                         ),
                       ],
@@ -231,18 +269,24 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.card_giftcard_rounded,
                           title: 'refer_friend'.tr(),
                           subtitle: 'refer_friend_sub'.tr(),
+                          iconBgColor: const Color(0xFFFCE7F3),
+                          iconColor: const Color(0xFFDB2777),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReferFriendPage())),
                         ),
                         _ProfileTile(
                           icon: Icons.star_rate_rounded,
                           title: 'rate_us'.tr(),
                           subtitle: 'rate_us_sub'.tr(),
+                          iconBgColor: const Color(0xFFFEF9C3),
+                          iconColor: const Color(0xFFCA8A04),
                           onTap: () {},
                         ),
                         _ProfileTile(
                           icon: Icons.system_update_rounded,
                           title: 'update_app'.tr(),
                           subtitle: 'update_app_sub'.tr(),
+                          iconBgColor: const Color(0xFFF0FDF4),
+                          iconColor: const Color(0xFF16A34A),
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('App is up to date! (v1.0.4)')),
@@ -253,18 +297,24 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.campaign_rounded,
                           title: 'send_announcements'.tr(),
                           subtitle: 'send_announcements_sub'.tr(),
+                          iconBgColor: const Color(0xFFEFF6FF),
+                          iconColor: const Color(0xFF2563EB),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SendAnnouncementsPage())),
                         ),
                         _ProfileTile(
                           icon: Icons.analytics_rounded,
                           title: 'my_reports'.tr(),
                           subtitle: 'my_reports_sub'.tr(),
+                          iconBgColor: const Color(0xFFECFDF5),
+                          iconColor: const Color(0xFF059669),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportsDashboardPage())),
                         ),
                         _ProfileTile(
                           icon: Icons.local_offer_rounded,
                           title: 'hostel_offers'.tr(),
                           subtitle: 'hostel_offers_sub'.tr(),
+                          iconBgColor: const Color(0xFFFFF7ED),
+                          iconColor: const Color(0xFFEA580C),
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const OffersManagementPage())),
                         ),
                       ]),
@@ -278,6 +328,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.share_rounded,
                           title: 'share_app'.tr(),
                           subtitle: 'share_app_sub'.tr(),
+                          iconBgColor: const Color(0xFFF5F3FF),
+                          iconColor: const Color(0xFF7C3AED),
                           onTap: () {},
                         ),
                       _ProfileTile(
@@ -285,6 +337,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         title: 'logout'.tr(),
                         subtitle: 'logout_sub'.tr(),
                         titleColor: AppColors.error,
+                        iconBgColor: const Color(0xFFFEF2F2),
+                        iconColor: const Color(0xFFDC2626),
                         onTap: () => _handleLogout(context),
                       ),
                     ]),
@@ -486,6 +540,143 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  void _showMembershipCard(BuildContext context, String name, String phone) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFBF953F), Color(0xFFFCF6BA), Color(0xFFB38728), Color(0xFFFBF5B7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24.r),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                blurRadius: 20,
+                spreadRadius: 2,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 20.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.stars_rounded, color: const Color(0xFFFFD700), size: 48.sp),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'GOLDEN PG STATUS',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFFFFD700),
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(24.r),
+                child: Column(
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E293B),
+                        letterSpacing: -0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 12.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: const Color(0xFFB38728), width: 1),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'MEMBERSHIP ID',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF475569),
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            'SI-OWNER-${phone.replaceAll("+91 ", "").replaceAll(" ", "")}',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF1E293B),
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.verified_rounded, color: const Color(0xFFB38728), size: 16.sp),
+                        SizedBox(width: 6.w),
+                        Text(
+                          'Verified Stay India Premium Partner',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF475569),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 24.h),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: const Color(0xFFFFD700),
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                      ),
+                      child: const Text(
+                        'Awesome',
+                        style: TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showLanguagePicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -626,6 +817,8 @@ class _ProfileTile extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
   final Color? titleColor;
+  final Color? iconBgColor;
+  final Color? iconColor;
 
   const _ProfileTile({
     required this.icon,
@@ -633,6 +826,8 @@ class _ProfileTile extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
     this.titleColor,
+    this.iconBgColor,
+    this.iconColor,
   });
 
   @override
@@ -647,10 +842,10 @@ class _ProfileTile extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(10.r),
               decoration: BoxDecoration(
-                color: AppColors.backgroundSecondary,
-                borderRadius: BorderRadius.circular(12.r),
+                color: iconBgColor ?? AppColors.backgroundSecondary,
+                shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: AppColors.primaryBlue, size: 20.sp),
+              child: Icon(icon, color: iconColor ?? AppColors.primaryBlue, size: 20.sp),
             ),
             SizedBox(width: 16.w),
             Expanded(

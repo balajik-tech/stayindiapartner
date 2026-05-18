@@ -16,8 +16,13 @@ class RoomConfigurationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hostelState = context.read<HostelCubit>().state;
+    String hostelId = '';
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+    }
     return BlocProvider(
-      create: (_) => sl<RoomCubit>()..getRooms(),
+      create: (_) => sl<RoomCubit>()..getRooms(hostelId: hostelId),
       child: const _RoomConfigurationView(),
     );
   }

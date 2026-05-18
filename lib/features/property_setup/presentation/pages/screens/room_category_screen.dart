@@ -1,372 +1,424 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
-import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
-import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 
-class RoomCategoryScreen extends StatelessWidget {
+class RoomPricing {
+  final int sharing;
+  final String type;
+  final String monthlyRent;
+  final String securityDeposit;
+  final String maintenance;
+  final String dailyRent;
+
+  RoomPricing({
+    required this.sharing,
+    required this.type,
+    this.monthlyRent = '',
+    this.securityDeposit = '',
+    this.maintenance = '',
+    this.dailyRent = '',
+  });
+}
+
+class RoomCategoryScreen extends StatefulWidget {
   const RoomCategoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<PropertySetupCubit, PropertySetupState>(
-      builder: (context, state) {
-        final totalRooms = context.read<PropertySetupCubit>().totalRooms;
-        final assignedRooms = context.read<PropertySetupCubit>().assignedCategoryRooms;
-        final remainingRooms = totalRooms - assignedRooms;
+  State<RoomCategoryScreen> createState() => _RoomCategoryScreenState();
+}
 
-        return Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 16.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'room_master'.tr(),
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF2B5797),
-                          letterSpacing: -0.5,
+class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
+  String _selectedType = 'AC'; 
+  late List<int> _activeSharingTypes;
+
+  late Map<String, Map<int, Map<String, TextEditingController>>> _controllers;
+  late Map<String, Map<int, Map<String, FocusNode>>> _focusNodes;
+
+  final Map<String, Set<int>> _customizedDeposits = {
+    'AC': {},
+    'NON_AC': {},
+  };
+  final Map<String, Set<int>> _customizedMaintenances = {
+    'AC': {},
+    'NON_AC': {},
+  };
+
+  final Map<String, Set<int>> _customizedDailies = {
+    'AC': {},
+    'NON_AC': {},
+  };
+
+  bool _isPropagating = false;
+
+  void _propagateValue(String type, int sourceSharing, String field, String value) {
+    if (_isPropagating) return;
+    _isPropagating = true;
+
+    try {
+      final Set<int> customizedSet;
+      if (field == 'deposit') {
+        customizedSet = _customizedDeposits[type]!;
+      } else if (field == 'maintenance') {
+        customizedSet = _customizedMaintenances[type]!;
+      } else {
+        customizedSet = _customizedDailies[type]!;
+      }
+
+      for (int s = 1; s <= 10; s++) {
+        if (s == sourceSharing) continue;
+        if (!customizedSet.contains(s)) {
+          _controllers[type]![s]![field]!.text = value;
+        }
+      }
+    } finally {
+      _isPropagating = false;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final Set<int> initialSharingTypes = {1, 2, 3, 4};
+
+    // Initialize controllers and focus nodes for 10 rows of both AC and NON_AC
+    _controllers = {
+      'AC': {},
+      'NON_AC': {},
+    };
+
+    _focusNodes = {
+      'AC': {},
+      'NON_AC': {},
+    };
+
+    for (final type in ['AC', 'NON_AC']) {
+      for (int s = 1; s <= 10; s++) {
+        _controllers[type]![s] = {
+          'rent': TextEditingController(),
+          'deposit': TextEditingController(),
+          'maintenance': TextEditingController(),
+          'daily': TextEditingController(),
+        };
+
+        _focusNodes[type]![s] = {
+          'rent': FocusNode(),
+          'deposit': FocusNode(),
+          'maintenance': FocusNode(),
+          'daily': FocusNode(),
+        };
+      }
+    }
+
+    // Prefill data from current cubit categories
+    final currentCategories = context.read<PropertySetupCubit>().state.roomCategories;
+    for (final cat in currentCategories) {
+      final int sharing = cat['sharingType'] ?? 2;
+      if (sharing >= 1 && sharing <= 10) {
+        final bool isAC = cat['isAC'] == true;
+        final String typeKey = isAC ? 'AC' : 'NON_AC';
+
+        final rent = cat['monthlyRent']?.toString() ?? '';
+        final deposit = cat['securityDeposit']?.toString() ?? '';
+        final maint = cat['maintenance']?.toString() ?? '';
+        final daily = cat['dailyRent']?.toString() ?? '';
+        _controllers[typeKey]![sharing]!['rent']!.text = rent;
+        _controllers[typeKey]![sharing]!['deposit']!.text = deposit;
+        _controllers[typeKey]![sharing]!['maintenance']!.text = maint;
+        _controllers[typeKey]![sharing]!['daily']!.text = daily;
+
+        if (deposit.isNotEmpty) {
+          _customizedDeposits[typeKey]!.add(sharing);
+        }
+        if (maint.isNotEmpty) {
+          _customizedMaintenances[typeKey]!.add(sharing);
+        }
+        initialSharingTypes.add(sharing);
+      }
+    }
+
+    _activeSharingTypes = initialSharingTypes.toList()..sort();
+
+    // Attach listeners for auto-calculation, validation, and smart propagation
+    for (final type in ['AC', 'NON_AC']) {
+      for (int s = 1; s <= 10; s++) {
+        final rentCtrl = _controllers[type]![s]!['rent']!;
+        final depositCtrl = _controllers[type]![s]!['deposit']!;
+        final maintCtrl = _controllers[type]![s]!['maintenance']!;
+        final dailyCtrl = _controllers[type]![s]!['daily']!;
+
+        final depositFocus = _focusNodes[type]![s]!['deposit']!;
+        final maintFocus = _focusNodes[type]![s]!['maintenance']!;
+        final dailyFocus = _focusNodes[type]![s]!['daily']!;
+
+        rentCtrl.addListener(() {
+          if (dailyCtrl.text.isEmpty) {
+            final monthly = double.tryParse(rentCtrl.text) ?? 0;
+            if (monthly > 0) {
+              dailyCtrl.text = (monthly / 30).round().toString();
+            }
+          }
+        });
+
+        // Propagation listeners: only propagate value changes when user is actively editing the first field (s == 1)
+        depositCtrl.addListener(() {
+          if (depositFocus.hasFocus) {
+            final val = depositCtrl.text.trim();
+            if (s == 1) {
+              _propagateValue(type, 1, 'deposit', val);
+            } else {
+              _customizedDeposits[type]!.add(s);
+            }
+          }
+        });
+
+        maintCtrl.addListener(() {
+          if (maintFocus.hasFocus) {
+            final val = maintCtrl.text.trim();
+            if (s == 1) {
+              _propagateValue(type, 1, 'maintenance', val);
+            } else {
+              _customizedMaintenances[type]!.add(s);
+            }
+          }
+        });
+
+        dailyCtrl.addListener(() {
+          if (dailyFocus.hasFocus) {
+            final val = dailyCtrl.text.trim();
+            if (s == 1) {
+              _propagateValue(type, 1, 'daily', val);
+            } else {
+              _customizedDailies[type]!.add(s);
+            }
+          }
+        });
+
+        // Silently sync matrix changes into the cubit state without triggering heavy UI rebuilds
+        rentCtrl.addListener(_silentSyncToCubit);
+        depositCtrl.addListener(_silentSyncToCubit);
+        maintCtrl.addListener(_silentSyncToCubit);
+        dailyCtrl.addListener(_silentSyncToCubit);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controllers.forEach((type, sharingMap) {
+      sharingMap.forEach((sharing, fieldMap) {
+        fieldMap.forEach((field, controller) {
+          controller.dispose();
+        });
+      });
+    });
+
+    _focusNodes.forEach((type, sharingMap) {
+      sharingMap.forEach((sharing, fieldMap) {
+        fieldMap.forEach((field, node) {
+          node.dispose();
+        });
+      });
+    });
+
+    super.dispose();
+  }
+
+  void _silentSyncToCubit() {
+    final List<Map<String, dynamic>> categoriesToSave = [];
+    _controllers.forEach((typeKey, sharingMap) {
+      final bool isAC = typeKey == 'AC';
+      sharingMap.forEach((sharing, fieldMap) {
+        if (!_activeSharingTypes.contains(sharing)) return;
+        final rent = fieldMap['rent']!.text.trim();
+        final deposit = fieldMap['deposit']!.text.trim();
+        final maint = fieldMap['maintenance']!.text.trim();
+        final daily = fieldMap['daily']!.text.trim();
+
+        if (rent.isNotEmpty) {
+          categoriesToSave.add({
+            'id': 'cat_${typeKey}_$sharing',
+            'sharingType': sharing,
+            'isAC': isAC,
+            'roomSize': '',
+            'roomCount': 0,
+            'monthlyRent': rent,
+            'dailyRent': daily.isNotEmpty ? daily : (double.parse(rent) / 30).round().toString(),
+            'securityDeposit': deposit.isNotEmpty ? deposit : '0',
+            'maintenance': maint.isNotEmpty ? maint : '0',
+            'securityDepositCustomized': true,
+            'maintenanceCustomized': true,
+            'dailyRentThresholdDays': '5',
+          });
+        }
+      });
+    });
+
+    context.read<PropertySetupCubit>().setRoomCategories(categoriesToSave);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: Column(
+        children: [
+          _buildHeaderSection(),
+          SizedBox(height: 8.h),
+          _buildToggleRow(),
+          SizedBox(height: 12.h),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16.r),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLeftStaticPanel(),
+                        Expanded(
+                          child: _buildRightScrollablePanel(),
                         ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'room_master_sub'.tr(),
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
-            Expanded(
-              child: state.roomCategories.isEmpty
-                  ? _buildEmptyState(context)
-                  : ListView.separated(
-                      padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h),
-                      itemCount: state.roomCategories.length + 1,
-                      separatorBuilder: (context, index) => SizedBox(height: 16.h),
-                      itemBuilder: (context, index) {
-                        if (index == state.roomCategories.length) {
-                          return _buildAddButton(context, remainingRooms);
-                        }
-                        return _buildCategoryCard(context, index, state.roomCategories[index], remainingRooms);
-                      },
-                    ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.category_rounded, size: 64.sp, color: const Color(0xFFCBD5E1)),
-          SizedBox(height: 16.h),
-            Text(
-              'no_room_master_defined'.tr(),
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: const Color(0xFF475569)),
-            ),
-          SizedBox(height: 24.h),
-          _buildAddButton(context, 0),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryCard(BuildContext context, int index, Map<String, dynamic> category, int remaining) {
-    return Container(
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
           ),
+          SizedBox(height: 8.h),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeaderSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 2.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'category_count'.tr(namedArgs: {'count': (index + 1).toString()}),
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797)),
-              ),
-              IconButton(
-                onPressed: () => context.read<PropertySetupCubit>().removeRoomCategory(index),
-                icon: Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20.sp),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
+          Text(
+            'Room Master',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF2B5797),
+              letterSpacing: -0.5,
+            ),
           ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDropdown<int>(
-                  label: 'sharing_type_label'.tr(),
-                  value: category['sharingType'] as int,
-                  items: (() {
-                    final list = [1, 2, 3, 4, 5];
-                    final currentVal = category['sharingType'] as int;
-                    final menuItems = list.map((e) => DropdownMenuItem<int>(
-                      value: e,
-                      child: Text('$e ${'sharing'.tr()}'),
-                    )).toList();
-                    
-                    if (!list.contains(currentVal)) {
-                      menuItems.add(DropdownMenuItem<int>(
-                        value: currentVal,
-                        child: Text('$currentVal ${'sharing'.tr()}'),
-                      ));
-                    }
-                    
-                    menuItems.add(DropdownMenuItem<int>(
-                      value: -1,
-                      child: Text(_translate('custom_dots', 'Custom...')),
-                    ));
-                    
-                    return menuItems;
-                  })(),
-                  onChanged: (val) async {
-                    if (val == -1) {
-                      final cubit = context.read<PropertySetupCubit>();
-                      final customVal = await _showCustomSharingDialog(context);
-                      if (customVal != null && customVal > 0) {
-                        cubit.updateRoomCategory(index, {'sharingType': customVal});
-                      }
-                    } else if (val != null) {
-                      context.read<PropertySetupCubit>().updateRoomCategory(index, {'sharingType': val});
-                    }
-                  },
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildDropdown<bool>(
-                  label: 'room_type_label'.tr(),
-                  value: category['isAC'],
-                  items: [
-                    DropdownMenuItem(value: true, child: Text('room_type_ac'.tr())),
-                    DropdownMenuItem(value: false, child: Text('room_type_non_ac'.tr())),
-                  ],
-                  onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'isAC': val}),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 14.h),
-          Row(
-            children: [
-              Expanded(child: Divider(color: const Color(0xFFE2E8F0), thickness: 1)),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.w),
-                child: Text(
-                  'pricing_master'.tr().toUpperCase(),
-                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 1),
-                ),
-              ),
-              Expanded(child: Divider(color: const Color(0xFFE2E8F0), thickness: 1)),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  label: 'monthly_rent'.tr(),
-                  hint: 'e.g. 8500',
-                  prefix: '₹',
-                  initialValue: category['monthlyRent'] ?? '',
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'monthlyRent': val}),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildTextField(
-                  label: 'deposit'.tr(),
-                  hint: 'e.g. 5000',
-                  prefix: '₹',
-                  initialValue: category['securityDeposit'] ?? '',
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'securityDeposit': val}),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  label: 'daily_rent'.tr(),
-                  hint: 'e.g. 500',
-                  prefix: '₹',
-                  initialValue: category['dailyRent'] ?? '',
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'dailyRent': val}),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildTextField(
-                  label: 'maintenance'.tr(),
-                  hint: 'e.g. 500',
-                  prefix: '₹',
-                  initialValue: category['maintenance'] ?? '',
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'maintenance': val}),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          _buildTextField(
-            label: 'daily_rent_limit_label'.tr(),
-            hint: 'e.g. 10',
-            suffix: 'days',
-            initialValue: category['dailyRentThresholdDays'] ?? '',
-            keyboardType: TextInputType.number,
-            onChanged: (val) => context.read<PropertySetupCubit>().updateRoomCategory(index, {'dailyRentThresholdDays': val}),
+          SizedBox(height: 4.h),
+          Text(
+            'Configure AC and Non-AC standard pricing matrix',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: const Color(0xFF64748B),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDropdown<T>({required String label, required T value, required List<DropdownMenuItem<T>> items, required Function(T?) onChanged}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
-        SizedBox(height: 4.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              value: value,
-              items: items,
-              onChanged: onChanged,
-              isExpanded: true,
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
-              icon: Icon(Icons.keyboard_arrow_down_rounded, color: const Color(0xFF2B5797), size: 20.sp),
-            ),
-          ),
+  Widget _buildToggleRow() {
+    final isAC = _selectedType == 'AC';
+    return Center(
+      child: Container(
+        width: 320.w,
+        height: 48.h,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
-      ],
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required String hint,
-    required String initialValue,
-    required Function(String) onChanged,
-    String? suffix,
-    String? prefix,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
-        SizedBox(height: 4.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: Row(
-            children: [
-              if (prefix != null)
-                Text(
-                  prefix,
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: const Color(0xFF64748B)),
-                ),
-              if (prefix != null) SizedBox(width: 4.w),
-              Expanded(
-                child: TextFormField(
-                  initialValue: initialValue,
-                  onChanged: onChanged,
-                  keyboardType: keyboardType,
-                  decoration: InputDecoration(
-                    hintText: hint,
-                    hintStyle: TextStyle(fontSize: 14.sp, color: const Color(0xFFCBD5E1)),
-                    border: InputBorder.none,
-                    isDense: true,
+        child: Stack(
+          children: [
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              alignment: isAC ? Alignment.centerLeft : Alignment.centerRight,
+              child: FractionallySizedBox(
+                widthFactor: 0.5,
+                child: Container(
+                  margin: EdgeInsets.all(4.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2B5797),
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2B5797).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
                 ),
               ),
-              if (suffix != null)
-                Text(
-                  suffix,
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8)),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _selectedType = 'AC';
+                      });
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(
+                      child: Text(
+                        'AC Room Pricing',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w800,
+                          color: isAC ? Colors.white : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  Widget _buildAddButton(BuildContext context, int remaining) {
-    return BouncingWrapper(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        context.read<PropertySetupCubit>().addRoomCategory();
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: const Color(0xFF2B5797).withValues(alpha: 0.3), style: BorderStyle.none),
-          boxShadow: [
-            BoxShadow(color: const Color(0xFF2B5797).withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_circle_outline_rounded, color: const Color(0xFF2B5797), size: 20.sp),
-            SizedBox(width: 8.w),
-            Text(
-              'add_room_master'.tr().toUpperCase(),
-              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2B5797), letterSpacing: 0.5),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _selectedType = 'NON_AC';
+                      });
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(
+                      child: Text(
+                        'Non-AC Pricing',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w800,
+                          color: !isAC ? Colors.white : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -374,23 +426,282 @@ class RoomCategoryScreen extends StatelessWidget {
     );
   }
 
-  String _translate(String key, String fallback) {
-    final val = key.tr();
-    return val == key ? fallback : val;
+  Widget _buildLeftStaticPanel() {
+    return Container(
+      width: 100.w,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            spreadRadius: 1,
+            offset: const Offset(3, 0), // Creates beautiful 3D elevation casting shadow to the right
+          ),
+        ],
+        border: const Border(
+          right: BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildStaticHeaderCell(),
+          ..._activeSharingTypes.map((sharing) => _buildStaticRowCell(sharing)),
+          _buildStaticAddRowCell(),
+        ],
+      ),
+    );
   }
 
-  Future<int?> _showCustomSharingDialog(BuildContext context) async {
+  Widget _buildStaticHeaderCell() {
+    return Container(
+      height: 44.h,
+      color: const Color(0xFFEFF6FF),
+      alignment: Alignment.center,
+      child: Text(
+        'Sharing',
+        style: TextStyle(
+          color: const Color(0xFF2B5797),
+          fontWeight: FontWeight.w900,
+          fontSize: 11.sp,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStaticRowCell(int sharing) {
+    final isAlternate = sharing % 2 == 0;
+    return Container(
+      height: 52.h,
+      decoration: BoxDecoration(
+        color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
+        border: const Border(
+          bottom: BorderSide(color: Color(0xFFF1F5F9)),
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        '$sharing Sharing',
+        style: TextStyle(
+          color: const Color(0xFF0F172A),
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStaticAddRowCell() {
+    return InkWell(
+      onTap: _showAddSharingDialog,
+      child: Container(
+        height: 48.h,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFF1F5F9)),
+          ),
+        ),
+        padding: EdgeInsets.only(left: 12.w),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            Icon(
+              Icons.add_circle_outline_rounded,
+              color: const Color(0xFF2B5797),
+              size: 16.sp,
+            ),
+            SizedBox(width: 4.w),
+            Text(
+              'Add',
+              style: TextStyle(
+                color: const Color(0xFF2B5797),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRightScrollablePanel() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: SizedBox(
+        width: 400.w, // 4 columns * 100.w
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildScrollableHeader(),
+            ..._activeSharingTypes.map((sharing) => _buildScrollableRow(sharing)),
+            _buildScrollableAddRowPlaceholder(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrollableHeader() {
+    return Container(
+      height: 44.h,
+      color: const Color(0xFFEFF6FF),
+      child: Row(
+        children: [
+          _buildHeaderCell('Monthly Rent', 100.w),
+          _buildHeaderCell('Deposit', 100.w),
+          _buildHeaderCell('Maintenance', 100.w),
+          _buildHeaderCell('Daily Rent', 100.w),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScrollableRow(int sharing) {
+    final isAlternate = sharing % 2 == 0;
+    return Container(
+      height: 52.h,
+      decoration: BoxDecoration(
+        color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
+        border: const Border(
+          bottom: BorderSide(color: Color(0xFFF1F5F9)),
+        ),
+      ),
+      child: Row(
+        children: [
+          _buildTableCellField(sharing, 'rent'),
+          _buildTableCellField(sharing, 'deposit'),
+          _buildTableCellField(sharing, 'maintenance'),
+          _buildTableCellField(sharing, 'daily'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScrollableAddRowPlaceholder() {
+    return InkWell(
+      onTap: _showAddSharingDialog,
+      child: Container(
+        height: 48.h,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFF1F5F9)),
+          ),
+        ),
+        padding: EdgeInsets.only(left: 12.w),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          'Add Custom Sharing Option...',
+          style: TextStyle(
+            color: const Color(0xFF94A3B8),
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderCell(String label, double width) {
+    return SizedBox(
+      width: width,
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            color: const Color(0xFF2B5797),
+            fontWeight: FontWeight.w900,
+            fontSize: 11.sp,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableCellField(int sharing, String field) {
+    final controller = _controllers[_selectedType]![sharing]![field]!;
+    final focusNode = _focusNodes[_selectedType]![sharing]![field]!;
+
+    return Container(
+      width: 100.w,
+      height: 52.h,
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: TextInputType.number,
+        textInputAction: (field == 'daily' && sharing == _activeSharingTypes.last)
+            ? TextInputAction.done
+            : TextInputAction.next,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          MaxValueTextInputFormatter(50000),
+        ],
+        onSubmitted: (_) {
+          if (field == 'rent') {
+            _focusNodes[_selectedType]![sharing]!['deposit']!.requestFocus();
+          } else if (field == 'deposit') {
+            _focusNodes[_selectedType]![sharing]!['maintenance']!.requestFocus();
+          } else if (field == 'maintenance') {
+            _focusNodes[_selectedType]![sharing]!['daily']!.requestFocus();
+          } else if (field == 'daily') {
+            final currentIndex = _activeSharingTypes.indexOf(sharing);
+            if (currentIndex != -1 && currentIndex < _activeSharingTypes.length - 1) {
+              final nextSharing = _activeSharingTypes[currentIndex + 1];
+              _focusNodes[_selectedType]![nextSharing]!['rent']!.requestFocus();
+            }
+          }
+        },
+        style: TextStyle(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF0F172A),
+        ),
+        decoration: InputDecoration(
+          prefixText: '₹ ',
+          prefixStyle: TextStyle(
+            color: const Color(0xFF94A3B8),
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.r),
+            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.r),
+            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.r),
+            borderSide: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddSharingDialog() {
     final controller = TextEditingController();
-    return showDialog<int>(
+    showDialog(
       context: context,
-      builder: (context) {
+      builder: (ctx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
           title: Text(
-            _translate('custom_sharing', 'Custom Sharing'),
+            'Add Custom Sharing',
             style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w900,
               color: const Color(0xFF2B5797),
             ),
           ),
@@ -399,32 +710,32 @@ class RoomCategoryScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _translate('enter_sharing_number', 'Enter sharing number'),
-                style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B)),
+                'Enter sharing number (e.g. 5, 6, 7)',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               SizedBox(height: 12.h),
               TextField(
                 controller: controller,
                 keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 autofocus: true,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
                 decoration: InputDecoration(
-                  hintText: 'e.g. 6',
-                  filled: true,
-                  fillColor: const Color(0xFFF8FAFC),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  hintText: 'Sharing number',
+                  hintStyle: TextStyle(color: const Color(0xFF94A3B8), fontSize: 13.sp),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(8.r),
                     borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: Color(0xFF2B5797)),
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
                   ),
                 ),
               ),
@@ -432,30 +743,90 @@ class RoomCategoryScreen extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'cancel'.tr(),
-                style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             ElevatedButton(
               onPressed: () {
-                final val = int.tryParse(controller.text);
-                Navigator.pop(context, val);
+                final text = controller.text.trim();
+                if (text.isEmpty) return;
+                final sharing = int.tryParse(text);
+                if (sharing == null || sharing < 1 || sharing > 10) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a sharing number between 1 and 10'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+                if (_activeSharingTypes.contains(sharing)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('This sharing option already exists'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pop(ctx);
+                setState(() {
+                  _activeSharingTypes.add(sharing);
+                  _activeSharingTypes.sort();
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2B5797),
-                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               ),
-              child: Text(
-                _translate('ok', 'OK'),
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              child: const Text(
+                'Add',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
         );
       },
     );
+  }
+}
+
+class MaxValueTextInputFormatter extends TextInputFormatter {
+  final int maxValue;
+
+  MaxValueTextInputFormatter(this.maxValue);
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    final value = int.tryParse(newValue.text);
+    if (value == null) {
+      return oldValue;
+    }
+
+    if (value > maxValue) {
+      final cappedText = maxValue.toString();
+      return TextEditingValue(
+        text: cappedText,
+        selection: TextSelection.collapsed(offset: cappedText.length),
+      );
+    }
+
+    return newValue;
   }
 }

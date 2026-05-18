@@ -604,7 +604,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
     }
 
     final roomCubit = context.read<RoomCubit>();
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
@@ -1335,39 +1335,11 @@ class _RoomManageCardState extends State<_RoomManageCard> {
               _buildSharingSelector(context, _localCapacity),
               SizedBox(height: 24.h),
               Text(
-                'AMENITIES',
+                'ROOM TYPE',
                 style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 0.5),
               ),
-              SizedBox(height: 16.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildFeatureIcon(
-                    icon: Icons.ac_unit_rounded,
-                    label: 'AC',
-                    isSelected: _localRoomType == 'AC',
-                    onTap: () => _toggleFeature(context, 'roomType', _localRoomType == 'AC' ? 'NON-AC' : 'AC'),
-                  ),
-                  _buildFeatureIcon(
-                    icon: Icons.menu_book_rounded,
-                    label: 'Study Table',
-                    isSelected: _localFeatures.contains('STUDY_ROOM'),
-                    onTap: () => _toggleFeature(context, 'feature', 'STUDY_ROOM'),
-                  ),
-                  _buildFeatureIcon(
-                    icon: Icons.balcony_rounded,
-                    label: 'Balcony',
-                    isSelected: _localFeatures.contains('BALCONY'),
-                    onTap: () => _toggleFeature(context, 'feature', 'BALCONY'),
-                  ),
-                  _buildFeatureIcon(
-                    icon: Icons.wc_rounded,
-                    label: 'Washroom',
-                    isSelected: _localFeatures.contains('WASHROOM'),
-                    onTap: () => _toggleFeature(context, 'feature', 'WASHROOM'),
-                  ),
-                ],
-              ),
+              SizedBox(height: 12.h),
+              _buildAcToggle(context, _localRoomType == 'AC'),
               SizedBox(height: 24.h),
               Text(
                 'BEDS CONFIGURATION',
@@ -1621,31 +1593,104 @@ class _RoomManageCardState extends State<_RoomManageCard> {
     );
   }
 
-  Widget _buildFeatureIcon({required IconData icon, required String label, required bool isSelected, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
+  Widget _buildAcToggle(BuildContext context, bool isAC) {
+    return Container(
+      height: 48.h,
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.all(12.r),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFF98125).withValues(alpha: 0.05) : const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: isSelected ? const Color(0xFFF98125) : const Color(0xFFE2E8F0),
-                width: 1.5,
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (!isAC) {
+                  _toggleFeature(context, 'roomType', 'AC');
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isAC ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: isAC
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.ac_unit_rounded,
+                        size: 16.sp,
+                        color: isAC ? const Color(0xFF2C5990) : const Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'AC',
+                        style: TextStyle(
+                          color: isAC ? const Color(0xFF2C5990) : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            child: Icon(icon, color: isSelected ? const Color(0xFFF98125) : const Color(0xFF94A3B8), size: 24.sp),
           ),
-          SizedBox(height: 8.h),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10.sp,
-              color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
-              fontWeight: FontWeight.w800,
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (isAC) {
+                  _toggleFeature(context, 'roomType', 'NON-AC');
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: !isAC ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: !isAC
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.thermostat_rounded,
+                        size: 16.sp,
+                        color: !isAC ? const Color(0xFF2C5990) : const Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'Non-AC',
+                        style: TextStyle(
+                          color: !isAC ? const Color(0xFF2C5990) : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],

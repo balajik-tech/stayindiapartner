@@ -160,7 +160,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 16.h),
+      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -175,7 +175,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   child: Text(
                     'app_name'.tr(),
                     style: TextStyle(
-                      fontSize: 32.sp,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.w900,
                       color: AppColors.darkText,
                       letterSpacing: -0.5,
@@ -188,7 +188,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   child: Text(
                     'pg_owners_community'.tr(),
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: 14.sp,
                       color: AppColors.greyText.withValues(alpha: 0.8),
                       fontWeight: FontWeight.w600,
                     ),
@@ -220,12 +220,12 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   );
                 },
                 child: Container(
-                  padding: EdgeInsets.all(12.w),
+                  padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
                     color: AppColors.primaryBlue.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.people_rounded, color: AppColors.primaryBlue, size: 28.sp),
+                  child: Icon(Icons.people_rounded, color: AppColors.primaryBlue, size: 24.sp),
                 ),
               ),
             ],
@@ -237,13 +237,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
 
   Widget _buildExploreSection() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
         builder: (context, state) {
           final communities = state is OwnerCommunityLoaded ? state.joinedCommunities : <CommunityDetailsEntity>[];
 
           return SizedBox(
-            height: 95.h,
+            height: 80.h,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
@@ -258,14 +258,14 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 60.w,
-                        height: 60.w,
+                        width: 48.w,
+                        height: 48.w,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.primaryBlue, width: 2),
                           color: Colors.white,
                         ),
-                        child: Icon(Icons.add, color: AppColors.primaryBlue, size: 30.sp),
+                        child: Icon(Icons.add, color: AppColors.primaryBlue, size: 24.sp),
                       ),
                       SizedBox(height: 6.h),
                       Text(
@@ -302,17 +302,17 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 60.w,
-                            height: 60.w,
+                            width: 48.w,
+                            height: 48.w,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.grey.shade200, width: 2),
                             ),
                             child: CircleAvatar(
-                              radius: 28.w,
+                              radius: 22.w,
                               backgroundImage: c.image != null ? CachedNetworkImageProvider(c.image!) : null,
                               backgroundColor: AppColors.accentOrange.withValues(alpha: 0.1),
-                              child: c.image == null ? Icon(Icons.groups, color: AppColors.accentOrange, size: 28.sp) : null,
+                              child: c.image == null ? Icon(Icons.groups, color: AppColors.accentOrange, size: 24.sp) : null,
                             ),
                           ),
                           SizedBox(height: 6.h),
@@ -347,8 +347,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     final validPollOptions = _pollOptionControllers.map((c) => c.text.trim()).where((t) => t.isNotEmpty).toList();
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-      padding: EdgeInsets.all(20.w),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24.r),
@@ -627,7 +627,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       }
       return [
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 20.h),
+          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -689,7 +689,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             clipBehavior: Clip.none,
             children: [
               Container(
-                padding: EdgeInsets.all(12.w),
+                padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
                   color: AppColors.primaryBlue.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
@@ -697,7 +697,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 child: Icon(
                   Icons.notifications_rounded,
                   color: AppColors.primaryBlue,
-                  size: 28.sp,
+                  size: 24.sp,
                 ),
               ),
               if (unreadCount > 0)

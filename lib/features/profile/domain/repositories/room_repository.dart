@@ -4,7 +4,7 @@ import '../entities/room_detail.dart';
 abstract class RoomRepository {
   Future<Occupancy> getOccupancy(String hostelId);
   Future<List<FloorData>> getFloorWiseRooms(String hostelId);
-  Future<List<RoomDetail>> getRooms({bool? isMaster});
+  Future<List<RoomDetail>> getRooms({bool? isMaster, String? hostelId});
   Future<List<int>> getFloors(String hostelId);
   Future<List<RoomDetail>> getRoomsByFloor(String hostelId, int floor);
   Future<List<String>> getFreeBeds(String roomId);
@@ -14,4 +14,5 @@ abstract class RoomRepository {
   Future<List<RoomDetail>> bulkCreateRooms(List<RoomDetail> rooms, String ownerId);
   Future<RoomDetail> updateRoom(RoomDetail room);
   Future<void> deleteRoom(String id);
+  Future<List<RoomDetail>> bulkUpsertRooms(List<RoomDetail> rooms, String ownerId);
 }

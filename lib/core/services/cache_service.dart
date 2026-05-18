@@ -33,7 +33,7 @@ class CacheService {
     AppLogger.info('Wiping all local application data...');
     
     try {
-      // 1. Clear SharedPreferences while preserving locale and app version
+      
       final prefs = await SharedPreferences.getInstance();
       final String? locale = prefs.getString('locale');
       final String? appVersion = prefs.getString(_lastVersionKey);
@@ -48,11 +48,11 @@ class CacheService {
         await prefs.setString(_lastVersionKey, appVersion);
       }
       
-      // 2. Clear TokenStorage (Secure Storage)
+      
       await _tokenStorage.clearAll();
       AppLogger.debug('Secure storage cleared.');
       
-      // 3. Clear HydratedBloc Storage completely
+      
       try {
         await HydratedBloc.storage.clear();
         AppLogger.debug('HydratedBloc storage fully cleared.');
@@ -60,7 +60,7 @@ class CacheService {
         AppLogger.error('Failed to clear HydratedBloc storage: $e');
       }
 
-      // 4. Clear Hive completely
+      
       try {
         await Hive.deleteFromDisk();
         AppLogger.debug('Hive storage deleted from disk.');

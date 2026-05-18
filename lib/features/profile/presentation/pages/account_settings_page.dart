@@ -352,7 +352,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
   Widget _buildStickyCTA(bool isUpdating) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 32.h),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -363,17 +362,23 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           ),
         ],
       ),
-      child: ElevatedButton(
-        onPressed: isUpdating ? null : _saveProfile,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryBlue,
-          minimumSize: Size(double.infinity, 56.h),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
-          elevation: 0,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 20.h),
+          child: ElevatedButton(
+            onPressed: isUpdating ? null : _saveProfile,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue,
+              minimumSize: Size(double.infinity, 56.h),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
+              elevation: 0,
+            ),
+            child: isUpdating
+                ? SizedBox(height: 24.h, width: 24.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                : Text('save_changes'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white)),
+          ),
         ),
-        child: isUpdating
-            ? SizedBox(height: 24.h, width: 24.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-            : Text('save_changes'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: Colors.white)),
       ),
     );
   }
@@ -428,7 +433,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, MediaQuery.of(context).viewInsets.bottom + 32.h),
+        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),

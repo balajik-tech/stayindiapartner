@@ -25,23 +25,24 @@ class PropertySetupStepperPage extends StatefulWidget {
 
 class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
   late final PageController _pageController;
+  late final PropertySetupCubit _propertySetupCubit;
 
   @override
   void initState() {
     super.initState();
-    final cubit = di.sl<PropertySetupCubit>();
+    _propertySetupCubit = di.sl<PropertySetupCubit>();
     if (widget.existingHostel != null) {
-      cubit.prefillFromHostel(widget.existingHostel!);
+      _propertySetupCubit.prefillFromHostel(widget.existingHostel!);
     } else if (widget.existingHostel == null) {
-      if (cubit.state.hostelId != null || (cubit.state.rooms.isEmpty && cubit.state.hostelId == null)) {
-        cubit.resetState();
+      if (_propertySetupCubit.state.hostelId != null || (_propertySetupCubit.state.rooms.isEmpty && _propertySetupCubit.state.hostelId == null)) {
+        _propertySetupCubit.resetState();
       }
     }
     if (widget.initialStep > 0) {
-      cubit.setStep(widget.initialStep);
+      _propertySetupCubit.setStep(widget.initialStep);
     }
 
-    final cubitStep = cubit.state.currentStep;
+    final cubitStep = _propertySetupCubit.state.currentStep;
     final startPage = widget.initialStep > 0 ? widget.initialStep : cubitStep;
     _pageController = PageController(initialPage: startPage);
   }
@@ -49,6 +50,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
   @override
   void dispose() {
     _pageController.dispose();
+    _propertySetupCubit.close();
     super.dispose();
   }
 
@@ -59,10 +61,10 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-          value: di.sl<PropertySetupCubit>(),
+          value: _propertySetupCubit,
         ),
         BlocProvider(
-          create: (context) => di.sl<RoomCubit>()..getRooms(isMaster: true),
+          create: (context) => di.sl<RoomCubit>()..getRooms(isMaster: true, hostelId: widget.existingHostel?.id),
         ),
       ],
       child: MultiBlocListener(
@@ -237,7 +239,6 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
         final isValid = context.read<PropertySetupCubit>().isValidToFinish;
 
         return Container(
-          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -249,104 +250,110 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
               ),
             ],
           ),
-          child: Row(
-            children: [
-              if (state.currentStep > 0)
-                Container(
-                  margin: EdgeInsets.only(right: 12.w),
-                  child: SizedBox(
-                    height: 50.h,
-                    width: 105.w,
-                    child: OutlinedButton(
-                      onPressed: () => context.read<PropertySetupCubit>().previousStep(),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                      ),
-                      child: Text(
-                        'btn_back'.tr(),
-                        style: TextStyle(
-                          color: const Color(0xFF2B5797),
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w800,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+              child: Row(
+                children: [
+                  if (state.currentStep > 0)
+                    Container(
+                      margin: EdgeInsets.only(right: 12.w),
+                      child: SizedBox(
+                        height: 50.h,
+                        width: 105.w,
+                        child: OutlinedButton(
+                          onPressed: () => context.read<PropertySetupCubit>().previousStep(),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                          ),
+                          child: Text(
+                            'btn_back'.tr(),
+                            style: TextStyle(
+                              color: const Color(0xFF2B5797),
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              Expanded(
-                child: _PremiumButton(
-                  onPressed: (state.isSaving || !context.read<PropertySetupCubit>().isStepValid)
-                      ? null
-                      : () {
-                          if (isLastStep) {
-                            if (isValid) {
-                              context.read<PropertySetupCubit>().saveProperty();
-                            } else {
-                              final message = context.read<PropertySetupCubit>().state.validationMessage ?? 'incomplete_setup_sub'.tr();
-                              showDialog(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-                                  title: Row(
-                                    children: [
-                                      const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                                      SizedBox(width: 8.w),
-                                      Text('incomplete_setup'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900)),
-                                    ],
-                                  ),
-                                  content: Text(message, style: TextStyle(fontSize: 14.sp, height: 1.6, color: const Color(0xFF475569))),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(ctx),
-                                      child: Text('btn_got_it'.tr(), style: TextStyle(color: const Color(0xFF2B5797), fontWeight: FontWeight.w800)),
+                  Expanded(
+                    child: _PremiumButton(
+                      onPressed: (state.isSaving || !context.read<PropertySetupCubit>().isStepValid)
+                          ? null
+                          : () {
+                              if (isLastStep) {
+                                if (isValid) {
+                                  context.read<PropertySetupCubit>().saveProperty();
+                                } else {
+                                  final message = context.read<PropertySetupCubit>().state.validationMessage ?? 'incomplete_setup_sub'.tr();
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+                                      title: Row(
+                                        children: [
+                                          const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                                          SizedBox(width: 8.w),
+                                          Text('incomplete_setup'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900)),
+                                        ],
+                                      ),
+                                      content: Text(message, style: TextStyle(fontSize: 14.sp, height: 1.6, color: const Color(0xFF475569))),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx),
+                                          child: Text('btn_got_it'.tr(), style: TextStyle(color: const Color(0xFF2B5797), fontWeight: FontWeight.w800)),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              );
-                            }
-                          } else if (state.currentStep == 0) {
-                            final buildingName = context.read<PropertySetupCubit>().state.buildingName;
-                            if (buildingName.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('err_property_name_req'.tr())),
-                              );
-                            } else {
-                              context.read<PropertySetupCubit>().nextStep();
-                            }
-                          } else if (state.currentStep == 1) {
-                            if (state.roomCategories.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('err_room_type_req'.tr()),
-                                  backgroundColor: Colors.redAccent,
-                                ),
-                              );
-                            } else {
-                              context.read<PropertySetupCubit>().nextStep();
-                            }
-                          } else if (state.currentStep == 2) {
-                            final totalRooms = context.read<PropertySetupCubit>().totalRooms;
-                            if (totalRooms == 0) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('err_room_req'.tr()),
-                                  backgroundColor: Colors.redAccent,
-                                ),
-                              );
-                            } else {
-                              context.read<PropertySetupCubit>().nextStep();
-                            }
-                          } else {
-                            context.read<PropertySetupCubit>().nextStep();
-                          }
-                        },
-                  isLoading: state.isSaving,
-                  text: isLastStep ? 'btn_finish_setup'.tr() : 'btn_continue'.tr(),
-                ),
+                                  );
+                                }
+                              } else if (state.currentStep == 0) {
+                                final buildingName = context.read<PropertySetupCubit>().state.buildingName;
+                                if (buildingName.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('err_property_name_req'.tr())),
+                                  );
+                                } else {
+                                  context.read<PropertySetupCubit>().nextStep();
+                                }
+                              } else if (state.currentStep == 1) {
+                                if (state.roomCategories.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('err_room_type_req'.tr()),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                } else {
+                                  context.read<PropertySetupCubit>().nextStep();
+                                }
+                              } else if (state.currentStep == 2) {
+                                final totalRooms = context.read<PropertySetupCubit>().totalRooms;
+                                if (totalRooms == 0) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('err_room_req'.tr()),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                } else {
+                                  context.read<PropertySetupCubit>().nextStep();
+                                }
+                              } else {
+                                context.read<PropertySetupCubit>().nextStep();
+                              }
+                            },
+                      isLoading: state.isSaving,
+                      text: isLastStep ? 'btn_finish_setup'.tr() : 'btn_continue'.tr(),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },

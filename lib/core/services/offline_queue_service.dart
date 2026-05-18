@@ -6,7 +6,7 @@ import '../utils/logger.dart';
 
 class OfflineAction {
   final String id;
-  final String type; // e.g., 'MUTATION'
+  final String type; 
   final Map<String, dynamic> payload;
   final DateTime timestamp;
   final int retryCount;
@@ -126,7 +126,7 @@ class OfflineQueueService {
       AppLogger.info('[OFFLINE QUEUE] Replaying ${actions.length} pending actions...');
 
       for (var action in actions) {
-        // Implement retry throttling: exponential backoff wait
+        
         if (action.lastAttempt != null) {
           final timeSinceLastAttempt = DateTime.now().toUtc().difference(action.lastAttempt!);
           final requiredDelay = Duration(seconds: 5 * action.retryCount);
@@ -136,7 +136,7 @@ class OfflineQueueService {
           }
         }
 
-        // Verify connectivity before replaying
+        
         final connectivityResult = await Connectivity().checkConnectivity();
         if (connectivityResult.contains(ConnectivityResult.none)) {
           AppLogger.warning('[OFFLINE QUEUE] Internet lost during sync. Stopping sync.');
@@ -171,16 +171,16 @@ class OfflineQueueService {
           final statusCode = de.response?.statusCode;
           if (statusCode != null) {
             if (statusCode >= 400 && statusCode < 500) {
-              // Client/Business error: invalid request, unauthorized, etc.
-              // Remove it from the queue because retrying it will never succeed and it will block the queue.
+              
+              
               success = true;
               AppLogger.warning('[OFFLINE QUEUE] Replay failed with status $statusCode. Removing invalid request from queue.');
             } else {
-              // Server error (500, etc.): retryable
+              
               AppLogger.error('[OFFLINE QUEUE] Replay failed with server error $statusCode. Keeping in queue for retry.');
             }
           } else {
-            // Network/Timeout error: retryable
+            
             AppLogger.error('[OFFLINE QUEUE] Replay failed with network error. Keeping in queue for retry.');
           }
         } catch (e) {
@@ -190,7 +190,7 @@ class OfflineQueueService {
         if (success) {
           await removeAction(action.id);
         } else {
-          // Increment retry count and update lastAttempt time
+          
           final updatedAction = OfflineAction(
             id: action.id,
             type: action.type,

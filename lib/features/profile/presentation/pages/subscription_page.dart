@@ -53,7 +53,7 @@ class SubscriptionPage extends StatelessWidget {
             ),
           ),
           body: SingleChildScrollView(
-            padding: EdgeInsets.all(24.w),
+            padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, MediaQuery.of(context).padding.bottom + 24.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

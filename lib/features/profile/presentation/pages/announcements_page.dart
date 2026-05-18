@@ -404,7 +404,7 @@ class _SendAnnouncementsPageState extends State<SendAnnouncementsPage> with Sing
     final categories = _getLocalizedCategories(context);
     final allCategoryLabel = StringUtils.translate('category_all', context: context);
     
-    // Ensure selected category is valid for current locale (first load or switch)
+    
     if (_selectedCategory == 'All') _selectedCategory = allCategoryLabel;
 
     return Container(
@@ -675,7 +675,7 @@ class _WriteNewSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),

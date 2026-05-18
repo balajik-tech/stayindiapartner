@@ -107,7 +107,7 @@ class _FloorAccordionState extends State<FloorAccordion> with SingleTickerProvid
             ),
           ),
           
-          // RepaintBoundary wrapping the expanded body to isolate paint operations
+          
           if (_isExpanded && widget.itemCount > 0)
             RepaintBoundary(
               child: Padding(

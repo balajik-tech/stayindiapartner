@@ -452,7 +452,7 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
       for (var rule in _customRules) {
         updatedCustomRules.add(CustomRule(
           text: rule.controller.text,
-          photo: "", // No photo
+          photo: "", 
         ));
       }
 
@@ -460,7 +460,7 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         hostelId,
         entryTime: _entryTimeController.text,
         visitorPolicy: _visitorPolicyController.text,
-        otherRules: "", // We use customRules now
+        otherRules: "", 
         penaltyDate: _penaltyDate,
         customRules: updatedCustomRules,
       );

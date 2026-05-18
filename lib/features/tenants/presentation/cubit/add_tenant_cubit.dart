@@ -89,6 +89,8 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     String? sharingType,
     double? deposit,
     required DateTime startDate,
+    String? userPhotoPath,
+    String? aadharPhotoPath,
   }) async {
     emit(AddTenantSubmitting());
     try {
@@ -103,6 +105,8 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         sharingType: sharingType,
         startDate: "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}",
         deposit: deposit,
+        userPhotoPath: userPhotoPath,
+        aadharPhotoPath: aadharPhotoPath,
       );
       emit(AddTenantSuccess());
     } catch (e) {

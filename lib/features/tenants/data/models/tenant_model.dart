@@ -59,6 +59,7 @@ class TenantDetailModel extends TenantDetailEntity {
     super.email,
     super.avatar,
     required super.kycVerified,
+    super.aadharCardPhoto,
     super.stay,
     required super.payments,
     required super.outstandingAmount,
@@ -78,13 +79,16 @@ class TenantDetailModel extends TenantDetailEntity {
             .where((e) => e != null && e.toString().isNotEmpty)
             .join(' ');
 
+    final kycData = tenantData['kyc'] as Map<String, dynamic>?;
+
     return TenantDetailModel(
       id: (tenantData['_id'] ?? tenantData['id'] ?? '').toString(),
       name: name,
       mobile: (tenantData['mobile'] ?? tenantData['phone'] ?? '').toString(),
       email: tenantData['email']?.toString(),
       avatar: tenantData['avatar']?.toString(),
-      kycVerified: tenantData['kyc']?['verified'] == true,
+      kycVerified: kycData?['verified'] == true,
+      aadharCardPhoto: kycData?['aadharCardPhoto']?.toString() ?? kycData?['idPhotoFront']?.toString(),
       stay: stayData != null ? TenantStayDetailModel.fromJson(stayData) : null,
       payments: paymentItems
           .map((p) => TenantPaymentItemModel.fromJson(p as Map<String, dynamic>))

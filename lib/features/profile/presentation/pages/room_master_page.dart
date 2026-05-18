@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -8,18 +9,21 @@ import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/widgets/add_room_master_sheet.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class RoomMasterPage extends StatelessWidget {
   const RoomMasterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final hostelState = context.read<HostelCubit>().state;
+    String hostelId = '';
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+    }
     return BlocProvider(
-      create: (_) => sl<RoomCubit>()..getRooms(isMaster: true),
+      create: (_) => sl<RoomCubit>()..getRooms(isMaster: true, hostelId: hostelId),
       child: const _RoomMasterView(),
     );
   }
@@ -32,19 +36,69 @@ class _RoomMasterView extends StatefulWidget {
   State<_RoomMasterView> createState() => _RoomMasterViewState();
 }
 
-class _RoomMasterViewState extends State<_RoomMasterView>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _RoomMasterViewState extends State<_RoomMasterView> {
+  String _selectedType = 'AC';
+  bool _isEditing = false;
+  late List<int> _activeSharingTypes;
+  late Map<String, Map<int, Map<String, TextEditingController>>> _controllers;
+  late Map<String, Map<int, Map<String, FocusNode>>> _focusNodes;
+  bool _initializedFromState = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _activeSharingTypes = [1, 2, 3, 4];
+    _controllers = {'AC': {}, 'NON_AC': {}};
+    _focusNodes = {'AC': {}, 'NON_AC': {}};
+
+    for (final type in ['AC', 'NON_AC']) {
+      for (int s = 1; s <= 10; s++) {
+        _controllers[type]![s] = {
+          'rent': TextEditingController(),
+          'deposit': TextEditingController(),
+          'maintenance': TextEditingController(),
+          'daily': TextEditingController(),
+        };
+        _focusNodes[type]![s] = {
+          'rent': FocusNode(),
+          'deposit': FocusNode(),
+          'maintenance': FocusNode(),
+          'daily': FocusNode(),
+        };
+
+        final rentCtrl = _controllers[type]![s]!['rent']!;
+        final dailyCtrl = _controllers[type]![s]!['daily']!;
+        rentCtrl.addListener(() {
+          if (_isEditing && dailyCtrl.text.isEmpty) {
+            final monthly = double.tryParse(rentCtrl.text) ?? 0;
+            if (monthly > 0) {
+              dailyCtrl.text = (monthly / 30).round().toString();
+            }
+          }
+        });
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = context.read<RoomCubit>().state;
+      if (state is RoomLoaded) {
+        _initializeFromRooms(state.rooms);
+      }
+    });
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _controllers.forEach((type, sharingMap) {
+      sharingMap.forEach((sharing, fieldMap) {
+        fieldMap.forEach((field, ctrl) => ctrl.dispose());
+      });
+    });
+    _focusNodes.forEach((type, sharingMap) {
+      sharingMap.forEach((sharing, fieldMap) {
+        fieldMap.forEach((field, node) => node.dispose());
+      });
+    });
     super.dispose();
   }
 
@@ -56,464 +110,796 @@ class _RoomMasterViewState extends State<_RoomMasterView>
     return '';
   }
 
-  int _totalFloors(BuildContext context) {
-    final hostelState = context.read<HostelCubit>().state;
-    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-      return hostelState.hostels[hostelState.selectedHostelIndex].floors;
+  void _initializeFromRooms(List<RoomDetail> rooms) {
+    for (final type in ['AC', 'NON_AC']) {
+      for (final s in _controllers[type]!.keys) {
+        _controllers[type]![s]!['rent']!.text = '';
+        _controllers[type]![s]!['deposit']!.text = '';
+        _controllers[type]![s]!['maintenance']!.text = '';
+        _controllers[type]![s]!['daily']!.text = '';
+      }
     }
-    return 0;
+
+    final Set<int> activeTypes = {1, 2, 3, 4};
+    for (final room in rooms) {
+      if (room.isMaster) {
+        final int sharing = room.capacity;
+        if (sharing >= 1) {
+          _addNewSharingType(sharing);
+          activeTypes.add(sharing);
+          final bool isAC = room.roomType == 'AC';
+          final typeKey = isAC ? 'AC' : 'NON_AC';
+
+          _controllers[typeKey]![sharing]!['rent']!.text = room.rent > 0 ? room.rent.toStringAsFixed(0) : '';
+          _controllers[typeKey]![sharing]!['deposit']!.text = room.deposit > 0 ? room.deposit.toStringAsFixed(0) : '';
+          _controllers[typeKey]![sharing]!['maintenance']!.text = room.maintenance > 0 ? room.maintenance.toStringAsFixed(0) : '';
+          _controllers[typeKey]![sharing]!['daily']!.text = room.dailyRent > 0 ? room.dailyRent.toStringAsFixed(0) : '';
+        }
+      }
+    }
+
+    setState(() {
+      _activeSharingTypes = activeTypes.toList()..sort();
+      _initializedFromState = true;
+    });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.darkText,
-            size: 18.sp,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'room_master'.tr(),
-          style: TextStyle(
-            color: const Color(0xFF2C5990),
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(48.h),
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
-            height: 38.h,
-            padding: EdgeInsets.all(3.r),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              indicatorSize: TabBarIndicatorSize.tab,
-              dividerColor: Colors.transparent,
-              indicator: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              labelColor: const Color(0xFF2C5990),
-              unselectedLabelColor: const Color(0xFF64748B),
-              labelStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800),
-              tabs: [
-                Tab(text: StringUtils.translate('all', context: context)),
-                Tab(text: StringUtils.translate('amenity_ac', context: context)),
-                Tab(text: StringUtils.translate('amenity_non_ac', context: context)),
-              ],
-            ),
-          ),
-        ),
-      ),
-      body: BlocConsumer<RoomCubit, RoomState>(
-        listener: (context, state) {
-          if (state is RoomOperationSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-            final hostelId = _hostelId(context);
-            if (hostelId.isNotEmpty) {
-              context.read<DashboardCubit>().fetchDashboardData(hostelId);
+  void _addNewSharingType(int sharing) {
+    if (_activeSharingTypes.contains(sharing)) return;
+
+    for (final type in ['AC', 'NON_AC']) {
+      if (!_controllers[type]!.containsKey(sharing)) {
+        _controllers[type]![sharing] = {
+          'rent': TextEditingController(),
+          'deposit': TextEditingController(),
+          'maintenance': TextEditingController(),
+          'daily': TextEditingController(),
+        };
+        _focusNodes[type]![sharing] = {
+          'rent': FocusNode(),
+          'deposit': FocusNode(),
+          'maintenance': FocusNode(),
+          'daily': FocusNode(),
+        };
+
+        final rentCtrl = _controllers[type]![sharing]!['rent']!;
+        final dailyCtrl = _controllers[type]![sharing]!['daily']!;
+        rentCtrl.addListener(() {
+          if (_isEditing && dailyCtrl.text.isEmpty) {
+            final monthly = double.tryParse(rentCtrl.text) ?? 0;
+            if (monthly > 0) {
+              dailyCtrl.text = (monthly / 30).round().toString();
             }
-          } else if (state is RoomError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
           }
-        },
-        builder: (context, state) {
-          if (state is RoomLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue));
-          }
-          final rooms = state is RoomLoaded ? state.rooms : <RoomDetail>[];
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _RoomListBuilder(rooms: rooms, filter: 'All'),
-              _RoomListBuilder(rooms: rooms, filter: 'AC'),
-              _RoomListBuilder(rooms: rooms, filter: 'NON-AC'),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final hostelId = _hostelId(context);
-          final ownerId = context.read<AuthCubit>().currentOwner?.id ?? '';
-          if (ownerId.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('owner_session_expired'.tr())),
-            );
-            return;
-          }
-          if (hostelId.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('no_hostel_found_profile'.tr())),
-            );
-            return;
-          }
-          final totalFloors = _totalFloors(context);
-          AddRoomMasterSheet.show(
-            context,
-            totalFloors: totalFloors,
-            roomCubit: context.read<RoomCubit>(),
-            onSave: (data) async => await context.read<RoomCubit>().createRoom(
-                  hostelId: hostelId,
-                  ownerId: ownerId,
-                  roomTypename: data['roomTypename'],
-                  floor: data['floor'],
-                  floors: data['floors'],
-                  sharingType: data['sharingType'],
-                  roomType: data['roomType'],
-                  rent: data['rent'],
-                  dailyRent: data['dailyRent'],
-                  deposit: data['deposit'],
-                  maintenance: data['maintenance'],
-                  isMaster: true,
-                ),
-          );
-        },
-        backgroundColor: AppColors.primaryBlue,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-}
-
-class _RoomListBuilder extends StatelessWidget {
-  final List<RoomDetail> rooms;
-  final String filter;
-
-  const _RoomListBuilder({required this.rooms, required this.filter});
-
-  @override
-  Widget build(BuildContext context) {
-    final filtered = filter == 'All'
-        ? rooms
-        : rooms.where((r) {
-            if (filter == 'AC') return r.roomType == 'AC';
-            return r.roomType == 'NON-AC';
-          }).toList();
-
-    if (filtered.isEmpty) {
-      return Center(
-        child: Text(
-          'no_rooms_found'.tr(),
-          style: TextStyle(fontSize: 16.sp, color: AppColors.greyText),
-        ),
-      );
+        });
+      }
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.all(20.w),
-      itemCount: filtered.length,
-      itemBuilder: (context, index) => _RoomMasterCard(room: filtered[index]),
-    );
+    setState(() {
+      if (!_activeSharingTypes.contains(sharing)) {
+        _activeSharingTypes.add(sharing);
+        _activeSharingTypes.sort();
+      }
+    });
   }
-}
 
-class _RoomMasterCard extends StatelessWidget {
-  final RoomDetail room;
+  Future<void> _savePricing(List<RoomDetail> currentLoadedRooms) async {
+    final ownerId = context.read<AuthCubit>().currentOwner?.id ?? '';
+    final hostelId = _hostelId(context);
 
-  const _RoomMasterCard({required this.room});
+    if (ownerId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('owner_session_expired'.tr())),
+      );
+      return;
+    }
+    if (hostelId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('no_hostel_found_profile'.tr())),
+      );
+      return;
+    }
+
+    final List<RoomDetail> roomsToSave = [];
+
+    for (final typeKey in ['AC', 'NON_AC']) {
+      final bool isAC = typeKey == 'AC';
+      for (final sharing in _activeSharingTypes) {
+        final rentText = _controllers[typeKey]![sharing]!['rent']!.text.trim();
+        final depositText = _controllers[typeKey]![sharing]!['deposit']!.text.trim();
+        final maintText = _controllers[typeKey]![sharing]!['maintenance']!.text.trim();
+        final dailyText = _controllers[typeKey]![sharing]!['daily']!.text.trim();
+
+        if (rentText.isNotEmpty) {
+          final rent = double.tryParse(rentText) ?? 0.0;
+          final deposit = double.tryParse(depositText) ?? 0.0;
+          final maint = double.tryParse(maintText) ?? 0.0;
+          final daily = double.tryParse(dailyText) ?? 0.0;
+
+          final matches = currentLoadedRooms.where((r) => r.isMaster && r.capacity == sharing && r.roomType == (isAC ? 'AC' : 'NON-AC'));
+          final String existingId = matches.isNotEmpty ? matches.first.id : '';
+          final existingBeds = matches.isNotEmpty ? matches.first.beds : const <BedInfo>[];
+          final existingFloors = matches.isNotEmpty ? matches.first.floors : const <int>[0];
+
+          roomsToSave.add(RoomDetail(
+            id: existingId,
+            hostelId: hostelId,
+            roomTypename: '$sharing Sharing ${isAC ? "AC" : "NON-AC"}',
+            floor: 0,
+            floors: existingFloors,
+            sharingType: sharing == 1 ? 'SINGLE' : sharing == 2 ? 'DOUBLE' : sharing == 3 ? 'TRIPLE' : sharing == 4 ? 'QUADRUPLE' : sharing == 5 ? 'QUINTUPLE' : 'DORMITORY',
+            roomType: isAC ? 'AC' : 'NON-AC',
+            rent: rent,
+            deposit: deposit,
+            maintenance: maint,
+            dailyRent: daily,
+            isActive: true,
+            isMaster: true,
+            capacity: sharing,
+            beds: existingBeds,
+          ));
+        }
+      }
+    }
+
+    setState(() {
+      _isEditing = false;
+    });
+
+    await context.read<RoomCubit>().bulkUpsertRooms(ownerId: ownerId, rooms: roomsToSave);
+  }
+
+  void _cancelEditing(List<RoomDetail> currentLoadedRooms) {
+    setState(() {
+      _isEditing = false;
+    });
+    _initializeFromRooms(currentLoadedRooms);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isAc = room.roomType == 'AC';
-    return Container(
-        margin: EdgeInsets.only(bottom: 24.h),
-        padding: EdgeInsets.symmetric(horizontal: 4.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              _getLocalizedRoomTypename(context, room),
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.darkText,
+    return BlocConsumer<RoomCubit, RoomState>(
+      listener: (context, state) {
+        if (state is RoomOperationSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+          final hostelId = _hostelId(context);
+          if (hostelId.isNotEmpty) {
+            context.read<DashboardCubit>().fetchDashboardData(hostelId);
+          }
+        } else if (state is RoomError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          );
+        } else if (state is RoomLoaded) {
+          if (!_isEditing) {
+            _initializeFromRooms(state.rooms);
+          }
+        }
+      },
+      builder: (context, state) {
+        final currentLoadedRooms = state is RoomLoaded ? state.rooms : <RoomDetail>[];
+        final isLoading = state is RoomLoading;
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: AppColors.darkText,
+                size: 18.sp,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              'room_master'.tr(),
+              style: TextStyle(
+                color: const Color(0xFF2C5990),
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          body: isLoading && !_initializedFromState
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
+              : Column(
+                  children: [
+                    _buildHeaderSection(),
+                    SizedBox(height: 12.h),
+                    _buildToggleRow(),
+                    SizedBox(height: 16.h),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
                               ),
-                              overflow: TextOverflow.ellipsis,
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.r),
+                            child: SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLeftStaticPanel(),
+                                  Expanded(
+                                    child: _buildRightScrollablePanel(),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          SizedBox(width: 8.w),
-                          _TypeBadge(isAc: isAc),
-                        ],
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        _getLocalizedSharingType(context, room),
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: const Color(0xFF667085),
                         ),
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+                    _buildBottomBar(currentLoadedRooms),
+                  ],
+                ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeaderSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 2.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Configure standard pricing matrix',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: const Color(0xFF64748B),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleRow() {
+    final isAC = _selectedType == 'AC';
+    return Center(
+      child: Container(
+        width: 320.w,
+        height: 48.h,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Stack(
+          children: [
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              alignment: isAC ? Alignment.centerLeft : Alignment.centerRight,
+              child: FractionallySizedBox(
+                widthFactor: 0.5,
+                child: Container(
+                  margin: EdgeInsets.all(4.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2B5797),
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2B5797).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                 ),
-                Transform.scale(
-                  scale: 0.8,
-                  child: Switch(
-                    value: room.isActive,
-                    onChanged: (value) {
-                      final updated = RoomDetail(
-                        id: room.id,
-                        hostelId: room.hostelId,
-                        roomTypename: room.roomTypename,
-                        floor: room.floor,
-                        floors: room.floors,
-                        sharingType: room.sharingType,
-                        roomType: room.roomType,
-                        rent: room.rent,
-                        dailyRent: room.dailyRent,
-                        deposit: room.deposit,
-                        maintenance: room.maintenance,
-                        isActive: value,
-                        isMaster: room.isMaster,
-                        capacity: room.capacity,
-                        beds: room.beds,
-                      );
-                      context.read<RoomCubit>().updateRoom(updated);
-                    },
-                    activeThumbColor: Colors.white,
-                    activeTrackColor: AppColors.primaryBlue,
-                    inactiveTrackColor: const Color(0xFFEAECF0),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-              ],
+              ),
             ),
-            SizedBox(height: 16.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                 _FinanceItem(label: StringUtils.translate('rent', context: context), value: room.rent.toStringAsFixed(0)),
-                 if (room.dailyRent > 0) ...[
-                   SizedBox(width: 24.w),
-                   _FinanceItem(label: StringUtils.translate('daily', context: context), value: room.dailyRent.toStringAsFixed(0)),
-                 ],
-                 SizedBox(width: 24.w),
-                 _FinanceItem(label: StringUtils.translate('deposit', context: context), value: room.deposit.toStringAsFixed(0)),
-                 SizedBox(width: 24.w),
-                 _FinanceItem(label: StringUtils.translate('maintenance_short', context: context), value: room.maintenance.toStringAsFixed(0)),
-              ],
-            ),
-            SizedBox(height: 20.h),
             Row(
               children: [
                 Expanded(
-                  child: _ActionButton(
-                    icon: Icons.edit_outlined,
-                    label: StringUtils.translate('btn_edit', context: context),
-                    color: const Color(0xFFF5F8FF),
-                    textColor: AppColors.primaryBlue,
-                    borderColor: const Color(0xFFD1E0FF),
-                    onPressed: () {
-                      final hostelState = context.read<HostelCubit>().state;
-                      int totalFloors = 0;
-                      if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                        totalFloors = hostelState.hostels[hostelState.selectedHostelIndex].floors;
-                      }
-                      
-                      AddRoomMasterSheet.show(
-                        context,
-                        room: room,
-                        totalFloors: totalFloors,
-                        roomCubit: context.read<RoomCubit>(),
-                        onSave: (data) async {
-                        final capacity = _mapSharingToCapacity(data['sharingType']);
-                        await context.read<RoomCubit>().updateRoom(
-                          RoomDetail(
-                            id: room.id,
-                            hostelId: room.hostelId,
-                            roomTypename: data['roomTypename'],
-                            floor: data['floor'],
-                            floors: List<int>.from(data['floors']),
-                            sharingType: data['sharingType'],
-                            roomType: data['roomType'],
-                            rent: data['rent'],
-                            dailyRent: data['dailyRent'],
-                            deposit: data['deposit'],
-                            maintenance: data['maintenance'],
-                            isActive: room.isActive,
-                            isMaster: true,
-                            capacity: capacity,
-                            beds: room.beds,
-                          ),
-                        );
-                        },
-                      );
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _selectedType = 'AC';
+                      });
                     },
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(
+                      child: Text(
+                        'AC Room Pricing',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w800,
+                          color: isAC ? Colors.white : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                SizedBox(width: 12.w),
                 Expanded(
-                  child: _ActionButton(
-                    icon: Icons.delete_outline,
-                    label: StringUtils.translate('btn_delete', context: context),
-                    color: const Color(0xFFFFF1F0),
-                    textColor: const Color(0xFFF04438),
-                    borderColor: const Color(0xFFFEE4E2),
-                    onPressed: () => _showDeleteDialog(context, room),
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _selectedType = 'NON_AC';
+                      });
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(
+                      child: Text(
+                        'Non-AC Pricing',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w800,
+                          color: !isAC ? Colors.white : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 24.h),
-            Divider(height: 1, color: AppColors.roomCardBorder.withValues(alpha: 0.6)),
           ],
+        ),
       ),
     );
   }
 
-  int _mapSharingToCapacity(String sharing) {
-    switch (sharing.toUpperCase()) {
-      case 'SINGLE': return 1;
-      case 'DOUBLE': return 2;
-      case 'TRIPLE': return 3;
-      case 'QUADRUPLE': return 4;
-      case 'QUINTUPLE': return 5;
-      default:
-        final digits = RegExp(r'\d+').firstMatch(sharing)?.group(0);
-        if (digits != null) {
-          return int.tryParse(digits) ?? 1;
-        }
-        return 1;
-    }
-  }
-
-  void _showDeleteDialog(BuildContext context, RoomDetail room) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(StringUtils.translate('delete_room', context: context)),
-        content: Text(StringUtils.translate('delete_room_confirm', namedArgs: {'room': _getLocalizedRoomTypename(context, room)}, context: context)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(StringUtils.translate('btn_cancel', context: context)),
+  Widget _buildLeftStaticPanel() {
+    return Container(
+      width: 100.w,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            spreadRadius: 1,
+            offset: const Offset(3, 0),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<RoomCubit>().deleteRoom(room.id, isMaster: true);
-            },
-            child: Text(StringUtils.translate('btn_delete', context: context), style: const TextStyle(color: Colors.red)),
-          ),
+        ],
+        border: const Border(
+          right: BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildStaticHeaderCell(),
+          ..._activeSharingTypes.map((sharing) => _buildStaticRowCell(sharing)),
+          if (_isEditing) _buildStaticAddRowCell(),
         ],
       ),
     );
   }
 
-  String _getLocalizedSharingType(BuildContext context, RoomDetail room) {
-    final sharing = room.sharingType;
-    switch (sharing.toUpperCase()) {
-      case 'SINGLE': return StringUtils.translate('sharing_single', context: context);
-      case 'DOUBLE': return StringUtils.translate('sharing_double', context: context);
-      case 'TRIPLE': return StringUtils.translate('sharing_triple', context: context);
-      case 'QUADRUPLE': return StringUtils.translate('sharing_quad', context: context);
-      case 'QUINTUPLE': return StringUtils.translate('sharing_count', namedArgs: {'count': '5'}, context: context);
-      case 'DORMITORY':
-        if (room.capacity > 0) {
-          return StringUtils.translate('sharing_count', namedArgs: {'count': room.capacity.toString()}, context: context);
-        }
-        return StringUtils.translate('sharing_dormitory', context: context);
-      default:
-        final digits = RegExp(r'\d+').firstMatch(sharing)?.group(0);
-        if (digits != null) {
-          return StringUtils.translate('sharing_count', namedArgs: {'count': digits}, context: context);
-        }
-        return sharing;
-    }
-  }
-
-  String _getLocalizedRoomTypename(BuildContext context, RoomDetail room) {
-    String res = room.roomTypename;
-    if (res.toUpperCase().contains('DORMITORY')) {
-      final capStr = room.capacity > 0 ? '${room.capacity} Sharing' : 'Dormitory';
-      res = res.replaceAll(RegExp(r'DORMITORY', caseSensitive: false), capStr);
-    }
-    
-    res = res.replaceAll('Single Sharing', StringUtils.translate('sharing_single', context: context));
-    res = res.replaceAll('2 Sharing', StringUtils.translate('sharing_double', context: context));
-    res = res.replaceAll('3 Sharing', StringUtils.translate('sharing_triple', context: context));
-    res = res.replaceAll('4 Sharing', StringUtils.translate('sharing_quad', context: context));
-    res = res.replaceAll('5 Sharing', StringUtils.translate('sharing_count', namedArgs: {'count': '5'}, context: context));
-    
-    // Support custom sharing count in typename
-    final match = RegExp(r'(\d+) Sharing').firstMatch(res);
-    if (match != null) {
-      final count = match.group(1)!;
-      final localized = StringUtils.translate('sharing_count', namedArgs: {'count': count}, context: context);
-      res = res.replaceAll('$count Sharing', localized);
-    }
-
-    if (res.contains('NON-AC')) {
-      res = res.replaceAll('NON-AC', StringUtils.translate('amenity_non_ac', context: context));
-    } else if (res.contains('AC')) {
-      res = res.replaceAll('AC', StringUtils.translate('amenity_ac', context: context));
-    }
-    return res;
-  }
-}
-
-class _TypeBadge extends StatelessWidget {
-  final bool isAc;
-  const _TypeBadge({required this.isAc});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildStaticHeaderCell() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      height: 44.h,
+      color: const Color(0xFFEFF6FF),
+      alignment: Alignment.center,
+      child: Text(
+        'Sharing',
+        style: TextStyle(
+          color: const Color(0xFF2B5797),
+          fontWeight: FontWeight.w900,
+          fontSize: 11.sp,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStaticRowCell(int sharing) {
+    final isAlternate = sharing % 2 == 0;
+    return Container(
+      height: 52.h,
       decoration: BoxDecoration(
-        color: isAc ? const Color(0xFFEFF4FF) : const Color(0xFFFFF7ED),
-        borderRadius: BorderRadius.circular(16.r),
+        color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
+        border: const Border(
+          bottom: BorderSide(color: Color(0xFFF1F5F9)),
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        '$sharing Sharing',
+        style: TextStyle(
+          color: const Color(0xFF0F172A),
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStaticAddRowCell() {
+    return InkWell(
+      onTap: _showAddSharingDialog,
+      child: Container(
+        height: 48.h,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFF1F5F9)),
+          ),
+        ),
+        padding: EdgeInsets.only(left: 12.w),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            Icon(
+              Icons.add_circle_outline_rounded,
+              color: const Color(0xFF2B5797),
+              size: 16.sp,
+            ),
+            SizedBox(width: 4.w),
+            Text(
+              'Add',
+              style: TextStyle(
+                color: const Color(0xFF2B5797),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRightScrollablePanel() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: SizedBox(
+        width: 400.w,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildScrollableHeader(),
+            ..._activeSharingTypes.map((sharing) => _buildScrollableRow(sharing)),
+            if (_isEditing) _buildScrollableAddRowPlaceholder(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrollableHeader() {
+    return Container(
+      height: 44.h,
+      color: const Color(0xFFEFF6FF),
+      child: Row(
+        children: [
+          _buildHeaderCell('Monthly Rent', 100.w),
+          _buildHeaderCell('Deposit', 100.w),
+          _buildHeaderCell('Maintenance', 100.w),
+          _buildHeaderCell('Daily Rent', 100.w),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScrollableRow(int sharing) {
+    final isAlternate = sharing % 2 == 0;
+    return Container(
+      height: 52.h,
+      decoration: BoxDecoration(
+        color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
+        border: const Border(
+          bottom: BorderSide(color: Color(0xFFF1F5F9)),
+        ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            isAc ? Icons.ac_unit : Icons.wb_sunny_outlined,
-            size: 14.sp,
-            color: isAc ? AppColors.primaryBlue : const Color(0xFFFB923C),
+          _buildTableCellField(sharing, 'rent'),
+          _buildTableCellField(sharing, 'deposit'),
+          _buildTableCellField(sharing, 'maintenance'),
+          _buildTableCellField(sharing, 'daily'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScrollableAddRowPlaceholder() {
+    return InkWell(
+      onTap: _showAddSharingDialog,
+      child: Container(
+        height: 48.h,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFF1F5F9)),
           ),
-          SizedBox(width: 6.w),
-          Text(
-            isAc ? StringUtils.translate('amenity_ac', context: context) : StringUtils.translate('amenity_non_ac', context: context),
+        ),
+        padding: EdgeInsets.only(left: 12.w),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          'Add Custom Sharing Option...',
+          style: TextStyle(
+            color: const Color(0xFF94A3B8),
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderCell(String label, double width) {
+    return SizedBox(
+      width: width,
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            color: const Color(0xFF2B5797),
+            fontWeight: FontWeight.w900,
+            fontSize: 11.sp,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableCellField(int sharing, String field) {
+    final controller = _controllers[_selectedType]![sharing]![field]!;
+    final focusNode = _focusNodes[_selectedType]![sharing]![field]!;
+
+    if (!_isEditing) {
+      final val = controller.text.trim();
+      return Container(
+        width: 100.w,
+        height: 52.h,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFF1F5F9)),
+            right: BorderSide(color: Color(0xFFF1F5F9)),
+          ),
+        ),
+        child: Text(
+          val.isNotEmpty ? '₹ $val' : '-',
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: val.isNotEmpty ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: 100.w,
+      height: 52.h,
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: TextInputType.number,
+        textInputAction: (field == 'daily' && sharing == _activeSharingTypes.last)
+            ? TextInputAction.done
+            : TextInputAction.next,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          MaxValueTextInputFormatter(50000),
+        ],
+        onSubmitted: (_) {
+          if (field == 'rent') {
+            _focusNodes[_selectedType]![sharing]!['deposit']!.requestFocus();
+          } else if (field == 'deposit') {
+            _focusNodes[_selectedType]![sharing]!['maintenance']!.requestFocus();
+          } else if (field == 'maintenance') {
+            _focusNodes[_selectedType]![sharing]!['daily']!.requestFocus();
+          } else if (field == 'daily') {
+            final currentIndex = _activeSharingTypes.indexOf(sharing);
+            if (currentIndex != -1 && currentIndex < _activeSharingTypes.length - 1) {
+              final nextSharing = _activeSharingTypes[currentIndex + 1];
+              _focusNodes[_selectedType]![nextSharing]!['rent']!.requestFocus();
+            }
+          }
+        },
+        style: TextStyle(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF0F172A),
+        ),
+        decoration: InputDecoration(
+          prefixText: '₹ ',
+          prefixStyle: TextStyle(
+            color: const Color(0xFF94A3B8),
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.r),
+            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.r),
+            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.r),
+            borderSide: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddSharingDialog() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+          title: Text(
+            'Add Custom Sharing Option',
             style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-              color: isAc ? AppColors.primaryBlue : const Color(0xFFFB923C),
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF0F172A),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Enter sharing capacity (e.g. 5 for 5 Sharing)',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF64748B),
+                ),
+              ),
+              SizedBox(height: 12.h),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                decoration: InputDecoration(
+                  hintText: 'Capacity (1 - 30)',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final capacity = int.tryParse(controller.text);
+                if (capacity != null && capacity >= 1 && capacity <= 30) {
+                  _addNewSharingType(capacity);
+                  Navigator.pop(ctx);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a valid capacity between 1 and 30')),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2B5797),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+              ),
+              child: const Text(
+                'Add',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildBottomBar(List<RoomDetail> currentLoadedRooms) {
+    if (!_isEditing) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h)),
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 48.h,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                _isEditing = true;
+              });
+            },
+            icon: Icon(Icons.edit_rounded, color: Colors.white, size: 18.sp),
+            label: Text(
+              'Edit Standard Pricing',
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2B5797),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              elevation: 2,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 48.h,
+              child: OutlinedButton(
+                onPressed: () => _cancelEditing(currentLoadedRooms),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFCBD5E1)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                ),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF64748B)),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: SizedBox(
+              height: 48.h,
+              child: ElevatedButton(
+                onPressed: () => _savePricing(currentLoadedRooms),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2B5797),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                  elevation: 2,
+                ),
+                child: Text(
+                  'Save Changes',
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Colors.white),
+                ),
+              ),
             ),
           ),
         ],
@@ -522,74 +908,33 @@ class _TypeBadge extends StatelessWidget {
   }
 }
 
-class _FinanceItem extends StatelessWidget {
-  final String label;
-  final String value;
-  const _FinanceItem({required this.label, required this.value});
+class MaxValueTextInputFormatter extends TextInputFormatter {
+  final int maxValue;
+
+  MaxValueTextInputFormatter(this.maxValue);
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: const Color(0xFF667085),
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        SizedBox(height: 2.h),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColors.darkText,
-          ),
-        ),
-      ],
-    );
-  }
-}
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
 
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final Color textColor;
-  final Color borderColor;
-  final VoidCallback onPressed;
+    final value = int.tryParse(newValue.text);
+    if (value == null) {
+      return oldValue;
+    }
 
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.textColor,
-    required this.borderColor,
-    required this.onPressed,
-  });
+    if (value > maxValue) {
+      final cappedText = maxValue.toString();
+      return TextEditingValue(
+        text: cappedText,
+        selection: TextSelection.collapsed(offset: cappedText.length),
+      );
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: textColor,
-        elevation: 0,
-        padding: EdgeInsets.symmetric(vertical: 12.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.r),
-          side: BorderSide(color: borderColor),
-        ),
-      ),
-      icon: Icon(icon, size: 18.sp),
-      label: Text(
-        label,
-        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
-      ),
-    );
+    return newValue;
   }
 }

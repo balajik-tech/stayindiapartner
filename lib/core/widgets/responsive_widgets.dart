@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Centralized Responsive Breakpoints for mobile screen hardening.
+
 class ResponsiveBreakpoints {
   static const double xs = 320.0;
   static const double sm = 360.0;
@@ -17,8 +17,8 @@ class ResponsiveBreakpoints {
   }
 }
 
-/// A text widget that scales dynamically and limits itself gracefully
-/// under accessibility font scale expansions and narrow screens.
+
+
 class ResponsiveText extends StatelessWidget {
   final String text;
   final TextStyle? style;
@@ -50,10 +50,10 @@ class ResponsiveText extends StatelessWidget {
     
     double baseFontSize = style?.fontSize ?? 14.sp;
     
-    // Scale text size down slightly on smaller displays to avoid overflows
+    
     double widthScale = screenWidth < 360 ? 0.9 : 1.0;
     
-    // Mitigate oversized system font settings by scaling down slightly
+    
     double adjustedScale = textScaleFactor > 1.3 ? (1.3 / textScaleFactor) : 1.0;
     
     double finalFontSize = (baseFontSize * widthScale * adjustedScale).clamp(minFontSize, maxFontSize);
@@ -72,8 +72,8 @@ class ResponsiveText extends StatelessWidget {
   }
 }
 
-/// A row of buttons or widgets that automatically switches to a stacked vertical
-/// column layout if the text expansion or narrow screen width would cause overflow.
+
+
 class AdaptiveActionRow extends StatelessWidget {
   final List<Widget> children;
   final double spacing;
@@ -93,7 +93,7 @@ class AdaptiveActionRow extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final textScale = MediaQuery.textScalerOf(context).scale(1.0);
 
-    // Stack vertically on narrow phones (<360dp) or large accessibility scales
+    
     if ((forceStackOnSmall && screenWidth <= 360.0) || textScale >= 1.3) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -110,7 +110,7 @@ class AdaptiveActionRow extends StatelessWidget {
       );
     }
 
-    // Horizontal Row with Expanded components
+    
     return Row(
       children: children.asMap().entries.map((entry) {
         final index = entry.key;
@@ -127,8 +127,8 @@ class AdaptiveActionRow extends StatelessWidget {
   }
 }
 
-/// A button styled to be perfectly readable and tap-friendly on high-dpi, small-width,
-/// and heavily localized (e.g. Tamil/Hindi/Telugu/Malayalam) environments.
+
+
 class ResponsiveButton extends StatelessWidget {
   final String label;
   final IconData? icon;
@@ -179,7 +179,7 @@ class ResponsiveButton extends StatelessWidget {
           )
         : textWidget;
 
-    // Strict adherence to accessible touch targets (min 48dp)
+    
     final double minHeight = (height ?? 48.0).clamp(48.0, 60.0);
 
     if (isPrimary) {
@@ -223,7 +223,7 @@ class ResponsiveButton extends StatelessWidget {
   }
 }
 
-/// An adaptive scrollable/non-scrollable TabBar built to support long multilingual tabs.
+
 class ResponsiveTabBar extends StatelessWidget implements PreferredSizeWidget {
   final TabController? controller;
   final List<Widget> tabs;
@@ -324,7 +324,7 @@ class ResponsiveTabBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(48.0);
 }
 
-/// A container card base built to be overflow-safe, utilizing dynamic scaling logic.
+
 class MultilingualSafeCard extends StatelessWidget {
   final Widget child;
   final Color? backgroundColor;
@@ -369,7 +369,7 @@ class MultilingualSafeCard extends StatelessWidget {
   }
 }
 
-/// Spacing utilities that scale correctly with responsive parameters.
+
 class ResponsiveSpacing {
   static Widget vertical(double height, BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;

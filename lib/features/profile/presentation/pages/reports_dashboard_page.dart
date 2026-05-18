@@ -373,7 +373,7 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
           ? ApiConstants.reportsPayments 
           : (_selectedReportType == 'tenants' ? ApiConstants.reportsTenants : ApiConstants.reportsBookings);
 
-      // No longer need to parse format from label
+      
 
       final response = await dio.get(
         endpoint,

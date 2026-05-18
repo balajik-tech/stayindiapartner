@@ -169,7 +169,7 @@ class StringUtils {
         return 'Please add staff members to manage their roles.';
       }
 
-      // Food Menu Fallbacks
+      
       if (key == 'weekly_food_menu') {
         if (locale == 'te') return 'వారపు భోజన మెనూ';
         if (locale == 'ta') return 'வாராந்திர உணவு மெனு';
@@ -921,7 +921,7 @@ class StringUtils {
         }
       }
 
-      // Service Agreement Fallbacks
+      
       if (key == 'service_agreement_title') {
         if (locale == 'te') return 'సర్వీస్ అగ్రిమెంట్';
         if (locale == 'ta') return 'சேவை ஒப்பந்தம்';
@@ -1107,7 +1107,7 @@ class StringUtils {
         return 'Service agreement accepted successfully!';
       }
 
-      // Communities & Associations Fallbacks
+      
       if (key == 'app_name') return 'Stay India';
       if (key == 'pg_owners_community') {
         if (locale == 'te') return 'PG యజమానుల సంఘం';
@@ -1257,7 +1257,7 @@ class StringUtils {
         return 'Failed to create post';
       }
 
-      // Help & Support Fallbacks
+      
       if (key == 'help_support_title') {
         if (locale == 'te') return 'సహాయం & మద్దతు';
         return 'Help & Support';
@@ -1288,7 +1288,7 @@ class StringUtils {
         return 'User Guide (PDF)';
       }
 
-      // FAQ Questions
+      
       if (key == 'faq_q1') {
         if (locale == 'te') return 'నేను కొత్త అద్దెదారుని ఎలా చేర్చాలి?';
         return 'How do I add a new tenant?';
@@ -1360,7 +1360,7 @@ class StringUtils {
         return 'Tenants can report via their app, or you can manually add a complaint in the "Complaints" section of the dashboard.';
       }
 
-      // Referral Fallbacks
+      
       if (key == 'refer_friend') {
         if (locale == 'te') return 'స్నేహితుడిని రిఫర్ చేయండి';
         if (locale == 'ta') return 'நண்பரைப் பரிந்துரைக்கவும்';
@@ -1698,7 +1698,7 @@ class StringUtils {
         return 'Failed to download report';
       }
 
-      // Special Offers Fallbacks
+      
       if (key == 'manage_offers') {
         if (locale == 'te') return 'ఆఫర్లను నిర్వహించండి';
         return 'Manage Offers';
@@ -1834,7 +1834,7 @@ class StringUtils {
         return 'Switch Property';
       }
 
-      // Bookings Management
+      
       if (key == 'bookings_title') {
         if (locale == 'te') return 'బుకింగ్‌లు';
         return 'Bookings';
@@ -1974,7 +1974,7 @@ class StringUtils {
         return 'Switch Property';
       }
 
-      // Stock Management Fallbacks
+      
       if (key == 'stock_management') {
         if (locale == 'te') return 'స్టాక్ మేనేజ్‌మెంట్';
         return 'Stock Management';
@@ -2028,7 +2028,7 @@ class StringUtils {
         return 'Out of Stock';
       }
 
-      // Stock Entry Fallbacks
+      
       if (key == 'quick_entry') {
         if (locale == 'te') return 'త్వరిత నమోదు';
         return 'Quick Entry';
@@ -2099,19 +2099,19 @@ class StringUtils {
         return 'Please select an item name';
       }
 
-      // Units
+      
       if (key == 'kg') return locale == 'te' ? 'కిలో' : 'kg';
       if (key == 'liters') return locale == 'te' ? 'లీటర్లు' : 'liters';
       if (key == 'pieces') return locale == 'te' ? 'ముక్కలు' : 'pieces';
       if (key == 'packets') return locale == 'te' ? 'ప్యాకెట్లు' : 'packets';
       if (key == 'units') return locale == 'te' ? 'యూనిట్లు' : 'units';
 
-      // Payment Modes
+      
       if (key == 'upi') return 'UPI';
       if (key == 'cash') return locale == 'te' ? 'నగదు' : 'Cash';
       if (key == 'bank_transfer') return locale == 'te' ? 'బ్యాంక్ బదిలీ' : 'Bank Transfer';
 
-      // Stock Detail Fallbacks
+      
       if (key == 'activity_history') {
         if (locale == 'te') return 'యాక్టివిటీ చరిత్ర';
         return 'Activity History';
@@ -2193,7 +2193,7 @@ class StringUtils {
         return 'Every month $day$ord';
       }
 
-      // Hostel Profile Fallbacks
+      
       if (key == 'hostel_profile_title') {
         if (locale == 'te') return 'హాస్టల్ ప్రొఫైల్';
         return 'Hostel Profile';
@@ -2291,7 +2291,7 @@ class StringUtils {
         return 'No images found';
       }
 
-      // Amenities Fallbacks
+      
       if (key == 'amenities_title') {
         if (locale == 'te') return 'అమెనిటీస్ (సౌకర్యాలు)';
         return 'Amenities';

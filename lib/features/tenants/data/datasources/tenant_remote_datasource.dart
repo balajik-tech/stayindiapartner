@@ -26,6 +26,8 @@ abstract class TenantRemoteDataSource {
     String? sharingType,
     String? startDate,
     double? deposit,
+    String? userPhotoPath,
+    String? aadharPhotoPath,
   });
 }
 
@@ -95,22 +97,46 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     String? sharingType,
     String? startDate,
     double? deposit,
+    String? userPhotoPath,
+    String? aadharPhotoPath,
   }) async {
     AppLogger.info('Adding manual tenant for hostel: $hostelId');
-    final body = {
+    final map = <String, dynamic>{
       'phone': phone,
       'hostelId': hostelId,
       'roomId': roomId,
       'bedNumber': bedNumber,
       'rent': rent,
-      'firstName': firstName,
-      'lastName': lastName,
-      'sharingType': sharingType,
-      'startDate': startDate,
-      'deposit': deposit,
-    }..removeWhere((key, value) => value == null || (value is String && value.isEmpty));
+    };
+    if (firstName != null && firstName.isNotEmpty) map['firstName'] = firstName;
+    if (lastName != null && lastName.isNotEmpty) map['lastName'] = lastName;
+    if (sharingType != null && sharingType.isNotEmpty) map['sharingType'] = sharingType;
+    if (startDate != null && startDate.isNotEmpty) map['startDate'] = startDate;
+    if (deposit != null) map['deposit'] = deposit;
 
-    final response = await _dio.post(ApiConstants.tenantsManual, data: body);
+    final formData = FormData.fromMap(map);
+
+    if (userPhotoPath != null && userPhotoPath.isNotEmpty) {
+      formData.files.add(MapEntry(
+        'avatar',
+        await MultipartFile.fromFile(
+          userPhotoPath,
+          contentType: DioMediaType('image', 'jpeg'),
+        ),
+      ));
+    }
+
+    if (aadharPhotoPath != null && aadharPhotoPath.isNotEmpty) {
+      formData.files.add(MapEntry(
+        'aadharCard',
+        await MultipartFile.fromFile(
+          aadharPhotoPath,
+          contentType: DioMediaType('image', 'jpeg'),
+        ),
+      ));
+    }
+
+    final response = await _dio.post(ApiConstants.tenantsManual, data: formData);
     if (response.statusCode != 200 && response.statusCode != 201) {
       final msg = response.data?['message'] ?? 'Failed to add tenant';
       throw Exception(msg);

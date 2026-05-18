@@ -22,5 +22,7 @@ abstract class TenantRepository {
     String? sharingType,
     String? startDate,
     double? deposit,
+    String? userPhotoPath,
+    String? aadharPhotoPath,
   });
 }

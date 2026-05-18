@@ -142,13 +142,15 @@ class CommentsSheetState extends State<CommentsSheet> {
                         _buildCommentItem(_comments[index]),
                   ),
           ),
-          Container(
-            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 30.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Colors.grey[100]!)),
-            ),
-            child: Row(
+          SafeArea(
+            top: false,
+            child: Container(
+              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.grey[100]!)),
+              ),
+              child: Row(
               children: [
                 Expanded(
                   child: Container(
@@ -199,6 +201,7 @@ class CommentsSheetState extends State<CommentsSheet> {
               ],
             ),
           ),
+        ),
         ],
       ),
     );

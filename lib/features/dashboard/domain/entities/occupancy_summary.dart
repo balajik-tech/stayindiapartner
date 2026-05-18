@@ -6,6 +6,7 @@ class Occupancy {
   final int awayBeds;
   final int reservedBeds;
   final int overdueBeds;
+  final int maintenanceBeds;
   final List<FloorData> floors;
 
   Occupancy({
@@ -16,6 +17,7 @@ class Occupancy {
     required this.awayBeds,
     required this.reservedBeds,
     required this.overdueBeds,
+    required this.maintenanceBeds,
     required this.floors,
   });
 }

@@ -116,7 +116,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     if (pickedFile != null) {
       final croppedFile = await cropper.ImageCropper().cropImage(
         sourcePath: pickedFile.path,
-        aspectRatio: const cropper.CropAspectRatio(ratioX: 1, ratioY: 1.41), // Standard A4 ratio
+        aspectRatio: const cropper.CropAspectRatio(ratioX: 1, ratioY: 1.41), 
         uiSettings: [
           cropper.AndroidUiSettings(
             toolbarTitle: 'crop_certificate'.tr(),

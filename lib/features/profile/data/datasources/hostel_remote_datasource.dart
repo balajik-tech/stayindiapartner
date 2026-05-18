@@ -183,39 +183,28 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
     try {
       final formData = FormData();
       
-      if (foodLicense != null && foodLicense.isNotEmpty && !foodLicense.startsWith('http')) {
-        formData.files.add(MapEntry('foodLicense', await MultipartFile.fromFile(foodLicense)));
+      Future<void> addFiles(String? fieldVal, String fieldName) async {
+        if (fieldVal != null && fieldVal.isNotEmpty) {
+          final paths = fieldVal.split(',').where((p) => p.isNotEmpty).toList();
+          for (final path in paths) {
+            if (!path.startsWith('http')) {
+              formData.files.add(MapEntry(fieldName, await MultipartFile.fromFile(path)));
+            }
+          }
+        }
       }
-      if (hostelLicense != null && hostelLicense.isNotEmpty && !hostelLicense.startsWith('http')) {
-        formData.files.add(MapEntry('hostelLicense', await MultipartFile.fromFile(hostelLicense)));
-      }
-      if (tradeLicense != null && tradeLicense.isNotEmpty && !tradeLicense.startsWith('http')) {
-        formData.files.add(MapEntry('tradeLicense', await MultipartFile.fromFile(tradeLicense)));
-      }
-      if (fireSafety != null && fireSafety.isNotEmpty && !fireSafety.startsWith('http')) {
-        formData.files.add(MapEntry('fireSafety', await MultipartFile.fromFile(fireSafety)));
-      }
-      if (policeNoc != null && policeNoc.isNotEmpty && !policeNoc.startsWith('http')) {
-        formData.files.add(MapEntry('policeNoc', await MultipartFile.fromFile(policeNoc)));
-      }
-      if (shopsEstablishment != null && shopsEstablishment.isNotEmpty && !shopsEstablishment.startsWith('http')) {
-        formData.files.add(MapEntry('shopsEstablishment', await MultipartFile.fromFile(shopsEstablishment)));
-      }
-      if (gstRegistration != null && gstRegistration.isNotEmpty && !gstRegistration.startsWith('http')) {
-        formData.files.add(MapEntry('gstRegistration', await MultipartFile.fromFile(gstRegistration)));
-      }
-      if (healthSanitation != null && healthSanitation.isNotEmpty && !healthSanitation.startsWith('http')) {
-        formData.files.add(MapEntry('healthSanitation', await MultipartFile.fromFile(healthSanitation)));
-      }
-      if (utilityBill != null && utilityBill.isNotEmpty && !utilityBill.startsWith('http')) {
-        formData.files.add(MapEntry('utilityBill', await MultipartFile.fromFile(utilityBill)));
-      }
-      if (pollutionNoc != null && pollutionNoc.isNotEmpty && !pollutionNoc.startsWith('http')) {
-        formData.files.add(MapEntry('pollutionNoc', await MultipartFile.fromFile(pollutionNoc)));
-      }
-      if (residentVerification != null && residentVerification.isNotEmpty && !residentVerification.startsWith('http')) {
-        formData.files.add(MapEntry('residentVerification', await MultipartFile.fromFile(residentVerification)));
-      }
+
+      await addFiles(foodLicense, 'foodLicense');
+      await addFiles(hostelLicense, 'hostelLicense');
+      await addFiles(tradeLicense, 'tradeLicense');
+      await addFiles(fireSafety, 'fireSafety');
+      await addFiles(policeNoc, 'policeNoc');
+      await addFiles(shopsEstablishment, 'shopsEstablishment');
+      await addFiles(gstRegistration, 'gstRegistration');
+      await addFiles(healthSanitation, 'healthSanitation');
+      await addFiles(utilityBill, 'utilityBill');
+      await addFiles(pollutionNoc, 'pollutionNoc');
+      await addFiles(residentVerification, 'residentVerification');
 
       if (formData.files.isEmpty) {
         return HostelModel(

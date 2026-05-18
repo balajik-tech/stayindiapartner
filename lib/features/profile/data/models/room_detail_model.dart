@@ -22,10 +22,10 @@ class RoomDetailModel extends RoomDetail {
   });
 
   factory RoomDetailModel.fromJson(Map<String, dynamic> json) {
-    final bedsJson = json['beds'] as List<dynamic>? ?? [];
+    final bedsJson = json['beds'] as List<dynamic>? ?? json['freeBeds'] as List<dynamic>? ?? [];
     return RoomDetailModel(
       id: json['_id'] ?? json['roomId'] ?? '',
-      hostelId: json['hostel'] is Map ? json['hostel']['_id'] ?? '' : json['hostel'] ?? '',
+      hostelId: json['hostelId'] ?? (json['hostel'] is Map ? json['hostel']['_id'] ?? '' : json['hostel'] ?? ''),
       roomTypename: (json['isMaster'] == true)
           ? (json['roomTypename']?.toString() ?? '')
           : StringUtils.formatRoomNumber(json['roomTypename']?.toString() ?? '', (json['floor'] as num?)?.toInt() ?? 0),

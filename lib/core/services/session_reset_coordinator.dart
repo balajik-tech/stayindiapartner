@@ -15,7 +15,7 @@ class SessionResetCoordinator {
     AppLogger.warning('🚨 Starting Atomic Owner Session Reset Lifecycle...');
 
     try {
-      // 1. Hard Socket Teardown
+      
       try {
         if (di.sl.isRegistered<SocketService>()) {
           AppLogger.info('Disconnecting and clearing Socket.io instances...');
@@ -25,7 +25,7 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to disconnect socket: $e');
       }
 
-      // 2. FCM Push Notifications Identity Reset
+      
       try {
         AppLogger.info('Deleting FCM token registry on device...');
         await FirebaseMessaging.instance.deleteToken();
@@ -34,7 +34,7 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to reset FCM token registry: $e');
       }
 
-      // 3. Clear Offline Queue Box (Hive)
+      
       try {
         if (di.sl.isRegistered<OfflineQueueService>()) {
           AppLogger.info('Wiping pending offline mutation queues...');
@@ -44,7 +44,7 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to clear Hive offline queue: $e');
       }
 
-      // 4. Flush caches (Selective preferences and HydratedBloc eviction)
+      
       try {
         if (di.sl.isRegistered<CacheService>()) {
           AppLogger.info('Invoking CacheService selective cache flush...');
@@ -54,7 +54,7 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to flush CacheService: $e');
       }
 
-      // 5. Leak Prevention: Clear In-Memory Image Cache
+      
       try {
         AppLogger.info('Evicting in-memory Image Caches...');
         PaintingBinding.instance.imageCache.clear();
@@ -63,7 +63,7 @@ class SessionResetCoordinator {
         AppLogger.error('Failed to clear image cache: $e');
       }
 
-      // 6. Rebuild Dependency Tree (Dependency Container Reset)
+      
       AppLogger.info('Recalibrating dependency injection container (GetIt)...');
       await di.resetInjections();
 
@@ -86,7 +86,7 @@ class SessionResetCoordinator {
         }
       });
     } catch (_) {
-      // Binding not initialized (e.g. in pure Dart unit tests). Run immediately!
+      
       try {
         AppLogger.warning('🧹 Post-Logout Cache Cleanup (Immediate): Wiping HydratedBloc and Hive storage...');
         HydratedBloc.storage.clear();

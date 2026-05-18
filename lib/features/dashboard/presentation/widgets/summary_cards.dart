@@ -155,7 +155,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(context, 'notice', isLoading ? '...' : (occupancy?.noticeBeds.toString() ?? '0'), 'move_out_notice'.tr(), const Color(0xFFFFB300), Icons.notifications_active_rounded, state.selectedMetric),
               _buildAttendanceCard(context, isLoading ? '...' : (status?.inside.toString() ?? '0'), isLoading ? '...' : (status?.outside.toString() ?? '0')),
               _buildCard(context, 'away', isLoading ? '...' : (status?.unknown.toString() ?? '0'), 'away'.tr(), const Color(0xFFE91E63), Icons.luggage_rounded, state.selectedMetric),
-              _buildCard(context, 'repair', isLoading ? '...' : '0', 'minor_repair'.tr(), const Color(0xFFCBD5E1), Icons.handyman_rounded, state.selectedMetric),
+              _buildCard(context, 'repair', isLoading ? '...' : (occupancy?.maintenanceBeds.toString() ?? '0'), 'minor_repair'.tr(), const Color(0xFFCBD5E1), Icons.handyman_rounded, state.selectedMetric),
             ],
           ),
         );

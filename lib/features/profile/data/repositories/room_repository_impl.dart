@@ -21,8 +21,8 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
-  Future<List<RoomDetail>> getRooms({bool? isMaster}) async {
-    return await remoteDataSource.getRooms(isMaster: isMaster);
+  Future<List<RoomDetail>> getRooms({bool? isMaster, String? hostelId}) async {
+    return await remoteDataSource.getRooms(isMaster: isMaster, hostelId: hostelId);
   }
 
   @override
@@ -121,5 +121,27 @@ class RoomRepositoryImpl implements RoomRepository {
   Future<List<Map<String, dynamic>>> getBedHistory(
       String roomId, String bedNumber) async {
     return await remoteDataSource.getBedHistory(roomId, bedNumber);
+  }
+
+  @override
+  Future<List<RoomDetail>> bulkUpsertRooms(List<RoomDetail> rooms, String ownerId) async {
+    final models = rooms.map((room) => RoomDetailModel(
+      id: room.id,
+      hostelId: room.hostelId,
+      roomTypename: room.roomTypename,
+      floor: room.floor,
+      floors: room.floors,
+      sharingType: room.sharingType,
+      roomType: room.roomType,
+      rent: room.rent,
+      dailyRent: room.dailyRent,
+      deposit: room.deposit,
+      maintenance: room.maintenance,
+      isActive: room.isActive,
+      isMaster: room.isMaster,
+      capacity: room.capacity,
+      beds: room.beds,
+    )).toList();
+    return await remoteDataSource.bulkUpsertRooms(models, ownerId);
   }
 }

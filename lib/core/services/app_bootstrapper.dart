@@ -76,7 +76,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
     });
 
     try {
-      // STAGE 1: Localization & Orientation
+      
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
@@ -88,7 +88,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         _statusText = 'Building secure storage...';
       });
 
-      // STAGE 2: Hydrated Storage & Hive DB
+      
       final storageDir = await getApplicationDocumentsDirectory();
       HydratedBloc.storage = await HydratedStorage.build(
         storageDirectory: storageDir,
@@ -100,12 +100,12 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         _statusText = 'Connecting Stay India Cloud...';
       });
 
-      // STAGE 3: Firebase core
+      
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      // System exception catching configuration
+      
       FlutterError.onError = (details) {
         FirebaseCrashlytics.instance.recordFlutterFatalError(details);
         final errorString = details.exception.toString();
@@ -125,7 +125,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         _statusText = 'Initializing services & dependencies...';
       });
 
-      // STAGE 4: Dependency Injection Setup
+      
       await di.init();
 
       setState(() {
@@ -133,20 +133,20 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
         _statusText = 'Optimizing caches & notifications...';
       });
 
-      // STAGE 5: Service Initializations & System checks
+      
       await di.sl<CacheService>().checkAndFlushOnUpdate();
       await di.sl<NotificationService>().init();
       await di.sl<NotificationService>().requestPermissions();
 
       AppLogger.info('Stay India Owner App Initialized via Bootstrapper');
 
-      // Complete initialization
+      
       setState(() {
         _progress = 1.0;
         _statusText = 'Welcome Owner';
       });
 
-      // Let progress bar fill smoothly
+      
       await Future.delayed(const Duration(milliseconds: 300));
 
       if (mounted) {
@@ -218,7 +218,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                     children: [
                       const Spacer(),
                       
-                      // Animated Branded Logo Container
+                      
                       Container(
                         width: 140,
                         height: 140,
@@ -236,7 +236,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                         ),
                         child: ClipOval(
                           child: Image.asset(
-                            'assets/images/logo.png', // Branded Asset
+                            'assets/images/logo.png', 
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(
@@ -319,7 +319,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                           ),
                         ),
                       ] else ...[
-                        // Custom premium progress bar
+                        
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: SizedBox(
@@ -334,7 +334,7 @@ class _AppBootstrapperState extends State<AppBootstrapper> with SingleTickerProv
                         ),
                         const SizedBox(height: 16),
                         
-                        // Status transitions
+                        
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 200),
                           child: Text(

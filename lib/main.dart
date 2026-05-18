@@ -64,7 +64,7 @@ class StayIndiaOwnerApp extends StatelessWidget {
                 },
                 child: BlocBuilder<AuthCubit, AuthState>(
                   buildWhen: (prev, curr) {
-                    // Ignore transient/action states to prevent resetting session and MaterialApp rebuilds
+                    
                     if (curr is AuthLoading || curr is AuthError || curr is AuthOtpSent) {
                       return false;
                     }

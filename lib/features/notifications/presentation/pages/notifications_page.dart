@@ -85,9 +85,9 @@ class NotificationsView extends StatelessWidget {
             return RefreshIndicator(
               onRefresh: () => context.read<NotificationCubit>().fetchNotifications(),
               child: ListView.separated(
-                padding: EdgeInsets.all(20.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 itemCount: state.notifications.length,
-                separatorBuilder: (context, index) => SizedBox(height: 12.h),
+                separatorBuilder: (context, index) => SizedBox(height: 8.h),
                 itemBuilder: (context, index) {
                   final notification = state.notifications[index];
                   return _NotificationItem(notification: notification);
@@ -142,12 +142,12 @@ class _NotificationItem extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
         border: Border.all(
@@ -156,58 +156,50 @@ class _NotificationItem extends StatelessWidget {
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         child: IntrinsicHeight(
           child: Row(
             children: [
               Container(
-                width: 6.w,
+                width: 4.w,
                 color: isSOS ? AppColors.sosRed : (notification.isRead ? Colors.transparent : AppColors.primaryBlue),
               ),
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: Row(
+                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildIcon(isSOS),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    notification.title,
-                                    style: GoogleFonts.outfit(
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 15.sp,
-                                      color: isSOS ? AppColors.sosRed : AppColors.darkText,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  _formatDate(notification.createdAt),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 11.sp,
-                                    color: AppColors.greyText.withValues(alpha: 0.6),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              notification.message,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              notification.title,
                               style: GoogleFonts.outfit(
-                                fontSize: 13.sp,
-                                color: AppColors.greyText,
-                                height: 1.4,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13.5.sp,
+                                color: isSOS ? AppColors.sosRed : AppColors.darkText,
                               ),
                             ),
-                          ],
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            _formatDate(notification.createdAt),
+                            style: GoogleFonts.outfit(
+                              fontSize: 10.sp,
+                              color: AppColors.greyText.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        notification.message,
+                        style: GoogleFonts.outfit(
+                          fontSize: 11.5.sp,
+                          color: AppColors.greyText,
+                          height: 1.35,
                         ),
                       ),
                     ],
@@ -217,22 +209,6 @@ class _NotificationItem extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildIcon(bool isSOS) {
-    return Container(
-      width: 44.w,
-      height: 44.w,
-      decoration: BoxDecoration(
-        color: isSOS ? AppColors.sosRed.withValues(alpha: 0.1) : AppColors.primaryBlue.withValues(alpha: 0.05),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        isSOS ? Icons.warning_amber_rounded : Icons.notifications_rounded,
-        color: isSOS ? AppColors.sosRed : AppColors.primaryBlue,
-        size: 22.sp,
       ),
     );
   }

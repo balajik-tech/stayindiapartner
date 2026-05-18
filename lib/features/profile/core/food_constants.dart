@@ -234,7 +234,7 @@ class FoodConstants {
         {'name': t('Idli Sambar', hi: 'इडली सांभर', te: 'ఇడ్లీ సాంబార్'), 'isVeg': true, 'desc': t('Steamed rice cakes')}
       ]},
     ],
-    // ... more days
+    
   };
 
   static final Map<String, List<Map<String, dynamic>>> northIndianTemplate = {
@@ -243,6 +243,6 @@ class FoodConstants {
         {'name': t('Aloo Paratha', hi: 'आलू पराठा', te: 'ఆలు పరోటా'), 'isVeg': true, 'desc': t('Spiced potato flatbread')}
       ]},
     ],
-    // ... more days
+    
   };
 }

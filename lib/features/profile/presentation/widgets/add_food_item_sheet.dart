@@ -72,21 +72,21 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
 
     final List<Map<String, dynamic>> allMatches = [];
     
-    // Search across ALL categories in the food library
+    
     FoodConstants.foodLibrary.forEach((category, items) {
       for (final item in items) {
         final nameMap = item['name'] as Map<String, dynamic>;
         final descMap = (item['desc'] ?? {}) as Map<String, dynamic>;
         
-        // Check if all query words are present in any localized name or description
+        
         bool matches = true;
         for (final word in queryWords) {
           bool wordFound = false;
-          // Search in names
+          
           if (nameMap.values.any((val) => val.toString().toLowerCase().contains(word))) {
             wordFound = true;
           }
-          // Search in descriptions
+          
           if (!wordFound && descMap.values.any((val) => val.toString().toLowerCase().contains(word))) {
             wordFound = true;
           }
@@ -98,7 +98,7 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
         }
         
         if (matches) {
-          // Avoid duplicates (same item might be in multiple categories, though unlikely in our current dataset)
+          
           final isDuplicate = allMatches.any((m) => m['name']['en'] == nameMap['en']);
           if (!isDuplicate) {
             allMatches.add({...item, 'originalCategory': category});
@@ -107,7 +107,7 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
       }
     });
 
-    // Prioritize items from the current category
+    
     allMatches.sort((a, b) {
       if (a['originalCategory'] == widget.mealType && b['originalCategory'] != widget.mealType) return -1;
       if (a['originalCategory'] != widget.mealType && b['originalCategory'] == widget.mealType) return 1;
@@ -115,7 +115,7 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
     });
 
     setState(() {
-      _suggestions = allMatches.take(10).toList(); // Show top 10 matches
+      _suggestions = allMatches.take(10).toList(); 
       _showSuggestions = _suggestions.isNotEmpty;
       debugPrint('Food Search Universal: query="$query", matches=${allMatches.length}, show=$_showSuggestions');
     });
@@ -422,7 +422,7 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
             return;
           }
 
-          // Update current locale translation before saving
+          
           if (_nameTranslations.isEmpty) _nameTranslations = {'en': name};
           _nameTranslations[locale] = name;
           

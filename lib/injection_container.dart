@@ -95,6 +95,7 @@ Future<void> init() async {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          options.headers['app-type'] = 'OWNER_APP';
           
           if (options.data is FormData) {
             options.headers.remove('Content-Type');
@@ -137,7 +138,7 @@ Future<void> init() async {
       RetryInterceptor(dio: dio),
     ]);
     
-    // Start background syncing of the offline queue
+    
     sl<OfflineQueueService>().startSyncListener(dio);
     
     return dio;

@@ -83,7 +83,7 @@ class FloorManagementPage extends StatelessWidget {
 
   Widget _buildBottomAction(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, MediaQuery.of(context).padding.bottom > 0 ? MediaQuery.of(context).padding.bottom + 8.h : 24.h),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
@@ -194,14 +194,6 @@ class _FloorCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, color: AppColors.greyText, size: 18),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('custom_floor_labels_soon'.tr())),
-                  );
-                },
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),

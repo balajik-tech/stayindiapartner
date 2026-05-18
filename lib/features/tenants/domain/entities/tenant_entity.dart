@@ -73,6 +73,7 @@ class TenantDetailEntity extends Equatable {
   final String? email;
   final String? avatar;
   final bool kycVerified;
+  final String? aadharCardPhoto;
   final TenantStayDetailEntity? stay;
   final List<TenantPaymentItemEntity> payments;
   final double outstandingAmount;
@@ -87,6 +88,7 @@ class TenantDetailEntity extends Equatable {
     this.email,
     this.avatar,
     required this.kycVerified,
+    this.aadharCardPhoto,
     this.stay,
     required this.payments,
     required this.outstandingAmount,
@@ -125,6 +127,7 @@ class TenantDetailEntity extends Equatable {
         email,
         avatar,
         kycVerified,
+        aadharCardPhoto,
         stay,
         payments,
         outstandingAmount,

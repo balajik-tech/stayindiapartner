@@ -29,6 +29,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
     if (roomState is RoomLoaded) {
       final masters = roomState.rooms.where((r) => r.isMaster).toList();
       if (masters.isNotEmpty) {
+        context.read<PropertySetupCubit>().setRoomMasters(masters);
         context.read<PropertySetupCubit>().updatePricingFromMasters();
       }
     }
@@ -43,6 +44,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
             if (state is RoomLoaded) {
               final masters = state.rooms.where((r) => r.isMaster).toList();
               if (masters.isNotEmpty) {
+                context.read<PropertySetupCubit>().setRoomMasters(masters);
                 context.read<PropertySetupCubit>().updatePricingFromMasters();
               }
             }
@@ -64,7 +66,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildSectionHeader('pricing_master'.tr(), 'pricing_master_sub'.tr()),
+                  _buildSectionHeader('pricing_master'.tr(), 'pricing_master_desc'.tr()),
                   if (state.rooms.isNotEmpty)
                     BouncingWrapper(
                       onTap: () {
@@ -86,7 +88,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                           Icon(Icons.auto_fix_high_rounded, color: const Color(0xFF2C5990), size: 16.sp),
                           SizedBox(width: 6.w),
                           Text(
-                            'btn_bulk_edit'.tr().toUpperCase(),
+                            'bulk_edit'.tr().toUpperCase(),
                             style: TextStyle(color: const Color(0xFF2C5990), fontSize: 10.sp, fontWeight: FontWeight.w900),
                           ),
                         ],
@@ -176,7 +178,15 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
   Widget _buildPricingSection(BuildContext context, PropertySetupState state, String type, IconData icon, Color bgColor, Color iconColor) {
     final categoriesOfType = state.roomCategories.where((cat) {
       final isAC = cat['isAC'] == true;
-      return type == 'AC' ? isAC : !isAC;
+      final matchType = type == 'AC' ? isAC : !isAC;
+      if (!matchType) return false;
+
+      final sharing = cat['sharingType'] ?? 2;
+      return state.rooms.any((room) {
+        final roomIsAC = (room['features'] as Map?)?['isAC'] == true;
+        final roomSharing = room['sharingType'] ?? 2;
+        return roomSharing == sharing && roomIsAC == isAC;
+      });
     }).toList();
 
     if (categoriesOfType.isEmpty) return const SizedBox.shrink();
@@ -215,6 +225,21 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
 
   Widget _buildPricingCard(BuildContext context, PropertySetupState state, Map<String, dynamic> category, int catIndex) {
     final sharing = category['sharingType'] ?? 2;
+    final isAC = category['isAC'] == true;
+
+    final matches = state.roomMasters.where(
+      (m) => m['sharingType'] == sharing && m['isAC'] == isAC,
+    );
+    final matchingMaster = matches.isNotEmpty ? matches.first : null;
+    final masterRent = matchingMaster != null ? (double.tryParse(matchingMaster['rent']?.toString() ?? '') ?? 0.0) : 0.0;
+    final masterDailyRent = matchingMaster != null ? (double.tryParse(matchingMaster['dailyRent']?.toString() ?? '') ?? 0.0) : 0.0;
+    final masterDeposit = matchingMaster != null ? (double.tryParse(matchingMaster['deposit']?.toString() ?? '') ?? 0.0) : 0.0;
+    final masterMaintenance = matchingMaster != null ? (double.tryParse(matchingMaster['maintenance']?.toString() ?? '') ?? 0.0) : 0.0;
+
+    final hasRentInMaster = masterRent > 0 || category['monthlyRentLocked'] == true;
+    final hasDailyRentInMaster = masterDailyRent > 0 || category['dailyRentLocked'] == true;
+    final hasDepositInMaster = masterDeposit > 0 || category['securityDepositLocked'] == true;
+    final hasMaintenanceInMaster = masterMaintenance > 0 || category['maintenanceLocked'] == true;
 
     return _PremiumCard(
       child: Column(
@@ -262,6 +287,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                   label: 'monthly_rent'.tr(),
                   initialValue: category['monthlyRent']?.toString() ?? '',
                   hint: 'monthly_rent_hint'.tr(),
+                  enabled: !hasRentInMaster,
                   onChanged: (val) {
                     context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'monthlyRent': val});
                   },
@@ -274,6 +300,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                   label: 'daily_rent'.tr(),
                   initialValue: category['dailyRent']?.toString() ?? '',
                   hint: 'daily_rent_hint'.tr(),
+                  enabled: !hasDailyRentInMaster,
                   onChanged: (val) {
                     context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'dailyRent': val});
                   },
@@ -290,6 +317,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                   label: 'deposit'.tr(),
                   initialValue: category['securityDeposit']?.toString() ?? '',
                   hint: 'security_deposit_hint'.tr(),
+                  enabled: !hasDepositInMaster,
                   onChanged: (val) {
                     context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'securityDeposit': val});
                   },
@@ -302,6 +330,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                   label: 'maintenance'.tr(),
                   initialValue: category['maintenance']?.toString() ?? '',
                   hint: 'maintenance_hint'.tr(),
+                  enabled: !hasMaintenanceInMaster,
                   onChanged: (val) {
                     context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'maintenance': val});
                   },
@@ -310,16 +339,6 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
             ],
           ),
           SizedBox(height: 20.h),
-          _PremiumPriceInput(
-            key: ValueKey('${category['id']}_threshold'),
-            label: 'daily_rent_limit_label'.tr(),
-            initialValue: category['dailyRentThresholdDays']?.toString() ?? '',
-            hint: 'e.g. 10',
-            suffix: 'days',
-            onChanged: (val) {
-              context.read<PropertySetupCubit>().updateRoomCategory(catIndex, {'dailyRentThresholdDays': val});
-            },
-          ),
         ],
       ),
     );
@@ -422,8 +441,8 @@ class _PremiumPriceInput extends StatefulWidget {
   final String label;
   final String initialValue;
   final String hint;
-  final String? suffix;
   final Function(String) onChanged;
+  final bool enabled;
 
   const _PremiumPriceInput({
     super.key,
@@ -431,7 +450,7 @@ class _PremiumPriceInput extends StatefulWidget {
     required this.initialValue,
     required this.hint,
     required this.onChanged,
-    this.suffix,
+    this.enabled = true,
   });
 
   @override
@@ -464,7 +483,7 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
 
   @override
   Widget build(BuildContext context) {
-    final hasSuffix = widget.suffix != null;
+    final isEnabled = widget.enabled;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -479,24 +498,23 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
             duration: const Duration(milliseconds: 200),
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: isEnabled ? const Color(0xFFF8FAFC) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                color: _isFocused ? const Color(0xFFF98125) : const Color(0xFFE2E8F0),
+                color: _isFocused && isEnabled ? const Color(0xFFF98125) : const Color(0xFFE2E8F0),
                 width: 1.5,
               ),
             ),
             child: Row(
               children: [
-                if (!hasSuffix) ...[
-                  Text('₹', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: _isFocused ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
-                  SizedBox(width: 6.w),
-                ],
+                Text('₹', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: _isFocused && isEnabled ? const Color(0xFFF98125) : const Color(0xFF94A3B8))),
+                SizedBox(width: 6.w),
                 Expanded(
                   child: TextFormField(
                     controller: _controller,
                     onChanged: widget.onChanged,
                     keyboardType: TextInputType.number,
+                    enabled: isEnabled,
                     decoration: InputDecoration(
                       hintText: widget.hint,
                       hintStyle: TextStyle(color: const Color(0xFFCBD5E1), fontSize: 14.sp, fontWeight: FontWeight.w600),
@@ -504,16 +522,17 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF334155)),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w800,
+                      color: isEnabled ? const Color(0xFF334155) : const Color(0xFF94A3B8),
+                    ),
                   ),
                 ),
-                if (hasSuffix) ...[
-                  SizedBox(width: 4.w),
-                  Text(widget.suffix!, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: const Color(0xFF94A3B8))),
-                ],
               ],
             ),
           ),

@@ -102,7 +102,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
 
             return Container(
               height: MediaQuery.of(context).size.height * 0.85,
-              padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 24.h),
+              padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 20.h),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
@@ -331,7 +331,7 @@ class _AddStockItemPageState extends State<AddStockItemPage> {
           ),
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.all(24.w),
+          padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, MediaQuery.of(context).padding.bottom + 24.h),
           child: Form(
             key: _formKey,
             child: Column(

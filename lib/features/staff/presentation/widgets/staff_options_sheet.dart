@@ -33,7 +33,7 @@ class StaffOptionsSheet extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
       ),
-      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 32.h),
+      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, MediaQuery.of(context).padding.bottom + 16.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

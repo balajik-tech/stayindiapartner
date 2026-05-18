@@ -10,6 +10,7 @@ import 'package:stayindia_owner/features/tenants/presentation/widgets/tenant_det
 import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
 import 'package:stayindia_owner/features/bookings/pages/room_selection_page.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/widgets/checkout_settlement_modal.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
 class OccupiedBedSheet extends StatelessWidget {
@@ -67,7 +68,9 @@ class OccupiedBedSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
@@ -376,61 +379,18 @@ class OccupiedBedSheet extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: isLoading || detail == null
                             ? null
-                            : () async {
-                                final confirmed = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-                                    title: Text(
-                                      'Confirm Check-out',
-                                      style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.darkText,
-                                      ),
-                                    ),
-                                    content: Text(
-                                      'Are you sure you want to check-out $tenantName? This will mark the bed as available for new bookings.',
-                                      style: TextStyle(
-                                        fontSize: 16.sp,
-                                        color: AppColors.greyText,
-                                      ),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(ctx, false),
-                                        child: Text(
-                                          'Cancel',
-                                          style: TextStyle(
-                                            color: AppColors.greyText,
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () => Navigator.pop(ctx, true),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.redAccent,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                                          elevation: 0,
-                                        ),
-                                        child: Text(
-                                          'Check-out',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            : () {
+                                CheckoutSettlementModal.show(
+                                  context,
+                                  tenantName: tenantName,
+                                  tenantId: tenantId,
+                                  hostelId: hostelId,
+                                  bookingId: detail.stay!.bookingId,
+                                  securityDeposit: detail.stay!.deposit,
+                                  onCheckoutConfirmed: () {
+                                    context.read<BookingsCubit>().checkoutBooking(detail.stay!.bookingId);
+                                  },
                                 );
-
-                                if (confirmed == true && context.mounted) {
-                                  context.read<BookingsCubit>().checkoutBooking(detail.stay!.bookingId);
-                                }
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFF9FAFB),

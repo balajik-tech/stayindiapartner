@@ -5,7 +5,7 @@ import '../models/room_detail_model.dart';
 
 abstract class RoomRemoteDataSource {
   Future<OccupancyModel> getOccupancy(String hostelId);
-  Future<List<RoomDetailModel>> getRooms({bool? isMaster});
+  Future<List<RoomDetailModel>> getRooms({bool? isMaster, String? hostelId});
   Future<List<int>> getFloors(String hostelId);
   Future<List<RoomDetailModel>> getRoomsByFloor(String hostelId, int floor);
   Future<List<String>> getFreeBeds(String roomId);
@@ -16,6 +16,7 @@ abstract class RoomRemoteDataSource {
   Future<List<RoomDetailModel>> bulkUpsertRooms(List<RoomDetailModel> rooms, String ownerId);
   Future<RoomDetailModel> updateRoom(RoomDetailModel room);
   Future<void> deleteRoom(String id);
+  Future<void> updateBedStatus(String roomId, String bedNumber, String status);
 }
 
 class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
@@ -45,11 +46,18 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
   }
 
   @override
-  Future<List<RoomDetailModel>> getRooms({bool? isMaster}) async {
+  Future<List<RoomDetailModel>> getRooms({bool? isMaster, String? hostelId}) async {
     try {
+      final Map<String, dynamic> queryParams = {};
+      if (isMaster != null) {
+        queryParams['isMaster'] = isMaster;
+      }
+      if (hostelId != null && hostelId.isNotEmpty) {
+        queryParams['hostelId'] = hostelId;
+      }
       final response = await dio.get(
         ApiConstants.rooms,
-        queryParameters: isMaster != null ? {'isMaster': isMaster} : null,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
       if (response.statusCode == 200) {
         final dynamic data = response.data is List
@@ -260,6 +268,21 @@ class RoomRemoteDataSourceImpl implements RoomRemoteDataSource {
       throw Exception('Failed to fetch bed history');
     } catch (e) {
       throw Exception('Error fetching bed history: $e');
+    }
+  }
+
+  @override
+  Future<void> updateBedStatus(String roomId, String bedNumber, String status) async {
+    try {
+      final response = await dio.put(
+        '${ApiConstants.rooms}/$roomId/beds/$bedNumber/status',
+        data: {'status': status},
+      );
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update bed status');
+      }
+    } catch (e) {
+      throw Exception('Error updating bed status: $e');
     }
   }
 }

@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
@@ -11,6 +14,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_state.dart';
 import 'package:stayindia_owner/injection_container.dart' as di;
+import 'package:stayindia_owner/features/profile/domain/usecases/room_usecases.dart';
 
 class AddTenantPage extends StatefulWidget {
   const AddTenantPage({super.key});
@@ -29,6 +33,23 @@ class _AddTenantPageState extends State<AddTenantPage> {
   DateTime? _checkInDate;
   late AddTenantCubit _addTenantCubit;
 
+  File? _userPhoto;
+  File? _aadharPhoto;
+  bool _isDetectingFace = false;
+
+  Hostel? _selectedHostel;
+  bool _isLoadingRooms = false;
+  List<RoomDetail> _allRooms = [];
+  List<String> _availableSharings = [];
+  String? _selectedSharing;
+
+  List<int> _floors = [];
+  int? _selectedFloor;
+  List<RoomDetail> _rooms = [];
+  RoomDetail? _selectedRoom;
+  List<String> _beds = [];
+  String? _selectedBed;
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +60,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
       final hostels = state.hostels;
       if (hostels.isNotEmpty) {
         final index = state.selectedHostelIndex;
-        _addTenantCubit.selectHostel(hostels[index < hostels.length ? index : 0]);
+        final defaultHostel = hostels[index < hostels.length ? index : 0];
+        _selectedHostel = defaultHostel;
+        _loadHostelRooms(defaultHostel);
       }
     }
   }
@@ -55,14 +78,148 @@ class _AddTenantPageState extends State<AddTenantPage> {
     super.dispose();
   }
 
-  void _submit(AddTenantState state) {
-    if (state is! AddTenantReady) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('fill_required_fields'.tr()), backgroundColor: Colors.redAccent),
-      );
-      return;
-    }
+  Future<void> _loadHostelRooms(Hostel hostel) async {
+    setState(() {
+      _isLoadingRooms = true;
+      _selectedHostel = hostel;
+      _selectedSharing = null;
+      _selectedFloor = null;
+      _selectedRoom = null;
+      _selectedBed = null;
+      _floors = [];
+      _rooms = [];
+      _beds = [];
+      _allRooms = [];
+      _availableSharings = [];
+    });
 
+    try {
+      final getRooms = di.sl<GetRoomsUseCase>();
+      final rooms = await getRooms(hostelId: hostel.id, isMaster: false);
+
+      // Extract unique sharing types which have at least one FREE bed
+      final sharings = rooms
+          .where((r) => r.isActive == true && r.beds.any((b) => b.status == 'FREE'))
+          .map((r) {
+            if (r.sharingType.toUpperCase() == 'DORMITORY') {
+              return 'DORMITORY_${r.capacity}';
+            }
+            return r.sharingType.toUpperCase();
+          })
+          .toSet()
+          .toList();
+
+      setState(() {
+        _allRooms = rooms;
+        _availableSharings = sharings;
+        _isLoadingRooms = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingRooms = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load hostel details: $e'), backgroundColor: Colors.redAccent),
+        );
+      }
+    }
+  }
+
+  void _onSharingSelected(String? sharing) {
+    if (sharing == null) return;
+
+    final floors = _allRooms
+        .where((r) => r.isActive == true &&
+            (r.sharingType.toUpperCase() == 'DORMITORY'
+                ? 'DORMITORY_${r.capacity}' == sharing
+                : r.sharingType.toUpperCase() == sharing) &&
+            r.beds.any((b) => b.status == 'FREE'))
+        .map((r) => r.floor)
+        .toSet()
+        .toList()
+      ..sort();
+
+    setState(() {
+      _selectedSharing = sharing;
+      _selectedFloor = null;
+      _selectedRoom = null;
+      _selectedBed = null;
+      _floors = floors;
+      _rooms = [];
+      _beds = [];
+    });
+  }
+
+  void _onFloorSelected(int? floor) {
+    if (floor == null) return;
+
+    final rooms = _allRooms
+        .where((r) => r.isActive == true &&
+            (r.sharingType.toUpperCase() == 'DORMITORY'
+                ? 'DORMITORY_${r.capacity}' == _selectedSharing
+                : r.sharingType.toUpperCase() == _selectedSharing) &&
+            r.floor == floor &&
+            r.beds.any((b) => b.status == 'FREE'))
+        .toList();
+
+    setState(() {
+      _selectedFloor = floor;
+      _selectedRoom = null;
+      _selectedBed = null;
+      _rooms = rooms;
+      _beds = [];
+    });
+  }
+
+  void _onRoomSelected(RoomDetail? room) {
+    if (room == null) return;
+
+    final beds = room.beds
+        .where((b) => b.status == 'FREE')
+        .map((b) => b.bedNumber)
+        .toList();
+
+    setState(() {
+      _selectedRoom = room;
+      _selectedBed = null;
+      _beds = beds;
+      _rentController.text = room.rent.toString();
+      _depositController.text = room.deposit.toString();
+    });
+  }
+
+  void _onBedSelected(String? bed) {
+    setState(() {
+      _selectedBed = bed;
+    });
+  }
+
+  String formatSharingType(String type) {
+    if (type.startsWith('DORMITORY_')) {
+      final parts = type.split('_');
+      final cap = parts.length > 1 ? parts[1] : '';
+      return '$cap Sharing Dormitory';
+    }
+    switch (type.toUpperCase()) {
+      case 'SINGLE':
+        return 'Single Sharing';
+      case 'DOUBLE':
+        return '2 Sharing';
+      case 'TRIPLE':
+        return '3 Sharing';
+      case 'QUADRUPLE':
+        return '4 Sharing';
+      case 'QUINTUPLE':
+        return '5 Sharing';
+      case 'DORMITORY':
+        return 'Dormitory';
+      default:
+        return type.isNotEmpty ? '${type[0].toUpperCase()}${type.substring(1).toLowerCase()} Sharing' : 'Unknown';
+    }
+  }
+
+  void _submit() {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final rentText = _rentController.text.trim();
@@ -92,6 +249,13 @@ class _AddTenantPageState extends State<AddTenantPage> {
       }
     }
 
+    if (_selectedHostel == null || _selectedSharing == null || _selectedFloor == null || _selectedRoom == null || _selectedBed == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select all room allocation details'), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
     if (rentText.isEmpty || (double.tryParse(rentText) ?? 0) <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('enter_valid_rent'.tr()), backgroundColor: Colors.redAccent),
@@ -106,21 +270,37 @@ class _AddTenantPageState extends State<AddTenantPage> {
       return;
     }
 
+    if (_userPhoto == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please take a user photo (Face validation required)'), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
+    if (_aadharPhoto == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please upload Aadhar Card'), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
     final nameParts = name.split(' ');
     final firstName = nameParts.isNotEmpty ? nameParts.first : name;
     final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '.';
 
     _addTenantCubit.submit(
-      hostel: state.hostel,
-      room: state.selectedRoom,
-      bed: state.selectedBed,
+      hostel: _selectedHostel!,
+      room: _selectedRoom!,
+      bed: _selectedBed!,
       phone: phone,
       rent: double.tryParse(rentText) ?? 0,
       firstName: firstName,
       lastName: lastName,
-      sharingType: state.selectedRoom.sharingType,
+      sharingType: _selectedRoom!.sharingType,
       deposit: depositText.isNotEmpty ? double.tryParse(depositText) : null,
       startDate: _checkInDate!,
+      userPhotoPath: _userPhoto?.path,
+      aadharPhotoPath: _aadharPhoto?.path,
     );
   }
 
@@ -139,9 +319,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message), backgroundColor: Colors.redAccent),
             );
-          } else if (state is AddTenantBedsLoaded) {
-            _rentController.text = state.selectedRoom.rent.toString();
-            _depositController.text = state.selectedRoom.deposit.toString();
           }
         },
         child: Scaffold(
@@ -164,44 +341,22 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 List<Hostel> hostels = [];
                 if (hostelState is HostelLoaded) {
                   hostels = hostelState.hostels;
+                  if (_selectedHostel == null && hostels.isNotEmpty) {
+                    final index = hostelState.selectedHostelIndex;
+                    final defaultHostel = hostels[index < hostels.length ? index : 0];
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted && _selectedHostel == null) {
+                        setState(() {
+                          _selectedHostel = defaultHostel;
+                        });
+                        _loadHostelRooms(defaultHostel);
+                      }
+                    });
+                  }
                 }
 
                 return BlocBuilder<AddTenantCubit, AddTenantState>(
                   builder: (context, state) {
-                    Hostel? selectedHostel;
-                    List<int> floors = [];
-                    int? selectedFloor;
-                    List<RoomDetail> rooms = [];
-                    RoomDetail? selectedRoom;
-                    List<String> beds = [];
-                    String? selectedBed;
-                    bool isLoading = state is AddTenantLoading;
-
-                    if (state is AddTenantFloorsLoaded) {
-                      selectedHostel = state.hostel;
-                      floors = state.floors;
-                    } else if (state is AddTenantRoomsLoaded) {
-                      selectedHostel = state.hostel;
-                      floors = state.floors;
-                      selectedFloor = state.selectedFloor;
-                      rooms = state.rooms;
-                    } else if (state is AddTenantBedsLoaded) {
-                      selectedHostel = state.hostel;
-                      floors = state.floors;
-                      selectedFloor = state.selectedFloor;
-                      rooms = state.rooms;
-                      selectedRoom = state.selectedRoom;
-                      beds = state.beds;
-                    } else if (state is AddTenantReady) {
-                      selectedHostel = state.hostel;
-                      floors = state.floors;
-                      selectedFloor = state.selectedFloor;
-                      rooms = state.rooms;
-                      selectedRoom = state.selectedRoom;
-                      beds = state.beds;
-                      selectedBed = state.selectedBed;
-                    }
-
                     return SingleChildScrollView(
                       padding: EdgeInsets.all(20.w),
                       child: Column(
@@ -212,8 +367,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           _buildDropdown<Hostel>(
                             'select_hostel'.tr(),
                             hostels,
-                            selectedHostel,
-                            (h) => _addTenantCubit.selectHostel(h!),
+                            _selectedHostel,
+                            (h) => _loadHostelRooms(h!),
                             itemLabel: (h) => h.name,
                           ),
 
@@ -243,15 +398,24 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           SizedBox(height: 32.h),
                           _buildSectionTitle('room_allocation'.tr()),
                           SizedBox(height: 16.h),
+                          _buildDropdown<String>(
+                            'room_sharing_req'.tr() == 'room_sharing_req' ? 'Room Sharing *' : 'room_sharing_req'.tr(),
+                            _availableSharings,
+                            _selectedSharing,
+                            _onSharingSelected,
+                            isLoading: _isLoadingRooms,
+                            itemLabel: (s) => formatSharingType(s),
+                          ),
+                          SizedBox(height: 16.h),
                           Row(
                             children: [
                               Expanded(
                                 child: _buildDropdown<int>(
                                   'floor_req'.tr(),
-                                  floors,
-                                  selectedFloor,
-                                  (f) => _addTenantCubit.selectFloor(selectedHostel!, f!, floors),
-                                  isLoading: isLoading,
+                                  _floors,
+                                  _selectedFloor,
+                                  _onFloorSelected,
+                                  isLoading: _isLoadingRooms,
                                   itemLabel: (f) => f == 0 ? 'ground'.tr() : '$f ${'floor_suffix'.tr()}',
                                 ),
                               ),
@@ -259,16 +423,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
                               Expanded(
                                 child: _buildDropdown<RoomDetail>(
                                   'room_req'.tr(),
-                                  rooms,
-                                  selectedRoom,
-                                  (r) {
-                                    if (r != null) {
-                                      _rentController.text = r.rent.toString();
-                                      _depositController.text = r.deposit.toString();
-                                      _addTenantCubit.selectRoom(selectedHostel!, selectedFloor!, floors, r, rooms);
-                                    }
-                                  },
-                                  isLoading: isLoading,
+                                  _rooms,
+                                  _selectedRoom,
+                                  _onRoomSelected,
+                                  isLoading: _isLoadingRooms,
                                   itemLabel: (r) => r.roomTypename,
                                 ),
                               ),
@@ -277,10 +435,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           SizedBox(height: 16.h),
                           _buildDropdown<String>(
                             'bed_req'.tr(),
-                            beds,
-                            selectedBed,
-                            (b) => _addTenantCubit.selectBed(selectedHostel!, selectedFloor!, floors, selectedRoom!, rooms, b!, beds),
-                            isLoading: isLoading,
+                            _beds,
+                            _selectedBed,
+                            _onBedSelected,
+                            isLoading: _isLoadingRooms,
                             itemLabel: (b) {
                               final num = int.tryParse(b);
                               if (num != null && num > 0 && num <= 26) {
@@ -311,6 +469,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           SizedBox(height: 16.h),
                           _buildDatePicker(context, 'check_in_date_req'.tr()),
 
+                          SizedBox(height: 32.h),
+                          _buildVerificationSection(context),
+
                           SizedBox(height: 40.h),
                           _buildSubmitButton(state),
                         ],
@@ -331,7 +492,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: isSubmitting ? null : () => _submit(state),
+        onPressed: isSubmitting ? null : _submit,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryBlue,
           foregroundColor: Colors.white,
@@ -431,6 +592,315 @@ class _AddTenantPageState extends State<AddTenantPage> {
               ],
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickUserPhoto() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.front,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      setState(() {
+        _isDetectingFace = true;
+      });
+
+      // Run ML Kit Face Detection
+      final inputImage = InputImage.fromFilePath(image.path);
+      final faceDetector = FaceDetector(
+        options: FaceDetectorOptions(
+          performanceMode: FaceDetectorMode.accurate,
+        ),
+      );
+
+      final List<Face> faces = await faceDetector.processImage(inputImage);
+      await faceDetector.close();
+
+      setState(() {
+        _isDetectingFace = false;
+      });
+
+      if (faces.isNotEmpty) {
+        setState(() {
+          _userPhoto = File(image.path);
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Face successfully detected and verified!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+              title: Row(
+                children: [
+                  Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 28.sp),
+                  SizedBox(width: 10.w),
+                  const Text('No Face Detected', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              content: const Text(
+                'Google ML Kit could not detect a valid human face in the photo. Please take a clear picture of the tenant\'s face with good lighting.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Try Again', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isDetectingFace = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Face detection error: $e'), backgroundColor: Colors.redAccent),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickAadharPhoto() async {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+      backgroundColor: Colors.white,
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 8.h),
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
+                child: Row(
+                  children: [
+                    Text(
+                      'Upload Aadhar Card',
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(color: Colors.blue[50], shape: BoxShape.circle),
+                  child: Icon(Icons.camera_alt_rounded, color: Colors.blue[700]),
+                ),
+                title: const Text('Take Photo (Camera)', style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () async {
+                  Navigator.pop(bottomSheetContext);
+                  final picker = ImagePicker();
+                  final XFile? image = await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+                  if (image != null) {
+                    setState(() {
+                      _aadharPhoto = File(image.path);
+                    });
+                  }
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(color: Colors.green[50], shape: BoxShape.circle),
+                  child: Icon(Icons.photo_library_rounded, color: Colors.green[700]),
+                ),
+                title: const Text('Choose from Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () async {
+                  Navigator.pop(bottomSheetContext);
+                  final picker = ImagePicker();
+                  final XFile? image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+                  if (image != null) {
+                    setState(() {
+                      _aadharPhoto = File(image.path);
+                    });
+                  }
+                },
+              ),
+              SizedBox(height: 16.h),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildVerificationSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('verification_documents'.tr() == 'verification_documents' ? 'Verification Documents' : 'verification_documents'.tr()),
+        SizedBox(height: 16.h),
+        Row(
+          children: [
+            // User Photo Card
+            Expanded(
+              child: GestureDetector(
+                onTap: _isDetectingFace ? null : _pickUserPhoto,
+                child: Container(
+                  height: 140.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: _userPhoto != null 
+                          ? Colors.green.withValues(alpha: 0.5) 
+                          : const Color(0xFFE2E8F0), 
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (_userPhoto != null) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16.r),
+                          child: Image.file(_userPhoto!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                        ),
+                        Positioned(
+                          top: 8.h,
+                          right: 8.w,
+                          child: Container(
+                            padding: EdgeInsets.all(4.r),
+                            decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+                            child: Icon(Icons.check, color: Colors.white, size: 14.sp),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)),
+                            ),
+                            child: const Text(
+                              'Tap to retake',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (_isDetectingFace) ...[
+                              const CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2C599D)),
+                              SizedBox(height: 8.h),
+                              Text('Detecting face...', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF475569))),
+                            ] else ...[
+                              Icon(Icons.face_retouching_natural_rounded, color: const Color(0xFF2C599D), size: 32.sp),
+                              SizedBox(height: 8.h),
+                              Text('User Photo *', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
+                              SizedBox(height: 2.h),
+                              Text('Face Scan (Camera)', style: TextStyle(fontSize: 10.sp, color: const Color(0xFF64748B))),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 16.w),
+            // Aadhar Card Card
+            Expanded(
+              child: GestureDetector(
+                onTap: _pickAadharPhoto,
+                child: Container(
+                  height: 140.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: _aadharPhoto != null 
+                          ? Colors.green.withValues(alpha: 0.5) 
+                          : const Color(0xFFE2E8F0), 
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (_aadharPhoto != null) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16.r),
+                          child: Image.file(_aadharPhoto!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                        ),
+                        Positioned(
+                          top: 8.h,
+                          right: 8.w,
+                          child: Container(
+                            padding: EdgeInsets.all(4.r),
+                            decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+                            child: Icon(Icons.check, color: Colors.white, size: 14.sp),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)),
+                            ),
+                            child: const Text(
+                              'Tap to retake',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.badge_rounded, color: const Color(0xFFF98125), size: 32.sp),
+                            SizedBox(height: 8.h),
+                            Text('Aadhar Card *', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
+                            SizedBox(height: 2.h),
+                            Text('Camera or Gallery', style: TextStyle(fontSize: 10.sp, color: const Color(0xFF64748B))),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

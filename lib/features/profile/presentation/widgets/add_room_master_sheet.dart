@@ -142,7 +142,7 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
 
     return Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+        bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
       ),
       child: Container(
         height: 0.85.sh,

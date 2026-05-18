@@ -252,7 +252,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
 
   Widget _buildBottomAction() {
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 40.h),
+      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, MediaQuery.of(context).padding.bottom + 16.h),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [

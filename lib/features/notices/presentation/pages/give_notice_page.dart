@@ -12,6 +12,20 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 
 enum NoticeType { general, vacant }
 
+class NoticeTemplate {
+  final String icon;
+  final String label;
+  final String title;
+  final String content;
+
+  const NoticeTemplate({
+    required this.icon,
+    required this.label,
+    required this.title,
+    required this.content,
+  });
+}
+
 class GiveNoticePage extends StatefulWidget {
   final TenantEntity? tenant;
   const GiveNoticePage({super.key, this.tenant});
@@ -35,6 +49,84 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
   List<TenantEntity> _allTenants = [];
   List<TenantEntity> _filteredTenants = [];
   bool _isLoadingTenants = false;
+
+  final List<NoticeTemplate> _generalTemplates = const [
+    NoticeTemplate(
+      icon: '🛠️',
+      label: 'Maintenance',
+      title: 'Scheduled Maintenance Work',
+      content: 'Please note that scheduled maintenance work will be carried out today. Water supply/electricity may be briefly interrupted. We apologize for any inconvenience caused.',
+    ),
+    NoticeTemplate(
+      icon: '💰',
+      label: 'Rent Reminder',
+      title: 'Rent Payment Due Reminder',
+      content: 'Dear Tenants, this is a friendly reminder that your monthly rent is due. Kindly make the payment and upload/share the receipt as soon as possible.',
+    ),
+    NoticeTemplate(
+      icon: '📶',
+      label: 'WiFi Downtime',
+      title: 'Internet Connection Maintenance',
+      content: 'Our internet service provider is conducting emergency maintenance. The WiFi services will be temporarily unavailable for the next 2 hours.',
+    ),
+    NoticeTemplate(
+      icon: '🧹',
+      label: 'Cleanliness',
+      title: 'Common Area Cleanliness',
+      content: 'Please help keep our PG clean and hygienic. Kindly throw garbage only in the designated bins and keep the common areas tidy after use.',
+    ),
+    NoticeTemplate(
+      icon: '🔑',
+      label: 'Gate Timing',
+      title: 'Important Late Entry Update',
+      content: 'For safety and security reasons, the main gate will be locked at 10:30 PM. Please coordinate with the warden/security guard in case of any late arrivals.',
+    ),
+    NoticeTemplate(
+      icon: '👥',
+      label: 'Guest Policy',
+      title: 'Revised Guest Policy Notice',
+      content: 'Tenants are requested to register all visitors/guests at the front desk before entry. Overnight guest stays are not permitted without prior written approval.',
+    ),
+  ];
+
+  final List<NoticeTemplate> _vacantTemplates = const [
+    NoticeTemplate(
+      icon: '💼',
+      label: 'Job Relocation',
+      title: '',
+      content: 'Relocating to a new city/office location for employment reasons.',
+    ),
+    NoticeTemplate(
+      icon: '🎓',
+      label: 'Studies',
+      title: '',
+      content: 'Moving out to pursue higher education / university courses elsewhere.',
+    ),
+    NoticeTemplate(
+      icon: '📜',
+      label: 'Agreement Expired',
+      title: '',
+      content: 'Tenancy contract period completed and agreement is expiring.',
+    ),
+    NoticeTemplate(
+      icon: '🏡',
+      label: 'Personal Reason',
+      title: '',
+      content: 'Returning to hometown / relocating due to personal or health-related reasons.',
+    ),
+    NoticeTemplate(
+      icon: '⚠️',
+      label: 'Rent Overdue',
+      title: '',
+      content: 'Requested to vacate due to outstanding rent dues and continuous non-payment despite reminders.',
+    ),
+    NoticeTemplate(
+      icon: '🚫',
+      label: 'Behavior Issue',
+      title: '',
+      content: 'Requested to vacate due to continuous behavioral issues and violation of PG/hostel guidelines.',
+    ),
+  ];
 
   @override
   void initState() {
@@ -108,7 +200,7 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
           }
         },
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(24.w),
+          padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, MediaQuery.of(context).padding.bottom + 24.h),
           child: Form(
             key: _formKey,
             child: Column(
@@ -305,6 +397,8 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
           ],
           SizedBox(height: 24.h),
         ],
+        _buildTemplatesSection(_generalTemplates),
+        SizedBox(height: 24.h),
         _buildSectionTitle('Title'),
         SizedBox(height: 12.h),
         TextFormField(
@@ -352,7 +446,8 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
             Expanded(child: _buildDatePicker('Vacating Date', _vacatingDate, (d) => setState(() => _vacatingDate = d))),
           ],
         ),
-        SizedBox(height: 32.h),
+        _buildTemplatesSection(_vacantTemplates),
+        SizedBox(height: 24.h),
         _buildSectionTitle('Reason (Optional)'),
         SizedBox(height: 16.h),
         TextFormField(
@@ -391,6 +486,51 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTemplatesSection(List<NoticeTemplate> templates) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Quick Templates'),
+        SizedBox(height: 12.h),
+        SizedBox(
+          height: 48.h,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: templates.length,
+            itemBuilder: (context, index) {
+              final t = templates[index];
+              return Padding(
+                padding: EdgeInsets.only(right: 8.w),
+                child: ActionChip(
+                  avatar: Text(t.icon, style: TextStyle(fontSize: 14.sp)),
+                  label: Text(
+                    t.label,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  backgroundColor: const Color(0xFFF1F5F9),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                  onPressed: () {
+                    setState(() {
+                      if (_noticeType == NoticeType.general) {
+                        _titleController.text = t.title;
+                      }
+                      _reasonController.text = t.content;
+                    });
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

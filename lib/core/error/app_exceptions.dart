@@ -52,7 +52,7 @@ class ErrorSanitizer {
     
     final lowerMessage = message.toLowerCase();
 
-    // Check for duplicate room name specifically
+    
     if (lowerMessage.contains('room name already exists') || lowerMessage.contains('room already exists')) {
       try {
         final val = 'room_exists_title'.tr();
@@ -61,17 +61,17 @@ class ErrorSanitizer {
       return 'Room Already Exists';
     }
     
-    // Check for Mongoose validation error specifically!
+    
     if (lowerMessage.contains("validation failed")) {
       return cleanMongooseMessage(message);
     }
     
-    // If it looks like a raw technical error, return a generic one
+    
     bool isTechnical = _technicalKeywords.any((keyword) => lowerMessage.contains(keyword));
     
-    // Check for common raw patterns
+    
     if (isTechnical || message.contains('[') || message.contains('{') || message.contains(':')) {
-      // If it contains specific friendly parts, we might keep it, but generally we want to be safe
+      
       if (lowerMessage.contains('not found') && !lowerMessage.contains('404')) return 'Requested item not found.';
       if (lowerMessage.contains('already exists')) return 'This record already exists.';
       if (lowerMessage.contains('invalid credentials')) return 'Invalid email or password.';
@@ -205,7 +205,7 @@ class GlobalErrorMapper {
           }
         }
 
-        // Try dictionary translation first
+        
         if (backendCode != null) {
           final translated = ErrorCodeDictionary.translate(backendCode);
           if (translated != null) {
@@ -279,7 +279,7 @@ class ErrorCodeDictionary {
     'UNAUTHORIZED_ACTION': 'You do not have permission to perform this action.',
   };
 
-  /// Returns a localized user-friendly string if the code exists, otherwise null.
+  
   static String? translate(String code) {
     return _dictionary[code];
   }

@@ -11,6 +11,7 @@ class OccupancyModel extends Occupancy {
     required super.awayBeds,
     required super.reservedBeds,
     required super.overdueBeds,
+    required super.maintenanceBeds,
     required super.floors,
   });
 
@@ -26,6 +27,7 @@ class OccupancyModel extends Occupancy {
       awayBeds: summary['awayBeds'] ?? 0,
       reservedBeds: summary['reservedBeds'] ?? 0,
       overdueBeds: summary['overdueBeds'] ?? 0,
+      maintenanceBeds: summary['maintenanceBeds'] ?? 0,
       floors: floorsJson.map((f) => FloorDataModel.fromJson(f)).toList(),
     );
   }

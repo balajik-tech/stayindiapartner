@@ -18,8 +18,7 @@ class ExploreCommunitiesPage extends StatefulWidget {
 class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  bool _isGridView = true;
-  int _maxCount = 8;
+  int _maxCount = 15;
 
   @override
   void initState() {
@@ -36,7 +35,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBlue,
+      backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
@@ -49,7 +48,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
               child: _buildStatesSection(),
             ),
             SliverToBoxAdapter(
-              child: SizedBox(height: 32.h),
+              child: SizedBox(height: 48.h),
             ),
             SliverToBoxAdapter(
               child: _buildBottomContent(),
@@ -57,7 +56,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
             SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
-              child: Container(color: Colors.white),
+              child: Container(color: const Color(0xFFF8FAFC)),
             ),
           ],
         ),
@@ -67,118 +66,88 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
 
   Widget _buildTopSection() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 24.h),
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BouncingWrapper(
             onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
-          ),
-          SizedBox(height: 32.h),
-          Text(
-            'explore_communities_by_state'.tr(),
-            style: GoogleFonts.dmSans(
-              fontSize: 34.sp,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              height: 1.1,
-              letterSpacing: -0.5,
+            child: Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFF1F5F9)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 4, offset: const Offset(0, 2)),
+                ],
+              ),
+              child: Icon(Icons.arrow_back_rounded, color: AppColors.darkText, size: 20.sp),
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 24.h),
           Text(
-            'select_state_desc'.tr(),
-            style: GoogleFonts.dmSans(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: Colors.white.withValues(alpha: 0.8),
+            'Explore Communities',
+            style: GoogleFonts.inter(
+              fontSize: 28.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.darkText,
+              letterSpacing: -0.5,
+              height: 1.2,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'Join local PG owner networks',
+            style: GoogleFonts.inter(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.greyText,
               height: 1.4,
             ),
           ),
-          SizedBox(height: 28.h),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 52.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (val) => setState(() {
-                      _searchQuery = val;
-                      _maxCount = 8;
-                    }),
-                    style: GoogleFonts.dmSans(fontSize: 15.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
-                    decoration: InputDecoration(
-                      hintText: 'search_state_hint'.tr(),
-                      hintStyle: GoogleFonts.dmSans(color: Colors.grey.shade400, fontSize: 15.sp),
-                      prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20.sp),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(Icons.close_rounded, color: Colors.grey.shade400, size: 18.sp),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _searchQuery = '';
-                                  _maxCount = 8;
-                                });
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 14.h),
-                    ),
-                  ),
+          SizedBox(height: 24.h),
+          Container(
+            height: 50.h,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
+              ],
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (val) => setState(() {
+                _searchQuery = val;
+                _maxCount = 15;
+              }),
+              style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w500, color: AppColors.darkText),
+              decoration: InputDecoration(
+                hintText: 'Search states...',
+                hintStyle: GoogleFonts.inter(color: Colors.grey.shade400, fontSize: 15.sp, fontWeight: FontWeight.w400),
+                prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20.sp),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.close_rounded, color: Colors.grey.shade400, size: 18.sp),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                            _maxCount = 15;
+                          });
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14.h),
               ),
-              SizedBox(width: 12.w),
-              Container(
-                height: 52.h,
-                padding: EdgeInsets.all(4.r),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Row(
-                  children: [
-                    BouncingWrapper(
-                      onTap: () => setState(() => _isGridView = true),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-                        decoration: BoxDecoration(
-                          color: _isGridView ? Colors.white : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Icon(
-                          Icons.grid_view_rounded,
-                          color: _isGridView ? AppColors.primaryBlue : Colors.white,
-                          size: 20.sp,
-                        ),
-                      ),
-                    ),
-                    BouncingWrapper(
-                      onTap: () => setState(() => _isGridView = false),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-                        decoration: BoxDecoration(
-                          color: !_isGridView ? Colors.white : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Icon(
-                          Icons.view_list_rounded,
-                          color: !_isGridView ? AppColors.primaryBlue : Colors.white,
-                          size: 20.sp,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -231,7 +200,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
         if (state is AssociationLoading) {
           return Padding(
             padding: EdgeInsets.symmetric(vertical: 40.h),
-            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+            child: const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue)),
           );
         }
         if (state is AssociationLoaded) {
@@ -245,7 +214,7 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
             return Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 40.h),
-                child: Text('no_states_found'.tr(), style: GoogleFonts.dmSans(color: Colors.white, fontSize: 16.sp)),
+                child: Text('no_states_found'.tr(), style: GoogleFonts.inter(color: AppColors.greyText, fontSize: 15.sp)),
               ),
             );
           }
@@ -253,210 +222,105 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
           final displayStates = filteredStates.take(_maxCount).toList();
           final hasMore = filteredStates.length > displayStates.length;
 
-          if (!_isGridView) {
-            return Column(
-              children: [
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  itemCount: displayStates.length,
-                  separatorBuilder: (context, index) => SizedBox(height: 12.h),
-                  itemBuilder: (context, index) {
-                    final s = displayStates[index];
-                    final stateName = s['name'] as String? ?? '';
-                    final stateIcon = _getStateIcon(stateName);
+          return Column(
+            children: [
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                itemCount: displayStates.length,
+                separatorBuilder: (context, index) => SizedBox(height: 10.h),
+                itemBuilder: (context, index) {
+                  final s = displayStates[index];
+                  final stateName = s['name'] as String? ?? '';
+                  final stateIcon = _getStateIcon(stateName);
 
-                    return BouncingWrapper(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => AssociationHierarchyPage(
-                              parentId: s['_id'] ?? s['id'],
-                              parentName: stateName,
-                            ),
+                  return BouncingWrapper(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AssociationHierarchyPage(
+                            parentId: s['_id'] ?? s['id'],
+                            parentName: stateName,
                           ),
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(16.r),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16.r),
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(10.r),
-                              decoration: BoxDecoration(
-                                color: AppColors.accentOrange.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              child: Icon(stateIcon, color: AppColors.accentOrange, size: 20.sp),
-                            ),
-                            SizedBox(width: 16.w),
-                            Expanded(
-                              child: Text(
-                                stateName,
-                                style: GoogleFonts.dmSans(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.darkText),
-                              ),
-                            ),
-                            Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                if (hasMore) ...[
-                  SizedBox(height: 16.h),
-                  BouncingWrapper(
-                    onTap: () => setState(() => _maxCount += 8),
+                      );
+                    },
                     child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 24.w),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add, color: AppColors.primaryBlue, size: 20.sp),
-                          SizedBox(width: 8.w),
-                          Text(
-                            'show_more_states'.tr(),
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primaryBlue,
-                            ),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: const Color(0xFFF1F5F9)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.02),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                ],
-              ],
-            );
-          }
-
-          return GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 12.h,
-              crossAxisSpacing: 12.w,
-              childAspectRatio: 0.72,
-            ),
-            itemCount: displayStates.length + (hasMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index < displayStates.length) {
-                final s = displayStates[index];
-                final stateName = s['name'] as String? ?? '';
-                final stateIcon = _getStateIcon(stateName);
-
-                return BouncingWrapper(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => AssociationHierarchyPage(
-                          parentId: s['_id'] ?? s['id'],
-                          parentName: stateName,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(10.r),
-                          decoration: BoxDecoration(
-                            color: AppColors.accentOrange.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8.r),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(color: const Color(0xFFF1F5F9)),
+                            ),
+                            child: Icon(stateIcon, color: AppColors.textPrimary, size: 18.sp),
                           ),
-                          child: Icon(stateIcon, color: AppColors.accentOrange, size: 22.sp),
-                        ),
-                        SizedBox(height: 8.h),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w),
-                          child: Text(
-                            stateName,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.dmSans(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.darkText,
+                          SizedBox(width: 14.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  stateName,
+                                  style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w600, color: AppColors.darkText),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  'Active community',
+                                  style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w400, color: AppColors.greyText),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade300, size: 14.sp),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              } else {
-                return BouncingWrapper(
-                  onTap: () {
-                    setState(() => _maxCount += 8);
-                  },
+                  );
+                },
+              ),
+              if (hasMore) ...[
+                SizedBox(height: 16.h),
+                BouncingWrapper(
+                  onTap: () => setState(() => _maxCount += 15),
                   child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 20.w),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(10.r),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.add, color: AppColors.primaryBlue, size: 22.sp),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'more'.tr(),
-                          style: GoogleFonts.dmSans(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primaryBlue,
-                          ),
-                        ),
-                      ],
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Load more states',
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.darkText,
+                      ),
                     ),
                   ),
-                );
-              }
-            },
+                ),
+              ],
+            ],
           );
         }
         return const SizedBox.shrink();
@@ -466,129 +330,109 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
 
   Widget _buildBottomContent() {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.all(24.r),
+          Container(
+            padding: EdgeInsets.all(20.r),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: const Color(0xFFF1F5F9)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Network Growth',
+                  style: GoogleFonts.inter(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildStatItem('28', 'States'),
+                    _buildStatItem('500+', 'Cities'),
+                    _buildStatItem('10K+', 'Communities'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24.h),
+          Container(
+            padding: EdgeInsets.all(20.r),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: const Color(0xFFF1F5F9)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Container(
-                      width: 4.w,
-                      height: 24.h,
+                      padding: EdgeInsets.all(6.r),
                       decoration: BoxDecoration(
-                        color: AppColors.accentOrange,
-                        borderRadius: BorderRadius.circular(2.r),
+                        color: AppColors.accentOrange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6.r),
                       ),
+                      child: Icon(Icons.visibility_outlined, color: AppColors.accentOrange, size: 16.sp),
                     ),
-                    SizedBox(width: 12.w),
+                    SizedBox(width: 10.w),
                     Text(
-                      'our_growth_potential'.tr(),
-                      style: GoogleFonts.dmSans(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.w800,
+                      'Our Vision',
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.darkText,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 32.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatItem('28', 'states_label'.tr()),
-                    _buildStatItem('500+', 'cities_label'.tr()),
-                    _buildStatItem('10K+', 'associations_label'.tr()),
-                  ],
-                ),
-                SizedBox(height: 32.h),
-                Text(
-                  'empowering_pg_owners'.tr(),
-                  style: GoogleFonts.dmSans(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.darkText,
-                    height: 1.2,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  'join_largest_network'.tr(),
-                  style: GoogleFonts.dmSans(
-                    fontSize: 15.sp,
-                    color: AppColors.greyText,
-                    height: 1.6,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 24.w),
-            padding: EdgeInsets.all(24.r),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24.r),
-              border: Border.all(color: Colors.grey.shade100),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.visibility_outlined, color: AppColors.accentOrange, size: 22.sp),
-                    SizedBox(width: 12.w),
-                    Text(
-                      'our_vision'.tr(),
-                      style: GoogleFonts.dmSans(
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.darkText,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 12.h),
                 Text(
                   'vision_statement'.tr(),
-                  style: GoogleFonts.dmSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     color: AppColors.greyText,
-                    height: 1.6,
-                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
           ),
           SizedBox(height: 32.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Text(
-              'key_features_benefits'.tr(),
-              style: GoogleFonts.dmSans(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w800,
-                color: AppColors.darkText,
-              ),
+          Text(
+            'Features & Benefits',
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.darkText,
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 16.h),
           _buildAccordionFeatures(),
           SizedBox(height: 80.h),
         ],
@@ -602,17 +446,18 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
       children: [
         Text(
           value,
-          style: GoogleFonts.dmSans(
-            fontSize: 32.sp,
-            fontWeight: FontWeight.w900,
+          style: GoogleFonts.inter(
+            fontSize: 24.sp,
+            fontWeight: FontWeight.w700,
             color: AppColors.accentOrange,
           ),
         ),
+        SizedBox(height: 4.h),
         Text(
           label,
-          style: GoogleFonts.dmSans(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w500,
             color: AppColors.greyText,
           ),
         ),
@@ -677,9 +522,9 @@ class _ExploreCommunitiesPageState extends State<ExploreCommunitiesPage> {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.zero,
       itemCount: features.length,
-      separatorBuilder: (context, index) => SizedBox(height: 12.h),
+      separatorBuilder: (context, index) => SizedBox(height: 10.h),
       itemBuilder: (context, index) {
         final f = features[index];
         return _ExpandableFeatureItem(
@@ -715,13 +560,13 @@ class _ExpandableFeatureItemState extends State<_ExpandableFeatureItem> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.01),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -729,38 +574,39 @@ class _ExpandableFeatureItemState extends State<_ExpandableFeatureItem> {
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           onExpansionChanged: (val) => setState(() => _isExpanded = val),
-          tilePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+          tilePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 0),
+          minTileHeight: 56.h,
           leading: Container(
-            padding: EdgeInsets.all(8.r),
+            padding: EdgeInsets.all(6.r),
             decoration: BoxDecoration(
               color: AppColors.accentOrange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(6.r),
             ),
-            child: Icon(widget.icon, color: AppColors.accentOrange, size: 20.sp),
+            child: Icon(widget.icon, color: AppColors.accentOrange, size: 16.sp),
           ),
           title: Text(
             widget.title,
-            style: GoogleFonts.dmSans(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primaryBlue,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.darkText,
             ),
           ),
           trailing: Icon(
             _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
             color: Colors.grey[400],
-            size: 24.sp,
+            size: 20.sp,
           ),
           children: [
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
               child: Text(
                 widget.description,
-                style: GoogleFonts.dmSans(
+                style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   color: AppColors.greyText,
                   height: 1.5,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),

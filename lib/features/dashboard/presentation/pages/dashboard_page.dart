@@ -116,7 +116,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
           context.read<DashboardCubit>().fetchDashboardData(selectedIds);
         }
       } else {
-        // Reset dashboard data when no properties exist
+        
         context.read<DashboardCubit>().reset();
       }
     } else {

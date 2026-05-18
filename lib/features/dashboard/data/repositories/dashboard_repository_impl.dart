@@ -55,6 +55,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
         int awayBeds = 0;
         int reservedBeds = 0;
         int overdueBeds = 0;
+        int maintenanceBeds = 0;
         List<FloorData> allFloors = [];
 
         int todayCheckIns = 0;
@@ -83,6 +84,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
           awayBeds += data.occupancy.awayBeds;
           reservedBeds += data.occupancy.reservedBeds;
           overdueBeds += data.occupancy.overdueBeds;
+          maintenanceBeds += data.occupancy.maintenanceBeds;
           allFloors.addAll(data.occupancy.floors);
 
           todayCheckIns += data.dailyOperations.todayCheckIns;
@@ -113,6 +115,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
             awayBeds: awayBeds,
             reservedBeds: reservedBeds,
             overdueBeds: overdueBeds,
+            maintenanceBeds: maintenanceBeds,
             floors: allFloors,
           ),
           dailyOperations: DailyOperations(

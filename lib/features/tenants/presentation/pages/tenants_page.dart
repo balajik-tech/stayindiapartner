@@ -131,7 +131,7 @@ class _TenantsPageState extends State<TenantsPage> {
     ),
       floatingActionButton: _buildFAB(context) != null
           ? Padding(
-              padding: EdgeInsets.only(bottom: 90.h),
+              padding: EdgeInsets.only(bottom: 10.h + MediaQuery.of(context).padding.bottom),
               child: _buildFAB(context),
             )
           : null,

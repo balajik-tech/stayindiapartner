@@ -45,7 +45,7 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
   final _passwordController = TextEditingController();
   final _salaryController = TextEditingController();
   
-  // Payment Controllers
+  
   final _upiController = TextEditingController();
   final _bankNameController = TextEditingController();
   final _accountNoController = TextEditingController();
@@ -161,7 +161,7 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
             _buildHandle(),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 40.h),
+                padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -502,15 +502,15 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
         }
         context.read<StaffCubit>().updateStaff(widget.staff!.id, data);
       } else {
-        // Since CreateStaffUseCase doesn't support photo/payment/salary yet in its signature,
-        // we might need to update the UseCase or Cubit.
-        // For simplicity, let's update createStaff signature in Cubit next.
         
-        // Wait, I already updated createStaff signature in Cubit? No, I only added uploadImage.
-        // Let's update createStaff signature now.
         
-        // Actually, I'll just use updateStaff approach if it's easier, 
-        // but it's better to fix the createStaff signature.
+        
+        
+        
+        
+        
+        
+        
         
         context.read<StaffCubit>().createStaff(
               hostelId: widget.hostelId,

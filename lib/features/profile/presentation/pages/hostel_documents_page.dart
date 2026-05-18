@@ -110,7 +110,7 @@ class _HostelDocumentsPageState extends State<HostelDocumentsPage> {
               }
 
               return ListView.separated(
-                padding: EdgeInsets.all(24.w),
+                padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, MediaQuery.of(context).padding.bottom + 80.h),
                 itemCount: state.documents.length,
                 separatorBuilder: (context, index) => SizedBox(height: 16.h),
                 itemBuilder: (context, index) {

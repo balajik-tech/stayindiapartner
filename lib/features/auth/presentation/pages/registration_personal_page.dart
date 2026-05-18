@@ -97,7 +97,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
 
       if (croppedFile != null) {
         final file = File(croppedFile.path);
-        // Guard: verify file actually exists before setting state
+        
         if (file.existsSync()) {
           setState(() {
             _selectedImage = file;
@@ -528,8 +528,14 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage> wit
   }
 
   Widget _buildStickyButton() {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+      padding: EdgeInsets.only(
+        left: 24.w,
+        right: 24.w,
+        top: 20.h,
+        bottom: bottomPadding > 0 ? bottomPadding + 8.h : 20.h,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [

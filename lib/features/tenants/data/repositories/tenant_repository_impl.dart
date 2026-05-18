@@ -38,6 +38,8 @@ class TenantRepositoryImpl implements TenantRepository {
     String? sharingType,
     String? startDate,
     double? deposit,
+    String? userPhotoPath,
+    String? aadharPhotoPath,
   }) => remote.addManualTenant(
         phone: phone,
         hostelId: hostelId,
@@ -49,5 +51,7 @@ class TenantRepositoryImpl implements TenantRepository {
         sharingType: sharingType,
         startDate: startDate,
         deposit: deposit,
+        userPhotoPath: userPhotoPath,
+        aadharPhotoPath: aadharPhotoPath,
       );
 }

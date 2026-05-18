@@ -47,6 +47,8 @@ class RoomCubit extends Cubit<RoomState> {
   final GetBedDetailUseCase _getBedDetail;
   final GetBedHistoryUseCase _getBedHistory;
   final BulkCreateRoomsUseCase _bulkCreateRooms;
+  final BulkUpsertRoomsUseCase _bulkUpsertRooms;
+  String? _lastHostelId;
 
   RoomCubit({
     required GetOccupancyUseCase getOccupancyUseCase,
@@ -61,24 +63,29 @@ class RoomCubit extends Cubit<RoomState> {
     required GetBedDetailUseCase getBedDetailUseCase,
     required GetBedHistoryUseCase getBedHistoryUseCase,
     required BulkCreateRoomsUseCase bulkCreateRoomsUseCase,
+    required BulkUpsertRoomsUseCase bulkUpsertRoomsUseCase,
   })  : _getOccupancy = getOccupancyUseCase,
-        _getFloorWiseRooms = getFloorWiseRoomsUseCase,
-        _getRooms = getRoomsUseCase,
-        _getFloors = getFloorsUseCase,
-        _getRoomsByFloor = getRoomsByFloorUseCase,
-        _getFreeBeds = getFreeBedsUseCase,
-        _createRoom = createRoomUseCase,
-        _updateRoom = updateRoomUseCase,
-        _deleteRoom = deleteRoomUseCase,
-        _getBedDetail = getBedDetailUseCase,
-        _getBedHistory = getBedHistoryUseCase,
-        _bulkCreateRooms = bulkCreateRoomsUseCase,
-        super(RoomInitial());
+      _getFloorWiseRooms = getFloorWiseRoomsUseCase,
+      _getRooms = getRoomsUseCase,
+      _getFloors = getFloorsUseCase,
+      _getRoomsByFloor = getRoomsByFloorUseCase,
+      _getFreeBeds = getFreeBedsUseCase,
+      _createRoom = createRoomUseCase,
+      _updateRoom = updateRoomUseCase,
+      _deleteRoom = deleteRoomUseCase,
+      _getBedDetail = getBedDetailUseCase,
+      _getBedHistory = getBedHistoryUseCase,
+      _bulkCreateRooms = bulkCreateRoomsUseCase,
+      _bulkUpsertRooms = bulkUpsertRoomsUseCase,
+      super(RoomInitial());
 
-  Future<void> getRooms({bool? isMaster}) async {
+  Future<void> getRooms({bool? isMaster, String? hostelId}) async {
+    if (hostelId != null) {
+      _lastHostelId = hostelId;
+    }
     emit(RoomLoading());
     try {
-      final rooms = await _getRooms(isMaster: isMaster);
+      final rooms = await _getRooms(isMaster: isMaster, hostelId: hostelId ?? _lastHostelId);
       emit(RoomLoaded(rooms));
     } catch (e) {
       emit(RoomError(ErrorHandler.getErrorMessage(e)));
@@ -250,6 +257,21 @@ class RoomCubit extends Cubit<RoomState> {
     try {
       await _bulkCreateRooms(rooms, ownerId);
       emit(RoomOperationSuccess('${rooms.length} rooms created successfully'));
+    } catch (e) {
+      emit(RoomError(ErrorHandler.getErrorMessage(e)));
+    }
+  }
+
+  Future<void> bulkUpsertRooms({
+    required String ownerId,
+    required List<RoomDetail> rooms,
+  }) async {
+    if (state is RoomLoading) return;
+    emit(RoomLoading());
+    try {
+      await _bulkUpsertRooms(rooms, ownerId);
+      emit(RoomOperationSuccess('Standard pricing saved successfully'));
+      await getRooms(isMaster: true);
     } catch (e) {
       emit(RoomError(ErrorHandler.getErrorMessage(e)));
     }

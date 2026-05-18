@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
-import 'map_picker_screen.dart';
+import 'geofence_intro_screen.dart';
 import 'package:stayindia_owner/core/widgets/local_pdf_preview_screen.dart';
 
 
@@ -165,7 +165,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                       final ll.LatLng? result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MapPickerScreen(
+                          builder: (context) => GeofenceIntroScreen(
                             initialLocation: cubit.state.lat != null 
                                 ? ll.LatLng(cubit.state.lat!, cubit.state.lng!) 
                                 : null,
@@ -283,91 +283,89 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   _buildFilePicker(
                     context,
                     label: 'food_license'.tr(),
-                    hint: state.foodLicense?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.foodLicense,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('food'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('food'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('food', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'hostel_license'.tr(),
-                    hint: state.hostelLicense?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.hostelLicense,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('hostel'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('hostel'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('hostel', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'trade_license'.tr(),
-                    hint: state.tradeLicense?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.tradeLicense,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('trade'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('trade'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('trade', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'fire_safety'.tr(),
-                    hint: state.fireSafety?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.fireSafety,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('fire'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('fire'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('fire', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'police_noc'.tr(),
-                    hint: state.policeNoc?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.policeNoc,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('police'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('police'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('police', idx),
+                  ),
+                  SizedBox(height: 20.h),
+                  _buildFilePicker(
+                    context,
+                    label: 'shops_establishment'.tr(),
+                    filePath: state.shopsEstablishment,
+                    onTap: () => context.read<PropertySetupCubit>().pickLicense('shops'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('shops', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'gst_registration'.tr(),
-                    hint: state.gstRegistration?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.gstRegistration,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('gst'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('gst'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('gst', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'health_noc'.tr(),
-                    hint: state.healthSanitation?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.healthSanitation,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('health'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('health'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('health', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'utility_bill'.tr(),
-                    hint: state.utilityBill?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.utilityBill,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('utility'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('utility'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('utility', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'pollution_noc'.tr(),
-                    hint: state.pollutionNoc?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.pollutionNoc,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('pollution'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('pollution'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('pollution', idx),
                   ),
                   SizedBox(height: 20.h),
                   _buildFilePicker(
                     context,
                     label: 'resident_verification'.tr(),
-                    hint: state.residentVerification?.split('/').last ?? 'select_pdf_image'.tr(),
                     filePath: state.residentVerification,
                     onTap: () => context.read<PropertySetupCubit>().pickLicense('resident'),
-                    onRemove: () => context.read<PropertySetupCubit>().removeLicense('resident'),
+                    onRemoveIndex: (idx) => context.read<PropertySetupCubit>().removeLicenseAtIndex('resident', idx),
                   ),
                 ]),
               ],
@@ -614,75 +612,68 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
           final images = state.categorizedImages[cat['id']] ?? [];
           final hasImage = images.isNotEmpty;
 
-          return Container(
-            width: 120.w,
-            margin: EdgeInsets.only(right: 12.w),
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: hasImage ? const Color(0xFFFF7A00).withValues(alpha: 0.3) : const Color(0xFFF1F5F9)),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))
-              ],
-            ),
-            child: Column(
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 64.r,
-                      height: 64.r,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(16.r),
-                        image: hasImage ? DecorationImage(
-                          image: ResizeImage(FileImage(File(images.last)), width: 128, height: 128),
-                          fit: BoxFit.cover,
-                        ) : null,
+          return GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              _showImageSourceSheet(context, cat['id'] as String, cat['name'] as String);
+            },
+            child: Container(
+              width: 120.w,
+              margin: EdgeInsets.only(right: 12.w),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: hasImage ? const Color(0xFFFF7A00).withValues(alpha: 0.3) : const Color(0xFFF1F5F9)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))
+                ],
+              ),
+              child: Column(
+                children: [
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 64.r,
+                        height: 64.r,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(16.r),
+                          image: hasImage ? DecorationImage(
+                            image: ResizeImage(FileImage(File(images.last)), width: 128, height: 128),
+                            fit: BoxFit.cover,
+                          ) : null,
+                        ),
+                        child: !hasImage ? Icon(cat['icon'] as IconData, color: const Color(0xFF1E3A8A), size: 24.sp) : null,
                       ),
-                      child: !hasImage ? Icon(cat['icon'] as IconData, color: const Color(0xFF1E3A8A), size: 24.sp) : null,
-                    ),
-                    if (hasImage)
-                      Positioned(
-                        top: -6.r,
-                        right: -6.r,
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            context.read<PropertySetupCubit>().removeCategoryImage(cat['id'] as String, images.length - 1);
-                          },
+                      if (hasImage)
+                        Positioned(
+                          top: -6.r,
+                          left: -6.r,
                           child: Container(
-                            padding: EdgeInsets.all(4.r),
-                            decoration: const BoxDecoration(
-                              color: Colors.redAccent,
-                              shape: BoxShape.circle,
+                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF7A00),
+                              borderRadius: BorderRadius.circular(10.r),
                             ),
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: Colors.white,
-                              size: 12.sp,
+                            child: Text(
+                              '${images.length}/5',
+                              style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-                Text(
-                  cat['name'] as String,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
-                  maxLines: 2,
-                ),
-                SizedBox(height: 16.h),
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    _showImageSourceSheet(context, cat['id'] as String);
-                  },
-                  child: Row(
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  Text(
+                    cat['name'] as String,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+                    maxLines: 2,
+                  ),
+                  SizedBox(height: 16.h),
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
@@ -692,13 +683,13 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        hasImage ? 'btn_edit'.tr().toUpperCase() : 'btn_add'.tr().toUpperCase(),
-                        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w900, color: const Color(0xFFFF7A00)),
+                        hasImage ? '${'btn_edit'.tr()} (${images.length})'.toUpperCase() : 'btn_add'.tr().toUpperCase(),
+                        style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: const Color(0xFFFF7A00)),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }).toList(),
@@ -709,154 +700,223 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
   Widget _buildFilePicker(
     BuildContext context, {
     required String label,
-    required String hint,
     required VoidCallback onTap,
     required String? filePath,
-    VoidCallback? onRemove,
+    required Function(int) onRemoveIndex,
   }) {
-    final hasFile = filePath != null && filePath.isNotEmpty;
-    final isImage = hasFile && (filePath.toLowerCase().endsWith('.jpg') || 
-                                filePath.toLowerCase().endsWith('.jpeg') || 
-                                filePath.toLowerCase().endsWith('.png'));
+    final files = filePath?.split(',').where((f) => f.isNotEmpty).toList() ?? [];
+    final count = files.length;
+    final hasFiles = files.isNotEmpty;
+    final canAdd = count < 5;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: const Color(0xFF1E293B)),
+            ),
+            if (hasFiles)
+              Text(
+                '$count/5 files',
+                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFFFF7A00)),
+              ),
+          ],
         ),
         SizedBox(height: 12.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+          padding: EdgeInsets.all(16.r),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(20.r),
             border: Border.all(color: const Color(0xFFE2E8F0)),
-            boxShadow: hasFile ? [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              )
-            ] : null,
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isImage)
-                GestureDetector(
-                  onTap: () => _showFullScreenImage(context, filePath),
-                  child: Container(
-                    width: 48.r,
-                    height: 48.r,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-                      image: DecorationImage(
-                        image: ResizeImage(FileImage(File(filePath)), width: 150, height: 150),
-                        fit: BoxFit.cover,
+              if (hasFiles) ...[
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: count,
+                  separatorBuilder: (context, index) => SizedBox(height: 12.h),
+                  itemBuilder: (context, idx) {
+                    final path = files[idx];
+                    final isImage = path.toLowerCase().endsWith('.jpg') || 
+                                    path.toLowerCase().endsWith('.jpeg') || 
+                                    path.toLowerCase().endsWith('.png');
+                    final fileName = path.split('/').last;
+
+                    return Container(
+                      padding: EdgeInsets.all(10.r),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: const Color(0xFFF1F5F9)),
                       ),
-                    ),
-                    child: Center(
-                      child: Container(
-                        padding: EdgeInsets.all(4.r),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.fullscreen_rounded, color: Colors.white, size: 16.sp),
-                      ),
-                    ),
-                  ),
-                )
-              else
-                GestureDetector(
-                  onTap: hasFile ? () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LocalPdfPreviewScreen(
-                          filePath: filePath,
-                          title: label,
-                        ),
+                      child: Row(
+                        children: [
+                          if (isImage)
+                            GestureDetector(
+                              onTap: () => _showFullScreenImage(context, path),
+                              child: Container(
+                                width: 44.r,
+                                height: 44.r,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  image: DecorationImage(
+                                    image: ResizeImage(FileImage(File(path)), width: 120, height: 120),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LocalPdfPreviewScreen(
+                                      filePath: path,
+                                      title: label,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width: 44.r,
+                                height: 44.r,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEFF6FF),
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                child: Icon(Icons.file_present_rounded, color: const Color(0xFF1E3A8A), size: 22.sp),
+                              ),
+                            ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                if (isImage) {
+                                  _showFullScreenImage(context, path);
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LocalPdfPreviewScreen(
+                                        filePath: path,
+                                        title: label,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    fileName,
+                                    style: TextStyle(
+                                      fontSize: 13.sp, 
+                                      color: const Color(0xFF1E293B), 
+                                      fontWeight: FontWeight.w800
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    'click_to_view'.tr(),
+                                    style: TextStyle(fontSize: 10.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          IconButton(
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              onRemoveIndex(idx);
+                            },
+                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                            style: IconButton.styleFrom(
+                              padding: EdgeInsets.all(6.r),
+                              backgroundColor: Colors.red.shade50,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     );
-                  } : null,
-                  child: Container(
-                    width: 48.r,
-                    height: 48.r,
-                    decoration: BoxDecoration(
-                      color: hasFile ? const Color(0xFFEFF6FF) : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Icon(
-                      hasFile ? Icons.file_present_rounded : Icons.upload_file_rounded, 
-                      color: hasFile ? const Color(0xFF1E3A8A) : const Color(0xFF94A3B8), 
-                      size: 24.sp
-                    ),
-                  ),
-                ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hint,
-                      style: TextStyle(
-                        fontSize: 14.sp, 
-                        color: hasFile ? const Color(0xFF1E293B) : const Color(0xFF64748B), 
-                        fontWeight: hasFile ? FontWeight.w800 : FontWeight.w600
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (hasFile)
-                      Text(
-                        'click_to_view'.tr(),
-                        style: TextStyle(fontSize: 11.sp, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
-                      ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 8.w),
-              ElevatedButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  onTap();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: hasFile ? Colors.white : const Color(0xFF2B5797),
-                  foregroundColor: hasFile ? const Color(0xFF2B5797) : Colors.white,
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                    side: hasFile ? const BorderSide(color: Color(0xFF2B5797), width: 1.5) : BorderSide.none,
-                  ),
-                ),
-                child: Text(
-                  hasFile ? 'btn_edit'.tr() : 'browse'.tr(), 
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900)
-                ),
-              ),
-              if (hasFile && onRemove != null) ...[
-                SizedBox(width: 8.w),
-                IconButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    onRemove();
                   },
-                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-                  style: IconButton.styleFrom(
-                    padding: EdgeInsets.all(8.r),
-                    backgroundColor: Colors.red.shade50,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.r),
+                ),
+                if (canAdd) SizedBox(height: 16.h),
+              ],
+              if (canAdd)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        hasFiles ? 'Upload another document' : 'Select PDF or Image',
+                        style: TextStyle(
+                          fontSize: 13.sp, 
+                          color: const Color(0xFF64748B), 
+                          fontWeight: FontWeight.w600
+                        ),
+                      ),
                     ),
+                    SizedBox(width: 8.w),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        onTap();
+                      },
+                      icon: Icon(Icons.add_rounded, size: 18.sp, color: Colors.white),
+                      label: Text(
+                        hasFiles ? 'Add'.tr() : 'browse'.tr(), 
+                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900)
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2B5797),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.info_outline_rounded, color: const Color(0xFF64748B), size: 18.sp),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'Maximum 5 documents uploaded',
+                        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)),
+                      ),
+                    ],
                   ),
                 ),
-              ],
             ],
           ),
         ),
@@ -898,96 +958,159 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     );
   }
 
-  void _showImageSourceSheet(BuildContext context, String category) {
+  void _showImageSourceSheet(BuildContext context, String category, String categoryName) {
     final cubit = context.read<PropertySetupCubit>();
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) {
-        final hasImage = cubit.state.categorizedImages[category]?.isNotEmpty == true;
         return BlocProvider.value(
           value: cubit,
-          child: Container(
-            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 32.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
+          child: BlocBuilder<PropertySetupCubit, PropertySetupState>(
+            builder: (context, state) {
+              final images = state.categorizedImages[category] ?? [];
+              final count = images.length;
+              final hasImages = images.isNotEmpty;
+              final canAdd = count < 5;
+
+              return Container(
+                padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
                 ),
-                SizedBox(height: 24.h),
-                Text(
-                  'select_image_source'.tr(),
-                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E3A8A)),
-                ),
-                SizedBox(height: 24.h),
-                Row(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: _buildSourceButton(
-                        context,
-                        icon: Icons.camera_alt_rounded,
-                        label: 'camera'.tr(),
-                        onTap: () {
-                          Navigator.pop(context);
-                          cubit.pickCategoryImage(category, source: ImageSource.camera);
-                        },
+                    Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(2.r),
                       ),
                     ),
-                    SizedBox(width: 16.w),
-                    Expanded(
-                      child: _buildSourceButton(
-                        context,
-                        icon: Icons.photo_library_rounded,
-                        label: 'gallery'.tr(),
-                        onTap: () {
-                          Navigator.pop(context);
-                          cubit.pickCategoryImage(category, source: ImageSource.gallery);
-                        },
-                      ),
+                    SizedBox(height: 24.h),
+                    Text(
+                      '$categoryName ($count/5)',
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E3A8A)),
                     ),
-                  ],
-                ),
-                if (hasImage) ...[
-                  SizedBox(height: 20.h),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        HapticFeedback.mediumImpact();
-                        cubit.removeCategoryImage(category, (cubit.state.categorizedImages[category]?.length ?? 0) - 1);
-                      },
-                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-                      label: Text(
-                        'remove'.tr(),
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.redAccent,
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Upload up to 5 images to showcase this section.',
+                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w500),
+                    ),
+                    if (hasImages) ...[
+                      SizedBox(height: 20.h),
+                      SizedBox(
+                        height: 90.h,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: count,
+                          itemBuilder: (context, idx) {
+                            final imgPath = images[idx];
+                            return Container(
+                              width: 90.w,
+                              margin: EdgeInsets.only(right: 12.w),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => _showFullScreenImage(context, imgPath),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                                        image: DecorationImage(
+                                          image: ResizeImage(FileImage(File(imgPath)), width: 180, height: 180),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: -4.r,
+                                    right: -4.r,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.mediumImpact();
+                                        cubit.removeCategoryImage(category, idx);
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(4.r),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.redAccent,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.close_rounded,
+                                          color: Colors.white,
+                                          size: 12.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        backgroundColor: Colors.red.shade50,
-                        shape: RoundedRectangleBorder(
+                    ],
+                    SizedBox(height: 24.h),
+                    if (canAdd) ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildSourceButton(
+                              context,
+                              icon: Icons.camera_alt_rounded,
+                              label: 'camera'.tr(),
+                              onTap: () {
+                                cubit.pickCategoryImage(category, source: ImageSource.camera);
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            child: _buildSourceButton(
+                              context,
+                              icon: Icons.photo_library_rounded,
+                              label: 'gallery'.tr(),
+                              onTap: () {
+                                cubit.pickCategoryImage(category, source: ImageSource.gallery);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(16.r),
                         ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.info_outline_rounded, color: const Color(0xFF64748B), size: 20.sp),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'max_images_reached'.tr(),
+                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: const Color(0xFF64748B)),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+                    ],
+                  ],
+                ),
+              );
+            },
           ),
         );
       },

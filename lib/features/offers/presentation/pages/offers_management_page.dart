@@ -554,7 +554,7 @@ class _OfferFormSheetState extends State<_OfferFormSheet> {
     }
 
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, MediaQuery.of(context).viewInsets.bottom + 30.h),
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 20.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),

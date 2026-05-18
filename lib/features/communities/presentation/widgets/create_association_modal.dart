@@ -126,7 +126,7 @@ class CreateAssociationModalState extends State<CreateAssociationModal> {
         24.w,
         12.h,
         24.w,
-        MediaQuery.of(context).viewInsets.bottom + 40.h,
+        MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h,
       ),
       decoration: BoxDecoration(
         color: Colors.white,

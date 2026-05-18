@@ -339,7 +339,7 @@ class RoomMasterSetupScreen extends StatelessWidget {
               ),
             ],
           ),
-          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, MediaQuery.of(context).viewInsets.bottom + 24.h),
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24.h),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(

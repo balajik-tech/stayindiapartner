@@ -417,6 +417,8 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
 
   Widget _buildKycDocuments(TenantDetailEntity? detail) {
     final verified = detail?.kycVerified ?? false;
+    final aadharPhotoUrl = ApiConstants.getImageUrl(detail?.aadharCardPhoto);
+
     return _buildSection(
       'kyc_docs'.tr(),
       Container(
@@ -427,52 +429,163 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
           borderRadius: BorderRadius.circular(16.r),
           color: const Color(0xFFF9FAFB),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 44.w,
-              height: 44.w,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.r),
-                border:
-                    Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
-              ),
-              child:
-                  Icon(Icons.badge_outlined, color: AppColors.primaryBlue, size: 22.sp),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('aadhaar_card'.tr(),
-                      style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkText)),
-                  SizedBox(height: 2.h),
-                  Row(
+            Row(
+              children: [
+                Container(
+                  width: 44.w,
+                  height: 44.w,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10.r),
+                    border:
+                        Border.all(color: AppColors.roomCardBorder.withValues(alpha: 0.5)),
+                  ),
+                  child:
+                      Icon(Icons.badge_outlined, color: AppColors.primaryBlue, size: 22.sp),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        verified ? Icons.verified_user : Icons.info_outline_rounded,
-                        size: 14.sp,
-                        color: verified ? const Color(0xFF27C26C) : AppColors.greyText,
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        verified ? 'verified_secured'.tr() : 'verification_pending'.tr(),
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
-                          color: verified ? const Color(0xFF27C26C) : AppColors.greyText,
-                        ),
+                      Text('aadhaar_card'.tr(),
+                          style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkText)),
+                      SizedBox(height: 2.h),
+                      Row(
+                        children: [
+                          Icon(
+                            verified ? Icons.verified_user : Icons.info_outline_rounded,
+                            size: 14.sp,
+                            color: verified ? const Color(0xFF27C26C) : AppColors.greyText,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            verified ? 'verified_secured'.tr() : 'verification_pending'.tr(),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: verified ? const Color(0xFF27C26C) : AppColors.greyText,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+            if (aadharPhotoUrl != null && aadharPhotoUrl.isNotEmpty) ...[
+              SizedBox(height: 12.h),
+              const Divider(height: 1, color: Color(0xFFE5E7EB)),
+              SizedBox(height: 12.h),
+              Text(
+                'Uploaded Document:',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.greyText,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      backgroundColor: Colors.transparent,
+                      insetPadding: EdgeInsets.all(10.w),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          InteractiveViewer(
+                            panEnabled: true,
+                            minScale: 0.5,
+                            maxScale: 4.0,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12.r),
+                              child: Image.network(
+                                aadharPhotoUrl,
+                                fit: BoxFit.contain,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(child: CircularProgressIndicator());
+                                },
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  color: Colors.white,
+                                  padding: EdgeInsets.all(20.w),
+                                  child: const Text('Failed to load Aadhar Card image'),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 10.h,
+                            right: 10.w,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.black.withValues(alpha: 0.5),
+                              child: IconButton(
+                                icon: const Icon(Icons.close, color: Colors.white),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 150.h,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    color: Colors.white,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: Image.network(
+                      aadharPhotoUrl,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.redAccent, size: 30.sp),
+                            SizedBox(height: 4.h),
+                            Text(
+                              'Failed to load Aadhar image',
+                              style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Center(
+                child: Text(
+                  'Tap to view and zoom',
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontStyle: FontStyle.italic,
+                    color: AppColors.greyText,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -824,17 +937,6 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
               ),
             ),
           ],
-        ),
-        SizedBox(height: 20.h),
-        TextButton(
-          onPressed: () {},
-          child: Text(
-            'Add to Blacklist',
-            style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFFF04438)),
-          ),
         ),
       ],
     );

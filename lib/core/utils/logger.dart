@@ -14,7 +14,7 @@ class AppLogger {
 
   static final Map<String, dynamic> _crashContext = {};
 
-  /// Enriches crash reports with user or system metadata
+  
   static void setContext(String key, dynamic value) {
     _crashContext[key] = value;
   }

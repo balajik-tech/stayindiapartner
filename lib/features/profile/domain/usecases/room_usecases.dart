@@ -24,8 +24,8 @@ class GetRoomsUseCase {
   final RoomRepository repository;
   GetRoomsUseCase(this.repository);
 
-  Future<List<RoomDetail>> call({bool? isMaster}) {
-    return repository.getRooms(isMaster: isMaster);
+  Future<List<RoomDetail>> call({bool? isMaster, String? hostelId}) {
+    return repository.getRooms(isMaster: isMaster, hostelId: hostelId);
   }
 }
 
@@ -107,5 +107,14 @@ class BulkCreateRoomsUseCase {
 
   Future<List<RoomDetail>> call(List<RoomDetail> rooms, String ownerId) {
     return repository.bulkCreateRooms(rooms, ownerId);
+  }
+}
+
+class BulkUpsertRoomsUseCase {
+  final RoomRepository repository;
+  BulkUpsertRoomsUseCase(this.repository);
+
+  Future<List<RoomDetail>> call(List<RoomDetail> rooms, String ownerId) {
+    return repository.bulkUpsertRooms(rooms, ownerId);
   }
 }

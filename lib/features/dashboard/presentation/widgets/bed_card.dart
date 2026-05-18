@@ -38,29 +38,29 @@ class BedCard extends StatelessWidget {
     final bool isBooked = upperStatus == 'BOOKED';
     final bool isNotice = upperStatus == 'NOTICE';
     final bool isFree = upperStatus == 'FREE';
+    final bool isMaintenance = upperStatus == 'MAINTENANCE';
 
     if (isFree) {
-
       bgColor = const Color(0xFFD6EEF8);
       borderColor = const Color(0xFF87CEEB);
       textColor = const Color(0xFF1A6F8A);
+    } else if (isMaintenance) {
+      bgColor = const Color(0xFFF1F5F9);
+      borderColor = const Color(0xFFCBD5E1);
+      textColor = const Color(0xFF475569);
     } else if (isNotice) {
-
       bgColor = const Color(0xFFFFF3CD);
       borderColor = const Color(0xFFFFB300);
       textColor = const Color(0xFF7A5800);
     } else if (isBooked) {
-
       bgColor = const Color(0xFFF3E8FF);
       borderColor = const Color(0xFF9C27B0);
       textColor = const Color(0xFF6A0080);
     } else if (isAway) {
-
       bgColor = const Color(0xFFFFE4EE);
       borderColor = const Color(0xFFE91E63);
       textColor = const Color(0xFF9C0040);
     } else {
-
       bgColor = const Color(0xFFFFEDD5);
       borderColor = const Color(0xFFFF8600);
       textColor = const Color(0xFF8B4000);
@@ -131,7 +131,7 @@ class BedCard extends StatelessWidget {
                               )
                             else
                               Icon(
-                                Icons.bed_rounded,
+                                isMaintenance ? Icons.build_rounded : Icons.bed_rounded,
                                 size: isSmall ? 22.sp : 34.sp,
                                 color: textColor.withValues(alpha: 0.8),
                               ),
@@ -219,7 +219,11 @@ class BedCard extends StatelessWidget {
             ),
             SizedBox(height: isSmall ? 4.h : 6.h),
             Text(
-              isFree ? StringUtils.translate('available', context: context) : (tenantName?.split(' ')[0] ?? upperStatus),
+              isFree
+                  ? StringUtils.translate('available', context: context)
+                  : isMaintenance
+                      ? 'Maintenance'
+                      : (tenantName?.split(' ')[0] ?? upperStatus),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,

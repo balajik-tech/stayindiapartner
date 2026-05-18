@@ -59,6 +59,8 @@ class AddTenantUseCase {
     String? sharingType,
     String? startDate,
     double? deposit,
+    String? userPhotoPath,
+    String? aadharPhotoPath,
   }) {
     return repository.addManualTenant(
       phone: phone,
@@ -71,6 +73,8 @@ class AddTenantUseCase {
       sharingType: sharingType,
       startDate: startDate,
       deposit: deposit,
+      userPhotoPath: userPhotoPath,
+      aadharPhotoPath: aadharPhotoPath,
     );
   }
 }

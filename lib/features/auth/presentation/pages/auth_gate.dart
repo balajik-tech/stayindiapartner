@@ -37,12 +37,12 @@ class _AuthGateState extends State<AuthGate> {
             current is! AuthError &&
             current is! AuthOtpSent,
         builder: (context, state) {
-          // Cache the last non-transient active state
+          
           if (state is! AuthLoading && state is! AuthError) {
             _lastActiveState = state;
           }
 
-          // Use the cached last active state if the current state is transient (loading or error)
+          
           final activeState = _lastActiveState ?? state;
 
           if (activeState is AuthInitial || activeState is AuthSessionRestoring) {

@@ -42,6 +42,7 @@ void main() {
         awayBeds: 0,
         reservedBeds: 0,
         overdueBeds: 0,
+        maintenanceBeds: 0,
         floors: [],
       ),
       dailyOperations: DailyOperations(
