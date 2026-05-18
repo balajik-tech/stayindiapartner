@@ -147,7 +147,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
     final isPending = page.status?.toUpperCase() == 'PENDING';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFefeae2),
       appBar: _buildAppBar(context, page),
       body: isPending
           ? Center(
@@ -191,10 +191,17 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                 ),
               ),
             )
-          : Column(
+          : Stack(
               children: [
-                Expanded(
-                  child: BlocBuilder<CommunityCubit, CommunityState>(
+                Positioned.fill(
+                  child: const CustomPaint(
+                    painter: ChatWallpaperPainter(),
+                  ),
+                ),
+                Column(
+                  children: [
+                    Expanded(
+                      child: BlocBuilder<CommunityCubit, CommunityState>(
                     builder: (context, state) {
                       if (state is CommunityLoading) {
                         return const Center(child: CircularProgressIndicator());
@@ -346,6 +353,8 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                 _buildInputSection(page),
               ],
             ),
+          ],
+        ),
     );
   }
 
@@ -529,4 +538,64 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
       ),
     );
   }
+}
+
+class ChatWallpaperPainter extends CustomPainter {
+  const ChatWallpaperPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paintColor = Colors.black.withValues(alpha: 0.012); // subtle background icons
+
+    final icons = [
+      Icons.chat_bubble_outline_rounded,
+      Icons.local_phone_outlined,
+      Icons.camera_alt_outlined,
+      Icons.music_note_outlined,
+      Icons.favorite_border_rounded,
+      Icons.sentiment_satisfied_alt_outlined,
+      Icons.coffee_outlined,
+      Icons.lightbulb_outline_rounded,
+      Icons.push_pin_outlined,
+      Icons.star_border_rounded,
+      Icons.wb_sunny_outlined,
+      Icons.directions_bike_outlined,
+      Icons.umbrella_outlined,
+      Icons.photo_outlined,
+      Icons.pets_outlined,
+    ];
+
+    const double gridStep = 75.0;
+    int index = 0;
+
+    for (double y = 20.0; y < size.height; y += gridStep) {
+      final double xStart = (index % 2 == 0) ? 20.0 : 20.0 + (gridStep / 2);
+      for (double x = xStart; x < size.width; x += gridStep) {
+        final icon = icons[(x.toInt() + y.toInt()) % icons.length];
+        
+        final textPainter = TextPainter(
+          textDirection: TextDirection.ltr,
+          text: TextSpan(
+            text: String.fromCharCode(icon.codePoint),
+            style: TextStyle(
+              fontSize: 20.0,
+              fontFamily: icon.fontFamily,
+              package: icon.fontPackage,
+              color: paintColor,
+            ),
+          ),
+        );
+        
+        textPainter.layout();
+        textPainter.paint(
+          canvas,
+          Offset(x - textPainter.width / 2, y - textPainter.height / 2),
+        );
+      }
+      index++;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
