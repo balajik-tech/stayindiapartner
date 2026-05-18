@@ -545,7 +545,7 @@ class ChatWallpaperPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paintColor = Colors.black.withValues(alpha: 0.012); // subtle background icons
+    final paintColor = Colors.black.withValues(alpha: 0.022); // subtle background icons
 
     final icons = [
       Icons.chat_bubble_outline_rounded,
@@ -556,29 +556,48 @@ class ChatWallpaperPainter extends CustomPainter {
       Icons.sentiment_satisfied_alt_outlined,
       Icons.coffee_outlined,
       Icons.lightbulb_outline_rounded,
-      Icons.push_pin_outlined,
       Icons.star_border_rounded,
       Icons.wb_sunny_outlined,
       Icons.directions_bike_outlined,
       Icons.umbrella_outlined,
       Icons.photo_outlined,
       Icons.pets_outlined,
+      Icons.cloud_queue_rounded,
+      Icons.explore_outlined,
+      Icons.brush_outlined,
+      Icons.headset_mic_outlined,
+      Icons.anchor_outlined,
+      Icons.watch_later_outlined,
+      Icons.sailing_outlined,
+      Icons.flight_outlined,
+      Icons.cake_outlined,
+      Icons.edit_outlined,
     ];
 
-    const double gridStep = 75.0;
-    int index = 0;
+    const double gridStep = 55.0; // high-density WhatsApp layout
+    int rowIndex = 0;
 
-    for (double y = 20.0; y < size.height; y += gridStep) {
-      final double xStart = (index % 2 == 0) ? 20.0 : 20.0 + (gridStep / 2);
+    for (double y = 25.0; y < size.height; y += gridStep) {
+      final double xStart = (rowIndex % 2 == 0) ? 25.0 : 25.0 + (gridStep / 2);
       for (double x = xStart; x < size.width; x += gridStep) {
-        final icon = icons[(x.toInt() + y.toInt()) % icons.length];
+        final int seed = (x.toInt() * 7 + y.toInt() * 13).abs();
         
+        final icon = icons[seed % icons.length];
+        
+        final double angleDegrees = ((seed % 90) - 45).toDouble();
+        final double angleRadians = angleDegrees * 3.141592653589793 / 180.0;
+        
+        final double fontSize = 15.0 + (seed % 8);
+        
+        final double jitterX = ((seed % 20) - 10).toDouble();
+        final double jitterY = (((seed >> 2) % 20) - 10).toDouble();
+
         final textPainter = TextPainter(
           textDirection: TextDirection.ltr,
           text: TextSpan(
             text: String.fromCharCode(icon.codePoint),
             style: TextStyle(
-              fontSize: 20.0,
+              fontSize: fontSize,
               fontFamily: icon.fontFamily,
               package: icon.fontPackage,
               color: paintColor,
@@ -587,12 +606,19 @@ class ChatWallpaperPainter extends CustomPainter {
         );
         
         textPainter.layout();
+        
+        canvas.save();
+        canvas.translate(x + jitterX, y + jitterY);
+        canvas.rotate(angleRadians);
+        
         textPainter.paint(
           canvas,
-          Offset(x - textPainter.width / 2, y - textPainter.height / 2),
+          Offset(-textPainter.width / 2, -textPainter.height / 2),
         );
+        
+        canvas.restore();
       }
-      index++;
+      rowIndex++;
     }
   }
 
