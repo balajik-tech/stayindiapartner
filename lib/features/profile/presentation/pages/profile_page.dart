@@ -508,30 +508,35 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ],
-              ],
-            ),
-          ),
-          BouncingWrapper(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AccountSettingsPage(),
-              ),
-            ),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF2C599D), width: 1.2),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Text(
-                'edit_profile'.tr(),
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF2C599D),
+                SizedBox(height: 8.h),
+                Row(
+                  children: [
+                    BouncingWrapper(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AccountSettingsPage(),
+                        ),
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFF2C599D), width: 1.2),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Text(
+                          'edit_profile'.tr(),
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF2C599D),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+              ],
             ),
           ),
         ],
