@@ -12,6 +12,7 @@ class CommunityDetailsModel extends CommunityDetailsEntity {
     super.stateId,
     super.districtId,
     super.wardId,
+    super.isPendingJoin,
   });
 
   factory CommunityDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +27,7 @@ class CommunityDetailsModel extends CommunityDetailsEntity {
       stateId: json['stateId']?.toString(),
       districtId: json['districtId']?.toString(),
       wardId: json['wardId']?.toString(),
+      isPendingJoin: json['isPendingJoin'] ?? false,
     );
   }
 }

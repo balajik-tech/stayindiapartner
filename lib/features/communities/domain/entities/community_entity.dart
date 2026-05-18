@@ -11,6 +11,7 @@ class CommunityDetailsEntity extends Equatable {
   final String? stateId;
   final String? districtId;
   final String? wardId;
+  final bool isPendingJoin;
 
   const CommunityDetailsEntity({
     required this.id,
@@ -23,6 +24,7 @@ class CommunityDetailsEntity extends Equatable {
     this.stateId,
     this.districtId,
     this.wardId,
+    this.isPendingJoin = false,
   });
 
   @override
@@ -37,6 +39,7 @@ class CommunityDetailsEntity extends Equatable {
     stateId,
     districtId,
     wardId,
+    isPendingJoin,
   ];
 }
 

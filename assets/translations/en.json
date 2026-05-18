@@ -907,5 +907,13 @@
   "not_now": "Not Now",
   "geofence_help_title": "How Geofencing Works",
   "geofence_help_content": "By pinning your property on the map, a virtual boundary of 150 meters is created. When checked-in tenants cross this boundary, the Stay India app automatically updates their status to Inside/Outside, allowing automated check-ins and logs without requiring manual register entries.",
-  "btn_ok": "Got It"
+  "btn_ok": "Got It",
+  "join_requested": "Pending Approval",
+  "join_community": "Join Community",
+  "join_request_success": "Join request submitted successfully!",
+  "join_request_failed": "Failed to submit join request",
+  "news_locked_title": "Announcements Locked",
+  "news_locked_desc": "Join this community to see announcements and interact with other PG owners.",
+  "locked_members_title": "Members List Locked",
+  "locked_members_desc": "Only verified community members can view the detailed list of members."
 }

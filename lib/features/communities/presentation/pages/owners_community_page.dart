@@ -13,6 +13,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/explore_communities_page.dart';
+import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
 import 'package:stayindia_owner/features/communities/presentation/widgets/comments_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
@@ -331,51 +332,94 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 ),
                 SizedBox(width: 20.w),
                 ...communities.map((c) {
+                  final isPending = c.isPendingJoin;
+
                   return Padding(
                     padding: EdgeInsets.only(right: 20.w),
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => TenantsChatPage(
-                              hostelId: c.id,
-                              communityName: c.name,
-                              communityIcon: c.image,
-                              isOwnerChat: true,
-                              status: c.status,
+                        if (isPending) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CommunityDetailPage(
+                                communityId: c.id,
+                              ),
                             ),
-                          ),
-                        );
+                          ).then((_) {
+                            if (context.mounted) {
+                              context.read<OwnerCommunityCubit>().loadCommunities();
+                            }
+                          });
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TenantsChatPage(
+                                hostelId: c.id,
+                                communityName: c.name,
+                                communityIcon: c.image,
+                                isOwnerChat: true,
+                                status: c.status,
+                              ),
+                            ),
+                          );
+                        }
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 48.w,
-                            height: 48.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.grey.shade200,
-                                width: 2,
+                          Stack(
+                            children: [
+                              Container(
+                                width: 48.w,
+                                height: 48.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isPending
+                                        ? Colors.orange.shade300
+                                        : Colors.grey.shade200,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 22.w,
+                                  backgroundImage: c.image != null
+                                      ? CachedNetworkImageProvider(c.image!)
+                                      : null,
+                                  backgroundColor: isPending
+                                      ? Colors.orange.shade50
+                                      : AppColors.accentOrange.withValues(alpha: 0.1),
+                                  child: c.image == null
+                                      ? Icon(
+                                          Icons.groups,
+                                          color: isPending
+                                              ? Colors.orange
+                                              : AppColors.accentOrange,
+                                          size: 24.sp,
+                                        )
+                                      : null,
+                                ),
                               ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 22.w,
-                              backgroundImage: c.image != null
-                                  ? CachedNetworkImageProvider(c.image!)
-                                  : null,
-                              backgroundColor: AppColors.accentOrange
-                                  .withValues(alpha: 0.1),
-                              child: c.image == null
-                                  ? Icon(
-                                      Icons.groups,
-                                      color: AppColors.accentOrange,
-                                      size: 24.sp,
-                                    )
-                                  : null,
-                            ),
+                              if (isPending)
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    padding: EdgeInsets.all(2.r),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.orange,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.access_time_filled_rounded,
+                                      color: Colors.white,
+                                      size: 10.sp,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           SizedBox(height: 6.h),
                           SizedBox(
@@ -385,7 +429,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                               style: TextStyle(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.darkText,
+                                color: isPending
+                                    ? Colors.orange.shade700
+                                    : AppColors.darkText,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

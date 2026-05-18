@@ -25,6 +25,7 @@ class CommunityDetailPage extends StatefulWidget {
 class _CommunityDetailPageState extends State<CommunityDetailPage> {
   Map<String, dynamic>? _info;
   bool _isLoading = true;
+  bool _isJoiningAction = false;
 
   @override
   void initState() {
@@ -55,41 +56,142 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF8FAFC),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_info == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        body: _buildErrorState(),
+      );
+    }
+
+    final currentUserId = context.read<AuthCubit>().currentOwner?.id;
+    final members = _info?['members'] as List? ?? [];
+    final pendingMembers = _info?['pendingMembers'] as List? ?? [];
+    final isMember = members.any((m) => m['_id']?.toString() == currentUserId);
+    final isPending = pendingMembers.any((id) => id.toString() == currentUserId);
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _info == null
-            ? _buildErrorState()
-            : NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                  _buildSliverAppBar(),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _SliverAppBarDelegate(
-                      TabBar(
-                        labelColor: AppColors.primaryBlue,
-                        unselectedLabelColor: AppColors.greyText,
-                        indicatorColor: AppColors.primaryBlue,
-                        indicatorWeight: 3,
-                        labelStyle: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        tabs: [
-                          Tab(text: "news_tab".tr()),
-                          Tab(text: "about_tab".tr()),
-                        ],
-                      ),
-                    ),
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            _buildSliverAppBar(),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _SliverAppBarDelegate(
+                TabBar(
+                  labelColor: AppColors.primaryBlue,
+                  unselectedLabelColor: AppColors.greyText,
+                  indicatorColor: AppColors.primaryBlue,
+                  indicatorWeight: 3,
+                  labelStyle: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-                body: TabBarView(children: [_buildNewsTab(), _buildAboutTab()]),
+                  tabs: [
+                    Tab(text: "news_tab".tr()),
+                    Tab(text: "about_tab".tr()),
+                  ],
+                ),
               ),
-        floatingActionButton: _buildRedAlertButton(),
+            ),
+          ],
+          body: TabBarView(
+            children: [
+              _buildNewsTab(isMember),
+              _buildAboutTab(isMember, isPending),
+            ],
+          ),
+        ),
+        floatingActionButton: isMember ? _buildRedAlertButton() : null,
+        bottomNavigationBar: !isMember ? _buildJoinBottomBar(isPending) : null,
       ),
     );
+  }
+
+  Widget _buildJoinBottomBar(bool isPending) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        24.w,
+        12.h,
+        24.w,
+        MediaQuery.of(context).padding.bottom + 16.h,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 50.h,
+        child: ElevatedButton(
+          onPressed: isPending || _isJoiningAction ? null : _handleJoinCommunity,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isPending ? Colors.grey[300] : AppColors.primaryBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+            elevation: 0,
+          ),
+          child: _isJoiningAction
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(
+                  isPending ? "join_requested".tr() : "join_community".tr(),
+                  style: GoogleFonts.outfit(
+                    color: isPending ? Colors.grey[600] : Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleJoinCommunity() async {
+    setState(() => _isJoiningAction = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await sl<JoinOwnerCommunityUseCase>().call(widget.communityId);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text("join_request_success".tr()),
+          backgroundColor: Colors.green,
+        ),
+      );
+      await _loadInfo();
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text("${"join_request_failed".tr()}: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isJoiningAction = false);
+      }
+    }
   }
 
   Widget _buildRedAlertButton() {
@@ -138,7 +240,52 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     );
   }
 
-  Widget _buildNewsTab() {
+  Widget _buildNewsTab(bool isMember) {
+    if (!isMember) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 32.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(24.r),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.lock_outline_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 40.sp,
+                ),
+              ),
+              SizedBox(height: 24.h),
+              Text(
+                "news_locked_title".tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                "news_locked_desc".tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 14.sp,
+                  color: AppColors.greyText,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: EdgeInsets.all(16.w),
       itemCount: 3,
@@ -173,8 +320,136 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     );
   }
 
-  Widget _buildAboutTab() {
+  Future<void> _handlePendingAction(String requesterId, String action) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await sl<HandleJoinRequestUseCase>().call(
+        communityId: widget.communityId,
+        requesterId: requesterId,
+        action: action,
+      );
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            action == "ACCEPT"
+                ? "Join request accepted successfully"
+                : "Join request rejected successfully",
+          ),
+          backgroundColor: action == "ACCEPT" ? Colors.green : Colors.red,
+        ),
+      );
+      _loadInfo();
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text("Failed to handle request: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Widget _buildPendingRequestItem(Map<String, dynamic> request) {
+    final requesterId = request['_id']?.toString() ?? '';
+    if (requesterId.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: AppColors.roomCardBorder.withValues(alpha: 0.8),
+        ),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 24.r,
+            backgroundImage: request['profileImage'] != null
+                ? CachedNetworkImageProvider(request['profileImage'])
+                : null,
+            child: request['profileImage'] == null
+                ? const Icon(Icons.person, color: AppColors.greyText)
+                : null,
+          ),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  request['name'] ?? 'Owner Requester',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                if (request['email'] != null) ...[
+                  SizedBox(height: 2.h),
+                  Text(
+                    request['email'],
+                    style: GoogleFonts.outfit(
+                      fontSize: 12.sp,
+                      color: AppColors.greyText,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Row(
+            children: [
+              IconButton(
+                icon: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.red,
+                    size: 18,
+                  ),
+                ),
+                onPressed: () => _handlePendingAction(requesterId, "REJECT"),
+              ),
+              IconButton(
+                icon: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE8F5E9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.green,
+                    size: 18,
+                  ),
+                ),
+                onPressed: () => _handlePendingAction(requesterId, "ACCEPT"),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAboutTab(bool isMember, bool isPending) {
     final members = _info?['members'] as List? ?? [];
+    final pendingMembers = _info?['pendingMembers'] as List? ?? [];
     final description = _info?['description'] ?? 'No description provided.';
     final rules = _info?['rules'];
     final currentUserId = context.read<AuthCubit>().currentOwner?.id;
@@ -187,6 +462,19 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     return ListView(
       padding: EdgeInsets.all(24.w),
       children: [
+        if (isAdmin && isMember && pendingMembers.isNotEmpty) ...[
+          Text(
+            "Pending Join Requests",
+            style: GoogleFonts.outfit(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.darkText,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          ...pendingMembers.map((request) => _buildPendingRequestItem(request as Map<String, dynamic>)),
+          SizedBox(height: 24.h),
+        ],
         Text(
           "about_community".tr(),
           style: GoogleFonts.outfit(
@@ -204,7 +492,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
             height: 1.5,
           ),
         ),
-        if (rules != null && rules.isNotEmpty) ...[
+        if (rules != null && rules.isNotEmpty && isMember) ...[
           SizedBox(height: 24.h),
           Text(
             "community_rules".tr(),
@@ -246,7 +534,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                 color: AppColors.darkText,
               ),
             ),
-            if (isAdmin)
+            if (isAdmin && isMember)
               Text(
                 "admin_view".tr(),
                 style: GoogleFonts.outfit(
@@ -258,7 +546,47 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           ],
         ),
         SizedBox(height: 16.h),
-        ...members.map((m) => _buildMemberItem(m, isAdmin, currentUserId)),
+        if (isMember) ...[
+          ...members.map((m) => _buildMemberItem(m, isAdmin, currentUserId)),
+        ] else ...[
+          Container(
+            padding: EdgeInsets.all(24.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(
+                color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.people_alt_outlined,
+                  color: Colors.grey.shade400,
+                  size: 40.sp,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  "locked_members_title".tr(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  "locked_members_desc".tr(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 12.sp,
+                    color: AppColors.greyText,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }

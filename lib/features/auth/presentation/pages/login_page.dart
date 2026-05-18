@@ -278,9 +278,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     child: Container(
                       width: double.infinity,
                       constraints: BoxConstraints(maxHeight: 0.85.sh),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 24.w,
-                        vertical: 36.h,
+                      padding: EdgeInsets.only(
+                        left: 24.w,
+                        right: 24.w,
+                        top: 24.h,
+                        bottom: 20.h,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -322,7 +324,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            SizedBox(height: 48.h),
+                            SizedBox(height: 24.h),
 
                             Container(
                               height: 48.h,
@@ -420,7 +422,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ],
                               ),
                             ),
-                            SizedBox(height: 32.h),
+                            SizedBox(height: 18.h),
 
                             Text(
                               'MOBILE NUMBER',
@@ -433,7 +435,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 letterSpacing: 1.2,
                               ),
                             ),
-                            SizedBox(height: 14.h),
+                            SizedBox(height: 8.h),
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeOutQuart,
@@ -466,7 +468,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   Container(
                                     padding: EdgeInsets.symmetric(
                                       horizontal: 20.w,
-                                      vertical: 18.h,
+                                      vertical: 12.h,
                                     ),
                                     decoration: BoxDecoration(
                                       border: Border(
@@ -526,7 +528,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                         isDense: true,
                                         contentPadding: EdgeInsets.symmetric(
                                           horizontal: 20.w,
-                                          vertical: 16.h,
+                                          vertical: 12.h,
                                         ),
                                         prefixIcon: Padding(
                                           padding: EdgeInsets.only(
@@ -657,7 +659,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               ),
                             ],
 
-                            SizedBox(height: 36.h),
+                            SizedBox(height: 20.h),
 
                             AuthPrimaryButton(
                               label: isLoading
@@ -729,7 +731,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               ),
                             ],
 
-                            SizedBox(height: 48.h),
+                            SizedBox(height: 24.h),
                             Center(
                               child: Column(
                                 children: [
