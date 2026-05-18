@@ -171,11 +171,12 @@ class ChatMessageBubble extends StatelessWidget {
   }
 
   String _formatTime(DateTime date) {
-    final h = date.hour > 12
-        ? date.hour - 12
-        : (date.hour == 0 ? 12 : date.hour);
-    final m = date.minute.toString().padLeft(2, '0');
-    final period = date.hour >= 12 ? 'PM' : 'AM';
+    final localDate = date.toLocal();
+    final h = localDate.hour > 12
+        ? localDate.hour - 12
+        : (localDate.hour == 0 ? 12 : localDate.hour);
+    final m = localDate.minute.toString().padLeft(2, '0');
+    final period = localDate.hour >= 12 ? 'PM' : 'AM';
     return '$h:$m $period';
   }
 }

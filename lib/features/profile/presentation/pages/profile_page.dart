@@ -61,9 +61,11 @@ class _ProfilePageState extends State<ProfilePage> {
               ? state.profile
               : (state is ProfileUpdateSuccess ? state.profile : null);
           final name = profile?.fullName ?? owner?.name ?? 'Owner';
-          final phone = profile != null
+          final phone = (profile?.phone != null && profile!.phone.trim().isNotEmpty)
               ? '+91 ${profile.phone}'
-              : (owner != null ? '+91 ${owner.phone}' : 'Stay India Member');
+              : ((owner?.phone != null && owner!.phone.trim().isNotEmpty)
+                  ? '+91 ${owner.phone}'
+                  : '');
 
           return CustomScrollView(
             physics: const BouncingScrollPhysics(),
@@ -495,15 +497,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  phone,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: const Color(0xFF6B7280),
-                    fontWeight: FontWeight.w500,
+                if (phone.isNotEmpty) ...[
+                  SizedBox(height: 2.h),
+                  Text(
+                    phone,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: const Color(0xFF6B7280),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

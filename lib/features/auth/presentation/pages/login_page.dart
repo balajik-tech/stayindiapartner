@@ -235,7 +235,26 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const AuthLogoBadge(),
-                                SizedBox(height: 12.h),
+                                SizedBox(height: 16.h),
+                                Text(
+                                  "STAY INDIA",
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 24.sp,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 4.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  "OWNER PORTAL",
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 13.sp,
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -681,9 +700,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Image.network(
-                                      'https://www.gstatic.com/images/branding/product/1x/gsa_android_48dp.png',
+                                      'https://www.gstatic.com/images/branding/product/2x/googleg_64dp.png',
                                       height: 24.h,
                                       width: 24.h,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(
+                                          Icons.g_mobiledata_rounded,
+                                          color: const Color(0xFF4285F4),
+                                          size: 28.sp,
+                                        );
+                                      },
                                     ),
                                     SizedBox(width: 12.w),
                                     Text(

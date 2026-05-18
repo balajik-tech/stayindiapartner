@@ -263,6 +263,13 @@ class AuthLogoBadge extends StatelessWidget {
                   width: 70.w,
                   height: 70.w,
                   fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.home_work_rounded,
+                      color: Colors.white,
+                      size: 40.sp,
+                    );
+                  },
                 ),
               ),
             ),

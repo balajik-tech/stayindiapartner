@@ -177,7 +177,9 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                             ),
                             _EditableRow(
                               label: 'phone_number'.tr(),
-                              value: '+91 ${_phoneController.text}',
+                              value: _phoneController.text.trim().isEmpty
+                                  ? ""
+                                  : '+91 ${_phoneController.text}',
                               icon: Icons.phone_rounded,
                               isLocked: true,
                             ),
@@ -320,14 +322,17 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                     color: AppColors.darkText,
                   ),
                 ),
-                Text(
-                  '+91 ${_phoneController.text}',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.greyText,
+                if (_phoneController.text.trim().isNotEmpty) ...[
+                  SizedBox(height: 4.h),
+                  Text(
+                    '+91 ${_phoneController.text}',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.greyText,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

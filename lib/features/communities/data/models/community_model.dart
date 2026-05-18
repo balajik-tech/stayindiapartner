@@ -93,7 +93,7 @@ class CommunityMessageModel extends CommunityMessageEntity {
       imageUrl: json['image']?.toString(),
       roomId: json['roomId']?.toString(),
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'].toString())
+          ? DateTime.parse(json['createdAt'].toString()).toLocal()
           : DateTime.now(),
       type: type,
       isSystem: type == 'SYSTEM',
@@ -117,7 +117,7 @@ class AnnouncementModel extends AnnouncementEntity {
       title: json['title']?.toString() ?? '',
       content: json['content']?.toString() ?? '',
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'].toString())
+          ? DateTime.parse(json['createdAt'].toString()).toLocal()
           : DateTime.now(),
       authorName: json['authorName']?.toString(),
     );
@@ -141,7 +141,7 @@ class OwnerDiscussionModel extends OwnerDiscussionEntity {
       description: json['description']?.toString() ?? '',
       type: json['type']?.toString() ?? '',
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'].toString())
+          ? DateTime.parse(json['createdAt'].toString()).toLocal()
           : DateTime.now(),
       authorName: json['authorName']?.toString(),
     );

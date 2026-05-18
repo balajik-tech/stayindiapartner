@@ -215,6 +215,35 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     hostelId =
                         hostelState.hostels[hostelState.selectedHostelIndex].id;
                   }
+                  if (hostelId.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.info_outline_rounded, color: Colors.white, size: 20.sp),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Text(
+                                "No hostels found. Please add a hostel and check-in tenants to view the Tenants Community.",
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: AppColors.primaryBlue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        duration: const Duration(seconds: 4),
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(

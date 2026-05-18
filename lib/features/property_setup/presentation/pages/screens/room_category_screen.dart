@@ -464,33 +464,48 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
 
   Widget _buildStaticRowCell(int sharing) {
     final isAlternate = sharing % 2 == 0;
-    return Container(
-      height: 52.h,
-      decoration: BoxDecoration(
-        color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
-        border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            '$sharing Sharing',
-            style: TextStyle(
-              color: const Color(0xFF0F172A),
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w800,
+    return GestureDetector(
+      onLongPress: () {
+        HapticFeedback.heavyImpact();
+        _deleteSharingType(sharing);
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 52.h,
+        decoration: BoxDecoration(
+          color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
+          border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                '$sharing Sharing',
+                style: TextStyle(
+                  color: const Color(0xFF0F172A),
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
-          ),
-          GestureDetector(
-            onTap: () => _deleteSharingType(sharing),
-            child: Icon(
-              Icons.delete_outline_rounded,
-              color: const Color(0xFFEF4444),
-              size: 18.sp,
+            GestureDetector(
+              onTap: () => _deleteSharingType(sharing),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: 32.w,
+                height: 40.h,
+                alignment: Alignment.centerRight,
+                child: Icon(
+                  Icons.delete_outline_rounded,
+                  color: const Color(0xFFEF4444),
+                  size: 20.sp,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

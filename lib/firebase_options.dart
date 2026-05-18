@@ -52,6 +52,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '730093151187',
     projectId: 'stay-india-owner',
     storageBucket: 'stay-india-owner.firebasestorage.app',
+    androidClientId: '730093151187-b9i8hboeqmd6i8tk5ribcqn1teq4anig.apps.googleusercontent.com',
+    iosClientId: '730093151187-dh312ecscfthjepn87g0e14jjs15f4ua.apps.googleusercontent.com',
     iosBundleId: 'com.example.stayindiaOwner',
   );
 
@@ -61,6 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '730093151187',
     projectId: 'stay-india-owner',
     storageBucket: 'stay-india-owner.firebasestorage.app',
+    androidClientId: '730093151187-b9i8hboeqmd6i8tk5ribcqn1teq4anig.apps.googleusercontent.com',
+    iosClientId: '730093151187-dh312ecscfthjepn87g0e14jjs15f4ua.apps.googleusercontent.com',
     iosBundleId: 'com.example.stayindiaOwner',
   );
 
@@ -73,4 +77,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'stay-india-owner.firebasestorage.app',
     measurementId: 'G-YYK02N7GKD',
   );
+
 }

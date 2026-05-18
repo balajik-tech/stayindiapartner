@@ -1,4 +1,14 @@
 PODS:
+  - AppAuth (1.7.6):
+    - AppAuth/Core (= 1.7.6)
+    - AppAuth/ExternalUserAgent (= 1.7.6)
+  - AppAuth/Core (1.7.6)
+  - AppAuth/ExternalUserAgent (1.7.6):
+    - AppAuth/Core
+  - AppCheckCore (11.2.0):
+    - GoogleUtilities/Environment (~> 8.0)
+    - GoogleUtilities/UserDefaults (~> 8.0)
+    - PromisesObjC (~> 2.4)
   - connectivity_plus (0.0.1):
     - Flutter
   - DKImagePickerController/Core (4.3.9):
@@ -37,11 +47,18 @@ PODS:
     - Flutter
   - Firebase/CoreOnly (12.13.0):
     - FirebaseCore (~> 12.13.0)
+  - Firebase/Crashlytics (12.13.0):
+    - Firebase/CoreOnly
+    - FirebaseCrashlytics (~> 12.13.0)
   - Firebase/Messaging (12.13.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 12.13.0)
   - firebase_core (4.9.0):
     - Firebase/CoreOnly (= 12.13.0)
+    - Flutter
+  - firebase_crashlytics (5.2.2):
+    - Firebase/Crashlytics (= 12.13.0)
+    - firebase_core
     - Flutter
   - firebase_messaging (16.2.2):
     - Firebase/Messaging (= 12.13.0)
@@ -51,8 +68,19 @@ PODS:
     - FirebaseCoreInternal (~> 12.13.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/Logger (~> 8.1)
+  - FirebaseCoreExtension (12.13.0):
+    - FirebaseCore (~> 12.13.0)
   - FirebaseCoreInternal (12.13.0):
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
+  - FirebaseCrashlytics (12.13.0):
+    - FirebaseCore (~> 12.13.0)
+    - FirebaseInstallations (~> 12.13.0)
+    - FirebaseRemoteConfigInterop (~> 12.13.0)
+    - FirebaseSessions (~> 12.13.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - nanopb (~> 3.30910.0)
+    - PromisesObjC (~> 2.4)
   - FirebaseInstallations (12.13.0):
     - FirebaseCore (~> 12.13.0)
     - GoogleUtilities/Environment (~> 8.1)
@@ -67,6 +95,16 @@ PODS:
     - GoogleUtilities/Reachability (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - nanopb (~> 3.30910.0)
+  - FirebaseRemoteConfigInterop (12.13.0)
+  - FirebaseSessions (12.13.0):
+    - FirebaseCore (~> 12.13.0)
+    - FirebaseCoreExtension (~> 12.13.0)
+    - FirebaseInstallations (~> 12.13.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
+    - PromisesSwift (~> 2.1)
   - Flutter (1.0.0)
   - flutter_image_compress_common (1.0.0):
     - Flutter
@@ -85,14 +123,27 @@ PODS:
   - google_mlkit_commons (0.11.1):
     - Flutter
     - MLKitVision (~> 10.0.0)
+  - google_mlkit_face_detection (0.13.2):
+    - Flutter
+    - google_mlkit_commons
+    - GoogleMLKit/FaceDetection (~> 9.0.0)
   - google_mlkit_image_labeling (0.14.2):
     - Flutter
     - google_mlkit_commons
     - GoogleMLKit/ImageLabeling (~> 9.0.0)
     - GoogleMLKit/ImageLabelingCustom (~> 9.0.0)
+  - google_sign_in_ios (0.0.1):
+    - AppAuth (>= 1.7.4)
+    - Flutter
+    - FlutterMacOS
+    - GoogleSignIn (~> 8.0)
+    - GTMSessionFetcher (>= 3.4.0)
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
+  - GoogleMLKit/FaceDetection (9.0.0):
+    - GoogleMLKit/MLKitCore
+    - MLKitFaceDetection (~> 8.0.0)
   - GoogleMLKit/ImageLabeling (9.0.0):
     - GoogleMLKit/MLKitCore
     - MLKitImageLabeling (~> 8.0.0)
@@ -101,6 +152,11 @@ PODS:
     - MLKitImageLabelingCustom (~> 8.0.0)
   - GoogleMLKit/MLKitCore (9.0.0):
     - MLKitCommon (~> 14.0.0)
+  - GoogleSignIn (8.0.0):
+    - AppAuth (< 2.0, >= 1.7.3)
+    - AppCheckCore (~> 11.0)
+    - GTMAppAuth (< 5.0, >= 4.1.1)
+    - GTMSessionFetcher/Core (~> 3.3)
   - GoogleToolboxForMac/Defines (4.2.1)
   - GoogleToolboxForMac/Logger (4.2.1):
     - GoogleToolboxForMac/Defines (= 4.2.1)
@@ -130,7 +186,14 @@ PODS:
   - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
+  - GTMAppAuth (4.1.1):
+    - AppAuth/Core (~> 1.7)
+    - GTMSessionFetcher/Core (< 4.0, >= 3.3)
+  - GTMSessionFetcher (3.5.0):
+    - GTMSessionFetcher/Full (= 3.5.0)
   - GTMSessionFetcher/Core (3.5.0)
+  - GTMSessionFetcher/Full (3.5.0):
+    - GTMSessionFetcher/Core
   - image_cropper (0.0.5):
     - Flutter
     - TOCropViewController (~> 3.1.2)
@@ -159,6 +222,9 @@ PODS:
     - GoogleUtilities/Logger (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3.2)
+  - MLKitFaceDetection (8.0.0):
+    - MLKitCommon (~> 14.0)
+    - MLKitVision (~> 10.0)
   - MLKitImageLabeling (8.0.0):
     - MLKitCommon (~> 14.0)
     - MLKitImageLabelingCommon (~> 10.0)
@@ -199,6 +265,8 @@ PODS:
   - printing (1.0.0):
     - Flutter
   - PromisesObjC (2.4.0)
+  - PromisesSwift (2.4.0):
+    - PromisesObjC (= 2.4.0)
   - SDWebImage (5.21.7):
     - SDWebImage/Core (= 5.21.7)
   - SDWebImage/Core (5.21.7)
@@ -222,6 +290,7 @@ DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
+  - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
@@ -230,7 +299,9 @@ DEPENDENCIES:
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
   - google_mlkit_commons (from `.symlinks/plugins/google_mlkit_commons/ios`)
+  - google_mlkit_face_detection (from `.symlinks/plugins/google_mlkit_face_detection/ios`)
   - google_mlkit_image_labeling (from `.symlinks/plugins/google_mlkit_image_labeling/ios`)
+  - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - mobile_scanner (from `.symlinks/plugins/mobile_scanner/darwin`)
@@ -243,22 +314,31 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppAuth
+    - AppCheckCore
     - DKImagePickerController
     - DKPhotoGallery
     - Firebase
     - FirebaseCore
+    - FirebaseCoreExtension
     - FirebaseCoreInternal
+    - FirebaseCrashlytics
     - FirebaseInstallations
     - FirebaseMessaging
+    - FirebaseRemoteConfigInterop
+    - FirebaseSessions
     - GoogleDataTransport
     - GoogleMLKit
+    - GoogleSignIn
     - GoogleToolboxForMac
     - GoogleUtilities
+    - GTMAppAuth
     - GTMSessionFetcher
     - libwebp
     - Mantle
     - MLImage
     - MLKitCommon
+    - MLKitFaceDetection
     - MLKitImageLabeling
     - MLKitImageLabelingCommon
     - MLKitImageLabelingCustom
@@ -267,6 +347,7 @@ SPEC REPOS:
     - MLKitVisionKit
     - nanopb
     - PromisesObjC
+    - PromisesSwift
     - SDWebImage
     - SDWebImageWebPCoder
     - SwiftyGif
@@ -279,6 +360,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
+  firebase_crashlytics:
+    :path: ".symlinks/plugins/firebase_crashlytics/ios"
   firebase_messaging:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
@@ -295,8 +378,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/geolocator_apple/darwin"
   google_mlkit_commons:
     :path: ".symlinks/plugins/google_mlkit_commons/ios"
+  google_mlkit_face_detection:
+    :path: ".symlinks/plugins/google_mlkit_face_detection/ios"
   google_mlkit_image_labeling:
     :path: ".symlinks/plugins/google_mlkit_image_labeling/ios"
+  google_sign_in_ios:
+    :path: ".symlinks/plugins/google_sign_in_ios/darwin"
   image_cropper:
     :path: ".symlinks/plugins/image_cropper/ios"
   image_picker_ios:
@@ -317,17 +404,24 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
+  AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
+  AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Firebase: 7d62445aeabdaea36f7d372f33052fed9a72514f
   firebase_core: 0013f886fbd0b4950865551eaab47784424bfdb5
+  firebase_crashlytics: fae0a58bac6eaaef4cdacc72f9e55fef1e0be0a1
   firebase_messaging: b875e4088ddd9ecd1834f6c89f6e0a1ffc7d98f0
   FirebaseCore: 58905958aa00a061397a0fd759ae4b55bddb3576
+  FirebaseCoreExtension: 5b94169f1ee96ecc2dbde40bc53690e4d65eb652
   FirebaseCoreInternal: 37bee58388fc6d183f0ab1b32d69ae44f2cf8aad
+  FirebaseCrashlytics: 8bb2d41cb47e8f3ea34200d99361499a59995e0d
   FirebaseInstallations: 134bde50e477628ded76070efdb12d515d53f948
   FirebaseMessaging: 30564b85d2f81a96f9d312bd23acf8186ff092ae
+  FirebaseRemoteConfigInterop: 4801ab93a543ef8fedfb40ae2f66d03e3fdcb864
+  FirebaseSessions: 0e5f64cd99400275798fcb5e2b773dd000ca02c1
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
   flutter_local_notifications: 643a3eda1ce1c0599413ca31672536d423dee214
@@ -335,11 +429,15 @@ SPEC CHECKSUMS:
   geocoding_ios: 33776c9ebb98d037b5e025bb0e7537f6dd19646e
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
   google_mlkit_commons: a5e4ffae5bc59ea4c7b9025dc72cb6cb79dc1166
+  google_mlkit_face_detection: ee4b72cfae062b4c972204be955d83055a4bfd36
   google_mlkit_image_labeling: 6f6fdb11c14600e01898e59a8c4413b255ede272
+  google_sign_in_ios: b48bb9af78576358a168361173155596c845f0b9
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleMLKit: b1eee21a41c57704fe72483b15c85cb2c0cd7444
+  GoogleSignIn: ce8c89bb9b37fb624b92e7514cc67335d1e277e4
   GoogleToolboxForMac: d1a2cbf009c453f4d6ded37c105e2f67a32206d8
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
+  GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   image_cropper: fca51f94982730acae168c4b5d691e0f11aeb259
   image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
@@ -347,6 +445,7 @@ SPEC CHECKSUMS:
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   MLImage: 0de5c6c2bf9e93b80ef752e2797f0836f03b58c0
   MLKitCommon: 47d47b50a031d00db62f1b0efe5a1d8b09a3b2e6
+  MLKitFaceDetection: 32549f1e70e6e7731261bf9cea2b74095e2531cb
   MLKitImageLabeling: 739591b1b69ebab735e97fa1b4ce37cea8361bb7
   MLKitImageLabelingCommon: 616b0c69b3e302720cfb65903da50dc2e697b915
   MLKitImageLabelingCustom: 43cf5d49fb762adb93e3108cb55c81a8ec005d57
@@ -358,6 +457,7 @@ SPEC CHECKSUMS:
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   printing: 54ff03f28fe9ba3aa93358afb80a8595a071dd07
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
