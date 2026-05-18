@@ -147,7 +147,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
     final isPending = page.status?.toUpperCase() == 'PENDING';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFefeae2),
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(context, page),
       body: isPending
           ? Center(
@@ -545,7 +545,7 @@ class ChatWallpaperPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paintColor = Colors.black.withValues(alpha: 0.022); // subtle background icons
+    final paintColor = Colors.black.withValues(alpha: 0.045); // subtle background icons
 
     final icons = [
       Icons.chat_bubble_outline_rounded,
