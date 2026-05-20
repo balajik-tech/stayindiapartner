@@ -63,10 +63,9 @@ class TenantCard extends StatelessWidget {
                                 child: Text(
                                   tenant.fullName,
                                   style: TextStyle(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w900,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
                                     color: AppColors.darkText,
-                                    letterSpacing: -0.5,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
