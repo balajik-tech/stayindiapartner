@@ -608,6 +608,9 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
         return BedStatus.away;
       case 'MAINTENANCE':
         return BedStatus.maintenance;
+      case 'BOOKED':
+      case 'RESERVED':
+        return BedStatus.booked;
       default:
         return BedStatus.occupied;
     }

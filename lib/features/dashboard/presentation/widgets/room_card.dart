@@ -371,6 +371,9 @@ class _RoomCardState extends State<RoomCard> {
         return BedStatus.away;
       case 'MAINTENANCE':
         return BedStatus.maintenance;
+      case 'BOOKED':
+      case 'RESERVED':
+        return BedStatus.booked;
       default:
         return BedStatus.occupied;
     }
