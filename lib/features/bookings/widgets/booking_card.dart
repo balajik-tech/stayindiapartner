@@ -87,10 +87,9 @@ class BookingCard extends StatelessWidget {
                                 child: Text(
                                   booking.tenantName,
                                   style: TextStyle(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w800,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
                                     color: AppColors.darkText,
-                                    letterSpacing: -0.5,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
