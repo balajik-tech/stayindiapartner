@@ -22,8 +22,8 @@ class HouseRulesPage extends StatefulWidget {
 class _HouseRulesPageState extends State<HouseRulesPage> {
   final _entryTimeController = TextEditingController();
   final _visitorPolicyController = TextEditingController();
+  final _rulesController = TextEditingController();
   int _penaltyDate = 7;
-  List<CustomRuleItem> _customRules = [];
 
   bool _isSaving = false;
 
@@ -35,12 +35,51 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
     return '';
   }
 
+  String _hostelName(BuildContext context) {
+    final hostelState = context.read<HostelCubit>().state;
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      return hostelState.hostels[hostelState.selectedHostelIndex].name;
+    }
+    return 'Hostel';
+  }
+
+  void _populateFields(SettingsLoaded state) {
+    final r = state.settings.houseRules;
+    setState(() {
+      _entryTimeController.text = r.entryTime;
+      _visitorPolicyController.text = r.visitorPolicy;
+      _penaltyDate = r.penaltyDate;
+
+      if (r.customRules.isNotEmpty) {
+        _rulesController.text = r.customRules.map((e) => e.text).join('\n\n');
+      } else {
+        final hostelName = _hostelName(context);
+        final List<String> defaultLines = [];
+        final len = HouseRulesConstants.stayIndiaStandardRules.length;
+        for (int i = 0; i < len - 1; i++) {
+          final ruleMap = HouseRulesConstants.stayIndiaStandardRules[i];
+          final text = ruleMap[context.locale.languageCode] ?? ruleMap['en'] ?? '';
+          final cleanedText = text
+              .replaceAll("Stay India", hostelName)
+              .replaceAll("STAY INDIA", hostelName.toUpperCase())
+              .replaceAll("stay india", hostelName.toLowerCase());
+          defaultLines.add(cleanedText);
+        }
+        _rulesController.text = defaultLines.join('\n\n');
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final hostelId = _hostelId(context);
       if (hostelId.isNotEmpty) {
+        final state = context.read<SettingsCubit>().state;
+        if (state is SettingsLoaded) {
+          _populateFields(state);
+        }
         context.read<SettingsCubit>().loadSettings(hostelId);
       }
     });
@@ -50,23 +89,8 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
   void dispose() {
     _entryTimeController.dispose();
     _visitorPolicyController.dispose();
-    for (var rule in _customRules) {
-      rule.controller.dispose();
-    }
+    _rulesController.dispose();
     super.dispose();
-  }
-
-  void _addCustomRule() {
-    setState(() {
-      _customRules.add(CustomRuleItem(controller: TextEditingController()));
-    });
-  }
-
-  void _removeCustomRule(int index) {
-    setState(() {
-      _customRules[index].controller.dispose();
-      _customRules.removeAt(index);
-    });
   }
 
   @override
@@ -74,20 +98,7 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
     return BlocListener<SettingsCubit, SettingsState>(
       listener: (context, state) {
         if (state is SettingsLoaded) {
-          final r = state.settings.houseRules;
-          _entryTimeController.text = r.entryTime;
-          _visitorPolicyController.text = r.visitorPolicy;
-          _penaltyDate = r.penaltyDate;
-
-          setState(() {
-            _customRules = r.customRules
-                .map(
-                  (e) => CustomRuleItem(
-                    controller: TextEditingController(text: e.text),
-                  ),
-                )
-                .toList();
-          });
+          _populateFields(state);
         } else if (state is SettingsSaveSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -119,11 +130,9 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildStandardRulesSection(),
+                      _buildCustomRulesSection(),
                       SizedBox(height: 24.h),
                       _buildEditableFieldsSection(),
-                      SizedBox(height: 24.h),
-                      _buildCustomRulesSection(),
                     ],
                   ),
                 ),
@@ -160,103 +169,6 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
     );
   }
 
-  Widget _buildStandardRulesSection() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(20.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.gavel_rounded,
-                color: AppColors.primaryBlue,
-                size: 20.sp,
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Text(
-                  StringUtils.translate(
-                    'stay_india_standard_rules',
-                    context: context,
-                  ),
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.darkText,
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Text(
-                  StringUtils.translate('fixed_tag', context: context),
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: HouseRulesConstants.stayIndiaStandardRules.length,
-            separatorBuilder: (context, index) => SizedBox(height: 12.h),
-            itemBuilder: (context, index) {
-              final rule = HouseRulesConstants.stayIndiaStandardRules[index];
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 6.h),
-                    width: 6.w,
-                    height: 6.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFCBD5E1),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Text(
-                      rule[context.locale.languageCode] ?? rule['en'] ?? '',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        color: const Color(0xFF64748B),
-                        height: 1.5,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEditableFieldsSection() {
     return Container(
@@ -372,92 +284,16 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
   }
 
   Widget _buildCustomRulesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                StringUtils.translate('custom_house_rules', context: context),
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.darkText,
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            BouncingWrapper(
-              onTap: _addCustomRule,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.add_rounded,
-                      color: AppColors.primaryBlue,
-                      size: 16.sp,
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      StringUtils.translate('add_rule', context: context),
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.primaryBlue,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        if (_customRules.isEmpty)
-          Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Text(
-                StringUtils.translate('no_custom_rules_yet', context: context),
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: const Color(0xFF94A3B8),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          )
-        else
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _customRules.length,
-            separatorBuilder: (context, index) => SizedBox(height: 16.h),
-            itemBuilder: (context, index) => _buildCustomRuleCard(index),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildCustomRuleCard(int index) {
-    final rule = _customRules[index];
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -466,34 +302,52 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         children: [
           Row(
             children: [
+              Icon(
+                Icons.gavel_rounded,
+                color: AppColors.primaryBlue,
+                size: 20.sp,
+              ),
+              SizedBox(width: 10.w),
               Expanded(
-                child: TextField(
-                  controller: rule.controller,
-                  maxLines: 2,
+                child: Text(
+                  "${_hostelName(context)} Rules & Regulations",
                   style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w900,
                     color: AppColors.darkText,
                   ),
-                  decoration: InputDecoration(
-                    hintText: StringUtils.translate(
-                      'type_custom_rule_hint',
-                      context: context,
-                    ),
-                    border: InputBorder.none,
-                    hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-                  ),
                 ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.delete_outline_rounded,
-                  color: Colors.redAccent,
-                  size: 20.sp,
-                ),
-                onPressed: () => _removeCustomRule(index),
               ),
             ],
+          ),
+          SizedBox(height: 20.h),
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: TextField(
+              controller: _rulesController,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkText,
+                height: 1.6,
+              ),
+              decoration: InputDecoration(
+                hintText: "Enter the hostel rules...",
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.all(16.r),
+                hintStyle: TextStyle(
+                  color: const Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -618,10 +472,14 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
       final cubit = context.read<SettingsCubit>();
       final List<CustomRule> updatedCustomRules = [];
 
-      for (var rule in _customRules) {
-        updatedCustomRules.add(
-          CustomRule(text: rule.controller.text, photo: ""),
-        );
+      final lines = _rulesController.text.split('\n');
+      for (var line in lines) {
+        final trimmed = line.trim();
+        if (trimmed.isNotEmpty) {
+          updatedCustomRules.add(
+            CustomRule(text: trimmed, photo: ""),
+          );
+        }
       }
 
       await cubit.updateHouseRules(
@@ -638,8 +496,3 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
   }
 }
 
-class CustomRuleItem {
-  final TextEditingController controller;
-
-  CustomRuleItem({required this.controller});
-}

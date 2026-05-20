@@ -118,11 +118,11 @@ class _FloorAccordionState extends State<FloorAccordion>
                         builder: (context, constraints) {
                           final double width = constraints.maxWidth;
 
-                          int crossAxisCount = 2;
+                          int crossAxisCount = 1;
                           if (width > 900) {
-                            crossAxisCount = 4;
-                          } else if (width > 600) {
                             crossAxisCount = 3;
+                          } else if (width > 600) {
+                            crossAxisCount = 2;
                           }
 
                           final double spacing = 16.w;

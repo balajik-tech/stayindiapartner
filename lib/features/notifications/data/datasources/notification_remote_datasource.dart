@@ -19,7 +19,10 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
 
   @override
   Future<List<NotificationEntity>> getNotifications() async {
-    final response = await _dio.get(ApiConstants.notifications);
+    final response = await _dio.get(
+      ApiConstants.notifications,
+      queryParameters: {'appType': 'OWNER_APP'},
+    );
     if (response.statusCode == 200) {
       final dynamic responseData = response.data['data'];
       final List results = (responseData is Map)
@@ -32,7 +35,10 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
 
   @override
   Future<void> markAllAsRead() async {
-    await _dio.post('${ApiConstants.notifications}/mark-read-all');
+    await _dio.post(
+      '${ApiConstants.notifications}/mark-read-all',
+      queryParameters: {'appType': 'OWNER_APP'},
+    );
   }
 
   @override

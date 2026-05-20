@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/auth/domain/models/guest_session.dart';
+import 'package:stayindia_owner/features/auth/presentation/cubit/guest_session_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/onboarding/presentation/pages/onboarding_page.dart';
 import '../cubit/auth_cubit.dart';
 import 'login_page.dart';
 import 'link_phone_page.dart';
@@ -23,12 +27,65 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   AuthState? _lastActiveState;
+  bool _hasSeenOnboarding = false;
+  bool _isCheckingOnboarding = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkOnboardingStatus();
+  }
+
+  Future<void> _checkOnboardingStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasSeen = prefs.getBool('has_seen_onboarding') ?? false;
+      if (mounted) {
+        setState(() {
+          _hasSeenOnboarding = hasSeen;
+          _isCheckingOnboarding = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isCheckingOnboarding = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _markOnboardingComplete() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('has_seen_onboarding', true);
+    } catch (_) {}
+    if (mounted) {
+      setState(() {
+        _hasSeenOnboarding = true;
+      });
+    }
+    // After onboarding, start in guest mode
+    final guestCubit = context.read<GuestSessionCubit>();
+    await guestCubit.setGuest(true);
+    await guestCubit.setKycComplete(false);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingOnboarding) {
+      return const _SplashScreen();
+    }
+
+    if (!_hasSeenOnboarding) {
+      return OnboardingPage(onComplete: _markOnboardingComplete);
+    }
+
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated || state is AuthProfileCompleted) {
+          // User logged in, exit guest mode
+          context.read<GuestSessionCubit>().setGuest(false);
           context.read<HostelCubit>().getHostels(forceRefresh: true);
         }
       },

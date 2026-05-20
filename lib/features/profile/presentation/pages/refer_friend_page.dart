@@ -5,6 +5,8 @@ import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ReferFriendPage extends StatelessWidget {
   const ReferFriendPage({super.key});
@@ -158,10 +160,23 @@ class ReferFriendPage extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context, String code) {
+    final String shareMessage = "Join Stay India using my referral code: $code and get ₹500 off!";
+
     return Column(
       children: [
         BouncingWrapper(
-          onTap: () {},
+          onTap: () async {
+            final Uri whatsappUri = Uri.parse(
+              "https://wa.me/?text=${Uri.encodeComponent(shareMessage)}",
+            );
+            if (await canLaunchUrl(whatsappUri)) {
+              await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Could not launch WhatsApp")),
+              );
+            }
+          },
           child: Container(
             height: 56.h,
             width: double.infinity,
@@ -199,7 +214,9 @@ class ReferFriendPage extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         BouncingWrapper(
-          onTap: () {},
+          onTap: () {
+            Share.share(shareMessage);
+          },
           child: Container(
             height: 56.h,
             width: double.infinity,

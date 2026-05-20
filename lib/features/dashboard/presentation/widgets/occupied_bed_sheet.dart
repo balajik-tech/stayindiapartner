@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
+import 'package:stayindia_owner/core/widgets/side_view_bed_icon.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_state.dart';
 import 'package:stayindia_owner/features/tenants/presentation/widgets/tenant_details_sheet.dart';
@@ -12,6 +15,12 @@ import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
 import 'package:stayindia_owner/features/bookings/pages/room_selection_page.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/checkout_settlement_modal.dart';
 import 'package:stayindia_owner/injection_container.dart';
+
+// Premium dark navy + orange accent colors matching client design
+const Color _navy = Color(0xFF1B2838);
+const Color _navyLight = Color(0xFF243447);
+const Color _orange = Color(0xFFE8722A);
+const Color _orangeLight = Color(0xFFFFF3ED);
 
 class OccupiedBedSheet extends StatelessWidget {
   final String roomNumber;
@@ -95,6 +104,7 @@ class OccupiedBedSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(height: 12.h),
+                // Drag handle
                 Container(
                   width: 40.w,
                   height: 4.h,
@@ -103,203 +113,266 @@ class OccupiedBedSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20.w,
-                    vertical: 10.h,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 10.w,
-                              vertical: 4.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isCheckedIn
-                                  ? AppColors.primaryBlue
-                                  : (isReserved ? Colors.orange : Colors.grey),
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Text(
-                              stayStatus.replaceAll('_', ' '),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          Text(
-                            'Bed $bedNumber',
-                            style: TextStyle(
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkText,
-                            ),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(
-                          Icons.close,
-                          size: 28.sp,
-                          color: AppColors.greyText,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(),
-                SizedBox(height: 20.h),
-                Container(
-                  padding: EdgeInsets.all(20.w),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.roomCardBorder),
-                    borderRadius: BorderRadius.circular(24.r),
-                  ),
-                  child: QrImageView(
-                    data:
-                        detail?.stay?.qrToken ??
-                        detail?.stay?.accessCode ??
-                        detail?.stay?.bookingId ??
-                        tenantId,
-                    version: QrVersions.auto,
-                    size: 160.w,
-                    gapless: false,
-                  ),
-                ),
                 SizedBox(height: 16.h),
-                if (detail != null && detail.stay != null) ...[
-                  Text(
-                    'Manual Check-in ID: ${detail.stay!.accessCode ?? detail.stay!.bookingId.toUpperCase().substring(detail.stay!.bookingId.length > 8 ? detail.stay!.bookingId.length - 8 : 0)}',
-                    style: TextStyle(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkText,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                ],
-                Text(
-                  'Access Pass',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.greyText,
-                  ),
-                ),
-                Text(
-                  'Valid for current stay',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.greyText.withValues(alpha: 0.7),
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildDetailCard(
-                          icon: Icons.access_time,
-                          label: 'Checkout Time',
-                          value: '11:00 AM',
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: _buildDetailCard(
-                          icon: Icons.currency_rupee,
-                          label: 'Monthly Fee',
-                          value: rent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20.h),
+
+                // ── ACCESS PASS CARD (with orange border) ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: Container(
-                    padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.roomCardBorder),
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                    child: Row(
-                      children: [
-                        CustomAvatar(
-                          imageUrl: tenantAvatar,
-                          name: tenantName,
-                          size: 48.0,
-                          isCircle: true,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24.r),
+                      border: Border.all(color: _orange, width: 2.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _orange.withValues(alpha: 0.12),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
                         ),
-                        SizedBox(width: 16.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 16.h),
+
+                        // Bed number + tenant name + Access Pass badge
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20.w),
+                          child: Row(
                             children: [
-                              Text(
-                                tenantName,
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.darkText,
-                                ),
-                              ),
-                              Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    TenantDetailsSheet.show(
-                                      context,
-                                      name: tenantName,
-                                      imageUrl: tenantAvatar,
-                                      room: roomNumber,
-                                      tenantId: tenantId,
-                                      hostelId: hostelId,
-                                    );
-                                  },
-                                  borderRadius: BorderRadius.circular(4.r),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 4.h,
-                                      horizontal: 4.w,
-                                    ),
-                                    child: Text(
-                                      'View full profile ',
+                              SideViewBedIcon(size: 22.sp, color: _navy),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'BED $bedNumber',
                                       style: TextStyle(
-                                        fontSize: 14.sp,
-                                        color: AppColors.primaryBlue,
-                                        fontWeight: FontWeight.w500,
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.w900,
+                                        color: _navy,
+                                        letterSpacing: 0.5,
                                       ),
                                     ),
+                                    Text(
+                                      tenantName.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey[500],
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 14.w,
+                                  vertical: 8.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _navy,
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                child: Text(
+                                  'ACCESS PASS',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.8,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
+
+                        SizedBox(height: 16.h),
+
+                        // QR Code in orange-bordered frame
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 40.w),
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: _orangeLight,
+                            borderRadius: BorderRadius.circular(20.r),
+                            border: Border.all(
+                              color: _orange.withValues(alpha: 0.4),
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: QrImageView(
+                              data:
+                                  detail?.stay?.qrToken ??
+                                  detail?.stay?.accessCode ??
+                                  detail?.stay?.bookingId ??
+                                  tenantId,
+                              version: QrVersions.auto,
+                              size: 140.w,
+                              gapless: false,
+                              eyeStyle: const QrEyeStyle(
+                                eyeShape: QrEyeShape.roundedOuter,
+                                color: _navy,
+                              ),
+                              dataModuleStyle: const QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.roundedOutsideCorners,
+                                color: _navy,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 10.h),
+
+                        // "GENERATE NEW" button
+                        TextButton.icon(
+                          onPressed: () {},
+                          icon: Icon(Icons.refresh_rounded, size: 16.sp, color: _orange),
+                          label: Text(
+                            'GENERATE NEW',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color: _orange,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
                       ],
                     ),
                   ),
                 ),
-                SizedBox(height: 24.h),
+
+                SizedBox(height: 20.h),
+
+                // ── ACTION ICONS ROW (Rent, Share, Scan, QR) ──
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildActionIcon(
+                        icon: Icons.currency_rupee_rounded,
+                        label: 'RENT',
+                        value: rent.isNotEmpty ? '₹$rent' : '—',
+                        color: const Color(0xFF4CAF50),
+                      ),
+                      _buildActionIcon(
+                        icon: Icons.share_rounded,
+                        label: 'SHARE',
+                        color: AppColors.primaryBlue,
+                      ),
+                      _buildActionIcon(
+                        icon: Icons.qr_code_scanner_rounded,
+                        label: 'SCAN',
+                        color: _orange,
+                      ),
+                      _buildActionIcon(
+                        icon: Icons.qr_code_rounded,
+                        label: 'QR',
+                        color: _navy,
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20.h),
+
+                // ── LIVE TIME & DATE ──
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: _LiveTimeDateRow(),
+                ),
+
+                SizedBox(height: 20.h),
+
+                // ── CHECK-IN / CHECK-OUT BUTTONS ──
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: BlocConsumer<BookingsCubit, BookingsState>(
+                    listener: (context, BookingsState bookingsState) {
+                      if (bookingsState.status == BookingsStatus.success &&
+                          bookingsState.successMessage != null) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(bookingsState.successMessage!),
+                          ),
+                        );
+                      }
+                    },
+                    builder: (context, BookingsState bookingsState) {
+                      final isLoading =
+                          bookingsState.status == BookingsStatus.loading;
+
+                      return Row(
+                        children: [
+                          // CHECK IN button
+                          Expanded(
+                            child: _buildCheckinButton(
+                              context: context,
+                              detail: detail,
+                              isCheckedIn: isCheckedIn,
+                              isLoading: isLoading,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          // CHECK OUT button
+                          Expanded(
+                            child: _buildCheckoutButton(
+                              context: context,
+                              detail: detail,
+                              isCheckedIn: isCheckedIn,
+                              isLoading: isLoading,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+
+                SizedBox(height: 20.h),
+
+                // ── ELECTRICITY & PARKING CARDS (dark navy style) ──
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildBillCard(
+                          icon: Icons.bolt_rounded,
+                          iconColor: const Color(0xFFFFD54F),
+                          label: 'ELECTRICITY',
+                          value: '—',
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: _buildBillCard(
+                          icon: Icons.two_wheeler_rounded,
+                          iconColor: _orange,
+                          label: 'PARKING',
+                          value: '—',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20.h),
+
+                // ── CHANGE ROOM button ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    child: OutlinedButton.icon(
                       onPressed: detail == null
                           ? null
                           : () {
@@ -337,164 +410,124 @@ class OccupiedBedSheet extends StatelessWidget {
                                 ),
                               );
                             },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: _navy,
+                        side: BorderSide(color: _navy.withValues(alpha: 0.2)),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                       ),
-                      icon: Icon(Icons.swap_horiz, size: 20.sp),
+                      icon: Icon(Icons.swap_horiz_rounded, size: 20.sp),
                       label: Text(
                         'CHANGE ROOM',
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 12.h),
+
+                SizedBox(height: 16.h),
+
+                // ── TENANT PROFILE ROW ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: BlocConsumer<BookingsCubit, BookingsState>(
-                    listener: (context, BookingsState bookingsState) {
-                      if (bookingsState.status == BookingsStatus.success &&
-                          bookingsState.successMessage != null) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(bookingsState.successMessage!),
-                          ),
-                        );
-                      }
-                    },
-                    builder: (context, BookingsState bookingsState) {
-                      final isLoading =
-                          bookingsState.status == BookingsStatus.loading;
-
-                      if (!isCheckedIn) {
-                        return SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: isLoading || detail == null
-                                ? null
-                                : () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider.value(
-                                          value: context.read<BookingsCubit>(),
-                                          child: RoomSelectionPage(
-                                            bookingId: detail.stay!.bookingId,
-                                            hostelId: hostelId,
-                                            tenantName: tenantName,
-                                            accessCode: detail.stay!.accessCode,
-                                            preAllocatedRoomId:
-                                                detail.stay!.roomId,
-                                            preAllocatedBedNumber:
-                                                detail.stay!.bedNumber,
-                                            bookedSharingType: detail.stay!.roomTypename.toLowerCase().contains('single') 
-                                                ? 'SINGLE' 
-                                                : detail.stay!.roomTypename.toLowerCase().contains('double') || detail.stay!.roomTypename.toLowerCase().contains('2 sharing')
-                                                    ? 'DOUBLE'
-                                                    : detail.stay!.roomTypename.toLowerCase().contains('triple') || detail.stay!.roomTypename.toLowerCase().contains('3 sharing')
-                                                        ? 'TRIPLE'
-                                                        : detail.stay!.roomTypename.toLowerCase().contains('quadruple') || detail.stay!.roomTypename.toLowerCase().contains('4 sharing')
-                                                            ? 'QUADRUPLE'
-                                                            : detail.stay!.roomTypename.toLowerCase().contains('quintuple') || detail.stay!.roomTypename.toLowerCase().contains('5 sharing')
-                                                                ? 'QUINTUPLE'
-                                                                : detail.stay!.roomTypename.toLowerCase().contains('dormitory')
-                                                                    ? 'DORMITORY'
-                                                                    : null,
-                                            bookedRoomType: detail.stay!.roomTypename.toLowerCase().contains('non ac') || detail.stay!.roomTypename.toLowerCase().contains('non-ac')
-                                                ? 'NON-AC'
-                                                : detail.stay!.roomTypename.toLowerCase().contains('ac')
-                                                    ? 'AC'
-                                                    : null,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: EdgeInsets.symmetric(vertical: 16.h),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                            ),
-                            icon: Icon(Icons.login, size: 20.sp),
-                            label: Text(
-                              'COMPLETE CHECK-IN',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      return SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: isLoading || detail == null
-                              ? null
-                              : () {
-                                  CheckoutSettlementModal.show(
-                                    context,
-                                    tenantName: tenantName,
-                                    tenantId: tenantId,
-                                    hostelId: hostelId,
-                                    bookingId: detail.stay!.bookingId,
-                                    securityDeposit: detail.stay!.deposit,
-                                    onCheckoutConfirmed: () {
-                                      context
-                                          .read<BookingsCubit>()
-                                          .checkoutBooking(
-                                            detail.stay!.bookingId,
-                                          );
-                                    },
-                                  );
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF9FAFB),
-                            foregroundColor: AppColors.darkText,
-                            elevation: 0,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                              side: BorderSide(color: AppColors.roomCardBorder),
-                            ),
-                          ),
-                          icon: isLoading
-                              ? SizedBox(
-                                  width: 20.w,
-                                  height: 20.w,
-                                  child: const CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Icon(Icons.logout, size: 20.sp),
-                          label: Text(
-                            'CHECK-OUT',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      TenantDetailsSheet.show(
+                        context,
+                        name: tenantName,
+                        imageUrl: tenantAvatar,
+                        room: roomNumber,
+                        tenantId: tenantId,
+                        hostelId: hostelId,
                       );
                     },
+                    child: Container(
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Row(
+                        children: [
+                          CustomAvatar(
+                            imageUrl: tenantAvatar,
+                            name: tenantName,
+                            size: 42.0,
+                            isCircle: true,
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tenantName,
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: _navy,
+                                  ),
+                                ),
+                                Text(
+                                  'View full profile',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: AppColors.primaryBlue,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16.sp,
+                            color: Colors.grey[400],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                SizedBox(height: 40.h),
+
+                SizedBox(height: 16.h),
+
+                // ── DONE BUTTON ──
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _navy,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      icon: Icon(Icons.check_circle_outline_rounded, size: 20.sp),
+                      label: Text(
+                        'DONE',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 24.h),
               ],
             ),
           );
@@ -503,41 +536,343 @@ class OccupiedBedSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailCard({
+  // ── Action icon builder ──
+  Widget _buildActionIcon({
     required IconData icon,
+    required String label,
+    String? value,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: 52.w,
+          height: 52.w,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
+          ),
+          child: Icon(icon, size: 24.sp, color: color),
+        ),
+        SizedBox(height: 6.h),
+        if (value != null)
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w800,
+              color: _navy,
+            ),
+          ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[500],
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Bill card builder (dark navy style) ──
+  Widget _buildBillCard({
+    required IconData icon,
+    required Color iconColor,
     required String label,
     required String value,
   }) {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.roomCardBorder),
+        color: _navy,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: _orange.withValues(alpha: 0.4), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 16.sp, color: AppColors.greyText),
-              SizedBox(width: 6.w),
-              Text(
-                label,
-                style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+              Container(
+                padding: EdgeInsets.all(6.w),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Icon(icon, size: 18.sp, color: iconColor),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkText,
-            ),
+          SizedBox(height: 10.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(4.w),
+                decoration: BoxDecoration(
+                  color: _orange,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.add, size: 14.sp, color: Colors.white),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  // ── Check In button ──
+  Widget _buildCheckinButton({
+    required BuildContext context,
+    required dynamic detail,
+    required bool isCheckedIn,
+    required bool isLoading,
+  }) {
+    return SizedBox(
+      height: 52.h,
+      child: ElevatedButton.icon(
+        onPressed: isCheckedIn || isLoading || detail == null
+            ? null
+            : () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<BookingsCubit>(),
+                      child: RoomSelectionPage(
+                        bookingId: detail.stay!.bookingId,
+                        hostelId: hostelId,
+                        tenantName: tenantName,
+                        accessCode: detail.stay!.accessCode,
+                        preAllocatedRoomId: detail.stay!.roomId,
+                        preAllocatedBedNumber: detail.stay!.bedNumber,
+                        bookedSharingType: detail.stay!.roomTypename.toLowerCase().contains('single') 
+                            ? 'SINGLE' 
+                            : detail.stay!.roomTypename.toLowerCase().contains('double') || detail.stay!.roomTypename.toLowerCase().contains('2 sharing')
+                                ? 'DOUBLE'
+                                : detail.stay!.roomTypename.toLowerCase().contains('triple') || detail.stay!.roomTypename.toLowerCase().contains('3 sharing')
+                                    ? 'TRIPLE'
+                                    : detail.stay!.roomTypename.toLowerCase().contains('quadruple') || detail.stay!.roomTypename.toLowerCase().contains('4 sharing')
+                                        ? 'QUADRUPLE'
+                                        : detail.stay!.roomTypename.toLowerCase().contains('quintuple') || detail.stay!.roomTypename.toLowerCase().contains('5 sharing')
+                                            ? 'QUINTUPLE'
+                                            : detail.stay!.roomTypename.toLowerCase().contains('dormitory')
+                                                ? 'DORMITORY'
+                                                : null,
+                        bookedRoomType: detail.stay!.roomTypename.toLowerCase().contains('non ac') || detail.stay!.roomTypename.toLowerCase().contains('non-ac')
+                            ? 'NON-AC'
+                            : detail.stay!.roomTypename.toLowerCase().contains('ac')
+                                ? 'AC'
+                                : null,
+                      ),
+                    ),
+                  ),
+                );
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isCheckedIn ? Colors.grey[200] : const Color(0xFFE8F5E9),
+          foregroundColor: isCheckedIn ? Colors.grey : const Color(0xFF2E7D32),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.r),
+            side: BorderSide(
+              color: isCheckedIn ? Colors.grey[300]! : const Color(0xFF4CAF50).withValues(alpha: 0.3),
+            ),
+          ),
+        ),
+        icon: Icon(Icons.login_rounded, size: 18.sp),
+        label: Text(
+          'CHECK IN',
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Check Out button ──
+  Widget _buildCheckoutButton({
+    required BuildContext context,
+    required dynamic detail,
+    required bool isCheckedIn,
+    required bool isLoading,
+  }) {
+    return SizedBox(
+      height: 52.h,
+      child: ElevatedButton.icon(
+        onPressed: !isCheckedIn || isLoading || detail == null
+            ? null
+            : () {
+                CheckoutSettlementModal.show(
+                  context,
+                  tenantName: tenantName,
+                  tenantId: tenantId,
+                  hostelId: hostelId,
+                  bookingId: detail.stay!.bookingId,
+                  securityDeposit: detail.stay!.deposit,
+                  onCheckoutConfirmed: () {
+                    context
+                        .read<BookingsCubit>()
+                        .checkoutBooking(
+                          detail.stay!.bookingId,
+                        );
+                  },
+                );
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: !isCheckedIn ? Colors.grey[200] : const Color(0xFFFBE9E7),
+          foregroundColor: !isCheckedIn ? Colors.grey : const Color(0xFFC62828),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.r),
+            side: BorderSide(
+              color: !isCheckedIn ? Colors.grey[300]! : const Color(0xFFEF5350).withValues(alpha: 0.3),
+            ),
+          ),
+        ),
+        icon: isLoading
+            ? SizedBox(
+                width: 18.w,
+                height: 18.w,
+                child: const CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Icon(Icons.logout_rounded, size: 18.sp),
+        label: Text(
+          'CHECK OUT',
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Live Time & Date widget with auto-updating clock ──
+class _LiveTimeDateRow extends StatefulWidget {
+  @override
+  State<_LiveTimeDateRow> createState() => _LiveTimeDateRowState();
+}
+
+class _LiveTimeDateRowState extends State<_LiveTimeDateRow> {
+  late Timer _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() {
+          _now = DateTime.now();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final timeStr = DateFormat('hh:mm a').format(_now);
+    final dateStr = DateFormat('dd MMM').format(_now).toUpperCase();
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'LIVE TIME',
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[400],
+                  letterSpacing: 0.8,
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                timeStr,
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.w900,
+                  color: _navy,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          width: 1,
+          height: 36.h,
+          color: Colors.grey[200],
+        ),
+        SizedBox(width: 20.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              'DATE',
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[400],
+                letterSpacing: 0.8,
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Row(
+              children: [
+                Icon(Icons.calendar_today_rounded, size: 16.sp, color: _navy),
+                SizedBox(width: 6.w),
+                Text(
+                  dateStr,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: _navy,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

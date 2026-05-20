@@ -20,6 +20,7 @@ import 'package:stayindia_owner/features/communities/presentation/cubit/communit
 import 'package:stayindia_owner/features/communities/presentation/cubit/owner_community_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/association_cubit.dart';
 import 'core/theme/theme_cubit.dart';
+import 'features/auth/presentation/cubit/guest_session_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cubit.dart';
 import 'injection_container.dart' as di;
 import 'core/services/app_bootstrapper.dart';
@@ -40,6 +41,7 @@ class StayIndiaOwnerApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => di.sl<AuthCubit>()..restoreSession()),
         BlocProvider(create: (context) => di.sl<ThemeCubit>()),
+        BlocProvider(create: (context) => di.sl<GuestSessionCubit>()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(390, 844),

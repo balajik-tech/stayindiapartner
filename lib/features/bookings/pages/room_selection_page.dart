@@ -9,6 +9,7 @@ import 'package:stayindia_owner/features/dashboard/presentation/widgets/floor_fi
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/floor_accordion.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/room_card.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
+import 'package:stayindia_owner/features/dashboard/domain/bed_allocation_service.dart';
 import '../cubit/bookings_cubit.dart';
 import '../cubit/bookings_state.dart';
 
@@ -42,6 +43,7 @@ class RoomSelectionPage extends StatefulWidget {
 
 class _RoomSelectionPageState extends State<RoomSelectionPage> {
   int _selectedFloorIndex = 0;
+  bool _hasAutoAllocated = false;
 
   String _getFloorDisplayName(FloorData floor) {
     if (floor.floorName == 'basement' ||
@@ -126,6 +128,22 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                   backgroundColor: Colors.red,
                 ),
               );
+            }
+
+            if (state.occupancy != null && !_hasAutoAllocated && widget.bookedSharingType != null && widget.bookedRoomType != null) {
+              _hasAutoAllocated = true;
+              final result = BedAllocationService.allocateOptimalBed(
+                occupancy: state.occupancy!,
+                targetSharingType: widget.bookedSharingType!,
+                targetRoomType: widget.bookedRoomType!,
+              );
+              if (result != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    _showConfirmationDialog(context, result.room, result.bed.bedNumber);
+                  }
+                });
+              }
             }
           },
           builder: (context, state) {

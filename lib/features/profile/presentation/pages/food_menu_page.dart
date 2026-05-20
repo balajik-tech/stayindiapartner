@@ -9,7 +9,6 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/presentation/cubit/food_menu_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/widgets/add_food_item_sheet.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:flutter/services.dart';
 
 class FoodMenuPage extends StatefulWidget {
@@ -22,6 +21,7 @@ class FoodMenuPage extends StatefulWidget {
 class _FoodMenuPageState extends State<FoodMenuPage> {
   late FoodMenuCubit _cubit;
   int _selectedDayIndex = 0;
+  String _rotationType = 'weekly';
 
   final List<String> _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   final List<String> _dayKeys = [
@@ -37,6 +37,66 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
 
   final Map<String, Map<String, List<FoodItem>>> _menuData = {};
   final bool _isApplyingTemplate = false;
+
+  String get _hostelName {
+    final state = context.read<HostelCubit>().state;
+    if (state is HostelLoaded && state.hostels.isNotEmpty) {
+      return state.hostels[state.selectedHostelIndex].name;
+    }
+    return 'Hostel';
+  }
+
+  int _getWeekOfYear(DateTime date) {
+    final firstDayOfYear = DateTime(date.year, 1, 1);
+    final daysOffset = firstDayOfYear.weekday - 1;
+    final firstMonday = firstDayOfYear.subtract(Duration(days: daysOffset));
+    final daysSinceMonday = date.difference(firstMonday).inDays;
+    return (daysSinceMonday / 7).floor() + 1;
+  }
+
+  List<FoodItem> _parseFoodItems(String rawText) {
+    if (rawText.isEmpty) return [];
+    final parts = rawText.split(RegExp(r'[,+&/]'));
+    return parts
+        .map((p) => p.trim())
+        .where((p) => p.isNotEmpty)
+        .map((p) => FoodItem(
+              name: {'en': p},
+              desc: {},
+              price: 0.0,
+              isVeg: true,
+              isActive: true,
+            ))
+        .toList();
+  }
+
+  void _autoPopulateMenuBasedOnRotation() {
+    final now = DateTime.now();
+    final weekNum = _getWeekOfYear(now);
+    
+    bool useWeek1 = true;
+    if (_rotationType == 'weekly') {
+      useWeek1 = weekNum % 2 == 1;
+    } else {
+      useWeek1 = (weekNum / 2).floor() % 2 == 1;
+    }
+
+    final activeTemplate = useWeek1 ? _week1Menu : _week2Menu;
+    final dayIndex = _selectedDayIndex;
+    final templateDay = activeTemplate[dayIndex];
+    final day = _days[dayIndex];
+
+    setState(() {
+      _menuData[day] = {
+        'Breakfast': _parseFoodItems(templateDay.breakfast),
+        'Lunch': _parseFoodItems(templateDay.lunch),
+        'Snacks': _parseFoodItems(templateDay.snacks),
+        'Dinner': _parseFoodItems(templateDay.dinner),
+      };
+    });
+
+    _saveCurrentDay();
+  }
 
   @override
   void initState() {
@@ -541,7 +601,7 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
     );
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _cubit,
@@ -550,7 +610,15 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
           BlocListener<FoodMenuCubit, FoodMenuState>(
             listener: (context, state) {
               if (state is FoodMenuLoaded) {
-                _applyMenuToLocal(state.menu);
+                final hasBreakfast = state.menu.breakfast.isNotEmpty;
+                final hasLunch = state.menu.lunch.isNotEmpty;
+                final hasSnacks = state.menu.snacks.isNotEmpty;
+                final hasDinner = state.menu.dinner.isNotEmpty;
+                if (!hasBreakfast && !hasLunch && !hasSnacks && !hasDinner) {
+                  _autoPopulateMenuBasedOnRotation();
+                } else {
+                  _applyMenuToLocal(state.menu);
+                }
               } else if (state is FoodMenuSaved) {
               } else if (state is FoodMenuError) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -603,251 +671,143 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
               appBar: _buildAppBar(),
               body: Stack(
                 children: [
-                  Row(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Container(
-                    width: 75.w,
-                    margin: EdgeInsets.fromLTRB(16.w, 16.h, 4.w, 16.h),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFFFFFFFF).withValues(alpha: 0.85),
-                          const Color(0xFFF1F5F9).withValues(alpha: 0.75),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                      borderRadius: BorderRadius.circular(24.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 16.h),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: _days.length,
-                            padding: EdgeInsets.symmetric(vertical: 8.h),
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              final isSelected = _selectedDayIndex == index;
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() => _selectedDayIndex = index);
-                                  _loadDay();
-                                },
-                                child: Container(
-                                  height: 46.h,
-                                  margin: EdgeInsets.symmetric(
-                                    horizontal: 10.w,
-                                    vertical: 6.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? AppColors.primaryBlue.withValues(alpha: 0.9)
-                                        : Colors.white.withValues(alpha: 0.6),
-                                    borderRadius: BorderRadius.circular(16.r),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? Colors.white.withValues(alpha: 0.4)
-                                          : Colors.white.withValues(alpha: 0.85),
-                                      width: 1.5,
-                                    ),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: const Color(0xFF1E3A8A).withValues(alpha: 0.4),
-                                              blurRadius: 8,
-                                              offset: const Offset(0, 4),
+                      _buildLiveServingBanner(),
+                      _buildRotationSelector(),
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildVerticalDaySelector(),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.fromLTRB(12.w, 12.h, 16.w, 10.h),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            _getSelectedDayDateString(),
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w900,
+                                              color: AppColors.darkText,
+                                              letterSpacing: -0.5,
                                             ),
-                                            BoxShadow(
-                                              color: Colors.white.withValues(alpha: 0.35),
-                                              blurRadius: 2,
-                                              offset: const Offset(0, -1.5),
-                                            ),
-                                          ]
-                                        : [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.08),
-                                              blurRadius: 5,
-                                              offset: const Offset(0, 3),
-                                            ),
-                                            BoxShadow(
-                                              color: Colors.white,
-                                              blurRadius: 2,
-                                              offset: const Offset(0, -1),
-                                            ),
-                                          ],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    _days[index].toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 14.5.sp,
-                                      fontWeight: FontWeight.w900,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFF475569),
-                                      shadows: isSelected
-                                          ? [
-                                              Shadow(
-                                                color: Colors.black.withValues(alpha: 0.3),
-                                                offset: const Offset(0, 1),
-                                                blurRadius: 2,
-                                              ),
-                                            ]
-                                          : null,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(12.w, 20.h, 20.w, 12.h),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _getSelectedDayDateString(),
-                                      style: TextStyle(
-                                        fontSize: 22.sp,
-                                        fontWeight: FontWeight.w900,
-                                        color: AppColors.darkText,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => _showPredefinedMenuSheet(context),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w,
-                                    vertical: 6.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryBlue.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    border: Border.all(
-                                      color: AppColors.primaryBlue.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.menu_book_rounded,
-                                        color: AppColors.primaryBlue,
-                                        size: 13.sp,
-                                      ),
-                                      SizedBox(width: 4.w),
-                                      Text(
-                                        "TEMPLATES",
-                                        style: TextStyle(
-                                          color: AppColors.primaryBlue,
-                                          fontSize: 10.sp,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0.5,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                        GestureDetector(
+                                          onTap: () => _showPredefinedMenuSheet(context),
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 8.w,
+                                              vertical: 6.h,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primaryBlue.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                              borderRadius: BorderRadius.circular(10.r),
+                                              border: Border.all(
+                                                color: AppColors.primaryBlue.withValues(
+                                                  alpha: 0.15,
+                                                ),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.menu_book_rounded,
+                                                  color: AppColors.primaryBlue,
+                                                  size: 13.sp,
+                                                ),
+                                                SizedBox(width: 4.w),
+                                                Text(
+                                                  "TEMPLATES",
+                                                  style: TextStyle(
+                                                    color: AppColors.primaryBlue,
+                                                    fontSize: 10.sp,
+                                                    fontWeight: FontWeight.w900,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Container(
+                                          padding: EdgeInsets.all(8.r),
+                                          decoration: BoxDecoration(
+                                            color: Colors.amber.shade50,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.wb_sunny_rounded,
+                                            color: Colors.amber,
+                                            size: 20.sp,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
+                                  Expanded(
+                                    child: BlocBuilder<FoodMenuCubit, FoodMenuState>(
+                                      builder: (context, state) {
+                                        if (state is FoodMenuLoading &&
+                                            !_isApplyingTemplate) {
+                                          return const Center(
+                                            child: CircularProgressIndicator(),
+                                          );
+                                        }
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.vertical,
+                                          padding: EdgeInsets.fromLTRB(
+                                            12.w,
+                                            4.h,
+                                            16.w,
+                                            80.h,
+                                          ),
+                                          physics: const BouncingScrollPhysics(),
+                                          child: Column(
+                                            children: _mealTypes
+                                                .map((type) => _buildMealColumnCard(type))
+                                                .toList(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 8.w),
-                              Container(
-                                padding: EdgeInsets.all(8.r),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade50,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.wb_sunny_rounded,
-                                  color: Colors.amber,
-                                  size: 24.sp,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-
-                        Expanded(
-                          child: BlocBuilder<FoodMenuCubit, FoodMenuState>(
-                            builder: (context, state) {
-                              if (state is FoodMenuLoading &&
-                                  !_isApplyingTemplate) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                              return SingleChildScrollView(
-                                scrollDirection: Axis.vertical,
-                                padding: EdgeInsets.fromLTRB(
-                                  12.w,
-                                  8.h,
-                                  12.w,
-                                  80.h,
-                                ),
-                                physics: const BouncingScrollPhysics(),
-                                child: Column(
-                                  children: _mealTypes
-                                      .map((type) => _buildMealColumnCard(type))
-                                      .toList(),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                  if (_isApplyingTemplate)
+                    Container(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      child: const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                    ),
                 ],
               ),
-              if (_isApplyingTemplate)
-                Container(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    ),
-  ),
-);
-}
+            );
+          },
+        ),
+      ),
+    );
+  }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -863,12 +823,296 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        StringUtils.translate('weekly_food_menu', context: context),
+        "$_hostelName Menu",
         style: TextStyle(
           color: AppColors.darkText,
           fontSize: 18.sp,
           fontWeight: FontWeight.w900,
         ),
+      ),
+    );
+  }
+
+  Widget _buildLiveServingBanner() {
+    final currentMeal = _getCurrentlyServingMeal();
+    final todayIndex = DateTime.now().weekday - 1;
+    final todayDayKey = _days[todayIndex];
+    final items = _menuData[todayDayKey]?[currentMeal] ?? [];
+    final dishText = items.isNotEmpty
+        ? items.map((i) => i.getName(context.locale.languageCode)).join(" + ")
+        : "Standard Hostel Special";
+    final emoji = items.isNotEmpty ? _getFoodEmoji(items.first.getName(context.locale.languageCode)) : "🍽️";
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0FDF4),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFFDCFCE7), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF15803D).withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const _PulseDot(),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "NOW SERVING: ${currentMeal.toUpperCase()}",
+                  style: TextStyle(
+                    fontSize: 10.5.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF166534),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Row(
+                  children: [
+                    Text(
+                      emoji,
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
+                    SizedBox(width: 6.w),
+                    Expanded(
+                      child: Text(
+                        dishText.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF14532D),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRotationSelector() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 6.h),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.01),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.autorenew_rounded, size: 16.sp, color: AppColors.primaryBlue),
+              SizedBox(width: 6.w),
+              Text(
+                "MENU AUTOMATION",
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryBlue,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildRotationButton(
+                  "Weekly Rotate",
+                  "Rotates Week 1/2 every week",
+                  _rotationType == 'weekly',
+                  () {
+                    setState(() {
+                      _rotationType = 'weekly';
+                      _autoPopulateMenuBasedOnRotation();
+                    });
+                  },
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildRotationButton(
+                  "2 Weeks Rotate",
+                  "Rotates Week 1/2 every 2 weeks",
+                  _rotationType == 'two_week',
+                  () {
+                    setState(() {
+                      _rotationType = 'two_week';
+                      _autoPopulateMenuBasedOnRotation();
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRotationButton(
+    String title,
+    String subtitle,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryBlue.withValues(alpha: 0.05)
+              : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryBlue : const Color(0xFFE2E8F0),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w900,
+                color: isSelected ? AppColors.primaryBlue : const Color(0xFF1E293B),
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 9.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVerticalDaySelector() {
+    return Container(
+      width: 70.w,
+      margin: EdgeInsets.fromLTRB(16.w, 12.h, 4.w, 16.h),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFFFFFFF).withValues(alpha: 0.85),
+            const Color(0xFFF1F5F9).withValues(alpha: 0.75),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.9),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: 12.h),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _days.length,
+              padding: EdgeInsets.symmetric(vertical: 4.h),
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                final isSelected = _selectedDayIndex == index;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() => _selectedDayIndex = index);
+                    _loadDay();
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    height: 44.h,
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryBlue
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.transparent
+                            : const Color(0xFFE2E8F0),
+                        width: 1,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ]
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 3,
+                                offset: const Offset(0, 1.5),
+                              ),
+                            ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      _days[index].toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w900,
+                        color: isSelected ? Colors.white : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1195,3 +1439,46 @@ final List<PredefinedMenuDay> _week2Menu = [
     dinner: "Chapati, Egg Curry, Rasam & Rice",
   ),
 ];
+
+class _PulseDot extends StatefulWidget {
+  const _PulseDot();
+
+  @override
+  State<_PulseDot> createState() => _PulseDotState();
+}
+
+class _PulseDotState extends State<_PulseDot> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: Tween(begin: 0.8, end: 1.2).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      ),
+      child: Container(
+        width: 10.r,
+        height: 10.r,
+        decoration: const BoxDecoration(
+          color: Color(0xFF22C55E),
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+}

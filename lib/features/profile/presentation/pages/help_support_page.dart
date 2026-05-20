@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HelpSupportPage extends StatefulWidget {
   const HelpSupportPage({super.key});
@@ -90,6 +91,13 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
     );
   }
 
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   Widget _buildContactActions() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -99,46 +107,56 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             StringUtils.translate('call_us_option', context: context),
             Icons.phone_outlined,
             const Color(0xFF2C5EBD),
+            () => _launchUrl('tel:+919747140240'),
           ),
           SizedBox(width: 12.w),
           _buildContactCard(
             StringUtils.translate('whatsapp_option', context: context),
             Icons.chat_bubble_outline,
             const Color(0xFF10B981),
+            () => _launchUrl('https://wa.me/919747140240?text=Hello%20Stay%20India%20Support!'),
           ),
           SizedBox(width: 12.w),
           _buildContactCard(
             StringUtils.translate('email_option', context: context),
             Icons.mail_outline,
             const Color(0xFFF97316),
+            () => _launchUrl('mailto:support@stayindia.org?subject=Stay%20India%20Support%20Query'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContactCard(String title, IconData icon, Color color) {
+  Widget _buildContactCard(String title, IconData icon, Color color, VoidCallback onTap) {
     return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: AppColors.roomCardBorder),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24.sp),
-            SizedBox(height: 8.h),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.darkText,
-              ),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 20.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: AppColors.roomCardBorder),
             ),
-          ],
+            child: Column(
+              children: [
+                Icon(icon, color: color, size: 24.sp),
+                SizedBox(height: 8.h),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.darkText,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

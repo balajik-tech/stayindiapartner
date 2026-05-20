@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -99,6 +100,8 @@ class BedDetailsSheet extends StatefulWidget {
 class _BedDetailsSheetState extends State<BedDetailsSheet> {
   late BedStatus _currentStatus;
   bool _isTogglingMaintenance = false;
+  double? _electricityBillAmount;
+  double? _parkingBillAmount;
 
   @override
   void initState() {
@@ -1018,181 +1021,348 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     required String mobile,
     TenantDetailEntity? detail,
   }) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(20.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    const Color navy = Color(0xFF1B2838);
+    const Color orange = Color(0xFFE8722A);
+
+    return Column(
+      children: [
+        _LiveTimeDateWidget(),
+
+        SizedBox(height: 20.h),
+
+        // ── CHECK IN / CHECK OUT BUTTONS ──
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 52.h,
+                child: ElevatedButton.icon(
+                  onPressed: _currentStatus == BedStatus.occupied || _currentStatus == BedStatus.booked
+                      ? () => _openScanner(context)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE8F5E9),
+                    foregroundColor: const Color(0xFF2E7D32),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                      side: BorderSide(color: const Color(0xFF4CAF50).withValues(alpha: 0.3)),
+                    ),
+                  ),
+                  icon: Icon(Icons.login_rounded, size: 18.sp),
+                  label: Text(
+                    'CHECK IN',
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: SizedBox(
+                height: 52.h,
+                child: ElevatedButton.icon(
+                  onPressed: detail != null
+                      ? () => _confirmCheckout(context, detail)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFBE9E7),
+                    foregroundColor: const Color(0xFFC62828),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                      side: BorderSide(color: const Color(0xFFEF5350).withValues(alpha: 0.3)),
+                    ),
+                  ),
+                  icon: Icon(Icons.logout_rounded, size: 18.sp),
+                  label: Text(
+                    'CHECK OUT',
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: 16.h),
+
+        // ── ELECTRICITY & PARKING BILL CARDS (dark navy) ──
+        Row(
+          children: [
+            Expanded(
+              child: _buildDarkBillCard(
+                icon: Icons.bolt_rounded,
+                iconColor: const Color(0xFFFFD54F),
+                label: 'ELECTRICITY',
+                value: _electricityBillAmount != null
+                    ? '₹${_electricityBillAmount!.toStringAsFixed(0)}'
+                    : '—',
+                onTap: () => _showSendBillDialog(context, 'ELECTRICITY'),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _buildDarkBillCard(
+                icon: Icons.two_wheeler_rounded,
+                iconColor: orange,
+                label: 'PARKING',
+                value: _parkingBillAmount != null
+                    ? '₹${_parkingBillAmount!.toStringAsFixed(0)}'
+                    : '—',
+                onTap: () => _showSendBillDialog(context, 'PARKING'),
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: 16.h),
+
+        // ── TENANT PROFILE + ACTIONS ──
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16.r),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Assigned Tenant',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1E293B),
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    final tId = detail?.id ?? widget.state.tenantId;
+                    final hId = widget.state.hostelId;
+                    final rNum =
+                        detail?.stay?.roomTypename ??
+                        widget.state.roomNumber ??
+                        'N/A';
+                    if (tId != null &&
+                        tId.isNotEmpty &&
+                        hId != null &&
+                        hId.isNotEmpty) {
+                      TenantDetailsSheet.show(
+                        context,
+                        name: name,
+                        imageUrl: ApiConstants.getImageUrl(avatar),
+                        room: rNum,
+                        tenantId: tId,
+                        hostelId: hId,
+                      );
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(12.r),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 6.h),
+                    child: Row(
+                      children: [
+                        CustomAvatar(
+                          imageUrl: ApiConstants.getImageUrl(avatar),
+                          name: name,
+                          size: 44.r,
+                          isCircle: true,
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: navy,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (mobile.isNotEmpty)
+                                Text(
+                                  mobile,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF64748B),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded, color: const Color(0xFF94A3B8), size: 22.sp),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  if (mobile.isNotEmpty) ...[
+                    Expanded(
+                      child: _buildTenantActionButton(
+                        Icons.call_rounded,
+                        'Call',
+                        const Color(0xFF10B981),
+                        const Color(0xFFECFDF5),
+                        () => _launchUrl('tel:$mobile'),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: _buildTenantActionButton(
+                        Icons.chat_bubble_rounded,
+                        'WhatsApp',
+                        const Color(0xFF06B6D4),
+                        const Color(0xFFECFEFF),
+                        () {
+                          String cleanPhone = mobile.replaceAll(RegExp(r'\D'), '');
+                          if (cleanPhone.length == 10) {
+                            cleanPhone = '91$cleanPhone';
+                          }
+                          _launchUrl('https://wa.me/$cleanPhone');
+                        },
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Action circle icon builder ──
+  Widget _buildActionCircle({
+    required IconData icon,
+    required String label,
+    String? value,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 52.w,
+            height: 52.w,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+              border: Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
+            ),
+            child: Icon(icon, size: 24.sp, color: color),
+          ),
+          SizedBox(height: 6.h),
+          if (value != null)
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF1B2838),
+              ),
+            ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF94A3B8),
+              letterSpacing: 0.5,
+            ),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Assigned Tenant',
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF1E293B),
-            ),
-          ),
-          SizedBox(height: 16.h),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                final tId = detail?.id ?? widget.state.tenantId;
-                final hId = widget.state.hostelId;
-                final rNum =
-                    detail?.stay?.roomTypename ??
-                    widget.state.roomNumber ??
-                    'N/A';
+    );
+  }
 
-                if (tId != null &&
-                    tId.isNotEmpty &&
-                    hId != null &&
-                    hId.isNotEmpty) {
-                  TenantDetailsSheet.show(
-                    context,
-                    name: name,
-                    imageUrl: ApiConstants.getImageUrl(avatar),
-                    room: rNum,
-                    tenantId: tId,
-                    hostelId: hId,
-                  );
-                }
-              },
-              borderRadius: BorderRadius.circular(16.r),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
-                child: Row(
-                  children: [
-                    CustomAvatar(
-                      imageUrl: ApiConstants.getImageUrl(avatar),
-                      name: name,
-                      size: 48.r,
-                      isCircle: true,
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w900,
-                              color: const Color(0xFF0F172A),
-                              letterSpacing: -0.5,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (mobile.isNotEmpty) ...[
-                            SizedBox(height: 2.h),
-                            Text(
-                              mobile,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: const Color(0xFF64748B),
-                      size: 24.sp,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              if (mobile.isNotEmpty) ...[
-                Expanded(
-                  child: _buildTenantActionButton(
-                    Icons.call_rounded,
-                    'Call',
-                    const Color(0xFF10B981),
-                    const Color(0xFFECFDF5),
-                    () => _launchUrl('tel:$mobile'),
+  // ── Dark navy bill card builder ──
+  Widget _buildDarkBillCard({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String value,
+    VoidCallback? onTap,
+  }) {
+    const Color navy = Color(0xFF1B2838);
+    const Color orange = Color(0xFFE8722A);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: navy,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: orange.withValues(alpha: 0.4), width: 1.5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
+                  child: Icon(icon, size: 18.sp, color: iconColor),
                 ),
                 SizedBox(width: 8.w),
                 Expanded(
-                  child: _buildTenantActionButton(
-                    Icons.chat_bubble_rounded,
-                    'WhatsApp',
-                    const Color(0xFF06B6D4),
-                    const Color(0xFFECFEFF),
-                    () => _launchUrl('https://wa.me/$mobile'),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
-                SizedBox(width: 8.w),
               ],
-              Expanded(
-                child: _buildTenantActionButton(
-                  Icons.exit_to_app_rounded,
-                  'Check-out',
-                  const Color(0xFFEF4444),
-                  const Color(0xFFFEF2F2),
-                  () => _confirmCheckout(context, detail),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Container(height: 1.h, color: const Color(0xFFF1F5F9)),
-          SizedBox(height: 16.h),
-          Text(
-            'Quick Actions / Send Bills',
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF475569),
             ),
-          ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTenantActionButton(
-                  Icons.directions_car_rounded,
-                  'Parking Bill',
-                  const Color(0xFF475569),
-                  const Color(0xFFF1F5F9),
-                  () => _showSendBillDialog(context, 'PARKING'),
+            SizedBox(height: 10.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: _buildTenantActionButton(
-                  Icons.flash_on_rounded,
-                  'Electric Bill',
-                  const Color(0xFF475569),
-                  const Color(0xFFF1F5F9),
-                  () => _showSendBillDialog(context, 'ELECTRICITY'),
+                Container(
+                  padding: EdgeInsets.all(4.w),
+                  decoration: const BoxDecoration(
+                    color: orange,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.add, size: 14.sp, color: Colors.white),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1374,7 +1544,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     try {
       final dio = sl<Dio>();
       final response = await dio.post(
-        '${ApiConstants.baseUrl}/api/v1/notifications/send-bill',
+        '${ApiConstants.baseUrl}/notifications/send-bill',
         data: {
           'tenantId': tId,
           'billType': billType.toUpperCase(),
@@ -1386,10 +1556,17 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
       if (response.statusCode == 200) {
         if (context.mounted) {
+          setState(() {
+            if (billType.toUpperCase() == 'PARKING') {
+              _parkingBillAmount = amount;
+            } else {
+              _electricityBillAmount = amount;
+            }
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${billType.toUpperCase() == 'PARKING' ? 'Parking' : 'Electricity'} bill sent successfully!',
+                '${billType.toUpperCase() == 'PARKING' ? 'Parking' : 'Electricity'} bill of ₹${amount.toStringAsFixed(0)} sent successfully!',
               ),
               backgroundColor: Colors.green,
             ),
@@ -1484,6 +1661,102 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Live Time & Date widget ──
+class _LiveTimeDateWidget extends StatefulWidget {
+  @override
+  State<_LiveTimeDateWidget> createState() => _LiveTimeDateWidgetState();
+}
+
+class _LiveTimeDateWidgetState extends State<_LiveTimeDateWidget> {
+  late Timer _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hour = _now.hour > 12 ? _now.hour - 12 : (_now.hour == 0 ? 12 : _now.hour);
+    final amPm = _now.hour >= 12 ? 'PM' : 'AM';
+    final timeStr = '${hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}:${_now.second.toString().padLeft(2, '0')} $amPm';
+    final months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    final dateStr = '${_now.day.toString().padLeft(2, '0')} ${months[_now.month - 1]}';
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'LIVE TIME',
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF94A3B8),
+                  letterSpacing: 0.8,
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                timeStr,
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF1B2838),
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(width: 1, height: 36.h, color: const Color(0xFFE2E8F0)),
+        SizedBox(width: 20.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              'DATE',
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF94A3B8),
+                letterSpacing: 0.8,
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Row(
+              children: [
+                Icon(Icons.calendar_today_rounded, size: 16.sp, color: const Color(0xFF1B2838)),
+                SizedBox(width: 6.w),
+                Text(
+                  dateStr,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1B2838),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

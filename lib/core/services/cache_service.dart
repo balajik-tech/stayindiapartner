@@ -39,6 +39,7 @@ class CacheService {
       final prefs = await SharedPreferences.getInstance();
       final String? locale = prefs.getString('locale');
       final String? appVersion = prefs.getString(_lastVersionKey);
+      final bool? hasSeenOnboarding = prefs.getBool('has_seen_onboarding');
 
       await prefs.clear();
       AppLogger.debug('SharedPreferences cleared.');
@@ -48,6 +49,9 @@ class CacheService {
       }
       if (appVersion != null) {
         await prefs.setString(_lastVersionKey, appVersion);
+      }
+      if (hasSeenOnboarding != null) {
+        await prefs.setBool('has_seen_onboarding', hasSeenOnboarding);
       }
 
       await _tokenStorage.clearAll();

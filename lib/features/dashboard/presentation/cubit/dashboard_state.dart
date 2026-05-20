@@ -10,7 +10,7 @@ abstract class DashboardState extends Equatable {
   const DashboardState({
     this.selectedFloorIndex = -1,
     this.searchQuery = '',
-    this.isGridView = false,
+    this.isGridView = true,
     this.selectedMetric,
     this.bulkData,
   });
