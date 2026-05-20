@@ -12,6 +12,7 @@ class RentDueDetails extends Equatable {
 
 class RentPayment extends Equatable {
   final String id;
+  final String tenantId;
   final String tenantName;
   final String tenantMobile;
   final String? tenantAvatar;
@@ -21,6 +22,7 @@ class RentPayment extends Equatable {
 
   const RentPayment({
     required this.id,
+    required this.tenantId,
     required this.tenantName,
     required this.tenantMobile,
     this.tenantAvatar,
@@ -32,6 +34,7 @@ class RentPayment extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    tenantId,
     tenantName,
     tenantMobile,
     tenantAvatar,
@@ -40,3 +43,4 @@ class RentPayment extends Equatable {
     month,
   ];
 }
+

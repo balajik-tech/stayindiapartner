@@ -5,12 +5,14 @@ abstract class DashboardState extends Equatable {
   final String searchQuery;
   final bool isGridView;
   final String? selectedMetric;
+  final DashboardData? bulkData;
 
   const DashboardState({
     this.selectedFloorIndex = -1,
     this.searchQuery = '',
     this.isGridView = false,
     this.selectedMetric,
+    this.bulkData,
   });
 
   @override
@@ -19,6 +21,7 @@ abstract class DashboardState extends Equatable {
     searchQuery,
     isGridView,
     selectedMetric,
+    bulkData,
   ];
 }
 
@@ -28,6 +31,7 @@ class DashboardInitial extends DashboardState {
     super.searchQuery,
     super.isGridView,
     super.selectedMetric,
+    super.bulkData,
   });
 }
 
@@ -37,6 +41,7 @@ class DashboardLoading extends DashboardState {
     super.searchQuery,
     super.isGridView,
     super.selectedMetric,
+    super.bulkData,
   });
 }
 
@@ -45,6 +50,7 @@ class DashboardLoaded extends DashboardState {
 
   const DashboardLoaded({
     required this.data,
+    super.bulkData,
     super.selectedFloorIndex,
     super.searchQuery,
     super.isGridView,
@@ -54,6 +60,7 @@ class DashboardLoaded extends DashboardState {
   @override
   List<Object?> get props => [
     data,
+    bulkData,
     selectedFloorIndex,
     searchQuery,
     isGridView,
@@ -62,14 +69,17 @@ class DashboardLoaded extends DashboardState {
 
   DashboardLoaded copyWith({
     DashboardData? data,
+    DashboardData? bulkData,
     int? selectedFloorIndex,
     String? searchQuery,
     bool? isGridView,
     String? selectedMetric,
     bool clearMetric = false,
+    bool clearBulkData = false,
   }) {
     return DashboardLoaded(
       data: data ?? this.data,
+      bulkData: clearBulkData ? null : (bulkData ?? this.bulkData),
       selectedFloorIndex: selectedFloorIndex ?? this.selectedFloorIndex,
       searchQuery: searchQuery ?? this.searchQuery,
       isGridView: isGridView ?? this.isGridView,
@@ -89,6 +99,7 @@ class DashboardError extends DashboardState {
     super.searchQuery,
     super.isGridView,
     super.selectedMetric,
+    super.bulkData,
   });
 
   @override
@@ -98,5 +109,6 @@ class DashboardError extends DashboardState {
     searchQuery,
     isGridView,
     selectedMetric,
+    bulkData,
   ];
 }

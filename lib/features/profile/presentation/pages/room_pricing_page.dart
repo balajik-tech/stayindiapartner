@@ -562,129 +562,132 @@ class _RoomPricingPageState extends State<RoomPricingPage> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 12.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+          ),
         ),
-      ),
-      child: BlocBuilder<PropertySetupCubit, PropertySetupState>(
-        builder: (context, state) {
-          return Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    side: const BorderSide(
-                      color: Color(0xFF2C5990),
-                      width: 1.5,
+        child: BlocBuilder<PropertySetupCubit, PropertySetupState>(
+          builder: (context, state) {
+            return Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      side: const BorderSide(
+                        color: Color(0xFF2C5990),
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
-                  child: Text(
-                    'back'.tr(),
-                    style: const TextStyle(
-                      color: Color(0xFF2C5990),
-                      fontWeight: FontWeight.w800,
+                    child: Text(
+                      'back'.tr(),
+                      style: const TextStyle(
+                        color: Color(0xFF2C5990),
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: state.isSaving
-                      ? null
-                      : () {
-                          final cubit = context.read<PropertySetupCubit>();
-                          if (cubit.isValidToFinish) {
-                            cubit.saveProperty();
-                          } else {
-                            final message =
-                                cubit.state.validationMessage ??
-                                'incomplete_setup_sub'.tr();
-                            showDialog(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20.r),
-                                ),
-                                title: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.warning_amber_rounded,
-                                      color: Colors.orange,
+                SizedBox(width: 16.w),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: state.isSaving
+                        ? null
+                        : () {
+                            final cubit = context.read<PropertySetupCubit>();
+                            if (cubit.isValidToFinish) {
+                              cubit.saveProperty();
+                            } else {
+                              final message =
+                                  cubit.state.validationMessage ??
+                                  'incomplete_setup_sub'.tr();
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.r),
+                                  ),
+                                  title: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.warning_amber_rounded,
+                                        color: Colors.orange,
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        'incomplete_setup'.tr(),
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  content: Text(
+                                    message,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      height: 1.6,
+                                      color: const Color(0xFF475569),
                                     ),
-                                    SizedBox(width: 8.w),
-                                    Text(
-                                      'incomplete_setup'.tr(),
-                                      style: TextStyle(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w900,
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: Text(
+                                        'btn_got_it'.tr(),
+                                        style: const TextStyle(
+                                          color: Color(0xFF2C5990),
+                                          fontWeight: FontWeight.w800,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                content: Text(
-                                  message,
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    height: 1.6,
-                                    color: const Color(0xFF475569),
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx),
-                                    child: Text(
-                                      'btn_got_it'.tr(),
-                                      style: const TextStyle(
-                                        color: Color(0xFF2C5990),
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2C5990),
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                              );
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2C5990),
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      elevation: 4,
                     ),
-                    elevation: 4,
+                    child: state.isSaving
+                        ? SizedBox(
+                            height: 20.h,
+                            width: 20.h,
+                            child: const CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'finish_setup'.tr(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                   ),
-                  child: state.isSaving
-                      ? SizedBox(
-                          height: 20.h,
-                          width: 20.h,
-                          child: const CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          'finish_setup'.tr(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

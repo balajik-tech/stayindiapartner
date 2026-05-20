@@ -106,6 +106,8 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll>
                     tenantName: state.scannedBooking!.tenantName,
                     preAllocatedRoomId: state.scannedBooking!.roomId,
                     preAllocatedBedNumber: state.scannedBooking!.bedNumber,
+                    bookedSharingType: state.scannedBooking!.sharingType,
+                    bookedRoomType: state.scannedBooking!.roomType,
                   ),
                 ),
               ),

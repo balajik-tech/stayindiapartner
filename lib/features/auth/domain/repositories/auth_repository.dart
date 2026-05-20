@@ -28,4 +28,5 @@ abstract class AuthRepository {
   });
   Future<OwnerEntity> acceptPolicy({String version = '1.0'});
   Future<OwnerEntity> staffLogin(String phone, String password);
+  Future<OwnerEntity> linkPhone(String phone);
 }

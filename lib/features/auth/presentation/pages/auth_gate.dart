@@ -5,6 +5,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import '../cubit/auth_cubit.dart';
 import 'login_page.dart';
+import 'link_phone_page.dart';
 
 class AuthGate extends StatefulWidget {
   final Widget dashboard;
@@ -46,6 +47,10 @@ class _AuthGateState extends State<AuthGate> {
           if (activeState is AuthInitial ||
               activeState is AuthSessionRestoring) {
             return const _SplashScreen();
+          }
+
+          if (activeState is AuthGoogleNeedsPhone) {
+            return const LinkPhonePage();
           }
 
           if (activeState is AuthAuthenticated ||

@@ -2,28 +2,15 @@ import '../domain/entities/stock_item.dart';
 
 class StockConstants {
   static const Map<String, List<Map<String, String>>> masterList = {
+    'Vegetables': [
+      {'name': 'Mixed Vegetables', 'unit': 'KG'},
+    ],
     'Grocery': [
       {'name': 'Rice', 'unit': 'KG'},
-      {'name': 'Dal', 'unit': 'KG'},
-      {'name': 'Oil', 'unit': 'LTR'},
-      {'name': 'Sugar', 'unit': 'KG'},
-      {'name': 'Salt', 'unit': 'KG'},
-    ],
-    'Cleaning': [
-      {'name': 'Phenyl', 'unit': 'LTR'},
-      {'name': 'Soap', 'unit': 'PCS'},
-      {'name': 'Detergent', 'unit': 'KG'},
-    ],
-    'Vegetables': [
-      {'name': 'Tomato', 'unit': 'KG'},
-      {'name': 'Onion', 'unit': 'KG'},
-      {'name': 'Potato', 'unit': 'KG'},
-      {'name': 'Green Chilli', 'unit': 'KG'},
-      {'name': 'Ginger', 'unit': 'KG'},
+      {'name': 'Atta', 'unit': 'KG'},
     ],
     'Other': [
-      {'name': 'Bulb', 'unit': 'PCS'},
-      {'name': 'Battery', 'unit': 'PCS'},
+      {'name': 'Gas', 'unit': 'PCS'},
     ],
   };
 
@@ -42,11 +29,35 @@ class StockConstants {
   }
 
   static const Map<String, Map<String, String>> stockTranslations = {
+    "Mixed Vegetables": {
+      "te": "మిశ్రమ కూరగాయలు",
+      "hi": "मिश्रित सब्जियां",
+      "ta": "கலப்பு காய்கறிகள்",
+      "kn": "ಮಿಶ್ರ ತರಕಾರಿಗಳು",
+    },
+    "Rice": {
+      "te": "బియ్యం",
+      "hi": "चावल",
+      "ta": "அரிசி",
+      "kn": "ಅಕ್ಕಿ",
+    },
+    "Atta": {
+      "te": "గోధుమ పిండి (అట్టా)",
+      "hi": "आटा",
+      "ta": "கோதுமை மாவு (ஆட்டா)",
+      "kn": "ಗೋಧಿ ಹಿಟ್ಟು (ಅಟ್ಟಾ)",
+    },
+    "Gas": {
+      "te": "గ్యాస్",
+      "hi": "गैस",
+      "ta": "కేస్",
+      "kn": "ಗ್ಯಾಸ್",
+    },
     "Basmati Rice": {
       "te": "బాస్మతి బియ్యం",
       "hi": "बासमती चावल",
       "ta": "பாசுமதி அரிசி",
-      "kn": "ಬಾಸ್ಮತಿ ಅಕ್ಕಿ",
+      "kn": "ಬಾಸ್ಮತಿ అಕ್ಕಿ",
     },
     "Sona Masoori Rice": {
       "te": "సోనా మసూరి బియ్యం",

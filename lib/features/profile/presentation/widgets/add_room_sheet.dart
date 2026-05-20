@@ -110,18 +110,6 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _onMappingChanged();
     });
-
-    _rentController.addListener(_onRentChanged);
-  }
-
-  void _onRentChanged() {
-    final monthly = double.tryParse(_rentController.text) ?? 0;
-    final currentDaily = double.tryParse(_dailyRentController.text) ?? 0;
-
-    if (monthly > 0 && currentDaily == 0) {
-      final daily = (monthly / 30).round();
-      _dailyRentController.text = daily.toString();
-    }
   }
 
   @override

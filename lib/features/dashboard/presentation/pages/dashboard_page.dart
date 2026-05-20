@@ -16,6 +16,7 @@ import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart
 import '../widgets/unified_header.dart';
 import '../widgets/dashboard_search_bar.dart';
 import '../widgets/floor_list_section.dart';
+import '../widgets/summary_card_details_section.dart';
 import '../widgets/dashboard_shimmer.dart';
 import '../widgets/staff_dashboard_view.dart';
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
@@ -109,13 +110,22 @@ class _DashboardPageState extends State<DashboardPage>
           return;
         }
 
-        final selectedIds = hostelState.selectedHostelIndices
-            .where((i) => i < hostelState.hostels.length)
-            .map((i) => hostelState.hostels[i].id)
-            .join(',');
+        final dashboardCubit = context.read<DashboardCubit>();
+        final showAllProperties = dashboardCubit.state.selectedMetric == 'properties';
 
-        if (selectedIds.isNotEmpty) {
-          context.read<DashboardCubit>().fetchDashboardData(selectedIds);
+        if (showAllProperties) {
+          final allIds = hostelState.hostels.map((h) => h.id).join(',');
+          if (allIds.isNotEmpty) {
+            dashboardCubit.fetchDashboardData(allIds, isBulk: true);
+          }
+        } else {
+          final selectedIds = hostelState.selectedHostelIndices
+              .where((i) => i < hostelState.hostels.length)
+              .map((i) => hostelState.hostels[i].id)
+              .join(',');
+          if (selectedIds.isNotEmpty) {
+            dashboardCubit.fetchDashboardData(selectedIds, isBulk: false);
+          }
         }
       } else {
         context.read<DashboardCubit>().reset();
@@ -154,6 +164,18 @@ class _DashboardPageState extends State<DashboardPage>
                             prev.selectedHostelIndices !=
                                 curr.selectedHostelIndices)),
                 listener: (context, state) {
+                  final dashboardCubit = context.read<DashboardCubit>();
+                  if (dashboardCubit.state.selectedMetric == 'properties') {
+                    dashboardCubit.toggleMetric('properties');
+                  } else {
+                    _refreshData();
+                  }
+                },
+              ),
+              BlocListener<DashboardCubit, DashboardState>(
+                listenWhen: (prev, curr) =>
+                    prev.selectedMetric != curr.selectedMetric,
+                listener: (context, state) {
                   _refreshData();
                 },
               ),
@@ -182,6 +204,8 @@ class _DashboardPageState extends State<DashboardPage>
                             preAllocatedRoomId: state.scannedBooking!.roomId,
                             preAllocatedBedNumber:
                                 state.scannedBooking!.bedNumber,
+                            bookedSharingType: state.scannedBooking!.sharingType,
+                            bookedRoomType: state.scannedBooking!.roomType,
                           ),
                         ),
                       ),
@@ -278,6 +302,10 @@ class _DashboardPageState extends State<DashboardPage>
                           padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
                           child: const DashboardSearchBar(),
                         ),
+                      ),
+
+                      const SliverToBoxAdapter(
+                        child: SummaryCardDetailsSection(),
                       ),
 
                       SliverToBoxAdapter(child: SizedBox(height: 4.h)),

@@ -16,4 +16,18 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<void> markAllAsRead() async {
     await remoteDataSource.markAllAsRead();
   }
+
+  @override
+  Future<void> sendBulkMessage({
+    required List<String> tenantIds,
+    required String title,
+    required String message,
+  }) async {
+    await remoteDataSource.sendBulkMessage(
+      tenantIds: tenantIds,
+      title: title,
+      message: message,
+    );
+  }
 }
+

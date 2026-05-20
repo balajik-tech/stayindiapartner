@@ -17,6 +17,7 @@ class BookingModel extends Booking {
     super.tenantAvatar,
     super.tenantId,
     super.createdAt,
+    super.roomType,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -73,6 +74,7 @@ class BookingModel extends Booking {
           tenant['userProfile']?['avatar']?.toString(),
       tenantId: tenant['_id']?.toString() ?? '',
       createdAt: json['createdAt']?.toString() ?? '',
+      roomType: json['roomType']?.toString() ?? json['acPreference']?.toString(),
     );
   }
 
@@ -86,6 +88,7 @@ class BookingModel extends Booking {
       'status': status.name.toUpperCase(),
       'checkInDate': checkInDate,
       'isKycVerified': isKycVerified,
+      'roomType': roomType,
     };
   }
 }
@@ -102,6 +105,7 @@ class PendingBookingModel extends PendingBooking {
     required super.status,
     required super.bookingStatus,
     required super.hostelId,
+    super.roomType,
   });
 
   factory PendingBookingModel.fromJson(Map<String, dynamic> json) {
@@ -116,6 +120,7 @@ class PendingBookingModel extends PendingBooking {
       status: json['status'] ?? '',
       bookingStatus: json['bookingStatus'] ?? '',
       hostelId: json['hostelId'] ?? '',
+      roomType: json['roomType']?.toString() ?? json['acPreference']?.toString(),
     );
   }
 }
@@ -132,6 +137,7 @@ class ScanBookingResponseModel extends ScanBookingResponse {
     required super.sharingType,
     required super.status,
     required super.bookingStatus,
+    super.roomType,
     super.roomId,
     super.roomTypename,
     super.bedNumber,
@@ -150,6 +156,7 @@ class ScanBookingResponseModel extends ScanBookingResponse {
       sharingType: json['sharingType'] ?? '',
       status: json['status'] ?? '',
       bookingStatus: json['bookingStatus'] ?? '',
+      roomType: json['roomType']?.toString() ?? json['acPreference']?.toString(),
       roomId: json['roomId'],
       roomTypename: StringUtils.formatRoomNumber(
         json['roomTypename']?.toString() ?? '',

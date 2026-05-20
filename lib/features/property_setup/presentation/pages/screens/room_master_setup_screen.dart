@@ -367,17 +367,6 @@ class RoomMasterSetupScreen extends StatelessWidget {
     final depositController = TextEditingController();
     final maintenanceController = TextEditingController();
     final roomSizeController = TextEditingController();
-
-    rentController.addListener(() {
-      final monthly = double.tryParse(rentController.text) ?? 0;
-      if (monthly > 0) {
-        final daily = (monthly / 30).round();
-        dailyRentController.text = daily.toString();
-      } else {
-        dailyRentController.text = '';
-      }
-    });
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

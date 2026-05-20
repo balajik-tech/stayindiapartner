@@ -304,16 +304,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                       final owner = authState is AuthAuthenticated
                           ? authState.owner
                           : (authState as AuthProfileCompleted).owner;
-                      if (index == 0 && !owner.hasPermission('dashboard')) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Access Denied: You do not have permission to view Dashboard.',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
+                      // Dashboard is accessible to all employees
                       if (index == 1 && !owner.hasPermission('bookings')) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -353,7 +344,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                   },
                 ),
                 floatingActionButton: _currentIndex == 0
-                    ? _buildPremiumFAB(context)
+                    ? _buildFABIfAllowed(context)
                     : null,
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.endFloat,
@@ -400,28 +391,37 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     );
   }
 
+  /// Only owner and manager roles see the FAB on the dashboard
+  Widget? _buildFABIfAllowed(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
+    if (authState is! AuthAuthenticated && authState is! AuthProfileCompleted) {
+      return null;
+    }
+    final owner = authState is AuthAuthenticated
+        ? authState.owner
+        : (authState as AuthProfileCompleted).owner;
+
+    final role = owner.role.toLowerCase();
+    if (role != 'owner' && role != 'manager') {
+      return null; // All other staff: no FAB
+    }
+    return _buildPremiumFAB(context);
+  }
+
   Widget _buildPremiumFAB(BuildContext context) {
+
     return BouncingWrapper(
       onTap: () {
         HapticFeedback.heavyImpact();
         final authState = context.read<AuthCubit>().state;
-        if (authState is AuthAuthenticated ||
-            authState is AuthProfileCompleted) {
-          final owner = authState is AuthAuthenticated
-              ? authState.owner
-              : (authState as AuthProfileCompleted).owner;
-          final role = owner.role;
-          if (role != 'owner' && role != 'manager') {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Access Denied: Only Owner or Manager can perform quick actions.',
-                ),
-              ),
-            );
-            return;
-          }
+        if (authState is! AuthAuthenticated &&
+            authState is! AuthProfileCompleted) {
+          return;
         }
+
+        final owner = authState is AuthAuthenticated
+            ? authState.owner
+            : (authState as AuthProfileCompleted).owner;
 
         final hostelState = context.read<HostelCubit>().state;
         Hostel? currentHostel;
@@ -435,8 +435,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           context,
           isMultiSelect: isMultiSelect,
           onNewProperty: () {
-            if (authState is AuthAuthenticated &&
-                authState.owner.role != 'owner') {
+            if (owner.role != 'owner') {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(
@@ -454,6 +453,18 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             );
           },
           onAddFloor: () {
+            if (owner.role != 'owner' &&
+                owner.role != 'manager' &&
+                !owner.hasPermission('maintenance')) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Access Denied: You do not have permission to manage floors.',
+                  ),
+                ),
+              );
+              return;
+            }
             if (currentHostel != null) {
               Navigator.push(
                 context,
@@ -468,6 +479,16 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           },
           onAddRoom: () {},
           onAddTenant: () async {
+            if (!owner.hasPermission('checkIn') && !owner.hasPermission('checkin')) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Access Denied: You do not have permission to make checkins.',
+                  ),
+                ),
+              );
+              return;
+            }
             final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const AddTenantPage()),
@@ -478,12 +499,34 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             }
           },
           onRoomMaster: () {
+            if (owner.role != 'owner' &&
+                owner.role != 'manager' &&
+                !owner.hasPermission('maintenance')) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Access Denied: You do not have permission to access Room Master.',
+                  ),
+                ),
+              );
+              return;
+            }
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const RoomMasterPage()),
             );
           },
           onGuestRequests: () {
+            if (!owner.hasPermission('bookings')) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Access Denied: You do not have permission to view Bookings.',
+                  ),
+                ),
+              );
+              return;
+            }
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -492,6 +535,16 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             );
           },
           onSpecialOffers: () {
+            if (owner.role != 'owner' && owner.role != 'manager') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Access Denied: Only Owner or Manager can manage offers.',
+                  ),
+                ),
+              );
+              return;
+            }
             Navigator.push(
               context,
               MaterialPageRoute(

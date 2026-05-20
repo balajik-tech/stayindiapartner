@@ -61,7 +61,8 @@ class FoodMenuModel extends FoodMenu {
         .map(
           (item) => {
             'name': item.name,
-            'description': item.desc,
+            if (item.desc.isNotEmpty && item.desc.values.any((v) => v.trim().isNotEmpty))
+              'description': item.desc,
             'price': item.price,
             'foodType': item.isVeg ? 'VEG' : 'NON_VEG',
             'isAvailable': item.isActive,

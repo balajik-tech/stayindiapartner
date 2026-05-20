@@ -45,6 +45,7 @@ abstract class AuthRemoteDataSource {
   });
   Future<OwnerModel> acceptPolicy({String version = '1.0'});
   Future<OwnerModel> staffLogin(String phone, String password);
+  Future<OwnerModel> linkPhone(String phone);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -373,6 +374,39 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     AppLogger.success('Staff login verified.');
     return owner;
+  }
+
+  @override
+  Future<OwnerModel> linkPhone(String phone) async {
+    final sanitized = _sanitizePhone(phone);
+    AppLogger.info('Linking phone number: $sanitized');
+
+    final response = await _dio.post(
+      '/auth/link-phone',
+      data: {'phone': sanitized},
+    );
+
+    if (response.statusCode != 200) {
+      final message = (response.data is Map && response.data['message'] != null)
+          ? response.data['message'].toString()
+          : 'Failed to link phone number.';
+      throw AuthException(message: message);
+    }
+
+    final raw = response.data is Map && response.data.containsKey('data')
+        ? response.data['data'] as Map<String, dynamic>
+        : response.data as Map<String, dynamic>;
+
+    final userJson = raw['user'] is Map
+        ? raw['user'] as Map<String, dynamic>
+        : <String, dynamic>{};
+
+    if (userJson.isNotEmpty) {
+      await _tokenStorage.savePhone(sanitized);
+      return OwnerModel.fromJson(userJson);
+    }
+
+    return getCurrentOwner();
   }
 
   Future<String?> _compressImage(String imagePath) async {

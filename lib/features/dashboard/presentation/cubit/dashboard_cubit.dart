@@ -20,7 +20,7 @@ class DashboardCubit extends Cubit<DashboardState> {
        _deleteRoom = deleteRoomUseCase,
        super(const DashboardInitial());
 
-  Future<void> fetchDashboardData(String hostelId) async {
+  Future<void> fetchDashboardData(String hostelId, {bool isBulk = false}) async {
     if (isClosed) return;
 
     if (_isFetching) return;
@@ -29,6 +29,10 @@ class DashboardCubit extends Cubit<DashboardState> {
     final currentIndex = state.selectedFloorIndex;
     final currentSearch = state.searchQuery;
     final currentView = state.isGridView;
+    final currentMetric = state.selectedMetric;
+
+    final existingData = state is DashboardLoaded ? (state as DashboardLoaded).data : null;
+    final existingBulkData = state is DashboardLoaded ? (state as DashboardLoaded).bulkData : null;
 
     if (state is! DashboardLoaded) {
       emit(
@@ -36,23 +40,54 @@ class DashboardCubit extends Cubit<DashboardState> {
           selectedFloorIndex: currentIndex,
           searchQuery: currentSearch,
           isGridView: currentView,
-          selectedMetric: state.selectedMetric,
+          selectedMetric: currentMetric,
+          bulkData: state.bulkData,
         ),
       );
     }
 
     try {
-      final data = await _getDashboardData(hostelId);
+      final fetchedData = await _getDashboardData(hostelId);
       if (isClosed) return;
-      emit(
-        DashboardLoaded(
-          data: data,
-          selectedFloorIndex: currentIndex,
-          searchQuery: currentSearch,
-          isGridView: currentView,
-          selectedMetric: state.selectedMetric,
-        ),
-      );
+
+      if (isBulk) {
+        if (existingData == null) {
+          // If single property data is not loaded yet, we can't show bulk only.
+          // Fallback to loading it as normal data as well.
+          emit(
+            DashboardLoaded(
+              data: fetchedData,
+              bulkData: fetchedData,
+              selectedFloorIndex: currentIndex,
+              searchQuery: currentSearch,
+              isGridView: currentView,
+              selectedMetric: currentMetric,
+            ),
+          );
+        } else {
+          emit(
+            DashboardLoaded(
+              data: existingData,
+              bulkData: fetchedData,
+              selectedFloorIndex: currentIndex,
+              searchQuery: currentSearch,
+              isGridView: currentView,
+              selectedMetric: currentMetric,
+            ),
+          );
+        }
+      } else {
+        emit(
+          DashboardLoaded(
+            data: fetchedData,
+            bulkData: existingBulkData,
+            selectedFloorIndex: currentIndex,
+            searchQuery: currentSearch,
+            isGridView: currentView,
+            selectedMetric: currentMetric,
+          ),
+        );
+      }
       AppLogger.success('Dashboard data loaded successfully');
     } catch (e) {
       AppLogger.error('fetchDashboardData failed', e);
@@ -63,7 +98,8 @@ class DashboardCubit extends Cubit<DashboardState> {
             selectedFloorIndex: currentIndex,
             searchQuery: currentSearch,
             isGridView: currentView,
-            selectedMetric: state.selectedMetric,
+            selectedMetric: currentMetric,
+            bulkData: state.bulkData,
           ),
         );
       }

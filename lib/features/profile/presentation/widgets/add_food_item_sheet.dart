@@ -191,21 +191,6 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
                       SizedBox(height: 20.h),
                       _buildLabel(
                         StringUtils.translate(
-                          'dish_description_label',
-                          context: context,
-                        ),
-                      ),
-                      _buildTextField(
-                        _descController,
-                        hint: StringUtils.translate(
-                          'dish_description_hint',
-                          context: context,
-                        ),
-                        maxLines: 2,
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildLabel(
-                        StringUtils.translate(
                           'dish_category_label',
                           context: context,
                         ),

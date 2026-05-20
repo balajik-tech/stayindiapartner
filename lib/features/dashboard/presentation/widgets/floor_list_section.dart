@@ -218,55 +218,6 @@ class FloorListSection extends StatelessWidget {
             delegate: SliverChildBuilderDelegate((context, index) {
               final floor = displayFloors[index];
               final filteredRooms = floor.rooms.where((room) {
-                if (state.selectedMetric != null) {
-                  bool matchesMetric = false;
-                  switch (state.selectedMetric) {
-                    case 'total':
-                      matchesMetric = true;
-                      break;
-                    case 'free':
-                      matchesMetric = room.beds.any(
-                        (b) => b.status.toLowerCase() == 'free',
-                      );
-                      break;
-                    case 'occupied':
-                      matchesMetric = room.beds.any(
-                        (b) => b.status.toLowerCase() == 'occupied',
-                      );
-                      break;
-                    case 'notice':
-                      matchesMetric = room.beds.any(
-                        (b) => b.status.toLowerCase() == 'notice',
-                      );
-                      break;
-                    case 'overdue':
-                      matchesMetric = room.beds.any(
-                        (b) => b.status.toLowerCase() == 'overdue',
-                      );
-                      break;
-                    case 'inside':
-                      matchesMetric = room.beds.any(
-                        (b) => b.status.toLowerCase() == 'inside',
-                      );
-                      break;
-                    case 'outside':
-                      matchesMetric = room.beds.any(
-                        (b) => b.status.toLowerCase() == 'outside',
-                      );
-                      break;
-                    case 'away':
-                      matchesMetric = room.beds.any(
-                        (b) =>
-                            b.status.toLowerCase() == 'away' ||
-                            b.status.toLowerCase() == 'unknown',
-                      );
-                      break;
-                    default:
-                      matchesMetric = true;
-                  }
-                  if (!matchesMetric) return false;
-                }
-
                 if (query.isEmpty) return true;
                 final roomNum = room.roomNumber.toLowerCase();
                 final hasMatchingTenant = room.beds.any(

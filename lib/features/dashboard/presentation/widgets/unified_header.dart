@@ -46,34 +46,40 @@ class UnifiedHeader extends StatelessWidget {
           color: Colors.white,
           child: Row(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF7000),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "SI",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w900,
-                        height: 1.0,
+              Image.asset(
+                'assets/images/logo.png',
+                width: 48.w,
+                height: 48.w,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF7000),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "SI",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w900,
+                          height: 1.0,
+                        ),
                       ),
-                    ),
-                    Text(
-                      "PARTNER",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 6.sp,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.2,
+                      Text(
+                        "PARTNER",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 6.sp,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.2,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -229,9 +235,10 @@ class UnifiedHeader extends StatelessWidget {
                       );
                       return BouncingWrapper(
                         onTap: () {
-                          context.read<HostelCubit>().toggleHostelSelection(
+                          context.read<HostelCubit>().selectHostel(
                             index,
                           );
+                          Navigator.pop(context);
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),

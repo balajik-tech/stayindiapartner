@@ -110,9 +110,10 @@ class PropertySwitcherSheet extends StatelessWidget {
                             onPropertySelected!(index);
                             Navigator.pop(context);
                           } else {
-                            context.read<HostelCubit>().toggleHostelSelection(
+                            context.read<HostelCubit>().selectHostel(
                               index,
                             );
+                            Navigator.pop(context);
                           }
                         },
                         child: Container(

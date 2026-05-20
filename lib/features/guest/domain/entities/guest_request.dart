@@ -8,6 +8,7 @@ class GuestRequest extends Equatable {
   final String hostelId;
   final String guestName;
   final String relationship;
+  final String? enteringTime;
   final DateTime startDate;
   final DateTime endDate;
   final int numberOfDays;
@@ -25,6 +26,7 @@ class GuestRequest extends Equatable {
     required this.hostelId,
     required this.guestName,
     required this.relationship,
+    this.enteringTime,
     required this.startDate,
     required this.endDate,
     required this.numberOfDays,
@@ -47,6 +49,7 @@ class GuestRequest extends Equatable {
           : (json['hostel'] ?? ''),
       guestName: json['guestName'] ?? '',
       relationship: json['relationship'] ?? '',
+      enteringTime: json['enteringTime'],
       startDate: DateTime.parse(json['startDate']),
       endDate: DateTime.parse(json['endDate']),
       numberOfDays: json['numberOfDays'] ?? 0,

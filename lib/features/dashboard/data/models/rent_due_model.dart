@@ -22,6 +22,7 @@ class RentDueDetailsModel extends RentDueDetails {
 class RentPaymentModel extends RentPayment {
   const RentPaymentModel({
     required super.id,
+    required super.tenantId,
     required super.tenantName,
     required super.tenantMobile,
     super.tenantAvatar,
@@ -39,6 +40,7 @@ class RentPaymentModel extends RentPayment {
         : {};
     return RentPaymentModel(
       id: json['_id'] ?? '',
+      tenantId: tenant['_id'] ?? '',
       tenantName: '${tenant['firstName'] ?? ''} ${tenant['lastName'] ?? ''}'
           .trim(),
       tenantMobile: tenant['mobile'] ?? '',
@@ -49,3 +51,4 @@ class RentPaymentModel extends RentPayment {
     );
   }
 }
+

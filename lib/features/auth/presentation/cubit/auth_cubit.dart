@@ -84,8 +84,20 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthSessionRestoring());
     try {
       final owner = await _getCurrentOwner();
-      emit(AuthAuthenticated(owner: owner));
-      _syncDeviceToken();
+      if (owner.phone.trim().isEmpty) {
+        final nameParts = owner.name.split(' ');
+        emit(
+          AuthGoogleNeedsPhone(
+            email: owner.email ?? '',
+            firstName: nameParts.isNotEmpty ? nameParts.first : '',
+            lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
+            avatar: owner.avatar ?? '',
+          ),
+        );
+      } else {
+        emit(AuthAuthenticated(owner: owner));
+        _syncDeviceToken();
+      }
       AppLogger.info('Session restored for owner: ${owner.id}');
     } on DioException catch (e) {
       final code = e.response?.statusCode;
@@ -192,14 +204,39 @@ class AuthCubit extends Cubit<AuthState> {
         );
       } else {
         final owner = await _getCurrentOwner();
-        emit(AuthAuthenticated(owner: owner, isNewUser: false));
-        _syncDeviceToken();
-        AppLogger.success(
-          'Google Login: Existing owner authenticated: ${owner.id}',
-        );
+        if (owner.phone.trim().isEmpty) {
+          final nameParts = owner.name.split(' ');
+          emit(
+            AuthGoogleNeedsPhone(
+              email: owner.email ?? '',
+              firstName: nameParts.isNotEmpty ? nameParts.first : '',
+              lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
+              avatar: owner.avatar ?? '',
+            ),
+          );
+        } else {
+          emit(AuthAuthenticated(owner: owner, isNewUser: false));
+          _syncDeviceToken();
+          AppLogger.success(
+            'Google Login: Existing owner authenticated: ${owner.id}',
+          );
+        }
       }
     } catch (e) {
       AppLogger.error('loginWithGoogle failed', e);
+      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> linkPhone(String phone) async {
+    emit(AuthLoading());
+    try {
+      final owner = await _repository.linkPhone(phone);
+      emit(AuthAuthenticated(owner: owner, isNewUser: false));
+      _syncDeviceToken();
+      AppLogger.success('Phone linked successfully for owner: ${owner.id}');
+    } catch (e) {
+      AppLogger.error('linkPhone failed', e);
       emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
     }
   }

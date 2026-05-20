@@ -22,6 +22,7 @@ class Booking {
   final String? tenantAvatar;
   final String? tenantId;
   final String? createdAt;
+  final String? roomType;
 
   Booking({
     required this.id,
@@ -38,6 +39,7 @@ class Booking {
     this.tenantAvatar,
     this.tenantId,
     this.createdAt,
+    this.roomType,
   });
 
   Booking copyWith({
@@ -55,6 +57,7 @@ class Booking {
     String? tenantAvatar,
     String? tenantId,
     String? createdAt,
+    String? roomType,
   }) {
     return Booking(
       id: id ?? this.id,
@@ -71,6 +74,7 @@ class Booking {
       tenantAvatar: tenantAvatar ?? this.tenantAvatar,
       tenantId: tenantId ?? this.tenantId,
       createdAt: createdAt ?? this.createdAt,
+      roomType: roomType ?? this.roomType,
     );
   }
 }
@@ -86,6 +90,7 @@ class PendingBooking {
   final String status;
   final String bookingStatus;
   final String hostelId;
+  final String? roomType;
 
   PendingBooking({
     required this.bookingId,
@@ -98,6 +103,7 @@ class PendingBooking {
     required this.status,
     required this.bookingStatus,
     required this.hostelId,
+    this.roomType,
   });
 }
 
@@ -112,6 +118,7 @@ class ScanBookingResponse {
   final String sharingType;
   final String status;
   final String bookingStatus;
+  final String? roomType;
 
   final String? roomId;
   final String? roomTypename;
@@ -128,6 +135,7 @@ class ScanBookingResponse {
     required this.sharingType,
     required this.status,
     required this.bookingStatus,
+    this.roomType,
     this.roomId,
     this.roomTypename,
     this.bedNumber,

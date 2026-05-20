@@ -115,17 +115,6 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
       _selectedSharingType = _sharingTypes.first;
     }
 
-    _rentController.addListener(_onRentChanged);
-  }
-
-  void _onRentChanged() {
-    final monthly = double.tryParse(_rentController.text) ?? 0;
-    if (monthly > 0) {
-      final daily = (monthly / 30).round();
-      _dailyRentController.text = daily.toString();
-    } else {
-      _dailyRentController.text = '';
-    }
   }
 
   @override

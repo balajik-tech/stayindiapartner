@@ -58,12 +58,14 @@ class SummaryCard extends StatelessWidget {
             color: backgroundColor,
             borderRadius: BorderRadius.circular(11.r),
             border: isSelected
-                ? Border.all(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    width: 2.0,
-                  )
+                ? (useWhiteStyle
+                      ? Border.all(color: const Color(0xFF3B71CA), width: 2.0)
+                      : Border.all(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          width: 2.0,
+                        ))
                 : (useWhiteStyle
-                      ? Border.all(color: const Color(0xFF3B71CA), width: 1.2)
+                      ? Border.all(color: const Color(0xFFE2E8F0), width: 1.2)
                       : null),
             boxShadow: [
               if (isSelected)
@@ -144,7 +146,10 @@ class SummaryCardsSection extends StatelessWidget {
     return BlocBuilder<DashboardCubit, DashboardState>(
       builder: (context, state) {
         final bool isLoading = state is DashboardLoading;
-        final data = state is DashboardLoaded ? state.data : null;
+        final isBulkSelected = state.selectedMetric == 'properties';
+        final data = state is DashboardLoaded
+            ? (isBulkSelected ? (state.bulkData ?? state.data) : state.data)
+            : null;
         final occupancy = data?.occupancy;
         final status = data?.occupancyStatus;
         final ops = data?.dailyOperations;

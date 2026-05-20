@@ -78,7 +78,34 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
     if (match.isNotEmpty) {
       setState(() {
         _selectedCategory = match['category']!;
-        _selectedUnit = match['unit']!;
+        
+        final String mappedUnit;
+        switch (match['unit']!.toUpperCase()) {
+          case 'KG':
+            mappedUnit = 'kg';
+            break;
+          case 'LTR':
+            mappedUnit = 'liters';
+            break;
+          case 'PCS':
+            mappedUnit = 'pieces';
+            break;
+          case 'BAG':
+            mappedUnit = 'units';
+            break;
+          case 'PACK':
+            mappedUnit = 'packets';
+            break;
+          default:
+            final lower = match['unit']!.toLowerCase();
+            if (const ['kg', 'liters', 'pieces', 'packets', 'units'].contains(lower)) {
+              mappedUnit = lower;
+            } else {
+              mappedUnit = 'units';
+            }
+        }
+        _selectedUnit = mappedUnit;
+
         _selectedTeluguName = langCode == 'en'
             ? null
             : StockConstants.getLocalizedName(match, langCode);
@@ -517,15 +544,18 @@ class _QuickAddTransactionPageState extends State<QuickAddTransactionPage> {
                         itemCount: filteredItems.length,
                         itemBuilder: (context, index) {
                           final item = filteredItems[index];
-                          return ListTile(
-                            title: Text(
-                              StockConstants.getLocalizedName(item, langCode),
+                          return Material(
+                            color: Colors.transparent,
+                            child: ListTile(
+                              title: Text(
+                                StockConstants.getLocalizedName(item, langCode),
+                              ),
+                              onTap: () {
+                                _nameController.text = item['name']!;
+                                _onItemSearch(item['name']!);
+                                Navigator.pop(context);
+                              },
                             ),
-                            onTap: () {
-                              _nameController.text = item['name']!;
-                              _onItemSearch(item['name']!);
-                              Navigator.pop(context);
-                            },
                           );
                         },
                       ),

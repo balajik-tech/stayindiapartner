@@ -52,6 +52,9 @@ class HostelCubit extends HydratedCubit<HostelState> {
           ? (state as HostelLoaded).selectedHostelIndices
           : [0];
       indices = indices.where((i) => i < hostels.length).toList();
+      if (indices.length > 1) {
+        indices = [indices.first];
+      }
       if (indices.isEmpty && hostels.isNotEmpty) indices = [0];
 
       emit(
@@ -86,28 +89,7 @@ class HostelCubit extends HydratedCubit<HostelState> {
   }
 
   void toggleHostelSelection(int index) {
-    if (state is HostelLoaded) {
-      final loadedState = state as HostelLoaded;
-      if (index >= 0 && index < loadedState.hostels.length) {
-        List<int> newIndices = List.from(loadedState.selectedHostelIndices);
-        if (newIndices.contains(index)) {
-          if (newIndices.length > 1) {
-            newIndices.remove(index);
-          }
-        } else {
-          newIndices.add(index);
-        }
-
-        emit(
-          HostelLoaded(
-            hostels: loadedState.hostels,
-            selectedHostelIndex: newIndices.first,
-            selectedHostelIndices: newIndices,
-            lastFetched: loadedState.lastFetched,
-          ),
-        );
-      }
-    }
+    selectHostel(index);
   }
 
   void reset() {
@@ -252,20 +234,26 @@ class HostelCubit extends HydratedCubit<HostelState> {
 
       if (hostels != null && hostels.isNotEmpty) {
         final selectedHostelIndex = json['selectedHostelIndex'] as int? ?? 0;
-        final selectedHostelIndices =
+        var selectedHostelIndices =
             (json['selectedHostelIndices'] as List<dynamic>?)
                 ?.map((e) => e as int)
                 .toList() ??
             [0];
+
+        selectedHostelIndices = selectedHostelIndices
+            .where((i) => i < hostels.length)
+            .toList();
+
+        if (selectedHostelIndices.length > 1) {
+          selectedHostelIndices = [selectedHostelIndices.first];
+        }
 
         return HostelLoaded(
           hostels: hostels,
           selectedHostelIndex: selectedHostelIndex < hostels.length
               ? selectedHostelIndex
               : 0,
-          selectedHostelIndices: selectedHostelIndices
-              .where((i) => i < hostels.length)
-              .toList(),
+          selectedHostelIndices: selectedHostelIndices,
           lastFetched: lastFetched,
         );
       }

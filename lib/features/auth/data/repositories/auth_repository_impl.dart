@@ -100,4 +100,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<OwnerEntity> staffLogin(String phone, String password) =>
       _remote.staffLogin(phone, password);
+
+  @override
+  Future<OwnerEntity> linkPhone(String phone) =>
+      _remote.linkPhone(phone);
 }

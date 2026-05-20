@@ -148,6 +148,19 @@ class _GuestRequestCard extends StatelessWidget {
               ),
             ],
           ),
+          if (request.enteringTime != null && request.enteringTime!.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 14.sp, color: Colors.grey),
+                SizedBox(width: 6.w),
+                Text(
+                  "Arrival Time: ${request.enteringTime}",
+                  style: TextStyle(fontSize: 13.sp),
+                ),
+              ],
+            ),
+          ],
           SizedBox(height: 8.h),
           Row(
             children: [

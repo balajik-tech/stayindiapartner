@@ -20,6 +20,8 @@ class RoomSelectionPage extends StatefulWidget {
   final String? preAllocatedRoomId;
   final String? preAllocatedBedNumber;
   final bool isRoomChange;
+  final String? bookedSharingType;
+  final String? bookedRoomType;
 
   const RoomSelectionPage({
     super.key,
@@ -30,6 +32,8 @@ class RoomSelectionPage extends StatefulWidget {
     this.preAllocatedRoomId,
     this.preAllocatedBedNumber,
     this.isRoomChange = false,
+    this.bookedSharingType,
+    this.bookedRoomType,
   });
 
   @override
@@ -172,6 +176,45 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                         });
                       },
                     ),
+                    if ((widget.bookedSharingType != null && widget.bookedSharingType!.isNotEmpty) ||
+                        (widget.bookedRoomType != null && widget.bookedRoomType!.isNotEmpty))
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: AppColors.primaryBlue.withValues(alpha: 0.15),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: AppColors.primaryBlue,
+                              size: 20.sp,
+                            ),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Text(
+                                'Showing rooms matching: ${[
+                                  if (widget.bookedSharingType != null && widget.bookedSharingType!.isNotEmpty)
+                                    StringUtils.formatSharingType(widget.bookedSharingType!, context),
+                                  if (widget.bookedRoomType != null && widget.bookedRoomType!.isNotEmpty)
+                                    widget.bookedRoomType!.toUpperCase(),
+                                ].join(' • ')}',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.darkText,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     SizedBox(height: 16.h),
                     Expanded(child: _buildFloorsList(occupancyModel)),
                   ],
@@ -193,16 +236,166 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
     );
   }
 
+  String _normalizeToGroup(String type) {
+    final clean = type.toUpperCase().replaceAll(' ', '').replaceAll('_', '').replaceAll('-', '');
+    
+    if (clean.contains('SINGLE') || clean == '1' || clean == '1SHARING' || clean == '1BED' || clean == 'SINGLESHARING') {
+      return 'SINGLE';
+    }
+    if (clean.contains('DOUBLE') || clean == '2' || clean == '2SHARING' || clean == '2BED' || clean == 'DOUBLESHARING') {
+      return 'DOUBLE';
+    }
+    if (clean.contains('TRIPLE') || clean == '3' || clean == '3SHARING' || clean == '3BED' || clean == 'TRIPLESHARING') {
+      return 'TRIPLE';
+    }
+    if (clean.contains('QUADRUPLE') || clean == '4' || clean == '4SHARING' || clean == '4BED' || clean == 'QUADRUPLESHARING') {
+      return 'QUADRUPLE';
+    }
+    if (clean.contains('QUINTUPLE') || clean == '5' || clean == '5SHARING' || clean == '5BED' || clean == 'QUINTUPLESHARING') {
+      return 'QUINTUPLE';
+    }
+    
+    final digitsMatch = RegExp(r'\d+').firstMatch(clean);
+    if (digitsMatch != null) {
+      final val = int.tryParse(digitsMatch.group(0)!) ?? 0;
+      if (val >= 6) {
+        return 'DORMITORY';
+      }
+    }
+    
+    if (clean.contains('DORMITORY') || clean.contains('DORM') || clean == '6SHARING' || clean == '6' || clean == 'DORMITORYSHARING') {
+      return 'DORMITORY';
+    }
+    
+    return clean;
+  }
+
+  bool _matchesSharing(String roomSharing, String bookedSharing) {
+    return _normalizeToGroup(roomSharing) == _normalizeToGroup(bookedSharing);
+  }
+
+  bool _matchesRoomType(String roomType, String bookedRoomType) {
+    final cleanRoom = roomType.toUpperCase().replaceAll('_', '').replaceAll('-', '');
+    final cleanBooked = bookedRoomType.toUpperCase().replaceAll('_', '').replaceAll('-', '');
+    
+    if (cleanRoom == cleanBooked) return true;
+    
+    if (cleanRoom == 'AC' && cleanBooked != 'AC') return false;
+    if (cleanRoom != 'AC' && cleanBooked == 'AC') return false;
+    
+    final isRoomNonAc = cleanRoom.contains('NONAC');
+    final isBookedNonAc = cleanBooked.contains('NONAC');
+    
+    return isRoomNonAc == isBookedNonAc;
+  }
+
   Widget _buildFloorsList(OccupancyModel occupancyModel) {
+    final bookedSharing = widget.bookedSharingType;
+    final bookedAc = widget.bookedRoomType;
+
+    final List<FloorData> criteriaFilteredFloors = [];
+
+    for (final floor in occupancyModel.floors) {
+      final matchingRooms = floor.rooms.where((room) {
+        bool matches = true;
+        if (bookedSharing != null && bookedSharing.isNotEmpty) {
+          matches = matches && _matchesSharing(room.sharingType, bookedSharing);
+        }
+        if (bookedAc != null && bookedAc.isNotEmpty) {
+          matches = matches && _matchesRoomType(room.roomType ?? '', bookedAc);
+        }
+        return matches;
+      }).toList();
+
+      if (matchingRooms.isNotEmpty) {
+        criteriaFilteredFloors.add(
+          FloorData(
+            floorName: floor.floorName,
+            floorNum: floor.floorNum,
+            bedInfo: floor.bedInfo,
+            totalBeds: matchingRooms.fold<int>(0, (sum, r) => sum + r.beds.length),
+            freeBeds: matchingRooms.fold<int>(0, (sum, r) => sum + r.beds.where((b) => b.status == 'FREE').length),
+            rooms: matchingRooms,
+          ),
+        );
+      }
+    }
+
+    if (criteriaFilteredFloors.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.r),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.r),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF1F5F9),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.hotel_outlined,
+                  color: const Color(0xFF94A3B8),
+                  size: 48.sp,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'No Rooms Available',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkText,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'There are no active rooms matching the booked criteria: ${[
+                  if (widget.bookedSharingType != null && widget.bookedSharingType!.isNotEmpty)
+                    StringUtils.formatSharingType(widget.bookedSharingType!, context),
+                  if (widget.bookedRoomType != null && widget.bookedRoomType!.isNotEmpty)
+                    widget.bookedRoomType!.toUpperCase(),
+                ].join(' • ')}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: AppColors.greyText,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     List<FloorData> filteredFloors;
     if (_selectedFloorIndex == 0) {
-      filteredFloors = occupancyModel.floors;
+      filteredFloors = criteriaFilteredFloors;
     } else {
-      if (_selectedFloorIndex - 1 < occupancyModel.floors.length) {
-        filteredFloors = [occupancyModel.floors[_selectedFloorIndex - 1]];
+      final selectedFloorData = occupancyModel.floors[_selectedFloorIndex - 1];
+      final matches = criteriaFilteredFloors.where((f) => f.floorNum == selectedFloorData.floorNum).toList();
+      if (matches.isNotEmpty) {
+        filteredFloors = [matches.first];
       } else {
         filteredFloors = [];
       }
+    }
+
+    if (filteredFloors.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Text(
+            'No rooms available on this floor for the booked criteria.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: AppColors.greyText,
+            ),
+          ),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -220,7 +413,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
               'total': '${floor.totalBeds ?? 0}',
             },
           ),
-          isInitialExpanded: _selectedFloorIndex != 0,
+          isInitialExpanded: _selectedFloorIndex != 0 || criteriaFilteredFloors.length == 1,
           itemCount: floor.rooms.length,
           itemBuilder: (context, i) {
             final room = floor.rooms[i];

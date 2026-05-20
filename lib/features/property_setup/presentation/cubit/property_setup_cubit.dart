@@ -1057,9 +1057,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             double.tryParse(matchingMaster['rent']?.toString() ?? '') ?? 0.0;
         if (rentVal > 0) {
           final String rentStr = rentVal.toStringAsFixed(0);
-          if (cat['monthlyRent']?.toString() != rentStr) {
-            cat['monthlyRent'] = rentStr;
-            changed = true;
+          final currentRent = cat['monthlyRent']?.toString() ?? '';
+          final isLocked = cat['monthlyRentLocked'] == true;
+          if (!isLocked && (currentRent.isEmpty || currentRent == '0' || currentRent == '0.0')) {
+            if (cat['monthlyRent']?.toString() != rentStr) {
+              cat['monthlyRent'] = rentStr;
+              changed = true;
+            }
           }
         }
 
@@ -1067,9 +1071,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             double.tryParse(matchingMaster['deposit']?.toString() ?? '') ?? 0.0;
         if (depositVal > 0) {
           final String depositStr = depositVal.toStringAsFixed(0);
-          if (cat['securityDeposit']?.toString() != depositStr) {
-            cat['securityDeposit'] = depositStr;
-            changed = true;
+          final currentDeposit = cat['securityDeposit']?.toString() ?? '';
+          final isLocked = cat['securityDepositLocked'] == true;
+          if (!isLocked && (currentDeposit.isEmpty || currentDeposit == '0' || currentDeposit == '0.0')) {
+            if (cat['securityDeposit']?.toString() != depositStr) {
+              cat['securityDeposit'] = depositStr;
+              changed = true;
+            }
           }
         }
 
@@ -1078,9 +1086,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             0.0;
         if (dailyVal > 0) {
           final String dailyStr = dailyVal.toStringAsFixed(0);
-          if (cat['dailyRent']?.toString() != dailyStr) {
-            cat['dailyRent'] = dailyStr;
-            changed = true;
+          final currentDaily = cat['dailyRent']?.toString() ?? '';
+          final isLocked = cat['dailyRentLocked'] == true;
+          if (!isLocked && (currentDaily.isEmpty || currentDaily == '0' || currentDaily == '0.0')) {
+            if (cat['dailyRent']?.toString() != dailyStr) {
+              cat['dailyRent'] = dailyStr;
+              changed = true;
+            }
           }
         }
 
@@ -1089,9 +1101,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             0.0;
         if (maintVal > 0) {
           final String maintStr = maintVal.toStringAsFixed(0);
-          if (cat['maintenance']?.toString() != maintStr) {
-            cat['maintenance'] = maintStr;
-            changed = true;
+          final currentMaint = cat['maintenance']?.toString() ?? '';
+          final isLocked = cat['maintenanceLocked'] == true;
+          if (!isLocked && (currentMaint.isEmpty || currentMaint == '0' || currentMaint == '0.0')) {
+            if (cat['maintenance']?.toString() != maintStr) {
+              cat['maintenance'] = maintStr;
+              changed = true;
+            }
           }
         }
       }
@@ -1219,9 +1235,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             double.tryParse(matchingMaster['rent']?.toString() ?? '') ?? 0.0;
         if (rentVal > 0) {
           final String rentStr = rentVal.toStringAsFixed(0);
-          if (cat['monthlyRent']?.toString() != rentStr) {
-            cat['monthlyRent'] = rentStr;
-            changed = true;
+          final currentRent = cat['monthlyRent']?.toString() ?? '';
+          final isLocked = cat['monthlyRentLocked'] == true;
+          if (!isLocked && (currentRent.isEmpty || currentRent == '0' || currentRent == '0.0')) {
+            if (cat['monthlyRent']?.toString() != rentStr) {
+              cat['monthlyRent'] = rentStr;
+              changed = true;
+            }
           }
         }
 
@@ -1229,9 +1249,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             double.tryParse(matchingMaster['deposit']?.toString() ?? '') ?? 0.0;
         if (depositVal > 0) {
           final String depositStr = depositVal.toStringAsFixed(0);
-          if (cat['securityDeposit']?.toString() != depositStr) {
-            cat['securityDeposit'] = depositStr;
-            changed = true;
+          final currentDeposit = cat['securityDeposit']?.toString() ?? '';
+          final isLocked = cat['securityDepositLocked'] == true;
+          if (!isLocked && (currentDeposit.isEmpty || currentDeposit == '0' || currentDeposit == '0.0')) {
+            if (cat['securityDeposit']?.toString() != depositStr) {
+              cat['securityDeposit'] = depositStr;
+              changed = true;
+            }
           }
         }
 
@@ -1240,9 +1264,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             0.0;
         if (dailyVal > 0) {
           final String dailyStr = dailyVal.toStringAsFixed(0);
-          if (cat['dailyRent']?.toString() != dailyStr) {
-            cat['dailyRent'] = dailyStr;
-            changed = true;
+          final currentDaily = cat['dailyRent']?.toString() ?? '';
+          final isLocked = cat['dailyRentLocked'] == true;
+          if (!isLocked && (currentDaily.isEmpty || currentDaily == '0' || currentDaily == '0.0')) {
+            if (cat['dailyRent']?.toString() != dailyStr) {
+              cat['dailyRent'] = dailyStr;
+              changed = true;
+            }
           }
         }
 
@@ -1251,9 +1279,13 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
             0.0;
         if (maintVal > 0) {
           final String maintStr = maintVal.toStringAsFixed(0);
-          if (cat['maintenance']?.toString() != maintStr) {
-            cat['maintenance'] = maintStr;
-            changed = true;
+          final currentMaint = cat['maintenance']?.toString() ?? '';
+          final isLocked = cat['maintenanceLocked'] == true;
+          if (!isLocked && (currentMaint.isEmpty || currentMaint == '0' || currentMaint == '0.0')) {
+            if (cat['maintenance']?.toString() != maintStr) {
+              cat['maintenance'] = maintStr;
+              changed = true;
+            }
           }
         }
       }

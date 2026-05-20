@@ -476,59 +476,164 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
     );
   }
 
+  Widget _buildNoHostelView() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(24.r),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF1F5F9),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.domain_disabled_rounded,
+                color: const Color(0xFF64748B),
+                size: 64.sp,
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              "No Property Setup Found",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: const Color(0xFF1E293B),
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              "Please complete your property setup in the Property Setup section first to start managing your weekly food menu.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: const Color(0xFF64748B),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                height: 1.5,
+              ),
+            ),
+            SizedBox(height: 32.h),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(Icons.arrow_back_rounded, size: 18.sp),
+              label: const Text("Go Back"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                textStyle: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _cubit,
-      child: BlocListener<FoodMenuCubit, FoodMenuState>(
-        listener: (context, state) {
-          if (state is FoodMenuLoaded) {
-            _applyMenuToLocal(state.menu);
-          } else if (state is FoodMenuSaved) {
-          } else if (state is FoodMenuError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        child: Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
-          appBar: _buildAppBar(),
-          body: Stack(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<FoodMenuCubit, FoodMenuState>(
+            listener: (context, state) {
+              if (state is FoodMenuLoaded) {
+                _applyMenuToLocal(state.menu);
+              } else if (state is FoodMenuSaved) {
+              } else if (state is FoodMenuError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
+          BlocListener<HostelCubit, HostelState>(
+            listener: (context, state) {
+              if (state is HostelLoaded && state.hostels.isNotEmpty) {
+                _loadDay();
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<HostelCubit, HostelState>(
+          builder: (context, hostelState) {
+            if (hostelState is HostelLoading) {
+              return Scaffold(
+                backgroundColor: const Color(0xFFF8FAFC),
+                appBar: _buildAppBar(),
+                body: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+            if (hostelState is HostelLoaded && hostelState.hostels.isEmpty) {
+              return Scaffold(
+                backgroundColor: const Color(0xFFF8FAFC),
+                appBar: _buildAppBar(),
+                body: _buildNoHostelView(),
+              );
+            }
+            if (hostelState is! HostelLoaded) {
+              return Scaffold(
+                backgroundColor: const Color(0xFFF8FAFC),
+                appBar: _buildAppBar(),
+                body: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            return Scaffold(
+              backgroundColor: const Color(0xFFF8FAFC),
+              appBar: _buildAppBar(),
+              body: Stack(
                 children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   Container(
                     width: 75.w,
                     margin: EdgeInsets.fromLTRB(16.w, 16.h, 4.w, 16.h),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFFFFFFFF).withValues(alpha: 0.85),
+                          const Color(0xFFF1F5F9).withValues(alpha: 0.75),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                       borderRadius: BorderRadius.circular(24.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 12,
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
                       ],
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        width: 1.5,
+                      ),
                     ),
                     child: Column(
                       children: [
-                        SizedBox(height: 20.h),
-                        Text(
-                          "DAY",
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w900,
-                            color: const Color(0xFF94A3B8),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
+                        SizedBox(height: 16.h),
                         Expanded(
                           child: ListView.builder(
                             itemCount: _days.length,
@@ -549,29 +654,59 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? AppColors.primaryBlue
-                                        : Colors.transparent,
+                                        ? AppColors.primaryBlue.withValues(alpha: 0.9)
+                                        : Colors.white.withValues(alpha: 0.6),
                                     borderRadius: BorderRadius.circular(16.r),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? Colors.white.withValues(alpha: 0.4)
+                                          : Colors.white.withValues(alpha: 0.85),
+                                      width: 1.5,
+                                    ),
                                     boxShadow: isSelected
                                         ? [
                                             BoxShadow(
-                                              color: AppColors.primaryBlue
-                                                  .withValues(alpha: 0.25),
+                                              color: const Color(0xFF1E3A8A).withValues(alpha: 0.4),
                                               blurRadius: 8,
-                                              offset: const Offset(0, 3),
+                                              offset: const Offset(0, 4),
+                                            ),
+                                            BoxShadow(
+                                              color: Colors.white.withValues(alpha: 0.35),
+                                              blurRadius: 2,
+                                              offset: const Offset(0, -1.5),
                                             ),
                                           ]
-                                        : [],
+                                        : [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.08),
+                                              blurRadius: 5,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                            BoxShadow(
+                                              color: Colors.white,
+                                              blurRadius: 2,
+                                              offset: const Offset(0, -1),
+                                            ),
+                                          ],
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
                                     _days[index].toUpperCase(),
                                     style: TextStyle(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14.5.sp,
+                                      fontWeight: FontWeight.w900,
                                       color: isSelected
                                           ? Colors.white
-                                          : const Color(0xFF64748B),
+                                          : const Color(0xFF475569),
+                                      shadows: isSelected
+                                          ? [
+                                              Shadow(
+                                                color: Colors.black.withValues(alpha: 0.3),
+                                                offset: const Offset(0, 1),
+                                                blurRadius: 2,
+                                              ),
+                                            ]
+                                          : null,
                                     ),
                                   ),
                                 ),
@@ -599,7 +734,7 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                                     Text(
                                       _getSelectedDayDateString(),
                                       style: TextStyle(
-                                        fontSize: 20.sp,
+                                        fontSize: 22.sp,
                                         fontWeight: FontWeight.w900,
                                         color: AppColors.darkText,
                                         letterSpacing: -0.5,
@@ -666,8 +801,6 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                           ),
                         ),
 
-                        _buildNowServingCard(),
-
                         Expanded(
                           child: BlocBuilder<FoodMenuCubit, FoodMenuState>(
                             builder: (context, state) {
@@ -709,10 +842,12 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                 ),
             ],
           ),
-        ),
-      ),
-    );
-  }
+        );
+      },
+    ),
+  ),
+);
+}
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -734,100 +869,6 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
           fontSize: 18.sp,
           fontWeight: FontWeight.w900,
         ),
-      ),
-    );
-  }
-
-  Widget _buildNowServingCard() {
-    final currentlyServing = _getCurrentlyServingMeal();
-    final day = _days[_selectedDayIndex];
-    final items = _menuData[day]?[currentlyServing] ?? [];
-
-    String mealTimeRange = '';
-    if (currentlyServing == 'Breakfast') mealTimeRange = '07:30 AM - 09:00 AM';
-    if (currentlyServing == 'Lunch') mealTimeRange = '12:30 PM - 02:30 PM';
-    if (currentlyServing == 'Snacks') mealTimeRange = '04:00 PM - 06:00 PM';
-    if (currentlyServing == 'Dinner') mealTimeRange = '07:30 PM - 09:30 PM';
-
-    final itemsText = items.isNotEmpty
-        ? items
-              .map((i) => i.getName(context.locale.languageCode).toUpperCase())
-              .join(', ')
-        : 'NO ITEMS';
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E9).withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: const Color(0xFFA5D6A7), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 8.w,
-                      height: 8.w,
-                      decoration: const BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      "NOW SERVING",
-                      style: TextStyle(
-                        color: Colors.green.shade800,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 12.sp,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  "${currentlyServing.toUpperCase()} ($mealTimeRange)",
-                  style: TextStyle(
-                    color: Colors.grey.shade900,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 15.sp,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  "Menu: $itemsText",
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12.sp,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (items.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.only(left: 12.w),
-              child: Text(
-                _getFoodEmoji(items[0].getName(context.locale.languageCode)),
-                style: TextStyle(fontSize: 32.sp),
-              ),
-            ),
-        ],
       ),
     );
   }
@@ -899,7 +940,7 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                       Text(
                         mealType.toUpperCase(),
                         style: TextStyle(
-                          fontSize: 11.5.sp,
+                          fontSize: 13.5.sp,
                           fontWeight: FontWeight.w900,
                           color: headerText,
                         ),
@@ -908,8 +949,8 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                       Text(
                         timeRange,
                         style: TextStyle(
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.w800,
                           color: headerText.withValues(alpha: 0.8),
                         ),
                       ),
@@ -937,21 +978,24 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                     },
                   ),
                   child: Container(
-                    padding: EdgeInsets.all(3.r),
+                    width: 36.r,
+                    height: 36.r,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Icon(Icons.add, color: headerText, size: 13.sp),
+                    child: Icon(Icons.add_rounded, color: headerText, size: 20.sp),
                   ),
                 ),
+
               ],
             ),
           ),
@@ -963,8 +1007,8 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                 child: Text(
                   "NO MEALS ADDED YET",
                   style: TextStyle(
-                    fontSize: 9.5.sp,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w900,
                     color: const Color(0xFF94A3B8),
                   ),
                 ),
@@ -993,16 +1037,16 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                     children: [
                       Text(
                         _getFoodEmoji(foodName),
-                        style: TextStyle(fontSize: 14.sp),
+                        style: TextStyle(fontSize: 16.sp),
                       ),
-                      SizedBox(width: 6.w),
+                      SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
                           foodName.toUpperCase(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 10.sp,
+                            fontSize: 13.sp,
                             fontWeight: FontWeight.w800,
                             color: AppColors.darkText,
                           ),

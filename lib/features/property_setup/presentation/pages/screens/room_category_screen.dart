@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 
 class RoomPricing {
   final int sharing;
@@ -45,6 +46,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
   final Map<String, Set<int>> _customizedDailies = {'AC': {}, 'NON_AC': {}};
 
   bool _isPropagating = false;
+  bool _isUpdatingFromState = false;
 
   void _propagateValue(
     String type,
@@ -74,6 +76,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
     } finally {
       _isPropagating = false;
     }
+    _silentSyncToCubit();
   }
 
   @override
@@ -104,6 +107,14 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       }
     }
 
+    String cleanZero(String val) {
+      final trimmed = val.trim();
+      if (trimmed == '0' || trimmed == '0.0' || trimmed == '0.00') {
+        return '';
+      }
+      return trimmed;
+    }
+
     final currentCategories = context
         .read<PropertySetupCubit>()
         .state
@@ -114,10 +125,10 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         final bool isAC = cat['isAC'] == true;
         final String typeKey = isAC ? 'AC' : 'NON_AC';
 
-        final rent = cat['monthlyRent']?.toString() ?? '';
-        final deposit = cat['securityDeposit']?.toString() ?? '';
-        final maint = cat['maintenance']?.toString() ?? '';
-        final daily = cat['dailyRent']?.toString() ?? '';
+        final rent = cleanZero(cat['monthlyRent']?.toString() ?? '');
+        final deposit = cleanZero(cat['securityDeposit']?.toString() ?? '');
+        final maint = cleanZero(cat['maintenance']?.toString() ?? '');
+        final daily = cleanZero(cat['dailyRent']?.toString() ?? '');
         _controllers[typeKey]![sharing]!['rent']!.text = rent;
         _controllers[typeKey]![sharing]!['deposit']!.text = deposit;
         _controllers[typeKey]![sharing]!['maintenance']!.text = maint;
@@ -145,15 +156,6 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         final depositFocus = _focusNodes[type]![s]!['deposit']!;
         final maintFocus = _focusNodes[type]![s]!['maintenance']!;
         final dailyFocus = _focusNodes[type]![s]!['daily']!;
-
-        rentCtrl.addListener(() {
-          if (dailyCtrl.text.isEmpty) {
-            final monthly = double.tryParse(rentCtrl.text) ?? 0;
-            if (monthly > 0) {
-              dailyCtrl.text = (monthly / 30).round().toString();
-            }
-          }
-        });
 
         depositCtrl.addListener(() {
           if (depositFocus.hasFocus) {
@@ -218,6 +220,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
   }
 
   void _silentSyncToCubit() {
+    if (_isPropagating || _isUpdatingFromState) return;
     final List<Map<String, dynamic>> categoriesToSave = [];
     _controllers.forEach((typeKey, sharingMap) {
       final bool isAC = typeKey == 'AC';
@@ -236,9 +239,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
             'roomSize': '',
             'roomCount': 0,
             'monthlyRent': rent,
-            'dailyRent': daily.isNotEmpty
-                ? daily
-                : (double.parse(rent) / 30).round().toString(),
+            'dailyRent': daily,
             'securityDeposit': deposit.isNotEmpty ? deposit : '0',
             'maintenance': maint.isNotEmpty ? maint : '0',
             'securityDepositCustomized': true,
@@ -254,48 +255,115 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: Column(
-        children: [
-          _buildHeaderSection(),
-          SizedBox(height: 8.h),
-          _buildToggleRow(),
-          SizedBox(height: 12.h),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16.r),
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLeftStaticPanel(),
-                        Expanded(child: _buildRightScrollablePanel()),
-                      ],
+    return BlocListener<PropertySetupCubit, PropertySetupState>(
+      listenWhen: (previous, current) =>
+          previous.roomCategories != current.roomCategories,
+      listener: (context, state) {
+        if (mounted) {
+          setState(() {
+            _isUpdatingFromState = true;
+          });
+        } else {
+          _isUpdatingFromState = true;
+        }
+
+        try {
+          String cleanZero(String val) {
+            final trimmed = val.trim();
+            if (trimmed == '0' || trimmed == '0.0' || trimmed == '0.00') {
+              return '';
+            }
+            return trimmed;
+          }
+
+          for (final cat in state.roomCategories) {
+            final int sharing = cat['sharingType'] ?? 2;
+            if (sharing >= 1 && sharing <= 10) {
+              final bool isAC = cat['isAC'] == true;
+              final String typeKey = isAC ? 'AC' : 'NON_AC';
+
+              final rentCtrl = _controllers[typeKey]![sharing]!['rent']!;
+              final depositCtrl = _controllers[typeKey]![sharing]!['deposit']!;
+              final maintCtrl = _controllers[typeKey]![sharing]!['maintenance']!;
+              final dailyCtrl = _controllers[typeKey]![sharing]!['daily']!;
+
+              final rentFocus = _focusNodes[typeKey]![sharing]!['rent']!;
+              final depositFocus = _focusNodes[typeKey]![sharing]!['deposit']!;
+              final maintFocus = _focusNodes[typeKey]![sharing]!['maintenance']!;
+              final dailyFocus = _focusNodes[typeKey]![sharing]!['daily']!;
+
+              final rent = cleanZero(cat['monthlyRent']?.toString() ?? '');
+              final deposit = cleanZero(cat['securityDeposit']?.toString() ?? '');
+              final maint = cleanZero(cat['maintenance']?.toString() ?? '');
+              final daily = cleanZero(cat['dailyRent']?.toString() ?? '');
+
+              if (!rentFocus.hasFocus && rentCtrl.text != rent) {
+                rentCtrl.text = rent;
+              }
+              if (!depositFocus.hasFocus && depositCtrl.text != deposit) {
+                depositCtrl.text = deposit;
+              }
+              if (!maintFocus.hasFocus && maintCtrl.text != maint) {
+                maintCtrl.text = maint;
+              }
+              if (!dailyFocus.hasFocus && dailyCtrl.text != daily) {
+                dailyCtrl.text = daily;
+              }
+            }
+          }
+        } finally {
+          if (mounted) {
+            setState(() {
+              _isUpdatingFromState = false;
+            });
+          } else {
+            _isUpdatingFromState = false;
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        body: Column(
+          children: [
+            _buildHeaderSection(),
+            SizedBox(height: 8.h),
+            _buildToggleRow(),
+            SizedBox(height: 12.h),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16.r),
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLeftStaticPanel(),
+                          Expanded(child: _buildRightScrollablePanel()),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          SizedBox(height: 8.h),
-        ],
+            SizedBox(height: 8.h),
+          ],
+        ),
       ),
     );
   }
@@ -419,7 +487,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
 
   Widget _buildLeftStaticPanel() {
     return Container(
-      width: 100.w,
+      width: 125.w,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -448,14 +516,14 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
   Widget _buildStaticHeaderCell() {
     return Container(
       height: 44.h,
-      color: const Color(0xFFEFF6FF),
+      color: const Color(0xFFF1F5F9),
       alignment: Alignment.center,
       child: Text(
         'Sharing',
         style: TextStyle(
-          color: const Color(0xFF2B5797),
-          fontWeight: FontWeight.w900,
-          fontSize: 11.sp,
+          color: const Color(0xFF475569),
+          fontWeight: FontWeight.w800,
+          fontSize: 12.sp,
           letterSpacing: 0.5,
         ),
       ),
@@ -471,10 +539,10 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       },
       behavior: HitTestBehavior.opaque,
       child: Container(
-        height: 52.h,
+        height: 56.h,
         decoration: BoxDecoration(
           color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
-          border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+          border: const Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
         ),
         padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Row(
@@ -483,10 +551,12 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
             Expanded(
               child: Text(
                 '$sharing Sharing',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: const Color(0xFF0F172A),
+                  color: const Color(0xFF1E293B),
                   fontSize: 13.sp,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -494,13 +564,13 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
               onTap: () => _deleteSharingType(sharing),
               behavior: HitTestBehavior.opaque,
               child: Container(
-                width: 32.w,
+                width: 28.w,
                 height: 40.h,
                 alignment: Alignment.centerRight,
                 child: Icon(
                   Icons.delete_outline_rounded,
                   color: const Color(0xFFEF4444),
-                  size: 20.sp,
+                  size: 18.sp,
                 ),
               ),
             ),
@@ -583,9 +653,9 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         height: 48.h,
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+          border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
         ),
-        padding: EdgeInsets.only(left: 12.w),
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
         alignment: Alignment.centerLeft,
         child: Row(
           children: [
@@ -594,13 +664,13 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
               color: const Color(0xFF2B5797),
               size: 16.sp,
             ),
-            SizedBox(width: 4.w),
+            SizedBox(width: 6.w),
             Text(
               'Add',
               style: TextStyle(
                 color: const Color(0xFF2B5797),
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w800,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -614,7 +684,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: SizedBox(
-        width: 400.w,
+        width: 440.w,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -632,13 +702,13 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
   Widget _buildScrollableHeader() {
     return Container(
       height: 44.h,
-      color: const Color(0xFFEFF6FF),
+      color: const Color(0xFFF1F5F9),
       child: Row(
         children: [
-          _buildHeaderCell('Monthly Rent', 100.w),
-          _buildHeaderCell('Deposit', 100.w),
-          _buildHeaderCell('Maintenance', 100.w),
-          _buildHeaderCell('Daily Rent', 100.w),
+          _buildHeaderCell('Monthly Rent', 110.w),
+          _buildHeaderCell('Deposit', 110.w),
+          _buildHeaderCell('Maintenance', 110.w),
+          _buildHeaderCell('Daily Rent', 110.w),
         ],
       ),
     );
@@ -647,10 +717,10 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
   Widget _buildScrollableRow(int sharing) {
     final isAlternate = sharing % 2 == 0;
     return Container(
-      height: 52.h,
+      height: 56.h,
       decoration: BoxDecoration(
         color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
-        border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        border: const Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
       ),
       child: Row(
         children: [
@@ -670,7 +740,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         height: 48.h,
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+          border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
         ),
         padding: EdgeInsets.only(left: 12.w),
         alignment: Alignment.centerLeft,
@@ -678,7 +748,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
           'Add Custom Sharing Option...',
           style: TextStyle(
             color: const Color(0xFF94A3B8),
-            fontSize: 12.sp,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -692,11 +762,13 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       child: Center(
         child: Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: const Color(0xFF2B5797),
-            fontWeight: FontWeight.w900,
+            color: const Color(0xFF475569),
+            fontWeight: FontWeight.w800,
             fontSize: 11.sp,
-            letterSpacing: 0.5,
+            letterSpacing: 0.3,
           ),
         ),
       ),
@@ -707,68 +779,74 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
     final controller = _controllers[_selectedType]![sharing]![field]!;
     final focusNode = _focusNodes[_selectedType]![sharing]![field]!;
 
-    return Container(
-      width: 100.w,
-      height: 52.h,
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        keyboardType: TextInputType.number,
-        textInputAction:
-            (field == 'daily' && sharing == _activeSharingTypes.last)
-            ? TextInputAction.done
-            : TextInputAction.next,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          MaxValueTextInputFormatter(50000),
-        ],
-        onSubmitted: (_) {
-          if (field == 'rent') {
-            _focusNodes[_selectedType]![sharing]!['deposit']!.requestFocus();
-          } else if (field == 'deposit') {
-            _focusNodes[_selectedType]![sharing]!['maintenance']!
-                .requestFocus();
-          } else if (field == 'maintenance') {
-            _focusNodes[_selectedType]![sharing]!['daily']!.requestFocus();
-          } else if (field == 'daily') {
-            final currentIndex = _activeSharingTypes.indexOf(sharing);
-            if (currentIndex != -1 &&
-                currentIndex < _activeSharingTypes.length - 1) {
-              final nextSharing = _activeSharingTypes[currentIndex + 1];
-              _focusNodes[_selectedType]![nextSharing]!['rent']!.requestFocus();
-            }
-          }
-        },
-        style: TextStyle(
-          fontSize: 13.sp,
-          fontWeight: FontWeight.w700,
-          color: const Color(0xFF0F172A),
-        ),
-        decoration: InputDecoration(
-          prefixText: '₹ ',
-          prefixStyle: TextStyle(
-            color: const Color(0xFF94A3B8),
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w600,
+    return AnimatedBuilder(
+      animation: focusNode,
+      builder: (context, child) {
+        final hasFocus = focusNode.hasFocus;
+        return Container(
+          width: 110.w,
+          height: 56.h,
+          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 7.h),
+          child: TextField(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: TextInputType.number,
+            textInputAction:
+                (field == 'daily' && sharing == _activeSharingTypes.last)
+                ? TextInputAction.done
+                : TextInputAction.next,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              MaxValueTextInputFormatter(50000),
+            ],
+            onSubmitted: (_) {
+              if (field == 'rent') {
+                _focusNodes[_selectedType]![sharing]!['deposit']!.requestFocus();
+              } else if (field == 'deposit') {
+                _focusNodes[_selectedType]![sharing]!['maintenance']!
+                    .requestFocus();
+              } else if (field == 'maintenance') {
+                _focusNodes[_selectedType]![sharing]!['daily']!.requestFocus();
+              } else if (field == 'daily') {
+                final currentIndex = _activeSharingTypes.indexOf(sharing);
+                if (currentIndex != -1 &&
+                    currentIndex < _activeSharingTypes.length - 1) {
+                  final nextSharing = _activeSharingTypes[currentIndex + 1];
+                  _focusNodes[_selectedType]![nextSharing]!['rent']!.requestFocus();
+                }
+              }
+            },
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1E293B),
+            ),
+            decoration: InputDecoration(
+              prefixText: '₹ ',
+              prefixStyle: TextStyle(
+                color: const Color(0xFF64748B),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              filled: true,
+              fillColor: hasFocus ? Colors.white : const Color(0xFFF8FAFC),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+                borderSide: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
+              ),
+            ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.r),
-            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.r),
-            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.r),
-            borderSide: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 

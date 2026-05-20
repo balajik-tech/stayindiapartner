@@ -314,6 +314,24 @@ class OccupiedBedSheet extends StatelessWidget {
                                       tenantName: tenantName,
                                       accessCode: detail.stay!.accessCode,
                                       isRoomChange: true,
+                                      bookedSharingType: detail.stay!.roomTypename.toLowerCase().contains('single') 
+                                          ? 'SINGLE' 
+                                          : detail.stay!.roomTypename.toLowerCase().contains('double') || detail.stay!.roomTypename.toLowerCase().contains('2 sharing')
+                                              ? 'DOUBLE'
+                                              : detail.stay!.roomTypename.toLowerCase().contains('triple') || detail.stay!.roomTypename.toLowerCase().contains('3 sharing')
+                                                  ? 'TRIPLE'
+                                                  : detail.stay!.roomTypename.toLowerCase().contains('quadruple') || detail.stay!.roomTypename.toLowerCase().contains('4 sharing')
+                                                      ? 'QUADRUPLE'
+                                                      : detail.stay!.roomTypename.toLowerCase().contains('quintuple') || detail.stay!.roomTypename.toLowerCase().contains('5 sharing')
+                                                          ? 'QUINTUPLE'
+                                                          : detail.stay!.roomTypename.toLowerCase().contains('dormitory')
+                                                              ? 'DORMITORY'
+                                                              : null,
+                                      bookedRoomType: detail.stay!.roomTypename.toLowerCase().contains('non ac') || detail.stay!.roomTypename.toLowerCase().contains('non-ac')
+                                          ? 'NON-AC'
+                                          : detail.stay!.roomTypename.toLowerCase().contains('ac')
+                                              ? 'AC'
+                                              : null,
                                     ),
                                   ),
                                 ),
@@ -379,6 +397,24 @@ class OccupiedBedSheet extends StatelessWidget {
                                                 detail.stay!.roomId,
                                             preAllocatedBedNumber:
                                                 detail.stay!.bedNumber,
+                                            bookedSharingType: detail.stay!.roomTypename.toLowerCase().contains('single') 
+                                                ? 'SINGLE' 
+                                                : detail.stay!.roomTypename.toLowerCase().contains('double') || detail.stay!.roomTypename.toLowerCase().contains('2 sharing')
+                                                    ? 'DOUBLE'
+                                                    : detail.stay!.roomTypename.toLowerCase().contains('triple') || detail.stay!.roomTypename.toLowerCase().contains('3 sharing')
+                                                        ? 'TRIPLE'
+                                                        : detail.stay!.roomTypename.toLowerCase().contains('quadruple') || detail.stay!.roomTypename.toLowerCase().contains('4 sharing')
+                                                            ? 'QUADRUPLE'
+                                                            : detail.stay!.roomTypename.toLowerCase().contains('quintuple') || detail.stay!.roomTypename.toLowerCase().contains('5 sharing')
+                                                                ? 'QUINTUPLE'
+                                                                : detail.stay!.roomTypename.toLowerCase().contains('dormitory')
+                                                                    ? 'DORMITORY'
+                                                                    : null,
+                                            bookedRoomType: detail.stay!.roomTypename.toLowerCase().contains('non ac') || detail.stay!.roomTypename.toLowerCase().contains('non-ac')
+                                                ? 'NON-AC'
+                                                : detail.stay!.roomTypename.toLowerCase().contains('ac')
+                                                    ? 'AC'
+                                                    : null,
                                           ),
                                         ),
                                       ),

@@ -66,17 +66,6 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           'maintenance': FocusNode(),
           'daily': FocusNode(),
         };
-
-        final rentCtrl = _controllers[type]![s]!['rent']!;
-        final dailyCtrl = _controllers[type]![s]!['daily']!;
-        rentCtrl.addListener(() {
-          if (_isEditing && dailyCtrl.text.isEmpty) {
-            final monthly = double.tryParse(rentCtrl.text) ?? 0;
-            if (monthly > 0) {
-              dailyCtrl.text = (monthly / 30).round().toString();
-            }
-          }
-        });
       }
     }
 
@@ -155,6 +144,20 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
   void _addNewSharingType(int sharing) {
     if (_activeSharingTypes.contains(sharing)) return;
 
+    // Find the closest smaller active sharing capacity (directly above it in the table)
+    int? upperSharing;
+    if (_activeSharingTypes.isNotEmpty) {
+      final smallerTypes = _activeSharingTypes.where((t) => t < sharing).toList();
+      if (smallerTypes.isNotEmpty) {
+        smallerTypes.sort();
+        upperSharing = smallerTypes.last;
+      } else {
+        // If there's no smaller capacity, take the first/smallest available one
+        _activeSharingTypes.sort();
+        upperSharing = _activeSharingTypes.first;
+      }
+    }
+
     for (final type in ['AC', 'NON_AC']) {
       if (!_controllers[type]!.containsKey(sharing)) {
         _controllers[type]![sharing] = {
@@ -180,6 +183,21 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
             }
           }
         });
+      }
+
+      // If actively editing and we have an upper row, copy its values
+      if (_isEditing && upperSharing != null) {
+        final currentDepositCtrl = _controllers[type]![sharing]!['deposit']!;
+        final currentMaintCtrl = _controllers[type]![sharing]!['maintenance']!;
+        final currentDailyCtrl = _controllers[type]![sharing]!['daily']!;
+
+        final upperDeposit = _controllers[type]![upperSharing]!['deposit']?.text ?? '';
+        final upperMaint = _controllers[type]![upperSharing]!['maintenance']?.text ?? '';
+        final upperDaily = _controllers[type]![upperSharing]!['daily']?.text ?? '';
+
+        currentDepositCtrl.text = upperDeposit;
+        currentMaintCtrl.text = upperMaint;
+        currentDailyCtrl.text = upperDaily;
       }
     }
 
@@ -504,7 +522,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
 
   Widget _buildLeftStaticPanel() {
     return Container(
-      width: 100.w,
+      width: _isEditing ? 116.w : 100.w,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -563,7 +581,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
           border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         ),
-        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        padding: EdgeInsets.symmetric(horizontal: _isEditing ? 8.w : 12.w),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -575,6 +593,8 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w800,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (_isEditing)
@@ -582,7 +602,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 onTap: () => _deleteSharingType(sharing),
                 behavior: HitTestBehavior.opaque,
                 child: Container(
-                  width: 32.w,
+                  width: 24.w,
                   height: 40.h,
                   alignment: Alignment.centerRight,
                   child: Icon(
@@ -672,7 +692,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           color: Colors.white,
           border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         ),
-        padding: EdgeInsets.only(left: 12.w),
+        padding: EdgeInsets.symmetric(horizontal: _isEditing ? 8.w : 12.w),
         alignment: Alignment.centerLeft,
         child: Row(
           children: [
@@ -976,7 +996,50 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
 
   Widget _buildBottomBar(List<RoomDetail> currentLoadedRooms) {
     if (!_isEditing) {
-      return Container(
+      return SafeArea(
+        top: false,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h),
+            ),
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            height: 48.h,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _isEditing = true;
+                });
+              },
+              icon: Icon(Icons.edit_rounded, color: Colors.white, size: 18.sp),
+              label: Text(
+                'Edit Standard Pricing',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2B5797),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                elevation: 2,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SafeArea(
+      top: false,
+      child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -984,93 +1047,56 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
             top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h),
           ),
         ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 48.h,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                _isEditing = true;
-              });
-            },
-            icon: Icon(Icons.edit_rounded, color: Colors.white, size: 18.sp),
-            label: Text(
-              'Edit Standard Pricing',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
+        child: Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 48.h,
+                child: OutlinedButton(
+                  onPressed: () => _cancelEditing(currentLoadedRooms),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFCBD5E1)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
               ),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2B5797),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: SizedBox(
+                height: 48.h,
+                child: ElevatedButton(
+                  onPressed: () => _savePricing(currentLoadedRooms),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2B5797),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    elevation: 2,
+                  ),
+                  child: Text(
+                    'Save Changes',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
-              elevation: 2,
             ),
-          ),
+          ],
         ),
-      );
-    }
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: const Color(0xFFE2E8F0), width: 1.h),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: SizedBox(
-              height: 48.h,
-              child: OutlinedButton(
-                onPressed: () => _cancelEditing(currentLoadedRooms),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFCBD5E1)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                ),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: SizedBox(
-              height: 48.h,
-              child: ElevatedButton(
-                onPressed: () => _savePricing(currentLoadedRooms),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2B5797),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  elevation: 2,
-                ),
-                child: Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

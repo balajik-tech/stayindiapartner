@@ -5,6 +5,11 @@ import '../../domain/entities/notification_entity.dart';
 abstract class NotificationRemoteDataSource {
   Future<List<NotificationEntity>> getNotifications();
   Future<void> markAllAsRead();
+  Future<void> sendBulkMessage({
+    required List<String> tenantIds,
+    required String title,
+    required String message,
+  });
 }
 
 class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
@@ -29,4 +34,24 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   Future<void> markAllAsRead() async {
     await _dio.post('${ApiConstants.notifications}/mark-read-all');
   }
+
+  @override
+  Future<void> sendBulkMessage({
+    required List<String> tenantIds,
+    required String title,
+    required String message,
+  }) async {
+    final response = await _dio.post(
+      '${ApiConstants.notifications}/bulk-message',
+      data: {
+        'tenantIds': tenantIds,
+        'title': title,
+        'message': message,
+      },
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to send bulk notifications');
+    }
+  }
 }
+

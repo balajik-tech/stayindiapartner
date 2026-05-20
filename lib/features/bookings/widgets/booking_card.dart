@@ -446,6 +446,8 @@ class BookingCard extends StatelessWidget {
             bookingId: booking.id,
             hostelId: booking.hostelId ?? '',
             tenantName: booking.tenantName,
+            bookedSharingType: booking.sharingType,
+            bookedRoomType: booking.roomType,
           ),
         ),
       ),
