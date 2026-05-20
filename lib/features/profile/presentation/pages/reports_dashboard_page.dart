@@ -485,8 +485,8 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
       final response = await dio.get(
         endpoint,
         queryParameters: {
-          'startDate': _startDate.toIso8601String(),
-          'endDate': _endDate.toIso8601String(),
+          'startDate': _startDate.toUtc().toIso8601String(),
+          'endDate': _endDate.toUtc().toIso8601String(),
           if (_selectedHostelId != null) 'propertyId': _selectedHostelId,
         },
       );
@@ -516,8 +516,8 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
       final response = await dio.get(
         endpoint,
         queryParameters: {
-          'startDate': _startDate.toIso8601String(),
-          'endDate': _endDate.toIso8601String(),
+          'startDate': _startDate.toUtc().toIso8601String(),
+          'endDate': _endDate.toUtc().toIso8601String(),
           if (_selectedHostelId != null) 'propertyId': _selectedHostelId,
           'format': format,
         },
