@@ -6,9 +6,9 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import '../cubit/finance_cubit.dart';
 import '../cubit/finance_state.dart';
-import '../widgets/revenue_chart.dart';
-import '../widgets/occupancy_revenue_chart.dart';
 import '../widgets/metric_card.dart';
+import '../widgets/revenue_chart.dart';
+import '../widgets/revenue_breakdown_chart.dart';
 import '../../data/services/pdf_export_service.dart';
 import 'package:intl/intl.dart';
 import 'revenue_history_page.dart';
@@ -56,7 +56,6 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
             if (state.status == FinanceStatus.loading && state.stats == null) {
               return const Center(child: CircularProgressIndicator());
             }
-
             return RefreshIndicator(
               onRefresh: () async => _loadData(),
               color: AppColors.primaryBlue,
@@ -88,17 +87,16 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                         SizedBox(height: 24.h),
                         _buildChartSection(
                           title: StringUtils.translate(
-                            'occupancy_vs_capacity',
+                            'revenue_breakdown',
                             context: context,
                           ),
                           subtitle: StringUtils.translate(
-                            'beds_distribution',
+                            'revenue_distribution',
                             context: context,
                           ),
-                          child: OccupancyRevenueChart(
-                            occupied: state.stats?.occupiedBeds ?? 0,
-                            total: state.stats?.totalBeds ?? 0,
-                          ),
+                          child: state.stats != null
+                              ? RevenueBreakdownChart(stats: state.stats!)
+                              : const SizedBox.shrink(),
                         ),
                         SizedBox(height: 24.h),
                       ]),
@@ -318,6 +316,24 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
           value: currencyFormat.format(state.stats?.pendingPayments ?? 0),
           icon: Icons.hourglass_empty_rounded,
           color: const Color(0xFFE03131),
+        ),
+        MetricCard(
+          title: StringUtils.translate('security_deposit', context: context),
+          value: currencyFormat.format(state.stats?.securityDeposit ?? 0),
+          icon: Icons.shield_rounded,
+          color: const Color(0xFF6741D9),
+        ),
+        MetricCard(
+          title: StringUtils.translate('maintenance', context: context),
+          value: currencyFormat.format(state.stats?.maintenance ?? 0),
+          icon: Icons.build_circle_rounded,
+          color: const Color(0xFFE8590C),
+        ),
+        MetricCard(
+          title: StringUtils.translate('daily_rent', context: context),
+          value: currencyFormat.format(state.stats?.dailyRent ?? 0),
+          icon: Icons.today_rounded,
+          color: const Color(0xFF0C8599),
         ),
       ],
     );

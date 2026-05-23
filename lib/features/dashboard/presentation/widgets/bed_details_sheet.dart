@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:stayindia_owner/features/movement_history/presentation/widgets/tenant_movement_history_section.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/features/tenants/presentation/widgets/tenant_details_sheet.dart';
@@ -102,11 +104,20 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   bool _isTogglingMaintenance = false;
   double? _electricityBillAmount;
   double? _parkingBillAmount;
+  final TextEditingController _electricityController = TextEditingController();
+  final TextEditingController _parkingController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _currentStatus = widget.state.status;
+  }
+
+  @override
+  void dispose() {
+    _electricityController.dispose();
+    _parkingController.dispose();
+    super.dispose();
   }
 
   String _formatReturnDate(String? rawDate) {
@@ -183,6 +194,40 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     return BlocConsumer<BookingsCubit, BookingsState>(
       listener: (context, bookingsState) {
         if (bookingsState.status == BookingsStatus.success &&
+            bookingsState.scannedBooking != null) {
+          final scanned = bookingsState.scannedBooking!;
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (dialogContext) => AlertDialog(
+              title: const Text('Confirm Check-in'),
+              content: Text(
+                'Do you want to assign ${scanned.tenantName} to Bed ${widget.state.bedNumber}?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    context.read<BookingsCubit>().clearScannedBooking();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    context.read<BookingsCubit>().finalizeCheckin(
+                      bookingId: scanned.bookingId,
+                      roomId: widget.state.roomId ?? '',
+                      bedNumber: widget.state.bedNumber,
+                    );
+                    context.read<BookingsCubit>().clearScannedBooking();
+                  },
+                  child: const Text('Confirm'),
+                ),
+              ],
+            ),
+          );
+        } else if (bookingsState.status == BookingsStatus.success &&
             bookingsState.successMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -245,6 +290,10 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                               _buildMaintenanceToggle(context),
                               SizedBox(height: 12.h),
                               _buildTenantProfileSection(context),
+                              if (widget.state.tenantId != null && widget.state.tenantId!.isNotEmpty) ...[
+                                SizedBox(height: 20.h),
+                                TenantMovementHistorySection(tenantId: widget.state.tenantId!),
+                              ],
                               SizedBox(height: 20.h),
                               _buildDoneButton(context),
                               SizedBox(height: 20.h),
@@ -272,17 +321,55 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     );
   }
 
+  void _showFullScreenImage(BuildContext context, String? imageUrl, String fallbackName) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog.fullscreen(
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                child: CustomAvatar(
+                  imageUrl: imageUrl,
+                  name: fallbackName,
+                  size: MediaQuery.of(context).size.width,
+                  isCircle: false,
+                  borderRadius: 0,
+                ),
+              ),
+            ),
+            Positioned(
+              top: 40.h,
+              right: 20.w,
+              child: IconButton(
+                icon: Icon(Icons.close, color: Colors.white, size: 30.sp),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildPassHeader(BuildContext context) {
+    final avatarUrl = ApiConstants.getImageUrl(widget.state.profileImage);
+    final fallbackName = widget.state.tenantName ?? '?';
+
     return Padding(
       padding: EdgeInsets.only(top: 16.h),
       child: Row(
         children: [
-          CustomAvatar(
-            imageUrl: ApiConstants.getImageUrl(widget.state.profileImage),
-            name: widget.state.tenantName ?? '?',
-            size: 38.r,
-            isCircle: false,
-            borderRadius: 10.r,
+          GestureDetector(
+            onTap: () => _showFullScreenImage(context, avatarUrl, fallbackName),
+            child: CustomAvatar(
+              imageUrl: avatarUrl,
+              name: fallbackName,
+              size: 38.r,
+              isCircle: false,
+              borderRadius: 10.r,
+            ),
           ),
           SizedBox(width: 10.w),
           Expanded(
@@ -452,6 +539,12 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   }
 
   Widget _buildQRSection(BuildContext context) {
+    if (_currentStatus != BedStatus.free && 
+        _currentStatus != BedStatus.maintenance && 
+        _currentStatus != BedStatus.away) {
+      return const SizedBox.shrink();
+    }
+
     final statusColor = _statusColor;
     final statusBgColor = _statusBgColor;
     final statusTextColor = _statusTextColor;
@@ -972,7 +1065,24 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
       return const SizedBox.shrink();
     }
 
-    return BlocBuilder<TenantDetailCubit, TenantDetailState>(
+    return BlocConsumer<TenantDetailCubit, TenantDetailState>(
+      listener: (context, tenantState) {
+        if (tenantState is TenantDetailLoaded) {
+          final detail = tenantState.detail;
+          if (_electricityBillAmount == null && detail.stay?.electricityBill != null) {
+            _electricityBillAmount = detail.stay!.electricityBill;
+            if (_electricityBillAmount! > 0) {
+              _electricityController.text = _electricityBillAmount!.toStringAsFixed(0);
+            }
+          }
+          if (_parkingBillAmount == null && detail.stay?.parkingBill != null) {
+            _parkingBillAmount = detail.stay!.parkingBill;
+            if (_parkingBillAmount! > 0) {
+              _parkingController.text = _parkingBillAmount!.toStringAsFixed(0);
+            }
+          }
+        }
+      },
       builder: (context, tenantState) {
         if (tenantState is TenantDetailLoading) {
           return Container(
@@ -1095,10 +1205,21 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 icon: Icons.bolt_rounded,
                 iconColor: const Color(0xFFFFD54F),
                 label: 'ELECTRICITY',
-                value: _electricityBillAmount != null
-                    ? '₹${_electricityBillAmount!.toStringAsFixed(0)}'
-                    : '—',
-                onTap: () => _showSendBillDialog(context, 'ELECTRICITY'),
+                controller: _electricityController,
+                currentBillValue: _electricityBillAmount,
+                onSend: () {
+                  final double? amt = double.tryParse(_electricityController.text);
+                  if (amt == null || amt <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enter a valid amount greater than 0.'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+                  _showConfirmSendBillDialog(context, 'ELECTRICITY', amt);
+                },
               ),
             ),
             SizedBox(width: 12.w),
@@ -1107,10 +1228,21 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 icon: Icons.two_wheeler_rounded,
                 iconColor: orange,
                 label: 'PARKING',
-                value: _parkingBillAmount != null
-                    ? '₹${_parkingBillAmount!.toStringAsFixed(0)}'
-                    : '—',
-                onTap: () => _showSendBillDialog(context, 'PARKING'),
+                controller: _parkingController,
+                currentBillValue: _parkingBillAmount,
+                onSend: () {
+                  final double? amt = double.tryParse(_parkingController.text);
+                  if (amt == null || amt <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enter a valid amount greater than 0.'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+                  _showConfirmSendBillDialog(context, 'PARKING', amt);
+                },
               ),
             ),
           ],
@@ -1168,11 +1300,40 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                     padding: EdgeInsets.symmetric(vertical: 6.h),
                     child: Row(
                       children: [
-                        CustomAvatar(
-                          imageUrl: ApiConstants.getImageUrl(avatar),
-                          name: name,
-                          size: 44.r,
-                          isCircle: true,
+                        GestureDetector(
+                          onTap: () {
+                            final imageUrl = ApiConstants.getImageUrl(avatar);
+                            if (imageUrl != null && imageUrl.isNotEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Scaffold(
+                                    backgroundColor: Colors.black,
+                                    appBar: AppBar(
+                                      backgroundColor: Colors.black,
+                                      iconTheme: const IconThemeData(color: Colors.white),
+                                    ),
+                                    body: Center(
+                                      child: InteractiveViewer(
+                                        child: CachedNetworkImage(
+                                          imageUrl: imageUrl,
+                                          fit: BoxFit.contain,
+                                          placeholder: (context, url) => const CircularProgressIndicator(color: Colors.white),
+                                          errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: CustomAvatar(
+                            imageUrl: ApiConstants.getImageUrl(avatar),
+                            name: name,
+                            size: 44.r,
+                            isCircle: true,
+                          ),
                         ),
                         SizedBox(width: 12.w),
                         Expanded(
@@ -1297,72 +1458,139 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     required IconData icon,
     required Color iconColor,
     required String label,
-    required String value,
-    VoidCallback? onTap,
+    required TextEditingController controller,
+    required VoidCallback onSend,
+    required double? currentBillValue,
   }) {
     const Color navy = Color(0xFF1B2838);
     const Color orange = Color(0xFFE8722A);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(14.w),
-        decoration: BoxDecoration(
-          color: navy,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: orange.withValues(alpha: 0.4), width: 1.5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(6.w),
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Icon(icon, size: 18.sp, color: iconColor),
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: navy,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: orange.withValues(alpha: 0.4), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(6.w),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Text(
-                    label,
+                child: Icon(icon, size: 16.sp, color: iconColor),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 44.h,
+                  child: TextField(
+                    controller: controller,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     style: TextStyle(
-                      fontSize: 11.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
-                      letterSpacing: 0.5,
+                    ),
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                      prefixText: '₹ ',
+                      prefixStyle: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey.shade400,
+                      ),
+                      hintText: '0.00',
+                      hintStyle: TextStyle(
+                        fontSize: 13.sp,
+                        color: Colors.grey.shade600,
+                      ),
+                      isDense: true,
+                      filled: true,
+                      fillColor: Colors.black.withValues(alpha: 0.2),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(color: Colors.grey.shade800),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(color: Colors.grey.shade800),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: const BorderSide(color: orange),
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 10.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.all(4.w),
-                  decoration: const BoxDecoration(
+              ),
+              SizedBox(width: 8.w),
+              GestureDetector(
+                onTap: onSend,
+                child: Container(
+                  height: 44.h,
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                  decoration: BoxDecoration(
                     color: orange,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Icon(Icons.add, size: 14.sp, color: Colors.white),
+                  child: Center(
+                    child: Text(
+                      'Send',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          if (currentBillValue != null && currentBillValue > 0) ...[
+            SizedBox(height: 6.h),
+            Text(
+              'Sent: ₹${currentBillValue.toStringAsFixed(0)}',
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade400,
+              ),
+            ),
+          ] else ...[
+            SizedBox(height: 6.h),
+            Text(
+              'Not Sent Yet',
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade600,
+              ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -1397,126 +1625,103 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     );
   }
 
-  void _showSendBillDialog(BuildContext context, String billType) {
-    final TextEditingController amountController = TextEditingController();
-    final bool isParking = billType.toUpperCase() == 'PARKING';
-    final typeStr = isParking ? 'Parking' : 'Electricity';
-    final icon = isParking ? '🚗' : '⚡';
+  void _showConfirmSendBillDialog(
+    BuildContext context,
+    String billType,
+    double amount,
+  ) {
+    final typeStr = billType.toUpperCase() == 'PARKING' ? 'Parking' : 'Electricity';
+    final icon = billType.toUpperCase() == 'PARKING' ? Icons.two_wheeler_rounded : Icons.bolt_rounded;
+    final iconColor = billType.toUpperCase() == 'PARKING' ? const Color(0xFFE8722A) : const Color(0xFFFFD54F);
 
     showDialog(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Row(
-          children: [
-            Text(icon, style: TextStyle(fontSize: 24.sp)),
-            SizedBox(width: 8.w),
-            Text(
-              'Send $typeStr Bill',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF0F172A),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Enter the bill amount to send a notification to ${widget.state.tenantName ?? "this tenant"}.',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: const Color(0xFF64748B),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 16.h),
-            TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              autofocus: true,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-              decoration: InputDecoration(
-                prefixText: '₹ ',
-                prefixStyle: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0F172A),
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1B2838),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+            side: const BorderSide(color: Color(0xFFE8722A), width: 1.5),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
-                labelText: 'Amount',
-                labelStyle: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF64748B),
-                ),
-                hintText: '0.00',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: const BorderSide(
-                    color: Color(0xFF0F172A),
-                    width: 2,
+                child: Icon(icon, color: iconColor, size: 24.sp),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Text(
+                  'Confirm Bill',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: Text(
-              'CANCEL',
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF64748B),
-              ),
+            ],
+          ),
+          content: Text(
+            'Are you sure you want to send a $typeStr bill of ₹${amount.toStringAsFixed(0)} to the tenant?',
+            style: TextStyle(
+              color: Colors.grey.shade300,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final double? amt = double.tryParse(amountController.text);
-              if (amt == null || amt <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Please enter a valid amount greater than 0.',
+          actionsPadding: EdgeInsets.only(bottom: 16.h, right: 16.w, left: 16.w),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Colors.grey.shade700),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
                     ),
                   ),
-                );
-                return;
-              }
-              Navigator.pop(dialogCtx);
-              await _sendBill(context, billType, amt);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0F172A),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                      _sendBill(context, billType, amount);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE8722A),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
+                    child: Text(
+                      'Send',
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            child: Text(
-              'SEND BILL',
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 
@@ -1559,10 +1764,13 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           setState(() {
             if (billType.toUpperCase() == 'PARKING') {
               _parkingBillAmount = amount;
+              _parkingController.clear();
             } else {
               _electricityBillAmount = amount;
+              _electricityController.clear();
             }
           });
+          FocusScope.of(context).unfocus();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(

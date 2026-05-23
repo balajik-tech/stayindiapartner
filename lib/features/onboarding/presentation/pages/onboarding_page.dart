@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,6 +24,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     [const Color(0xFFFFFFFF), const Color(0xFFEBF0F9)],
     [const Color(0xFFFDFDFE), const Color(0xFFF0F4FA)],
     [const Color(0xFFFFFFFF), const Color(0xFFEDF2FB)],
+    [const Color(0xFFFFFFFF), const Color(0xFFF0EFFF)],
   ];
 
   String _tr(String key, String fallback) {
@@ -68,7 +70,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       _currentIndex = index;
                     });
                   },
-                  itemCount: 4,
+                  itemCount: 5,
                   itemBuilder: (context, index) {
                     return _buildPageContent(index);
                   },
@@ -111,7 +113,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
           
           // Skip Button (only if not on the last screen)
-          if (_currentIndex < 3)
+          if (_currentIndex < 4)
             GestureDetector(
               onTap: widget.onComplete,
               child: Container(
@@ -169,13 +171,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
         animationWidget = const _FinanceAnalyticsAnimation();
         break;
       case 3:
-      default:
         title = _tr('onboarding_title_4', 'Seamless Daily Operations');
         subtitle = _tr(
           'onboarding_sub_4',
           'Broadcast notices instantly to room categories, manage staff duties, and resolve tenant tickets.',
         );
         animationWidget = const _OperationsNoticeAnimation();
+        break;
+      case 4:
+      default:
+        title = _tr('onboarding_title_5', 'Global & Owner Communities');
+        subtitle = _tr(
+          'onboarding_sub_5',
+          'Connect with owners globally. Discuss strategies, find buyers, or resolve disputes collectively.',
+        );
+        animationWidget = const _CommunitiesAnimation();
         break;
     }
 
@@ -248,17 +258,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
           // Dots Indicator
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(4, (index) => _buildDot(index)),
+            children: List.generate(5, (index) => _buildDot(index)),
           ),
           SizedBox(height: 20.h),
           
           // Action Button
           _OnboardingActionButton(
-            text: _currentIndex == 3
+            text: _currentIndex == 4
                 ? _tr('btn_onboard_start', 'Get Started')
                 : _tr('btn_continue', 'Continue'),
             onPressed: () {
-              if (_currentIndex == 3) {
+              if (_currentIndex == 4) {
                 widget.onComplete();
               } else {
                 _pageController.nextPage(
@@ -1244,4 +1254,181 @@ class _OnboardingActionButtonState extends State<_OnboardingActionButton>
       ),
     );
   }
+}
+
+// ---------------------------------------------------------
+// Screen 5: Communities Animation
+// ---------------------------------------------------------
+class _CommunitiesAnimation extends StatefulWidget {
+  const _CommunitiesAnimation();
+
+  @override
+  State<_CommunitiesAnimation> createState() => _CommunitiesAnimationState();
+}
+
+class _CommunitiesAnimationState extends State<_CommunitiesAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    _pulseAnimation = Tween<double>(begin: 0.85, end: 1.15).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    _pulseController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildNode(IconData icon, Color color, double size, double top, double left, double phase) {
+    return Positioned(
+      top: top,
+      left: left,
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          final val = (math.sin((_pulseController.value * 2 * math.pi) + phase) + 1) / 2;
+          return Transform.scale(
+            scale: 0.9 + 0.2 * val,
+            child: Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+                border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.15),
+                    blurRadius: 15 * val,
+                    spreadRadius: 2 * val,
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: color, size: size),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: Center(
+        child: SizedBox(
+          height: 350.h,
+          width: double.infinity,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Connection Lines (Static for simplicity, behind the nodes)
+              CustomPaint(
+                size: Size(double.infinity, 350.h),
+                painter: _NetworkLinesPainter(),
+              ),
+              
+              // Central Globe
+              AnimatedBuilder(
+                animation: _pulseAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _pulseAnimation.value,
+                    child: Container(
+                      padding: EdgeInsets.all(32.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.05),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2), width: 4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                            blurRadius: 40 * _pulseAnimation.value,
+                            spreadRadius: 10 * _pulseAnimation.value,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.public_rounded,
+                        size: 80.sp,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              
+              // Animated Networking Nodes
+              _buildNode(Icons.groups_rounded, const Color(0xFF10B981), 32.sp, 20.h, 40.w, 0.0),
+              _buildNode(Icons.handshake_rounded, const Color(0xFFF59E0B), 28.sp, 30.h, 240.w, 2.0),
+              _buildNode(Icons.store_rounded, const Color(0xFF3B82F6), 36.sp, 240.h, 30.w, 4.0),
+              _buildNode(Icons.forum_rounded, const Color(0xFFEF4444), 24.sp, 220.h, 250.w, 1.0),
+              _buildNode(Icons.lightbulb_rounded, const Color(0xFF8B5CF6), 28.sp, -10.h, 150.w, 3.0),
+              
+              // Verification badge
+              Positioned(
+                bottom: 10.h,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.1), width: 1),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.wifi_tethering_rounded, color: AppColors.primaryBlue, size: 20.sp),
+                      SizedBox(width: 8.w),
+                      Text(
+                        '10,000+ Active Owners Connected',
+                        style: TextStyle(
+                          color: AppColors.primaryBlue,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NetworkLinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primaryBlue.withValues(alpha: 0.1)
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+      
+    final center = Offset(size.width / 2, size.height / 2);
+    
+    // Draw lines to approximate node positions
+    canvas.drawLine(center, Offset(40 + 20, 20 + 20), paint); // Top Left
+    canvas.drawLine(center, Offset(240 + 20, 30 + 20), paint); // Top Right
+    canvas.drawLine(center, Offset(30 + 20, 240 + 20), paint); // Bottom Left
+    canvas.drawLine(center, Offset(250 + 20, 220 + 20), paint); // Bottom Right
+    canvas.drawLine(center, Offset(150 + 20, -10 + 20), paint); // Top Center
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

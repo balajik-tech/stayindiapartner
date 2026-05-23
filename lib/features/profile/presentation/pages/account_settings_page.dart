@@ -347,9 +347,9 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 12.sp,
+          fontSize: 13.sp,
           fontWeight: FontWeight.w800,
-          color: AppColors.greyText.withValues(alpha: 0.6),
+          color: AppColors.greyText.withValues(alpha: 0.85),
           letterSpacing: 1.2,
         ),
       ),

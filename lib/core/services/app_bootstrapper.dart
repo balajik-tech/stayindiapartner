@@ -81,6 +81,16 @@ class _AppBootstrapperState extends State<AppBootstrapper>
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
       ]);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarIconBrightness: Brightness.dark,
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+        ),
+      );
       await EasyLocalization.ensureInitialized();
 
       setState(() {

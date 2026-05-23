@@ -116,68 +116,83 @@ class _RoomCardState extends State<RoomCard> {
                     ),
                   ),
                 ),
-                SizedBox(width: 4.w),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 5.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Text(
-                    StringUtils.formatSharingType(
-                      widget.sharingType,
-                      context,
-                      widget.beds.length,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF475569),
-                    ),
-                  ),
-                ),
+
               ],
             ),
             SizedBox(height: 6.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: Text(
-                    widget.roomNumber,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF0F172A),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.roomNumber,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 4.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Text(
+                        StringUtils.formatSharingType(
+                          widget.sharingType,
+                          context,
+                          widget.beds.length,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF475569),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 6.w),
-                _buildRoomTypeBadge(widget.roomType, context),
+                SizedBox(height: 6.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if ((widget.rent != null && widget.rent! > 0) ||
+                        (widget.dailyRent != null && widget.dailyRent! > 0))
+                      Flexible(
+                        child: Text(
+                          widget.rent != null && widget.rent! > 0
+                              ? '₹${widget.rent!.toInt()}${StringUtils.translate('price_per_month', context: context)}'
+                              : '₹${widget.dailyRent!.toInt()}${StringUtils.translate('daily_rate', context: context)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w900,
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
+                      )
+                    else
+                      const Spacer(),
+                    SizedBox(width: 4.w),
+                    _buildRoomTypeBadge(widget.roomType, context),
+                  ],
+                ),
               ],
             ),
-            if ((widget.rent != null && widget.rent! > 0) ||
-                (widget.dailyRent != null && widget.dailyRent! > 0)) ...[
-              SizedBox(height: 8.h),
-              Text(
-                widget.rent != null && widget.rent! > 0
-                    ? '₹${widget.rent!.toInt()}${StringUtils.translate('price_per_month', context: context)}'
-                    : '₹${widget.dailyRent!.toInt()}${StringUtils.translate('daily_rate', context: context)}',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF0F172A),
-                ),
-              ),
-            ],
           ] else ...[
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,

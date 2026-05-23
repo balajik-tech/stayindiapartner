@@ -8,6 +8,8 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/core/location/location_cubit.dart';
 import 'package:stayindia_owner/core/location/location_state.dart';
 import 'package:stayindia_owner/injection_container.dart' as di;
+import 'package:latlong2/latlong.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/pages/screens/map_picker_screen.dart';
 
 class AddHostelSheet extends StatefulWidget {
   const AddHostelSheet({super.key});
@@ -142,7 +144,14 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
                 _buildHeader(),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.all(24.w),
+                    padding: EdgeInsets.fromLTRB(
+                      24.w,
+                      24.w,
+                      24.w,
+                      MediaQuery.of(context).viewInsets.bottom +
+                          MediaQuery.of(context).padding.bottom +
+                          24.w,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -391,35 +400,79 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
               bool isGettingLocation = state is LocationFetching;
               return SizedBox(
                 width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: isGettingLocation
-                      ? null
-                      : () => _locationCubit.fetchCurrentLocation(),
-                  icon: isGettingLocation
-                      ? SizedBox(
-                          height: 16.w,
-                          width: 16.w,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.primaryBlue,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: isGettingLocation
+                            ? null
+                            : () => _locationCubit.fetchCurrentLocation(),
+                        icon: isGettingLocation
+                            ? SizedBox(
+                                height: 16.w,
+                                width: 16.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primaryBlue,
+                                ),
+                              )
+                            : const Icon(Icons.my_location),
+                        label: Text(
+                          isGettingLocation
+                              ? 'Fetching...'
+                              : (_latitude == null ? 'Use GPS' : 'Update GPS'),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          side: BorderSide(color: AppColors.primaryBlue),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
-                        )
-                      : const Icon(Icons.my_location),
-                  label: Text(
-                    isGettingLocation
-                        ? 'Fetching...'
-                        : (_latitude == null
-                              ? 'Get Current Location'
-                              : 'Update Location'),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12.h),
-                    side: BorderSide(color: AppColors.primaryBlue),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
+                          foregroundColor: AppColors.primaryBlue,
+                        ),
+                      ),
                     ),
-                    foregroundColor: AppColors.primaryBlue,
-                  ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          final LatLng? result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MapPickerScreen(
+                                initialLocation: _latitude != null && _longitude != null
+                                    ? LatLng(_latitude!, _longitude!)
+                                    : null,
+                              ),
+                            ),
+                          );
+                          if (result != null) {
+                            setState(() {
+                              _latitude = result.latitude;
+                              _longitude = result.longitude;
+                            });
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Location selected from map'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.map_outlined),
+                        label: const Text('Pin on Map'),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          side: BorderSide(color: AppColors.primaryBlue),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          foregroundColor: AppColors.primaryBlue,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -448,6 +501,18 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Please fill all required fields'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (_latitude == null ||
+                        _longitude == null ||
+                        (_latitude == 0 && _longitude == 0)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Location is required! Please use GPS or Pin on Map.'),
+                          backgroundColor: Colors.redAccent,
                         ),
                       );
                       return;

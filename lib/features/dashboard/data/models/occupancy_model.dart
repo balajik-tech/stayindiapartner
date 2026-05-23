@@ -122,6 +122,7 @@ class RoomModel extends Room {
         tenantId: tenant?['_id']?.toString() ?? tenant?['id']?.toString(),
         isAway: tenant?['isAway'] == true,
         awayReturnDate: tenant?['awayReturnDate']?.toString(),
+        geofenceStatus: tenant?['geofenceStatus']?.toString().toUpperCase(),
       );
     }).toList();
 

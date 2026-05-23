@@ -278,9 +278,9 @@ class AppDrawer extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w700,
-          color: const Color(0xFF94A3B8),
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF475569),
           letterSpacing: 0.5,
         ),
       ),

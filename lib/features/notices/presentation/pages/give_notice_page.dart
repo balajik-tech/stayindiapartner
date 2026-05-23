@@ -51,6 +51,102 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
   bool _isLoadingTenants = false;
 
   final List<NoticeTemplate> _generalTemplates = const [
+    // --- CATEGORY 1: FESTIVAL & LEAVE STATUS ---
+    NoticeTemplate(
+      icon: '🌴',
+      label: 'Festival Leave',
+      title: 'Festival Vacation Update',
+      content: 'Going home for the festival? Please update your travel dates and return date in the app now for our records.',
+    ),
+    NoticeTemplate(
+      icon: '✈️',
+      label: 'Leave Mode',
+      title: 'Turn On Leave Mode',
+      content: 'Traveling out? Kindly turn on the \'Leave/Out of Station\' mode in your app and set your correct return date.',
+    ),
+    NoticeTemplate(
+      icon: '🍽️',
+      label: 'Food Plan',
+      title: 'Food Attendance Mapping',
+      content: 'Please update your return status in the app before arriving, so the kitchen team can prepare food accordingly.',
+    ),
+    // --- CATEGORY 2: VACATING & NOTICE PERIOD ---
+    NoticeTemplate(
+      icon: '⚠️',
+      label: '1-Month Notice',
+      title: '1-Month Prior Notice Required',
+      content: 'Planning to vacate? As per policy, you must submit your 1-month prior Notice Period directly through the app.',
+    ),
+    NoticeTemplate(
+      icon: '📱',
+      label: 'App Notice',
+      title: 'Intimation Through App Only',
+      content: 'Important: Vacating notices will not be accepted over calls or messages. Please submit it only via the app.',
+    ),
+    NoticeTemplate(
+      icon: '✅',
+      label: 'Checkout',
+      title: 'Checkout Inspection & Dues',
+      content: 'Before final checkout, ensure all your pending dues are cleared in the app for a smooth exit approval.',
+    ),
+    // --- CATEGORY 3: FOOD & MESS REPETITIVE ALERTS ---
+    NoticeTemplate(
+      icon: '🍳',
+      label: 'Breakfast',
+      title: 'Breakfast Active Alert',
+      content: 'Breakfast is ready and active now. Please visit the mess hall before timings end.',
+    ),
+    NoticeTemplate(
+      icon: '🍛',
+      label: 'Lunch',
+      title: 'Lunch Active Alert',
+      content: 'Lunch is officially served. Kindly have your meal on time today.',
+    ),
+    NoticeTemplate(
+      icon: '☕',
+      label: 'Snacks',
+      title: 'Evening Snacks Alert',
+      content: 'Evening tea and snacks are ready at the counter. Please collect yours.',
+    ),
+    NoticeTemplate(
+      icon: '🍲',
+      label: 'Dinner',
+      title: 'Dinner Active Alert',
+      content: 'Dinner is served. Please visit the dining area before the kitchen closes for the night.',
+    ),
+    // --- CATEGORY 4: NIGHT GATE & VISITOR REGULATIONS ---
+    NoticeTemplate(
+      icon: '🔒',
+      label: '10 PM Gate',
+      title: 'Strict 10:00 PM Gate Lock',
+      content: 'Gate closing reminder: All residents must be inside by 10:00 PM. The main gates will be locked sharp at 10:00 PM.',
+    ),
+    NoticeTemplate(
+      icon: '👥',
+      label: 'Guests',
+      title: '2-Hour Advance Guest Intimation',
+      content: 'Visiting Parents/Friends? Kindly inform the management through the app at least 2 hours in advance for entry permission.',
+    ),
+    // --- CATEGORY 5: ROOM MAINTENANCE & SAFETY ---
+    NoticeTemplate(
+      icon: '🔑',
+      label: 'Lock Doors',
+      title: 'Lock Doors Securely',
+      content: 'Security Alert: Please ensure your room doors are securely locked whenever you step out.',
+    ),
+    NoticeTemplate(
+      icon: '💡',
+      label: 'Save Energy',
+      title: 'Turn Off Appliances',
+      content: 'Save Energy: Kindly turn off all lights, fans, and AC units before leaving your room.',
+    ),
+    NoticeTemplate(
+      icon: '🗝️',
+      label: 'Handover Keys',
+      title: 'Handover Keys Before Leaving',
+      content: 'Traveling or Vacating? Do not forget to handover your room keys to the warden/reception before leaving.',
+    ),
+    // --- EXISTING TEMPLATES ---
     NoticeTemplate(
       icon: '🛠️',
       label: 'Maintenance',
@@ -78,20 +174,6 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       title: 'Common Area Cleanliness',
       content:
           'Please help keep our PG clean and hygienic. Kindly throw garbage only in the designated bins and keep the common areas tidy after use.',
-    ),
-    NoticeTemplate(
-      icon: '🔑',
-      label: 'Gate Timing',
-      title: 'Important Late Entry Update',
-      content:
-          'For safety and security reasons, the main gate will be locked at 10:30 PM. Please coordinate with the warden/security guard in case of any late arrivals.',
-    ),
-    NoticeTemplate(
-      icon: '👥',
-      label: 'Guest Policy',
-      title: 'Revised Guest Policy Notice',
-      content:
-          'Tenants are requested to register all visitors/guests at the front desk before entry. Overnight guest stays are not permitted without prior written approval.',
     ),
   ];
 

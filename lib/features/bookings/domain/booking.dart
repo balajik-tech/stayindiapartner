@@ -123,6 +123,8 @@ class ScanBookingResponse {
   final String? roomId;
   final String? roomTypename;
   final String? bedNumber;
+  final String? reservedRoomId;
+  final String? reservedBed;
 
   ScanBookingResponse({
     required this.bookingId,
@@ -139,5 +141,7 @@ class ScanBookingResponse {
     this.roomId,
     this.roomTypename,
     this.bedNumber,
+    this.reservedRoomId,
+    this.reservedBed,
   });
 }

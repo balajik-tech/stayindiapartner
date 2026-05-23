@@ -7,6 +7,7 @@ class NotificationEntity extends Equatable {
   final String type;
   final bool isRead;
   final DateTime createdAt;
+  final Map<String, dynamic>? metadata;
 
   const NotificationEntity({
     required this.id,
@@ -15,10 +16,11 @@ class NotificationEntity extends Equatable {
     required this.type,
     required this.isRead,
     required this.createdAt,
+    this.metadata,
   });
 
   @override
-  List<Object?> get props => [id, title, message, type, isRead, createdAt];
+  List<Object?> get props => [id, title, message, type, isRead, createdAt, metadata];
 
   factory NotificationEntity.fromJson(Map<String, dynamic> json) {
     return NotificationEntity(
@@ -30,6 +32,9 @@ class NotificationEntity extends Equatable {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
+      metadata: json['metadata'] != null
+          ? Map<String, dynamic>.from(json['metadata'])
+          : null,
     );
   }
 }

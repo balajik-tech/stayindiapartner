@@ -8,6 +8,7 @@ import 'package:stayindia_owner/features/navigation/presentation/pages/main_navi
 import 'package:stayindia_owner/features/auth/presentation/pages/registration_personal_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/login_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:stayindia_owner/core/widgets/animated_splash_text.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -46,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Timer(const Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
           _isTimerDone = true;
@@ -156,6 +157,8 @@ class _SplashScreenState extends State<SplashScreen>
                         fit: BoxFit.contain,
                       ),
                     ),
+                    SizedBox(height: 24.h),
+                    const AnimatedFutureOfLivingText(),
                   ],
                 ),
               ),

@@ -105,7 +105,14 @@ class _AddFloorSheetState extends State<AddFloorSheet> {
           _buildHeader(),
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 40.h),
+              padding: EdgeInsets.fromLTRB(
+                24.w,
+                8.h,
+                24.w,
+                MediaQuery.of(context).viewInsets.bottom +
+                    MediaQuery.of(context).padding.bottom +
+                    40.h,
+              ),
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

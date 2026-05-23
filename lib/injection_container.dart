@@ -23,6 +23,7 @@ import 'package:stayindia_owner/features/guest/guest_injections.dart';
 import 'package:stayindia_owner/features/notifications/notification_injections.dart';
 import 'package:stayindia_owner/features/property_setup/property_setup_injections.dart';
 import 'package:stayindia_owner/features/offers/offers_injections.dart';
+import 'package:stayindia_owner/features/movement_history/movement_injections.dart';
 import 'package:stayindia_owner/core/theme/theme_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/guest_session_cubit.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
@@ -52,6 +53,7 @@ Future<void> init() async {
   registerNotificationFeature(sl);
   registerPropertySetupFeature(sl);
   registerOffersFeature(sl);
+  registerMovementFeature(sl);
   sl.registerLazySingleton(() => ThemeCubit());
   sl.registerLazySingleton(() => GuestSessionCubit());
 

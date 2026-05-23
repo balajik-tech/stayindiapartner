@@ -613,9 +613,9 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11.sp,
+          fontSize: 13.sp,
           fontWeight: FontWeight.w800,
-          color: AppColors.textSecondary.withValues(alpha: 0.5),
+          color: AppColors.textSecondary.withValues(alpha: 0.85),
           letterSpacing: 1.2,
         ),
       ),

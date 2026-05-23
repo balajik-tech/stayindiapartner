@@ -151,6 +151,8 @@ class TenantStayDetailEntity extends Equatable {
   final String? accessCode;
   final String? qrToken;
   final String? status;
+  final double? electricityBill;
+  final double? parkingBill;
 
   const TenantStayDetailEntity({
     required this.bookingId,
@@ -164,6 +166,8 @@ class TenantStayDetailEntity extends Equatable {
     this.accessCode,
     this.qrToken,
     this.status,
+    this.electricityBill,
+    this.parkingBill,
   });
 
   @override
@@ -179,6 +183,8 @@ class TenantStayDetailEntity extends Equatable {
     accessCode,
     qrToken,
     status,
+    electricityBill,
+    parkingBill,
   ];
 }
 

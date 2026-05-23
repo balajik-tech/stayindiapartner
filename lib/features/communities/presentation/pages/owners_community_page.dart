@@ -1075,10 +1075,62 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   }
 }
 
-class _PostCard extends StatelessWidget {
+class _PostCard extends StatefulWidget {
   final SocialPostEntity post;
 
   const _PostCard({required this.post});
+
+  @override
+  State<_PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<_PostCard> {
+  bool _isEditing = false;
+  late TextEditingController _contentController;
+  String? _selectedImagePath;
+  bool _removeImage = false;
+  final List<TextEditingController> _pollOptionControllers = [];
+  bool _removePoll = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _contentController = TextEditingController(text: widget.post.content);
+    _initPollControllers();
+  }
+
+  void _initPollControllers() {
+    _pollOptionControllers.clear();
+    final poll = widget.post.poll;
+    if (poll != null) {
+      final options = poll['options'] as List? ?? [];
+      for (var opt in options) {
+        _pollOptionControllers.add(
+          TextEditingController(text: opt['text']?.toString() ?? ''),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    for (var c in _pollOptionControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: ImageSource.gallery);
+    if (file != null) {
+      setState(() {
+        _selectedImagePath = file.path;
+        _removeImage = false;
+      });
+    }
+  }
 
   String _formatTimeAgo(DateTime dateTime) {
     final diff = DateTime.now().difference(dateTime);
@@ -1092,7 +1144,11 @@ class _PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pollOptionsList = post.poll?['options'] as List<dynamic>? ?? [];
+    if (_isEditing) {
+      return _buildInlineEditor(context);
+    }
+
+    final pollOptionsList = widget.post.poll?['options'] as List<dynamic>? ?? [];
     int totalVotes = 0;
     for (var opt in pollOptionsList) {
       if (opt is Map) {
@@ -1121,13 +1177,13 @@ class _PostCard extends StatelessWidget {
               CircleAvatar(
                 radius: 20.r,
                 backgroundImage:
-                    (post.userAvatar != null && post.userAvatar!.isNotEmpty)
+                    (widget.post.userAvatar != null && widget.post.userAvatar!.isNotEmpty)
                     ? CachedNetworkImageProvider(
-                        ApiConstants.getImageUrl(post.userAvatar!)!,
+                        ApiConstants.getImageUrl(widget.post.userAvatar!)!,
                       )
                     : null,
                 backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
-                child: (post.userAvatar == null || post.userAvatar!.isEmpty)
+                child: (widget.post.userAvatar == null || widget.post.userAvatar!.isEmpty)
                     ? Icon(
                         Icons.person,
                         color: AppColors.primaryBlue,
@@ -1143,8 +1199,8 @@ class _PostCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          post.userName.isNotEmpty
-                              ? post.userName
+                          widget.post.userName.isNotEmpty
+                              ? widget.post.userName
                               : 'Unknown User',
                           style: TextStyle(
                             fontSize: 16.sp,
@@ -1162,8 +1218,8 @@ class _PostCard extends StatelessWidget {
                         ),
                         SizedBox(width: 8.w),
                         Text(
-                          post.visibility != null &&
-                                  post.visibility!.toUpperCase() == 'GLOBAL'
+                          widget.post.visibility != null &&
+                                  widget.post.visibility!.toUpperCase() == 'GLOBAL'
                               ? 'Global'
                               : 'Community',
                           style: TextStyle(
@@ -1176,7 +1232,7 @@ class _PostCard extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      _formatTimeAgo(post.createdAt),
+                      _formatTimeAgo(widget.post.createdAt),
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.grey.shade400,
@@ -1186,11 +1242,65 @@ class _PostCard extends StatelessWidget {
                   ],
                 ),
               ),
+              BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, authState) {
+                  final String? currentUserId = context.read<AuthCubit>().currentOwner?.id;
+                  
+                  if (currentUserId == null || currentUserId != widget.post.userId) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert_rounded,
+                      color: Colors.grey.shade400,
+                      size: 20.sp,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        setState(() {
+                          _isEditing = true;
+                          _selectedImagePath = null;
+                          _removeImage = false;
+                          _removePoll = false;
+                          _initPollControllers();
+                        });
+                      } else if (value == 'delete') {
+                        _showDeleteConfirmDialog(context, widget.post);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_rounded, size: 18.sp, color: AppColors.darkText),
+                            SizedBox(width: 8.w),
+                            Text('Edit', style: TextStyle(fontSize: 14.sp)),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_rounded, size: 18.sp, color: Colors.red),
+                            SizedBox(width: 8.w),
+                            Text('Delete', style: TextStyle(fontSize: 14.sp, color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
           SizedBox(height: 16.h),
           Text(
-            post.content,
+            widget.post.content,
             style: TextStyle(
               fontSize: 15.sp,
               color: AppColors.darkText,
@@ -1198,12 +1308,12 @@ class _PostCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          if (post.imageUrl != null && post.imageUrl!.isNotEmpty) ...[
+          if (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty) ...[
             SizedBox(height: 16.h),
             ClipRRect(
               borderRadius: BorderRadius.circular(16.r),
               child: CachedNetworkImage(
-                imageUrl: ApiConstants.getImageUrl(post.imageUrl!) ?? '',
+                imageUrl: ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
                 width: double.infinity,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
@@ -1232,13 +1342,13 @@ class _PostCard extends StatelessWidget {
                 final count = ((opt['votesCount'] ?? opt['votes'] ?? 0) as num)
                     .toInt();
                 final pct = totalVotes > 0 ? (count / totalVotes) : 0.0;
-                final isMyVote = post.userVote == i;
+                final isMyVote = widget.post.userVote == i;
 
                 return BouncingWrapper(
-                  onTap: post.userVote != null
+                  onTap: widget.post.userVote != null
                       ? null
                       : () {
-                          context.read<SocialFeedCubit>().votePoll(post.id, i);
+                          context.read<SocialFeedCubit>().votePoll(widget.post.id, i);
                         },
                   child: Container(
                     margin: EdgeInsets.only(bottom: 8.h),
@@ -1337,28 +1447,28 @@ class _PostCard extends StatelessWidget {
             children: [
               BouncingWrapper(
                 onTap: () {
-                  context.read<SocialFeedCubit>().toggleLike(post.id);
+                  context.read<SocialFeedCubit>().toggleLike(widget.post.id);
                 },
                 child: Row(
                   children: [
                     Icon(
-                      post.isLiked
+                      widget.post.isLiked
                           ? Icons.thumb_up_alt_rounded
                           : Icons.thumb_up_off_alt_rounded,
-                      color: post.isLiked
+                      color: widget.post.isLiked
                           ? AppColors.primaryBlue
                           : Colors.grey.shade400,
                       size: 20.sp,
                     ),
                     SizedBox(width: 8.w),
                     Text(
-                      '${post.likesCount}',
+                      '${widget.post.likesCount}',
                       style: TextStyle(
                         fontSize: 13.sp,
-                        fontWeight: post.isLiked
+                        fontWeight: widget.post.isLiked
                             ? FontWeight.w800
                             : FontWeight.w600,
-                        color: post.isLiked
+                        color: widget.post.isLiked
                             ? AppColors.primaryBlue
                             : Colors.grey.shade500,
                       ),
@@ -1372,7 +1482,7 @@ class _PostCard extends StatelessWidget {
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => CommentsSheet(post: post),
+                    builder: (context) => CommentsSheet(post: widget.post),
                   );
                 },
                 child: Row(
@@ -1384,7 +1494,7 @@ class _PostCard extends StatelessWidget {
                     ),
                     SizedBox(width: 8.w),
                     Text(
-                      '${post.commentsCount} Replies',
+                      '${widget.post.commentsCount} Replies',
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -1395,6 +1505,368 @@ class _PostCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInlineEditor(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Edit Post',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.darkText,
+                ),
+              ),
+              const Spacer(),
+              if (widget.post.poll != null && !_removePoll)
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _removePoll = true;
+                    });
+                  },
+                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 16),
+                  label: const Text(
+                    'Remove Poll',
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
+              if (_removePoll)
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _removePoll = false;
+                    });
+                  },
+                  icon: const Icon(Icons.restore_rounded, color: AppColors.primaryBlue, size: 16),
+                  label: const Text(
+                    'Restore Poll',
+                    style: TextStyle(color: AppColors.primaryBlue, fontSize: 12),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: TextField(
+              controller: _contentController,
+              maxLines: 4,
+              maxLength: 200,
+              style: TextStyle(
+                fontSize: 15.sp,
+                color: AppColors.darkText,
+                fontWeight: FontWeight.w500,
+              ),
+              decoration: const InputDecoration(
+                hintText: 'Edit your thoughts...',
+                border: InputBorder.none,
+                counterText: '',
+              ),
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          // Image Edit section
+          if (widget.post.imageUrl != null && !_removeImage && _selectedImagePath == null)
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16.r),
+                  child: CachedNetworkImage(
+                    imageUrl: ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
+                    width: double.infinity,
+                    height: 180.h,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8.h,
+                  right: 8.w,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _removeImage = true;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(4.r),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+          if (_selectedImagePath != null)
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16.r),
+                  child: Image.file(
+                    File(_selectedImagePath!),
+                    width: double.infinity,
+                    height: 180.h,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8.h,
+                  right: 8.w,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedImagePath = null;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(4.r),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+          if ((widget.post.imageUrl == null || _removeImage) && _selectedImagePath == null)
+            OutlinedButton.icon(
+              onPressed: _pickImage,
+              icon: const Icon(Icons.add_photo_alternate_rounded, size: 18),
+              label: const Text('Add Image'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primaryBlue,
+                side: BorderSide(color: Colors.grey.shade300),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+            ),
+
+          // Poll Edit section
+          if (widget.post.poll != null && !_removePoll) ...[
+            SizedBox(height: 16.h),
+            Text(
+              'Poll Options',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.darkText,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            ...List.generate(_pollOptionControllers.length, (index) {
+              return Container(
+                margin: EdgeInsets.only(bottom: 8.h),
+                height: 42.h,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: TextField(
+                  controller: _pollOptionControllers[index],
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+                  decoration: InputDecoration(
+                    hintText: 'Option ${index + 1}',
+                    border: InputBorder.none,
+                  ),
+                ),
+              );
+            }),
+          ],
+
+          if (_removePoll) ...[
+            SizedBox(height: 8.h),
+            Text(
+              'Poll will be removed on save',
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: Colors.red.shade400,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+
+          SizedBox(height: 16.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isEditing = false;
+                    _contentController.text = widget.post.content;
+                    _selectedImagePath = null;
+                    _removeImage = false;
+                    _removePoll = false;
+                    _initPollControllers();
+                  });
+                },
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              ElevatedButton(
+                onPressed: () {
+                  final newContent = _contentController.text.trim();
+                  if (newContent.isEmpty &&
+                      _selectedImagePath == null &&
+                      (widget.post.imageUrl == null || _removeImage) &&
+                      (widget.post.poll == null || _removePoll)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Post content cannot be completely empty'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+
+                  final validPollOptions = _pollOptionControllers
+                      .map((c) => c.text.trim())
+                      .where((t) => t.isNotEmpty)
+                      .toList();
+
+                  context.read<SocialFeedCubit>().updatePost(
+                    postId: widget.post.id,
+                    content: newContent,
+                    imagePath: _selectedImagePath,
+                    removeImage: _removeImage,
+                    pollOptions: _removePoll ? null : validPollOptions,
+                    removePoll: _removePoll,
+                  );
+
+                  setState(() {
+                    _isEditing = false;
+                  });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Saving post changes...'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmDialog(BuildContext context, SocialPostEntity post) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        title: Text(
+          'Delete Post?',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: AppColors.darkText,
+            fontSize: 18.sp,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete this post? This action cannot be undone.',
+          style: TextStyle(
+            color: AppColors.greyText,
+            fontSize: 14.sp,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: AppColors.greyText,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<SocialFeedCubit>().deletePost(post.id);
+              Navigator.pop(dialogContext);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Post deleted successfully'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ],
       ),

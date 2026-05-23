@@ -95,24 +95,76 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll>
           }
           if (state.status == BookingsStatus.success &&
               state.scannedBooking != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BlocProvider.value(
-                  value: context.read<BookingsCubit>(),
-                  child: RoomSelectionPage(
-                    bookingId: state.scannedBooking!.bookingId,
-                    hostelId: state.scannedBooking!.hostelId,
-                    tenantName: state.scannedBooking!.tenantName,
-                    preAllocatedRoomId: state.scannedBooking!.roomId,
-                    preAllocatedBedNumber: state.scannedBooking!.bedNumber,
-                    bookedSharingType: state.scannedBooking!.sharingType,
-                    bookedRoomType: state.scannedBooking!.roomType,
+            final scanned = state.scannedBooking!;
+            if (scanned.reservedRoomId != null && scanned.reservedBed != null) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (dialogContext) => AlertDialog(
+                  title: const Text('Reserved Bed Found'),
+                  content: Text(
+                    '${scanned.tenantName} has reserved Bed ${scanned.reservedBed}.\n\nDo you want to assign this bed?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BlocProvider.value(
+                              value: context.read<BookingsCubit>(),
+                              child: RoomSelectionPage(
+                                bookingId: scanned.bookingId,
+                                hostelId: scanned.hostelId,
+                                tenantName: scanned.tenantName,
+                                preAllocatedRoomId: scanned.roomId,
+                                preAllocatedBedNumber: scanned.bedNumber,
+                                bookedSharingType: scanned.sharingType,
+                                bookedRoomType: scanned.roomType,
+                              ),
+                            ),
+                          ),
+                        );
+                        context.read<BookingsCubit>().clearScannedBooking();
+                      },
+                      child: const Text('Change Bed'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                        context.read<BookingsCubit>().finalizeCheckin(
+                          bookingId: scanned.bookingId,
+                          roomId: scanned.reservedRoomId!,
+                          bedNumber: scanned.reservedBed!,
+                        );
+                        context.read<BookingsCubit>().clearScannedBooking();
+                      },
+                      child: const Text('Assign Bed'),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<BookingsCubit>(),
+                    child: RoomSelectionPage(
+                      bookingId: scanned.bookingId,
+                      hostelId: scanned.hostelId,
+                      tenantName: scanned.tenantName,
+                      preAllocatedRoomId: scanned.roomId,
+                      preAllocatedBedNumber: scanned.bedNumber,
+                      bookedSharingType: scanned.sharingType,
+                      bookedRoomType: scanned.roomType,
+                    ),
                   ),
                 ),
-              ),
-            );
-            context.read<BookingsCubit>().clearScannedBooking();
+              );
+              context.read<BookingsCubit>().clearScannedBooking();
+            }
           }
         },
         child: BlocBuilder<HostelCubit, HostelState>(

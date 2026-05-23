@@ -9,6 +9,8 @@ class SocketService {
   io.Socket? _socket;
 
   final _messageController = StreamController<Map<String, dynamic>>.broadcast();
+  final _messageEditedController = StreamController<Map<String, dynamic>>.broadcast();
+  final _messageDeletedController = StreamController<Map<String, dynamic>>.broadcast();
   final _typingController = StreamController<String>.broadcast();
   final _stopTypingController = StreamController<String>.broadcast();
   final _bookingController = StreamController<Map<String, dynamic>>.broadcast();
@@ -17,6 +19,8 @@ class SocketService {
       StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
+  Stream<Map<String, dynamic>> get messageEditedStream => _messageEditedController.stream;
+  Stream<Map<String, dynamic>> get messageDeletedStream => _messageDeletedController.stream;
   Stream<String> get typingStream => _typingController.stream;
   Stream<String> get stopTypingStream => _stopTypingController.stream;
   Stream<Map<String, dynamic>> get bookingStream => _bookingController.stream;
@@ -104,6 +108,16 @@ class SocketService {
       _messageController.add(Map<String, dynamic>.from(data));
     });
 
+    _socket!.on('message_edited', (data) {
+      AppLogger.debug(' Socket: Message edited');
+      _messageEditedController.add(Map<String, dynamic>.from(data));
+    });
+
+    _socket!.on('message_deleted', (data) {
+      AppLogger.debug(' Socket: Message deleted');
+      _messageDeletedController.add(Map<String, dynamic>.from(data));
+    });
+
     _socket!.on('new_booking', (data) {
       AppLogger.info(' Received new_booking notification: $data');
       _bookingController.add(Map<String, dynamic>.from(data));
@@ -188,6 +202,8 @@ class SocketService {
 
   void dispose() {
     _messageController.close();
+    _messageEditedController.close();
+    _messageDeletedController.close();
     _typingController.close();
     _stopTypingController.close();
     _bookingController.close();

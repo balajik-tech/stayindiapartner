@@ -469,6 +469,54 @@ class StringUtils {
         if (locale == 'ml') return 'തീർപ്പാക്കാത്തത്';
         return 'Pending';
       }
+      if (key == 'security_deposit') {
+        if (locale == 'te') return 'సెక్యూరిటీ డిపాజిట్';
+        if (locale == 'ta') return 'பாதுகாப்பு வைப்பு';
+        if (locale == 'hi') return 'सुरक्षा जमा';
+        if (locale == 'kn') return 'ಭದ್ರತಾ ಠೇವಣಿ';
+        if (locale == 'ml') return 'സെക്യൂരിറ്റി ഡെപ്പോസിറ്റ്';
+        return 'Security Deposit';
+      }
+      if (key == 'maintenance') {
+        if (locale == 'te') return 'నిర్వహణ';
+        if (locale == 'ta') return 'பராமரிப்பு';
+        if (locale == 'hi') return 'रखरखाव';
+        if (locale == 'kn') return 'ನಿರ್ವಹಣೆ';
+        if (locale == 'ml') return 'മെയിന്റനൻസ്';
+        return 'Maintenance';
+      }
+      if (key == 'monthly_rent') {
+        if (locale == 'te') return 'నెలవారీ అద్దె';
+        if (locale == 'ta') return 'மாதாந்திர வாடகை';
+        if (locale == 'hi') return 'मासिक किराया';
+        if (locale == 'kn') return 'ಮಾಸಿಕ ಬಾಡಿಗೆ';
+        if (locale == 'ml') return 'പ്രതിമാസ വാടക';
+        return 'Monthly Rent';
+      }
+      if (key == 'revenue_breakdown') {
+        if (locale == 'te') return 'ఆదాయ విభజన';
+        if (locale == 'ta') return 'வருவாய் முறிவு';
+        if (locale == 'hi') return 'राजस्व विवरण';
+        if (locale == 'kn') return 'ಆದಾಯ ವಿಭಜನೆ';
+        if (locale == 'ml') return 'വരുമാന വിഭജനം';
+        return 'Revenue Breakdown';
+      }
+      if (key == 'revenue_distribution') {
+        if (locale == 'te') return 'ఆదాయ పంపిణీ';
+        if (locale == 'ta') return 'வருவாய் விநியோகம்';
+        if (locale == 'hi') return 'राजस्व वितरण';
+        if (locale == 'kn') return 'ಆದಾಯ ವಿತರಣೆ';
+        if (locale == 'ml') return 'വരുമാന വിതരണം';
+        return 'Revenue Distribution';
+      }
+      if (key == 'daily_rent') {
+        if (locale == 'te') return 'రోజువారీ అద్దె';
+        if (locale == 'ta') return 'தினசரி வாடகை';
+        if (locale == 'hi') return 'दैनिक किराया';
+        if (locale == 'kn') return 'ದೈನಂದಿನ ಬಾಡಿಗೆ';
+        if (locale == 'ml') return 'പ്രതിദിന വാടക';
+        return 'Daily Rent';
+      }
       if (key == 'revenue_trends') {
         if (locale == 'te') return 'ఆదాయ పోకడలు';
         if (locale == 'ta') return 'வருவாய் போக்குகள்';
@@ -1440,6 +1488,10 @@ class StringUtils {
       if (key == 'failed_delete_post_err') {
         if (locale == 'te') return 'పోస్ట్‌ను తొలగించడం విఫలమైంది';
         return 'Failed to delete post';
+      }
+      if (key == 'failed_update_post_err') {
+        if (locale == 'te') return 'పోస్ట్‌ను నవీకరించడం విఫలమైంది';
+        return 'Failed to update post';
       }
       if (key == 'failed_create_post_err') {
         if (locale == 'te') return 'పోస్ట్‌ను సృష్టించడం విఫలమైంది';

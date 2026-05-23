@@ -141,6 +141,8 @@ class ScanBookingResponseModel extends ScanBookingResponse {
     super.roomId,
     super.roomTypename,
     super.bedNumber,
+    super.reservedRoomId,
+    super.reservedBed,
   });
 
   factory ScanBookingResponseModel.fromJson(Map<String, dynamic> json) {
@@ -162,6 +164,8 @@ class ScanBookingResponseModel extends ScanBookingResponse {
         json['roomTypename']?.toString() ?? '',
       ),
       bedNumber: json['bedNumber'],
+      reservedRoomId: json['reservedRoomId']?.toString(),
+      reservedBed: json['reservedBed']?.toString(),
     );
   }
 }

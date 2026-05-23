@@ -25,6 +25,20 @@ class SendCommunityMessageUseCase {
       repository.sendMessage(hostelId, text);
 }
 
+class EditCommunityMessageUseCase {
+  final CommunityRepository repository;
+  EditCommunityMessageUseCase(this.repository);
+  Future<void> call(String hostelId, String messageId, String text) =>
+      repository.editMessage(hostelId, messageId, text);
+}
+
+class DeleteCommunityMessageUseCase {
+  final CommunityRepository repository;
+  DeleteCommunityMessageUseCase(this.repository);
+  Future<void> call(String hostelId, String messageId) =>
+      repository.deleteMessage(hostelId, messageId);
+}
+
 class SendCommunityImageUseCase {
   final CommunityRepository repository;
   SendCommunityImageUseCase(this.repository);
@@ -277,3 +291,25 @@ class DeleteSocialPostUseCase {
   DeleteSocialPostUseCase(this.repository);
   Future<void> call(String postId) => repository.deleteSocialPost(postId);
 }
+
+class UpdateSocialPostUseCase {
+  final CommunityRepository repository;
+  UpdateSocialPostUseCase(this.repository);
+  Future<void> call({
+    required String postId,
+    String? content,
+    String? imagePath,
+    bool? removeImage,
+    List<String>? pollOptions,
+    bool? removePoll,
+  }) =>
+      repository.updateSocialPost(
+        postId: postId,
+        content: content,
+        imagePath: imagePath,
+        removeImage: removeImage,
+        pollOptions: pollOptions,
+        removePoll: removePoll,
+      );
+}
+

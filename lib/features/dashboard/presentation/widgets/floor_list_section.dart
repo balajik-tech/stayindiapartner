@@ -10,7 +10,6 @@ import '../cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/floor_accordion.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/room_card.dart';
-import 'package:stayindia_owner/features/dashboard/presentation/widgets/bed_list_row.dart';
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart'
     as entity;
 
@@ -213,73 +212,7 @@ class FloorListSection extends StatelessWidget {
           );
         }
 
-        if (!state.isGridView) {
-          final allBeds = <Widget>[];
-          for (final floor in displayFloors) {
-            final filteredRooms = floor.rooms.where((room) {
-              if (query.isEmpty) return true;
-              final roomNum = room.roomNumber.toLowerCase();
-              final hasMatchingTenant = room.beds.any(
-                (bed) => (bed.tenantName?.toLowerCase().contains(query) ?? false),
-              );
-              return roomNum.contains(query) || hasMatchingTenant;
-            }).toList();
 
-            for (final room in filteredRooms) {
-              for (final bed in room.beds) {
-                allBeds.add(
-                  Column(
-                    children: [
-                      BedListRow(
-                        roomNumber: room.roomNumber,
-                        bedNumber: bed.bedNumber,
-                        status: bed.status,
-                        tenantName: bed.tenantName,
-                        onTap: () {
-                          // Optional: Add tap to open details like in RoomCard
-                        },
-                      ),
-                      Divider(height: 1, color: const Color(0xFFF1F5F9)),
-                    ],
-                  ),
-                );
-              }
-            }
-          }
-
-          if (allBeds.isEmpty) {
-            return SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(child: Text('no_beds_found'.tr())),
-            );
-          }
-
-          return SliverPadding(
-            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-            sliver: SliverToBoxAdapter(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    const BedListHeader(),
-                    Divider(height: 1, color: const Color(0xFFF1F5F9)),
-                    ...allBeds,
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
 
         return SliverPadding(
           padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
@@ -333,7 +266,7 @@ class FloorListSection extends StatelessWidget {
                     },
                   ),
                   isInitialExpanded: index == 0 || query.isNotEmpty,
-                  isGridView: true,
+                  isGridView: state.isGridView,
                   itemCount: filteredRooms.length,
                   itemBuilder: (context, idx) {
                     final room = filteredRooms[idx];
@@ -342,7 +275,7 @@ class FloorListSection extends StatelessWidget {
                       roomNumber: room.roomNumber,
                       sharingType: room.sharingType,
                       occupancy: room.occupancy,
-                      isGridView: true,
+                      isGridView: state.isGridView,
                       rent: room.rent,
                       dailyRent: room.dailyRent,
                       beds: room.beds

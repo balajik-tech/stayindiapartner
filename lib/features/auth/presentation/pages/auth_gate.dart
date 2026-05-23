@@ -10,6 +10,7 @@ import 'package:stayindia_owner/features/onboarding/presentation/pages/onboardin
 import '../cubit/auth_cubit.dart';
 import 'login_page.dart';
 import 'link_phone_page.dart';
+import 'package:stayindia_owner/core/widgets/animated_splash_text.dart';
 
 class AuthGate extends StatefulWidget {
   final Widget dashboard;
@@ -29,11 +30,19 @@ class _AuthGateState extends State<AuthGate> {
   AuthState? _lastActiveState;
   bool _hasSeenOnboarding = false;
   bool _isCheckingOnboarding = true;
+  bool _isSplashDelayDone = false;
 
   @override
   void initState() {
     super.initState();
     _checkOnboardingStatus();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _isSplashDelayDone = true;
+        });
+      }
+    });
   }
 
   Future<void> _checkOnboardingStatus() async {
@@ -73,7 +82,7 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isCheckingOnboarding) {
+    if (_isCheckingOnboarding || !_isSplashDelayDone) {
       return const _SplashScreen();
     }
 
@@ -102,7 +111,8 @@ class _AuthGateState extends State<AuthGate> {
           final activeState = _lastActiveState ?? state;
 
           if (activeState is AuthInitial ||
-              activeState is AuthSessionRestoring) {
+              activeState is AuthSessionRestoring ||
+              !_isSplashDelayDone) {
             return const _SplashScreen();
           }
 
@@ -163,7 +173,9 @@ class _SplashScreen extends StatelessWidget {
                 color: AppColors.primaryBlue,
               ),
             ),
-            SizedBox(height: 48.h),
+            SizedBox(height: 24.h),
+            const AnimatedFutureOfLivingText(),
+            SizedBox(height: 32.h),
             const CircularProgressIndicator(color: AppColors.primaryBlue),
           ],
         ),

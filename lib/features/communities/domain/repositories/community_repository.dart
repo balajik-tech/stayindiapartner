@@ -8,6 +8,8 @@ abstract class CommunityRepository {
     String? before,
   });
   Future<void> sendMessage(String hostelId, String text);
+  Future<void> editMessage(String hostelId, String messageId, String text);
+  Future<void> deleteMessage(String hostelId, String messageId);
   Future<void> sendImageMessage(String hostelId, String imagePath);
 
   Future<List<AnnouncementEntity>> getAnnouncements(String hostelId);
@@ -100,4 +102,12 @@ abstract class CommunityRepository {
   Future<void> addPostComment(String postId, String text);
   Future<void> votePoll(String postId, int optionIndex);
   Future<void> deleteSocialPost(String postId);
+  Future<void> updateSocialPost({
+    required String postId,
+    String? content,
+    String? imagePath,
+    bool? removeImage,
+    List<String>? pollOptions,
+    bool? removePoll,
+  });
 }

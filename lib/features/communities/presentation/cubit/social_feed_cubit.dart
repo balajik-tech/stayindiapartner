@@ -64,6 +64,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   final AddPostCommentUseCase _addPostComment;
   final VotePollUseCase _votePoll;
   final DeleteSocialPostUseCase _deleteSocialPost;
+  final UpdateSocialPostUseCase _updateSocialPost;
 
   SocialFeedCubit({
     required GetSocialFeedUseCase getSocialFeedUseCase,
@@ -72,12 +73,14 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
     required AddPostCommentUseCase addPostCommentUseCase,
     required VotePollUseCase votePollUseCase,
     required DeleteSocialPostUseCase deleteSocialPostUseCase,
+    required UpdateSocialPostUseCase updateSocialPostUseCase,
   }) : _getSocialFeed = getSocialFeedUseCase,
        _createSocialPost = createSocialPostUseCase,
        _togglePostLike = togglePostLikeUseCase,
        _addPostComment = addPostCommentUseCase,
        _votePoll = votePollUseCase,
        _deleteSocialPost = deleteSocialPostUseCase,
+       _updateSocialPost = updateSocialPostUseCase,
        super(SocialFeedInitial());
 
   Future<void> loadFeed({bool isRefresh = false}) async {
@@ -252,6 +255,35 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
     if (s is SocialFeedLoaded) {
       try {
         await _deleteSocialPost(postId);
+        final posts = await _getSocialFeed(limit: 20, skip: 0);
+        if (state is SocialFeedLoaded) {
+          emit((state as SocialFeedLoaded).copyWith(posts: posts));
+        }
+      } catch (e) {
+        emit(SocialFeedError(message: ErrorHelper.toFriendlyMessage(e)));
+      }
+    }
+  }
+
+  Future<void> updatePost({
+    required String postId,
+    String? content,
+    String? imagePath,
+    bool? removeImage,
+    List<String>? pollOptions,
+    bool? removePoll,
+  }) async {
+    final s = state;
+    if (s is SocialFeedLoaded) {
+      try {
+        await _updateSocialPost(
+          postId: postId,
+          content: content,
+          imagePath: imagePath,
+          removeImage: removeImage,
+          pollOptions: pollOptions,
+          removePoll: removePoll,
+        );
         final posts = await _getSocialFeed(limit: 20, skip: 0);
         if (state is SocialFeedLoaded) {
           emit((state as SocialFeedLoaded).copyWith(posts: posts));

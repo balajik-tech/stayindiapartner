@@ -7,6 +7,7 @@ import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_
 import 'package:stayindia_owner/features/dashboard/domain/entities/occupancy_summary.dart' as entity;
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/notifications/domain/repositories/notification_repository.dart';
+import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 
 class DetailTenantItem {
   final String id;
@@ -131,6 +132,26 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
               subtitle = 'Maintenance active';
               if (displayName.isEmpty) displayName = 'Maintenance Bed';
               break;
+            case 'free':
+              matches = bed.status.toLowerCase() == 'free' || bed.status.toLowerCase() == 'vacant' || bed.status.toLowerCase() == 'available';
+              subtitle = 'Available for booking';
+              if (displayName.isEmpty) displayName = 'Empty Bed';
+              break;
+            case 'total':
+              matches = true;
+              subtitle = bed.status.toUpperCase();
+              if (displayName.isEmpty) displayName = 'Empty Bed';
+              break;
+            case 'in':
+              if (bed.tenantName == null || bed.tenantName!.isEmpty) continue;
+              matches = bed.geofenceStatus == 'INSIDE' && !bed.isAway;
+              subtitle = 'Currently In';
+              break;
+            case 'out':
+              if (bed.tenantName == null || bed.tenantName!.isEmpty) continue;
+              matches = bed.geofenceStatus == 'OUTSIDE' && !bed.isAway;
+              subtitle = 'Currently Out';
+              break;
             default:
               matches = false;
           }
@@ -170,6 +191,14 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
         return 'Overdue Payments';
       case 'repair':
         return 'Beds under Maintenance';
+      case 'free':
+        return 'Available Beds';
+      case 'total':
+        return 'All Beds';
+      case 'in':
+        return 'Tenants Currently In';
+      case 'out':
+        return 'Tenants Currently Out';
       default:
         return 'Tenant List';
     }
@@ -320,15 +349,11 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
         if (state is! DashboardLoaded) return const SizedBox.shrink();
 
         final metric = state.selectedMetric;
-        if (metric == null ||
-            metric == 'properties' ||
-            metric == 'total' ||
-            metric == 'free') {
+        if (metric == null || metric == 'properties') {
           return const SizedBox.shrink();
         }
 
         final tenants = _getTenants(state, metric);
-        if (tenants.isEmpty) return const SizedBox.shrink();
 
         final title = _getTitle(metric);
         final allChecked = tenants.every((t) => _selectedIds.contains(t.id));
@@ -397,9 +422,23 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                       width: 1,
                     ),
                   ),
-                  child: Column(
-                    children: [
-                      // List of tenants
+                  child: tenants.isEmpty
+                      ? Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32.h),
+                          child: Center(
+                            child: Text(
+                              'No beds found',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Column(
+                          children: [
+                            // List of tenants
                       ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -431,22 +470,11 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                                 ),
 
                                 // Avatar
-                                CircleAvatar(
-                                  radius: 16.r,
-                                  backgroundColor: Colors.grey[300],
-                                  backgroundImage: tenant.avatar != null && tenant.avatar!.isNotEmpty
-                                      ? NetworkImage(tenant.avatar!)
-                                      : null,
-                                  child: tenant.avatar == null || tenant.avatar!.isEmpty
-                                      ? Text(
-                                          tenant.name.isNotEmpty ? tenant.name[0].toUpperCase() : '?',
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        )
-                                      : null,
+                                CustomAvatar(
+                                  imageUrl: tenant.avatar,
+                                  name: tenant.name,
+                                  size: 32,
+                                  isCircle: true,
                                 ),
                                 SizedBox(width: 12.w),
 
@@ -485,7 +513,7 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
-                                if (metric != 'repair') ...[
+                                if (metric != 'repair' && metric != 'free' && metric != 'total') ...[
                                   SizedBox(width: 16.w),
 
                                   // Checkbox
@@ -525,7 +553,7 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                           );
                         },
                       ),                      // Footer Row
-                      if (metric != 'repair')
+                      if (metric != 'repair' && metric != 'free' && metric != 'total')
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                         decoration: BoxDecoration(

@@ -93,17 +93,25 @@ class SummaryCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(icon, color: contentColor, size: 16.sp),
+                  Icon(icon, color: contentColor, size: 14.sp),
                   SizedBox(width: 4.w),
                   Text(
                     count,
                     style: TextStyle(
-                      fontSize: 22.sp,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.w900,
                       color: contentColor,
                       height: 1.0,
                     ),
                   ),
+                  if (onTap != null) ...[
+                    SizedBox(width: 2.w),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: contentColor.withValues(alpha: 0.7),
+                      size: 14.sp,
+                    ),
+                  ],
                 ],
               ),
               SizedBox(height: 2.h),
@@ -265,34 +273,33 @@ class SummaryCardsSection extends StatelessWidget {
     String inCount,
     String outCount,
   ) {
-    return BouncingWrapper(
-      onTap: () {},
-      scaleFactor: 0.97,
-      child: Container(
-        width: 132.w,
-        height: 54.h,
-        margin: EdgeInsets.only(right: 10.w, bottom: 4.h, top: 2.h),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(11.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                SizedBox(height: 18.h),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
+    return Container(
+      width: 132.w,
+      height: 54.h,
+      margin: EdgeInsets.only(right: 10.w, bottom: 4.h, top: 2.h),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(11.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              SizedBox(height: 18.h),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => context.read<DashboardCubit>().toggleMetric('in'),
                         child: Container(
                           color: const Color(0xFF34A853),
                           child: _buildAttendanceStat(
@@ -303,7 +310,10 @@ class SummaryCardsSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Expanded(
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => context.read<DashboardCubit>().toggleMetric('out'),
                         child: Container(
                           color: const Color(0xFF94A3B8),
                           child: _buildAttendanceStat(
@@ -314,9 +324,10 @@ class SummaryCardsSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
               ],
             ),
 
@@ -361,7 +372,6 @@ class SummaryCardsSection extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -381,16 +391,22 @@ class SummaryCardsSection extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: color, size: 12.sp),
+                Icon(icon, color: color, size: 10.sp),
                 SizedBox(width: 4.w),
                 Text(
                   count,
                   style: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     height: 1.0,
                   ),
+                ),
+                SizedBox(width: 2.w),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Colors.white.withValues(alpha: 0.7),
+                  size: 10.sp,
                 ),
               ],
             ),

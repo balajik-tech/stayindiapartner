@@ -484,6 +484,39 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
     }
   }
 
+  Future<void> _editPost({
+    required String postId,
+    String? content,
+    String? imagePath,
+    bool? removeImage,
+    List<String>? pollOptions,
+    bool? removePoll,
+  }) async {
+    try {
+      await sl<UpdateSocialPostUseCase>().call(
+        postId: postId,
+        content: content,
+        imagePath: imagePath,
+        removeImage: removeImage,
+        pollOptions: pollOptions,
+        removePoll: removePoll,
+      );
+      _feedSkip = 0;
+      await _loadFeed(isRefresh: true);
+    } catch (e) {
+      AppLogger.error('Error updating post: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              StringUtils.translate('failed_update_post_err', context: context),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   void _showCommentsSheet(SocialPostEntity post) {
     showModalBottomSheet(
       context: context,
@@ -1046,6 +1079,21 @@ class AssociationIntroPageState extends State<AssociationIntroPage> {
             _voteOnPoll(post, optionIndex);
           },
           onDelete: () => _deletePost(post.id),
+          onEdit: ({
+            required String content,
+            String? imagePath,
+            bool? removeImage,
+            List<String>? pollOptions,
+            bool? removePoll,
+          }) =>
+              _editPost(
+                postId: post.id,
+                content: content,
+                imagePath: imagePath,
+                removeImage: removeImage,
+                pollOptions: pollOptions,
+                removePoll: removePoll,
+              ),
         );
       }, childCount: _posts.length + (_hasMorePosts ? 1 : 0)),
     );

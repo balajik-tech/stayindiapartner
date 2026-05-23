@@ -14,6 +14,8 @@ void registerCommunityFeature(GetIt sl) {
       getCommunityDetailsUseCase: sl(),
       getCommunityMessagesUseCase: sl(),
       sendCommunityMessageUseCase: sl(),
+      editCommunityMessageUseCase: sl(),
+      deleteCommunityMessageUseCase: sl(),
       sendCommunityImageUseCase: sl(),
       getAnnouncementsUseCase: sl(),
       postAnnouncementUseCase: sl(),
@@ -52,12 +54,15 @@ void registerCommunityFeature(GetIt sl) {
       addPostCommentUseCase: sl(),
       votePollUseCase: sl(),
       deleteSocialPostUseCase: sl(),
+      updateSocialPostUseCase: sl(),
     ),
   );
 
   sl.registerLazySingleton(() => GetCommunityDetailsUseCase(sl()));
   sl.registerLazySingleton(() => GetCommunityMessagesUseCase(sl()));
   sl.registerLazySingleton(() => SendCommunityMessageUseCase(sl()));
+  sl.registerLazySingleton(() => EditCommunityMessageUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteCommunityMessageUseCase(sl()));
   sl.registerLazySingleton(() => SendCommunityImageUseCase(sl()));
   sl.registerLazySingleton(() => GetAnnouncementsUseCase(sl()));
   sl.registerLazySingleton(() => PostAnnouncementUseCase(sl()));
@@ -82,6 +87,7 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerLazySingleton(() => AddPostCommentUseCase(sl()));
   sl.registerLazySingleton(() => VotePollUseCase(sl()));
   sl.registerLazySingleton(() => DeleteSocialPostUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateSocialPostUseCase(sl()));
 
   sl.registerLazySingleton<CommunityRepository>(
     () => CommunityRepositoryImpl(remote: sl()),

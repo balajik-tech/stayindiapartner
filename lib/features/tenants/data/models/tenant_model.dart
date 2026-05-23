@@ -132,6 +132,8 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
     super.accessCode,
     super.qrToken,
     super.status,
+    super.electricityBill,
+    super.parkingBill,
   });
 
   factory TenantStayDetailModel.fromJson(Map<String, dynamic> json) {
@@ -166,6 +168,8 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
       accessCode: json['accessCode']?.toString(),
       qrToken: json['qrToken']?.toString(),
       status: json['status']?.toString(),
+      electricityBill: _toDouble(json['electricityBill']),
+      parkingBill: _toDouble(json['parkingBill']),
     );
   }
 }

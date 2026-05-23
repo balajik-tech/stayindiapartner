@@ -8,6 +8,9 @@ class FinancialStatsModel extends FinancialStats {
     required super.totalBeds,
     required super.occupiedBeds,
     required super.pendingPayments,
+    required super.securityDeposit,
+    required super.maintenance,
+    required super.dailyRent,
   });
 
   factory FinancialStatsModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +21,9 @@ class FinancialStatsModel extends FinancialStats {
       totalBeds: (json['totalBeds'] ?? 0).toInt(),
       occupiedBeds: (json['occupiedBeds'] ?? 0).toInt(),
       pendingPayments: (json['pendingPayments'] ?? 0).toDouble(),
+      securityDeposit: (json['securityDeposit'] ?? 0).toDouble(),
+      maintenance: (json['maintenance'] ?? 0).toDouble(),
+      dailyRent: (json['dailyRent'] ?? 0).toDouble(),
     );
   }
 }

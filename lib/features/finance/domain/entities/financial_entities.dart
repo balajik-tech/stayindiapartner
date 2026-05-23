@@ -7,6 +7,9 @@ class FinancialStats extends Equatable {
   final int totalBeds;
   final int occupiedBeds;
   final double pendingPayments;
+  final double securityDeposit;
+  final double maintenance;
+  final double dailyRent;
 
   const FinancialStats({
     required this.totalRevenue,
@@ -15,6 +18,9 @@ class FinancialStats extends Equatable {
     required this.totalBeds,
     required this.occupiedBeds,
     required this.pendingPayments,
+    required this.securityDeposit,
+    required this.maintenance,
+    required this.dailyRent,
   });
 
   @override
@@ -25,6 +31,9 @@ class FinancialStats extends Equatable {
     totalBeds,
     occupiedBeds,
     pendingPayments,
+    securityDeposit,
+    maintenance,
+    dailyRent,
   ];
 }
 

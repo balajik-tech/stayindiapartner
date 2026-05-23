@@ -209,12 +209,28 @@ class _NotificationItem extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 8.w),
-                          Text(
-                            _formatDate(notification.createdAt),
-                            style: GoogleFonts.outfit(
-                              fontSize: 10.sp,
-                              color: AppColors.greyText.withValues(alpha: 0.6),
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                _formatDate(notification.createdAt),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 10.sp,
+                                  color: AppColors.greyText.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              if (notification.type.toUpperCase() == 'BOOKING' && _getBookingDate(notification.metadata) != null) ...[
+                                SizedBox(height: 2.h),
+                                Text(
+                                  'For: ${_getBookingDate(notification.metadata)!}',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 10.sp,
+                                    color: AppColors.primaryBlue,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
@@ -251,5 +267,19 @@ class _NotificationItem extends StatelessWidget {
     } else {
       return DateFormat('dd MMM').format(date);
     }
+  }
+
+  String? _getBookingDate(Map<String, dynamic>? metadata) {
+    if (metadata == null) return null;
+    final dateStr = metadata['startDate'] ?? metadata['bookingDate'] ?? metadata['date'];
+    if (dateStr != null) {
+      try {
+        final parsed = DateTime.parse(dateStr.toString());
+        return DateFormat('dd MMM yyyy').format(parsed);
+      } catch (e) {
+        return dateStr.toString();
+      }
+    }
+    return null;
   }
 }

@@ -14,6 +14,8 @@ class CommunityCubit extends Cubit<CommunityState> {
   final GetCommunityDetailsUseCase _getDetails;
   final GetCommunityMessagesUseCase _getMessages;
   final SendCommunityMessageUseCase _sendMessage;
+  final EditCommunityMessageUseCase _editMessage;
+  final DeleteCommunityMessageUseCase _deleteMessage;
   final SendCommunityImageUseCase _sendImage;
   final GetAnnouncementsUseCase _getAnnouncements;
   final PostAnnouncementUseCase _postAnnouncement;
@@ -22,6 +24,8 @@ class CommunityCubit extends Cubit<CommunityState> {
   final SocketService _socketService;
 
   StreamSubscription? _messageSubscription;
+  StreamSubscription? _messageEditedSubscription;
+  StreamSubscription? _messageDeletedSubscription;
   String? _activeHostelId;
 
   final Map<String, List<CommunityMessageEntity>> _messagesCache = {};
@@ -34,6 +38,8 @@ class CommunityCubit extends Cubit<CommunityState> {
     required GetCommunityDetailsUseCase getCommunityDetailsUseCase,
     required GetCommunityMessagesUseCase getCommunityMessagesUseCase,
     required SendCommunityMessageUseCase sendCommunityMessageUseCase,
+    required EditCommunityMessageUseCase editCommunityMessageUseCase,
+    required DeleteCommunityMessageUseCase deleteCommunityMessageUseCase,
     required SendCommunityImageUseCase sendCommunityImageUseCase,
     required GetAnnouncementsUseCase getAnnouncementsUseCase,
     required PostAnnouncementUseCase postAnnouncementUseCase,
@@ -43,6 +49,8 @@ class CommunityCubit extends Cubit<CommunityState> {
   }) : _getDetails = getCommunityDetailsUseCase,
        _getMessages = getCommunityMessagesUseCase,
        _sendMessage = sendCommunityMessageUseCase,
+       _editMessage = editCommunityMessageUseCase,
+       _deleteMessage = deleteCommunityMessageUseCase,
        _sendImage = sendCommunityImageUseCase,
        _getAnnouncements = getAnnouncementsUseCase,
        _postAnnouncement = postAnnouncementUseCase,
@@ -78,6 +86,60 @@ class CommunityCubit extends Cubit<CommunityState> {
               ),
             );
           }
+        }
+      }
+    });
+
+    _messageEditedSubscription?.cancel();
+    _messageEditedSubscription = _socketService.messageEditedStream.listen((data) {
+      final editedMessage = CommunityMessageModel.fromJson(data);
+      final roomId = editedMessage.roomId ?? _activeHostelId;
+
+      if (roomId != null) {
+        final currentMessages = _messagesCache[roomId] ?? [];
+        final updatedMessages = currentMessages.map((m) {
+          return m.id == editedMessage.id ? editedMessage : m;
+        }).toList();
+
+        _messagesCache[roomId] = updatedMessages;
+
+        if (roomId == _activeHostelId && state is CommunityLoaded) {
+          emit((state as CommunityLoaded).copyWith(messages: updatedMessages));
+        }
+      }
+    });
+
+    _messageDeletedSubscription?.cancel();
+    _messageDeletedSubscription = _socketService.messageDeletedStream.listen((data) {
+      final roomId = data['roomId']?.toString() ?? _activeHostelId;
+      final deletedId = data['id']?.toString() ?? '';
+
+      if (roomId != null) {
+        final currentMessages = _messagesCache[roomId] ?? [];
+        final updatedMessages = currentMessages.map((m) {
+          if (m.id == deletedId) {
+            return CommunityMessageModel(
+              id: m.id,
+              senderId: m.senderId,
+              senderName: m.senderName,
+              text: '',
+              createdAt: m.createdAt,
+              isMe: m.isMe,
+              senderAvatar: m.senderAvatar,
+              roomId: m.roomId,
+              type: m.type,
+              isSystem: m.isSystem,
+              isEdited: m.isEdited,
+              isDeleted: true,
+            );
+          }
+          return m;
+        }).toList();
+
+        _messagesCache[roomId] = updatedMessages;
+
+        if (roomId == _activeHostelId && state is CommunityLoaded) {
+          emit((state as CommunityLoaded).copyWith(messages: updatedMessages));
         }
       }
     });
@@ -238,6 +300,98 @@ class CommunityCubit extends Cubit<CommunityState> {
     }
   }
 
+  Future<void> editMessage(String messageId, String newText) async {
+    final currentState = state;
+    if (currentState is! CommunityLoaded || newText.trim().isEmpty || _activeHostelId == null) return;
+
+    final currentMessages = List<CommunityMessageEntity>.from(currentState.messages);
+    final index = currentMessages.indexWhere((m) => m.id == messageId);
+    CommunityMessageEntity? oldMessage;
+    
+    if (index != -1) {
+      oldMessage = currentMessages[index];
+      final optimisticMessage = CommunityMessageEntity(
+        id: oldMessage.id,
+        senderId: oldMessage.senderId,
+        senderName: oldMessage.senderName,
+        text: newText,
+        createdAt: oldMessage.createdAt,
+        isMe: oldMessage.isMe,
+        senderAvatar: oldMessage.senderAvatar,
+        roomId: oldMessage.roomId,
+        type: oldMessage.type,
+        isSystem: oldMessage.isSystem,
+        isEdited: true,
+        isDeleted: oldMessage.isDeleted,
+      );
+      currentMessages[index] = optimisticMessage;
+      _messagesCache[_activeHostelId!] = currentMessages;
+      emit(currentState.copyWith(messages: currentMessages));
+    }
+
+    try {
+      await _editMessage(_activeHostelId!, messageId, newText);
+    } catch (e) {
+      AppLogger.error('editMessage failed', e);
+      if (oldMessage != null && state is CommunityLoaded) {
+        final fallbackState = state as CommunityLoaded;
+        final fallbackMessages = List<CommunityMessageEntity>.from(fallbackState.messages);
+        final fallbackIndex = fallbackMessages.indexWhere((m) => m.id == messageId);
+        if (fallbackIndex != -1) {
+          fallbackMessages[fallbackIndex] = oldMessage;
+          _messagesCache[_activeHostelId!] = fallbackMessages;
+          emit(fallbackState.copyWith(messages: fallbackMessages));
+        }
+      }
+    }
+  }
+
+  Future<void> deleteMessage(String messageId) async {
+    final currentState = state;
+    if (currentState is! CommunityLoaded || _activeHostelId == null) return;
+
+    final currentMessages = List<CommunityMessageEntity>.from(currentState.messages);
+    final index = currentMessages.indexWhere((m) => m.id == messageId);
+    CommunityMessageEntity? oldMessage;
+
+    if (index != -1) {
+      oldMessage = currentMessages[index];
+      final optimisticMessage = CommunityMessageEntity(
+        id: oldMessage.id,
+        senderId: oldMessage.senderId,
+        senderName: oldMessage.senderName,
+        text: '',
+        createdAt: oldMessage.createdAt,
+        isMe: oldMessage.isMe,
+        senderAvatar: oldMessage.senderAvatar,
+        roomId: oldMessage.roomId,
+        type: oldMessage.type,
+        isSystem: oldMessage.isSystem,
+        isEdited: oldMessage.isEdited,
+        isDeleted: true,
+      );
+      currentMessages[index] = optimisticMessage;
+      _messagesCache[_activeHostelId!] = currentMessages;
+      emit(currentState.copyWith(messages: currentMessages));
+    }
+
+    try {
+      await _deleteMessage(_activeHostelId!, messageId);
+    } catch (e) {
+      AppLogger.error('deleteMessage failed', e);
+      if (oldMessage != null && state is CommunityLoaded) {
+        final fallbackState = state as CommunityLoaded;
+        final fallbackMessages = List<CommunityMessageEntity>.from(fallbackState.messages);
+        final fallbackIndex = fallbackMessages.indexWhere((m) => m.id == messageId);
+        if (fallbackIndex != -1) {
+          fallbackMessages[fallbackIndex] = oldMessage;
+          _messagesCache[_activeHostelId!] = fallbackMessages;
+          emit(fallbackState.copyWith(messages: fallbackMessages));
+        }
+      }
+    }
+  }
+
   Future<void> sendImageMessage(
     String hostelId,
     String imagePath, {
@@ -324,6 +478,8 @@ class CommunityCubit extends Cubit<CommunityState> {
   @override
   Future<void> close() {
     _messageSubscription?.cancel();
+    _messageEditedSubscription?.cancel();
+    _messageDeletedSubscription?.cancel();
     return super.close();
   }
 }

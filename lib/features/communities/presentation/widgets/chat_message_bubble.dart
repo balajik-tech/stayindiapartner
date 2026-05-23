@@ -8,23 +8,34 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final CommunityMessageEntity message;
+  final void Function(LongPressStartDetails)? onLongPressStart;
 
-  const ChatMessageBubble({super.key, required this.message});
+  const ChatMessageBubble({
+    super.key,
+    required this.message,
+    this.onLongPressStart,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (message.isDeleted || (message.text.isEmpty && (message.imageUrl == null || message.imageUrl!.isEmpty))) {
+      return const SizedBox.shrink();
+    }
+
     if (message.isSystem) {
       return _buildSystemMessage();
     }
 
     final bool isMe = message.isMe;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: Row(
-        mainAxisAlignment: isMe
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+    return GestureDetector(
+      onLongPressStart: onLongPressStart,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 16.h),
+        child: Row(
+          mainAxisAlignment: isMe
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
@@ -104,39 +115,7 @@ class ChatMessageBubble extends StatelessWidget {
                         if (message.text.isNotEmpty) SizedBox(height: 8.h),
                       ],
                       if (message.text.isNotEmpty)
-                        Text(
-                          message.text,
-                          style: GoogleFonts.outfit(
-                            fontSize: 15.sp,
-                            color: isMe ? Colors.white : AppColors.darkText,
-                            height: 1.4,
-                          ),
-                        ),
-                      SizedBox(height: 6.h),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            _formatTime(message.createdAt),
-                            style: GoogleFonts.outfit(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w500,
-                              color: isMe
-                                  ? Colors.white.withValues(alpha: 0.7)
-                                  : AppColors.greyText,
-                            ),
-                          ),
-                          if (isMe) ...[
-                            SizedBox(width: 4.w),
-                            Icon(
-                              Icons.done_all_rounded,
-                              size: 14.sp,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                          ],
-                        ],
-                      ),
+                        _buildMessageWithInlineTime(isMe),
                     ],
                   ),
                 ),
@@ -146,6 +125,77 @@ class ChatMessageBubble extends StatelessWidget {
           if (isMe) SizedBox(width: 12.w),
         ],
       ),
+    ));
+  }
+
+  Widget _buildMessageWithInlineTime(bool isMe) {
+    final timeColor = isMe ? Colors.white.withValues(alpha: 0.7) : AppColors.greyText;
+    final textColor = isMe ? Colors.white : AppColors.darkText;
+    final timeString = _formatTime(message.createdAt);
+
+    final timeWidget = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (message.isEdited) ...[
+          Text(
+            "(edited) ",
+            style: GoogleFonts.outfit(
+              fontSize: 10.sp,
+              fontStyle: FontStyle.italic,
+              color: timeColor,
+            ),
+          ),
+        ],
+        Text(
+          timeString,
+          style: GoogleFonts.outfit(
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w500,
+            color: timeColor,
+          ),
+        ),
+        if (isMe) ...[
+          SizedBox(width: 4.w),
+          Icon(
+            Icons.done_all_rounded,
+            size: 14.sp,
+            color: timeColor,
+          ),
+        ],
+      ],
+    );
+
+    return Stack(
+      children: [
+        Padding(
+          padding: EdgeInsets.only(bottom: 2.h),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: message.text,
+                  style: GoogleFonts.outfit(
+                    fontSize: 15.sp,
+                    color: textColor,
+                    height: 1.4,
+                  ),
+                ),
+                WidgetSpan(
+                  child: SizedBox(
+                    width: timeString.length * 6.5.w + (isMe ? 20.w : 4.w) + (message.isEdited ? 45.w : 0),
+                    height: 0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          right: 0,
+          bottom: 0,
+          child: timeWidget,
+        ),
+      ],
     );
   }
 

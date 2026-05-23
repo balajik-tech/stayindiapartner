@@ -594,9 +594,9 @@ class _ReportsDashboardPageState extends State<ReportsDashboardPage> {
     return Text(
       label,
       style: TextStyle(
-        fontSize: 10.sp,
+        fontSize: 12.sp,
         fontWeight: FontWeight.w800,
-        color: AppColors.textSecondary,
+        color: const Color(0xFF475569),
         letterSpacing: 1.2,
       ),
     );

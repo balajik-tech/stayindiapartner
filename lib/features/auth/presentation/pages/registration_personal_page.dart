@@ -27,8 +27,7 @@ class RegistrationPersonalPage extends StatefulWidget {
 
 class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     with SingleTickerProviderStateMixin {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
 
   final _stateController = TextEditingController();
@@ -58,8 +57,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _fullNameController.dispose();
     _emailController.dispose();
     _stateController.dispose();
     _districtController.dispose();
@@ -110,8 +108,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
   }
 
   void _onContinue(BuildContext context) async {
-    final firstName = _firstNameController.text.trim();
-    final lastName = _lastNameController.text.trim();
+    final fullName = _fullNameController.text.trim();
     final email = _emailController.text.trim();
 
     final stateStr = _stateController.text.trim();
@@ -121,8 +118,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
 
     final address = "$street, $district, $stateStr - $pincode";
 
-    if (firstName.isEmpty ||
-        lastName.isEmpty ||
+    if (fullName.isEmpty ||
         email.isEmpty ||
         stateStr.isEmpty ||
         district.isEmpty ||
@@ -147,10 +143,14 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
       phone = await sl<TokenStorage>().getPhone() ?? '';
     }
 
+    final int spaceIndex = fullName.indexOf(' ');
+    final String parsedFirstName = spaceIndex == -1 ? fullName : fullName.substring(0, spaceIndex);
+    final String parsedLastName = spaceIndex == -1 ? "" : fullName.substring(spaceIndex + 1);
+
     authCubit.completeProfile(
       ProfileParams(
-        firstName: firstName,
-        lastName: lastName,
+        firstName: parsedFirstName,
+        lastName: parsedLastName,
         email: email,
         phone: phone,
         address: address,
@@ -379,24 +379,10 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
   Widget _buildFormSection() {
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: AuthTextField(
-                label: 'First Name',
-                controller: _firstNameController,
-                hintText: 'e.g. Rahul',
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: AuthTextField(
-                label: 'Last Name',
-                controller: _lastNameController,
-                hintText: 'e.g. Sharma',
-              ),
-            ),
-          ],
+        AuthTextField(
+          label: 'Full Name',
+          controller: _fullNameController,
+          hintText: 'e.g. Rahul Sharma',
         ),
         SizedBox(height: 24.h),
         AuthTextField(

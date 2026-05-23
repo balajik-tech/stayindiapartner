@@ -48,6 +48,8 @@ class _TenantsChatView extends StatefulWidget {
 class _TenantsChatViewState extends State<_TenantsChatView> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
+  String? _editingMessageId;
 
   @override
   void initState() {
@@ -68,7 +70,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels <= 40) {
+    if (_scrollController.hasClients && _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 40) {
       final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
       context.read<CommunityCubit>().loadOlderMessages(page.hostelId);
     }
@@ -78,7 +80,78 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _showMessageOptions(BuildContext context, CommunityMessageEntity message, Offset position) async {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final result = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & const Size(40, 40),
+        Offset.zero & overlay.size,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+      color: Colors.white,
+      items: [
+        PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              const Icon(Icons.edit_rounded, color: AppColors.primaryBlue, size: 20),
+              SizedBox(width: 12.w),
+              Text('Edit Message', style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              const Icon(Icons.delete_rounded, color: Colors.red, size: 20),
+              SizedBox(width: 12.w),
+              Text('Delete Message', style: GoogleFonts.outfit(fontWeight: FontWeight.w500, color: Colors.red)),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (result == 'edit') {
+      setState(() {
+        _editingMessageId = message.id;
+        _controller.text = message.text;
+      });
+      _focusNode.requestFocus();
+    } else if (result == 'delete') {
+      _confirmDelete(context, message.id);
+    }
+  }
+
+  void _confirmDelete(BuildContext context, String messageId) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete Message', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to delete this message?', style: GoogleFonts.outfit()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: GoogleFonts.outfit(color: AppColors.greyText)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<CommunityCubit>().deleteMessage(messageId);
+            },
+            child: Text('Delete', style: GoogleFonts.outfit(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _sendMessage() {
@@ -87,28 +160,33 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
       final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
       final owner = context.read<AuthCubit>().currentOwner;
 
-      context.read<CommunityCubit>().sendMessage(
-        page.hostelId,
-        text,
-        senderId: owner?.id,
-        senderName: owner?.name,
-        senderAvatar: owner?.avatar,
-      );
+      if (_editingMessageId != null) {
+        context.read<CommunityCubit>().editMessage(_editingMessageId!, text);
+        setState(() {
+          _editingMessageId = null;
+        });
+      } else {
+        context.read<CommunityCubit>().sendMessage(
+          page.hostelId,
+          text,
+          senderId: owner?.id,
+          senderName: owner?.name,
+          senderAvatar: owner?.avatar,
+        );
+        _scrollToBottom();
+      }
       _controller.clear();
-      _scrollToBottom();
     }
   }
 
   void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
+    if (_scrollController.hasClients && _scrollController.offset > 0) {
+      _scrollController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   Future<void> _pickAndSendImage() async {
@@ -209,14 +287,6 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                       if (state is CommunityLoaded) {
                         final messages = state.messages;
 
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (_scrollController.hasClients) {
-                            _scrollController.jumpTo(
-                              _scrollController.position.maxScrollExtent,
-                            );
-                          }
-                        });
-
                         if (messages.isEmpty) {
                           return Center(
                             child: Column(
@@ -240,13 +310,15 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                           );
                         }
 
-                        final itemCount = messages.length + 1;
+                        final reversedMessages = messages.reversed.toList();
+                        final itemCount = reversedMessages.length + 1;
                         return ListView.builder(
+                          reverse: true,
                           controller: _scrollController,
                           padding: EdgeInsets.all(20.w),
                           itemCount: itemCount,
                           itemBuilder: (context, index) {
-                            if (index == 0) {
+                            if (index == itemCount - 1) {
                               if (state.isLoadingMoreMessages) {
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 12),
@@ -278,7 +350,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                               return const SizedBox.shrink();
                             }
 
-                            final message = messages[index - 1];
+                            final message = reversedMessages[index];
 
                             final owner = context
                                 .read<AuthCubit>()
@@ -304,7 +376,14 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                               isMe: isMe,
                             );
 
-                            return ChatMessageBubble(message: updatedMessage);
+                            return ChatMessageBubble(
+                              message: updatedMessage,
+                              onLongPressStart: (details) {
+                                if (isMe && !updatedMessage.isDeleted) {
+                                  _showMessageOptions(context, updatedMessage, details.globalPosition);
+                                }
+                              },
+                            );
                           },
                         );
                       }
@@ -476,8 +555,45 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          if (_editingMessageId != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              margin: EdgeInsets.only(bottom: 8.h),
+              decoration: BoxDecoration(
+                color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.edit_rounded, color: AppColors.primaryBlue, size: 16),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      'Editing Message',
+                      style: GoogleFonts.outfit(
+                        color: AppColors.primaryBlue,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _editingMessageId = null;
+                        _controller.clear();
+                      });
+                    },
+                    child: const Icon(Icons.close_rounded, color: AppColors.primaryBlue, size: 18),
+                  ),
+                ],
+              ),
+            ),
+          Row(
+            children: [
           if (page.isOwnerChat) ...[
             BouncingWrapper(
               onTap: _pickAndSendImage,
@@ -504,6 +620,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
               ),
               child: TextField(
                 controller: _controller,
+                focusNode: _focusNode,
                 style: GoogleFonts.outfit(fontSize: 15.sp),
                 decoration: InputDecoration(
                   hintText: 'Type a message...',
@@ -535,6 +652,8 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
             ),
           ),
         ],
+      ),
+      ],
       ),
     );
   }

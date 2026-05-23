@@ -167,7 +167,14 @@ class _AddFoodItemSheetState extends State<AddFoodItemSheet> {
             child: Stack(
               children: [
                 SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
+                  padding: EdgeInsets.fromLTRB(
+                    24.w,
+                    0,
+                    24.w,
+                    MediaQuery.of(context).viewInsets.bottom +
+                        MediaQuery.of(context).padding.bottom +
+                        24.h,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

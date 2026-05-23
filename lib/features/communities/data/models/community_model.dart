@@ -45,6 +45,8 @@ class CommunityMessageModel extends CommunityMessageEntity {
     super.type,
     super.isSystem,
     super.isMe,
+    super.isEdited,
+    super.isDeleted,
   });
 
   factory CommunityMessageModel.fromJson(Map<String, dynamic> json) {
@@ -100,6 +102,8 @@ class CommunityMessageModel extends CommunityMessageEntity {
       type: type,
       isSystem: type == 'SYSTEM',
       isMe: json['isMe'] ?? false,
+      isEdited: json['isEdited'] ?? false,
+      isDeleted: json['isDeleted'] ?? false,
     );
   }
 }

@@ -11,6 +11,8 @@ abstract class CommunityRemoteDataSource {
     String? before,
   });
   Future<void> sendMessage(String hostelId, String text);
+  Future<void> editMessage(String hostelId, String messageId, String text);
+  Future<void> deleteMessage(String hostelId, String messageId);
   Future<void> sendImageMessage(String hostelId, String imagePath);
   Future<List<AnnouncementModel>> getAnnouncements(String hostelId);
   Future<void> postAnnouncement(String hostelId, String title, String content);
@@ -99,6 +101,14 @@ abstract class CommunityRemoteDataSource {
   Future<void> addPostComment(String postId, String text);
   Future<void> votePoll(String postId, int optionIndex);
   Future<void> deleteSocialPost(String postId);
+  Future<void> updateSocialPost({
+    required String postId,
+    String? content,
+    String? imagePath,
+    bool? removeImage,
+    List<String>? pollOptions,
+    bool? removePoll,
+  });
 }
 
 class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
@@ -161,6 +171,31 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to send message');
+    }
+  }
+
+  @override
+  Future<void> editMessage(String hostelId, String messageId, String text) async {
+    AppLogger.info('Editing community message: $messageId');
+    final response = await _dio.patch(
+      '${ApiConstants.community}/$hostelId/message/$messageId',
+      data: {'text': text},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to edit message');
+    }
+  }
+
+  @override
+  Future<void> deleteMessage(String hostelId, String messageId) async {
+    AppLogger.info('Deleting community message: $messageId');
+    final response = await _dio.delete(
+      '${ApiConstants.community}/$hostelId/message/$messageId',
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete message');
     }
   }
 
@@ -724,6 +759,53 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     final response = await _dio.delete('${ApiConstants.socialPosts}/$postId');
     if (response.statusCode != 200) {
       throw Exception('Failed to delete post');
+    }
+  }
+
+  @override
+  Future<void> updateSocialPost({
+    required String postId,
+    String? content,
+    String? imagePath,
+    bool? removeImage,
+    List<String>? pollOptions,
+    bool? removePoll,
+  }) async {
+    AppLogger.info('Updating social post: $postId');
+
+    dynamic data;
+    final Map<String, dynamic> payload = {
+      if (content != null) 'content': content,
+      if (removeImage != null) 'removeImage': removeImage,
+      if (removePoll != null) 'removePoll': removePoll,
+      if (pollOptions != null && pollOptions.isNotEmpty)
+        'poll': {
+          'options': pollOptions.map((o) => {'text': o}).toList(),
+          'expiresAt': DateTime.now()
+              .add(const Duration(days: 7))
+              .toIso8601String(),
+        },
+    };
+
+    if (imagePath != null) {
+      data = FormData.fromMap({
+        ...payload,
+        'image': await MultipartFile.fromFile(imagePath),
+      });
+    } else {
+      data = payload;
+    }
+
+    final response = await _dio.put(
+      '${ApiConstants.socialPosts}/$postId',
+      data: data,
+      options: Options(
+        headers: {if (imagePath != null) 'x-upload-folder': 'social/posts'},
+      ),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update post');
     }
   }
 }

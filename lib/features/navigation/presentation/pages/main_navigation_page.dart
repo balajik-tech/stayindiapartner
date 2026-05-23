@@ -618,199 +618,61 @@ class _PremiumNavBar extends StatelessWidget {
     final bool hasTenants = owner?.hasPermission('tenants') ?? true;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    if (!hasCommunity) {
-      return Container(
-        height: 85.h + bottomPadding,
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 15,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
+    return Container(
+      height: 70.h + bottomPadding,
+      padding: EdgeInsets.only(bottom: bottomPadding),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _NavBarItem(
+            index: 0,
+            currentIndex: currentIndex,
+            icon: Icons.grid_view_rounded,
+            label: 'dashboard'.tr(),
+            onTap: onTap,
+          ),
+          if (hasBookings)
             _NavBarItem(
-              index: 0,
+              index: 1,
               currentIndex: currentIndex,
-              icon: Icons.grid_view_rounded,
-              label: 'dashboard'.tr(),
+              icon: Icons.receipt_long_rounded,
+              label: 'bookings'.tr(),
               onTap: onTap,
             ),
-            if (hasBookings)
-              _NavBarItem(
-                index: 1,
-                currentIndex: currentIndex,
-                icon: Icons.receipt_long_rounded,
-                label: 'bookings'.tr(),
-                onTap: onTap,
-              ),
-            if (hasTenants)
-              _NavBarItem(
-                index: 3,
-                currentIndex: currentIndex,
-                icon: Icons.group_rounded,
-                label: 'tenants'.tr(),
-                onTap: onTap,
-              ),
+          if (hasCommunity)
             _NavBarItem(
-              index: 4,
+              index: 2,
               currentIndex: currentIndex,
-              icon: Icons.menu_rounded,
-              label: 'More',
+              icon: Icons.groups_rounded,
+              label: 'community'.tr(),
               onTap: onTap,
             ),
-          ],
-        ),
-      );
-    }
-
-    return Stack(
-      alignment: Alignment.topCenter,
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          height: 85.h + bottomPadding,
-          padding: EdgeInsets.only(bottom: bottomPadding),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 15,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _NavBarItem(
-                      index: 0,
-                      currentIndex: currentIndex,
-                      icon: Icons.grid_view_rounded,
-                      label: 'dashboard'.tr(),
-                      onTap: onTap,
-                    ),
-                    if (hasBookings)
-                      _NavBarItem(
-                        index: 1,
-                        currentIndex: currentIndex,
-                        icon: Icons.receipt_long_rounded,
-                        label: 'bookings'.tr(),
-                        onTap: onTap,
-                      )
-                    else
-                      const SizedBox.shrink(),
-                  ],
-                ),
-              ),
-              SizedBox(width: 96.w),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    if (hasTenants)
-                      _NavBarItem(
-                        index: 3,
-                        currentIndex: currentIndex,
-                        icon: Icons.group_rounded,
-                        label: 'tenants'.tr(),
-                        onTap: onTap,
-                      )
-                    else
-                      const SizedBox.shrink(),
-                    _NavBarItem(
-                      index: 4,
-                      currentIndex: currentIndex,
-                      icon: Icons.menu_rounded,
-                      label: 'More',
-                      onTap: onTap,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          top: -24.h,
-          child: _FloatingCommunityButton(
-            isSelected: currentIndex == 2,
-            onTap: () => onTap(2),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FloatingCommunityButton extends StatelessWidget {
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FloatingCommunityButton({
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return BouncingWrapper(
-      onTap: onTap,
-      child: Container(
-        color: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 65.w,
-              height: 65.w,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2C599D),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF2C599D).withValues(alpha: 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.groups_rounded,
-                color: Colors.white,
-                size: 26.sp,
-              ),
+          if (hasTenants)
+            _NavBarItem(
+              index: 3,
+              currentIndex: currentIndex,
+              icon: Icons.group_rounded,
+              label: 'tenants'.tr(),
+              onTap: onTap,
             ),
-            SizedBox(height: 6.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  'community'.tr(),
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w700,
-                    color: isSelected
-                        ? const Color(0xFF2C599D)
-                        : const Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          _NavBarItem(
+            index: 4,
+            currentIndex: currentIndex,
+            icon: Icons.menu_rounded,
+            label: 'More',
+            onTap: onTap,
+          ),
+        ],
       ),
     );
   }
@@ -835,6 +697,68 @@ class _NavBarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSelected = currentIndex == index;
 
+    if (index == 2) {
+      // Community Item - custom elevated layout with circular background
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => onTap(index),
+          behavior: HitTestBehavior.opaque,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Transform.translate(
+                offset: Offset(0, -16.h),
+                child: Container(
+                  width: 56.w,
+                  height: 56.w,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2C599D),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2C599D).withValues(alpha: 0.35),
+                        blurRadius: 12,
+                        spreadRadius: 1.5,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      icon,
+                      color: Colors.white,
+                      size: 28.sp,
+                    ),
+                  ),
+                ),
+              ),
+              Transform.translate(
+                offset: Offset(0, -12.h),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: isSelected
+                            ? const Color(0xFF2C599D)
+                            : const Color(0xFF5A6E85),
+                        fontSize: 11.sp,
+                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Expanded(
       child: GestureDetector(
         onTap: () => onTap(index),
@@ -847,7 +771,7 @@ class _NavBarItem extends StatelessWidget {
               icon,
               color: isSelected
                   ? const Color(0xFF2C599D)
-                  : const Color(0xFF94A3B8),
+                  : const Color(0xFF5A6E85),
               size: 26.sp,
             ),
             SizedBox(height: 4.h),
@@ -861,7 +785,7 @@ class _NavBarItem extends StatelessWidget {
                   style: TextStyle(
                     color: isSelected
                         ? const Color(0xFF2C599D)
-                        : const Color(0xFF94A3B8),
+                        : const Color(0xFF5A6E85),
                     fontSize: 11.sp,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                   ),

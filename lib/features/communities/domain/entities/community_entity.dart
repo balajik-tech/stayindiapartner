@@ -57,6 +57,8 @@ class CommunityMessageEntity extends Equatable {
   final bool isMe;
   final String? associationLevel;
   final bool isVerified;
+  final bool isEdited;
+  final bool isDeleted;
 
   const CommunityMessageEntity({
     required this.id,
@@ -72,6 +74,8 @@ class CommunityMessageEntity extends Equatable {
     this.isMe = false,
     this.associationLevel,
     this.isVerified = false,
+    this.isEdited = false,
+    this.isDeleted = false,
   });
 
   @override
@@ -89,6 +93,8 @@ class CommunityMessageEntity extends Equatable {
     isMe,
     associationLevel,
     isVerified,
+    isEdited,
+    isDeleted,
   ];
 }
 

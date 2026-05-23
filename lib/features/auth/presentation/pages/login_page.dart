@@ -673,63 +673,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   : _onSendOtp(context),
                             ),
 
-                            if (!_isStaffLogin) ...[
-                              SizedBox(height: 16.h),
-                              Center(
-                                child: Text(
-                                  'OR',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.greyText.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    letterSpacing: 1.0,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 16.h),
-                              BouncingButton(
-                                onTap: isLoading
-                                    ? null
-                                    : () => context
-                                          .read<AuthCubit>()
-                                          .loginWithGoogle(),
-                                backgroundColor: Colors.white,
-                                border: Border.all(
-                                  color: Colors.grey.shade300,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(22.r),
-                                height: 56.h,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Image.network(
-                                      'https://www.gstatic.com/images/branding/product/2x/googleg_64dp.png',
-                                      height: 24.h,
-                                      width: 24.h,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Icon(
-                                          Icons.g_mobiledata_rounded,
-                                          color: const Color(0xFF4285F4),
-                                          size: 28.sp,
-                                        );
-                                      },
-                                    ),
-                                    SizedBox(width: 12.w),
-                                    Text(
-                                      'Continue with Google',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.darkText,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+
 
                             SizedBox(height: 24.h),
                             Center(

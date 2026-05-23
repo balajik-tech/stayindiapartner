@@ -98,8 +98,8 @@ class BedCard extends StatelessWidget {
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  width: isSmall ? 52.w : 72.w,
-                  height: isSmall ? 76.h : 106.h,
+                  width: isSmall ? 48.w : 60.w,
+                  height: isSmall ? 68.h : 96.h,
                   child: CustomPaint(
                     foregroundPainter: _DottedBorderPainter(
                       color: borderColor,
@@ -124,7 +124,7 @@ class BedCard extends StatelessWidget {
                               ]
                             : null,
                       ),
-                      child: tenantAvatar != null
+                      child: tenantAvatar != null && tenantAvatar!.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(isSmall ? 14.r : 18.r),
                               child: Stack(
@@ -155,7 +155,7 @@ class BedCard extends StatelessWidget {
                                         child: Text(
                                           bedLabel,
                                           style: TextStyle(
-                                            fontSize: isSmall ? 11.sp : 14.sp,
+                                            fontSize: isSmall ? 12.sp : 16.sp,
                                             fontWeight: FontWeight.w900,
                                             color: Colors.white.withValues(alpha: 0.9),
                                             height: 1,
@@ -175,7 +175,7 @@ class BedCard extends StatelessWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  if (tenantName != null)
+                                  if (tenantName != null && tenantName!.isNotEmpty)
                                     CustomAvatar(
                                       imageUrl: null,
                                       name: tenantName ?? 'T',
@@ -191,7 +191,7 @@ class BedCard extends StatelessWidget {
                                             color: textColor.withValues(alpha: 0.8),
                                           )
                                         : SideViewBedIcon(
-                                            size: isSmall ? 22.sp : 34.sp,
+                                            size: isSmall ? 28.sp : 36.sp,
                                             color: textColor.withValues(alpha: 0.8),
                                           ),
                                   SizedBox(height: isSmall ? 4.h : 8.h),
@@ -199,7 +199,7 @@ class BedCard extends StatelessWidget {
                                     child: Text(
                                       bedLabel,
                                       style: TextStyle(
-                                        fontSize: isSmall ? 11.sp : 14.sp,
+                                        fontSize: isSmall ? 12.sp : 16.sp,
                                         fontWeight: FontWeight.w900,
                                         color: textColor.withValues(alpha: 0.6),
                                         height: 1,
@@ -227,7 +227,7 @@ class BedCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                         child: Text(
-                          'away'.tr(),
+                          'away'.tr().toUpperCase(),
                           style: TextStyle(
                             fontSize: isSmall ? 7.sp : 9.sp,
                             fontWeight: FontWeight.w900,
@@ -248,11 +248,11 @@ class BedCard extends StatelessWidget {
                           vertical: 2.h,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFB300),
+                          color: const Color(0xFFFF9800),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                         child: Text(
-                          'notice_status'.tr(),
+                          'notice_status'.tr().toUpperCase(),
                           style: TextStyle(
                             fontSize: isSmall ? 7.sp : 9.sp,
                             fontWeight: FontWeight.w900,
@@ -278,7 +278,7 @@ class BedCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                         child: Text(
-                          isAway ? 'away'.tr() : (isNotice ? 'notice_status'.tr() : (isReserved ? 'reserved'.tr() : 'booked'.tr())),
+                          (isAway ? 'away'.tr() : (isNotice ? 'notice_status'.tr() : (isReserved ? 'reserved'.tr() : 'booked'.tr()))).toUpperCase(),
                           style: TextStyle(
                             fontSize: isSmall ? 7.sp : 9.sp,
                             fontWeight: FontWeight.w900,

@@ -14,11 +14,11 @@ import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
 import 'package:stayindia_owner/features/bookings/pages/room_selection_page.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/checkout_settlement_modal.dart';
+import 'package:stayindia_owner/features/movement_history/presentation/widgets/tenant_movement_history_section.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
 // Premium dark navy + orange accent colors matching client design
 const Color _navy = Color(0xFF1B2838);
-const Color _navyLight = Color(0xFF243447);
 const Color _orange = Color(0xFFE8722A);
 const Color _orangeLight = Color(0xFFFFF3ED);
 
@@ -93,11 +93,6 @@ class OccupiedBedSheet extends StatelessWidget {
               : '';
           final String stayStatus = detail?.stay?.status ?? 'OCCUPIED';
           final bool isCheckedIn = stayStatus == 'CHECKED_IN';
-          final bool isReserved =
-              stayStatus == 'BOOKED' ||
-              stayStatus == 'CONFIRMED' ||
-              stayStatus == 'PENDING_PAYMENT' ||
-              stayStatus == 'LOCKED';
 
           return SingleChildScrollView(
             child: Column(
@@ -191,42 +186,6 @@ class OccupiedBedSheet extends StatelessWidget {
                         ),
 
                         SizedBox(height: 16.h),
-
-                        // QR Code in orange-bordered frame
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 40.w),
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: _orangeLight,
-                            borderRadius: BorderRadius.circular(20.r),
-                            border: Border.all(
-                              color: _orange.withValues(alpha: 0.4),
-                              width: 2,
-                            ),
-                          ),
-                          child: Center(
-                            child: QrImageView(
-                              data:
-                                  detail?.stay?.qrToken ??
-                                  detail?.stay?.accessCode ??
-                                  detail?.stay?.bookingId ??
-                                  tenantId,
-                              version: QrVersions.auto,
-                              size: 140.w,
-                              gapless: false,
-                              eyeStyle: const QrEyeStyle(
-                                eyeShape: QrEyeShape.roundedOuter,
-                                color: _navy,
-                              ),
-                              dataModuleStyle: const QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.roundedOutsideCorners,
-                                color: _navy,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        SizedBox(height: 10.h),
 
                         // "GENERATE NEW" button
                         TextButton.icon(
@@ -496,6 +455,11 @@ class OccupiedBedSheet extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                SizedBox(height: 16.h),
+
+                // ── MOVEMENT HISTORY ──
+                TenantMovementHistorySection(tenantId: tenantId),
 
                 SizedBox(height: 16.h),
 

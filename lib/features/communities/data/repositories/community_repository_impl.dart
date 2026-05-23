@@ -23,6 +23,14 @@ class CommunityRepositoryImpl implements CommunityRepository {
       remote.sendMessage(hostelId, text);
 
   @override
+  Future<void> editMessage(String hostelId, String messageId, String text) =>
+      remote.editMessage(hostelId, messageId, text);
+
+  @override
+  Future<void> deleteMessage(String hostelId, String messageId) =>
+      remote.deleteMessage(hostelId, messageId);
+
+  @override
   Future<void> sendImageMessage(String hostelId, String imagePath) =>
       remote.sendImageMessage(hostelId, imagePath);
 
@@ -224,4 +232,22 @@ class CommunityRepositoryImpl implements CommunityRepository {
   @override
   Future<void> deleteSocialPost(String postId) =>
       remote.deleteSocialPost(postId);
+
+  @override
+  Future<void> updateSocialPost({
+    required String postId,
+    String? content,
+    String? imagePath,
+    bool? removeImage,
+    List<String>? pollOptions,
+    bool? removePoll,
+  }) =>
+      remote.updateSocialPost(
+        postId: postId,
+        content: content,
+        imagePath: imagePath,
+        removeImage: removeImage,
+        pollOptions: pollOptions,
+        removePoll: removePoll,
+      );
 }

@@ -175,28 +175,73 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       ? displayName[0].toUpperCase()
                       : 'T';
 
-                  return CircleAvatar(
-                    radius: 28.r,
-                    backgroundColor: AppColors.primaryBlue.withValues(
-                      alpha: 0.1,
-                    ),
-                    backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
-                        ? NetworkImage(avatarUrl)
-                        : null,
-                    onBackgroundImageError:
-                        (avatarUrl != null && avatarUrl.isNotEmpty)
-                        ? (e, stackTrace) {}
-                        : null,
-                    child: (avatarUrl == null || avatarUrl.isEmpty)
-                        ? Text(
-                            initials,
-                            style: TextStyle(
-                              fontSize: 24.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryBlue,
+                  return GestureDetector(
+                    onTap: () {
+                      if (avatarUrl != null && avatarUrl.isNotEmpty) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => Dialog(
+                            backgroundColor: Colors.transparent,
+                            insetPadding: EdgeInsets.all(10.w),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                InteractiveViewer(
+                                  panEnabled: true,
+                                  minScale: 0.5,
+                                  maxScale: 4.0,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    child: Image.network(
+                                      avatarUrl,
+                                      fit: BoxFit.contain,
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return const Center(child: CircularProgressIndicator());
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 10.h,
+                                  right: 10.w,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.black.withValues(alpha: 0.5),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.close, color: Colors.white),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          )
-                        : null,
+                          ),
+                        );
+                      }
+                    },
+                    child: CircleAvatar(
+                      radius: 28.r,
+                      backgroundColor: AppColors.primaryBlue.withValues(
+                        alpha: 0.1,
+                      ),
+                      backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                          ? NetworkImage(avatarUrl)
+                          : null,
+                      onBackgroundImageError:
+                          (avatarUrl != null && avatarUrl.isNotEmpty)
+                          ? (e, stackTrace) {}
+                          : null,
+                      child: (avatarUrl == null || avatarUrl.isEmpty)
+                          ? Text(
+                              initials,
+                              style: TextStyle(
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryBlue,
+                              ),
+                            )
+                          : null,
+                    ),
                   );
                 })(),
                 SizedBox(width: 16.w),
