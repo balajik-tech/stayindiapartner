@@ -589,6 +589,7 @@ class _ProfilePageState extends State<ProfilePage> {
         SizedBox(height: 8.h),
         GridView.count(
           crossAxisCount: 2,
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: 10.w,
