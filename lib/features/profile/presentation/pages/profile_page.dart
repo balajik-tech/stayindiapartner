@@ -86,12 +86,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     if (!isStaff) ...[
-                      _buildSectionLabel('personal_management'.tr()),
-                      _buildSectionBlock([
-                        _ProfileTile(
+                      _buildGridSection('1. ${'personal_management'.tr()}', [
+                        _ProfileCard(
                           icon: Icons.person_rounded,
                           title: 'account_settings'.tr(),
-                          subtitle: 'account_settings_sub'.tr(),
                           iconBgColor: const Color(0xFFE0F2FE),
                           iconColor: const Color(0xFF0284C7),
                           onTap: () => Navigator.push(
@@ -101,10 +99,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.credit_card_rounded,
                           title: 'subscription'.tr(),
-                          subtitle: 'subscription_sub'.tr(),
                           iconBgColor: const Color(0xFFF0FDF4),
                           iconColor: const Color(0xFF16A34A),
                           onTap: () => Navigator.push(
@@ -114,24 +111,19 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.stars_rounded,
                           title: 'membership_id'.tr() == 'membership_id'
                               ? 'Membership ID'
                               : 'membership_id'.tr(),
-                          subtitle:
-                              'golden_pg_status'.tr() == 'golden_pg_status'
-                              ? 'Golden PG Status'
-                              : 'golden_pg_status'.tr(),
                           iconBgColor: const Color(0xFFFEF9C3),
                           iconColor: const Color(0xFFCA8A04),
                           onTap: () =>
                               _showMembershipCard(context, name, phone),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.card_membership_rounded,
                           title: 'digital_certificate'.tr(),
-                          subtitle: 'digital_certificate_sub'.tr(),
                           iconBgColor: const Color(0xFFF5F3FF),
                           iconColor: const Color(0xFF7C3AED),
                           onTap: () => Navigator.push(
@@ -146,14 +138,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ]),
-                      SizedBox(height: 32.h),
                     ] else ...[
-                      _buildSectionLabel('personal_management'.tr()),
-                      _buildSectionBlock([
-                        _ProfileTile(
+                      _buildGridSection('1. ${'personal_management'.tr()}', [
+                        _ProfileCard(
                           icon: Icons.person_rounded,
                           title: 'account_settings'.tr(),
-                          subtitle: 'account_settings_sub'.tr(),
                           iconBgColor: const Color(0xFFE0F2FE),
                           iconColor: const Color(0xFF0284C7),
                           onTap: () => Navigator.push(
@@ -164,16 +153,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ]),
-                      SizedBox(height: 32.h),
                     ],
 
                     if (!isStaff) ...[
-                      _buildSectionLabel('hostel_configuration'.tr()),
-                      _buildSectionBlock([
-                        _ProfileTile(
+                      _buildGridSection('2. ${'hostel_configuration'.tr()}', [
+                        _ProfileCard(
                           icon: Icons.business_rounded,
                           title: 'hostel_profile'.tr(),
-                          subtitle: 'hostel_profile_sub'.tr(),
                           iconBgColor: const Color(0xFFFFF1F2),
                           iconColor: const Color(0xFFE11D48),
                           onTap: () => Navigator.push(
@@ -183,10 +169,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.wifi_rounded,
                           title: 'amenities'.tr(),
-                          subtitle: 'amenities_sub'.tr(),
                           iconBgColor: const Color(0xFFECFDF5),
                           iconColor: const Color(0xFF059669),
                           onTap: () => Navigator.push(
@@ -196,10 +181,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.rule_rounded,
                           title: 'house_rules'.tr(),
-                          subtitle: 'house_rules_sub'.tr(),
                           iconBgColor: const Color(0xFFFFF7ED),
                           iconColor: const Color(0xFFEA580C),
                           onTap: () => Navigator.push(
@@ -209,10 +193,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.restaurant_rounded,
                           title: 'food_menu'.tr(),
-                          subtitle: 'food_menu_sub'.tr(),
                           iconBgColor: const Color(0xFFFEF2F2),
                           iconColor: const Color(0xFFDC2626),
                           onTap: () => Navigator.push(
@@ -223,16 +206,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ]),
-                      SizedBox(height: 32.h),
                     ],
 
                     if (!isStaff) ...[
-                      _buildSectionLabel('business_management'.tr()),
-                      _buildSectionBlock([
-                        _ProfileTile(
+                      _buildGridSection('3. ${'business_management'.tr()}', [
+                        _ProfileCard(
                           icon: Icons.insights_rounded,
                           title: 'financial_insights'.tr(),
-                          subtitle: 'financial_insights_sub'.tr(),
                           iconBgColor: const Color(0xFFEFF6FF),
                           iconColor: const Color(0xFF2563EB),
                           onTap: () => Navigator.push(
@@ -245,10 +225,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.inventory_2_rounded,
                           title: 'stock_management'.tr(),
-                          subtitle: 'stock_management_sub'.tr(),
                           iconBgColor: const Color(0xFFFAF5FF),
                           iconColor: const Color(0xFF9333EA),
                           onTap: () => Navigator.push(
@@ -261,10 +240,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.people_alt_rounded,
                           title: 'staff_management'.tr(),
-                          subtitle: 'staff_management_sub'.tr(),
                           iconBgColor: const Color(0xFFF0FDFA),
                           iconColor: const Color(0xFF0D9488),
                           onTap: () => Navigator.push(
@@ -275,23 +253,19 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ]),
-                      SizedBox(height: 32.h),
                     ],
 
-                    _buildSectionLabel('support_legal'.tr()),
-                    _buildSectionBlock([
-                      _ProfileTile(
+                    _buildGridSection('4. ${'support_legal'.tr()}', [
+                      _ProfileCard(
                         icon: Icons.language_rounded,
                         title: 'change_language'.tr(),
-                        subtitle: 'language_sub'.tr(),
                         iconBgColor: const Color(0xFFF1F5F9),
                         iconColor: const Color(0xFF475569),
                         onTap: () => _showLanguagePicker(context),
                       ),
-                      _ProfileTile(
+                      _ProfileCard(
                         icon: Icons.verified_user_rounded,
                         title: 'privacy_policy'.tr(),
-                        subtitle: 'privacy_policy_sub'.tr(),
                         iconBgColor: const Color(0xFFECFEFF),
                         iconColor: const Color(0xFF0891B2),
                         onTap: () => Navigator.push(
@@ -303,10 +277,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       if (!isStaff) ...[
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.help_center_rounded,
                           title: 'help_support'.tr(),
-                          subtitle: 'help_support_sub'.tr(),
                           iconBgColor: const Color(0xFFFFFBEB),
                           iconColor: const Color(0xFFD97706),
                           onTap: () => Navigator.push(
@@ -316,10 +289,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.chat_bubble_rounded,
                           title: 'feedback'.tr(),
-                          subtitle: 'feedback_sub'.tr(),
                           iconBgColor: const Color(0xFFFFF1F2),
                           iconColor: const Color(0xFFE11D48),
                           onTap: () {},
@@ -327,15 +299,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ]),
 
-                    SizedBox(height: 32.h),
-
                     if (!isStaff) ...[
-                      _buildSectionLabel('tools_reports'.tr()),
-                      _buildSectionBlock([
-                        _ProfileTile(
+                      _buildGridSection('5. ${'tools_reports'.tr()}', [
+                        _ProfileCard(
                           icon: Icons.card_giftcard_rounded,
                           title: 'refer_friend'.tr(),
-                          subtitle: 'refer_friend_sub'.tr(),
                           iconBgColor: const Color(0xFFFCE7F3),
                           iconColor: const Color(0xFFDB2777),
                           onTap: () => Navigator.push(
@@ -345,18 +313,16 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.star_rate_rounded,
                           title: 'rate_us'.tr(),
-                          subtitle: 'rate_us_sub'.tr(),
                           iconBgColor: const Color(0xFFFEF9C3),
                           iconColor: const Color(0xFFCA8A04),
                           onTap: () {},
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.system_update_rounded,
                           title: 'update_app'.tr(),
-                          subtitle: 'update_app_sub'.tr(),
                           iconBgColor: const Color(0xFFF0FDF4),
                           iconColor: const Color(0xFF16A34A),
                           onTap: () {
@@ -367,10 +333,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             );
                           },
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.campaign_rounded,
                           title: 'send_announcements'.tr(),
-                          subtitle: 'send_announcements_sub'.tr(),
                           iconBgColor: const Color(0xFFEFF6FF),
                           iconColor: const Color(0xFF2563EB),
                           onTap: () => Navigator.push(
@@ -381,10 +346,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.analytics_rounded,
                           title: 'my_reports'.tr(),
-                          subtitle: 'my_reports_sub'.tr(),
                           iconBgColor: const Color(0xFFECFDF5),
                           iconColor: const Color(0xFF059669),
                           onTap: () => Navigator.push(
@@ -395,10 +359,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.local_offer_rounded,
                           title: 'hostel_offers'.tr(),
-                          subtitle: 'hostel_offers_sub'.tr(),
                           iconBgColor: const Color(0xFFFFF7ED),
                           iconColor: const Color(0xFFEA580C),
                           onTap: () => Navigator.push(
@@ -410,24 +373,20 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ]),
-                      SizedBox(height: 32.h),
                     ],
 
-                    _buildSectionLabel('application'.tr()),
-                    _buildSectionBlock([
+                    _buildGridSection('6. ${'application'.tr()}', [
                       if (!isStaff)
-                        _ProfileTile(
+                        _ProfileCard(
                           icon: Icons.share_rounded,
                           title: 'share_app'.tr(),
-                          subtitle: 'share_app_sub'.tr(),
                           iconBgColor: const Color(0xFFF5F3FF),
                           iconColor: const Color(0xFF7C3AED),
                           onTap: () {},
                         ),
-                      _ProfileTile(
+                      _ProfileCard(
                         icon: Icons.logout_rounded,
                         title: 'logout'.tr(),
-                        subtitle: 'logout_sub'.tr(),
                         titleColor: AppColors.error,
                         iconBgColor: const Color(0xFFFEF2F2),
                         iconColor: const Color(0xFFDC2626),
@@ -622,38 +581,23 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildSectionBlock(List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: children.asMap().entries.map((entry) {
-          final isLast = entry.key == children.length - 1;
-          return Column(
-            children: [
-              entry.value,
-              if (!isLast)
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Divider(
-                    height: 1,
-                    color: AppColors.border.withValues(alpha: 0.5),
-                  ),
-                ),
-            ],
-          );
-        }).toList(),
-      ),
+  Widget _buildGridSection(String label, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionLabel(label),
+        SizedBox(height: 8.h),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 10.w,
+          mainAxisSpacing: 10.h,
+          childAspectRatio: 2.3,
+          children: children,
+        ),
+        SizedBox(height: 28.h),
+      ],
     );
   }
 
@@ -1032,19 +976,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-class _ProfileTile extends StatelessWidget {
+class _ProfileCard extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
   final VoidCallback onTap;
   final Color? titleColor;
   final Color? iconBgColor;
   final Color? iconColor;
 
-  const _ProfileTile({
+  const _ProfileCard({
     required this.icon,
     required this.title,
-    required this.subtitle,
     required this.onTap,
     this.titleColor,
     this.iconBgColor,
@@ -1056,51 +998,51 @@ class _ProfileTile extends StatelessWidget {
     return BouncingWrapper(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        color: Colors.transparent,
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(10.r),
+              padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
                 color: iconBgColor ?? AppColors.backgroundSecondary,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Icon(
                 icon,
                 color: iconColor ?? AppColors.primaryBlue,
-                size: 20.sp,
+                size: 18.sp,
               ),
             ),
-            SizedBox(width: 16.w),
+            SizedBox(width: 8.w),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                      color: titleColor ?? AppColors.textPrimary,
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.textSecondary.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                  color: titleColor ?? AppColors.textPrimary,
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Icon(
               Icons.chevron_right_rounded,
               color: AppColors.border,
-              size: 20.sp,
+              size: 16.sp,
             ),
           ],
         ),

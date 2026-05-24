@@ -597,174 +597,231 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
           );
         }
 
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32.r),
-          ),
-          backgroundColor: Colors.white,
-          elevation: 20,
-          child: Container(
-            padding: EdgeInsets.all(24.w),
-            constraints: BoxConstraints(maxHeight: 0.72.sh, maxWidth: 340.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+        bool isAccepted = false;
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32.r),
+              ),
+              backgroundColor: Colors.white,
+              elevation: 20,
+              child: Container(
+                padding: EdgeInsets.all(24.w),
+                constraints: BoxConstraints(maxHeight: 0.75.sh, maxWidth: 340.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(10.r),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFFEFF6FF), Color(0xFFDBEAFE)],
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(10.r),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xFFEFF6FF), Color(0xFFDBEAFE)],
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.shield_rounded,
+                            color: const Color(0xFF2563EB),
+                            size: 24.sp,
+                          ),
                         ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF2563EB).withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                        SizedBox(width: 14.w),
+                        Expanded(
+                          child: Text(
+                            "Privacy Policy",
+                            style: TextStyle(
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF0F172A),
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Please review and accept our Privacy Policy to complete your hostel setup.",
+                      style: TextStyle(
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF64748B),
+                        height: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
+                          ),
+                          borderRadius: BorderRadius.circular(18.r),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        padding: EdgeInsets.all(14.w),
+                        child: Scrollbar(
+                          thumbVisibility: true,
+                          child: SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Welcome to Stay India Owner App.",
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                SizedBox(height: 12.h),
+                                buildPolicySection(
+                                  title: "1. Data Collection & Property Management",
+                                  body: "By adding your hostel, you authorize Stay India to collect and store property-specific information including the hostel name, contact number, coordinates, floors structure, rooms categories, and pricing details. This data is essential for managing your properties, configuring floor layouts, assigning beds, and managing tenants.",
+                                ),
+                                buildPolicySection(
+                                  title: "2. Tenant & Room Allocation Data",
+                                  body: "Any information added regarding tenants (e.g. names, sharing preferences, document attachments) is securely stored and used solely for property management operations by you. We do not sell or share your tenants' personal data with unauthorized third parties.",
+                                ),
+                                buildPolicySection(
+                                  title: "3. Location and Address Verification",
+                                  body: "We collect geographic coordinates (latitude and longitude) of your properties to enable correct location-based matches for potential tenants in the Stay India platform.",
+                                ),
+                                buildPolicySection(
+                                  title: "4. Security and Retention",
+                                  body: "Your data is hosted in highly secure cloud environments. We implement advanced encryption protocols to safeguard your property and financial transactions.",
+                                ),
+                                buildPolicySection(
+                                  title: "5. Term Acceptance",
+                                  body: "By clicking 'Accept & Continue', you confirm that you own or are legally authorized to manage this property and that you agree to Stay India's privacy policy and owner terms of service.",
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isAccepted = !isAccepted;
+                        });
+                      },
+                      child: Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 20.w,
+                            height: 20.w,
+                            decoration: BoxDecoration(
+                              color: isAccepted ? const Color(0xFF2563EB) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(6.r),
+                              border: Border.all(
+                                color: isAccepted ? const Color(0xFF2563EB) : const Color(0xFFCBD5E1),
+                                width: 2.w,
+                              ),
+                            ),
+                            child: isAccepted
+                                ? Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 14.sp,
+                                  )
+                                : null,
+                          ),
+                          SizedBox(width: 10.w),
+                          Expanded(
+                            child: Text(
+                              "I accept the terms and conditions",
+                              style: TextStyle(
+                                fontSize: 12.5.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF334155),
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.shield_rounded,
-                        color: const Color(0xFF2563EB),
-                        size: 24.sp,
-                      ),
                     ),
-                    SizedBox(width: 14.w),
-                    Expanded(
-                      child: Text(
-                        "Privacy Policy",
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF0F172A),
-                          letterSpacing: -0.5,
+                    SizedBox(height: 20.h),
+                    Container(
+                      width: double.infinity,
+                      height: 50.h,
+                      decoration: BoxDecoration(
+                        gradient: isAccepted
+                            ? const LinearGradient(
+                                colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              )
+                            : null,
+                        color: isAccepted ? null : const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: isAccepted
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: ElevatedButton(
+                        onPressed: isAccepted
+                            ? () async {
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.setBool('privacy_policy_accepted', true);
+                                
+                                if (context.mounted) {
+                                  Navigator.pop(dialogContext); // Close dialog
+                                  Navigator.pop(context); // Close sheet
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+                                }
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          disabledBackgroundColor: Colors.transparent,
+                          disabledForegroundColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                        ),
+                        child: Text(
+                          "Accept & Continue",
+                          style: TextStyle(
+                            color: isAccepted ? Colors.white : const Color(0xFF94A3B8),
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 16.h),
-                Text(
-                  "Please review and accept our Privacy Policy to complete your hostel setup.",
-                  style: TextStyle(
-                    fontSize: 12.5.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B),
-                    height: 1.5,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
-                      ),
-                      borderRadius: BorderRadius.circular(18.r),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    padding: EdgeInsets.all(14.w),
-                    child: Scrollbar(
-                      thumbVisibility: true,
-                      child: SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Welcome to Stay India Owner App.",
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0F172A),
-                              ),
-                            ),
-                            SizedBox(height: 12.h),
-                            buildPolicySection(
-                              title: "1. Data Collection & Property Management",
-                              body: "By adding your hostel, you authorize Stay India to collect and store property-specific information including the hostel name, contact number, coordinates, floors structure, rooms categories, and pricing details. This data is essential for managing your properties, configuring floor layouts, assigning beds, and managing tenants.",
-                            ),
-                            buildPolicySection(
-                              title: "2. Tenant & Room Allocation Data",
-                              body: "Any information added regarding tenants (e.g. names, sharing preferences, document attachments) is securely stored and used solely for property management operations by you. We do not sell or share your tenants' personal data with unauthorized third parties.",
-                            ),
-                            buildPolicySection(
-                              title: "3. Location and Address Verification",
-                              body: "We collect geographic coordinates (latitude and longitude) of your properties to enable correct location-based matches for potential tenants in the Stay India platform.",
-                            ),
-                            buildPolicySection(
-                              title: "4. Security and Retention",
-                              body: "Your data is hosted in highly secure cloud environments. We implement advanced encryption protocols to safeguard your property and financial transactions.",
-                            ),
-                            buildPolicySection(
-                              title: "5. Term Acceptance",
-                              body: "By clicking 'Accept & Continue', you confirm that you own or are legally authorized to manage this property and that you agree to Stay India's privacy policy and owner terms of service.",
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Container(
-                  width: double.infinity,
-                  height: 50.h,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF2563EB).withValues(alpha: 0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setBool('privacy_policy_accepted', true);
-                      
-                      if (context.mounted) {
-                        Navigator.pop(dialogContext); // Close dialog
-                        Navigator.pop(context); // Close sheet
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                    ),
-                    child: Text(
-                      "Accept & Continue",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
