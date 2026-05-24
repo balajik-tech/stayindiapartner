@@ -715,6 +715,10 @@ class _NavBarItem extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFF2C599D),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFF98125),
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFF2C599D).withValues(alpha: 0.35),
