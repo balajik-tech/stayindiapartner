@@ -9,6 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/features/movement_history/presentation/widgets/tenant_movement_history_section.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
@@ -46,6 +47,7 @@ class BedState {
   final String? hostelName;
   final String? hostelAddress;
   final String? awayReturnDate;
+  final String? sharingType;
 
   BedState({
     required this.status,
@@ -67,6 +69,7 @@ class BedState {
     this.hostelName,
     this.hostelAddress,
     this.awayReturnDate,
+    this.sharingType,
   });
 }
 
@@ -106,6 +109,19 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   double? _parkingBillAmount;
   final TextEditingController _electricityController = TextEditingController();
   final TextEditingController _parkingController = TextEditingController();
+
+  String _formatBedNumber(String bedNumber) {
+    if (bedNumber.contains('-')) {
+      final parts = bedNumber.split('-');
+      final lastPart = parts.last;
+      final index = int.tryParse(lastPart);
+      if (index != null && index >= 1 && index <= 26) {
+        final letter = String.fromCharCode('A'.codeUnitAt(0) + index - 1);
+        return '${parts.sublist(0, parts.length - 1).join('-')}-$letter';
+      }
+    }
+    return bedNumber;
+  }
 
   @override
   void initState() {
@@ -202,7 +218,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
             builder: (dialogContext) => AlertDialog(
               title: const Text('Confirm Check-in'),
               content: Text(
-                'Do you want to assign ${scanned.tenantName} to Bed ${widget.state.bedNumber}?',
+                'Do you want to assign ${scanned.tenantName} to Bed ${_formatBedNumber(widget.state.bedNumber)}?',
               ),
               actions: [
                 TextButton(
@@ -254,7 +270,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
             Container(
               width: double.infinity,
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
+                maxHeight: MediaQuery.of(context).size.height * 0.9,
               ),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -377,7 +393,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${'bed'.tr()} ${widget.state.bedNumber}".toUpperCase(),
+                  "${'bed'.tr()} ${_formatBedNumber(widget.state.bedNumber)}".toUpperCase(),
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w900,
@@ -794,42 +810,77 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                   color: const Color(0xFF1E293B),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: isAc
-                      ? const Color(0xFFE0F2FE)
-                      : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(
-                    color: isAc
-                        ? const Color(0xFFBAE6FD)
-                        : const Color(0xFFE2E8F0),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isAc ? Icons.ac_unit_rounded : Icons.mode_fan_off_rounded,
-                      size: 13.sp,
-                      color: isAc
-                          ? const Color(0xFF0284C7)
-                          : const Color(0xFF64748B),
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      roomType.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w900,
-                        color: isAc
-                            ? const Color(0xFF0369A1)
-                            : const Color(0xFF475569),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.state.sharingType != null && widget.state.sharingType!.isNotEmpty) ...[
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF7ED),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(color: const Color(0xFFFFEDD5)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.people_rounded,
+                            size: 13.sp,
+                            color: const Color(0xFFEA580C),
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            StringUtils.formatSharingType(widget.state.sharingType!, context).toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFFC2410C),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    SizedBox(width: 8.w),
                   ],
-                ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: isAc
+                          ? const Color(0xFFE0F2FE)
+                          : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(
+                        color: isAc
+                            ? const Color(0xFFBAE6FD)
+                            : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isAc ? Icons.ac_unit_rounded : Icons.mode_fan_off_rounded,
+                          size: 13.sp,
+                          color: isAc
+                              ? const Color(0xFF0284C7)
+                              : const Color(0xFF64748B),
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          roomType.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w900,
+                            color: isAc
+                                ? const Color(0xFF0369A1)
+                                : const Color(0xFF475569),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

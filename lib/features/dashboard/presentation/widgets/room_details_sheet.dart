@@ -321,6 +321,8 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
       tenantName: bed.tenantName,
       tenantAvatar: bed.tenantAvatar,
       isSelected: isSelected,
+      awayReturnDate: bed.awayReturnDate,
+      vacatingDate: bed.vacatingDate,
       onTap: () => setState(() => selectedBed = bed),
     );
   }
@@ -397,6 +399,7 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                       hostelId: widget.hostelId,
                       roomNumber: widget.room.roomNumber,
                       awayReturnDate: bed.awayReturnDate,
+                      sharingType: widget.room.sharingType,
                     ),
                   );
                 },
@@ -474,6 +477,7 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                     hostelId: widget.hostelId,
                     roomNumber: widget.room.roomNumber,
                     awayReturnDate: bed.awayReturnDate,
+                    sharingType: widget.room.sharingType,
                   ),
                 );
               },
@@ -555,6 +559,7 @@ class _RoomDetailsSheetState extends State<RoomDetailsSheet> {
                     deposit: widget.room.deposit,
                     roomType: widget.room.roomType,
                     amenities: widget.room.features,
+                    sharingType: widget.room.sharingType,
                   ),
                 );
               },

@@ -8,8 +8,6 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/owner_community_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/social_feed_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/explore_communities_page.dart';
@@ -18,9 +16,10 @@ import 'package:stayindia_owner/features/communities/presentation/widgets/commen
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:stayindia_owner/features/communities/presentation/pages/owners_list_page.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
   const OwnersCommunityPage({super.key});
@@ -204,54 +203,16 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           ),
           SizedBox(width: 16.w),
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildNotificationAction(),
-              SizedBox(width: 12.w),
+              SizedBox(width: 10.w),
               BouncingWrapper(
                 onTap: () {
-                  String hostelId = '';
-                  final hostelState = context.read<HostelCubit>().state;
-                  if (hostelState is HostelLoaded &&
-                      hostelState.hostels.isNotEmpty) {
-                    hostelId =
-                        hostelState.hostels[hostelState.selectedHostelIndex].id;
-                  }
-                  if (hostelId.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Row(
-                          children: [
-                            Icon(Icons.info_outline_rounded, color: Colors.white, size: 20.sp),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              child: Text(
-                                "No hostels found. Please add a hostel and check-in tenants to view the Tenants Community.",
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: AppColors.primaryBlue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        duration: const Duration(seconds: 4),
-                      ),
-                    );
-                    return;
-                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TenantsChatPage(
-                        hostelId: hostelId,
-                        communityName: 'Tenants Community',
-                      ),
+                      builder: (context) => const OwnersListPage(),
                     ),
                   );
                 },
@@ -262,7 +223,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.people_rounded,
+                    Icons.info_outline_rounded,
                     color: AppColors.primaryBlue,
                     size: 24.sp,
                   ),
@@ -1073,6 +1034,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       },
     );
   }
+
 }
 
 class _PostCard extends StatefulWidget {

@@ -59,6 +59,7 @@ class CommunityMessageEntity extends Equatable {
   final bool isVerified;
   final bool isEdited;
   final bool isDeleted;
+  final String? reaction;
 
   const CommunityMessageEntity({
     required this.id,
@@ -76,6 +77,7 @@ class CommunityMessageEntity extends Equatable {
     this.isVerified = false,
     this.isEdited = false,
     this.isDeleted = false,
+    this.reaction,
   });
 
   @override
@@ -95,6 +97,7 @@ class CommunityMessageEntity extends Equatable {
     isVerified,
     isEdited,
     isDeleted,
+    reaction,
   ];
 }
 

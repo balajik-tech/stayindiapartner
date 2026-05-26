@@ -134,6 +134,8 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
     super.status,
     super.electricityBill,
     super.parkingBill,
+    super.sharingType,
+    super.acType,
   });
 
   factory TenantStayDetailModel.fromJson(Map<String, dynamic> json) {
@@ -170,6 +172,8 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
       status: json['status']?.toString(),
       electricityBill: _toDouble(json['electricityBill']),
       parkingBill: _toDouble(json['parkingBill']),
+      sharingType: (room['sharingType'] ?? json['sharingType'])?.toString(),
+      acType: (room['roomType'] ?? json['roomType'])?.toString(),
     );
   }
 }

@@ -19,6 +19,8 @@ import 'package:stayindia_owner/core/widgets/pattern_background.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 
+import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
+
 class TenantsPage extends StatefulWidget {
   const TenantsPage({super.key});
 
@@ -111,11 +113,11 @@ class _TenantsPageState extends State<TenantsPage> {
                     SliverPersistentHeader(
                       pinned: true,
                       delegate: _SliverHeaderDelegate(
-                        height: 80.h,
+                        height: 56.h,
                         child: Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 20.w,
-                            vertical: 12.h,
+                            vertical: 6.h,
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.scaffoldBackground.withValues(
@@ -155,10 +157,10 @@ class _TenantsPageState extends State<TenantsPage> {
   Widget _buildAppHeader() {
     return SliverToBoxAdapter(
       child: Container(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
+        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 14.h),
         decoration: BoxDecoration(
           color: AppColors.primaryBlue,
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20.r)),
         ),
         child: Row(
           children: [
@@ -169,17 +171,17 @@ class _TenantsPageState extends State<TenantsPage> {
                   Text(
                     'tenants_title'.tr(),
                     style: TextStyle(
-                      fontSize: 26.sp,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
-                      letterSpacing: -1.0,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 2.h),
                   Text(
                     'tenants_subtitle'.tr(),
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 12.sp,
                       color: Colors.white.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                     ),
@@ -188,19 +190,99 @@ class _TenantsPageState extends State<TenantsPage> {
               ),
             ),
             BouncingWrapper(
+              onTap: () {
+                String hostelId = '';
+                final hostelState = context.read<HostelCubit>().state;
+                if (hostelState is HostelLoaded &&
+                    hostelState.hostels.isNotEmpty) {
+                  hostelId =
+                      hostelState.hostels[hostelState.selectedHostelIndex].id;
+                }
+                if (hostelId.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded, color: Colors.white, size: 16.sp),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Text(
+                              "No hostels found. Please add a hostel and check-in tenants to view the Tenants Community.",
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: AppColors.primaryBlue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                  return;
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TenantsChatPage(
+                      hostelId: hostelId,
+                      communityName: 'Tenants Community',
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.forum_rounded,
+                      size: 15.sp,
+                      color: Colors.white,
+                    ),
+                    SizedBox(width: 6.w),
+                    Text(
+                      'Community',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            BouncingWrapper(
               onTap: () => _loadData(),
               child: Container(
-                padding: EdgeInsets.all(12.r),
+                padding: EdgeInsets.all(8.r),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16.r),
+                  borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.1),
                   ),
                 ),
                 child: Icon(
                   Icons.refresh_rounded,
-                  size: 24.sp,
+                  size: 18.sp,
                   color: Colors.white,
                 ),
               ),
@@ -213,10 +295,10 @@ class _TenantsPageState extends State<TenantsPage> {
 
   Widget _buildTabBar() {
     return Container(
-      padding: EdgeInsets.all(5.w),
+      padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: AppColors.backgroundSecondary,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
@@ -239,16 +321,16 @@ class _TenantsPageState extends State<TenantsPage> {
       child: GestureDetector(
         onTap: () => setState(() => _selectedTabIndex = index),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
+          padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primaryBlue : Colors.transparent,
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(10.r),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
                       color: AppColors.primaryBlue.withValues(alpha: 0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : null,
@@ -258,10 +340,10 @@ class _TenantsPageState extends State<TenantsPage> {
             children: [
               Icon(
                 icon,
-                size: 16.sp,
+                size: 14.sp,
                 color: isSelected ? Colors.white : AppColors.textSecondary,
               ),
-              SizedBox(width: 6.w),
+              SizedBox(width: 4.w),
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -272,7 +354,7 @@ class _TenantsPageState extends State<TenantsPage> {
                       color: isSelected
                           ? Colors.white
                           : AppColors.textSecondary,
-                      fontSize: 12.sp,
+                      fontSize: 11.sp,
                       fontWeight: isSelected
                           ? FontWeight.w800
                           : FontWeight.w600,
@@ -293,19 +375,19 @@ class _TenantsPageState extends State<TenantsPage> {
         Expanded(
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
-            height: 54.h,
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            height: 44.h,
+            padding: EdgeInsets.symmetric(horizontal: 14.w),
             decoration: BoxDecoration(
               color: AppColors.backgroundPrimary,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
                 color: AppColors.border.withValues(alpha: 0.8),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -314,9 +396,9 @@ class _TenantsPageState extends State<TenantsPage> {
                 Icon(
                   Icons.search_rounded,
                   color: AppColors.textSecondary.withValues(alpha: 0.6),
-                  size: 22.sp,
+                  size: 18.sp,
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: 10.w),
                 Expanded(
                   child: TextField(
                     controller: _searchController,
@@ -337,7 +419,7 @@ class _TenantsPageState extends State<TenantsPage> {
                       hintText: 'search_residents'.tr(),
                       hintStyle: TextStyle(
                         color: AppColors.textSecondary.withValues(alpha: 0.4),
-                        fontSize: 14.sp,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
                       ),
                       filled: false,
@@ -349,7 +431,7 @@ class _TenantsPageState extends State<TenantsPage> {
                       contentPadding: EdgeInsets.zero,
                     ),
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
@@ -359,7 +441,7 @@ class _TenantsPageState extends State<TenantsPage> {
             ),
           ),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 10.w),
         _buildControlAction(
           Icons.history_rounded,
           () => PastTenantsSheet.show(context),
@@ -377,8 +459,8 @@ class _TenantsPageState extends State<TenantsPage> {
     return BouncingWrapper(
       onTap: onTap,
       child: Container(
-        height: 52.h,
-        width: 52.w,
+        height: 42.h,
+        width: 42.w,
         decoration: BoxDecoration(
           color: AppColors.backgroundPrimary,
           border: Border.all(
@@ -386,19 +468,19 @@ class _TenantsPageState extends State<TenantsPage> {
                 ? AppColors.primaryBlue.withValues(alpha: 0.3)
                 : AppColors.border,
           ),
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.01),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Icon(
           icon,
           color: isActive ? AppColors.primaryBlue : AppColors.textSecondary,
-          size: 22.sp,
+          size: 18.sp,
         ),
       ),
     );

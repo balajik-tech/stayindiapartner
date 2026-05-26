@@ -81,6 +81,7 @@ class BedInfo {
   final bool isAway;
   final String? awayReturnDate;
   final String? geofenceStatus;
+  final String? vacatingDate;
 
   BedInfo({
     required this.bedNumber,
@@ -91,5 +92,6 @@ class BedInfo {
     this.isAway = false,
     this.awayReturnDate,
     this.geofenceStatus,
+    this.vacatingDate,
   });
 }

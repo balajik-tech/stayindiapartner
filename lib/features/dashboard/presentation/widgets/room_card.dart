@@ -341,6 +341,8 @@ class _RoomCardState extends State<RoomCard> {
           widget.isPreAllocated &&
           bed.bedNumber == widget.preAllocatedBedNumber,
       isSmall: widget.isGridView,
+      awayReturnDate: bed.awayReturnDate,
+      vacatingDate: bed.vacatingDate,
       onTap: () {
         final bedStatus = _mapStatus(bed.status);
 
@@ -370,6 +372,7 @@ class _RoomCardState extends State<RoomCard> {
             roomType: widget.roomType ?? widget.room.roomType,
             amenities: widget.room.features,
             awayReturnDate: bed.awayReturnDate,
+            sharingType: widget.sharingType,
           ),
         );
       },

@@ -153,6 +153,8 @@ class TenantStayDetailEntity extends Equatable {
   final String? status;
   final double? electricityBill;
   final double? parkingBill;
+  final String? sharingType;  // e.g. "SINGLE", "DOUBLE", "TRIPLE", "QUADRUPLE"...
+  final String? acType;       // e.g. "AC", "NON-AC"
 
   const TenantStayDetailEntity({
     required this.bookingId,
@@ -168,6 +170,8 @@ class TenantStayDetailEntity extends Equatable {
     this.status,
     this.electricityBill,
     this.parkingBill,
+    this.sharingType,
+    this.acType,
   });
 
   @override
@@ -185,6 +189,8 @@ class TenantStayDetailEntity extends Equatable {
     status,
     electricityBill,
     parkingBill,
+    sharingType,
+    acType,
   ];
 }
 

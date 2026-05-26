@@ -287,6 +287,8 @@ class FloorListSection extends StatelessWidget {
                               tenantAvatar: b.tenantAvatar,
                               tenantId: b.tenantId,
                               isAway: b.isAway,
+                              awayReturnDate: b.awayReturnDate,
+                              vacatingDate: b.vacatingDate,
                             ),
                           )
                           .toList(),

@@ -20,16 +20,16 @@ class TenantCard extends StatelessWidget {
     final bool isPending = tenant.checkInDate == null;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
+      margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.roomCardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -44,123 +44,123 @@ class TenantCard extends StatelessWidget {
             tenantId: tenant.id,
             hostelId: tenant.hostelId,
           ),
-          borderRadius: BorderRadius.circular(24.r),
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
-                child: Row(
-                  children: [
-                    _buildProfileImage(tenant),
-                    SizedBox(width: 14.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          borderRadius: BorderRadius.circular(16.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            child: Row(
+              children: [
+                _buildProfileImage(tenant),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  tenant.fullName,
-                                  style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.darkText,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                          Flexible(
+                            child: Text(
+                              tenant.fullName,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.darkText,
                               ),
-                              SizedBox(width: 8.w),
-                              _buildStatusIndicator(
-                                isActive,
-                                isPending,
-                                isNotice,
-                              ),
-                            ],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          SizedBox(height: 2.h),
+                          SizedBox(width: 6.w),
+                          _buildStatusIndicator(
+                            isActive,
+                            isPending,
+                            isNotice,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4.h),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.meeting_room_rounded,
+                            size: 12.sp,
+                            color: AppColors.primaryBlue,
+                          ),
+                          SizedBox(width: 4.w),
                           Text(
-                            tenant.mobile,
+                            tenant.roomTypename,
                             style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primaryBlue,
+                            ),
+                          ),
+                          Text(
+                            " • ",
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: Colors.grey.shade400,
+                            ),
+                          ),
+                          Icon(
+                            Icons.access_time_rounded,
+                            size: 12.sp,
+                            color: AppColors.greyText,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            _formatDate(tenant.checkInDate, context),
+                            style: TextStyle(
+                              fontSize: 11.sp,
                               color: AppColors.greyText,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Container(
-                  padding: EdgeInsets.all(12.w),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8F9FA),
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  child: Row(
-                    children: [
-                      _buildInfoItem(
-                        Icons.meeting_room_rounded,
-                        tenant.roomTypename,
-                        'position'.tr(),
-                      ),
-                      _buildVerticalDivider(),
-                      _buildInfoItem(
-                        Icons.access_time_rounded,
-                        'since'.tr(
-                          namedArgs: {
-                            'date': _formatDate(tenant.checkInDate, context),
-                          },
-                        ),
-                        'duration'.tr(),
-                      ),
                       if (isNotice) ...[
-                        _buildVerticalDivider(),
-                        _buildInfoItem(
-                          Icons.exit_to_app_rounded,
-                          _formatDate(tenant.checkOutDate, context),
-                          'vacating'.tr(),
+                        SizedBox(height: 3.h),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.exit_to_app_rounded,
+                              size: 12.sp,
+                              color: const Color(0xFFF24822),
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              "${'vacating'.tr()}: ${_formatDate(tenant.checkOutDate, context)}",
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: const Color(0xFFF24822),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ],
                   ),
                 ),
-              ),
-
-              Padding(
-                padding: EdgeInsets.all(12.w),
-                child: Row(
+                SizedBox(width: 8.w),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildQuickAction(
+                    _buildCompactCallAction(
                       Icons.call_rounded,
-                      'call_resident'.tr(),
                       const Color(0xFF27C26C),
                       () => _launchUrl('tel:${tenant.mobile}'),
                     ),
-                    const Spacer(),
-                    Text(
-                      'view_details'.tr(),
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primaryBlue,
-                      ),
-                    ),
+                    SizedBox(width: 4.w),
                     Icon(
                       Icons.chevron_right_rounded,
-                      size: 18.sp,
-                      color: AppColors.primaryBlue,
+                      size: 20.sp,
+                      color: Colors.grey.shade400,
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -182,9 +182,9 @@ class TenantCard extends StatelessWidget {
       child: CustomAvatar(
         imageUrl: ApiConstants.getImageUrl(tenant.avatar),
         name: tenant.fullName,
-        size: 52.0,
+        size: 38.0,
         isCircle: true,
-        fontSize: 20.sp,
+        fontSize: 14.sp,
       ),
     );
   }
@@ -203,15 +203,15 @@ class TenantCard extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.5.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6.r),
+        borderRadius: BorderRadius.circular(4.r),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 12.sp,
+          fontSize: 9.sp,
           fontWeight: FontWeight.w900,
           color: color,
           letterSpacing: 0.5,
@@ -220,54 +220,8 @@ class TenantCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String value, String label) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 12.sp, color: AppColors.greyText),
-              SizedBox(width: 4.w),
-              Text(
-                label.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.greyText,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w900,
-              color: AppColors.darkText,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVerticalDivider() {
-    return Container(
-      height: 24.h,
-      width: 1,
-      margin: EdgeInsets.symmetric(horizontal: 12.w),
-      color: Colors.black.withValues(alpha: 0.05),
-    );
-  }
-
-  Widget _buildQuickAction(
+  Widget _buildCompactCallAction(
     IconData icon,
-    String label,
     Color color,
     VoidCallback onTap,
   ) {
@@ -275,27 +229,14 @@ class TenantCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(8.r),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          padding: EdgeInsets.all(8.r),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Row(
-            children: [
-              Icon(icon, size: 16.sp, color: color),
-              SizedBox(width: 6.w),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w800,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
+          child: Icon(icon, size: 16.sp, color: color),
         ),
       ),
     );

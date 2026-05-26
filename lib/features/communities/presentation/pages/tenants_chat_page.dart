@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/community_cubit.dart';
+
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/widgets/chat_message_bubble.dart';
@@ -51,11 +54,17 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   final FocusNode _focusNode = FocusNode();
   String? _editingMessageId;
 
+  final Set<String> _selectedMessageIds = {};
+  final Set<String> _starredMessageIds = {};
+  final Map<String, String> _reactions = {}; // messageId -> emoji
+  CommunityMessageEntity? _replyingToMessage;
+
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadStarredMessages();
       final cubit = context.read<CommunityCubit>();
       final ownerId = context.read<AuthCubit>().currentOwner?.id;
       final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
@@ -67,6 +76,85 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
     });
 
     _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> _loadStarredMessages() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+      final List<String>? starred = prefs.getStringList('starred_messages_${page.hostelId}');
+      if (starred != null) {
+        setState(() {
+          _starredMessageIds.addAll(starred);
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _toggleStarSelectedMessages() async {
+    final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
+    bool allStarred = _selectedMessageIds.every((id) => _starredMessageIds.contains(id));
+    setState(() {
+      if (allStarred) {
+        _starredMessageIds.removeAll(_selectedMessageIds);
+      } else {
+        _starredMessageIds.addAll(_selectedMessageIds);
+      }
+      _selectedMessageIds.clear();
+    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('starred_messages_${page.hostelId}', _starredMessageIds.toList());
+    } catch (_) {}
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(allStarred ? "Messages unstarred" : "Messages starred"),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  String _getCleanTextMessage(String text) {
+    final prefix = 'REPLY_TO_MSG:';
+    if (text.startsWith(prefix)) {
+      final body = text.substring(prefix.length);
+      final parts = body.split('::REPLY_TO_MSG:');
+      if (parts.length >= 2) {
+        return parts.sublist(1).join('::REPLY_TO_MSG:');
+      }
+    }
+    return text;
+  }
+
+  void _copySelectedMessages(List<CommunityMessageEntity> allMessages) {
+    final selected = allMessages.where((m) => _selectedMessageIds.contains(m.id)).toList();
+    selected.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    final texts = selected.map((m) {
+      final cleanText = _getCleanTextMessage(m.text);
+      return "${m.senderName}: $cleanText";
+    }).join('\n');
+
+    Clipboard.setData(ClipboardData(text: texts));
+    setState(() {
+      _selectedMessageIds.clear();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Copied to clipboard"),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+
+  void _reactToMessage(String messageId, String emoji) {
+    setState(() {
+      if (_reactions[messageId] == emoji) {
+        _reactions.remove(messageId); // tap same emoji = remove
+      } else {
+        _reactions[messageId] = emoji;
+      }
+    });
   }
 
   void _onScroll() {
@@ -84,75 +172,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
     super.dispose();
   }
 
-  void _showMessageOptions(BuildContext context, CommunityMessageEntity message, Offset position) async {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
 
-    final result = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromRect(
-        position & const Size(40, 40),
-        Offset.zero & overlay.size,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-      color: Colors.white,
-      items: [
-        PopupMenuItem(
-          value: 'edit',
-          child: Row(
-            children: [
-              const Icon(Icons.edit_rounded, color: AppColors.primaryBlue, size: 20),
-              SizedBox(width: 12.w),
-              Text('Edit Message', style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: [
-              const Icon(Icons.delete_rounded, color: Colors.red, size: 20),
-              SizedBox(width: 12.w),
-              Text('Delete Message', style: GoogleFonts.outfit(fontWeight: FontWeight.w500, color: Colors.red)),
-            ],
-          ),
-        ),
-      ],
-    );
-
-    if (result == 'edit') {
-      setState(() {
-        _editingMessageId = message.id;
-        _controller.text = message.text;
-      });
-      _focusNode.requestFocus();
-    } else if (result == 'delete') {
-      _confirmDelete(context, message.id);
-    }
-  }
-
-  void _confirmDelete(BuildContext context, String messageId) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Delete Message', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: Text('Are you sure you want to delete this message?', style: GoogleFonts.outfit()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.outfit(color: AppColors.greyText)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<CommunityCubit>().deleteMessage(messageId);
-            },
-            child: Text('Delete', style: GoogleFonts.outfit(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _sendMessage() {
     final text = _controller.text.trim();
@@ -161,14 +181,37 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
       final owner = context.read<AuthCubit>().currentOwner;
 
       if (_editingMessageId != null) {
-        context.read<CommunityCubit>().editMessage(_editingMessageId!, text);
+        final communityState = context.read<CommunityCubit>().state;
+        final messages = communityState is CommunityLoaded ? communityState.messages : <CommunityMessageEntity>[];
+        final originalMsg = messages.firstWhere((m) => m.id == _editingMessageId);
+        String editedText = text;
+        
+        final prefix = 'REPLY_TO_MSG:';
+        if (originalMsg.text.startsWith(prefix)) {
+          final body = originalMsg.text.substring(prefix.length);
+          final parts = body.split('::REPLY_TO_MSG:');
+          if (parts.length >= 2) {
+            final header = parts[0];
+            editedText = 'REPLY_TO_MSG:$header::REPLY_TO_MSG:$text';
+          }
+        }
+        
+        context.read<CommunityCubit>().editMessage(_editingMessageId!, editedText);
         setState(() {
           _editingMessageId = null;
         });
       } else {
+        String sentText = text;
+        if (_replyingToMessage != null) {
+          final cleanText = _getCleanTextMessage(_replyingToMessage!.text);
+          sentText = 'REPLY_TO_MSG:${_replyingToMessage!.senderName}::${cleanText.replaceAll('\n', ' ')}::REPLY_TO_MSG:$text';
+          setState(() {
+            _replyingToMessage = null;
+          });
+        }
         context.read<CommunityCubit>().sendMessage(
           page.hostelId,
-          text,
+          sentText,
           senderId: owner?.id,
           senderName: owner?.name,
           senderAvatar: owner?.avatar,
@@ -223,10 +266,14 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   Widget build(BuildContext context) {
     final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
     final isPending = page.status?.toUpperCase() == 'PENDING';
+    final communityState = context.watch<CommunityCubit>().state;
+    final allMessages = communityState is CommunityLoaded ? communityState.messages : <CommunityMessageEntity>[];
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: _buildAppBar(context, page),
+      appBar: _selectedMessageIds.isNotEmpty
+          ? _buildSelectionAppBar(context, allMessages)
+          : _buildAppBar(context, page),
       body: isPending
           ? Center(
               child: Padding(
@@ -374,15 +421,48 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                               type: message.type,
                               isSystem: message.isSystem,
                               isMe: isMe,
+                              reaction: _reactions[message.id],
                             );
 
-                            return ChatMessageBubble(
-                              message: updatedMessage,
-                              onLongPressStart: (details) {
-                                if (isMe && !updatedMessage.isDeleted) {
-                                  _showMessageOptions(context, updatedMessage, details.globalPosition);
-                                }
+                            final isSelected = _selectedMessageIds.contains(updatedMessage.id);
+                            final isSelectionMode = _selectedMessageIds.isNotEmpty;
+                            final isStarred = _starredMessageIds.contains(updatedMessage.id);
+
+                            return SwipeToReply(
+                              enabled: !isSelectionMode && !updatedMessage.isDeleted,
+                              onSwipe: () {
+                                setState(() {
+                                  _replyingToMessage = updatedMessage;
+                                });
+                                _focusNode.requestFocus();
                               },
+                              child: ChatMessageBubble(
+                                message: updatedMessage,
+                                isSelected: isSelected,
+                                isSelectionMode: isSelectionMode,
+                                isStarred: isStarred,
+                                onReact: !isSelectionMode && !updatedMessage.isDeleted
+                                    ? (emoji) => _reactToMessage(updatedMessage.id, emoji)
+                                    : null,
+                                onTap: () {
+                                  setState(() {
+                                    if (isSelected) {
+                                      _selectedMessageIds.remove(updatedMessage.id);
+                                    } else {
+                                      _selectedMessageIds.add(updatedMessage.id);
+                                    }
+                                  });
+                                },
+                                onLongPressStart: isSelectionMode
+                                    ? (details) {
+                                        if (!updatedMessage.isDeleted) {
+                                          setState(() {
+                                            _selectedMessageIds.add(updatedMessage.id);
+                                          });
+                                        }
+                                      }
+                                    : null,
+                              ),
                             );
                           },
                         );
@@ -542,6 +622,107 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
     );
   }
 
+  PreferredSizeWidget _buildSelectionAppBar(BuildContext context, List<CommunityMessageEntity> allMessages) {
+    final selected = allMessages.where((m) => _selectedMessageIds.contains(m.id)).toList();
+    final isOne = selected.length == 1;
+    final owner = context.read<AuthCubit>().currentOwner;
+    final currentOwnerId = owner?.id;
+    final isOneMe = isOne &&
+        currentOwnerId != null &&
+        selected.first.senderId.isNotEmpty &&
+        selected.first.senderId == currentOwnerId;
+
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.close, color: Colors.black),
+        onPressed: () {
+          setState(() {
+            _selectedMessageIds.clear();
+          });
+        },
+      ),
+      title: Text(
+        '${_selectedMessageIds.length}',
+        style: GoogleFonts.outfit(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          fontSize: 20.sp,
+        ),
+      ),
+      actions: [
+        if (isOne)
+          IconButton(
+            icon: const Icon(Icons.reply_rounded, color: Colors.black),
+            onPressed: () {
+              setState(() {
+                _replyingToMessage = selected.first;
+                _selectedMessageIds.clear();
+              });
+              _focusNode.requestFocus();
+            },
+          ),
+        if (isOneMe)
+          IconButton(
+            icon: const Icon(Icons.edit_rounded, color: Colors.black),
+            onPressed: () {
+              setState(() {
+                _editingMessageId = selected.first.id;
+                _controller.text = _getCleanTextMessage(selected.first.text);
+                _selectedMessageIds.clear();
+              });
+              _focusNode.requestFocus();
+            },
+          ),
+        IconButton(
+          icon: Icon(
+            _selectedMessageIds.every((id) => _starredMessageIds.contains(id))
+                ? Icons.star_border_rounded
+                : Icons.star_rounded,
+            color: Colors.black,
+          ),
+          onPressed: _toggleStarSelectedMessages,
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete_rounded, color: Colors.black),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: Text('Delete message(s)', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                content: Text('Are you sure you want to delete these message(s)?', style: GoogleFonts.outfit()),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text('Cancel', style: GoogleFonts.outfit(color: AppColors.greyText)),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      for (var id in _selectedMessageIds) {
+                        context.read<CommunityCubit>().deleteMessage(id);
+                      }
+                      setState(() {
+                        _selectedMessageIds.clear();
+                      });
+                    },
+                    child: Text('Delete', style: GoogleFonts.outfit(color: Colors.white)),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.copy_rounded, color: Colors.black),
+          onPressed: () => _copySelectedMessages(allMessages),
+        ),
+      ],
+    );
+  }
+
   Widget _buildInputSection(TenantsChatPage page) {
     return Container(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
@@ -585,6 +766,63 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                       setState(() {
                         _editingMessageId = null;
                         _controller.clear();
+                      });
+                    },
+                    child: const Icon(Icons.close_rounded, color: AppColors.primaryBlue, size: 18),
+                  ),
+                ],
+              ),
+            ),
+          if (_replyingToMessage != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              margin: EdgeInsets.only(bottom: 8.h),
+              decoration: BoxDecoration(
+                color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4.w,
+                    height: 32.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBlue,
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _replyingToMessage!.senderName,
+                          style: GoogleFonts.outfit(
+                            color: AppColors.primaryBlue,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.sp,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          _getCleanTextMessage(_replyingToMessage!.text),
+                          style: GoogleFonts.outfit(
+                            color: Colors.grey.shade600,
+                            fontSize: 12.sp,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _replyingToMessage = null;
                       });
                     },
                     child: const Icon(Icons.close_rounded, color: AppColors.primaryBlue, size: 18),
@@ -743,4 +981,105 @@ class ChatWallpaperPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class SwipeToReply extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onSwipe;
+  final bool enabled;
+
+  const SwipeToReply({
+    super.key,
+    required this.child,
+    required this.onSwipe,
+    this.enabled = true,
+  });
+
+  @override
+  State<SwipeToReply> createState() => _SwipeToReplyState();
+}
+
+class _SwipeToReplyState extends State<SwipeToReply> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  double _dragOffset = 0.0;
+  bool _swipedTriggered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+
+    return GestureDetector(
+      onHorizontalDragUpdate: (details) {
+        if (details.delta.dx > 0) {
+          setState(() {
+            _dragOffset = (_dragOffset + details.delta.dx).clamp(0.0, 70.0);
+          });
+          if (_dragOffset >= 50.0 && !_swipedTriggered) {
+            _swipedTriggered = true;
+          }
+        } else if (details.delta.dx < 0 && _dragOffset > 0) {
+          setState(() {
+            _dragOffset = (_dragOffset + details.delta.dx).clamp(0.0, 70.0);
+          });
+        }
+      },
+      onHorizontalDragEnd: (details) {
+        if (_dragOffset >= 50.0) {
+          widget.onSwipe();
+        }
+        _swipedTriggered = false;
+        final start = _dragOffset;
+        final double end = 0.0;
+        _controller.reset();
+        final animation = Tween<double>(begin: start, end: end).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+        );
+        animation.addListener(() {
+          setState(() {
+            _dragOffset = animation.value;
+          });
+        });
+        _controller.forward();
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 12,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Opacity(
+                opacity: (_dragOffset / 50.0).clamp(0.0, 1.0),
+                child: const Icon(
+                  Icons.reply_rounded,
+                  color: Colors.grey,
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+          Transform.translate(
+            offset: Offset(_dragOffset, 0.0),
+            child: widget.child,
+          ),
+        ],
+      ),
+    );
+  }
 }

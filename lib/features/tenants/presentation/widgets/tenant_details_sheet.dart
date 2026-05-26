@@ -154,11 +154,6 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
 
   Widget _buildHeader(BuildContext context, TenantDetailEntity? detail) {
     final displayName = detail?.name ?? widget.name;
-    final displayRoom = detail?.stay?.roomTypename ?? widget.room;
-    final bedNum = detail?.stay?.bedNumber ?? '';
-    final bedLabel = bedNum.isNotEmpty
-        ? '  ${'bed_label'.tr(namedArgs: {'label': bedNum})}'
-        : '';
     return Padding(
       padding: EdgeInsets.all(20.w),
       child: Row(
@@ -305,17 +300,74 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         ),
                       ],
                       SizedBox(height: 4.h),
-                      Text(
-                        (detail?.stay?.roomTypename == null)
-                            ? 'not_assigned'.tr()
-                            : '${displayRoom.toLowerCase().startsWith('room') ? displayRoom : 'room_number_label'.tr(namedArgs: {'number': displayRoom})}$bedLabel',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: AppColors.greyText,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Builder(builder: (_) {
+                        // Room label
+                        final rawRoom = detail?.stay?.roomTypename ?? widget.room;
+                        final roomLabel = rawRoom.isEmpty ? null : rawRoom;
+
+                        // Bed: convert numeric to letter (1→A, 2→B...)
+                        final rawBed = detail?.stay?.bedNumber ?? '';
+                        String bedLabel = '';
+                        if (rawBed.isNotEmpty) {
+                          final num = int.tryParse(rawBed);
+                          if (num != null && num >= 1) {
+                            bedLabel = String.fromCharCode(64 + num); // A=65
+                          } else {
+                            bedLabel = rawBed.toUpperCase();
+                          }
+                        }
+
+                        // AC type label
+                        final rawAcType = detail?.stay?.acType ?? '';
+                        String acLabel = '';
+                        if (rawAcType.toUpperCase().contains('NON')) {
+                          acLabel = 'Non-AC';
+                        } else if (rawAcType.toUpperCase() == 'AC') {
+                          acLabel = 'AC';
+                        }
+
+                        // Sharing label
+                        final rawSharing = detail?.stay?.sharingType ?? '';
+                        String sharingLabel = '';
+                        final sharingMap = {
+                          'SINGLE': '1 Sharing',
+                          'DOUBLE': '2 Sharing',
+                          'TRIPLE': '3 Sharing',
+                          'QUADRUPLE': '4 Sharing',
+                          'QUINTUPLE': '5 Sharing',
+                          'DORMITORY': 'Dormitory',
+                        };
+                        sharingLabel = sharingMap[rawSharing.toUpperCase()] ?? (rawSharing.isNotEmpty ? rawSharing : '');
+
+                        if (roomLabel == null) {
+                          return Text(
+                            'not_assigned'.tr(),
+                            style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
+                          );
+                        }
+
+                        return Wrap(
+                          spacing: 6.w,
+                          runSpacing: 4.h,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            // Room chip
+                            _buildInfoChip(
+                              label: roomLabel.toLowerCase().startsWith('room') ? roomLabel : 'Room $roomLabel',
+                              color: const Color(0xFF1B2838),
+                            ),
+                            if (bedLabel.isNotEmpty)
+                              _buildInfoChip(label: 'Bed $bedLabel', color: const Color(0xFF1B2838)),
+                            if (acLabel.isNotEmpty)
+                              _buildInfoChip(
+                                label: acLabel,
+                                color: acLabel == 'AC' ? const Color(0xFF0277BD) : const Color(0xFF558B2F),
+                              ),
+                            if (sharingLabel.isNotEmpty)
+                              _buildInfoChip(label: sharingLabel, color: const Color(0xFF6A1B9A)),
+                          ],
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -327,6 +379,25 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
             icon: Icon(Icons.close, size: 28.sp, color: AppColors.greyText),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip({required String label, required Color color}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
       ),
     );
   }

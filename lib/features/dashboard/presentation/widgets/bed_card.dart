@@ -17,6 +17,8 @@ class BedCard extends StatelessWidget {
   final bool? isAwayField;
   final Color? labelColor;
   final VoidCallback onTap;
+  final String? awayReturnDate;
+  final String? vacatingDate;
 
   const BedCard({
     super.key,
@@ -29,7 +31,26 @@ class BedCard extends StatelessWidget {
     this.isAwayField,
     this.labelColor,
     required this.onTap,
+    this.awayReturnDate,
+    this.vacatingDate,
   });
+
+  String? _formatDate(String? rawDate) {
+    if (rawDate == null || rawDate.isEmpty) return null;
+    try {
+      final parsed = DateTime.tryParse(rawDate);
+      if (parsed != null) {
+        return DateFormat('dd MMM').format(parsed);
+      }
+    } catch (_) {}
+    if (rawDate.length >= 10) {
+      try {
+        final parsed = DateTime.parse(rawDate.substring(0, 10));
+        return DateFormat('dd MMM').format(parsed);
+      } catch (_) {}
+    }
+    return rawDate;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +65,9 @@ class BedCard extends StatelessWidget {
     final bool isNotice = upperStatus == 'NOTICE';
     final bool isFree = upperStatus == 'FREE';
     final bool isMaintenance = upperStatus == 'MAINTENANCE';
+    final bool isOccupied = !isFree && !isMaintenance && !isBooked && !isReserved && !isAway && !isNotice;
+
+    final bool useSolidBorder = isOccupied || isAway || isNotice;
 
     if (isFree) {
       bgColor = const Color(0xFFD6EEF8);
@@ -83,6 +107,140 @@ class BedCard extends StatelessWidget {
       bedLabel = bedNumber;
     }
 
+    final borderBoxDecoration = BoxDecoration(
+      color: bgColor,
+      border: useSolidBorder
+          ? Border.all(color: borderColor, width: 3.0)
+          : null,
+      borderRadius: BorderRadius.circular(
+        isSmall ? 14.r : 18.r,
+      ),
+      boxShadow: isSelected
+          ? [
+              BoxShadow(
+                color: borderColor.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ]
+          : null,
+    );
+
+    final Widget cardBody = Container(
+      decoration: borderBoxDecoration,
+      child: tenantAvatar != null && tenantAvatar!.isNotEmpty
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(isSmall ? 14.r : 18.r),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: ApiConstants.getImageUrl(tenantAvatar) ?? '',
+                    fit: BoxFit.cover,
+                    errorWidget: (context, url, error) => Container(color: bgColor),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.7),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: isSmall ? 8.h : 12.h),
+                      child: FittedBox(
+                        child: Text(
+                          bedLabel,
+                          style: TextStyle(
+                            fontSize: isSmall ? 12.sp : 16.sp,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white.withValues(alpha: 0.9),
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: isSmall ? 8.h : 12.h,
+                horizontal: 4.w,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (tenantName != null && tenantName!.isNotEmpty)
+                    CustomAvatar(
+                      imageUrl: null,
+                      name: tenantName ?? 'T',
+                      size: isSmall ? 30.r : 42.r,
+                      fontSize: isSmall ? 14.sp : 18.sp,
+                      isCircle: true,
+                    )
+                  else
+                    isMaintenance
+                        ? Icon(
+                            Icons.build_rounded,
+                            size: isSmall ? 22.sp : 34.sp,
+                            color: textColor.withValues(alpha: 0.8),
+                          )
+                        : SideViewBedIcon(
+                            size: isSmall ? 28.sp : 36.sp,
+                            color: textColor.withValues(alpha: 0.8),
+                          ),
+                  SizedBox(height: isSmall ? 4.h : 8.h),
+                  FittedBox(
+                    child: Text(
+                      bedLabel,
+                      style: TextStyle(
+                        fontSize: isSmall ? 12.sp : 16.sp,
+                        fontWeight: FontWeight.w900,
+                        color: textColor.withValues(alpha: 0.6),
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+
+    final Widget finalCardContainer = useSolidBorder
+        ? cardBody
+        : CustomPaint(
+            foregroundPainter: _DottedBorderPainter(
+              color: borderColor,
+              strokeWidth: 3.0,
+              dashWidth: 4,
+              dashSpace: 3,
+              borderRadius: isSmall ? 14.r : 18.r,
+            ),
+            child: cardBody,
+          );
+
+    String? dateLine;
+    if (isAway && awayReturnDate != null && awayReturnDate!.isNotEmpty) {
+      final formattedAway = _formatDate(awayReturnDate);
+      if (formattedAway != null) {
+        dateLine = 'Away: $formattedAway';
+      }
+    } else if (isNotice && vacatingDate != null && vacatingDate!.isNotEmpty) {
+      final formattedNotice = _formatDate(vacatingDate);
+      if (formattedNotice != null) {
+        dateLine = 'Vac: $formattedNotice';
+      }
+    }
+
     return Semantics(
       label:
           '${'bed'.tr()} $bedNumber, ${'status'.tr()}: $status${tenantName != null ? ', ${'tenant'.tr()}: $tenantName' : ''}',
@@ -100,117 +258,7 @@ class BedCard extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   width: isSmall ? 48.w : 60.w,
                   height: isSmall ? 68.h : 96.h,
-                  child: CustomPaint(
-                    foregroundPainter: _DottedBorderPainter(
-                      color: borderColor,
-                      strokeWidth: 3.0,
-                      dashWidth: 4,
-                      dashSpace: 3,
-                      borderRadius: isSmall ? 14.r : 18.r,
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: bgColor,
-                        borderRadius: BorderRadius.circular(
-                          isSmall ? 14.r : 18.r,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: borderColor.withValues(alpha: 0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: tenantAvatar != null && tenantAvatar!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(isSmall ? 14.r : 18.r),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  CachedNetworkImage(
-                                    imageUrl: ApiConstants.getImageUrl(tenantAvatar) ?? '',
-                                    fit: BoxFit.cover,
-                                    errorWidget: (context, url, error) => Container(color: bgColor),
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Colors.transparent,
-                                          Colors.black.withValues(alpha: 0.7),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(bottom: isSmall ? 8.h : 12.h),
-                                      child: FittedBox(
-                                        child: Text(
-                                          bedLabel,
-                                          style: TextStyle(
-                                            fontSize: isSmall ? 12.sp : 16.sp,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.white.withValues(alpha: 0.9),
-                                            height: 1,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: isSmall ? 8.h : 12.h,
-                                horizontal: 4.w,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (tenantName != null && tenantName!.isNotEmpty)
-                                    CustomAvatar(
-                                      imageUrl: null,
-                                      name: tenantName ?? 'T',
-                                      size: isSmall ? 30.r : 42.r,
-                                      fontSize: isSmall ? 14.sp : 18.sp,
-                                      isCircle: true,
-                                    )
-                                  else
-                                    isMaintenance
-                                        ? Icon(
-                                            Icons.build_rounded,
-                                            size: isSmall ? 22.sp : 34.sp,
-                                            color: textColor.withValues(alpha: 0.8),
-                                          )
-                                        : SideViewBedIcon(
-                                            size: isSmall ? 28.sp : 36.sp,
-                                            color: textColor.withValues(alpha: 0.8),
-                                          ),
-                                  SizedBox(height: isSmall ? 4.h : 8.h),
-                                  FittedBox(
-                                    child: Text(
-                                      bedLabel,
-                                      style: TextStyle(
-                                        fontSize: isSmall ? 12.sp : 16.sp,
-                                        fontWeight: FontWeight.w900,
-                                        color: textColor.withValues(alpha: 0.6),
-                                        height: 1,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                    ),
-                  ),
+                  child: finalCardContainer,
                 ),
                 if (isAway && isNotice) ...[
                   Positioned(
@@ -308,6 +356,20 @@ class BedCard extends StatelessWidget {
                 letterSpacing: 0.1,
               ),
             ),
+            if (dateLine != null) ...[
+              SizedBox(height: isSmall ? 1.h : 2.h),
+              Text(
+                dateLine,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isSmall ? 7.sp : 9.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF64748B),
+                ),
+              ),
+            ],
           ],
         ),
       ),
