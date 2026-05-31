@@ -550,14 +550,20 @@ class BookingCard extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        TenantDetailsSheet.show(
-          context,
-          name: booking.tenantName,
-          imageUrl: booking.tenantAvatar,
-          room: booking.roomTypeName,
-          tenantId: booking.tenantId ?? '',
-          hostelId: booking.hostelId ?? '',
-        );
+        if (booking.status == BookingStatus.checkedIn) {
+          _showActiveActionsBottomSheet(context);
+        } else if (booking.status == BookingStatus.confirmed || booking.status == BookingStatus.pending) {
+          _showRequestActionsBottomSheet(context);
+        } else {
+          TenantDetailsSheet.show(
+            context,
+            name: booking.tenantName,
+            imageUrl: booking.tenantAvatar,
+            room: booking.roomTypeName,
+            tenantId: booking.tenantId ?? '',
+            hostelId: booking.hostelId ?? '',
+          );
+        }
       },
       borderRadius: BorderRadius.circular(16.r),
       child: Container(
@@ -595,7 +601,7 @@ class BookingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    booking.tenantName,
+                    booking.tenantName.isNotEmpty ? booking.tenantName : booking.tenantPhone,
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
@@ -605,7 +611,9 @@ class BookingCard extends StatelessWidget {
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    '${booking.tenantPhone}  •  ${DateFormatter.formatISO(booking.checkInDate)}',
+                    booking.tenantName.isNotEmpty
+                        ? '${booking.tenantPhone}  •  ${DateFormatter.formatISO(booking.checkInDate)}'
+                        : DateFormatter.formatISO(booking.checkInDate),
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: AppColors.greyText.withValues(alpha: 0.8),
@@ -625,6 +633,268 @@ class BookingCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showActiveActionsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (sheetContext) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _buildProfileAvatar(),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          booking.tenantName,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          '${booking.tenantPhone}  •  ${booking.roomTypeName.isNotEmpty ? booking.roomTypeName : "Active Resident"}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.greyText,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24.h),
+              const Divider(height: 1),
+              SizedBox(height: 12.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: const Icon(Icons.bed_outlined, color: AppColors.primaryBlue),
+                ),
+                title: Text(
+                  StringUtils.translate('change_room', context: context),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _navigateToRoomSelection(context);
+                },
+              ),
+              SizedBox(height: 8.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(Icons.person_outline_rounded, color: Colors.green.shade700),
+                ),
+                title: const Text(
+                  'View Guest Profile',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  TenantDetailsSheet.show(
+                    context,
+                    name: booking.tenantName,
+                    imageUrl: booking.tenantAvatar,
+                    room: booking.roomTypeName,
+                    tenantId: booking.tenantId ?? '',
+                    hostelId: booking.hostelId ?? '',
+                  );
+                },
+              ),
+              SizedBox(height: 8.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                ),
+                title: Text(
+                  StringUtils.translate('checkout', context: context),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.redAccent,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded, color: Colors.redAccent),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _showCheckoutConfirmation(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showRequestActionsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (sheetContext) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _buildProfileAvatar(),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          booking.tenantName,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          '${booking.tenantPhone}  •  Booking Request',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.greyText,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24.h),
+              const Divider(height: 1),
+              SizedBox(height: 12.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(Icons.add_task_rounded, color: Colors.green.shade700),
+                ),
+                title: Text(
+                  StringUtils.translate('assign_room', context: context),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.green.shade700,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _showCheckInDialog(context);
+                },
+              ),
+              SizedBox(height: 8.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: const Icon(Icons.person_outline_rounded, color: AppColors.primaryBlue),
+                ),
+                title: const Text(
+                  'View Guest Profile',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  TenantDetailsSheet.show(
+                    context,
+                    name: booking.tenantName,
+                    imageUrl: booking.tenantAvatar,
+                    room: booking.roomTypeName,
+                    tenantId: booking.tenantId ?? '',
+                    hostelId: booking.hostelId ?? '',
+                  );
+                },
+              ),
+              SizedBox(height: 8.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: const Icon(Icons.close_rounded, color: Colors.redAccent),
+                ),
+                title: Text(
+                  StringUtils.translate('reject', context: context),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.redAccent,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded, color: Colors.redAccent),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _showCancelConfirmation(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

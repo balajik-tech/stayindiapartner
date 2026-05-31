@@ -479,7 +479,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll>
           itemCount: items.length + (state.isLoadMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index < items.length) {
-              return BookingCard(booking: items[index], isCompact: isHistory);
+              return BookingCard(booking: items[index], isCompact: true);
             }
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
