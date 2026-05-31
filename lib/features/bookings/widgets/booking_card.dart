@@ -31,29 +31,25 @@ class BookingCard extends StatelessWidget {
     ].contains(booking.status);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 20.h),
+      margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
-        color: isKycPending && isRequest
-            ? const Color(0xFFFFF9F2)
-            : Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: isKycPending && isRequest
-              ? const Color(0xFFFFE5CC)
-              : AppColors.roomCardBorder.withValues(alpha: 0.5),
+          color: AppColors.roomCardBorder.withValues(alpha: 0.4),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(16.r),
         child: InkWell(
           onTap: () {
             TenantDetailsSheet.show(
@@ -65,14 +61,15 @@ class BookingCard extends StatelessWidget {
               hostelId: booking.hostelId ?? '',
             );
           },
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(16.r),
           child: Padding(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top row: Profile Avatar, Name, Phone & Status
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _buildProfileAvatar(),
                     SizedBox(width: 12.w),
@@ -81,11 +78,10 @@ class BookingCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Flexible(
                                 child: Text(
-                                  booking.tenantName,
+                                  booking.tenantName.isNotEmpty ? booking.tenantName : booking.tenantPhone,
                                   style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w700,
@@ -95,91 +91,88 @@ class BookingCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (booking.createdAt != null && isRequest)
-                                Text(
-                                  DateFormatter.formatTimeAgo(
-                                    booking.createdAt,
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.orange.shade700,
-                                  ),
-                                ),
+                              SizedBox(width: 8.w),
+                              _buildStatusBadge(),
                             ],
                           ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            booking.tenantPhone,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.greyText.withValues(alpha: 0.8),
+                          if (booking.tenantName.isNotEmpty) ...[
+                            SizedBox(height: 2.h),
+                            Text(
+                              booking.tenantPhone,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.greyText.withValues(alpha: 0.8),
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
+                    if (booking.createdAt != null && isRequest)
+                      Text(
+                        DateFormatter.formatTimeAgo(
+                          booking.createdAt,
+                        ),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.orange.shade700,
+                        ),
+                      ),
                   ],
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 10.h),
 
-                Wrap(
-                  spacing: 8.w,
-                  runSpacing: 8.h,
+                // Middle Row: Simple inline details (Check-in Date & Room Type)
+                Row(
                   children: [
-                    _buildStatusBadge(),
-                    if (isKycPending) _buildKycWarningBadge(context),
-                    if (booking.status != BookingStatus.checkedIn &&
-                        booking.roomTypeName.isEmpty)
-                      _buildPendingAllocationBadge(context),
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 11.sp,
+                      color: AppColors.greyText.withValues(alpha: 0.5),
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      DateFormatter.formatISO(booking.checkInDate),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.darkText.withValues(alpha: 0.9),
+                      ),
+                    ),
+                    SizedBox(width: 14.w),
+                    Icon(
+                      Icons.bed_outlined,
+                      size: 13.sp,
+                      color: AppColors.greyText.withValues(alpha: 0.5),
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      booking.roomTypeName.isNotEmpty
+                          ? booking.roomTypeName
+                          : (booking.sharingType ?? 'N/A'),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.darkText.withValues(alpha: 0.9),
+                      ),
+                    ),
+                    const Spacer(),
+                    if (isKycPending) ...[
+                      _buildKycWarningBadge(context),
+                    ],
                   ],
                 ),
-                SizedBox(height: 16.h),
 
-                Container(
-                  padding: EdgeInsets.all(14.w),
-                  decoration: BoxDecoration(
-                    color: isKycPending && isRequest
-                        ? Colors.white.withValues(alpha: 0.5)
-                        : const Color(0xFFF8F9FB),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: Colors.black.withValues(alpha: 0.03),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildInfoItem(
-                          StringUtils.translate(
-                            'checkin_date',
-                            context: context,
-                          ),
-                          DateFormatter.formatISO(booking.checkInDate),
-                          Icons.calendar_today_outlined,
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30.h,
-                        color: Colors.black.withValues(alpha: 0.05),
-                        margin: EdgeInsets.symmetric(horizontal: 12.w),
-                      ),
-                      Expanded(
-                        child: _buildInfoItem(
-                          StringUtils.translate('room_type', context: context),
-                          booking.roomTypeName.isNotEmpty
-                              ? booking.roomTypeName
-                              : (booking.sharingType ?? 'N/A'),
-                          Icons.bed_outlined,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20.h),
+                if (booking.status != BookingStatus.checkedIn &&
+                    booking.roomTypeName.isEmpty) ...[
+                  SizedBox(height: 8.h),
+                  _buildPendingAllocationBadge(context),
+                ],
+                SizedBox(height: 12.h),
 
+                // Bottom row: Actions
                 _buildActions(context),
               ],
             ),
