@@ -88,8 +88,20 @@ class BookingsRepositoryImpl implements BookingsRepository {
   }
 
   @override
-  Future<void> checkoutBooking(String bookingId) {
-    return remote.checkoutBooking(bookingId);
+  Future<void> checkoutBooking(
+    String bookingId, {
+    double? securityDeposit,
+    double? pendingRent,
+    double? utilityDue,
+    double? finalSettlement,
+  }) {
+    return remote.checkoutBooking(
+      bookingId,
+      securityDeposit: securityDeposit,
+      pendingRent: pendingRent,
+      utilityDue: utilityDue,
+      finalSettlement: finalSettlement,
+    );
   }
 
   @override

@@ -18,7 +18,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
-  // Premium colors/gradients for each onboarding screen
   final List<List<Color>> _gradients = [
     [const Color(0xFFFFFFFF), const Color(0xFFF0F4FA)],
     [const Color(0xFFFFFFFF), const Color(0xFFEBF0F9)],
@@ -58,10 +57,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top Bar with Skip Button
               _buildTopBar(),
               
-              // Main content: Swipeable PageView
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
@@ -77,7 +74,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 ),
               ),
 
-              // Bottom Section containing indicators and buttons
               _buildBottomControls(),
             ],
           ),
@@ -112,7 +108,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
             ],
           ),
           
-          // Skip Button (only if not on the last screen)
           if (_currentIndex < 4)
             GestureDetector(
               onTap: widget.onComplete,
@@ -134,7 +129,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
             )
           else
-            SizedBox(width: 50.w), // Dummy widget to keep constraints symmetric
+            SizedBox(width: 50.w),
         ],
       ),
     );
@@ -194,7 +189,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
       children: [
         SizedBox(height: 12.h),
         
-        // Title & Description
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Column(
@@ -226,7 +220,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
         
         SizedBox(height: 24.h),
 
-        // Full Screen Animated Component (Expanded to take up all remaining space)
         Expanded(
           child: animationWidget,
         ),
@@ -255,14 +248,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Dots Indicator
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(5, (index) => _buildDot(index)),
           ),
           SizedBox(height: 20.h),
           
-          // Action Button
           _OnboardingActionButton(
             text: _currentIndex == 4
                 ? _tr('btn_onboard_start', 'Get Started')
@@ -298,9 +289,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 }
 
-// ---------------------------------------------------------
-// Screen 1: Property Layout Configurator Animation
-// ---------------------------------------------------------
 class _PropertySetupAnimation extends StatefulWidget {
   const _PropertySetupAnimation();
 
@@ -407,7 +395,6 @@ class _PropertySetupAnimationState extends State<_PropertySetupAnimation>
           ),
           SizedBox(height: 10.h),
           
-          // Animate floor block
           Expanded(
             child: AnimatedBuilder(
               animation: _slideAnimation,
@@ -571,9 +558,6 @@ class _PropertySetupAnimationState extends State<_PropertySetupAnimation>
   }
 }
 
-// ---------------------------------------------------------
-// Screen 2: Tenant KYC Face-Scan Animation
-// ---------------------------------------------------------
 class _TenantKYCAnimation extends StatefulWidget {
   const _TenantKYCAnimation();
 
@@ -601,7 +585,6 @@ class _TenantKYCAnimationState extends State<_TenantKYCAnimation>
 
     _scannerController.repeat(reverse: true);
 
-    // Simulate validation matching
     Future.delayed(const Duration(milliseconds: 3200), () {
       if (mounted) {
         setState(() {
@@ -624,13 +607,11 @@ class _TenantKYCAnimationState extends State<_TenantKYCAnimation>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Face scanning frame
           Expanded(
             child: Center(
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Circular Scanning Frame Container
                   Container(
                     width: 180.w,
                     height: 180.h,
@@ -651,7 +632,6 @@ class _TenantKYCAnimationState extends State<_TenantKYCAnimation>
                     ),
                   ),
                   
-                  // Scanning Line
                   if (!_isVerified)
                     AnimatedBuilder(
                       animation: _scannerAnimation,
@@ -678,7 +658,6 @@ class _TenantKYCAnimationState extends State<_TenantKYCAnimation>
                       },
                     ),
                     
-                  // Verified icon badge
                   if (_isVerified)
                     Positioned(
                       bottom: 8.h,
@@ -703,7 +682,6 @@ class _TenantKYCAnimationState extends State<_TenantKYCAnimation>
           
           SizedBox(height: 16.h),
           
-          // Steps Panel
           Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
@@ -722,7 +700,6 @@ class _TenantKYCAnimationState extends State<_TenantKYCAnimation>
           
           SizedBox(height: 16.h),
           
-          // Verification badge
           AnimatedContainer(
             duration: const Duration(milliseconds: 500),
             padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -777,9 +754,6 @@ class _TenantKYCAnimationState extends State<_TenantKYCAnimation>
   }
 }
 
-// ---------------------------------------------------------
-// Screen 3: Revenue & Expense Analytics Animation
-// ---------------------------------------------------------
 class _FinanceAnalyticsAnimation extends StatefulWidget {
   const _FinanceAnalyticsAnimation();
 
@@ -819,7 +793,6 @@ class _FinanceAnalyticsAnimationState extends State<_FinanceAnalyticsAnimation>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Revenue Card
           Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
@@ -880,7 +853,6 @@ class _FinanceAnalyticsAnimationState extends State<_FinanceAnalyticsAnimation>
           
           SizedBox(height: 20.h),
           
-          // Chart section
           Text(
             'MONTHLY LEDGER TARGETS',
             style: TextStyle(
@@ -892,7 +864,6 @@ class _FinanceAnalyticsAnimationState extends State<_FinanceAnalyticsAnimation>
           ),
           SizedBox(height: 12.h),
 
-          // Growing Bar Charts representation
           Container(
             height: 125.h,
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -914,7 +885,6 @@ class _FinanceAnalyticsAnimationState extends State<_FinanceAnalyticsAnimation>
           
           const Spacer(),
           
-          // Transaction ledger logs
           _buildTransactionItem('J. Miller (Rent Paid)', '+₹12,500', const Color(0xFF34D399)),
           SizedBox(height: 8.h),
           _buildTransactionItem('Utility Bills (Electricity)', '-₹42,300', const Color(0xFFF87171)),
@@ -982,9 +952,6 @@ class _FinanceAnalyticsAnimationState extends State<_FinanceAnalyticsAnimation>
   }
 }
 
-// ---------------------------------------------------------
-// Screen 4: Operational Notices & Tickets Console
-// ---------------------------------------------------------
 class _OperationsNoticeAnimation extends StatefulWidget {
   const _OperationsNoticeAnimation();
 
@@ -995,7 +962,7 @@ class _OperationsNoticeAnimation extends StatefulWidget {
 class _OperationsNoticeAnimationState extends State<_OperationsNoticeAnimation>
     with SingleTickerProviderStateMixin {
   late AnimationController _statusController;
-  int _statusStep = 0; // 0 = Assigned, 1 = In Progress, 2 = Fixed
+  int _statusStep = 0;
 
   @override
   void initState() {
@@ -1027,14 +994,14 @@ class _OperationsNoticeAnimationState extends State<_OperationsNoticeAnimation>
   @override
   Widget build(BuildContext context) {
     String badgeText = 'Assigned';
-    Color badgeColor = const Color(0xFFFBBF24); // Amber
+    Color badgeColor = const Color(0xFFFBBF24);
 
     if (_statusStep == 1) {
       badgeText = 'In Progress';
-      badgeColor = const Color(0xFF38BDF8); // Blue
+      badgeColor = const Color(0xFF38BDF8);
     } else if (_statusStep == 2) {
       badgeText = 'Fixed';
-      badgeColor = const Color(0xFF34D399); // Green
+      badgeColor = const Color(0xFF34D399);
     }
 
     return Padding(
@@ -1053,7 +1020,6 @@ class _OperationsNoticeAnimationState extends State<_OperationsNoticeAnimation>
           ),
           SizedBox(height: 10.h),
           
-          // Complaint Ticket Card
           Container(
             padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
@@ -1120,7 +1086,6 @@ class _OperationsNoticeAnimationState extends State<_OperationsNoticeAnimation>
           ),
           SizedBox(height: 10.h),
           
-          // Notice Announcement card
           _buildNoticeCard('Elevator Maintenance Alert', 'Scheduled maintenance on Nov 15th, 10am-2pm.'),
           
           const Spacer(),
@@ -1256,9 +1221,6 @@ class _OnboardingActionButtonState extends State<_OnboardingActionButton>
   }
 }
 
-// ---------------------------------------------------------
-// Screen 5: Communities Animation
-// ---------------------------------------------------------
 class _CommunitiesAnimation extends StatefulWidget {
   const _CommunitiesAnimation();
 
@@ -1333,13 +1295,11 @@ class _CommunitiesAnimationState extends State<_CommunitiesAnimation>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Connection Lines (Static for simplicity, behind the nodes)
               CustomPaint(
                 size: Size(double.infinity, 350.h),
                 painter: _NetworkLinesPainter(),
               ),
               
-              // Central Globe
               AnimatedBuilder(
                 animation: _pulseAnimation,
                 builder: (context, child) {
@@ -1369,14 +1329,12 @@ class _CommunitiesAnimationState extends State<_CommunitiesAnimation>
                 },
               ),
               
-              // Animated Networking Nodes
               _buildNode(Icons.groups_rounded, const Color(0xFF10B981), 32.sp, 20.h, 40.w, 0.0),
               _buildNode(Icons.handshake_rounded, const Color(0xFFF59E0B), 28.sp, 30.h, 240.w, 2.0),
               _buildNode(Icons.store_rounded, const Color(0xFF3B82F6), 36.sp, 240.h, 30.w, 4.0),
               _buildNode(Icons.forum_rounded, const Color(0xFFEF4444), 24.sp, 220.h, 250.w, 1.0),
               _buildNode(Icons.lightbulb_rounded, const Color(0xFF8B5CF6), 28.sp, -10.h, 150.w, 3.0),
               
-              // Verification badge
               Positioned(
                 bottom: 10.h,
                 child: Container(
@@ -1421,12 +1379,11 @@ class _NetworkLinesPainter extends CustomPainter {
       
     final center = Offset(size.width / 2, size.height / 2);
     
-    // Draw lines to approximate node positions
-    canvas.drawLine(center, Offset(40 + 20, 20 + 20), paint); // Top Left
-    canvas.drawLine(center, Offset(240 + 20, 30 + 20), paint); // Top Right
-    canvas.drawLine(center, Offset(30 + 20, 240 + 20), paint); // Bottom Left
-    canvas.drawLine(center, Offset(250 + 20, 220 + 20), paint); // Bottom Right
-    canvas.drawLine(center, Offset(150 + 20, -10 + 20), paint); // Top Center
+    canvas.drawLine(center, Offset(40 + 20, 20 + 20), paint);
+    canvas.drawLine(center, Offset(240 + 20, 30 + 20), paint);
+    canvas.drawLine(center, Offset(30 + 20, 240 + 20), paint);
+    canvas.drawLine(center, Offset(250 + 20, 220 + 20), paint);
+    canvas.drawLine(center, Offset(150 + 20, -10 + 20), paint);
   }
 
   @override

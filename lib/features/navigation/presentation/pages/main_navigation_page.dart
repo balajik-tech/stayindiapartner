@@ -304,7 +304,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                       final owner = authState is AuthAuthenticated
                           ? authState.owner
                           : (authState as AuthProfileCompleted).owner;
-                      // Dashboard is accessible to all employees
                       if (index == 1 && !owner.hasPermission('bookings')) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -391,7 +390,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     );
   }
 
-  /// Only owner and manager roles see the FAB on the dashboard
   Widget? _buildFABIfAllowed(BuildContext context) {
     final authState = context.read<AuthCubit>().state;
     if (authState is! AuthAuthenticated && authState is! AuthProfileCompleted) {
@@ -403,7 +401,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
     final role = owner.role.toLowerCase();
     if (role != 'owner' && role != 'manager') {
-      return null; // All other staff: no FAB
+      return null;
     }
     return _buildPremiumFAB(context);
   }
@@ -618,6 +616,23 @@ class _PremiumNavBar extends StatelessWidget {
     final bool hasTenants = owner?.hasPermission('tenants') ?? true;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
+    final List<int> activeTabs = [
+      0,
+      if (hasBookings) 1,
+      if (hasCommunity) 2,
+      if (hasTenants) 3,
+      4,
+    ];
+
+    final visibleIndex = activeTabs.indexOf(currentIndex);
+    final totalTabs = activeTabs.length;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double tabWidth = screenWidth / totalTabs;
+    final double indicatorWidth = 36.w;
+    final double leftOffset = visibleIndex != -1
+        ? visibleIndex * tabWidth + (tabWidth - indicatorWidth) / 2
+        : 0.0;
+
     return Container(
       height: 70.h + bottomPadding,
       padding: EdgeInsets.only(bottom: bottomPadding),
@@ -631,47 +646,72 @@ class _PremiumNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Stack(
         children: [
-          _NavBarItem(
-            index: 0,
-            currentIndex: currentIndex,
-            icon: Icons.grid_view_rounded,
-            label: 'dashboard'.tr(),
-            onTap: onTap,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavBarItem(
+                index: 0,
+                currentIndex: currentIndex,
+                icon: Icons.grid_view_rounded,
+                label: 'dashboard'.tr(),
+                onTap: onTap,
+              ),
+              if (hasBookings)
+                _NavBarItem(
+                  index: 1,
+                  currentIndex: currentIndex,
+                  icon: Icons.receipt_long_rounded,
+                  label: 'bookings'.tr(),
+                  onTap: onTap,
+                ),
+              if (hasCommunity)
+                _NavBarItem(
+                  index: 2,
+                  currentIndex: currentIndex,
+                  icon: Icons.groups_rounded,
+                  label: 'community'.tr(),
+                  onTap: onTap,
+                ),
+              if (hasTenants)
+                _NavBarItem(
+                  index: 3,
+                  currentIndex: currentIndex,
+                  icon: Icons.group_rounded,
+                  label: 'tenants'.tr(),
+                  onTap: onTap,
+                ),
+              _NavBarItem(
+                index: 4,
+                currentIndex: currentIndex,
+                icon: Icons.menu_rounded,
+                label: 'More',
+                onTap: onTap,
+              ),
+            ],
           ),
-          if (hasBookings)
-            _NavBarItem(
-              index: 1,
-              currentIndex: currentIndex,
-              icon: Icons.receipt_long_rounded,
-              label: 'bookings'.tr(),
-              onTap: onTap,
+          if (visibleIndex != -1)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubic,
+              left: leftOffset,
+              top: 0,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: currentIndex == 2 ? 0.0 : 1.0,
+                child: Container(
+                  width: indicatorWidth,
+                  height: 3.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF7000),
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(1.5.r),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          if (hasCommunity)
-            _NavBarItem(
-              index: 2,
-              currentIndex: currentIndex,
-              icon: Icons.groups_rounded,
-              label: 'community'.tr(),
-              onTap: onTap,
-            ),
-          if (hasTenants)
-            _NavBarItem(
-              index: 3,
-              currentIndex: currentIndex,
-              icon: Icons.group_rounded,
-              label: 'tenants'.tr(),
-              onTap: onTap,
-            ),
-          _NavBarItem(
-            index: 4,
-            currentIndex: currentIndex,
-            icon: Icons.menu_rounded,
-            label: 'More',
-            onTap: onTap,
-          ),
         ],
       ),
     );
@@ -698,7 +738,6 @@ class _NavBarItem extends StatelessWidget {
     final isSelected = currentIndex == index;
 
     if (index == 2) {
-      // Community Item - custom elevated layout with circular background
       return Expanded(
         child: GestureDetector(
           onTap: () => onTap(index),
@@ -767,47 +806,39 @@ class _NavBarItem extends StatelessWidget {
       child: GestureDetector(
         onTap: () => onTap(index),
         behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? const Color(0xFF2C599D)
-                  : const Color(0xFF5A6E85),
-              size: 26.sp,
-            ),
-            SizedBox(height: 4.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: isSelected
-                        ? const Color(0xFF2C599D)
-                        : const Color(0xFF5A6E85),
-                    fontSize: 11.sp,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+        child: Padding(
+          padding: EdgeInsets.only(top: 8.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: isSelected
+                    ? const Color(0xFF2C599D)
+                    : const Color(0xFF5A6E85),
+                size: 26.sp,
+              ),
+              SizedBox(height: 4.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: isSelected
+                          ? const Color(0xFF2C599D)
+                          : const Color(0xFF5A6E85),
+                      fontSize: 11.sp,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ),
-            if (isSelected) ...[
-              SizedBox(height: 4.h),
-              Container(
-                width: 5.w,
-                height: 5.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2C599D),
-                  shape: BoxShape.circle,
-                ),
-              ),
             ],
-          ],
+          ),
         ),
       ),
     );

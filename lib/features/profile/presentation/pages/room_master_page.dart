@@ -144,7 +144,6 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
   void _addNewSharingType(int sharing) {
     if (_activeSharingTypes.contains(sharing)) return;
 
-    // Find the closest smaller active sharing capacity (directly above it in the table)
     int? upperSharing;
     if (_activeSharingTypes.isNotEmpty) {
       final smallerTypes = _activeSharingTypes.where((t) => t < sharing).toList();
@@ -152,7 +151,6 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         smallerTypes.sort();
         upperSharing = smallerTypes.last;
       } else {
-        // If there's no smaller capacity, take the first/smallest available one
         _activeSharingTypes.sort();
         upperSharing = _activeSharingTypes.first;
       }
@@ -185,7 +183,6 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         });
       }
 
-      // If actively editing and we have an upper row, copy its values
       if (_isEditing && upperSharing != null) {
         final currentDepositCtrl = _controllers[type]![sharing]!['deposit']!;
         final currentMaintCtrl = _controllers[type]![sharing]!['maintenance']!;

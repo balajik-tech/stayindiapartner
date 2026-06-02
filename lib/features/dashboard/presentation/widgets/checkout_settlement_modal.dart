@@ -10,7 +10,12 @@ class CheckoutSettlementModal extends StatefulWidget {
   final String hostelId;
   final String bookingId;
   final double securityDeposit;
-  final VoidCallback onCheckoutConfirmed;
+  final Function({
+    required double securityDeposit,
+    required double pendingRent,
+    required double utilityDue,
+    required double finalSettlement,
+  }) onCheckoutConfirmed;
 
   const CheckoutSettlementModal({
     super.key,
@@ -29,7 +34,12 @@ class CheckoutSettlementModal extends StatefulWidget {
     required String hostelId,
     required String bookingId,
     required double securityDeposit,
-    required VoidCallback onCheckoutConfirmed,
+    required Function({
+      required double securityDeposit,
+      required double pendingRent,
+      required double utilityDue,
+      required double finalSettlement,
+    }) onCheckoutConfirmed,
   }) {
     showModalBottomSheet(
       context: context,
@@ -54,15 +64,45 @@ class CheckoutSettlementModal extends StatefulWidget {
 class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
   bool _isLoading = true;
   String? _errorMessage;
+  double _securityDeposit = 0.0;
   double _pendingRent = 0.0;
   double _utilityDue = 0.0;
   double _totalDues = 0.0;
   double _finalSettlement = 0.0;
 
+  late TextEditingController _depositController;
+  late TextEditingController _pendingRentController;
+  late TextEditingController _utilityController;
+
   @override
   void initState() {
     super.initState();
+    _depositController = TextEditingController();
+    _pendingRentController = TextEditingController();
+    _utilityController = TextEditingController();
     _fetchSettlementData();
+  }
+
+  @override
+  void dispose() {
+    _depositController.dispose();
+    _pendingRentController.dispose();
+    _utilityController.dispose();
+    super.dispose();
+  }
+
+  void _onValuesChanged() {
+    final double dep = double.tryParse(_depositController.text) ?? 0.0;
+    final double rent = double.tryParse(_pendingRentController.text) ?? 0.0;
+    final double util = double.tryParse(_utilityController.text) ?? 0.0;
+
+    setState(() {
+      _securityDeposit = dep;
+      _pendingRent = rent;
+      _utilityDue = util;
+      _totalDues = _pendingRent + _utilityDue;
+      _finalSettlement = _securityDeposit - _totalDues;
+    });
   }
 
   Future<void> _fetchSettlementData() async {
@@ -96,10 +136,16 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
       }
 
       setState(() {
+        _securityDeposit = widget.securityDeposit;
         _pendingRent = rentAccumulator;
         _utilityDue = utilityAccumulator;
         _totalDues = _pendingRent + _utilityDue;
-        _finalSettlement = widget.securityDeposit - _totalDues;
+        _finalSettlement = _securityDeposit - _totalDues;
+
+        _depositController.text = _securityDeposit.toStringAsFixed(0);
+        _pendingRentController.text = _pendingRent.toStringAsFixed(0);
+        _utilityController.text = _utilityDue.toStringAsFixed(0);
+
         _isLoading = false;
       });
     } catch (e) {
@@ -264,21 +310,21 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
               ),
               child: Column(
                 children: [
-                  _buildFinancialRow(
+                  _buildFinancialInputRow(
                     'Refundable Security Deposit',
-                    widget.securityDeposit,
+                    _depositController,
                     isPositive: true,
                   ),
                   const Divider(height: 24),
-                  _buildFinancialRow(
+                  _buildFinancialInputRow(
                     'Pending Rent',
-                    _pendingRent,
+                    _pendingRentController,
                     isPositive: false,
                   ),
                   SizedBox(height: 12.h),
-                  _buildFinancialRow(
+                  _buildFinancialInputRow(
                     'Utility / Electricity Bills',
-                    _utilityDue,
+                    _utilityController,
                     isPositive: false,
                   ),
                   const Divider(height: 24),
@@ -288,7 +334,7 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
                       Text(
                         _finalSettlement >= 0
                             ? 'Refund to Tenant'
-                            : 'Tenant Oues Owner',
+                            : 'Tenant Owes Owner',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
@@ -316,7 +362,12 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
               label: 'Slide to Confirm Check-out',
               onConfirmed: () {
                 Navigator.pop(context);
-                widget.onCheckoutConfirmed();
+                widget.onCheckoutConfirmed(
+                  securityDeposit: _securityDeposit,
+                  pendingRent: _pendingRent,
+                  utilityDue: _utilityDue,
+                  finalSettlement: _finalSettlement,
+                );
               },
             ),
           ],
@@ -325,30 +376,67 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
     );
   }
 
-  Widget _buildFinancialRow(
+  Widget _buildFinancialInputRow(
     String title,
-    double amount, {
+    TextEditingController controller, {
     required bool isPositive,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: const Color(0xFF475569),
-            fontWeight: FontWeight.w500,
+        Expanded(
+          flex: 3,
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: const Color(0xFF475569),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
-        Text(
-          '${isPositive ? "+" : "-"} ₹${amount.toStringAsFixed(0)}',
-          style: TextStyle(
-            fontSize: 15.sp,
-            fontWeight: FontWeight.bold,
-            color: isPositive
-                ? const Color(0xFF16A34A)
-                : const Color(0xFFDC2626),
+        SizedBox(width: 12.w),
+        Expanded(
+          flex: 2,
+          child: SizedBox(
+            height: 40.h,
+            child: TextField(
+              controller: controller,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              textAlign: TextAlign.end,
+              onChanged: (_) => _onValuesChanged(),
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+              ),
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                prefixText: isPositive ? '+ ₹' : '- ₹',
+                prefixStyle: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                  color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                ),
+                isDense: true,
+                filled: true,
+                fillColor: const Color(0xFFF8FAFC),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(
+                    color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ],

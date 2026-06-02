@@ -51,7 +51,6 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
   bool _isLoadingTenants = false;
 
   final List<NoticeTemplate> _generalTemplates = const [
-    // --- CATEGORY 1: FESTIVAL & LEAVE STATUS ---
     NoticeTemplate(
       icon: '🌴',
       label: 'Festival Leave',
@@ -70,7 +69,6 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       title: 'Food Attendance Mapping',
       content: 'Please update your return status in the app before arriving, so the kitchen team can prepare food accordingly.',
     ),
-    // --- CATEGORY 2: VACATING & NOTICE PERIOD ---
     NoticeTemplate(
       icon: '⚠️',
       label: '1-Month Notice',
@@ -89,7 +87,6 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       title: 'Checkout Inspection & Dues',
       content: 'Before final checkout, ensure all your pending dues are cleared in the app for a smooth exit approval.',
     ),
-    // --- CATEGORY 3: FOOD & MESS REPETITIVE ALERTS ---
     NoticeTemplate(
       icon: '🍳',
       label: 'Breakfast',
@@ -114,7 +111,6 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       title: 'Dinner Active Alert',
       content: 'Dinner is served. Please visit the dining area before the kitchen closes for the night.',
     ),
-    // --- CATEGORY 4: NIGHT GATE & VISITOR REGULATIONS ---
     NoticeTemplate(
       icon: '🔒',
       label: '10 PM Gate',
@@ -127,7 +123,6 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       title: '2-Hour Advance Guest Intimation',
       content: 'Visiting Parents/Friends? Kindly inform the management through the app at least 2 hours in advance for entry permission.',
     ),
-    // --- CATEGORY 5: ROOM MAINTENANCE & SAFETY ---
     NoticeTemplate(
       icon: '🔑',
       label: 'Lock Doors',
@@ -146,7 +141,6 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
       title: 'Handover Keys Before Leaving',
       content: 'Traveling or Vacating? Do not forget to handover your room keys to the warden/reception before leaving.',
     ),
-    // --- EXISTING TEMPLATES ---
     NoticeTemplate(
       icon: '🛠️',
       label: 'Maintenance',

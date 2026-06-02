@@ -96,7 +96,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
   void _initSocketListener() {
     final owner = context.read<AuthCubit>().currentOwner;
     if (owner != null) {
-      // Join socket room
       sl<SocketService>().joinCommunity(widget.chatId, owner.id);
     }
 
@@ -105,13 +104,11 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
       if (roomId == widget.chatId) {
         if (mounted) {
           setState(() {
-            // Check if message already exists (e.g. sent by me and optimistic message already present)
             final exists = _messages.any((m) => m['_id'] == data['_id'] || (m['isTemp'] == true && m['text'] == data['text']));
             if (!exists) {
               _messages.add(data);
               _scrollToBottom();
             } else {
-              // Update status/id if it exists
               final idx = _messages.indexWhere((m) => m['isTemp'] == true && m['text'] == data['text']);
               if (idx != -1) {
                 _messages[idx] = data;
@@ -266,7 +263,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
       debugPrint('Error sending personal message: $e');
     }
 
-    // Rollback optimistic update on error
     if (mounted) {
       setState(() {
         _messages.removeWhere((m) => m['_id'] == tempId);
@@ -432,7 +428,7 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
         margin: EdgeInsets.only(bottom: 6.h),
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: const Color(0xFF1F2C34), // WhatsApp dark mode reaction bar color
+          color: const Color(0xFF1F2C34),
           borderRadius: BorderRadius.circular(30.r),
           boxShadow: [
             BoxShadow(
@@ -521,22 +517,18 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
       backgroundColor: Colors.white,
       builder: (bottomSheetContext) {
         final allEmojis = [
-          // Smiley faces
           '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇',
           '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚',
           '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸',
           '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️',
           '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡',
           '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓',
-          // Hands & gestures
           '👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞',
           '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍',
           '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝',
           '🙏', '✍️', '💅', '🤳', '💪', '🦾',
-          // Hearts & symbols
           '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔',
           '❤️‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝',
-          // Activities/objects
           '✨', '⭐', '🌟', '💫', '🔥', '💥', '💯', '🎉', '🎊', '🎈',
         ];
 
@@ -742,7 +734,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
         body: SafeArea(
           child: Stack(
             children: [
-              // Wallpaper background — same icon pattern as community chats
               const Positioned.fill(
                 child: CustomPaint(
                   painter: ChatWallpaperPainter(),
@@ -777,7 +768,7 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
       final textToCopyOrForward = selectedMsg['text'] as String? ?? '';
 
       return AppBar(
-        backgroundColor: const Color(0xFF1F2C34), // WhatsApp dark selection app bar
+        backgroundColor: const Color(0xFF1F2C34),
         elevation: 0.5,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 24),
@@ -793,7 +784,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
           ),
         ),
         actions: [
-          // Star / Unstar
           IconButton(
             icon: Icon(
               isStarred ? Icons.star_rounded : Icons.star_border_rounded,
@@ -804,14 +794,12 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
               _exitSelectionMode();
             },
           ),
-          // Trash/Delete
           IconButton(
             icon: const Icon(Icons.delete_rounded, color: Colors.white),
             onPressed: () {
               _showDeleteConfirmationDialog(context, _selectedMessageId!);
             },
           ),
-          // Copy
           IconButton(
             icon: const Icon(Icons.content_copy_rounded, color: Colors.white),
             onPressed: () {
@@ -822,7 +810,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
               );
             },
           ),
-          // Forward
           IconButton(
             icon: Transform.flip(
               flipX: true,
@@ -833,7 +820,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
               _showForwardDialog(textToCopyOrForward);
             },
           ),
-          // Edit (only show if isMe)
           if (isMe)
             IconButton(
               icon: const Icon(Icons.edit_rounded, color: Colors.white),
@@ -1025,7 +1011,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
         physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
           final m = _messages[index];
-          // Skip deleted messages — they should be invisible
           if (m['isDeleted'] == true) return const SizedBox.shrink();
           final text = (m['text'] as String? ?? '').trim();
           if (text.isEmpty && m['image'] == null && m['video'] == null && m['file'] == null && m['isTemp'] != true) {
@@ -1037,7 +1022,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
           final isStarred = m['isStarred'] as bool? ?? false;
           final isSelected = _selectedMessageId == m['_id'];
           final isEdited = m['isEdited'] == true;
-
 
           return Align(
             alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,

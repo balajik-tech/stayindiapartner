@@ -5,16 +5,13 @@ import 'package:stayindia_owner/features/movement_history/domain/repositories/mo
 import 'package:stayindia_owner/features/movement_history/presentation/cubit/movement_history_cubit.dart';
 
 void registerMovementFeature(GetIt sl) {
-  // Data sources
   sl.registerLazySingleton<MovementRemoteDataSource>(
     () => MovementRemoteDataSource(dio: sl<Dio>()),
   );
 
-  // Repositories
   sl.registerLazySingleton<MovementRepository>(
     () => MovementRepository(remoteDataSource: sl()),
   );
 
-  // Cubits
   sl.registerFactory(() => MovementHistoryCubit(repository: sl()));
 }

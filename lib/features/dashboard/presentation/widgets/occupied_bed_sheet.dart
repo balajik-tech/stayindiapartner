@@ -17,7 +17,6 @@ import 'package:stayindia_owner/features/dashboard/presentation/widgets/checkout
 import 'package:stayindia_owner/features/movement_history/presentation/widgets/tenant_movement_history_section.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
-// Premium dark navy + orange accent colors matching client design
 const Color _navy = Color(0xFF1B2838);
 const Color _orange = Color(0xFFE8722A);
 const Color _orangeLight = Color(0xFFFFF3ED);
@@ -99,7 +98,6 @@ class OccupiedBedSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(height: 12.h),
-                // Drag handle
                 Container(
                   width: 40.w,
                   height: 4.h,
@@ -110,7 +108,6 @@ class OccupiedBedSheet extends StatelessWidget {
                 ),
                 SizedBox(height: 16.h),
 
-                // ── ACCESS PASS CARD (with orange border) ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: Container(
@@ -130,7 +127,6 @@ class OccupiedBedSheet extends StatelessWidget {
                       children: [
                         SizedBox(height: 16.h),
 
-                        // Bed number + tenant name + Access Pass badge
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 20.w),
                           child: Row(
@@ -187,7 +183,6 @@ class OccupiedBedSheet extends StatelessWidget {
 
                         SizedBox(height: 16.h),
 
-                        // "GENERATE NEW" button
                         TextButton.icon(
                           onPressed: () {},
                           icon: Icon(Icons.refresh_rounded, size: 16.sp, color: _orange),
@@ -209,7 +204,6 @@ class OccupiedBedSheet extends StatelessWidget {
 
                 SizedBox(height: 20.h),
 
-                // ── ACTION ICONS ROW (Rent, Share, Scan, QR) ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: Row(
@@ -242,7 +236,6 @@ class OccupiedBedSheet extends StatelessWidget {
 
                 SizedBox(height: 20.h),
 
-                // ── LIVE TIME & DATE ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: _LiveTimeDateRow(),
@@ -250,7 +243,6 @@ class OccupiedBedSheet extends StatelessWidget {
 
                 SizedBox(height: 20.h),
 
-                // ── CHECK-IN / CHECK-OUT BUTTONS ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: BlocConsumer<BookingsCubit, BookingsState>(
@@ -271,7 +263,6 @@ class OccupiedBedSheet extends StatelessWidget {
 
                       return Row(
                         children: [
-                          // CHECK IN button
                           Expanded(
                             child: _buildCheckinButton(
                               context: context,
@@ -281,7 +272,6 @@ class OccupiedBedSheet extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 12.w),
-                          // CHECK OUT button
                           Expanded(
                             child: _buildCheckoutButton(
                               context: context,
@@ -298,7 +288,6 @@ class OccupiedBedSheet extends StatelessWidget {
 
                 SizedBox(height: 20.h),
 
-                // ── ELECTRICITY & PARKING CARDS (dark navy style) ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: Row(
@@ -326,7 +315,6 @@ class OccupiedBedSheet extends StatelessWidget {
 
                 SizedBox(height: 20.h),
 
-                // ── CHANGE ROOM button ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: SizedBox(
@@ -391,7 +379,6 @@ class OccupiedBedSheet extends StatelessWidget {
 
                 SizedBox(height: 16.h),
 
-                // ── TENANT PROFILE ROW ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: GestureDetector(
@@ -458,12 +445,10 @@ class OccupiedBedSheet extends StatelessWidget {
 
                 SizedBox(height: 16.h),
 
-                // ── MOVEMENT HISTORY ──
                 TenantMovementHistorySection(tenantId: tenantId),
 
                 SizedBox(height: 16.h),
 
-                // ── DONE BUTTON ──
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: SizedBox(
@@ -500,7 +485,6 @@ class OccupiedBedSheet extends StatelessWidget {
     );
   }
 
-  // ── Action icon builder ──
   Widget _buildActionIcon({
     required IconData icon,
     required String label,
@@ -542,7 +526,6 @@ class OccupiedBedSheet extends StatelessWidget {
     );
   }
 
-  // ── Bill card builder (dark navy style) ──
   Widget _buildBillCard({
     required IconData icon,
     required Color iconColor,
@@ -610,7 +593,6 @@ class OccupiedBedSheet extends StatelessWidget {
     );
   }
 
-  // ── Check In button ──
   Widget _buildCheckinButton({
     required BuildContext context,
     required dynamic detail,
@@ -681,7 +663,6 @@ class OccupiedBedSheet extends StatelessWidget {
     );
   }
 
-  // ── Check Out button ──
   Widget _buildCheckoutButton({
     required BuildContext context,
     required dynamic detail,
@@ -701,11 +682,20 @@ class OccupiedBedSheet extends StatelessWidget {
                   hostelId: hostelId,
                   bookingId: detail.stay!.bookingId,
                   securityDeposit: detail.stay!.deposit,
-                  onCheckoutConfirmed: () {
+                  onCheckoutConfirmed: ({
+                    required double securityDeposit,
+                    required double pendingRent,
+                    required double utilityDue,
+                    required double finalSettlement,
+                  }) {
                     context
                         .read<BookingsCubit>()
                         .checkoutBooking(
                           detail.stay!.bookingId,
+                          securityDeposit: securityDeposit,
+                          pendingRent: pendingRent,
+                          utilityDue: utilityDue,
+                          finalSettlement: finalSettlement,
                         );
                   },
                 );
@@ -740,7 +730,6 @@ class OccupiedBedSheet extends StatelessWidget {
   }
 }
 
-// ── Live Time & Date widget with auto-updating clock ──
 class _LiveTimeDateRow extends StatefulWidget {
   @override
   State<_LiveTimeDateRow> createState() => _LiveTimeDateRowState();

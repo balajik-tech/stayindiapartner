@@ -102,7 +102,6 @@ class ChatMessageBubble extends StatelessWidget {
                         ),
                       ),
                     ),
-                  // Bubble
                   Container(
                     margin: EdgeInsets.only(bottom: reaction != null ? 12.h : 4.h),
                     child: Stack(
@@ -159,7 +158,6 @@ class ChatMessageBubble extends StatelessWidget {
                             ],
                           ),
                         ),
-                        // Reaction badge
                         if (reaction != null)
                           Positioned(
                             bottom: -14.h,
@@ -264,7 +262,6 @@ class ChatMessageBubble extends StatelessWidget {
                             ),
                           );
                         }),
-                        // + more emojis button
                         TweenAnimationBuilder<double>(
                           duration: Duration(milliseconds: 200 + (emojis.length * 35)),
                           tween: Tween<double>(begin: 0.0, end: 1.0),

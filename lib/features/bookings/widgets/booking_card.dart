@@ -67,7 +67,6 @@ class BookingCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top row: Profile Avatar, Name, Phone & Status
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -124,7 +123,6 @@ class BookingCard extends StatelessWidget {
                 ),
                 SizedBox(height: 10.h),
 
-                // Middle Row: Simple inline details (Check-in Date & Room Type)
                 Row(
                   children: [
                     Icon(
@@ -172,7 +170,6 @@ class BookingCard extends StatelessWidget {
                 ],
                 SizedBox(height: 12.h),
 
-                // Bottom row: Actions
                 _buildActions(context),
               ],
             ),

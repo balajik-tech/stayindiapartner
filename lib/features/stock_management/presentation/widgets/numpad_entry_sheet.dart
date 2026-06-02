@@ -39,9 +39,8 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
   void initState() {
     super.initState();
     _selectedUnit = widget.defaultUnit;
-    _priceController.text = ''; // Start empty for direct entry of total price
+    _priceController.text = '';
     
-    // Autofocus quantity field
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _amountFocusNode.requestFocus();

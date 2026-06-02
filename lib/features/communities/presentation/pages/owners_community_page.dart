@@ -39,6 +39,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     TextEditingController(),
   ];
 
+  String _activeFeedType = 'OFFICIAL';
+
   Set<String> _readPostIds = {};
 
   Future<void> _loadReadPostIds() async {
@@ -130,6 +132,90 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     }
   }
 
+  Widget _buildFeedSwitcher() {
+    final isOfficial = _activeFeedType == 'OFFICIAL';
+    return Container(
+      margin: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: BouncingWrapper(
+              onTap: () {
+                setState(() {
+                  _activeFeedType = 'OFFICIAL';
+                });
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: isOfficial ? const Color(0xFF2563EB) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: isOfficial
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'official_feed'.tr(),
+                  style: GoogleFonts.dmSans(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w800,
+                    color: isOfficial ? Colors.white : const Color(0xFF64748B),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: BouncingWrapper(
+              onTap: () {
+                setState(() {
+                  _activeFeedType = 'GLOBAL';
+                });
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: !isOfficial ? const Color(0xFFEA580C) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: !isOfficial
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFFEA580C).withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'owner_forum'.tr(),
+                  style: GoogleFonts.dmSans(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w800,
+                    color: !isOfficial ? Colors.white : const Color(0xFF64748B),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,6 +237,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 slivers: [
                   SliverToBoxAdapter(child: _buildHeader()),
                   SliverToBoxAdapter(child: _buildExploreSection()),
+                  SliverToBoxAdapter(child: _buildFeedSwitcher()),
                   SliverToBoxAdapter(child: _buildCreatePostBox()),
                   ..._buildFeedSlivers(state),
                 ],
@@ -413,6 +500,43 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   }
 
   Widget _buildCreatePostBox() {
+    final authCubit = context.read<AuthCubit>();
+    final owner = authCubit.currentOwner;
+    final isOfficial = _activeFeedType == 'OFFICIAL';
+
+    if (isOfficial) {
+      final role = owner?.role.toLowerCase() ?? 'owner';
+      final canPost = role != 'owner';
+      if (!canPost) {
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF6FF),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(color: const Color(0xFFBFDBFE)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline_rounded, color: const Color(0xFF2563EB), size: 20.sp),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  'official_read_only_banner'.tr(),
+                  style: GoogleFonts.dmSans(
+                    color: const Color(0xFF1E3A8A),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
     final validPollOptions = _pollOptionControllers
         .map((c) => c.text.trim())
         .where((t) => t.isNotEmpty)
@@ -752,7 +876,16 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       ];
     }
     if (state is SocialFeedLoaded) {
-      if (state.posts.isEmpty) {
+      final isOfficial = _activeFeedType == 'OFFICIAL';
+      final filteredPosts = state.posts.where((post) {
+        if (isOfficial) {
+          return post.visibility?.toUpperCase() != 'GLOBAL';
+        } else {
+          return post.visibility?.toUpperCase() == 'GLOBAL';
+        }
+      }).toList();
+
+      if (filteredPosts.isEmpty) {
         return [
           SliverToBoxAdapter(
             child: Center(
@@ -767,7 +900,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'no_posts_yet'.tr(),
+                      isOfficial ? 'no_official_updates'.tr() : 'no_forum_posts'.tr(),
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
@@ -776,7 +909,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'be_first_share'.tr(),
+                      isOfficial 
+                          ? 'official_updates_appear_here'.tr() 
+                          : 'forum_posts_appear_here'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14.sp,
@@ -792,20 +927,17 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       }
       return [
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+          padding: EdgeInsets.zero,
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
-              final post = state.posts[index];
+              final post = filteredPosts[index];
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   _markPostAsRead(post.id);
                 }
               });
-              return Padding(
-                padding: EdgeInsets.only(bottom: 16.h),
-                child: _PostCard(post: post),
-              );
-            }, childCount: state.posts.length),
+              return _PostCard(post: post);
+            }, childCount: filteredPosts.length),
           ),
         ),
         if (state.isFetchingMore)
@@ -1118,81 +1250,79 @@ class _PostCardState extends State<_PostCard> {
       }
     }
 
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+    final isOfficialPost = widget.post.visibility?.toUpperCase() != 'GLOBAL';
+    final accentColor = isOfficialPost ? const Color(0xFF2563EB) : const Color(0xFFEA580C);
+    final indicatorIcon = isOfficialPost ? '🔹' : '🔸';
+    final displayRole = isOfficialPost 
+        ? (widget.post.userRole != null && widget.post.userRole!.isNotEmpty ? widget.post.userRole : 'president_admin_role'.tr()) 
+        : 'pg_owner_role'.tr();
+
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                children: [
               CircleAvatar(
-                radius: 20.r,
+                radius: 18.r,
                 backgroundImage:
                     (widget.post.userAvatar != null && widget.post.userAvatar!.isNotEmpty)
                     ? CachedNetworkImageProvider(
                         ApiConstants.getImageUrl(widget.post.userAvatar!)!,
                       )
                     : null,
-                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+                backgroundColor: accentColor.withValues(alpha: 0.08),
                 child: (widget.post.userAvatar == null || widget.post.userAvatar!.isEmpty)
                     ? Icon(
                         Icons.person,
-                        color: AppColors.primaryBlue,
-                        size: 24.sp,
+                        color: accentColor,
+                        size: 20.sp,
                       )
                     : null,
               ),
-              SizedBox(width: 14.w),
+              SizedBox(width: 10.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          widget.post.userName.isNotEmpty
-                              ? widget.post.userName
-                              : 'Unknown User',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.darkText,
-                          ),
+                    RichText(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      text: TextSpan(
+                        text: '${widget.post.userName.isNotEmpty ? widget.post.userName : 'Unknown User'} ',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.darkText,
                         ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          '·',
-                          style: TextStyle(
-                            color: Colors.grey.shade400,
-                            fontWeight: FontWeight.w800,
+                        children: [
+                          TextSpan(
+                            text: '$indicatorIcon [$displayRole]',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w700,
+                              color: accentColor,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          widget.post.visibility != null &&
-                                  widget.post.visibility!.toUpperCase() == 'GLOBAL'
-                              ? 'Global'
-                              : 'Community',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryBlue,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 1.h),
                     Text(
                       _formatTimeAgo(widget.post.createdAt),
                       style: TextStyle(
@@ -1470,7 +1600,9 @@ class _PostCardState extends State<_PostCard> {
           ),
         ],
       ),
-    );
+    ),
+  ],
+);
   }
 
   Widget _buildInlineEditor(BuildContext context) {
@@ -1555,7 +1687,6 @@ class _PostCardState extends State<_PostCard> {
           ),
           SizedBox(height: 16.h),
 
-          // Image Edit section
           if (widget.post.imageUrl != null && !_removeImage && _selectedImagePath == null)
             Stack(
               children: [
@@ -1638,7 +1769,6 @@ class _PostCardState extends State<_PostCard> {
               ),
             ),
 
-          // Poll Edit section
           if (widget.post.poll != null && !_removePoll) ...[
             SizedBox(height: 16.h),
             Text(

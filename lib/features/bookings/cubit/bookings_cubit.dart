@@ -269,11 +269,23 @@ class BookingsCubit extends Cubit<BookingsState> {
     }
   }
 
-  Future<void> checkoutBooking(String bookingId) async {
+  Future<void> checkoutBooking(
+    String bookingId, {
+    double? securityDeposit,
+    double? pendingRent,
+    double? utilityDue,
+    double? finalSettlement,
+  }) async {
     if (isClosed) return;
     emit(state.copyWith(status: BookingsStatus.loading));
     try {
-      await checkoutBookingUseCase.execute(bookingId);
+      await checkoutBookingUseCase.execute(
+        bookingId,
+        securityDeposit: securityDeposit,
+        pendingRent: pendingRent,
+        utilityDue: utilityDue,
+        finalSettlement: finalSettlement,
+      );
       if (isClosed) return;
       emit(
         state.copyWith(

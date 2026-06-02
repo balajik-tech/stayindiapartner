@@ -52,7 +52,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
         child: SafeArea(
           child: Column(
             children: [
-              // Unified Header with back button integrated
               Container(
                 color: Colors.white,
                 child: Row(
@@ -75,7 +74,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header: Add/Update Stock
                       Text(
                         StringUtils.translate('add_update_stock', context: context),
                         style: TextStyle(
@@ -97,12 +95,10 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
                       
                       const Spacer(flex: 1),
   
-                      // Entry Cards Grid
                       SizedBox(
                         height: 280.h,
                         child: Row(
                           children: [
-                            // Add Vegetables
                             Expanded(
                               child: _buildSelectionCard(
                                 title: StringUtils.translate('add_vegetables', context: context),
@@ -114,7 +110,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
                               ),
                             ),
                             SizedBox(width: 16.w),
-                            // Add Main Stock
                             Expanded(
                               child: _buildSelectionCard(
                                 title: StringUtils.translate('add_main_stock', context: context),
@@ -168,7 +163,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Styled Graphic Container
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -221,7 +215,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
     final isTe = context.locale.languageCode == 'te';
     final List<Map<String, String>> masterList = [];
 
-    // Filter master items based on type selection
     if (type == 'Vegetables') {
       masterList.addAll(StockConstants.masterList['Vegetables']!);
     } else {
@@ -246,7 +239,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
           value: stockCubit,
           child: StatefulBuilder(
             builder: (stateContext, setModalState) {
-            // Apply search filter locally
             final filteredList = masterList.where((item) {
               final name = item['name'] ?? '';
               final nameTe = StockConstants.getLocalizedNameForString(name, context.locale.languageCode);
@@ -263,7 +255,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
               padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 32.h),
               child: Column(
                 children: [
-                  // Handle
                   Center(
                     child: Container(
                       width: 40.w,
@@ -275,7 +266,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
                     ),
                   ),
                   SizedBox(height: 20.h),
-                  // Title
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -296,7 +286,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
                     ],
                   ),
                   SizedBox(height: 12.h),
-                  // Search Bar
                   Container(
                     height: 48.h,
                     decoration: BoxDecoration(
@@ -320,7 +309,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  // Items List
                   Expanded(
                     child: ListView.builder(
                       itemCount: filteredList.length,
@@ -332,7 +320,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
 
                         return BlocBuilder<StockCubit, StockState>(
                           builder: (cubitContext, state) {
-                            // Find existing StockItem in state
                             final StockItem? existingItem = state.items.cast<StockItem?>().firstWhere(
                                   (i) => i != null && i.name.toLowerCase() == itemName.toLowerCase(),
                                   orElse: () => null,
@@ -377,9 +364,8 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
                                 ),
                                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFF94A3B8)),
                                 onTap: () {
-                                  Navigator.pop(modalContext); // Close Selector Sheet
+                                  Navigator.pop(modalContext);
                                   
-                                  // Find the correct category from StockConstants.getAllItems()
                                   final allMasterItems = StockConstants.getAllItems();
                                   final matchedItem = allMasterItems.firstWhere(
                                     (element) => element['name']?.toLowerCase() == itemName.toLowerCase(),
@@ -387,7 +373,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
                                   );
                                   final actualCategory = matchedItem['category'] ?? (type == 'Vegetables' ? 'Vegetables' : 'Grocery');
 
-                                  // Open custom numpad keyboard
                                   _showNumpadBottomSheet(
                                     context,
                                     itemName: itemName,
@@ -437,7 +422,6 @@ class _AddUpdateStockPageState extends State<AddUpdateStockPage> {
             propertyId: activePropertyId,
             existingItem: existingItem,
             onSubmitted: () {
-              // Reload stocks to update dashboard state
               stockCubit.loadStocks(activePropertyId);
             },
           ),

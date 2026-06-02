@@ -48,7 +48,6 @@ class NotificationCubit extends Cubit<NotificationState> {
       await repository.markAllAsRead();
       fetchNotifications();
     } catch (e) {
-      // Failures marking notifications as read are caught silently to avoid interrupting the UI flow.
     }
   }
 }

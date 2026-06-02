@@ -74,7 +74,6 @@ class _AuthGateState extends State<AuthGate> {
         _hasSeenOnboarding = true;
       });
     }
-    // After onboarding, start in guest mode
     final guestCubit = context.read<GuestSessionCubit>();
     await guestCubit.setGuest(true);
     await guestCubit.setKycComplete(false);
@@ -93,7 +92,6 @@ class _AuthGateState extends State<AuthGate> {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated || state is AuthProfileCompleted) {
-          // User logged in, exit guest mode
           context.read<GuestSessionCubit>().setGuest(false);
           context.read<HostelCubit>().getHostels(forceRefresh: true);
         }

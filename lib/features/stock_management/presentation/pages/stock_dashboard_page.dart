@@ -67,7 +67,6 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
         child: SafeArea(
           child: Column(
             children: [
-              // Unified Header with back button integrated
               Container(
                 color: Colors.white,
                 child: Row(
@@ -172,7 +171,6 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Localized Screen Title
                                 Text(
                                   StringUtils.translate('inventory_overview', context: context),
                                   style: TextStyle(
@@ -192,7 +190,6 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                                 ),
                                 SizedBox(height: 16.h),
 
-                                // STOCK ALERTS Section
                                 if (lowStockItems.isNotEmpty) ...[
                                   ...lowStockItems.map((item) => Column(
                                     children: [
@@ -203,11 +200,9 @@ class _StockDashboardPageState extends State<StockDashboardPage> {
                                   SizedBox(height: 8.h),
                                 ],
 
-                                // Quick Add Grid
                                 _buildQuickAddGrid(context, items, isTelugu),
                                 SizedBox(height: 24.h),
 
-                                // Stock Levels Header
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [

@@ -255,8 +255,8 @@ class _OwnersListPageState extends State<OwnersListPage> {
               Text(
                 _showChats
                     ? (_isChatsLoading
-                        ? "Recent conversations"
-                        : "Recent conversations (${_chats.length})")
+                        ? (_isLoading ? "Recent conversations" : "Recent conversations • ${_allOwners.length} owners")
+                        : (_isLoading ? "Recent conversations (${_chats.length})" : "Recent conversations (${_chats.length}) • ${_allOwners.length} owners"))
                     : (_isLoading
                         ? "Registered staying partners and hosts"
                         : "Registered staying partners and hosts (${_allOwners.length})"),
@@ -385,7 +385,7 @@ class _OwnersListPageState extends State<OwnersListPage> {
                   '${ApiConstants.baseUrl}${ApiConstants.ownerCommunities}/personal-chat/get-or-create',
                   data: {'targetUserId': o['id']},
                 );
-                Navigator.pop(context); // Dismiss loading dialog
+                Navigator.pop(context);
                 if (response.statusCode == 200) {
                   final chatData = response.data['data'];
                   _searchController.clear();
@@ -407,7 +407,7 @@ class _OwnersListPageState extends State<OwnersListPage> {
                   _fetchChatsList();
                 }
               } catch (e) {
-                Navigator.pop(context); // Dismiss loading dialog
+                Navigator.pop(context);
                 debugPrint('Error starting personal chat: $e');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Failed to start chat. Please retry.')),

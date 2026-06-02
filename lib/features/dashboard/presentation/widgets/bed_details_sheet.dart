@@ -1191,7 +1191,6 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
         SizedBox(height: 20.h),
 
-        // ── CHECK IN / CHECK OUT BUTTONS ──
         Row(
           children: [
             Expanded(
@@ -1248,7 +1247,6 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
         SizedBox(height: 16.h),
 
-        // ── ELECTRICITY & PARKING BILL CARDS (dark navy) ──
         Row(
           children: [
             Expanded(
@@ -1301,7 +1299,6 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
         SizedBox(height: 16.h),
 
-        // ── TENANT PROFILE + ACTIONS ──
         Container(
           width: double.infinity,
           padding: EdgeInsets.all(16.r),
@@ -1458,7 +1455,6 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     );
   }
 
-  // ── Action circle icon builder ──
   Widget _buildActionCircle({
     required IconData icon,
     required String label,
@@ -1504,7 +1500,6 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     );
   }
 
-  // ── Dark navy bill card builder ──
   Widget _buildDarkBillCard({
     required IconData icon,
     required Color iconColor,
@@ -1864,9 +1859,18 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
       hostelId: widget.state.hostelId ?? '',
       bookingId: detail.stay?.bookingId ?? widget.state.tenantId ?? '',
       securityDeposit: detail.stay?.deposit ?? 0.0,
-      onCheckoutConfirmed: () {
+      onCheckoutConfirmed: ({
+        required double securityDeposit,
+        required double pendingRent,
+        required double utilityDue,
+        required double finalSettlement,
+      }) {
         context.read<BookingsCubit>().checkoutBooking(
           detail.stay?.bookingId ?? widget.state.tenantId ?? '',
+          securityDeposit: securityDeposit,
+          pendingRent: pendingRent,
+          utilityDue: utilityDue,
+          finalSettlement: finalSettlement,
         );
       },
     );
@@ -1924,7 +1928,6 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   }
 }
 
-// ── Live Time & Date widget ──
 class _LiveTimeDateWidget extends StatefulWidget {
   @override
   State<_LiveTimeDateWidget> createState() => _LiveTimeDateWidgetState();

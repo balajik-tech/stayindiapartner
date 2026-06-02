@@ -54,6 +54,12 @@ abstract class BookingsRepository {
     String razorpaySignature,
   );
   Future<Booking> getBookingById(String id);
-  Future<void> checkoutBooking(String bookingId);
+  Future<void> checkoutBooking(
+    String bookingId, {
+    double? securityDeposit,
+    double? pendingRent,
+    double? utilityDue,
+    double? finalSettlement,
+  });
   Future<void> cancelBooking(String bookingId);
 }

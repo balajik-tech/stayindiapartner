@@ -301,23 +301,20 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       ],
                       SizedBox(height: 4.h),
                       Builder(builder: (_) {
-                        // Room label
                         final rawRoom = detail?.stay?.roomTypename ?? widget.room;
                         final roomLabel = rawRoom.isEmpty ? null : rawRoom;
 
-                        // Bed: convert numeric to letter (1→A, 2→B...)
                         final rawBed = detail?.stay?.bedNumber ?? '';
                         String bedLabel = '';
                         if (rawBed.isNotEmpty) {
                           final num = int.tryParse(rawBed);
                           if (num != null && num >= 1) {
-                            bedLabel = String.fromCharCode(64 + num); // A=65
+                            bedLabel = String.fromCharCode(64 + num);
                           } else {
                             bedLabel = rawBed.toUpperCase();
                           }
                         }
 
-                        // AC type label
                         final rawAcType = detail?.stay?.acType ?? '';
                         String acLabel = '';
                         if (rawAcType.toUpperCase().contains('NON')) {
@@ -326,7 +323,6 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                           acLabel = 'AC';
                         }
 
-                        // Sharing label
                         final rawSharing = detail?.stay?.sharingType ?? '';
                         String sharingLabel = '';
                         final sharingMap = {
@@ -351,7 +347,6 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                           runSpacing: 4.h,
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
-                            // Room chip
                             _buildInfoChip(
                               label: roomLabel.toLowerCase().startsWith('room') ? roomLabel : 'Room $roomLabel',
                               color: const Color(0xFF1B2838),

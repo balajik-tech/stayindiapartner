@@ -614,7 +614,7 @@ class _PersonalChatsTabState extends State<_PersonalChatsTab> {
                   ),
                 ),
               );
-              _fetchChatsList(); // Refresh on return
+              _fetchChatsList();
             },
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),

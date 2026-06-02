@@ -43,7 +43,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
   @override
   void didUpdateWidget(covariant SummaryCardDetailsSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Reset selected IDs when metric changes
     _selectedIds.clear();
   }
 
@@ -87,7 +86,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
       return items;
     }
 
-    // For other metrics, traverse occupancy structure
     for (final floor in occupancy.floors) {
       for (final room in floor.rooms) {
         for (final bed in room.beds) {
@@ -101,7 +99,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
               matches = bed.isAway ||
                   bed.status.toLowerCase() == 'away' ||
                   bed.status.toLowerCase() == 'unknown';
-              // Dynamically generate a premium-looking last active time based on index/hash for realism
               final hours = ((index * 3) + 4) % 12;
               final minutes = ((index * 7) + 12) % 60;
               final timeStr = '${hours.toString().padLeft(2, '0')} h:${minutes.toString().padLeft(2, '0')} ago';
@@ -283,7 +280,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                           });
 
                           try {
-                            // Filter out placeholders if any
                             final tenantIds = selectedTenants
                                 .map((t) => t.id)
                                 .where((id) => id.isNotEmpty && !id.contains(' '))
@@ -341,7 +337,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DashboardCubit, DashboardState>(
@@ -363,7 +358,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -373,7 +367,7 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                         width: 4.w,
                         height: 24.h,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE25822), // Orange/Accent indicator
+                          color: const Color(0xFFE25822),
                           borderRadius: BorderRadius.circular(2.r),
                         ),
                       ),
@@ -411,11 +405,10 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
               ),
               SizedBox(height: 12.h),
 
-              // Expanded Content Card
               if (_isExpanded)
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6), // Matches the premium soft off-white/gray background
+                    color: const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(
                       color: Colors.black.withValues(alpha: 0.08),
@@ -438,7 +431,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                         )
                       : Column(
                           children: [
-                            // List of tenants
                       ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -456,7 +448,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                             child: Row(
                               children: [
-                                // Short ID
                                 SizedBox(
                                   width: 45.w,
                                   child: Text(
@@ -469,7 +460,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                                   ),
                                 ),
 
-                                // Avatar
                                 CustomAvatar(
                                   imageUrl: tenant.avatar,
                                   name: tenant.name,
@@ -478,7 +468,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                                 ),
                                 SizedBox(width: 12.w),
 
-                                // Name & Subtitle
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,7 +493,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                                   ),
                                 ),
 
-                                // Room & Bed
                                 Text(
                                   tenant.roomBed,
                                   style: TextStyle(
@@ -516,7 +504,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                                 if (metric != 'repair' && metric != 'free' && metric != 'total') ...[
                                   SizedBox(width: 16.w),
 
-                                  // Checkbox
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -552,7 +539,7 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                             ),
                           );
                         },
-                      ),                      // Footer Row
+                      ),
                       if (metric != 'repair' && metric != 'free' && metric != 'total')
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -567,7 +554,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Check All
                             GestureDetector(
                               onTap: () {
                                 setState(() {
@@ -612,7 +598,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                               ),
                             ),
 
-                            // Select All Text Button
                             TextButton(
                               onPressed: () {
                                 setState(() {
@@ -634,7 +619,6 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
                               ),
                             ),
 
-                            // Bulk Message Button with built-in selection count pill
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryBlue,

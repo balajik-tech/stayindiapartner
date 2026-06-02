@@ -56,7 +56,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
 
   final Set<String> _selectedMessageIds = {};
   final Set<String> _starredMessageIds = {};
-  final Map<String, String> _reactions = {}; // messageId -> emoji
+  final Map<String, String> _reactions = {};
   CommunityMessageEntity? _replyingToMessage;
 
   @override
@@ -150,7 +150,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   void _reactToMessage(String messageId, String emoji) {
     setState(() {
       if (_reactions[messageId] == emoji) {
-        _reactions.remove(messageId); // tap same emoji = remove
+        _reactions.remove(messageId);
       } else {
         _reactions[messageId] = emoji;
       }
@@ -902,7 +902,7 @@ class ChatWallpaperPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paintColor = Colors.black.withValues(alpha: 0.045); // subtle background icons
+    final paintColor = Colors.black.withValues(alpha: 0.045);
 
     final icons = [
       Icons.chat_bubble_outline_rounded,
@@ -931,7 +931,7 @@ class ChatWallpaperPainter extends CustomPainter {
       Icons.edit_outlined,
     ];
 
-    const double gridStep = 55.0; // high-density WhatsApp layout
+    const double gridStep = 55.0;
     int rowIndex = 0;
 
     for (double y = 25.0; y < size.height; y += gridStep) {

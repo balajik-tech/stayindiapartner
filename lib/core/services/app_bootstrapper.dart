@@ -84,7 +84,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.white,
           systemNavigationBarDividerColor: Colors.transparent,
           systemNavigationBarIconBrightness: Brightness.dark,
           statusBarColor: Colors.transparent,

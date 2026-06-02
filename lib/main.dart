@@ -128,7 +128,11 @@ class StayIndiaOwnerApp extends StatelessWidget {
                         locale: context.locale,
                         builder: (context, child) {
                           Intl.defaultLocale = context.locale.toString();
-                          return child!;
+                          return SafeArea(
+                            top: false,
+                            bottom: true,
+                            child: child!,
+                          );
                         },
                         home: const AuthGate(
                           dashboard: MainNavigationPage(),

@@ -791,8 +791,8 @@ class _AddHostelSheetState extends State<AddHostelSheet> {
                                 await prefs.setBool('privacy_policy_accepted', true);
                                 
                                 if (context.mounted) {
-                                  Navigator.pop(dialogContext); // Close dialog
-                                  Navigator.pop(context); // Close sheet
+                                  Navigator.pop(dialogContext);
+                                  Navigator.pop(context);
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
                                 }
                               }

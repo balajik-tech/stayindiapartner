@@ -31,11 +31,6 @@ class UnifiedHeader extends StatelessWidget {
 
             if (index < state.hostels.length) {
               selectedHostelName = state.hostels[index].name;
-
-              if (selectedHostelName.length > 12) {
-                selectedHostelName =
-                    "${selectedHostelName.substring(0, 9).trim()}...";
-              }
             }
           }
         }
@@ -85,41 +80,40 @@ class UnifiedHeader extends StatelessWidget {
 
               SizedBox(width: 16.w),
 
-              Semantics(
-                label: StringUtils.translate(
-                  'switch_property',
-                  context: context,
-                ),
-                hint:
-                    '${StringUtils.translate('current_property', context: context)}: $selectedHostelName',
-                button: true,
-                child: GestureDetector(
-                  onTap: () => _showSwitchHostelSheet(context),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.apartment_rounded,
-                          color: const Color(0xFFFF7000),
-                          size: 18.sp,
-                        ),
-                        SizedBox(width: 8.w),
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
+              Expanded(
+                child: Semantics(
+                  label: StringUtils.translate(
+                    'switch_property',
+                    context: context,
+                  ),
+                  hint:
+                      '${StringUtils.translate('current_property', context: context)}: $selectedHostelName',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () => _showSwitchHostelSheet(context),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 8.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.apartment_rounded,
+                            color: const Color(0xFFFF7000),
+                            size: 18.sp,
+                          ),
+                          SizedBox(width: 8.w),
+                          Expanded(
                             child: Text(
                               selectedHostelName,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                               style: TextStyle(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w800,
@@ -127,20 +121,20 @@ class UnifiedHeader extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: const Color(0xFF64748B),
-                          size: 18.sp,
-                        ),
-                      ],
+                          SizedBox(width: 4.w),
+                          Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: const Color(0xFF64748B),
+                            size: 18.sp,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
 
-              const Spacer(),
+              SizedBox(width: 16.w),
 
               Semantics(
                 label: StringUtils.translate('notifications', context: context),

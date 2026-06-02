@@ -238,10 +238,10 @@ class SetupSuccessScreen extends StatelessWidget {
                                 await prefs.setBool('privacy_policy_accepted', true);
                                 
                                 if (context.mounted) {
-                                  Navigator.pop(dialogContext); // Close dialog
+                                  Navigator.pop(dialogContext);
                                   context.read<HostelCubit>().getHostels(forceRefresh: true);
                                   context.read<PropertySetupCubit>().resetState();
-                                  Navigator.pop(context); // Close setup screen
+                                  Navigator.pop(context);
                                 }
                               }
                             : null,

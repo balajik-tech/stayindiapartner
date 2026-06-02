@@ -18,6 +18,7 @@ class TenantMovementHistorySection extends StatefulWidget {
 
 class _TenantMovementHistorySectionState extends State<TenantMovementHistorySection> {
   DateTimeRange? _selectedDateRange;
+  int _visibleCount = 2;
 
   Future<void> _selectDateRange(BuildContext context) async {
     final DateTimeRange? picked = await showDateRangePicker(
@@ -41,6 +42,7 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
     if (picked != null && picked != _selectedDateRange) {
       setState(() {
         _selectedDateRange = picked;
+        _visibleCount = 2;
       });
     }
   }
@@ -91,7 +93,6 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
   }
 
   Widget _buildContent(BuildContext context, MovementHistoryLoaded state) {
-    // Filter history by selected date range
     final filteredHistory = _selectedDateRange != null
         ? state.history.where((entry) {
             final start = DateTime(_selectedDateRange!.start.year, _selectedDateRange!.start.month, _selectedDateRange!.start.day);
@@ -100,14 +101,14 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
           }).toList()
         : state.history;
 
-    // Group history by date
     final Map<String, List<_TimelineItem>> groupedHistory = {};
     
-    // Sort descending
     final history = List<MovementHistoryEntity>.from(filteredHistory)
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-    for (int i = 0; i < history.length; i++) {
+    final limit = _visibleCount < history.length ? _visibleCount : history.length;
+
+    for (int i = 0; i < limit; i++) {
       final entry = history[i];
       final dateStr = _formatDateHeader(entry.timestamp);
       
@@ -134,7 +135,6 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
       ));
     }
 
-    // Get current status from unfiltered list (real active status)
     final realHistory = state.history;
     final currentStatus = realHistory.isNotEmpty ? realHistory.first.action.toUpperCase() : 'UNKNOWN';
     final isOutside = currentStatus.contains('OUT') || currentStatus == 'OUTSIDE';
@@ -187,6 +187,7 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
                         onPressed: () {
                           setState(() {
                             _selectedDateRange = null;
+                            _visibleCount = 2;
                           });
                         },
                       ),
@@ -327,7 +328,6 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Left side: Time & Duration
                             SizedBox(
                               width: 80.w,
                               child: Column(
@@ -356,7 +356,6 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
                               ),
                             ),
                             SizedBox(width: 12.w),
-                            // Middle: Timeline line & Icon
                             Column(
                               children: [
                                 Container(
@@ -386,7 +385,6 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
                               ],
                             ),
                             SizedBox(width: 12.w),
-                            // Right side: Status texts
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,6 +417,41 @@ class _TenantMovementHistorySectionState extends State<TenantMovementHistorySect
               ),
             );
           }),
+        if (history.length > _visibleCount) ...[
+          SizedBox(height: 12.h),
+          Center(
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _visibleCount += 2;
+                });
+              },
+              borderRadius: BorderRadius.circular(20.r),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Show More",
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: AppColors.primaryBlue,
+                      size: 20.sp,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

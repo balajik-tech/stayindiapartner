@@ -89,20 +89,20 @@ class BedListRow extends StatelessWidget {
     final isMaintenance = displayStatus == 'MAINTENANCE';
 
     if (isFree) {
-      pillBgColor = const Color(0xFFE0F2FE); // Light Teal
+      pillBgColor = const Color(0xFFE0F2FE);
       pillTextColor = const Color(0xFF0284C7);
       displayStatus = 'AVAILABLE';
     } else if (isOccupied) {
-      pillBgColor = const Color(0xFFFFEDD5); // Light Orange
+      pillBgColor = const Color(0xFFFFEDD5);
       pillTextColor = const Color(0xFFEA580C);
     } else if (isReserved || isBooked) {
-      pillBgColor = const Color(0xFFF3E8FF); // Light Purple
+      pillBgColor = const Color(0xFFF3E8FF);
       pillTextColor = const Color(0xFF9333EA);
     } else if (isNotice) {
-      pillBgColor = const Color(0xFFFEF3C7); // Light Yellow
+      pillBgColor = const Color(0xFFFEF3C7);
       pillTextColor = const Color(0xFFD97706);
     } else if (isMaintenance) {
-      pillBgColor = const Color(0xFFF1F5F9); // Light Gray
+      pillBgColor = const Color(0xFFF1F5F9);
       pillTextColor = const Color(0xFF475569);
     } else {
       pillBgColor = const Color(0xFFF1F5F9);
@@ -138,12 +138,12 @@ class BedListRow extends StatelessWidget {
                     width: 32.r,
                     height: 32.r,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF4), // Very light green/teal
+                      color: const Color(0xFFF0FDF4),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: SideViewBedIcon(
                       size: 18.sp,
-                      color: const Color(0xFF4ADE80), // Teal/Green icon
+                      color: const Color(0xFF4ADE80),
                     ),
                   ),
                   SizedBox(width: 8.w),

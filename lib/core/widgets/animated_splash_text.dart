@@ -21,7 +21,6 @@ class _AnimatedFutureOfLivingTextState extends State<AnimatedFutureOfLivingText>
       duration: const Duration(milliseconds: 1400),
     );
     
-    // Start animation with a slight delay so the logo loads first
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) {
         _controller.forward();

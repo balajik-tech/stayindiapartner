@@ -52,8 +52,6 @@ class DashboardCubit extends Cubit<DashboardState> {
 
       if (isBulk) {
         if (existingData == null) {
-          // If single property data is not loaded yet, we can't show bulk only.
-          // Fallback to loading it as normal data as well.
           emit(
             DashboardLoaded(
               data: fetchedData,

@@ -153,8 +153,8 @@ class TenantStayDetailEntity extends Equatable {
   final String? status;
   final double? electricityBill;
   final double? parkingBill;
-  final String? sharingType;  // e.g. "SINGLE", "DOUBLE", "TRIPLE", "QUADRUPLE"...
-  final String? acType;       // e.g. "AC", "NON-AC"
+  final String? sharingType;
+  final String? acType;
 
   const TenantStayDetailEntity({
     required this.bookingId,

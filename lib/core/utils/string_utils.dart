@@ -1408,7 +1408,7 @@ class StringUtils {
       }
       if (key == 'level_ward') {
         if (locale == 'te') return 'వార్డు స్థాయి';
-        return 'Ward Level';
+        return 'LOCALITIES';
       }
       if (key == 'district_label') {
         if (locale == 'te') return 'జిల్లా';
@@ -1416,7 +1416,7 @@ class StringUtils {
       }
       if (key == 'ward_label') {
         if (locale == 'te') return 'వార్డు';
-        return 'Ward';
+        return 'Locality';
       }
       if (key == 'state_level_communities') {
         final name = namedArgs?['name'] ?? '';
@@ -1436,7 +1436,7 @@ class StringUtils {
       if (key == 'explore_wards_in') {
         final name = namedArgs?['name'] ?? '';
         if (locale == 'te') return '$name వార్డులను అన్వేషించండి';
-        return 'Explore wards in $name';
+        return 'Explore Localities in $name';
       }
       if (key == 'search_level_hint') {
         final level = namedArgs?['level'] ?? '';
@@ -1452,7 +1452,7 @@ class StringUtils {
         if (locale == 'te') {
           return 'వార్డులను చూడటానికి దయచేసి ముందుగా $requirement ఎంచుకోండి.';
         }
-        return 'Please select a $requirement first to view wards.';
+        return 'Please select a $requirement first to view localities.';
       }
       if (key == 'go_to_district_tab') {
         if (locale == 'te') return 'జిల్లా ట్యాబ్‌కు వెళ్లండి';
@@ -1868,6 +1868,84 @@ class StringUtils {
           return 'വാടക 5-ാം തീയതിക്കുള്ളിൽ അടയ്ക്കണമെന്ന് ഓർമ്മിപ്പിക്കുന്നു. കൃത്യസമയത്ത് പേയ്‌മെന്റ് ഉറപ്പാക്കുക.';
         }
         return 'Friendly reminder that rent is due by the 5th. Please ensure timely payment.';
+      }
+      if (key == 'template_water_update_title') {
+        if (locale == 'te') return 'నీటి సరఫరా అప్‌డేట్';
+        if (locale == 'ta') return 'குடிநீர் விநியோக அறிவிப்பு';
+        if (locale == 'hi') return 'जलापूर्ति अपडेट';
+        if (locale == 'kn') return 'ನೀರು ಸರಬరాಜು ಅಪ್ಡೇಟ್';
+        if (locale == 'ml') return 'കുടിവെള്ള വിതരണ അറിയിപ്പ്';
+        return 'Water Supply Update';
+      }
+      if (key == 'template_water_update_desc') {
+        if (locale == 'te') {
+          return 'ఈ రోజు మధ్యాహ్నం 2 గంటల నుండి 4 గంటల వరకు నిర్వహణ పనుల కారణంగా నీటి సరఫరా తాత్కాలికంగా నిలిపివేయబడుతుంది.';
+        }
+        if (locale == 'ta') {
+          return 'பராமரிப்பு பணி காரணமாக இன்று மதியம் 2 மணி முதல் 4 மணி வரை குடிநீர் விநியோகம் தற்காலிகமாக நிறுத்தப்படும்.';
+        }
+        if (locale == 'hi') {
+          return 'रखरखाव के कारण आज दोपहर 2 बजे से 4 बजे तक जलापूर्ति अस्थायी रूप से निलंबित रहेगी।';
+        }
+        if (locale == 'kn') {
+          return 'ನಿರ್ವಹಣಾ ಕೆಲಸದ ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಇಂದು ಮಧ್ಯಾಹ್ನ 2 ರಿಂದ 4 ರವರೆಗೆ ನೀರು ಸರಬರಾಜನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಸ್ಥಗಿತಗೊಳಿಸಲಾಗುವುದು.';
+        }
+        if (locale == 'ml') {
+          return 'അറ്റകുറ്റപ്പണികൾ കാരണം ഇന്ന് ഉച്ചയ്ക്ക് 2 മണി മുതൽ 4 മണി വരെ കുടിവെള്ള വിതരണം താൽക്കാലികമായി തടസ്സപ്പെടും.';
+        }
+        return 'Water supply will be temporarily suspended for maintenance today from 2 PM to 4 PM.';
+      }
+      if (key == 'template_gate_timing_title') {
+        if (locale == 'te') return 'గేట్ సమయాల రిమైండర్';
+        if (locale == 'ta') return 'கேட் நேர நினைவூட்டல்';
+        if (locale == 'hi') return 'गेट टाइमिंग रिमाइंडर';
+        if (locale == 'kn') return 'ಗೇಟ್ ಸಮಯದ ಜ್ಞಾಪನೆ';
+        if (locale == 'ml') return 'ಗೇറ്റ് സമയ ഓർമ്മപ്പെടുത്തൽ';
+        return 'Gate Timing Reminder';
+      }
+      if (key == 'template_gate_timing_desc') {
+        if (locale == 'te') {
+          return 'ప్రధాన గేట్ ప్రతిరోజూ రాత్రి 10:30 గంటలకు మూసివేయబడుతుందని గుర్తుంచుకోండి. దయచేసి సెక్యూరిటీ బృందానికి సహకరించండి.';
+        }
+        if (locale == 'ta') {
+          return 'தினமும் இரவு 10:30 மணிக்கு பிரதான கேட் மூடப்படும் என்பதை நினைவிற் கொள்ளவும். பாதுகாப்பு குழுவினருக்கு ஒத்துழைப்பு நல்கவும்.';
+        }
+        if (locale == 'hi') {
+          return 'कृपया ध्यान दें कि मुख्य गेट प्रतिदिन रात 10:30 बजे बंद हो जाता है। कृपया सुरक्षा टीम का सहयोग करें।';
+        }
+        if (locale == 'kn') {
+          return 'ಮುಖ್ಯ ಗೇಟ್ ಪ್ರತಿದಿನ ರಾತ್ರಿ 10:30 ಕ್ಕೆ ಮುಚ್ಚಲ್ಪಡುತ್ತದೆ ಎಂಬುದನ್ನು ದಯವಿಟ್ಟು ನೆನಪಿನಲ್ಲಿಡಿ. ದಯವಿಟ್ಟು ಭದ್ರತಾ ಸಿಬ್ಬಂದಿಗೆ ಸಹಕರಿಸಿ.';
+        }
+        if (locale == 'ml') {
+          return 'ಪ್ರധാന ഗേറ്റ് ദിവസവും രാത്രി 10:30-ന് അടയ്ക്കുമെന്ന് ദയവായി ഓർക്കുക. സെക്യൂരിറ്റി ടീമുമായി സഹകരിക്കുക.';
+        }
+        return 'Please remember that the main gate closes at 10:30 PM daily. Kindly cooperate with the security team.';
+      }
+      if (key == 'template_movie_night_title') {
+        if (locale == 'te') return 'ఈ రాత్రికి మూవీ నైట్';
+        if (locale == 'ta') return 'இன்று இரவு திரைப்பட இரவு';
+        if (locale == 'hi') return 'आज रात मूवी नाइट';
+        if (locale == 'kn') return 'ಇಂದು ರಾತ್ರಿ ಮೂವಿ ನೈಟ್';
+        if (locale == 'ml') return 'ഇന്ന് രാത്രി മൂവി നൈറ്റ്';
+        return 'Movie Night Tonight';
+      }
+      if (key == 'template_movie_night_desc') {
+        if (locale == 'te') {
+          return 'ఈ రోజు రాత్రి 8 గంటలకు కామన్ ఏరియాలో జరిగే మూవీ స్క్రీనింగ్‌కు విచ్చేయండి. ఉచిత స్నాక్స్ అందించబడతాయి!';
+        }
+        if (locale == 'ta') {
+          return 'இன்று இரவு 8 மணிக்கு பொது இடத்தில் நடைபெறும் திரைப்படக் காட்சியில் எங்களோடு இணையுங்கள். இலவச தின்பண்டங்கள் வழங்கப்படும்!';
+        }
+        if (locale == 'hi') {
+          return 'आज रात 8 बजे कॉमन एरिया में मूवी स्क्रीनिंग के लिए आएं। मुफ्त स्नैक्स दिए जाएंगे!';
+        }
+        if (locale == 'kn') {
+          return 'ಇಂದು ರಾತ್ರಿ 8 ಗಂಟೆಗೆ ಕಾಮನ್ ಏರಿಯಾದಲ್ಲಿ ನಡೆಯಲಿರುವ ಚലನಚಿತ್ರ ಪ್ರದರ್ಶನಕ್ಕೆ ನಮ್ಮೊಂದಿಗೆ ಸೇರಿಕೊಳ್ಳಿ. ಉಚಿತ ಸ್ನ್ಯาಕ್ಸ್ ನೀಡಲಾಗುವುದು!';
+        }
+        if (locale == 'ml') {
+          return 'ഇന്ന് രാത്രി 8 മണിക്ക് കോമൺ ഏരിയയിൽ നടക്കുന്ന സിനിമ പ്രദർശനത്തിലേക്ക് എല്ലാവരെയും സ്വാഗതം ചെയ്യുന്നു. സൗജന്യ സ്നാക്സ് ഉണ്ടായിരിക്കും!';
+        }
+        return 'Join us for a movie screening tonight at 8 PM in the common area. Free snacks provided!';
       }
       if (key == 'reports_analytics_title') {
         if (locale == 'te') return 'నివేదికలు & విశ్లేషణలు';

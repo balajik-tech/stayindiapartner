@@ -194,7 +194,6 @@ class _SocialPostCardState extends State<SocialPostCard> {
           ),
           SizedBox(height: 12.h),
 
-          // Image Edit section
           if (widget.post.imageUrl != null && !_removeImage && _selectedImagePath == null)
             Stack(
               children: [
@@ -277,7 +276,6 @@ class _SocialPostCardState extends State<SocialPostCard> {
               ),
             ),
 
-          // Poll Edit section
           if (widget.post.poll != null && !_removePoll) ...[
             SizedBox(height: 16.h),
             Text(

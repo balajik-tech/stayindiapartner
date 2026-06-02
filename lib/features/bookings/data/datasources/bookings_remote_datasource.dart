@@ -58,7 +58,13 @@ abstract class BookingsRemoteDataSource {
     String razorpaySignature,
   );
   Future<BookingModel> getBookingById(String id);
-  Future<void> checkoutBooking(String bookingId);
+  Future<void> checkoutBooking(
+    String bookingId, {
+    double? securityDeposit,
+    double? pendingRent,
+    double? utilityDue,
+    double? finalSettlement,
+  });
   Future<void> cancelBooking(String bookingId);
 }
 
@@ -287,9 +293,23 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<void> checkoutBooking(String bookingId) async {
+  Future<void> checkoutBooking(
+    String bookingId, {
+    double? securityDeposit,
+    double? pendingRent,
+    double? utilityDue,
+    double? finalSettlement,
+  }) async {
     try {
-      await dio.post('${ApiConstants.checkoutBooking}/$bookingId');
+      await dio.post(
+        '${ApiConstants.checkoutBooking}/$bookingId',
+        data: {
+          if (securityDeposit != null) 'securityDeposit': securityDeposit,
+          if (pendingRent != null) 'pendingRent': pendingRent,
+          if (utilityDue != null) 'utilityDue': utilityDue,
+          if (finalSettlement != null) 'finalSettlement': finalSettlement,
+        },
+      );
     } catch (e) {
       AppLogger.error('[BOOKINGS] Error during check-out: $e');
       rethrow;

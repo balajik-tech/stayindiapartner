@@ -927,5 +927,14 @@
   "adjust_search_filters": "अपनी खोज या फ़िल्टर को समायोजित करने का प्रयास करें",
   "in_stock": "स्टॉक में है",
   "out_of_stock": "आउट ऑफ स्टॉक",
-  "low_stock": "कम स्टॉक"
+  "low_stock": "कम स्टॉक",
+  "official_feed": "🔹 आधिकारिक फ़ीड",
+  "owner_forum": "🔸 पीजी ओनर्स फोरम",
+  "official_read_only_banner": "आधिकारिक फ़ीड केवल पढ़ने के लिए है। केवल एसोसिएशन अध्यक्ष, व्यवस्थापक और समिति के सदस्य ही पोस्ट कर सकते हैं।",
+  "no_official_updates": "कोई घोषणा नहीं है",
+  "no_forum_posts": "कोई पोस्ट नहीं है",
+  "official_updates_appear_here": "आधिकारिक अपडेट यहाँ दिखाई देंगे।",
+  "forum_posts_appear_here": "अपनी समस्याओं या प्रतिक्रिया को यहाँ साझा करें।",
+  "president_admin_role": "अध्यक्ष / व्यवस्थापक",
+  "pg_owner_role": "पीजी मालिक"
 }
