@@ -58,6 +58,57 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   final Set<String> _starredMessageIds = {};
   final Map<String, String> _reactions = {};
   CommunityMessageEntity? _replyingToMessage;
+  String? _highlightedMessageId;
+  final Map<String, GlobalKey> _messageKeys = {};
+
+  void _scrollToMessage(String msgId, List<CommunityMessageEntity> messages) {
+    final reversedMessages = messages.reversed.toList();
+    final index = reversedMessages.indexWhere((m) => m.id == msgId);
+    if (index != -1) {
+      final key = _messageKeys[msgId];
+      if (key != null && key.currentContext != null) {
+        Scrollable.ensureVisible(
+          key.currentContext!,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+        _flashHighlight(msgId);
+      } else {
+        final estimatedOffset = index * 90.0;
+        _scrollController.animateTo(
+          estimatedOffset,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        ).then((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (key != null && key.currentContext != null) {
+              Scrollable.ensureVisible(
+                key.currentContext!,
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeInOut,
+              );
+              _flashHighlight(msgId);
+            }
+          });
+        });
+      }
+    }
+  }
+
+  void _flashHighlight(String msgId) {
+    setState(() {
+      _highlightedMessageId = msgId;
+    });
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          if (_highlightedMessageId == msgId) {
+            _highlightedMessageId = null;
+          }
+        });
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -204,7 +255,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
         String sentText = text;
         if (_replyingToMessage != null) {
           final cleanText = _getCleanTextMessage(_replyingToMessage!.text);
-          sentText = 'REPLY_TO_MSG:${_replyingToMessage!.senderName}::${cleanText.replaceAll('\n', ' ')}::REPLY_TO_MSG:$text';
+          sentText = 'REPLY_TO_MSG:${_replyingToMessage!.senderName}::${_replyingToMessage!.id}::${cleanText.replaceAll('\n', ' ')}::REPLY_TO_MSG:$text';
           setState(() {
             _replyingToMessage = null;
           });
@@ -428,7 +479,10 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                             final isSelectionMode = _selectedMessageIds.isNotEmpty;
                             final isStarred = _starredMessageIds.contains(updatedMessage.id);
 
+                            final key = _messageKeys.putIfAbsent(updatedMessage.id, () => GlobalKey());
+
                             return SwipeToReply(
+                              key: key,
                               enabled: !isSelectionMode && !updatedMessage.isDeleted,
                               onSwipe: () {
                                 setState(() {
@@ -441,6 +495,8 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                                 isSelected: isSelected,
                                 isSelectionMode: isSelectionMode,
                                 isStarred: isStarred,
+                                onReplyTap: (msgId) => _scrollToMessage(msgId, allMessages),
+                                isHighlighted: _highlightedMessageId == updatedMessage.id,
                                 onReact: !isSelectionMode && !updatedMessage.isDeleted
                                     ? (emoji) => _reactToMessage(updatedMessage.id, emoji)
                                     : null,
@@ -453,15 +509,13 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
                                     }
                                   });
                                 },
-                                onLongPressStart: isSelectionMode
-                                    ? (details) {
-                                        if (!updatedMessage.isDeleted) {
-                                          setState(() {
-                                            _selectedMessageIds.add(updatedMessage.id);
-                                          });
-                                        }
-                                      }
-                                    : null,
+                                onLongPressStart: (details) {
+                                  if (!updatedMessage.isDeleted) {
+                                    setState(() {
+                                      _selectedMessageIds.add(updatedMessage.id);
+                                    });
+                                  }
+                                },
                               ),
                             );
                           },

@@ -36,6 +36,7 @@ import 'package:stayindia_owner/core/services/notification_service.dart';
 import '../widgets/global_action_sheet.dart';
 import 'package:stayindia_owner/features/profile/presentation/pages/floor_management_page.dart';
 import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
@@ -49,7 +50,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   late int _currentIndex;
   StreamSubscription? _bookingSubscription;
   StreamSubscription? _noticeSubscription;
+  StreamSubscription? _communitySocketSubscription;
   String? _currentHostelId;
+  int _totalCommunityUnread = 0;
 
   @override
   void initState() {
@@ -60,6 +63,14 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     );
     _noticeSubscription = sl<SocketService>().noticeStream.listen(_onNewNotice);
 
+    _loadCommunityUnread();
+
+    _communitySocketSubscription = sl<SocketService>().messageStream.listen((data) {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _loadCommunityUnread();
+      });
+    });
+
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
       final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
@@ -67,6 +78,29 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _setupSocket(hostelId);
       });
+    }
+  }
+
+  Future<void> _loadCommunityUnread() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? jsonStr = prefs.getString('owner_community_unread_counts');
+      if (jsonStr != null) {
+        final Map<String, dynamic> decoded = jsonDecode(jsonStr);
+        int sum = 0;
+        decoded.forEach((key, value) {
+          if (value is int) {
+            sum += value;
+          }
+        });
+        if (mounted) {
+          setState(() {
+            _totalCommunityUnread = sum;
+          });
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error loading unread community counts in nav: $e');
     }
   }
 
@@ -86,6 +120,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   void dispose() {
     _bookingSubscription?.cancel();
     _noticeSubscription?.cancel();
+    _communitySocketSubscription?.cancel();
     super.dispose();
   }
 
@@ -297,6 +332,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                 ),
                 bottomNavigationBar: _PremiumNavBar(
                   currentIndex: _currentIndex,
+                  totalCommunityUnread: _totalCommunityUnread,
                   onTap: (index) {
                     final authState = context.read<AuthCubit>().state;
                     if (authState is AuthAuthenticated ||
@@ -340,6 +376,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
                     HapticFeedback.lightImpact();
                     setState(() => _currentIndex = index);
+                    _loadCommunityUnread();
                   },
                 ),
                 floatingActionButton: _currentIndex == 0
@@ -600,9 +637,14 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
 class _PremiumNavBar extends StatelessWidget {
   final int currentIndex;
+  final int totalCommunityUnread;
   final Function(int) onTap;
 
-  const _PremiumNavBar({required this.currentIndex, required this.onTap});
+  const _PremiumNavBar({
+    required this.currentIndex,
+    required this.totalCommunityUnread,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -672,6 +714,7 @@ class _PremiumNavBar extends StatelessWidget {
                   currentIndex: currentIndex,
                   icon: Icons.groups_rounded,
                   label: 'community'.tr(),
+                  unreadCount: totalCommunityUnread,
                   onTap: onTap,
                 ),
               if (hasTenants)
@@ -723,6 +766,7 @@ class _NavBarItem extends StatelessWidget {
   final int currentIndex;
   final IconData icon;
   final String label;
+  final int unreadCount;
   final Function(int) onTap;
 
   const _NavBarItem({
@@ -730,6 +774,7 @@ class _NavBarItem extends StatelessWidget {
     required this.currentIndex,
     required this.icon,
     required this.label,
+    this.unreadCount = 0,
     required this.onTap,
   });
 
@@ -767,12 +812,44 @@ class _NavBarItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Center(
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 28.sp,
-                    ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Center(
+                        child: Icon(
+                          icon,
+                          color: Colors.white,
+                          size: 28.sp,
+                        ),
+                      ),
+                      if (unreadCount > 0)
+                        Positioned(
+                          top: -2.h,
+                          right: -2.w,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 1.5),
+                            ),
+                            constraints: BoxConstraints(
+                              minWidth: 18.w,
+                              minHeight: 18.w,
+                            ),
+                            child: Center(
+                              child: Text(
+                                unreadCount > 99 ? '99+' : '$unreadCount',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),

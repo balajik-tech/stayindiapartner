@@ -12,6 +12,7 @@ class CommunityDetailsEntity extends Equatable {
   final String? districtId;
   final String? wardId;
   final bool isPendingJoin;
+  final DateTime? updatedAt;
 
   const CommunityDetailsEntity({
     required this.id,
@@ -25,6 +26,7 @@ class CommunityDetailsEntity extends Equatable {
     this.districtId,
     this.wardId,
     this.isPendingJoin = false,
+    this.updatedAt,
   });
 
   @override
@@ -40,6 +42,7 @@ class CommunityDetailsEntity extends Equatable {
     districtId,
     wardId,
     isPendingJoin,
+    updatedAt,
   ];
 }
 
@@ -154,6 +157,8 @@ class SocialPostEntity extends Equatable {
   final String userName;
   final String? userAvatar;
   final String? userRole;
+  final String? userCity;
+  final String? userState;
   final String content;
   final String type;
   final int likesCount;
@@ -173,6 +178,8 @@ class SocialPostEntity extends Equatable {
     required this.userName,
     this.userAvatar,
     this.userRole,
+    this.userCity,
+    this.userState,
     required this.content,
     required this.type,
     required this.likesCount,
@@ -193,6 +200,8 @@ class SocialPostEntity extends Equatable {
     String? userName,
     String? userAvatar,
     String? userRole,
+    String? userCity,
+    String? userState,
     String? content,
     String? type,
     int? likesCount,
@@ -212,6 +221,8 @@ class SocialPostEntity extends Equatable {
       userName: userName ?? this.userName,
       userAvatar: userAvatar ?? this.userAvatar,
       userRole: userRole ?? this.userRole,
+      userCity: userCity ?? this.userCity,
+      userState: userState ?? this.userState,
       content: content ?? this.content,
       type: type ?? this.type,
       likesCount: likesCount ?? this.likesCount,
@@ -234,6 +245,8 @@ class SocialPostEntity extends Equatable {
     userName,
     userAvatar,
     userRole,
+    userCity,
+    userState,
     content,
     type,
     likesCount,

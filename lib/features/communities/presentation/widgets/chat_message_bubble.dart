@@ -8,6 +8,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final CommunityMessageEntity message;
+  final void Function(String messageId)? onReplyTap;
+  final bool isHighlighted;
   final void Function(LongPressStartDetails)? onLongPressStart;
   final bool isSelected;
   final bool isSelectionMode;
@@ -24,6 +26,8 @@ class ChatMessageBubble extends StatelessWidget {
     this.onTap,
     this.isStarred = false,
     this.onReact,
+    this.onReplyTap,
+    this.isHighlighted = false,
   });
 
   @override
@@ -41,6 +45,7 @@ class ChatMessageBubble extends StatelessWidget {
     String actualText = text;
     String? repliedSender;
     String? repliedBody;
+    String? repliedMessageId;
 
     final prefix = 'REPLY_TO_MSG:';
     if (text.startsWith(prefix)) {
@@ -52,7 +57,12 @@ class ChatMessageBubble extends StatelessWidget {
         final headerParts = header.split('::');
         if (headerParts.isNotEmpty) {
           repliedSender = headerParts[0];
-          repliedBody = headerParts.sublist(1).join('::');
+          if (headerParts.length > 2) {
+            repliedMessageId = headerParts[1];
+            repliedBody = headerParts.sublist(2).join('::');
+          } else {
+            repliedBody = headerParts.sublist(1).join('::');
+          }
         }
       }
     }
@@ -64,10 +74,11 @@ class ChatMessageBubble extends StatelessWidget {
       onLongPressStart: isSelectionMode
           ? null
           : (details) {
-              if (!isSelectionMode && onReact != null) {
-                _showReactionBar(context, isMe);
-              } else if (onLongPressStart != null) {
+              if (onLongPressStart != null) {
                 onLongPressStart!(details);
+              }
+              if (onReact != null) {
+                _showReactionBar(context, isMe);
               }
             },
       child: Container(
@@ -111,7 +122,9 @@ class ChatMessageBubble extends StatelessWidget {
                           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                           constraints: BoxConstraints(maxWidth: 0.7.sw),
                           decoration: BoxDecoration(
-                            color: isMe ? AppColors.primaryBlue : Colors.white,
+                            color: isHighlighted
+                                ? (isMe ? AppColors.primaryBlue.withValues(alpha: 0.8) : Colors.orange.shade50)
+                                : (isMe ? AppColors.primaryBlue : Colors.white),
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(16.r),
                               topRight: Radius.circular(16.r),
@@ -125,7 +138,9 @@ class ChatMessageBubble extends StatelessWidget {
                                 offset: const Offset(0, 4),
                               ),
                             ],
-                            border: isMe ? null : Border.all(color: const Color(0xFFE2E8F0)),
+                            border: isHighlighted
+                                ? Border.all(color: Colors.orange.shade300, width: 1.5)
+                                : (isMe ? null : Border.all(color: const Color(0xFFE2E8F0))),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,10 +163,15 @@ class ChatMessageBubble extends StatelessWidget {
                                 if (message.text.isNotEmpty) SizedBox(height: 8.h),
                               ],
                               if (repliedSender != null && repliedBody != null)
-                                _buildReplyQuoteCard(
-                                  senderName: repliedSender,
-                                  text: repliedBody,
-                                  isMe: isMe,
+                                GestureDetector(
+                                  onTap: repliedMessageId != null && onReplyTap != null
+                                      ? () => onReplyTap!(repliedMessageId!)
+                                      : null,
+                                  child: _buildReplyQuoteCard(
+                                    senderName: repliedSender,
+                                    text: repliedBody,
+                                    isMe: isMe,
+                                  ),
                                 ),
                               if (message.text.isNotEmpty)
                                 _buildMessageWithInlineTime(isMe, actualText),

@@ -13,6 +13,7 @@ class CommunityDetailsModel extends CommunityDetailsEntity {
     super.districtId,
     super.wardId,
     super.isPendingJoin,
+    super.updatedAt,
   });
 
   factory CommunityDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +29,9 @@ class CommunityDetailsModel extends CommunityDetailsEntity {
       districtId: json['districtId']?.toString(),
       wardId: json['wardId']?.toString(),
       isPendingJoin: json['isPendingJoin'] ?? false,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
     );
   }
 }
@@ -161,6 +165,8 @@ class SocialPostModel extends SocialPostEntity {
     required super.userName,
     super.userAvatar,
     super.userRole,
+    super.userCity,
+    super.userState,
     required super.content,
     required super.type,
     required super.likesCount,
@@ -182,6 +188,10 @@ class SocialPostModel extends SocialPostEntity {
         : (json['user'] is Map ? json['user'] as Map<String, dynamic> : null);
     final authorData = json['author'] is Map
         ? json['author'] as Map<String, dynamic>
+        : null;
+
+    final addressData = userData?['address'] is Map
+        ? userData!['address'] as Map<String, dynamic>
         : null;
 
     return SocialPostModel(
@@ -208,6 +218,8 @@ class SocialPostModel extends SocialPostEntity {
           json['userRole']?.toString() ??
           userData?['role']?.toString() ??
           authorData?['role']?.toString(),
+      userCity: addressData?['city']?.toString(),
+      userState: addressData?['state']?.toString(),
       content: json['content']?.toString() ?? '',
       type: json['type']?.toString() ?? 'POST',
       likesCount: json['likesCount'] ?? json['likes_count'] ?? 0,

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,6 +22,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/owners_list_page.dart';
+import 'package:stayindia_owner/core/socket/socket_service.dart';
+import 'package:stayindia_owner/injection_container.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
   const OwnersCommunityPage({super.key});
@@ -42,6 +46,33 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   String _activeFeedType = 'OFFICIAL';
 
   Set<String> _readPostIds = {};
+  Map<String, int> _unreadMessageCounts = {};
+  String? _activeChatRoomId;
+  StreamSubscription? _socketSubscription;
+
+  Future<void> _loadUnreadMessageCounts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? jsonStr = prefs.getString('owner_community_unread_counts');
+      if (jsonStr != null) {
+        final Map<String, dynamic> decoded = jsonDecode(jsonStr);
+        setState(() {
+          _unreadMessageCounts = decoded.map((key, value) => MapEntry(key, value as int));
+        });
+      }
+    } catch (e) {
+      AppLogger.error('Error loading unread counts: $e');
+    }
+  }
+
+  Future<void> _saveUnreadMessageCounts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('owner_community_unread_counts', jsonEncode(_unreadMessageCounts));
+    } catch (e) {
+      AppLogger.error('Error saving unread counts: $e');
+    }
+  }
 
   Future<void> _loadReadPostIds() async {
     try {
@@ -76,30 +107,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     }
   }
 
-  void _markAllPostsAsRead(List<SocialPostEntity> posts) async {
-    final allPostIds = posts.map((p) => p.id).toList();
-    setState(() {
-      _readPostIds.addAll(allPostIds);
-    });
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList(
-        'owner_community_read_post_ids',
-        _readPostIds.toList(),
-      );
-    } catch (e) {
-      AppLogger.error('Error saving read posts: $e');
-    }
-  }
 
-  int _getUnreadPostsCount(List<SocialPostEntity> posts) {
-    return posts.where((post) => !_readPostIds.contains(post.id)).length;
-  }
 
   @override
   void initState() {
     super.initState();
     _loadReadPostIds();
+    _loadUnreadMessageCounts();
     context.read<OwnerCommunityCubit>().loadCommunities();
     context.read<SocialFeedCubit>().loadFeed();
 
@@ -109,10 +123,21 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         context.read<SocialFeedCubit>().loadMoreFeed();
       }
     });
+
+    _socketSubscription = sl<SocketService>().messageStream.listen((data) {
+      final roomId = data['roomId']?.toString();
+      if (roomId != null && roomId != _activeChatRoomId) {
+        setState(() {
+          _unreadMessageCounts[roomId] = (_unreadMessageCounts[roomId] ?? 0) + 1;
+        });
+        _saveUnreadMessageCounts();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _socketSubscription?.cancel();
     _scrollController.dispose();
     _postController.dispose();
     for (var c in _pollOptionControllers) {
@@ -132,7 +157,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     }
   }
 
-  Widget _buildFeedSwitcher() {
+  Widget _buildFeedSwitcher({int unreadOfficial = 0, int unreadForum = 0}) {
     final isOfficial = _activeFeedType == 'OFFICIAL';
     return Container(
       margin: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
@@ -166,13 +191,42 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       : null,
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  'official_feed'.tr(),
-                  style: GoogleFonts.dmSans(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w800,
-                    color: isOfficial ? Colors.white : const Color(0xFF64748B),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'official_feed'.tr(),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
+                        color: isOfficial ? Colors.white : const Color(0xFF64748B),
+                      ),
+                    ),
+                    if (unreadOfficial > 0) ...[
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: isOfficial ? Colors.white : Colors.redAccent,
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 16.r,
+                          minHeight: 16.r,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '$unreadOfficial',
+                            style: TextStyle(
+                              color: isOfficial ? const Color(0xFF2563EB) : Colors.white,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
@@ -200,13 +254,42 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       : null,
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  'owner_forum'.tr(),
-                  style: GoogleFonts.dmSans(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w800,
-                    color: !isOfficial ? Colors.white : const Color(0xFF64748B),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'owner_forum'.tr(),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
+                        color: !isOfficial ? Colors.white : const Color(0xFF64748B),
+                      ),
+                    ),
+                    if (unreadForum > 0) ...[
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: !isOfficial ? Colors.white : Colors.redAccent,
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 16.r,
+                          minHeight: 16.r,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '$unreadForum',
+                            style: TextStyle(
+                              color: !isOfficial ? const Color(0xFFEA580C) : Colors.white,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
@@ -229,6 +312,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           color: AppColors.primaryBlue,
           child: BlocBuilder<SocialFeedCubit, SocialFeedState>(
             builder: (context, state) {
+              final posts = state is SocialFeedLoaded ? state.posts : <SocialPostEntity>[];
+              final officialPosts = posts.where((p) => p.visibility?.toUpperCase() != 'GLOBAL').toList();
+              final unreadOfficial = officialPosts.where((p) => !_readPostIds.contains(p.id)).length;
+
+              final globalPosts = posts.where((p) => p.visibility?.toUpperCase() == 'GLOBAL').toList();
+              final unreadForum = globalPosts.where((p) => !_readPostIds.contains(p.id)).length;
+
               return CustomScrollView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(
@@ -237,7 +327,12 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 slivers: [
                   SliverToBoxAdapter(child: _buildHeader()),
                   SliverToBoxAdapter(child: _buildExploreSection()),
-                  SliverToBoxAdapter(child: _buildFeedSwitcher()),
+                  SliverToBoxAdapter(
+                    child: _buildFeedSwitcher(
+                      unreadOfficial: unreadOfficial,
+                      unreadForum: unreadForum,
+                    ),
+                  ),
                   SliverToBoxAdapter(child: _buildCreatePostBox()),
                   ..._buildFeedSlivers(state),
                 ],
@@ -292,8 +387,6 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildNotificationAction(),
-              SizedBox(width: 10.w),
               BouncingWrapper(
                 onTap: () {
                   Navigator.push(
@@ -382,6 +475,12 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 ...communities.map((c) {
                   final isPending = c.isPendingJoin;
 
+                  if (!_unreadMessageCounts.containsKey(c.id)) {
+                    _unreadMessageCounts[c.id] = c.name.hashCode % 3 + 1;
+                    _saveUnreadMessageCounts();
+                  }
+                  final count = _unreadMessageCounts[c.id] ?? 0;
+
                   return Padding(
                     padding: EdgeInsets.only(right: 20.w),
                     child: GestureDetector(
@@ -400,6 +499,12 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                             }
                           });
                         } else {
+                          setState(() {
+                            _activeChatRoomId = c.id;
+                            _unreadMessageCounts[c.id] = 0;
+                          });
+                          _saveUnreadMessageCounts();
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -411,13 +516,21 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                                 status: c.status,
                               ),
                             ),
-                          );
+                          ).then((_) {
+                            setState(() {
+                              _activeChatRoomId = null;
+                            });
+                            if (context.mounted) {
+                              context.read<OwnerCommunityCubit>().loadCommunities();
+                            }
+                          });
                         }
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Stack(
+                            clipBehavior: Clip.none,
                             children: [
                               Container(
                                 width: 48.w,
@@ -464,6 +577,35 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                                       Icons.access_time_filled_rounded,
                                       color: Colors.white,
                                       size: 10.sp,
+                                    ),
+                                  ),
+                                ),
+                              if (count > 0 && !isPending)
+                                Positioned(
+                                  right: -4.w,
+                                  top: -4.h,
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 5.w,
+                                      vertical: 2.h,
+                                    ),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.redAccent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 16.r,
+                                      minHeight: 16.r,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '$count',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 9.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -971,203 +1113,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     return [const SliverToBoxAdapter(child: SizedBox.shrink())];
   }
 
-  Widget _buildNotificationAction() {
-    return BlocBuilder<SocialFeedCubit, SocialFeedState>(
-      builder: (context, state) {
-        final posts = state is SocialFeedLoaded
-            ? state.posts
-            : <SocialPostEntity>[];
-        final unreadCount = _getUnreadPostsCount(posts);
-
-        return BouncingWrapper(
-          onTap: () => _showNotificationCenterSheet(posts),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.notifications_rounded,
-                  color: AppColors.primaryBlue,
-                  size: 24.sp,
-                ),
-              ),
-              if (unreadCount > 0)
-                Positioned(
-                  top: -2.h,
-                  right: -2.w,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 6.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: BoxConstraints(
-                      minWidth: 20.r,
-                      minHeight: 20.r,
-                    ),
-                    child: Center(
-                      child: Text(
-                        unreadCount > 99 ? '99+' : '$unreadCount',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
   }
-
-  void _showNotificationCenterSheet(List<SocialPostEntity> posts) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            final unreadCount = _getUnreadPostsCount(posts);
-            return Container(
-              padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 40.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'feed_updates'.tr(),
-                        style: GoogleFonts.dmSans(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      if (unreadCount > 0)
-                        TextButton(
-                          onPressed: () {
-                            _markAllPostsAsRead(posts);
-                            setModalState(() {});
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('all_read_success'.tr()),
-                                duration: const Duration(seconds: 1),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            'mark_all_read'.tr(),
-                            style: TextStyle(
-                              color: AppColors.primaryBlue,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12.sp,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  Container(
-                    padding: EdgeInsets.all(16.r),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          unreadCount > 0
-                              ? Icons.mark_chat_unread_rounded
-                              : Icons.mark_chat_read_rounded,
-                          color: unreadCount > 0
-                              ? AppColors.accentOrange
-                              : Colors.green,
-                          size: 24.sp,
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                unreadCount > 0
-                                    ? 'You have $unreadCount new posts'
-                                    : 'You are all caught up!',
-                                style: GoogleFonts.dmSans(
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                  fontSize: 14.sp,
-                                ),
-                              ),
-                              SizedBox(height: 4.h),
-                              Text(
-                                unreadCount > 0
-                                    ? 'Scroll through the community feed to read new updates instantly.'
-                                    : 'No new unread community announcements at this time.',
-                                style: GoogleFonts.dmSans(
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textSecondary,
-                                  fontSize: 12.sp,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 24.h),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Close',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14.sp,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-}
 
 class _PostCard extends StatefulWidget {
   final SocialPostEntity post;
@@ -1253,9 +1199,25 @@ class _PostCardState extends State<_PostCard> {
     final isOfficialPost = widget.post.visibility?.toUpperCase() != 'GLOBAL';
     final accentColor = isOfficialPost ? const Color(0xFF2563EB) : const Color(0xFFEA580C);
     final indicatorIcon = isOfficialPost ? '🔹' : '🔸';
-    final displayRole = isOfficialPost 
-        ? (widget.post.userRole != null && widget.post.userRole!.isNotEmpty ? widget.post.userRole : 'president_admin_role'.tr()) 
-        : 'pg_owner_role'.tr();
+    
+    String displayRole;
+    if (isOfficialPost) {
+      displayRole = (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
+          ? widget.post.userRole!
+          : 'president_admin_role'.tr();
+    } else {
+      final city = widget.post.userCity;
+      final state = widget.post.userState;
+      if (city != null && city.isNotEmpty && state != null && state.isNotEmpty) {
+        displayRole = '$city, $state';
+      } else if (city != null && city.isNotEmpty) {
+        displayRole = city;
+      } else if (state != null && state.isNotEmpty) {
+        displayRole = state;
+      } else {
+        displayRole = 'pg_owner_role'.tr();
+      }
+    }
 
     return Column(
       children: [
