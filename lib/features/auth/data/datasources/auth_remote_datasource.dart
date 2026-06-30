@@ -58,8 +58,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) : _dio = dio,
        _tokenStorage = tokenStorage;
 
-  String _sanitizePhone(String phone) =>
-      phone.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^91'), '');
+  // String _sanitizePhone(String phone) =>
+  //     phone.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^91'), '');
+
+  String _sanitizePhone(String phone) {
+    final cleaned = phone.replaceAll(RegExp(r'\D'), '');
+
+    if (cleaned.length > 10 && cleaned.startsWith('91')) {
+      return cleaned.substring(2);
+    }
+
+    return cleaned;
+  }
 
   Map<String, dynamic> _extractOwnerJson(dynamic responseData) {
     if (responseData is! Map) {

@@ -63,6 +63,8 @@ class _FloorAccordionState extends State<FloorAccordion>
                     vertical: 12.h,
                   ),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         width: 4.w,
