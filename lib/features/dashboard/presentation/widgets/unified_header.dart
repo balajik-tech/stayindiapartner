@@ -291,6 +291,71 @@ class UnifiedHeader extends StatelessWidget {
                                   color: AppColors.primaryBlue,
                                   size: 24.sp,
                                 ),
+                              SizedBox(width: 4.w),
+                              Container(
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (_) => AlertDialog(
+                                        title: const Text('Delete Hostel'),
+                                          content: RichText(
+                                            text: TextSpan(
+                                              style: DefaultTextStyle.of(context).style,
+                                              children: [
+                                                const TextSpan(
+                                                  text: 'Are you sure you want to delete ',
+                                                ),
+                                                TextSpan(
+                                                  text: hostel.name,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black
+                                                  ),
+                                                ),
+                                                const TextSpan(
+                                                  text: '?',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, false),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                            ),
+                                            onPressed: () => Navigator.pop(context, true),
+                                            child: const Text(
+                                              'Delete',
+                                              style: TextStyle(color: Colors.white),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirm == true && context.mounted) {
+                                      context.read<HostelCubit>().deleteHostel(hostel.id);
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(6.r),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withValues(alpha: 0.08),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.delete_outline_rounded,
+                                      color: Colors.red.shade700,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                ),
+                              )
                             ],
                           ),
                         ),
