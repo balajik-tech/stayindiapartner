@@ -848,6 +848,67 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     );
   }
 
+  void _showDeleteConfirmation() async {
+    String hostelName = '';
+    String hostelId = '';
+
+    final hostelState = context.read<HostelCubit>().state;
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      hostelName =
+          hostelState.hostels[hostelState.selectedHostelIndex].name;
+      hostelId = hostelState
+          .hostels[hostelState.selectedHostelIndex]
+          .id;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Hostel'),
+        content: Text.rich(
+          TextSpan(
+            children: [
+              const TextSpan(
+                text: 'Are you sure you want to delete ',
+              ),
+              TextSpan(
+                text: hostelName,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                    color: Colors.black
+                ),
+              ),
+              const TextSpan(
+                text: '?',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted && hostelId != '') {
+      context.read<HostelCubit>().deleteHostel(hostelId);
+      Navigator.pop(context);
+    }
+  }
+
   Widget _buildStickyBottomBar(BuildContext context, SettingsState state) {
     final isSaving = state is SettingsSaving;
     return Container(
@@ -867,21 +928,50 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
           ),
         ],
       ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56.h,
-        child: ElevatedButton(
-          onPressed: isSaving ? null : _handleSave,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryBlue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18.r),
+      child:Row(
+        children: [
+          /// Delete Property Button
+          Expanded(
+            child: SizedBox(
+              height: 56.h,
+              child: OutlinedButton(
+                onPressed: isSaving ? null : _showDeleteConfirmation,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
+                ),
+                child: Text(
+                  "Delete Property",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
             ),
-            elevation: 0,
           ),
-          child: isSaving
-              ? const CircularProgressIndicator(color: Colors.white)
-              : Text(
+
+          SizedBox(width: 12.w),
+
+          /// Save Property Button
+          Expanded(
+            child: SizedBox(
+              height: 56.h,
+              child: ElevatedButton(
+                onPressed: isSaving ? null : _handleSave,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
+                  elevation: 0,
+                ),
+                child: isSaving
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
                   StringUtils.translate(
                     'save_property_profile',
                     context: context,
@@ -892,8 +982,10 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                     color: Colors.white,
                   ),
                 ),
-        ),
-      ),
+              ),
+            ),
+          ),
+        ])
     );
   }
 
