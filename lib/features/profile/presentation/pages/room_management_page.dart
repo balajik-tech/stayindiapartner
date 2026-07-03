@@ -81,6 +81,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
   final Map<String, RoomDetail> _modifiedRooms = {};
   final Set<String> _updatingRoomIds = {};
   bool get _anyCardUpdating => _updatingRoomIds.isNotEmpty;
+  final Set<String> _deletedRoomIds = {};
 
   @override
   void initState() {
@@ -281,7 +282,12 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                               ),
                             );
 
-                        final allRooms = [...floor.rooms, ...?_draftRooms];
+                        final allRooms = [
+                          ...floor.rooms.where(
+                                (room) => !_deletedRoomIds.contains(room.id),
+                          ),
+                          ...?_draftRooms,
+                        ];
                         return _buildMainContent(
                           context,
                           state,
@@ -550,6 +556,18 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     floorName: widget.floorName,
                     floorNum: widget.floorNum,
                     isDraftMode: true,
+                    onDelete: () async {
+                      await context.read<RoomCubit>().deleteRoom(
+                        room.id,
+                        isMaster: false,
+                      );
+                      if (!mounted) return;
+
+                      setState(() {
+                        _deletedRoomIds.add(room.id);
+                        _modifiedRooms.remove(room.id);
+                      });
+                    },
                     onDraftUpdate: (updatedRoom) {
                       setState(() {
                         _modifiedRooms[room.id] = updatedRoom;
@@ -577,6 +595,23 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                     floorName: widget.floorName,
                     floorNum: widget.floorNum,
                     isDraftMode: true,
+                    onDelete: () async {
+                      // Call API only if it is an existing room.
+                      if (!draftRoom.id.startsWith('draft_')) {
+                        await context.read<RoomCubit>().deleteRoom(
+                          draftRoom.id,
+                          isMaster: false,
+                        );
+
+                        if (!mounted) return;
+                      }
+
+                      setState(() {
+                        _deletedRoomIds.add(room.id);
+                        _modifiedRooms.remove(room.id);
+                        _draftRooms?.removeWhere((r) => r.id == draftRoom.id);
+                      });
+                    },
                     onSaveComplete: _requestRefresh,
                     onDraftUpdate: (updatedRoom) {
                       setState(() {
@@ -680,6 +715,9 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
     if (_lastData != null) {
       for (var floor in _lastData!.occupancy.floors) {
         for (var r in floor.rooms) {
+          if (_deletedRoomIds.contains(r.id)) {
+            continue;
+          }
           if (_modifiedRooms.containsKey(r.id)) {
             final modified = _modifiedRooms[r.id]!;
             List<BedInfo> beds = modified.beds;
@@ -1043,7 +1081,7 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                 rooms: [],
               ),
             );
-        currentRooms.addAll(floor.rooms);
+        currentRooms.addAll(floor.rooms.where((room) => !_deletedRoomIds.contains(room.id)));
       }
 
       if (!widget.isSetupMode && !widget.isDraftMode && _draftRooms != null) {
@@ -1444,9 +1482,12 @@ class _RoomManagementPageState extends State<RoomManagementPage> {
                         }
                       }
 
+                      allRooms.removeWhere((room) => _deletedRoomIds.contains(room.id));
                       if (!context.mounted) return;
 
                       final roomCubit = context.read<RoomCubit>();
+                      roomCubit.refreshRooms(List<RoomDetail>.from(allRooms));
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -1499,6 +1540,8 @@ class _RoomManageCard extends StatefulWidget {
   final Function(RoomDetail)? onDraftUpdate;
   final Function(bool)? onUpdatingStatusChanged;
 
+  final VoidCallback? onDelete;
+
   const _RoomManageCard({
     super.key,
     this.roomMap,
@@ -1512,6 +1555,7 @@ class _RoomManageCard extends StatefulWidget {
     this.onDraftUpdate,
     this.onSaveComplete,
     this.onUpdatingStatusChanged,
+    this.onDelete,
   });
 
   final VoidCallback? onSaveComplete;
@@ -1652,7 +1696,20 @@ class _RoomManageCardState extends State<_RoomManageCard> {
                   ],
                 ],
               ),
-              _buildFloorBadge(),
+              Row(
+                children: [
+                  _buildFloorBadge(),
+                  SizedBox(width: 8.w),
+                  InkWell(
+                    onTap: widget.onDelete,
+                    child: Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.red,
+                      size: 22.sp,
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
           SizedBox(height: 20.h),

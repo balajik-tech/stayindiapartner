@@ -379,4 +379,7 @@ class RoomCubit extends Cubit<RoomState> {
         return '$capacity Sharing';
     }
   }
+  void refreshRooms(List<RoomDetail> rooms) {
+    emit(RoomLoaded(List.from(rooms)));
+  }
 }
