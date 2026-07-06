@@ -452,11 +452,11 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 child: Container(
                   margin: EdgeInsets.all(4.r),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2B5797),
+                    color: const Color(0xFF16539B),
                     borderRadius: BorderRadius.circular(10.r),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2B5797).withValues(alpha: 0.3),
+                        color: const Color(0xFF16539B).withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -553,7 +553,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
       child: Text(
         'Sharing',
         style: TextStyle(
-          color: const Color(0xFF2B5797),
+          color: const Color(0xFF16539B),
           fontWeight: FontWeight.w900,
           fontSize: 11.sp,
           letterSpacing: 0.5,
@@ -695,14 +695,14 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           children: [
             Icon(
               Icons.add_circle_outline_rounded,
-              color: const Color(0xFF2B5797),
+              color: const Color(0xFF16539B),
               size: 16.sp,
             ),
             SizedBox(width: 4.w),
             Text(
               'Add',
               style: TextStyle(
-                color: const Color(0xFF2B5797),
+                color: const Color(0xFF16539B),
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w800,
               ),
@@ -797,7 +797,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         child: Text(
           label,
           style: TextStyle(
-            color: const Color(0xFF2B5797),
+            color: const Color(0xFF16539B),
             fontWeight: FontWeight.w900,
             fontSize: 11.sp,
             letterSpacing: 0.5,
@@ -894,7 +894,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.r),
-            borderSide: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
+            borderSide: const BorderSide(color: Color(0xFF16539B), width: 1.5),
           ),
         ),
       ),
@@ -972,7 +972,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2B5797),
+                backgroundColor: const Color(0xFF16539B),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r),
                 ),
@@ -1022,7 +1022,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2B5797),
+                backgroundColor: const Color(0xFF16539B),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
                 ),
@@ -1075,7 +1075,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 child: ElevatedButton(
                   onPressed: () => _savePricing(currentLoadedRooms),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B5797),
+                    backgroundColor: const Color(0xFF16539B),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),

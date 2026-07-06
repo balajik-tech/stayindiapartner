@@ -1132,7 +1132,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2B5797),
+                        backgroundColor: const Color(0xFF16539B),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: EdgeInsets.symmetric(

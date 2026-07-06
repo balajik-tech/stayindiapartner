@@ -54,12 +54,12 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                         color: const Color(0xFFEDF2F7),
                         borderRadius: BorderRadius.circular(20.r),
                         border: Border.all(
-                          color: const Color(0xFF2B5797).withValues(alpha: 0.3),
+                          color: const Color(0xFF16539B).withValues(alpha: 0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(
-                              0xFF2B5797,
+                              0xFF16539B,
                             ).withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
@@ -70,14 +70,14 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                         children: [
                           Icon(
                             Icons.copy_all_rounded,
-                            color: const Color(0xFF2B5797),
+                            color: const Color(0xFF16539B),
                             size: 16.sp,
                           ),
                           SizedBox(width: 6.w),
                           Text(
                             'btn_clone'.tr().toUpperCase(),
                             style: TextStyle(
-                              color: const Color(0xFF2B5797),
+                              color: const Color(0xFF16539B),
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w900,
                             ),
@@ -127,7 +127,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF2B5797),
+            color: const Color(0xFF16539B),
             letterSpacing: -0.5,
           ),
         ),
@@ -387,7 +387,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                       label,
                       style: TextStyle(
                         color: isSelected
-                            ? const Color(0xFF2B5797)
+                            ? const Color(0xFF16539B)
                             : const Color(0xFF64748B),
                         fontWeight: FontWeight.w900,
                         fontSize: 9.sp,
@@ -448,7 +448,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                         Icons.ac_unit_rounded,
                         size: 16.sp,
                         color: isAC
-                            ? const Color(0xFF2B5797)
+                            ? const Color(0xFF16539B)
                             : const Color(0xFF64748B),
                       ),
                       SizedBox(width: 6.w),
@@ -456,7 +456,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                         'AC',
                         style: TextStyle(
                           color: isAC
-                              ? const Color(0xFF2B5797)
+                              ? const Color(0xFF16539B)
                               : const Color(0xFF64748B),
                           fontWeight: FontWeight.w900,
                           fontSize: 12.sp,
@@ -502,7 +502,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                         Icons.thermostat_rounded,
                         size: 16.sp,
                         color: !isAC
-                            ? const Color(0xFF2B5797)
+                            ? const Color(0xFF16539B)
                             : const Color(0xFF64748B),
                       ),
                       SizedBox(width: 6.w),
@@ -510,7 +510,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                         'Non-AC',
                         style: TextStyle(
                           color: !isAC
-                              ? const Color(0xFF2B5797)
+                              ? const Color(0xFF16539B)
                               : const Color(0xFF64748B),
                           fontWeight: FontWeight.w900,
                           fontSize: 12.sp,
@@ -560,7 +560,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF2B5797),
+              color: const Color(0xFF16539B),
             ),
           ),
           content: Column(
@@ -599,7 +599,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: Color(0xFF2B5797)),
+                    borderSide: const BorderSide(color: Color(0xFF16539B)),
                   ),
                 ),
               ),
@@ -622,7 +622,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                 Navigator.pop(context, val);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2B5797),
+                backgroundColor: const Color(0xFF16539B),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),
@@ -690,7 +690,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2B5797),
+                backgroundColor: const Color(0xFF16539B),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
                 ),

@@ -293,7 +293,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                               context.read<PropertySetupCubit>().previousStep(),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(
-                              color: Color(0xFF2B5797),
+                              color: Color(0xFF16539B),
                               width: 1.5,
                             ),
                             padding: EdgeInsets.zero,
@@ -304,7 +304,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                           child: Text(
                             'btn_back'.tr(),
                             style: TextStyle(
-                              color: const Color(0xFF2B5797),
+                              color: const Color(0xFF16539B),
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w800,
                             ),
@@ -369,7 +369,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                                           child: Text(
                                             'btn_got_it'.tr(),
                                             style: TextStyle(
-                                              color: const Color(0xFF2B5797),
+                                              color: const Color(0xFF16539B),
                                               fontWeight: FontWeight.w800,
                                             ),
                                           ),
@@ -494,13 +494,13 @@ class _PremiumButtonState extends State<_PremiumButton>
           decoration: BoxDecoration(
             color: widget.onPressed == null
                 ? const Color(0xFFCBD5E1)
-                : const Color(0xFF2B5797),
+                : const Color(0xFF16539B),
             borderRadius: BorderRadius.circular(12.r),
             boxShadow: widget.onPressed == null
                 ? null
                 : [
                     BoxShadow(
-                      color: const Color(0xFF2B5797).withValues(alpha: 0.2),
+                      color: const Color(0xFF16539B).withValues(alpha: 0.2),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
                     ),

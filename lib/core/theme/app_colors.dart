@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primaryBlue = Color(0xFF2B5797);
+  static const Color primaryBlue = Color(0xFF16539B);
   static const Color backgroundGrey = Color(0xFFF8F9FB);
   static const Color white = Colors.white;
 
   static const Color totalBlue = Color(0xFFF0F4FF);
-  static const Color totalBlueText = Color(0xFF2B5797);
+  static const Color totalBlueText = Color(0xFF16539B);
 
   static const Color freeGreen = Color(0xFF008435);
-  static const Color occupiedBlue = Color(0xFF2B5797);
+  static const Color occupiedBlue = Color(0xFF16539B);
   static const Color noticeOrange = Color(0xFFFF9F58);
   static const Color awayYellow = Color(0xFFFAB005);
 
@@ -22,7 +22,7 @@ class AppColors {
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF2B5797), Color(0xFF1E3A68)],
+    colors: [Color(0xFF16539B), Color(0xFF1E3A68)],
   );
 
   static const Color sosRed = Color(0xFFE53935);

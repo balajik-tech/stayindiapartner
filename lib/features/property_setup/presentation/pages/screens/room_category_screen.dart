@@ -380,7 +380,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
-              color: const Color(0xFF2B5797),
+              color: const Color(0xFF16539B),
               letterSpacing: -0.5,
             ),
           ),
@@ -420,11 +420,11 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                 child: Container(
                   margin: EdgeInsets.all(4.r),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2B5797),
+                    color: const Color(0xFF16539B),
                     borderRadius: BorderRadius.circular(10.r),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2B5797).withValues(alpha: 0.3),
+                        color: const Color(0xFF16539B).withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -661,14 +661,14 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
           children: [
             Icon(
               Icons.add_circle_outline_rounded,
-              color: const Color(0xFF2B5797),
+              color: const Color(0xFF16539B),
               size: 16.sp,
             ),
             SizedBox(width: 6.w),
             Text(
               'Add',
               style: TextStyle(
-                color: const Color(0xFF2B5797),
+                color: const Color(0xFF16539B),
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
               ),
@@ -841,7 +841,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.r),
-                borderSide: const BorderSide(color: Color(0xFF2B5797), width: 1.5),
+                borderSide: const BorderSide(color: Color(0xFF16539B), width: 1.5),
               ),
             ),
           ),
@@ -864,7 +864,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w900,
-              color: const Color(0xFF2B5797),
+              color: const Color(0xFF16539B),
             ),
           ),
           content: Column(
@@ -902,7 +902,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.r),
                     borderSide: const BorderSide(
-                      color: Color(0xFF2B5797),
+                      color: Color(0xFF16539B),
                       width: 1.5,
                     ),
                   ),
@@ -953,7 +953,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2B5797),
+                backgroundColor: const Color(0xFF16539B),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),
                 ),

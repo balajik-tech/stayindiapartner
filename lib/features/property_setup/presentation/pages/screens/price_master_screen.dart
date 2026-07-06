@@ -169,7 +169,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF2B5797),
+            color: const Color(0xFF16539B),
             letterSpacing: -0.5,
           ),
         ),
@@ -363,7 +363,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2B5797).withValues(alpha: 0.08),
+                  color: const Color(0xFF16539B).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
@@ -371,7 +371,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                   style: TextStyle(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w900,
-                    color: const Color(0xFF2B5797),
+                    color: const Color(0xFF16539B),
                   ),
                 ),
               ),
@@ -610,7 +610,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2B5797),
+                backgroundColor: const Color(0xFF16539B),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
                 ),

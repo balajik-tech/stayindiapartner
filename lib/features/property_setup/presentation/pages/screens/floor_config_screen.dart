@@ -91,9 +91,9 @@ class FloorConfigScreen extends StatelessWidget {
                         ),
                         Switch(
                           value: state.selectedFloors.contains('B'),
-                          activeThumbColor: const Color(0xFF2B5797),
+                          activeThumbColor: const Color(0xFF16539B),
                           activeTrackColor: const Color(
-                            0xFF2B5797,
+                            0xFF16539B,
                           ).withValues(alpha: 0.2),
                           inactiveThumbColor: const Color(0xFF94A3B8),
                           inactiveTrackColor: const Color(0xFFE2E8F0),
@@ -123,7 +123,7 @@ class FloorConfigScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w900,
-                            color: const Color(0xFF2B5797),
+                            color: const Color(0xFF16539B),
                           ),
                         ),
                         Text(
@@ -142,7 +142,7 @@ class FloorConfigScreen extends StatelessWidget {
                         vertical: 4.h,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2B5797),
+                        color: const Color(0xFF16539B),
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
@@ -295,11 +295,11 @@ class FloorConfigScreen extends StatelessWidget {
         width: 48.w,
         height: 48.w,
         decoration: BoxDecoration(
-          color: const Color(0xFF2B5797),
+          color: const Color(0xFF16539B),
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF2B5797).withValues(alpha: 0.15),
+              color: const Color(0xFF16539B).withValues(alpha: 0.15),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -335,7 +335,7 @@ class FloorConfigScreen extends StatelessWidget {
             height: 44.w,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: const Color(0xFF2B5797),
+              color: const Color(0xFF16539B),
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Text(
@@ -435,7 +435,7 @@ class FloorConfigScreen extends StatelessWidget {
         padding: EdgeInsets.all(10.r),
         margin: EdgeInsets.all(4.r),
         decoration: BoxDecoration(
-          color: const Color(0xFF2B5797),
+          color: const Color(0xFF16539B),
           borderRadius: BorderRadius.circular(10.r),
         ),
         child: Icon(icon, color: Colors.white, size: 20.sp),
@@ -462,7 +462,7 @@ class FloorConfigScreen extends StatelessWidget {
             Icon(
               Icons.bolt_rounded,
               size: 14.sp,
-              color: const Color(0xFF2B5797),
+              color: const Color(0xFF16539B),
             ),
             SizedBox(width: 6.w),
             Text(
@@ -470,7 +470,7 @@ class FloorConfigScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w900,
-                color: const Color(0xFF2B5797),
+                color: const Color(0xFF16539B),
               ),
             ),
           ],

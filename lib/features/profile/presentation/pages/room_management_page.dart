@@ -2153,7 +2153,7 @@ class _RoomManageCardState extends State<_RoomManageCard> {
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF2B5797),
+              color: const Color(0xFF16539B),
             ),
           ),
           content: Column(
@@ -2192,7 +2192,7 @@ class _RoomManageCardState extends State<_RoomManageCard> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: Color(0xFF2B5797)),
+                    borderSide: const BorderSide(color: Color(0xFF16539B)),
                   ),
                 ),
               ),
@@ -2215,7 +2215,7 @@ class _RoomManageCardState extends State<_RoomManageCard> {
                 Navigator.pop(context, val);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2B5797),
+                backgroundColor: const Color(0xFF16539B),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),

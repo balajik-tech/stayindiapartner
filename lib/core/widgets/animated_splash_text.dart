@@ -37,8 +37,8 @@ class _AnimatedFutureOfLivingTextState extends State<AnimatedFutureOfLivingText>
   @override
   Widget build(BuildContext context) {
     final words = [
-      {'text': 'Manage ', 'color': const Color(0xFF2B5797)},
-      {'text': 'simply, ', 'color': const Color(0xFF2B5797)},
+      {'text': 'Manage ', 'color': const Color(0xFF16539B)},
+      {'text': 'simply, ', 'color': const Color(0xFF16539B)},
       {'text': 'grow ', 'color': const Color(0xFFFF7000)},
       {'text': 'rapidly', 'color': const Color(0xFFFF7000)},
     ];

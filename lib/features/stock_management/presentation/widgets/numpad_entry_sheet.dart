@@ -282,10 +282,10 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
               hintText: '0',
               hintStyle: TextStyle(color: Colors.black26, fontSize: 20.sp),
               labelText: isTe ? 'పరిమాణం' : 'Quantity',
-              labelStyle: const TextStyle(color: Color(0xFF2B5797), fontWeight: FontWeight.bold),
+              labelStyle: const TextStyle(color: Color(0xFF16539B), fontWeight: FontWeight.bold),
               filled: true,
               fillColor: const Color(0xFFF8FAFC),
-              prefixIcon: const Icon(Icons.calculate_rounded, color: Color(0xFF2B5797)),
+              prefixIcon: const Icon(Icons.calculate_rounded, color: Color(0xFF16539B)),
               suffixIcon: Container(
                 margin: EdgeInsets.only(right: 12.w),
                 child: Row(
@@ -294,7 +294,7 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2B5797),
+                        color: const Color(0xFF16539B),
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
@@ -315,7 +315,7 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
-                borderSide: const BorderSide(color: Color(0xFF2B5797), width: 2),
+                borderSide: const BorderSide(color: Color(0xFF16539B), width: 2),
               ),
             ),
           ),
@@ -333,17 +333,17 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
               hintText: '0',
               hintStyle: TextStyle(color: Colors.black26, fontSize: 20.sp),
               labelText: isTe ? 'మొత్తం ధర' : 'Total Price (₹)',
-              labelStyle: const TextStyle(color: Color(0xFF2B5797), fontWeight: FontWeight.bold),
+              labelStyle: const TextStyle(color: Color(0xFF16539B), fontWeight: FontWeight.bold),
               filled: true,
               fillColor: const Color(0xFFF8FAFC),
-              prefixIcon: const Icon(Icons.currency_rupee_rounded, color: Color(0xFF2B5797)),
+              prefixIcon: const Icon(Icons.currency_rupee_rounded, color: Color(0xFF16539B)),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
                 borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
-                borderSide: const BorderSide(color: Color(0xFF2B5797), width: 2),
+                borderSide: const BorderSide(color: Color(0xFF16539B), width: 2),
               ),
             ),
           ),
@@ -362,7 +362,7 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
                   Text(
                     isTe ? 'యూనిట్ ధర:' : 'Price per Unit:',
                     style: TextStyle(
-                      color: const Color(0xFF2B5797),
+                      color: const Color(0xFF16539B),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -370,7 +370,7 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
                   Text(
                     '₹ ${_pricePerUnit.toStringAsFixed(2)} / $_selectedUnit',
                     style: TextStyle(
-                      color: const Color(0xFF2B5797),
+                      color: const Color(0xFF16539B),
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w900,
                     ),
@@ -402,13 +402,13 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
                   ),
                 ),
                 selected: isSelected,
-                selectedColor: const Color(0xFF2B5797),
+                selectedColor: const Color(0xFF16539B),
                 backgroundColor: const Color(0xFFF1F5F9),
                 checkmarkColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
                   side: BorderSide(
-                    color: isSelected ? const Color(0xFF2B5797) : const Color(0xFFE2E8F0),
+                    color: isSelected ? const Color(0xFF16539B) : const Color(0xFFE2E8F0),
                   ),
                 ),
                 onSelected: (selected) {
@@ -425,7 +425,7 @@ class _NumpadEntrySheetState extends State<NumpadEntrySheet> {
           ElevatedButton(
             onPressed: _submitTransaction,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2B5797),
+              backgroundColor: const Color(0xFF16539B),
               elevation: 0,
               padding: EdgeInsets.symmetric(vertical: 16.h),
               shape: RoundedRectangleBorder(
