@@ -164,7 +164,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     setState(() => _isFetchingSimHint = true);
     try {
       final hint = await GooglePhoneNumberHint().getMobileNumber();
-      debugPrint('[SIM] Phone number hint returned: $hint');
+      // debugPrint('[SIM] Phone number hint returned: $hint');
       final tenDigit = _extractTenDigitNumber(hint);
       if (!mounted) return;
       if (tenDigit != null) {
@@ -176,7 +176,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         });
       }
     } on PlatformException catch (e) {
-      debugPrint('[SIM] Phone number hint failed: ${e.code} — ${e.message}');
+      // debugPrint('[SIM] Phone number hint failed: ${e.code} — ${e.message}');
       if (mounted) {
         _showSnackBar(
           context,
