@@ -209,7 +209,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                             ),
                           ]),
                           SizedBox(height: 32.h),
-                          _buildDeleteAccountButton(context),
+                          // _buildDeleteAccountButton(context), //commented delete account button
                         ],
                       ),
                     ),
