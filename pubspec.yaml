@@ -61,6 +61,7 @@ dependencies:
   firebase_crashlytics: ^5.2.2
   google_mlkit_face_detection: ^0.13.2
   google_sign_in: ^6.2.1
+  google_phone_number_hint: ^0.0.3
 
 dev_dependencies:
   flutter_test:

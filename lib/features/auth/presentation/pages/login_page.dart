@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_phone_number_hint/google_phone_number_hint.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
@@ -32,6 +35,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final FocusNode _passwordFocusNode = FocusNode();
   bool _isPasswordFocused = false;
   bool _obscurePassword = true;
+
+  // --- SIM detection ---
+  bool _isFetchingSimHint = false;
 
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
@@ -119,6 +125,102 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           ),
         ),
       );
+  }
+
+  // ==========================================================================
+  // SIM detection — uses Google's Phone Number Hint API (Play Services),
+  // the same mechanism apps like PhonePe/GPay use. Unlike reading
+  // TelephonyManager/SubscriptionManager directly, this is handled by Play
+  // Services with system-level access, so it reliably lists every SIM-linked
+  // number regardless of OEM restrictions (e.g. ColorOS on Oppo, MIUI, etc.)
+  // and needs no runtime permission at all.
+  //
+  // Android only — iOS has no equivalent API; no plugin can read a device's
+  // own SIM number there, so we simply prompt for manual entry.
+  // ==========================================================================
+
+  /// Extracts a clean 10-digit Indian mobile number from whatever format
+  /// the OS reports (e.g. "+91 98765 43210", "0091-9876543210").
+  String? _extractTenDigitNumber(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return null;
+    final digitsOnly = raw.replaceAll(RegExp(r'[^\d]'), '');
+    if (digitsOnly.length < 10) return null;
+    return digitsOnly.substring(digitsOnly.length - 10);
+  }
+
+  /// Tap handler wired to the existing phone number TextField. Opens
+  /// Google's native SIM-number picker (shows every SIM on the device,
+  /// including dual-SIM) and fills in whichever one the user selects.
+  Future<void> _onPhoneFieldTap() async {
+    if (Platform.isIOS) {
+      _showIosSimUnsupportedDialog();
+      return;
+    }
+    if (!Platform.isAndroid || _isFetchingSimHint) return;
+    // Don't reopen the picker if the user is just re-tapping to edit an
+    // already-filled number.
+    if (_phoneController.text.isNotEmpty) return;
+
+    setState(() => _isFetchingSimHint = true);
+    try {
+      final hint = await GooglePhoneNumberHint().getMobileNumber();
+      debugPrint('[SIM] Phone number hint returned: $hint');
+      final tenDigit = _extractTenDigitNumber(hint);
+      if (!mounted) return;
+      if (tenDigit != null) {
+        setState(() {
+          _phoneController.text = tenDigit;
+          _phoneController.selection = TextSelection.fromPosition(
+            TextPosition(offset: _phoneController.text.length),
+          );
+        });
+      }
+    } on PlatformException catch (e) {
+      debugPrint('[SIM] Phone number hint failed: ${e.code} — ${e.message}');
+      if (mounted) {
+        _showSnackBar(
+          context,
+          'Could not detect a SIM number. Please enter it manually.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isFetchingSimHint = false);
+    }
+  }
+
+  void _showIosSimUnsupportedDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          title: Text(
+            'Enter your number manually',
+            style: GoogleFonts.outfit(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkText,
+            ),
+          ),
+          content: Text(
+            "iOS doesn't allow apps to read a device's SIM phone number, "
+            'so this has to be typed in manually.',
+            style: GoogleFonts.outfit(
+              fontSize: 13.sp,
+              color: AppColors.greyText,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text('Got it', style: GoogleFonts.outfit()),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -510,6 +612,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                                   minHeight: 0,
                                                 ),
                                           ),
+                                          onTap: _onPhoneFieldTap,
                                           onSubmitted: (_) => _isStaffLogin
                                               ? _onStaffLogin(context)
                                               : _onSendOtp(context),
