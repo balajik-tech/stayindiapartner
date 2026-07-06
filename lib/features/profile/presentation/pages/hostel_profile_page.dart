@@ -85,6 +85,17 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     try {
       final locationResult = await LocationService().getCurrentLocation();
 
+      final addressParts = [
+        locationResult.street,
+        locationResult.thoroughfare,
+        locationResult.subThoroughfare,
+        locationResult.subLocality,
+        locationResult.locality,
+        locationResult.subAdministrativeArea,
+        locationResult.administrativeArea,
+        locationResult.country,
+      ].where((e) => e != null && e.toString().trim().isNotEmpty).join(", ");
+
       setState(() {
         _lat = locationResult.latitude;
         _lng = locationResult.longitude;
@@ -96,9 +107,10 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
             "${locationResult.street ?? ""}, ${locationResult.subLocality ?? ""}"
                 .trim();
         _pincodeController.text = locationResult.pincode ?? "";
-        _addressController.text =
-            "${locationResult.street ?? ''}, ${locationResult.subLocality ?? ''}, ${locationResult.locality ?? ''}, ${locationResult.administrativeArea ?? ''}"
-                .trim();
+        // _addressController.text =
+        //     "${locationResult.street ?? ''}, ${locationResult.subLocality ?? ''}, ${locationResult.locality ?? ''}, ${locationResult.administrativeArea ?? ''}"
+        //         .trim();
+        _addressController.text = addressParts.trim();
       });
       HapticFeedback.heavyImpact();
     } catch (e) {

@@ -505,9 +505,20 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
 
+        final addressParts = [
+          place.street,
+          place.thoroughfare,
+          place.subThoroughfare,
+          place.subLocality,
+          place.locality,
+          place.subAdministrativeArea,
+          place.administrativeArea,
+          place.country,
+        ].where((e) => e != null && e.toString().trim().isNotEmpty).join(", ");
+
         setState(() {
-          _streetController.text =
-              "${place.name ?? ''} ${place.subLocality ?? ''}".trim();
+          // _streetController.text = "${place.name ?? ''} ${place.subLocality ?? ''}".trim();
+          _streetController.text = addressParts.trim();
           _districtController.text =
               place.locality ?? place.subAdministrativeArea ?? '';
           _stateController.text = place.administrativeArea ?? '';

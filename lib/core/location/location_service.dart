@@ -10,6 +10,9 @@ class LocationResult {
   final String? administrativeArea;
   final String? subAdministrativeArea;
   final String? pincode;
+  final String? country;
+  final String? thoroughfare;
+  final String? subThoroughfare;
 
   LocationResult({
     required this.latitude,
@@ -20,6 +23,9 @@ class LocationResult {
     this.administrativeArea,
     this.subAdministrativeArea,
     this.pincode,
+    this.country,
+    this.thoroughfare,
+    this.subThoroughfare,
   });
 }
 
