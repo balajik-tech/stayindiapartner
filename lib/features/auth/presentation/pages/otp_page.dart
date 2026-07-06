@@ -180,16 +180,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                 Container(
                   // height: 0.4.sh,
                   width: double.infinity,
-                  // decoration: BoxDecoration(
-                  //   gradient: LinearGradient(
-                  //     begin: Alignment.topCenter,
-                  //     end: Alignment.bottomCenter,
-                  //     colors: [
-                  //       AppColors.primaryBlue,
-                  //       AppColors.primaryBlue.withValues(alpha: 0.85),
-                  //     ],
-                  //   ),
-                  // ),
                   child: Stack(
 
                     children: [
@@ -217,13 +207,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                                 ),
                               ),
                             ),
-                            // FadeTransition(
-                            //   opacity: _fadeAnimation,
-                            //   child: SlideTransition(
-                            //     position: _slideAnimation,
-                            //     child: const AuthLogoBadge(),
-                            //   ),
-                            // ),
                             const AuthLogoBadge(),
 
                           ],
@@ -232,16 +215,16 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                     ],
                   ),
                 ),
-                SizedBox(height: 2.h),
+                // SizedBox(height: 2.h),
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 10.h),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   color: AppColors.totalBlueText,
                   child: Center(
                     child: Text(
                       "PARTNER",
                       style: GoogleFonts.outfit(
-                        fontSize: 18.sp,
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                         letterSpacing: 4,

@@ -197,45 +197,17 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   Container(
                     height: 0.45.sh,
                     width: double.infinity,
-                    // decoration: BoxDecoration(
-                    //   gradient: LinearGradient(
-                    //     begin: Alignment.topCenter,
-                    //     end: Alignment.bottomCenter,
-                    //     colors: [
-                    //       AppColors.primaryBlue,
-                    //       AppColors.primaryBlue.withValues(alpha: 0.85),
-                    //     ],
-                    //   ),
-                    // ),
                     child: Stack(
                       children: [
                         CustomPaint(
                           painter: _HeroPatternPainter(),
                           size: Size(1.sw, 0.45.sh),
                         ),
-
-                        // Positioned(
-                        //   top: -100,
-                        //   right: -100,
-                        //   child: Container(
-                        //     width: 300,
-                        //     height: 300,
-                        //     decoration: BoxDecoration(
-                        //       shape: BoxShape.circle,
-                        //       gradient: RadialGradient(
-                        //         colors: [
-                        //           Colors.white.withValues(alpha: 0.1),
-                        //           Colors.white.withValues(alpha: 0),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
                         SafeArea(
                           child: Align(
                             alignment: Alignment.topCenter,
                             child: Padding(
-                              padding: EdgeInsets.only(top: 15.h),
+                              padding: EdgeInsets.only(top: 6.h),
                               child: FadeTransition(
                                 opacity: _fadeAnimation,
                                 child: SlideTransition(
@@ -243,28 +215,17 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      // SizedBox(height: 24.h),
-                                      // Text(
-                                      //   "Stay India Partner",
-                                      //   style: GoogleFonts.outfit(
-                                      //     fontSize: 24.sp,
-                                      //     fontWeight: FontWeight.w900,
-                                      //     letterSpacing: 4.0,
-                                      //     color: AppColors.totalBlueText,
-                                      //   ),
-                                      // ),
-                                      // SizedBox(height: 24.h),
                                       const AuthLogoBadge(),
-                                      SizedBox(height: 2.h),
+                                      // SizedBox(height: 2.h),
                                       Container(
                                         width: double.infinity,
-                                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                                        padding: EdgeInsets.symmetric(vertical: 16.h),
                                         color: AppColors.totalBlueText,
                                         child: Center(
                                           child: Text(
                                             "PARTNER",
                                             style: GoogleFonts.outfit(
-                                              fontSize: 18.sp,
+                                              fontSize: 22.sp,
                                               fontWeight: FontWeight.w800,
                                               color: Colors.white,
                                               letterSpacing: 4,
@@ -300,21 +261,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               top: 24.h,
                               bottom: 20.h,
                             ),
-                            // decoration: BoxDecoration(
-                            //   color: Colors.white,
-                            //   borderRadius: BorderRadius.only(
-                            //     topLeft: Radius.circular(40.r),
-                            //     topRight: Radius.circular(40.r),
-                            //   ),
-                            //   boxShadow: [
-                            //     BoxShadow(
-                            //       color: Colors.black.withValues(alpha: 0.03),
-                            //       blurRadius: 30,
-                            //       spreadRadius: 5,
-                            //       offset: const Offset(0, -10),
-                            //     ),
-                            //   ],
-                            // ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
