@@ -221,59 +221,75 @@ class AuthLogoBadge extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
+        // Container(
+        //   width: 220.w,
+        //   height: 220.w,
+        //   decoration: BoxDecoration(
+        //     shape: BoxShape.circle,
+        //     gradient: RadialGradient(
+        //       colors: [
+        //         Colors.white.withValues(alpha: 0.15),
+        //         Colors.white.withValues(alpha: 0),
+        //       ],
+        //     ),
+        //   ),
+        // ),
         Container(
-          width: 140.w,
-          height: 140.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.15),
-                Colors.white.withValues(alpha: 0),
-              ],
+          width: double.infinity,
+          // decoration: BoxDecoration(
+          //   color: Colors.white.withValues(alpha: 0.15),
+          //   borderRadius: BorderRadius.circular(28.r),
+          //   border: Border.all(
+          //     color: Colors.white.withValues(alpha: 0.25),
+          //     width: 1.5,
+          //   ),
+          //   boxShadow: [
+          //     BoxShadow(
+          //       color: Colors.black.withValues(alpha: 0.1),
+          //       blurRadius: 20,
+          //       offset: const Offset(0, 10),
+          //     ),
+          //   ],
+          // ),
+          child: Container(
+            alignment: Alignment.center,
+            child: Image.asset(
+              'assets/images/login_logo.jpg',
+              width: double.infinity,
+              height: 0.35.sh,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.home_work_rounded,
+                  color: Colors.white,
+                  size: 40.sp,
+                );
+              },
             ),
-          ),
-        ),
-        Container(
-          width: 90.w,
-          height: 90.w,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(28.r),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.25),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(28.r),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
-                alignment: Alignment.center,
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  width: 70.w,
-                  height: 70.w,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      Icons.home_work_rounded,
-                      color: Colors.white,
-                      size: 40.sp,
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
+          )
+
+          // ClipRRect(
+          //   borderRadius: BorderRadius.circular(12.r),
+          //   child: BackdropFilter(
+          //     filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          //     child: Container(
+          //       alignment: Alignment.center,
+          //       child: Image.asset(
+          //         'assets/images/login_logo.jpg',
+          //         // width: 70.w,
+          //         // height: 70.w,
+          //         fit: BoxFit.fill,
+          //         errorBuilder: (context, error, stackTrace) {
+          //           return Icon(
+          //             Icons.home_work_rounded,
+          //             color: Colors.white,
+          //             size: 40.sp,
+          //           );
+          //         },
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ),
       ],
     );

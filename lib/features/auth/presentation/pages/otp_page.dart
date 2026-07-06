@@ -168,23 +168,30 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
         builder: (context, state) {
           final isLoading = state is AuthLoading;
           return Scaffold(
-            backgroundColor: AppColors.backgroundGrey,
-            body: Stack(
+            backgroundColor: AppColors.white,
+            body:SingleChildScrollView(
+                child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height,
+                    ),
+                    child: IntrinsicHeight(
+                      child:  Column(
               children: [
                 Container(
-                  height: 0.4.sh,
+                  // height: 0.4.sh,
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.primaryBlue,
-                        AppColors.primaryBlue.withValues(alpha: 0.85),
-                      ],
-                    ),
-                  ),
+                  // decoration: BoxDecoration(
+                  //   gradient: LinearGradient(
+                  //     begin: Alignment.topCenter,
+                  //     end: Alignment.bottomCenter,
+                  //     colors: [
+                  //       AppColors.primaryBlue,
+                  //       AppColors.primaryBlue.withValues(alpha: 0.85),
+                  //     ],
+                  //   ),
+                  // ),
                   child: Stack(
+
                     children: [
                       CustomPaint(
                         painter: _HeroPatternPainter(),
@@ -195,35 +202,54 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                           children: [
                             Padding(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 8.h,
+                                horizontal: 8.w,
+                                // vertical: 4.h,
                               ),
                               child: Align(
                                 alignment: Alignment.centerLeft,
                                 child: IconButton(
                                   icon: const Icon(
                                     Icons.arrow_back_ios_new_rounded,
-                                    color: Colors.white,
+                                    color: AppColors.textPrimary,
                                     size: 22,
                                   ),
                                   onPressed: () => Navigator.pop(context),
                                 ),
                               ),
                             ),
-                            FadeTransition(
-                              opacity: _fadeAnimation,
-                              child: SlideTransition(
-                                position: _slideAnimation,
-                                child: const AuthLogoBadge(),
-                              ),
-                            ),
+                            // FadeTransition(
+                            //   opacity: _fadeAnimation,
+                            //   child: SlideTransition(
+                            //     position: _slideAnimation,
+                            //     child: const AuthLogoBadge(),
+                            //   ),
+                            // ),
+                            const AuthLogoBadge(),
+
                           ],
                         ),
                       ),
                     ],
                   ),
                 ),
-
+                SizedBox(height: 2.h),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 10.h),
+                  color: AppColors.totalBlueText,
+                  child: Center(
+                    child: Text(
+                      "PARTNER",
+                      style: GoogleFonts.outfit(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 4,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                ),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: SlideTransition(
@@ -252,62 +278,60 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                             ),
                           ],
                         ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Verification Code',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 26.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.darkText,
-                                  letterSpacing: -0.8,
-                                  height: 1.1,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Verification Code',
+                              style: GoogleFonts.outfit(
+                                fontSize: 26.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkText,
+                                letterSpacing: -0.8,
+                                height: 1.1,
+                              ),
+                            ),
+                            SizedBox(height: 10.h),
+                            Text(
+                              'Enter the code sent to +91 ${widget.phone}',
+                              style: GoogleFonts.outfit(
+                                fontSize: 16.sp,
+                                color: AppColors.greyText.withValues(
+                                  alpha: 0.8,
                                 ),
+                                fontWeight: FontWeight.w400,
                               ),
-                              SizedBox(height: 10.h),
-                              Text(
-                                'Enter the code sent to +91 ${widget.phone}',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 16.sp,
-                                  color: AppColors.greyText.withValues(
-                                    alpha: 0.8,
-                                  ),
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
+                            ),
 
-                              if (_currentDevOtp != null &&
-                                  _currentDevOtp!.isNotEmpty) ...[
-                                SizedBox(height: 24.h),
-                                _DevOtpBanner(otp: _currentDevOtp!),
-                              ],
-
-                              SizedBox(height: 48.h),
-
-                              _OtpInputGrid(
-                                controllers: _controllers,
-                                focusNodes: _focusNodes,
-                              ),
-
-                              SizedBox(height: 40.h),
-
-                              AuthPrimaryButton(
-                                label: isLoading
-                                    ? 'VERIFYING...'
-                                    : 'VERIFY & CONTINUE',
-                                isLoading: isLoading,
-                                onPressed: () => _onVerify(context),
-                              ),
-
-                              SizedBox(height: 32.h),
-                              _ResendRow(
-                                countdown: _countdown,
-                                onResend: () => _onResend(context),
-                              ),
+                            if (_currentDevOtp != null &&
+                                _currentDevOtp!.isNotEmpty) ...[
+                              SizedBox(height: 24.h),
+                              _DevOtpBanner(otp: _currentDevOtp!),
                             ],
-                          ),
+
+                            SizedBox(height: 48.h),
+
+                            _OtpInputGrid(
+                              controllers: _controllers,
+                              focusNodes: _focusNodes,
+                            ),
+
+                            SizedBox(height: 40.h),
+
+                            AuthPrimaryButton(
+                              label: isLoading
+                                  ? 'VERIFYING...'
+                                  : 'VERIFY & CONTINUE',
+                              isLoading: isLoading,
+                              onPressed: () => _onVerify(context),
+                            ),
+
+                            SizedBox(height: 32.h),
+                            _ResendRow(
+                              countdown: _countdown,
+                              onResend: () => _onResend(context),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -315,7 +339,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                 ),
               ],
             ),
-          );
+          ))));
         },
       ),
     );
