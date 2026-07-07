@@ -41,43 +41,58 @@ class UnifiedHeader extends StatelessWidget {
           color: Colors.white,
           child: Row(
             children: [
-              Image.asset(
-                'assets/images/logo.png',
-                width: 48.w,
-                height: 48.w,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF7000),
-                    borderRadius: BorderRadius.circular(8.r),
+              Container(
+                width: 65.w,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "SI",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w900,
-                          height: 1.0,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      child: Image.asset(
+                        'assets/images/login_logo_nobg.png',
+                        fit: BoxFit.fill,
+                        height: 45.h,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.image_not_supported,
+                          size: 40.sp,
+                          color: Colors.grey,
                         ),
                       ),
-                      Text(
-                        "PARTNER",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 6.sp,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.2,
+                    ),
+
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(vertical: 2.h,horizontal: 1.h),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBlue, // Blue background
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(4.r),
+                          bottomRight: Radius.circular(4.r),
                         ),
                       ),
-                    ],
-                  ),
+                      child: Center(
+                        child: Text(
+                          'PARTNER',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
               SizedBox(width: 16.w),
 
               Expanded(

@@ -248,7 +248,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                         ),
                         child: ClipOval(
                           child: Image.asset(
-                            'assets/images/logo.png',
+                            'assets/images/login_logo.png',
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(
