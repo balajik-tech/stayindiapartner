@@ -518,6 +518,12 @@ class _TenantsPageState extends State<TenantsPage> {
           }
 
           return BlocBuilder<TenantCubit, TenantState>(
+            buildWhen: (prev, curr) {
+              return prev.runtimeType != curr.runtimeType ||
+                  (prev is TenantLoaded && curr is TenantLoaded &&
+                      (prev.tenants.length != curr.tenants.length ||
+                       prev.isLoadMore != curr.isLoadMore));
+            },
             builder: (context, state) {
               if (state is TenantLoading) {
                 return SliverPadding(
@@ -584,6 +590,8 @@ class _TenantsPageState extends State<TenantsPage> {
                       },
                       childCount:
                           state.tenants.length + (state.isLoadMore ? 1 : 0),
+                      addAutomaticKeepAlives: true,
+                      addRepaintBoundaries: true,
                     ),
                   ),
                 );

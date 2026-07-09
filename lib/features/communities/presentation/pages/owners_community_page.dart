@@ -49,6 +49,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   Map<String, int> _unreadMessageCounts = {};
   String? _activeChatRoomId;
   StreamSubscription? _socketSubscription;
+  Timer? _debounceTimer;
 
   Future<void> _loadUnreadMessageCounts() async {
     try {
@@ -92,9 +93,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
 
   void _markPostAsRead(String postId) async {
     if (!_readPostIds.contains(postId)) {
-      setState(() {
-        _readPostIds.add(postId);
-      });
+      _readPostIds.add(postId);
+      setState(() {});
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setStringList(
@@ -105,6 +105,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         AppLogger.error('Error saving read posts: $e');
       }
     }
+  }
+
+  void _debouncedSetState(VoidCallback fn) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) setState(fn);
+    });
   }
 
 
@@ -127,9 +134,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     _socketSubscription = sl<SocketService>().messageStream.listen((data) {
       final roomId = data['roomId']?.toString();
       if (roomId != null && roomId != _activeChatRoomId) {
-        setState(() {
-          _unreadMessageCounts[roomId] = (_unreadMessageCounts[roomId] ?? 0) + 1;
-        });
+        _unreadMessageCounts[roomId] = (_unreadMessageCounts[roomId] ?? 0) + 1;
+        _debouncedSetState(() {});
         _saveUnreadMessageCounts();
       }
     });
@@ -138,6 +144,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   @override
   void dispose() {
     _socketSubscription?.cancel();
+    _debounceTimer?.cancel();
     _scrollController.dispose();
     _postController.dispose();
     for (var c in _pollOptionControllers) {

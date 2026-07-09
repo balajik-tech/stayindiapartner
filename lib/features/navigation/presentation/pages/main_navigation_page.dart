@@ -53,6 +53,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   StreamSubscription? _communitySocketSubscription;
   String? _currentHostelId;
   int _totalCommunityUnread = 0;
+  Timer? _communityDebounceTimer;
 
   @override
   void initState() {
@@ -66,8 +67,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     _loadCommunityUnread();
 
     _communitySocketSubscription = sl<SocketService>().messageStream.listen((data) {
-      Future.delayed(const Duration(milliseconds: 200), () {
-        _loadCommunityUnread();
+      _communityDebounceTimer?.cancel();
+      _communityDebounceTimer = Timer(const Duration(milliseconds: 500), () {
+        if (mounted) _loadCommunityUnread();
       });
     });
 
@@ -104,16 +106,23 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     }
   }
 
-  List<Widget> _getPages() {
+  Widget _getCurrentPage() {
     final localeKey = ValueKey('locale_${context.locale.languageCode}');
 
-    return [
-      DashboardPage(key: ValueKey('dash_page_$localeKey')),
-      BookingsPage(key: ValueKey('book_page_$localeKey')),
-      OwnersCommunityPage(key: ValueKey('comm_page_$localeKey')),
-      TenantsPage(key: ValueKey('tenant_page_$localeKey')),
-      ProfilePage(key: ValueKey('profile_page_$localeKey')),
-    ];
+    switch (_currentIndex) {
+      case 0:
+        return DashboardPage(key: ValueKey('dash_page_$localeKey'));
+      case 1:
+        return BookingsPage(key: ValueKey('book_page_$localeKey'));
+      case 2:
+        return OwnersCommunityPage(key: ValueKey('comm_page_$localeKey'));
+      case 3:
+        return TenantsPage(key: ValueKey('tenant_page_$localeKey'));
+      case 4:
+        return ProfilePage(key: ValueKey('profile_page_$localeKey'));
+      default:
+        return DashboardPage(key: ValueKey('dash_page_$localeKey'));
+    }
   }
 
   @override
@@ -121,6 +130,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     _bookingSubscription?.cancel();
     _noticeSubscription?.cancel();
     _communitySocketSubscription?.cancel();
+    _communityDebounceTimer?.cancel();
     super.dispose();
   }
 
@@ -323,13 +333,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             }
 
             if (hostelState is HostelLoaded) {
-              final pages = _getPages();
               return Scaffold(
                 extendBody: true,
-                body: IndexedStack(
-                  index: _currentIndex >= pages.length ? 0 : _currentIndex,
-                  children: pages,
-                ),
+                body: _getCurrentPage(),
                 bottomNavigationBar: _PremiumNavBar(
                   currentIndex: _currentIndex,
                   totalCommunityUnread: _totalCommunityUnread,

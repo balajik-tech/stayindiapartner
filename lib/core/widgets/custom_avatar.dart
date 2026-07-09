@@ -40,6 +40,8 @@ class CustomAvatar extends StatelessWidget {
     if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
       return CachedNetworkImage(
         imageUrl: resolvedUrl,
+        maxWidthDiskCache: 200,
+        maxHeightDiskCache: 200,
         imageBuilder: (context, imageProvider) => Container(
           width: effectiveSize,
           height: effectiveSize,
