@@ -31,6 +31,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   String? _googleAvatar;
 
   bool _isStaffLogin = false;
+  bool _useSmsOtp = true;
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
   bool _isPasswordFocused = false;
@@ -96,7 +97,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       _showSnackBar(context, 'Please enter a valid 10-digit mobile number.');
       return;
     }
-    context.read<AuthCubit>().sendOtp(phone);
+    if (_useSmsOtp) {
+      context.read<AuthCubit>().sendOtpViaSms(phone);
+    } else {
+      context.read<AuthCubit>().sendOtp(phone);
+    }
   }
 
   void _onStaffLogin(BuildContext context) {

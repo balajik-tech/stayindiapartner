@@ -18,6 +18,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<String?> requestOtp(String phone) => _remote.requestOtp(phone);
 
   @override
+  Future<String?> requestOtpViaSms(String phone) => _remote.requestOtpViaSms(phone);
+
+  @override
   Future<({OwnerEntity owner, bool isNewUser})> verifyOtp(
     String phone,
     String otp, {

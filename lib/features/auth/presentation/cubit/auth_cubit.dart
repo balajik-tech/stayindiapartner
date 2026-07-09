@@ -9,6 +9,7 @@ import 'package:stayindia_owner/features/auth/domain/usecases/complete_profile_u
 import 'package:stayindia_owner/features/auth/domain/usecases/get_current_owner_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/request_otp_usecase.dart';
+import 'package:stayindia_owner/features/auth/domain/usecases/request_otp_via_sms_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/delete_account_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/has_active_session_usecase.dart';
@@ -23,6 +24,7 @@ part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final RequestOtpUseCase _requestOtp;
+  final RequestOtpViaSmsUseCase _requestOtpViaSms;
   final VerifyOtpUseCase _verifyOtp;
   final GetCurrentOwnerUseCase _getCurrentOwner;
   final CompleteProfileUseCase _completeProfile;
@@ -36,6 +38,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit({
     required RequestOtpUseCase requestOtpUseCase,
+    required RequestOtpViaSmsUseCase requestOtpViaSmsUseCase,
     required VerifyOtpUseCase verifyOtpUseCase,
     required GetCurrentOwnerUseCase getCurrentOwnerUseCase,
     required CompleteProfileUseCase completeProfileUseCase,
@@ -46,6 +49,7 @@ class AuthCubit extends Cubit<AuthState> {
     required NotificationService notificationService,
     required CacheService cacheService,
   }) : _requestOtp = requestOtpUseCase,
+       _requestOtpViaSms = requestOtpViaSmsUseCase,
        _verifyOtp = verifyOtpUseCase,
        _getCurrentOwner = getCurrentOwnerUseCase,
        _completeProfile = completeProfileUseCase,
@@ -143,6 +147,29 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthOtpSent(phone: phone, devOtp: devOtp, isResend: true));
     } catch (e) {
       AppLogger.error('resendOtp failed', e);
+      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> resendOtpViaSms(String phone) async {
+    emit(AuthLoading());
+    try {
+      final devOtp = await _requestOtpViaSms(phone);
+      emit(AuthOtpSent(phone: phone, devOtp: devOtp, isResend: true));
+    } catch (e) {
+      AppLogger.error('resendOtp failed', e);
+      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> sendOtpViaSms(String phone) async {
+    emit(AuthLoading());
+    try {
+      final devOtp = await _requestOtpViaSms(phone);
+      emit(AuthOtpSent(phone: phone, devOtp: devOtp));
+      AppLogger.info('SMS OTP sent to $phone');
+    } catch (e) {
+      AppLogger.error('sendOtpViaSms failed', e);
       emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
     }
   }

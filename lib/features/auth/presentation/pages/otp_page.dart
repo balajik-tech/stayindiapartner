@@ -41,6 +41,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   int _countdown = 30;
   Timer? _timer;
 
+  bool _useSmsOtp = true;
   late String? _currentDevOtp;
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
@@ -128,7 +129,11 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       c.clear();
     }
     _focusNodes.first.requestFocus();
-    context.read<AuthCubit>().resendOtp(widget.phone);
+    if(_useSmsOtp){
+      context.read<AuthCubit>().resendOtpViaSms(widget.phone);
+    }else{
+      context.read<AuthCubit>().resendOtp(widget.phone);
+    }
   }
 
   @override
