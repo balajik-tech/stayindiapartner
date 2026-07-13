@@ -3,18 +3,15 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io';
-import 'dart:math';
 
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import 'package:stayindia_owner/core/services/token_storage.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
-import 'package:stayindia_owner/core/services/notification_service.dart';
 import '../models/owner_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<String?> requestOtp(String phone);
-  Future<String?> requestOtpViaSms(String phone);
 
   Future<({OwnerModel owner, bool isNewUser})> verifyOtp(
     String phone,
@@ -54,15 +51,12 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio _dio;
   final TokenStorage _tokenStorage;
-  final NotificationService _notificationService;
 
   AuthRemoteDataSourceImpl({
     required Dio dio,
     required TokenStorage tokenStorage,
-    required NotificationService notificationService,
   }) : _dio = dio,
-       _tokenStorage = tokenStorage,
-       _notificationService = notificationService;
+       _tokenStorage = tokenStorage;
 
   // String _sanitizePhone(String phone) =>
   //     phone.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^91'), '');
@@ -114,53 +108,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ? response.data['message'].toString()
         : 'Failed to send OTP. Please try again.';
     throw ServerException(message: message, statusCode: response.statusCode);
-  }
-
-  String _generateRandomOtp() {
-    final random = Random();
-    return (100000 + random.nextInt(900000)).toString();
-  }
-
-  @override
-  Future<String?> requestOtpViaSms(String phone) async {
-    final sanitized = _sanitizePhone(phone);
-    final otp = _generateRandomOtp();
-    AppLogger.info('Requesting SMS OTP for: $sanitized, OTP: $otp');
-
-    try {
-      final response = await _dio.get(
-        ApiConstants.newRequestOTP,
-        queryParameters: {
-          'ukey': 'VpYYYf3XGWWOvebP1g9lLk4di',
-          'msisdn': sanitized,
-          'language': '0',
-          'credittype': '7',
-          'senderid': 'INCVEN',
-          'templateid': '0',
-          'message': otp,
-        },
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        AppLogger.success('SMS OTP dispatched for $sanitized');
-        
-        await _notificationService.showNotification(
-          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          title: 'Stay India - OTP Verification',
-          body: 'Your OTP is $otp to  is your OTP to log in to your Stay India account. Valid for 10 minutes. Do not share this code with anyone. Powered by IndiaConnect Venture Pvt Ltd',
-        );
-        
-        return otp;
-      }
-
-      final message = (response.data is Map && response.data['message'] != null)
-          ? response.data['message'].toString()
-          : 'Failed to send SMS OTP. Please try again.';
-      throw ServerException(message: message, statusCode: response.statusCode);
-    } catch (e) {
-      AppLogger.error('SMS OTP request failed: $e');
-      throw ServerException(message: 'Failed to send SMS OTP. Please try again.');
-    }
   }
 
   @override

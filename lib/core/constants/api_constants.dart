@@ -6,8 +6,6 @@ class ApiConstants {
 
   static const String _prodUrl = 'https://api.stayindia.in$_api_Version';
 
-  static const String _otpBaseUrl = "http://125.16.147.178";
-
   static String get baseUrl {
     const url = String.fromEnvironment('API_BASE_URL', defaultValue: _prodUrl);
     if (Platform.isAndroid && url.contains('localhost')) {
@@ -26,7 +24,6 @@ class ApiConstants {
   }
 
   static const String requestOtp = '/auth/request-otp';
-  static const String newRequestOTP = _otpBaseUrl + '/VoicenSMS/webresources/CreateSMSCampaignGet';
   static const String verifyOtp = '/auth/verify-otp';
   static const String staffLogin = '/auth/login';
   static const String getMe = '/auth/me';
