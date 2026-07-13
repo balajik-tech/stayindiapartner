@@ -1,8 +1,10 @@
 import 'dart:io';
 
 class ApiConstants {
-  static const String _prodUrl =
-      'https://api.koushiksoftwaresolutions.online/api/v1';
+
+  static const String _api_Version = '/api/v1';
+
+  static const String _prodUrl = 'https://api.stayindia.in$_api_Version';
 
   static const String _otpBaseUrl = "http://125.16.147.178";
 

@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   String? _googleAvatar;
 
   bool _isStaffLogin = false;
-  bool _useSmsOtp = true;
+  bool _useSmsOtp = false;
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
   bool _isPasswordFocused = false;

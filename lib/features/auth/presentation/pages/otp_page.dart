@@ -41,7 +41,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   int _countdown = 30;
   Timer? _timer;
 
-  bool _useSmsOtp = true;
+  bool _useSmsOtp = false;
   late String? _currentDevOtp;
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
@@ -291,13 +291,13 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                               ),
                             ),
 
-                            if (_currentDevOtp != null &&
-                                _currentDevOtp!.isNotEmpty) ...[
-                              SizedBox(height: 24.h),
-                              _DevOtpBanner(otp: _currentDevOtp!),
-                            ],
+                            // if (_currentDevOtp != null &&
+                            //     _currentDevOtp!.isNotEmpty) ...[
+                            //   SizedBox(height: 24.h),
+                            //   _DevOtpBanner(otp: _currentDevOtp!),
+                            // ],
 
-                            SizedBox(height: 48.h),
+                            SizedBox(height: 40.h),
 
                             _OtpInputGrid(
                               controllers: _controllers,
