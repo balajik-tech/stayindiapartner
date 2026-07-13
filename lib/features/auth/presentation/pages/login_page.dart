@@ -97,11 +97,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       _showSnackBar(context, 'Please enter a valid 10-digit mobile number.');
       return;
     }
-    if (_useSmsOtp) {
-      context.read<AuthCubit>().sendOtpViaSms(phone);
-    } else {
-      context.read<AuthCubit>().sendOtp(phone);
-    }
+    context.read<AuthCubit>().sendOtp(phone);
   }
 
   void _onStaffLogin(BuildContext context) {

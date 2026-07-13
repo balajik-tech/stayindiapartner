@@ -129,11 +129,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       c.clear();
     }
     _focusNodes.first.requestFocus();
-    if(_useSmsOtp){
-      context.read<AuthCubit>().resendOtpViaSms(widget.phone);
-    }else{
-      context.read<AuthCubit>().resendOtp(widget.phone);
-    }
+    context.read<AuthCubit>().resendOtp(widget.phone);
   }
 
   @override
@@ -291,11 +287,11 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                               ),
                             ),
 
-                            // if (_currentDevOtp != null &&
-                            //     _currentDevOtp!.isNotEmpty) ...[
-                            //   SizedBox(height: 24.h),
-                            //   _DevOtpBanner(otp: _currentDevOtp!),
-                            // ],
+                            if (_currentDevOtp != null &&
+                                _currentDevOtp!.isNotEmpty) ...[
+                              SizedBox(height: 24.h),
+                              _DevOtpBanner(otp: _currentDevOtp!),
+                            ],
 
                             SizedBox(height: 40.h),
 
