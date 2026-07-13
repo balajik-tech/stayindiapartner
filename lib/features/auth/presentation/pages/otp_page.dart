@@ -287,11 +287,11 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                               ),
                             ),
 
-                            if (_currentDevOtp != null &&
-                                _currentDevOtp!.isNotEmpty) ...[
-                              SizedBox(height: 24.h),
-                              _DevOtpBanner(otp: _currentDevOtp!),
-                            ],
+                            // if (_currentDevOtp != null &&
+                            //     _currentDevOtp!.isNotEmpty) ...[
+                            //   SizedBox(height: 24.h),
+                            //   _DevOtpBanner(otp: _currentDevOtp!),
+                            // ],
 
                             SizedBox(height: 40.h),
 
