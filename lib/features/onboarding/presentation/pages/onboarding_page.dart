@@ -1329,11 +1329,11 @@ class _CommunitiesAnimationState extends State<_CommunitiesAnimation>
                 },
               ),
               
-              _buildNode(Icons.groups_rounded, const Color(0xFF10B981), 32.sp, 20.h, 40.w, 0.0),
-              _buildNode(Icons.handshake_rounded, const Color(0xFFF59E0B), 28.sp, 30.h, 240.w, 2.0),
-              _buildNode(Icons.store_rounded, const Color(0xFF3B82F6), 36.sp, 240.h, 30.w, 4.0),
-              _buildNode(Icons.forum_rounded, const Color(0xFFEF4444), 24.sp, 220.h, 250.w, 1.0),
-              _buildNode(Icons.lightbulb_rounded, const Color(0xFF8B5CF6), 28.sp, -10.h, 150.w, 3.0),
+              _buildNode(Icons.groups_rounded, const Color(0xFF10B981), 32.sp, 20.h, 40.w, 2.0),
+              _buildNode(Icons.handshake_rounded, const Color(0xFFF59E0B), 28.sp, 20.h, 240.w, 2.0),
+              _buildNode(Icons.store_rounded, const Color(0xFF3B82F6), 32.sp, 220.h, 30.w, 2.0),
+              _buildNode(Icons.forum_rounded, const Color(0xFFEF4444), 28.sp, 220.h, 250.w, 2.0),
+              _buildNode(Icons.lightbulb_rounded, const Color(0xFF8B5CF6), 28.sp, -5.h, 150.w, 2.0),
               
               Positioned(
                 bottom: 10.h,
