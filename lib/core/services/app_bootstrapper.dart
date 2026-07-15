@@ -230,11 +230,11 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                       const Spacer(),
 
                       Container(
-                        width: 140,
-                        height: 140,
-                        padding: const EdgeInsets.all(20),
+                        width: 160,
+                        height: 160,
+                        padding: const EdgeInsets.all(0),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          // color: Colors.white,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -250,6 +250,8 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                           child: Image.asset(
                             'assets/images/login_logo_nobg.png',
                             fit: BoxFit.contain,
+                            width: double.infinity,
+                            height: double.infinity,
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(
                                 Icons.business_rounded,

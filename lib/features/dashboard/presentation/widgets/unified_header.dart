@@ -67,29 +67,29 @@ class UnifiedHeader extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(vertical: 2.h,horizontal: 1.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryBlue, // Blue background
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(4.r),
-                          bottomRight: Radius.circular(4.r),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'PARTNER',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // Commented partner text in logo
+                    // Container(
+                    //   width: double.infinity,
+                    //   padding: EdgeInsets.symmetric(vertical: 2.h,horizontal: 1.h),
+                    //   decoration: BoxDecoration(
+                    //     color: AppColors.primaryBlue, // Blue background
+                    //     borderRadius: BorderRadius.only(
+                    //       bottomLeft: Radius.circular(4.r),
+                    //       bottomRight: Radius.circular(4.r),
+                    //     ),
+                    //   ),
+                    //   child: Center(
+                    //     child: Text(
+                    //       'PARTNER',
+                    //       style: TextStyle(
+                    //         color: Colors.white,
+                    //         fontSize: 12.sp,
+                    //         fontWeight: FontWeight.w700,
+                    //         letterSpacing: 0.5,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

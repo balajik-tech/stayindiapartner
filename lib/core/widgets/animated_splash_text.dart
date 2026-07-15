@@ -74,7 +74,7 @@ class _AnimatedFutureOfLivingTextState extends State<AnimatedFutureOfLivingText>
             child: Text(
               word['text'] as String,
               style: GoogleFonts.outfit(
-                fontSize: 18.sp,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w900,
                 color: word['color'] as Color,
                 letterSpacing: -0.2,

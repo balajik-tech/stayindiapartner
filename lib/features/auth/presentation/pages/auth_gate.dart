@@ -164,7 +164,7 @@ class _SplashScreen extends StatelessWidget {
           children: [
             Image.asset(
               'assets/images/logo.jpg',
-              height: 120.h,
+              height: 160.h,
               errorBuilder: (context, error, stackTrace) => Icon(
                 Icons.apartment_rounded,
                 size: 100.sp,
@@ -174,7 +174,7 @@ class _SplashScreen extends StatelessWidget {
             SizedBox(height: 24.h),
             const AnimatedFutureOfLivingText(),
             SizedBox(height: 32.h),
-            const CircularProgressIndicator(color: AppColors.primaryBlue),
+            // const CircularProgressIndicator(color: AppColors.primaryBlue),
           ],
         ),
       ),
