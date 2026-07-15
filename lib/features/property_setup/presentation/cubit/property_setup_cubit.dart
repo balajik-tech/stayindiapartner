@@ -188,6 +188,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
         emit(
           state.copyWith(
             address: detailedAddress,
+            detailedAddress: detailedAddress,
             area: place.subLocality ?? '',
             city: place.locality ?? '',
             state: place.administrativeArea ?? '',

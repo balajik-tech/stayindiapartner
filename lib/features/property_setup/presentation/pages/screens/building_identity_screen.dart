@@ -34,7 +34,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     _nameController = TextEditingController(text: cubit.state.buildingName);
     _gstController = TextEditingController(text: cubit.state.gstNumber);
     _addressController = TextEditingController(
-      text: cubit.state.address,
+      text: cubit.state.detailedAddress,
     );
     _areaController = TextEditingController(text: cubit.state.area);
     _cityController = TextEditingController(text: cubit.state.city);
@@ -85,8 +85,8 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
         if (_gstController.text != state.gstNumber) {
           _gstController.text = state.gstNumber;
         }
-        if (_addressController.text != state.address) {
-          _addressController.text = state.address;
+        if (_addressController.text != state.detailedAddress) {
+          _addressController.text = state.detailedAddress;
         }
         if (_areaController.text != state.area) {
           _areaController.text = state.area;
