@@ -163,7 +163,7 @@ class _SplashScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/logo.png',
+              'assets/images/logo.jpg',
               height: 120.h,
               errorBuilder: (context, error, stackTrace) => Icon(
                 Icons.apartment_rounded,

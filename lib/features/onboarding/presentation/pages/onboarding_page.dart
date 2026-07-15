@@ -91,7 +91,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           Row(
             children: [
               Image.asset(
-                'assets/images/logo_cropped.png',
+                'assets/images/logo_cropped.jpg',
                 height: 24.h,
                 errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
               ),
