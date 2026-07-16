@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smart_auth/smart_auth.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
@@ -42,6 +43,9 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   Timer? _timer;
 
   bool _useSmsOtp = false;
+  bool _hasAutoSubmitted = false;
+  String? _appSignature; // debug helper — see initState
+  final SmartAuth _smartAuth = SmartAuth.instance;
   late String? _currentDevOtp;
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
@@ -52,6 +56,13 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     super.initState();
     _currentDevOtp = widget.devOtp;
     _startCountdown();
+
+    // Start listening for an incoming SMS containing the OTP, via the
+    // Android SMS User Consent API. Unlike the SMS Retriever API this
+    // does NOT require any "<#>" prefix or app-signature hash in the
+    // message — it just needs a short code in the SMS body, and shows
+    // the user a native "Allow" dialog once the SMS arrives.
+    _listenForSmsOtp();
 
     _entranceController = AnimationController(
       vsync: this,
@@ -78,6 +89,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   void dispose() {
     _timer?.cancel();
     _entranceController.dispose();
+    _smartAuth.removeUserConsentApiListener(); // stop the SMS listener
     for (final c in _controllers) {
       c.dispose();
     }
@@ -100,6 +112,69 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   }
 
   String get _otp => _controllers.map((c) => c.text).join();
+
+  // Starts (or restarts) listening for the incoming OTP SMS via the
+  // Android SMS User Consent API. This call suspends until either an
+  // SMS arrives and the user taps "Allow" on the system dialog, the
+  // user dismisses it, or it times out (~5 minutes) — so we don't
+  // await it inline, just let it resolve in the background.
+  Future<void> _listenForSmsOtp() async {
+    // Also fetch the app signature — not required for the User Consent
+    // API, but handy to log in case you want to fall back to the
+    // Retriever API (getSmsWithRetrieverApi) later.
+    final signatureResult = await _smartAuth.getAppSignature();
+    final signature = signatureResult.hasData
+        ? signatureResult.requireData
+        : null;
+    debugPrint('App signature: $signature');
+    if (mounted) setState(() => _appSignature = signature);
+
+    final result = await _smartAuth.getSmsWithUserConsentApi();
+    if (!mounted) return;
+
+    if (result.hasData) {
+      final detectedCode = result.requireData.code;
+      debugPrint('SMS received, extracted code: $detectedCode');
+      if (detectedCode != null) {
+        _fillOtpFields(detectedCode);
+      } else {
+        debugPrint(
+          'SMS was received and consent granted, but no code could '
+              'be extracted from the message text — check the SMS content.',
+        );
+      }
+    } else if (result.isCanceled) {
+      debugPrint('User dismissed the SMS consent dialog.');
+    } else {
+      debugPrint('SMS User Consent API failed: $result');
+    }
+  }
+
+  void _fillOtpFields(String rawCode) {
+    if (!mounted) return;
+
+    // Keep only digits, then take the last 6 in case the SMS text
+    // contains other numbers (e.g. a support phone number).
+    final digits = rawCode.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 6) return;
+    final otp = digits.substring(digits.length - 6);
+
+    setState(() {
+      for (int i = 0; i < 6; i++) {
+        _controllers[i].text = otp[i];
+      }
+      _useSmsOtp = true;
+    });
+
+    FocusScope.of(context).unfocus();
+    _focusNodes.last.unfocus();
+
+    // Auto-submit once, right after the fields are filled.
+    if (!_hasAutoSubmitted) {
+      _hasAutoSubmitted = true;
+      // _onVerify(context);
+    }
+  }
 
   void _onVerify(BuildContext context) {
     if (_otp.length < 6) {
@@ -128,8 +203,11 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     for (final c in _controllers) {
       c.clear();
     }
+    _hasAutoSubmitted = false;
     _focusNodes.first.requestFocus();
     context.read<AuthCubit>().resendOtp(widget.phone);
+    // Re-arm the listener for the newly sent SMS.
+    _listenForSmsOtp();
   }
 
   @override
@@ -155,6 +233,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             ),
           );
         } else if (state is AuthError) {
+          _hasAutoSubmitted = false;
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
@@ -422,6 +501,9 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                   textAlign: TextAlign.center,
                   textAlignVertical: TextAlignVertical.center,
                   keyboardType: TextInputType.number,
+                  autofillHints: const [
+                    AutofillHints.oneTimeCode,
+                  ],
                   maxLength: 1,
                   showCursor: false,
                   style: GoogleFonts.outfit(
