@@ -88,7 +88,7 @@ class SetupSuccessScreen extends StatelessWidget {
                             SizedBox(width: 14.w),
                             Expanded(
                               child: Text(
-                                "Privacy Policy",
+                                'privacy_policy_title'.tr(),
                                 style: TextStyle(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w900,
@@ -101,7 +101,7 @@ class SetupSuccessScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          "Please review and accept our Privacy Policy to complete your hostel setup.",
+                          'privacy_policy_subtitle'.tr(),
                           style: TextStyle(
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w500,
@@ -130,7 +130,7 @@ class SetupSuccessScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Welcome to Stay India Owner App.",
+                                      'privacy_welcome'.tr(),
                                       style: TextStyle(
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.bold,
@@ -139,24 +139,24 @@ class SetupSuccessScreen extends StatelessWidget {
                                     ),
                                     SizedBox(height: 12.h),
                                     buildPolicySection(
-                                      title: "1. Data Collection & Property Management",
-                                      body: "By adding your hostel, you authorize Stay India to collect and store property-specific information including the hostel name, contact number, coordinates, floors structure, rooms categories, and pricing details. This data is essential for managing your properties, configuring floor layouts, assigning beds, and managing tenants.",
+                                      title: 'privacy_section_1_title'.tr(),
+                                      body: 'privacy_section_1_body'.tr(),
                                     ),
                                     buildPolicySection(
-                                      title: "2. Tenant & Room Allocation Data",
-                                      body: "Any information added regarding tenants (e.g. names, sharing preferences, document attachments) is securely stored and used solely for property management operations by you. We do not sell or share your tenants' personal data with unauthorized third parties.",
+                                      title: 'privacy_section_2_title'.tr(),
+                                      body: 'privacy_section_2_body'.tr(),
                                     ),
                                     buildPolicySection(
-                                      title: "3. Location and Address Verification",
-                                      body: "We collect geographic coordinates (latitude and longitude) of your properties to enable correct location-based matches for potential tenants in the Stay India platform.",
+                                      title: 'privacy_section_3_title'.tr(),
+                                      body: 'privacy_section_3_body'.tr(),
                                     ),
                                     buildPolicySection(
-                                      title: "4. Security and Retention",
-                                      body: "Your data is hosted in highly secure cloud environments. We implement advanced encryption protocols to safeguard your property and financial transactions.",
+                                      title: 'privacy_section_4_title'.tr(),
+                                      body: 'privacy_section_4_body'.tr(),
                                     ),
                                     buildPolicySection(
-                                      title: "5. Term Acceptance",
-                                      body: "By clicking 'Accept & Continue', you confirm that you own or are legally authorized to manage this property and that you agree to Stay India's privacy policy and owner terms of service.",
+                                      title: 'privacy_section_5_title'.tr(),
+                                      body: 'privacy_section_5_body'.tr(),
                                     ),
                                   ],
                                 ),
@@ -196,7 +196,7 @@ class SetupSuccessScreen extends StatelessWidget {
                               SizedBox(width: 10.w),
                               Expanded(
                                 child: Text(
-                                  "I accept the terms and conditions",
+                                  'privacy_accept_terms'.tr(),
                                   style: TextStyle(
                                     fontSize: 12.5.sp,
                                     fontWeight: FontWeight.w600,
@@ -255,7 +255,7 @@ class SetupSuccessScreen extends StatelessWidget {
                               ),
                             ),
                             child: Text(
-                              "Accept & Continue",
+                              'privacy_accept_continue'.tr(),
                               style: TextStyle(
                                 color: isAccepted ? Colors.white : const Color(0xFF94A3B8),
                                 fontSize: 14.sp,

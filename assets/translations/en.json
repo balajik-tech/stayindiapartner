@@ -944,5 +944,21 @@
   "official_updates_appear_here": "Official updates will appear here.",
   "forum_posts_appear_here": "Share your issues or feedback here.",
   "president_admin_role": "President / Admin",
-  "pg_owner_role": "PG Owner"
+  "pg_owner_role": "PG Owner",
+
+  "privacy_policy_title": "Privacy Policy",
+  "privacy_policy_subtitle": "Please review and accept our Privacy Policy to complete your hostel setup.",
+  "privacy_welcome": "Welcome to Stay India Owner App.",
+  "privacy_section_1_title": "1. Data Collection & Property Management",
+  "privacy_section_1_body": "By adding your hostel, you authorize Stay India to collect and store property-specific information including the hostel name, contact number, coordinates, floors structure, rooms categories, and pricing details. This data is essential for managing your properties, configuring floor layouts, assigning beds, and managing tenants.",
+  "privacy_section_2_title": "2. Tenant & Room Allocation Data",
+  "privacy_section_2_body": "Any information added regarding tenants (e.g. names, sharing preferences, document attachments) is securely stored and used solely for property management operations by you. We do not sell or share your tenants' personal data with unauthorized third parties.",
+  "privacy_section_3_title": "3. Location and Address Verification",
+  "privacy_section_3_body": "We collect geographic coordinates (latitude and longitude) of your properties to enable correct location-based matches for potential tenants in the Stay India platform.",
+  "privacy_section_4_title": "4. Security and Retention",
+  "privacy_section_4_body": "Your data is hosted in highly secure cloud environments. We implement advanced encryption protocols to safeguard your property and financial transactions.",
+  "privacy_section_5_title": "5. Term Acceptance",
+  "privacy_section_5_body": "By clicking 'Accept & Continue', you confirm that you own or are legally authorized to manage this property and that you agree to Stay India's privacy policy and owner terms of service.",
+  "privacy_accept_terms": "I accept the terms and conditions",
+  "privacy_accept_continue": "Accept & Continue"
 }
