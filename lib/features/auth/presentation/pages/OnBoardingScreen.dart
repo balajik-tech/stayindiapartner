@@ -126,7 +126,7 @@ class OnBoardingScreen extends StatelessWidget {
                   const Spacer(),
 
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -156,7 +156,7 @@ class OnBoardingScreen extends StatelessWidget {
                               child: const Text(
                                 "Owner Login",
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
                                 ),
@@ -164,7 +164,7 @@ class OnBoardingScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 8),
                         Expanded(child: SizedBox(
                           height: 56,
                           child:  TextButton(
@@ -181,7 +181,7 @@ class OnBoardingScreen extends StatelessWidget {
                             child: const Text(
                               "Staff Login",
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black,
                               ),
