@@ -53,7 +53,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     _passwordFocusNode.addListener(() {
       setState(() => _isPasswordFocused = _passwordFocusNode.hasFocus);
     });
-
+    _onPhoneFieldTap();
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -613,7 +613,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                                   minHeight: 0,
                                                 ),
                                           ),
-                                          onTap: _onPhoneFieldTap,
+                                          // onTap: _onPhoneFieldTap,
                                           onSubmitted: (_) => _isStaffLogin
                                               ? _onStaffLogin(context)
                                               : _onSendOtp(context),
