@@ -132,7 +132,7 @@ class OnBoardingScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: SizedBox(
-                            height: 56,
+                            height: 60,
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
@@ -166,7 +166,7 @@ class OnBoardingScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Expanded(child: SizedBox(
-                          height: 56,
+                          height: 60,
                           child:  TextButton(
                             onPressed: () {
                               Navigator.push(
@@ -183,7 +183,7 @@ class OnBoardingScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black,
+                                color: Color(0xFF0A0A0A),
                               ),
                             ),
                           ),
