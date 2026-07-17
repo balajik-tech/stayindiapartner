@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/auth/domain/models/guest_session.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/guest_session_cubit.dart';
+import 'package:stayindia_owner/features/auth/presentation/pages/OnBoardingScreen.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/onboarding/presentation/pages/onboarding_page.dart';
 import '../cubit/auth_cubit.dart';
@@ -133,7 +134,8 @@ class _AuthGateState extends State<AuthGate> {
           if (activeState is AuthUnauthenticated ||
               activeState is AuthOtpSent) {
             context.read<HostelCubit>().reset();
-            return const LoginPage();
+            // return const LoginPage();
+            return const OnBoardingScreen();
           }
 
           if (activeState is AuthSessionRestoreError) {
@@ -144,7 +146,8 @@ class _AuthGateState extends State<AuthGate> {
             );
           }
 
-          return const LoginPage();
+          // return const LoginPage();
+          return const OnBoardingScreen();
         },
       ),
     );

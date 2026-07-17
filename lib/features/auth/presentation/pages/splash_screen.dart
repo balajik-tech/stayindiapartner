@@ -10,6 +10,8 @@ import 'package:stayindia_owner/features/auth/presentation/pages/login_page.dart
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/core/widgets/animated_splash_text.dart';
 
+import 'OnBoardingScreen.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -83,7 +85,8 @@ class _SplashScreenState extends State<SplashScreen>
         nextScreen = const MainNavigationPage();
       }
     } else if (state is AuthUnauthenticated || state is AuthOtpSent) {
-      nextScreen = const LoginPage();
+      // nextScreen = const LoginPage();
+      nextScreen = const OnBoardingScreen();
     } else {
       nextScreen = AuthGate(
         dashboard: const MainNavigationPage(),

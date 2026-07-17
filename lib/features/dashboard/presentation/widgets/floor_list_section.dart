@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/widgets/AppCustomButton.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import '../../../property_setup/presentation/pages/property_setup_stepper_page.dart';
 import '../cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/floor_accordion.dart';
@@ -28,10 +31,16 @@ class FloorListSection extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.add_business_rounded,
-                  size: 80.sp,
-                  color: AppColors.textSecondary.withValues(alpha: 0.2),
+                Image.asset(
+                  'assets/images/property_build.png',
+                  fit: BoxFit.fill,
+                  height: 140.h,
+                  width: 140.w,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.image_not_supported,
+                    size: 40.sp,
+                    color: Colors.grey,
+                  ),
                 ),
                 SizedBox(height: 24.h),
                 Text(
@@ -51,6 +60,37 @@ class FloorListSection extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 36.h),
+                AppCustomButton(
+                  label: '+ Add Property',
+
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                        const PropertySetupStepperPage(),
+                      ),
+                    );
+                  },
+
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.inputBoxColor,
+                      AppColors.inputBoxColor,
+                    ],
+                  ),
+
+                  textStyle: GoogleFonts.outfit(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+
+                  height: 52.h,
+
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
               ],
             ),

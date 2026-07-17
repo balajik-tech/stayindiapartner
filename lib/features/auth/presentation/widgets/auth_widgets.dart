@@ -245,6 +245,39 @@ class AuthLogoBadge extends StatelessWidget {
   }
 }
 
+
+class AuthNewLogoBadge extends StatelessWidget {
+  const AuthNewLogoBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+            width: double.infinity,
+            child: Container(
+              alignment: Alignment.center,
+              child: Image.asset(
+                'assets/images/logo_icon.png',
+                width: 120.w,
+                height: 80.h,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.home_work_rounded,
+                    color: Colors.white,
+                    size: 40.sp,
+                  );
+                },
+              ),
+            )
+        ),
+      ],
+    );
+  }
+}
+
 class AuthDropdown<T> extends StatelessWidget {
   final String label;
   final T value;

@@ -10,6 +10,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 import '../cubit/auth_cubit.dart';
 import '../widgets/auth_widgets.dart';
+import 'OnBoardingScreen.dart';
 
 class OtpPage extends StatefulWidget {
   final String phone;
@@ -141,7 +142,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       } else {
         debugPrint(
           'SMS was received and consent granted, but no code could '
-              'be extracted from the message text — check the SMS content.',
+          'be extracted from the message text — check the SMS content.',
         );
       }
     } else if (result.isCanceled) {
@@ -250,161 +251,235 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           final isLoading = state is AuthLoading;
           return Scaffold(
             backgroundColor: AppColors.white,
-            body:SingleChildScrollView(
-                child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height,
-                    ),
-                    child: IntrinsicHeight(
-                      child:  Column(
+            body: Stack(
               children: [
-                Container(
-                  // height: 0.4.sh,
-                  width: double.infinity,
-                  child: Stack(
-
-                    children: [
-                      CustomPaint(
-                        painter: _HeroPatternPainter(),
-                        size: Size(1.sw, 0.4.sh),
-                      ),
-                      SafeArea(
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8.w,
-                                // vertical: 4.h,
-                              ),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.arrow_back_ios_new_rounded,
-                                    color: AppColors.textPrimary,
-                                    size: 22,
-                                  ),
-                                  onPressed: () => Navigator.pop(context),
-                                ),
-                              ),
-                            ),
-                            const AuthLogoBadge(),
-
-                          ],
-                        ),
-                      ),
-                    ],
+                OnBoardingScreen(),
+                // Transparent overlay
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(
+                      0.75,
+                    ), // Change opacity as needed
                   ),
                 ),
-                // SizedBox(height: 2.h),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 16.h),
-                  color: AppColors.totalBlueText,
-                  child: Center(
-                    child: Text(
-                      "PARTNER",
-                      style: GoogleFonts.outfit(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.w800,
+
+                Center(
+                  child: Dialog(
+                    insetPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 20,
+                    ),
+                    backgroundColor: Colors.transparent,
+                    child: Container(
+                      width: double.infinity,
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * .85,
+                        maxWidth: 420.w,
+                      ),
+                      decoration: BoxDecoration(
                         color: Colors.white,
-                        letterSpacing: 4,
-                        height: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Container(
-                        height: 0.65.sh,
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24.w,
-                          vertical: 36.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(40.r),
-                            topRight: Radius.circular(40.r),
+                        borderRadius: BorderRadius.circular(24.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 40,
+                            offset: const Offset(0, 20),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 30,
-                              spreadRadius: 5,
-                              offset: const Offset(0, -10),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Verification Code',
-                              style: GoogleFonts.outfit(
-                                fontSize: 26.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.darkText,
-                                letterSpacing: -0.8,
-                                height: 1.1,
-                              ),
-                            ),
-                            SizedBox(height: 10.h),
-                            Text(
-                              'Enter the code sent to +91 ${widget.phone}',
-                              style: GoogleFonts.outfit(
-                                fontSize: 16.sp,
-                                color: AppColors.greyText.withValues(
-                                  alpha: 0.8,
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24.r),
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.fromLTRB(24.w, 14.h, 24.w, 24.h),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // ---- close button ----
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: GestureDetector(
+                                  onTap: () => Navigator.of(context).pop(),
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(4.r),
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      size: 22.sp,
+                                      color: AppColors.primaryBlue,
+                                    ),
+                                  ),
                                 ),
-                                fontWeight: FontWeight.w400,
                               ),
-                            ),
+                              // ---- logo ----
+                              Center(child: const AuthNewLogoBadge()),
+                              // ---- heading ----
+                              Text(
+                                'Your Hostel control center',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 24.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.inputBoxColor,
+                                  letterSpacing: -0.4,
+                                ),
+                              ),
+                              SizedBox(height: 6.h),
+                              Text(
+                                'Manage Your Hostels effortlessly',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryBlue,
+                                ),
+                              ),
 
-                            // if (_currentDevOtp != null &&
-                            //     _currentDevOtp!.isNotEmpty) ...[
-                            //   SizedBox(height: 24.h),
-                            //   _DevOtpBanner(otp: _currentDevOtp!),
-                            // ],
+                              // ---- illustration ----
+                              SizedBox(height: 18.h),
 
-                            SizedBox(height: 40.h),
+                              Container(
+                                alignment: Alignment.center,
+                                child: Image.asset(
+                                  'assets/images/login_lap.png',
+                                  width: 180.w,
+                                  height: 125.h,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.home_work_rounded,
+                                      color: Colors.white,
+                                      size: 40.sp,
+                                    );
+                                  },
+                                ),
+                              ),
+                              SizedBox(height: 22.h),
 
-                            _OtpInputGrid(
-                              controllers: _controllers,
-                              focusNodes: _focusNodes,
-                              onOtpPasted: _fillOtpFields,
-                            ),
+                              // ---- mobile number label ----
+                              _OtpInputGrid(
+                                controllers: _controllers,
+                                focusNodes: _focusNodes,
+                                onOtpPasted: _fillOtpFields,
+                              ),
 
-                            SizedBox(height: 40.h),
+                              SizedBox(height: 4.h),
+                              // ---- phone field ----
+                              _ResendRow(
+                                countdown: _countdown,
+                                onResend: () => _onResend(context),
+                              ),
 
-                            AuthPrimaryButton(
-                              label: isLoading
-                                  ? 'VERIFYING...'
-                                  : 'VERIFY & CONTINUE',
-                              isLoading: isLoading,
-                              onPressed: () => _onVerify(context),
-                            ),
+                              // ---- password field (staff login only) ----
+                              SizedBox(height: 8.h),
 
-                            SizedBox(height: 32.h),
-                            _ResendRow(
-                              countdown: _countdown,
-                              onResend: () => _onResend(context),
-                            ),
-                          ],
+                              // ---- submit button ----
+                              Material(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(8.r),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  onTap: isLoading
+                                      ? null
+                                      : () => _onVerify(context),
+                                  child: Container(
+                                    height: 52.h,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppColors.kAuthOrange,
+                                          AppColors.kAuthOrangeDark,
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.kAuthOrange
+                                              .withValues(alpha: 0.35),
+                                          blurRadius: 14,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+                                    child: isLoading
+                                        ? SizedBox(
+                                            width: 22.w,
+                                            height: 22.w,
+                                            child:
+                                                const CircularProgressIndicator(
+                                                  strokeWidth: 2.4,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation(
+                                                        Colors.white,
+                                                      ),
+                                                ),
+                                          )
+                                        : Text(
+                                            isLoading
+                                                ? 'VERIFYING...'
+                                                : 'VERIFY & CONTINUE',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              letterSpacing: 0.4,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(height: 18.h),
+
+                              // ---- terms footer ----
+                              Center(
+                                child: Text.rich(
+                                  TextSpan(
+                                    text: 'By continuing, you agree to our ',
+                                    children: [
+                                      TextSpan(
+                                        text: 'Terms',
+                                        style: TextStyle(
+                                          color: AppColors.kAuthOrange,
+                                          fontWeight: FontWeight.bold,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                      const TextSpan(text: ' & '),
+                                      TextSpan(
+                                        text: 'Privacy Policy',
+                                        style: TextStyle(
+                                          color: AppColors.kAuthOrange,
+                                          fontWeight: FontWeight.bold,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12.sp,
+                                    color: AppColors.primaryBlue.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
+
               ],
             ),
-          ))));
+          );
         },
       ),
     );
@@ -442,7 +517,11 @@ class _OtpInputGrid extends StatefulWidget {
   final List<FocusNode> focusNodes;
   final Function(String)? onOtpPasted;
 
-  const _OtpInputGrid({required this.controllers, required this.focusNodes,this.onOtpPasted});
+  const _OtpInputGrid({
+    required this.controllers,
+    required this.focusNodes,
+    this.onOtpPasted,
+  });
 
   @override
   State<_OtpInputGrid> createState() => _OtpInputGridState();
@@ -454,10 +533,13 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
   @override
   void initState() {
     super.initState();
+
     for (int i = 0; i < widget.focusNodes.length; i++) {
       widget.focusNodes[i].addListener(() {
         if (widget.focusNodes[i].hasFocus) {
-          setState(() => _focusedIndex = i);
+          setState(() {
+            _focusedIndex = i;
+          });
         }
       });
     }
@@ -467,9 +549,12 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(
-        6,
-        (i) => Expanded(
+      children: List.generate(6, (i) {
+        final hasValue = widget.controllers[i].text.isNotEmpty;
+
+        final isFocused = _focusedIndex == i;
+
+        return Expanded(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 5.w),
             child: AspectRatio(
@@ -478,20 +563,24 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeOutCubic,
                 decoration: BoxDecoration(
-                  color: _focusedIndex == i
+                  // Filled box background
+                  color: hasValue
+                      ? AppColors.inputBoxColor.withValues(alpha: 1)
+                      : isFocused
                       ? Colors.white
-                      : AppColors.backgroundGrey.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(16.r),
+                      : AppColors.white.withValues(alpha: 1),
+                  borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(
-                    color: _focusedIndex == i
-                        ? AppColors.primaryBlue
+                    color: hasValue || isFocused
+                        ? AppColors.inputBoxColor
                         : Colors.grey.shade200,
-                    width: _focusedIndex == i ? 2 : 1.5,
+
+                    width: hasValue || isFocused ? 1.5 : 1.5,
                   ),
                   boxShadow: [
-                    if (_focusedIndex == i)
+                    if (hasValue || isFocused)
                       BoxShadow(
-                        color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                        color: AppColors.inputBoxColor.withValues(alpha: 0.12),
                         blurRadius: 12,
                         spreadRadius: 1,
                       ),
@@ -504,18 +593,14 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                   textAlign: TextAlign.center,
                   textAlignVertical: TextAlignVertical.center,
                   keyboardType: TextInputType.number,
-                  autofillHints: const [
-                    AutofillHints.oneTimeCode,
-                  ],
-                  // maxLength: 1,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
+                  autofillHints: const [AutofillHints.oneTimeCode],
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(1),],
                   showCursor: false,
                   style: GoogleFonts.outfit(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
+                    fontSize: 23.sp,
+                    fontWeight: FontWeight.w500,
+                    color: hasValue ? AppColors.white : AppColors.darkText,
                     height: 1.0,
                   ),
                   scrollPadding: EdgeInsets.only(bottom: 140.h),
@@ -525,16 +610,24 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                     isCollapsed: true,
                     contentPadding: EdgeInsets.zero,
                   ),
+
                   onChanged: (val) {
-                    // User pasted entire OTP
+                    // Refresh UI after typing
+                    setState(() {});
+
+                    // Handle paste OTP
                     if (val.length > 1) {
-                      widget.onOtpPasted?.call(val);   // <-- call parent
+                      widget.onOtpPasted?.call(val);
+
                       return;
                     }
 
+                    // Move next
                     if (val.isNotEmpty && i < 5) {
                       widget.focusNodes[i + 1].requestFocus();
-                    } else if (val.isEmpty && i > 0) {
+                    }
+                    // Move previous on delete
+                    else if (val.isEmpty && i > 0) {
                       widget.focusNodes[i - 1].requestFocus();
                     }
                   },
@@ -542,8 +635,8 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
               ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
@@ -559,6 +652,7 @@ class _ResendRow extends StatelessWidget {
     return Center(
       child: Column(
         children: [
+          SizedBox(height: 12.h),
           Text(
             countdown > 0
                 ? 'Resend code in 00:${countdown.toString().padLeft(2, '0')}'
@@ -570,7 +664,7 @@ class _ResendRow extends StatelessWidget {
             ),
           ),
           if (countdown == 0) ...[
-            SizedBox(height: 12.h),
+            SizedBox(height: 2.h),
             BouncingButton(
               onTap: onResend,
               backgroundColor: Colors.transparent,
