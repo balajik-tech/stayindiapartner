@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -377,6 +378,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                             _OtpInputGrid(
                               controllers: _controllers,
                               focusNodes: _focusNodes,
+                              onOtpPasted: _fillOtpFields,
                             ),
 
                             SizedBox(height: 40.h),
@@ -438,8 +440,9 @@ class _HeroPatternPainter extends CustomPainter {
 class _OtpInputGrid extends StatefulWidget {
   final List<TextEditingController> controllers;
   final List<FocusNode> focusNodes;
+  final Function(String)? onOtpPasted;
 
-  const _OtpInputGrid({required this.controllers, required this.focusNodes});
+  const _OtpInputGrid({required this.controllers, required this.focusNodes,this.onOtpPasted});
 
   @override
   State<_OtpInputGrid> createState() => _OtpInputGridState();
@@ -504,7 +507,10 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                   autofillHints: const [
                     AutofillHints.oneTimeCode,
                   ],
-                  maxLength: 1,
+                  // maxLength: 1,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                   showCursor: false,
                   style: GoogleFonts.outfit(
                     fontSize: 22.sp,
@@ -520,6 +526,12 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                     contentPadding: EdgeInsets.zero,
                   ),
                   onChanged: (val) {
+                    // User pasted entire OTP
+                    if (val.length > 1) {
+                      widget.onOtpPasted?.call(val);   // <-- call parent
+                      return;
+                    }
+
                     if (val.isNotEmpty && i < 5) {
                       widget.focusNodes[i + 1].requestFocus();
                     } else if (val.isEmpty && i > 0) {
