@@ -10,12 +10,18 @@ import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/finance/presentation/pages/financial_dashboard_page.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/pages/DigiLockerScreen.dart';
+import 'package:stayindia_owner/features/profile/presentation/pages/kyc_result.dart';
+import 'package:stayindia_owner/features/profile/presentation/pages/kyc_result_card.dart';
 import 'package:stayindia_owner/features/stock_management/presentation/pages/stock_dashboard_page.dart';
 import 'package:stayindia_owner/features/stock_management/presentation/cubit/stock_cubit.dart';
 import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import 'account_settings_page.dart';
+import 'digilocker_credentials.dart';
+import 'digilocker_verification_screen.dart';
 import 'help_support_page.dart';
+import 'kyc_result_screen.dart';
 import 'subscription_page.dart';
 import 'hostel_profile_page.dart';
 import 'amenities_page.dart';
@@ -115,32 +121,32 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileCard(
-                          icon: Icons.stars_rounded,
-                          title: 'membership_id'.tr() == 'membership_id'
-                              ? 'Membership ID'
-                              : 'membership_id'.tr(),
-                          iconBgColor: const Color(0xFFFEF9C3),
-                          iconColor: const Color(0xFFCA8A04),
-                          onTap: () =>
-                              _showMembershipCard(context, name, phone),
-                        ),
-                        _ProfileCard(
-                          icon: Icons.card_membership_rounded,
-                          title: 'digital_certificate'.tr(),
-                          iconBgColor: const Color(0xFFF5F3FF),
-                          iconColor: const Color(0xFF7C3AED),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                create: (context) =>
-                                    sl<HostelCubit>()..getHostels(),
-                                child: const DigitalCertificatePage(),
-                              ),
-                            ),
-                          ),
-                        ),
+                        // _ProfileCard(
+                        //   icon: Icons.stars_rounded,
+                        //   title: 'membership_id'.tr() == 'membership_id'
+                        //       ? 'Membership ID'
+                        //       : 'membership_id'.tr(),
+                        //   iconBgColor: const Color(0xFFFEF9C3),
+                        //   iconColor: const Color(0xFFCA8A04),
+                        //   onTap: () =>
+                        //       _showMembershipCard(context, name, phone),
+                        // ),
+                        // _ProfileCard(
+                        //   icon: Icons.card_membership_rounded,
+                        //   title: 'digital_certificate'.tr(),
+                        //   iconBgColor: const Color(0xFFF5F3FF),
+                        //   iconColor: const Color(0xFF7C3AED),
+                        //   onTap: () => Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) => BlocProvider(
+                        //         create: (context) =>
+                        //             sl<HostelCubit>()..getHostels(),
+                        //         child: const DigitalCertificatePage(),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                       ]),
                     ] else ...[
                       _buildGridSection('1. ${'personal_management'.tr()}', [
@@ -322,7 +328,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           title: 'rate_us'.tr(),
                           iconBgColor: const Color(0xFFFEF9C3),
                           iconColor: const Color(0xFFCA8A04),
-                          onTap: () {},
+                          onTap: () {
+
+                          },
                         ),
                         _ProfileCard(
                           icon: Icons.system_update_rounded,
@@ -397,6 +405,39 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () => _handleLogout(context),
                       ),
                     ]),
+
+                    ElevatedButton(
+                      onPressed: () async {
+                        final result = await Navigator.push<KycResult>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DigiLockerVerificationScreen(
+                              credentials: const DigiLockerCredentials(
+                                companyName: 'punithOiXa',
+                                secretToken: 'K1tPIbkUX6eZE28sgP5qCIrwmTJnW5F1',
+                                redirectUrl: 'https://digilocker.meon.co.in/digilocker/thank-you-page',
+                              ),
+                              documents: 'aadhaar', //'aadhaar,pan',
+                            ),
+                          ),
+                        );
+
+                        if (result != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => KycResultScreen(result: result)),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Verification cancelled or failed')),
+                          );
+                        }
+                      },
+                      child: const Text('Verify with DigiLocker'),
+                    ),
+
+
+
 
                     SizedBox(height: 140.h),
                   ]),

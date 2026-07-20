@@ -63,6 +63,7 @@ dependencies:
   google_sign_in: ^6.2.1
   google_phone_number_hint: ^0.0.3
   smart_auth: ^3.2.0
+  flutter_digilocker_aadhar_pan: ^1.0.0
 
 dev_dependencies:
   flutter_test:
