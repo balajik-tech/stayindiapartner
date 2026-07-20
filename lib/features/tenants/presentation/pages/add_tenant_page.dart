@@ -16,6 +16,12 @@ import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_s
 import 'package:stayindia_owner/injection_container.dart' as di;
 import 'package:stayindia_owner/features/profile/domain/usecases/room_usecases.dart';
 
+
+enum StayType {
+  MONTHLY,
+  CUSTOM,
+}
+
 class AddTenantPage extends StatefulWidget {
   const AddTenantPage({super.key});
 
@@ -24,14 +30,25 @@ class AddTenantPage extends StatefulWidget {
 }
 
 class _AddTenantPageState extends State<AddTenantPage> {
+
+
+
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _rentController = TextEditingController();
   final _depositController = TextEditingController();
+  final _customDepositController = TextEditingController();
+
+  final _maintenanceController = TextEditingController();
+  final _dayRentController = TextEditingController();
+
+  DateTime? _checkOutDate;
+  StayType _stayType = StayType.MONTHLY;
 
   DateTime? _checkInDate;
   late AddTenantCubit _addTenantCubit;
+  bool _isAC = true;
 
   File? _userPhoto;
   File? _aadharPhoto;
@@ -49,6 +66,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
   RoomDetail? _selectedRoom;
   List<String> _beds = [];
   String? _selectedBed;
+
 
   @override
   void initState() {
@@ -75,6 +93,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
     _rentController.dispose();
     _depositController.dispose();
     _addTenantCubit.close();
+    _dayRentController.dispose();
+    _maintenanceController.dispose();
+    _customDepositController.dispose();
     super.dispose();
   }
 
@@ -197,6 +218,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
       _beds = beds;
       _rentController.text = room.rent.toString();
       _depositController.text = room.deposit.toString();
+      _dayRentController.text = room.dailyRent.toString();
+      _maintenanceController.text = room.maintenance.toString();
+      _customDepositController.text = room.deposit.toString();
     });
   }
 
@@ -237,6 +261,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
     final phone = _phoneController.text.trim();
     final rentText = _rentController.text.trim();
     final depositText = _depositController.text.trim();
+    final dayRentText = _dayRentController.text.trim();
+    final maintainanceText = _maintenanceController.text.trim();
+    final customDepositeText = _customDepositController.text.trim();
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -299,6 +326,16 @@ class _AddTenantPageState extends State<AddTenantPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('select_check_in_date'.tr()),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    if (_checkOutDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('select_check_out_date'.tr()),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -500,6 +537,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             ],
                           ),
                           SizedBox(height: 16.h),
+                          _buildAcToggle(),
+                          SizedBox(height: 16.h),
                           _buildDropdown<String>(
                             'bed_req'.tr(),
                             _beds,
@@ -522,27 +561,79 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           SizedBox(height: 32.h),
                           _buildSectionTitle('stay_details'.tr()),
                           SizedBox(height: 16.h),
-                          _buildTextField(
-                            'monthly_rent_req'.tr(),
-                            Icons.currency_rupee,
-                            _rentController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                          ),
-                          SizedBox(height: 16.h),
-                          _buildTextField(
-                            'security_deposit_req'.tr(),
-                            Icons.account_balance_wallet_outlined,
-                            _depositController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                          ),
-                          SizedBox(height: 16.h),
-                          _buildDatePicker(context, 'check_in_date_req'.tr()),
+
+                          _buildStayCustomToggle(),
+
+                          SizedBox(height: 20.h),
+
+                          if (_stayType == StayType.MONTHLY) ...[
+                            _buildTextField(
+                              'monthly_rent_req'.tr(),
+                              Icons.currency_rupee,
+                              _rentController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+
+                            _buildTextField(
+                              'security_deposit_req'.tr(),
+                              Icons.account_balance_wallet_outlined,
+                              _depositController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+                            _buildTextField(
+                              'maintainance_req'.tr(),
+                              Icons.account_balance_wallet_outlined,
+                              _maintenanceController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+                            _buildDatePicker(context, 'check_in_date_req'.tr()),
+
+                          ],
+
+                          if (_stayType == StayType.CUSTOM) ...[
+
+                            _buildTextField(
+                              'day_rent'.tr(),
+                              Icons.currency_rupee,
+                              _dayRentController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+                            _buildTextField(
+                              'security_deposit'.tr(),
+                              Icons.account_balance_wallet_outlined,
+                              _customDepositController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(child: _buildDatePicker(context, 'check_in_date_req'.tr())),
+                                SizedBox(width: 16.w),
+                                Expanded(child: _buildDatePickerCheckout(context, 'check_out_date_req'.tr())),
+                              ],
+                            ),
+                          ],
 
                           SizedBox(height: 32.h),
                           _buildVerificationSection(context),
@@ -765,6 +856,276 @@ class _AddTenantPageState extends State<AddTenantPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDatePickerCheckout(BuildContext context, String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: AppColors.greyText,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        GestureDetector(
+          onTap: () async {
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: _checkOutDate ?? DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+            );
+            if (picked != null) {
+              setState(() => _checkOutDate = picked);
+            }
+          },
+          child: Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2F4F7),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today_outlined, color: AppColors.greyText),
+                SizedBox(width: 12.w),
+                Text(
+                  _checkOutDate == null
+                      ? 'select_date'.tr()
+                      : '${_checkOutDate!.day}/${_checkOutDate!.month}/${_checkOutDate!.year}',
+                  style: TextStyle(
+                    color: _checkOutDate == null
+                        ? AppColors.greyText.withValues(alpha: 0.5)
+                        : AppColors.darkText,
+                    fontSize: 15.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAcToggle() {
+    return Container(
+      height: 48.h,
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (!_isAC) {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    _isAC = true;
+                  });
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _isAC ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: _isAC
+                      ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.ac_unit_rounded,
+                        size: 16.sp,
+                        color: _isAC
+                            ? const Color(0xFF16539B)
+                            : const Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'AC',
+                        style: TextStyle(
+                          color: _isAC
+                              ? const Color(0xFF16539B)
+                              : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (_isAC) {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    _isAC = false;
+                  });
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: !_isAC ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: !_isAC
+                      ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.thermostat_rounded,
+                        size: 16.sp,
+                        color: !_isAC
+                            ? const Color(0xFF16539B)
+                            : const Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'Non-AC',
+                        style: TextStyle(
+                          color: !_isAC
+                              ? const Color(0xFF16539B)
+                              : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStayCustomToggle() {
+    return Container(
+      height: 48.h,
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (_stayType != StayType.MONTHLY) {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    _stayType = StayType.MONTHLY;
+                  });
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _stayType == StayType.MONTHLY
+                      ? Colors.white
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: _stayType == StayType.MONTHLY
+                      ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                      : null,
+                ),
+                child: Center(
+                  child: Text(
+                    'Monthly',
+                    style: TextStyle(
+                      color: _stayType == StayType.MONTHLY
+                          ? const Color(0xFF16539B)
+                          : const Color(0xFF64748B),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (_stayType != StayType.CUSTOM) {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    _stayType = StayType.CUSTOM;
+                  });
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _stayType == StayType.CUSTOM
+                      ? Colors.white
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: _stayType == StayType.CUSTOM
+                      ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                      : null,
+                ),
+                child: Center(
+                  child: Text(
+                    'Custom',
+                    style: TextStyle(
+                      color: _stayType == StayType.CUSTOM
+                          ? const Color(0xFF16539B)
+                          : const Color(0xFF64748B),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
