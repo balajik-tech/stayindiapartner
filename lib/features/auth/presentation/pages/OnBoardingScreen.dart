@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/login_page.dart';
 
-class OnBoardingScreen extends StatelessWidget {
-  const OnBoardingScreen({super.key});
+class LoginOnBoardingScreen extends StatelessWidget {
+  const LoginOnBoardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

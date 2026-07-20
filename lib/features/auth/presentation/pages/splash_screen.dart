@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
       }
     } else if (state is AuthUnauthenticated || state is AuthOtpSent) {
       // nextScreen = const LoginPage();
-      nextScreen = const OnBoardingScreen();
+      nextScreen = const LoginOnBoardingScreen();
     } else {
       nextScreen = AuthGate(
         dashboard: const MainNavigationPage(),

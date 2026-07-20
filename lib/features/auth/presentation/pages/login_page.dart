@@ -303,7 +303,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           backgroundColor: AppColors.white,
           body: Stack(
             children: [
-              OnBoardingScreen(),
+              LoginOnBoardingScreen(),
               // Transparent overlay
               Positioned.fill(
                 child: BackdropFilter(

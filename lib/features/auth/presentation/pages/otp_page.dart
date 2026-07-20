@@ -253,7 +253,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             backgroundColor: AppColors.white,
             body: Stack(
               children: [
-                OnBoardingScreen(),
+                LoginOnBoardingScreen(),
                 // Transparent overlay
                 Positioned.fill(
                   child: Container(

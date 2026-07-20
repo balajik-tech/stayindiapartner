@@ -135,7 +135,7 @@ class _AuthGateState extends State<AuthGate> {
               activeState is AuthOtpSent) {
             context.read<HostelCubit>().reset();
             // return const LoginPage();
-            return const OnBoardingScreen();
+            return const LoginOnBoardingScreen();
           }
 
           if (activeState is AuthSessionRestoreError) {
@@ -147,7 +147,7 @@ class _AuthGateState extends State<AuthGate> {
           }
 
           // return const LoginPage();
-          return const OnBoardingScreen();
+          return const LoginOnBoardingScreen();
         },
       ),
     );
