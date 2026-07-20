@@ -10,7 +10,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 import '../cubit/auth_cubit.dart';
 import '../widgets/auth_widgets.dart';
-import 'OnBoardingScreen.dart';
+import 'LoginOnBoardingScreen.dart';
 
 class OtpPage extends StatefulWidget {
   final String phone;
