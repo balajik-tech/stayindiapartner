@@ -7,9 +7,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 
-class SetupSuccessScreen extends StatelessWidget {
+import '../../../../tenants/presentation/widgets/AppLanguageStrings.dart';
+
+class SetupSuccessScreen extends StatefulWidget {
   const SetupSuccessScreen({super.key});
 
+  @override
+  State<SetupSuccessScreen> createState() => _SetupSuccessScreenState();
+}
+
+
+class _SetupSuccessScreenState extends State<SetupSuccessScreen> {
+  String selectedLanguage = "en";
+
+  String tr(String key) {
+    return AppLanguageStrings.languages[selectedLanguage]?[key] ??
+        AppLanguageStrings.languages["en"]![key] ??
+        key;
+  }
 
   void _showPrivacyPolicyDialog(BuildContext context) {
     Navigator.push(
@@ -88,7 +103,7 @@ class SetupSuccessScreen extends StatelessWidget {
                             SizedBox(width: 14.w),
                             Expanded(
                               child: Text(
-                                'privacy_policy_title'.tr(),
+                                tr('privacy_policy_title'),
                                 style: TextStyle(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w900,
@@ -101,7 +116,7 @@ class SetupSuccessScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          'privacy_policy_subtitle'.tr(),
+                          tr('privacy_policy_subtitle'),
                           style: TextStyle(
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w500,
@@ -110,6 +125,52 @@ class SetupSuccessScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 16.h),
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: selectedLanguage,
+                              isExpanded: true,
+                              icon: const Icon(Icons.language),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: "en",
+                                  child: Text("English"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "te",
+                                  child: Text("తెలుగు"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "hi",
+                                  child: Text("हिन्दी"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "ta",
+                                  child: Text("தமிழ்"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "kn",
+                                  child: Text("ಕನ್ನಡ"),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                if (value == null) return;
+
+                                setState(() {
+                                  selectedLanguage = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 18.h),
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
@@ -130,7 +191,7 @@ class SetupSuccessScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'privacy_welcome'.tr(),
+                                      tr('privacy_welcome'),
                                       style: TextStyle(
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.bold,
@@ -139,24 +200,24 @@ class SetupSuccessScreen extends StatelessWidget {
                                     ),
                                     SizedBox(height: 12.h),
                                     buildPolicySection(
-                                      title: 'privacy_section_1_title'.tr(),
-                                      body: 'privacy_section_1_body'.tr(),
+                                      title: tr('privacy_section_1_title'),
+                                      body: tr('privacy_section_1_body'),
                                     ),
                                     buildPolicySection(
-                                      title: 'privacy_section_2_title'.tr(),
-                                      body: 'privacy_section_2_body'.tr(),
+                                      title: tr('privacy_section_2_title'),
+                                      body: tr('privacy_section_2_body'),
                                     ),
                                     buildPolicySection(
-                                      title: 'privacy_section_3_title'.tr(),
-                                      body: 'privacy_section_3_body'.tr(),
+                                      title: tr('privacy_section_3_title'),
+                                      body: tr('privacy_section_3_body'),
                                     ),
                                     buildPolicySection(
-                                      title: 'privacy_section_4_title'.tr(),
-                                      body: 'privacy_section_4_body'.tr(),
+                                      title: tr('privacy_section_4_title'),
+                                      body: tr('privacy_section_4_body'),
                                     ),
                                     buildPolicySection(
-                                      title: 'privacy_section_5_title'.tr(),
-                                      body: 'privacy_section_5_body'.tr(),
+                                      title: tr('privacy_section_5_title'),
+                                      body: tr('privacy_section_5_body'),
                                     ),
                                   ],
                                 ),
@@ -196,7 +257,7 @@ class SetupSuccessScreen extends StatelessWidget {
                               SizedBox(width: 10.w),
                               Expanded(
                                 child: Text(
-                                  'privacy_accept_terms'.tr(),
+                                  tr('privacy_accept_terms'),
                                   style: TextStyle(
                                     fontSize: 12.5.sp,
                                     fontWeight: FontWeight.w600,
@@ -255,7 +316,7 @@ class SetupSuccessScreen extends StatelessWidget {
                               ),
                             ),
                             child: Text(
-                              'privacy_accept_continue'.tr(),
+                              tr('privacy_accept_continue'),
                               style: TextStyle(
                                 color: isAccepted ? Colors.white : const Color(0xFF94A3B8),
                                 fontSize: 14.sp,

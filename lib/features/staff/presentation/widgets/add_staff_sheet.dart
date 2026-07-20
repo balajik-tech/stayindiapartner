@@ -207,6 +207,15 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
                         ),
                       ),
                       SizedBox(height: 16.h),
+                      _buildSectionTitle(
+                        StringUtils.translate(
+                          'designated_role_section',
+                          context: context,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      _buildRoleSelector(),
+                      SizedBox(height: 16.h),
                       _buildTextField(
                         controller: _nameController,
                         label: StringUtils.translate(
@@ -427,15 +436,7 @@ class _AddStaffSheetState extends State<AddStaffSheet> {
                         icon: Icons.badge_rounded,
                       ),
 
-                      SizedBox(height: 32.h),
-                      _buildSectionTitle(
-                        StringUtils.translate(
-                          'designated_role_section',
-                          context: context,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-                      _buildRoleSelector(),
+
                       SizedBox(height: 48.h),
                       _buildSubmitButton(),
                     ],

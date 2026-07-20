@@ -330,16 +330,19 @@ class _AddTenantPageState extends State<AddTenantPage> {
         ),
       );
       return;
+
     }
 
-    if (_checkOutDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('select_check_out_date'.tr()),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
+    if (_stayType == StayType.CUSTOM) {
+      if (_checkOutDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('select_check_out_date'.tr()),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
     }
 
     if (_userPhoto == null) {

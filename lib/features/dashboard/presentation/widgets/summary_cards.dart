@@ -169,16 +169,16 @@ class SummaryCardsSection extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             children: [
-              _buildCard(
-                context,
-                'properties',
-                '$totalProperties',
-                'total_properties'.tr(),
-                Colors.white,
-                Icons.apartment_rounded,
-                state.selectedMetric,
-                isBordered: true,
-              ),
+              // _buildCard(
+              //   context,
+              //   'properties',
+              //   '$totalProperties',
+              //   'total_properties'.tr(),
+              //   Colors.white,
+              //   Icons.apartment_rounded,
+              //   state.selectedMetric,
+              //   isBordered: true,
+              // ),
               _buildCard(
                 context,
                 'total',

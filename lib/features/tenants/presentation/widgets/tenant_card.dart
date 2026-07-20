@@ -146,10 +146,17 @@ class TenantCard extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+
+                    _buildCompactCallActionImage(
+                     "assets/images/whatsapp.png",
+                      const Color(0xFF27C26C),
+                          () =>  _launchUrl('https://wa.me/${tenant.mobile}'),
+                    ),
+                    SizedBox(width: 8.w),
                     _buildCompactCallAction(
                       Icons.call_rounded,
                       const Color(0xFF27C26C),
-                      () => _launchUrl('tel:${tenant.mobile}'),
+                          () => _launchUrl('tel:${tenant.mobile}'),
                     ),
                     SizedBox(width: 4.w),
                     Icon(
@@ -220,8 +227,10 @@ class TenantCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactCallAction(
-    IconData icon,
+
+
+  Widget _buildCompactCallActionImage(
+    String icon,
     Color color,
     VoidCallback onTap,
   ) {
@@ -236,10 +245,54 @@ class TenantCard extends StatelessWidget {
             color: color.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, size: 16.sp, color: color),
+          child:  Image.asset(
+            icon,
+            width: 20,
+            height: 20,
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildCompactCallAction(
+      IconData icon,
+      Color color,
+      VoidCallback onTap,
+      ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Container(
+          padding: EdgeInsets.all(8.r),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child:  Icon(icon, size: 16.sp, color: color),
+        ),
+      ),
+    );
+  }
+
+  Future<void> openWhatsApp(String phoneNumber) async {
+    // Phone number should include country code without '+'
+    final String formattedNumber = phoneNumber.replaceAll('+', '');
+
+    final Uri whatsappUrl = Uri.parse(
+      'https://wa.me/$formattedNumber',
+    );
+
+    if (await canLaunchUrl(whatsappUrl)) {
+      await launchUrl(
+        whatsappUrl,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      throw 'Could not launch WhatsApp';
+    }
   }
 
   Future<void> _launchUrl(String url) async {

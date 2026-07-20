@@ -10,6 +10,11 @@ import '../widgets/add_staff_sheet.dart';
 import '../widgets/staff_options_sheet.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 
+enum StaffFilter {
+  active,
+  inactive,
+}
+
 class StaffManagementPage extends StatefulWidget {
   const StaffManagementPage({super.key});
 
@@ -19,6 +24,8 @@ class StaffManagementPage extends StatefulWidget {
 
 class _StaffManagementPageState extends State<StaffManagementPage> {
   final TextEditingController _searchController = TextEditingController();
+
+  StaffFilter _selectedFilter = StaffFilter.active;
 
   @override
   void initState() {
@@ -55,6 +62,7 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
             : Column(
                 children: [
                   _buildControlBar(),
+                  _buildStatusFilter(),
                   Expanded(
                     child: RefreshIndicator(
                       onRefresh: () async => _refreshData(),
@@ -68,12 +76,29 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                           } else if (state is StaffError) {
                             return _buildErrorState(state.message);
                           } else if (state is StaffLoaded) {
+
+                            // final staff = state.staffList.where((s) {
+                            //   final query = _searchController.text
+                            //       .toLowerCase();
+                            //   return s.name.toLowerCase().contains(query) ||
+                            //       s.role.toLowerCase().contains(query) ||
+                            //       s.phone.contains(query);
+                            // }).toList();
+
+                            final query = _searchController.text.toLowerCase();
+
                             final staff = state.staffList.where((s) {
-                              final query = _searchController.text
-                                  .toLowerCase();
-                              return s.name.toLowerCase().contains(query) ||
-                                  s.role.toLowerCase().contains(query) ||
-                                  s.phone.contains(query);
+                              final matchesSearch =
+                                  s.name.toLowerCase().contains(query) ||
+                                      s.role.toLowerCase().contains(query) ||
+                                      s.phone.contains(query);
+
+                              final matchesStatus =
+                              _selectedFilter == StaffFilter.active
+                                  ? s.isActive
+                                  : !s.isActive;
+
+                              return matchesSearch && matchesStatus;
                             }).toList();
 
                             if (staff.isEmpty) {
@@ -112,6 +137,72 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
               ),
       ),
       floatingActionButton: _buildAddButton(),
+    );
+  }
+
+  Widget _buildStatusFilter() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 12.h),
+      child: Container(
+        height: 48.h,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(14.r),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildFilterButton(
+                title: "Active",
+                selected: _selectedFilter == StaffFilter.active,
+                onTap: () {
+                  setState(() {
+                    _selectedFilter = StaffFilter.active;
+                  });
+                },
+              ),
+            ),
+            Expanded(
+              child: _buildFilterButton(
+                title: "Inactive",
+                selected: _selectedFilter == StaffFilter.inactive,
+                onTap: () {
+                  setState(() {
+                    _selectedFilter = StaffFilter.inactive;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton({
+    required String title,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        margin: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primaryBlue : Colors.transparent,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : Colors.black87,
+          ),
+        ),
+      ),
     );
   }
 

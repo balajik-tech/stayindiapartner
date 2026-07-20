@@ -472,7 +472,7 @@
   "logout_confirm_title": "साइन आउट",
   "logout_confirm_msg": "क्या आप वाकई साइन आउट करना चाहते हैं?",
   "dashboard": "डैशबोर्ड",
-  "community": "समुदाय",
+  "community":"संघ",
   "tenants": "किरायेदार",
   "total_properties": "कुल संपत्तियां",
   "total_beds": "कुल बिस्तर",
