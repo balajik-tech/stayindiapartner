@@ -10,18 +10,14 @@ import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/finance/presentation/pages/financial_dashboard_page.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/pages/DigiLockerScreen.dart';
-import 'package:stayindia_owner/features/profile/presentation/pages/kyc_result.dart';
-import 'package:stayindia_owner/features/profile/presentation/pages/kyc_result_card.dart';
 import 'package:stayindia_owner/features/stock_management/presentation/pages/stock_dashboard_page.dart';
 import 'package:stayindia_owner/features/stock_management/presentation/cubit/stock_cubit.dart';
 import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import '../../../digilocker/domain/entities/digilocker_credentials.dart';
+import '../../../digilocker/presentation/utils/digilocker_navigator.dart';
 import 'account_settings_page.dart';
-import 'digilocker_credentials.dart';
-import 'digilocker_verification_screen.dart';
 import 'help_support_page.dart';
-import 'kyc_result_screen.dart';
 import 'subscription_page.dart';
 import 'hostel_profile_page.dart';
 import 'amenities_page.dart';
@@ -31,7 +27,6 @@ import 'refer_friend_page.dart';
 import 'announcements_page.dart';
 import 'reports_dashboard_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_conditions_page.dart';
-import 'digital_certificate_page.dart';
 import 'government_licenses_page.dart';
 import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
@@ -408,34 +403,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     ElevatedButton(
                       onPressed: () async {
-                        final result = await Navigator.push<KycResult>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DigiLockerVerificationScreen(
-                              credentials: const DigiLockerCredentials(
-                                companyName: 'punithOiXa',
-                                secretToken: 'K1tPIbkUX6eZE28sgP5qCIrwmTJnW5F1',
-                                redirectUrl: 'https://digilocker.meon.co.in/digilocker/thank-you-page',
-                              ),
-                              documents: 'aadhaar', //'aadhaar,pan',
-                            ),
-                          ),
+                        final credentials = DigiLockerCredentials(
+                          companyName: 'punithOiXa',
+                          secretToken: 'K1tPIbkUX6eZE28sgP5qCIrwmTJnW5F1',
+                          redirectUrl: 'https://digilocker.meon.co.in/digilocker/thank-you-page',
                         );
 
-                        if (result != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => KycResultScreen(result: result)),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Verification cancelled or failed')),
-                          );
-                        }
+                        await DigiLockerNavigator.verifyWithDigiLocker(
+                          context: context,
+                          credentials: credentials,
+                          documents: 'aadhaar',
+                          onResult: (result) {
+                            if (result != null) {
+                              print(result);
+                            }
+                          },
+                        );
                       },
                       child: const Text('Verify with DigiLocker'),
                     ),
-
 
 
 

@@ -34,6 +34,8 @@ import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart
 import 'package:stayindia_owner/core/location/location_cubit.dart';
 import 'package:stayindia_owner/core/location/location_service.dart';
 
+import 'core/di/feature_di/digilocker_di.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -54,6 +56,10 @@ Future<void> init() async {
   registerPropertySetupFeature(sl);
   registerOffersFeature(sl);
   registerMovementFeature(sl);
+
+  // Register DigiLocker dependencies
+  DigiLockerDI.init(sl);
+
   sl.registerLazySingleton(() => ThemeCubit());
   sl.registerLazySingleton(() => GuestSessionCubit());
 
