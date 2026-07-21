@@ -15,6 +15,7 @@ import 'package:stayindia_owner/features/stock_management/presentation/cubit/sto
 import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import '../../../digilocker/domain/entities/digilocker_credentials.dart';
+import '../../../digilocker/presentation/pages/DigiLockerStorage.dart';
 import '../../../digilocker/presentation/utils/digilocker_navigator.dart';
 import 'account_settings_page.dart';
 import 'help_support_page.dart';
@@ -39,6 +40,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+
+  String _isAddressStored = "";
+
   @override
   void initState() {
     super.initState();
@@ -46,6 +50,18 @@ class _ProfilePageState extends State<ProfilePage> {
     if (profileCubit.state is ProfileInitial) {
       profileCubit.loadProfile();
     }
+    _checkAddressStored();
+
+  }
+
+  Future<void> _checkAddressStored() async {
+    final isStored = await DigiLockerStorage.getAddress();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isAddressStored = isStored!;
+    });
   }
 
   @override
@@ -213,54 +229,54 @@ class _ProfilePageState extends State<ProfilePage> {
                       ]),
                     ],
 
-                    if (!isStaff) ...[
-                      _buildGridSection('3. ${'business_management'.tr()}', [
-                        _ProfileCard(
-                          icon: Icons.insights_rounded,
-                          title: 'financial_insights'.tr(),
-                          iconBgColor: const Color(0xFFEFF6FF),
-                          iconColor: const Color(0xFF2563EB),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                create: (context) => sl<FinanceCubit>(),
-                                child: const FinancialDashboardPage(),
-                              ),
-                            ),
-                          ),
-                        ),
-                        _ProfileCard(
-                          icon: Icons.inventory_2_rounded,
-                          title: 'stock_management'.tr(),
-                          iconBgColor: const Color(0xFFFAF5FF),
-                          iconColor: const Color(0xFF9333EA),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                create: (context) => sl<StockCubit>(),
-                                child: const StockDashboardPage(),
-                              ),
-                            ),
-                          ),
-                        ),
-                        _ProfileCard(
-                          icon: Icons.people_alt_rounded,
-                          title: 'staff_management'.tr(),
-                          iconBgColor: const Color(0xFFF0FDFA),
-                          iconColor: const Color(0xFF0D9488),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const StaffManagementPage(),
-                            ),
-                          ),
-                        ),
-                      ]),
-                    ],
+                    // if (!isStaff) ...[
+                    //   _buildGridSection('3. ${'business_management'.tr()}', [
+                    //     _ProfileCard(
+                    //       icon: Icons.insights_rounded,
+                    //       title: 'financial_insights'.tr(),
+                    //       iconBgColor: const Color(0xFFEFF6FF),
+                    //       iconColor: const Color(0xFF2563EB),
+                    //       onTap: () => Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (context) => BlocProvider(
+                    //             create: (context) => sl<FinanceCubit>(),
+                    //             child: const FinancialDashboardPage(),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     _ProfileCard(
+                    //       icon: Icons.inventory_2_rounded,
+                    //       title: 'stock_management'.tr(),
+                    //       iconBgColor: const Color(0xFFFAF5FF),
+                    //       iconColor: const Color(0xFF9333EA),
+                    //       onTap: () => Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (context) => BlocProvider(
+                    //             create: (context) => sl<StockCubit>(),
+                    //             child: const StockDashboardPage(),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     _ProfileCard(
+                    //       icon: Icons.people_alt_rounded,
+                    //       title: 'staff_management'.tr(),
+                    //       iconBgColor: const Color(0xFFF0FDFA),
+                    //       iconColor: const Color(0xFF0D9488),
+                    //       onTap: () => Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (context) => const StaffManagementPage(),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ]),
+                    // ],
 
-                    _buildGridSection('4. ${'support_legal'.tr()}', [
+                    _buildGridSection('3. ${'support_legal'.tr()}', [
                       _ProfileCard(
                         icon: Icons.language_rounded,
                         title: 'change_language'.tr(),
@@ -305,7 +321,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ]),
 
                     if (!isStaff) ...[
-                      _buildGridSection('5. ${'tools_reports'.tr()}', [
+                      _buildGridSection('4. ${'tools_reports'.tr()}', [
                         _ProfileCard(
                           icon: Icons.card_giftcard_rounded,
                           title: 'refer_friend'.tr(),
@@ -382,7 +398,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ]),
                     ],
 
-                    _buildGridSection('6. ${'application'.tr()}', [
+                    _buildGridSection('5. ${'application'.tr()}', [
                       if (!isStaff)
                         _ProfileCard(
                           icon: Icons.share_rounded,
@@ -400,31 +416,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () => _handleLogout(context),
                       ),
                     ]),
-
-                    ElevatedButton(
-                      onPressed: () async {
-                        final credentials = DigiLockerCredentials(
-                          companyName: 'punithOiXa',
-                          secretToken: 'K1tPIbkUX6eZE28sgP5qCIrwmTJnW5F1',
-                          redirectUrl: 'https://digilocker.meon.co.in/digilocker/thank-you-page',
-                        );
-
-                        await DigiLockerNavigator.verifyWithDigiLocker(
-                          context: context,
-                          credentials: credentials,
-                          documents: 'aadhaar',
-                          onResult: (result) {
-                            if (result != null) {
-                              print(result);
-                            }
-                          },
-                        );
-                      },
-                      child: const Text('Verify with DigiLocker'),
-                    ),
-
-
-
                     SizedBox(height: 140.h),
                   ]),
                 ),
@@ -600,95 +591,141 @@ class _ProfilePageState extends State<ProfilePage> {
     String phone,
     String? avatar,
   ) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(20.w, 54.h, 20.w, 12.h),
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          margin: EdgeInsets.fromLTRB(20.w, 54.h, 20.w, 12.h),
+          padding: EdgeInsets.all(16.r),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFF98125), width: 1.5),
-            ),
-            child: CustomAvatar(
-              imageUrl: ApiConstants.getImageUrl(avatar),
-              name: name,
-              size: 52.0,
-              isCircle: true,
-              fontSize: 18.sp,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF1A1A1A),
-                    letterSpacing: -0.4,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          child: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFF98125), width: 1.5),
                 ),
-                if (phone.isNotEmpty) ...[
-                  SizedBox(height: 2.h),
-                  Text(
-                    phone,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: const Color(0xFF6B7280),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-                SizedBox(height: 8.h),
-                Row(
+                child: CustomAvatar(
+                  imageUrl: ApiConstants.getImageUrl(avatar),
+                  name: name,
+                  size: 52.0,
+                  isCircle: true,
+                  fontSize: 18.sp,
+                ),
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    BouncingWrapper(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AccountSettingsPage(),
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1A1A1A),
+                        letterSpacing: -0.4,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (phone.isNotEmpty) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        phone,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: const Color(0xFF6B7280),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFF2C599D), width: 1.2),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Text(
-                          'edit_profile'.tr(),
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF2C599D),
+                    ],
+                    SizedBox(height: 8.h),
+                    Row(
+                      children: [
+                        BouncingWrapper(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AccountSettingsPage(),
+                            ),
+                          ),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: const Color(0xFF2C599D), width: 1.2),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Text(
+                              'edit_profile'.tr(),
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF2C599D),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
+              SizedBox(width: 6.h),
+            ],
+          ),
+        ),
+
+        if (_isAddressStored.isNotEmpty)
+          Positioned(
+            top: 70.h,   // Relative to Stack top
+            right: 35.w, // Relative to Stack right
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 10.w,
+                vertical: 5.h,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F5E9),
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(
+                  color: const Color(0xFF4CAF50),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.verified,
+                    color: const Color(0xFF2E7D32),
+                    size: 16.sp,
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    "Verified",
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF2E7D32),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
-      ),
     );
   }
 

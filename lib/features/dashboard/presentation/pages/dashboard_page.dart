@@ -224,6 +224,7 @@ class _DashboardPageState extends State<DashboardPage>
               displacement: 40,
               child: BlocBuilder<DashboardCubit, DashboardState>(
                 builder: (context, state) {
+                  final hostelState = context.watch<HostelCubit>().state;
                   if (state is DashboardLoading) {
                     return const DashboardShimmer();
                   }
@@ -232,77 +233,78 @@ class _DashboardPageState extends State<DashboardPage>
                       parent: AlwaysScrollableScrollPhysics(),
                     ),
                     slivers: [
-                      const SliverToBoxAdapter(child: UnifiedHeader()),
-
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.h),
-                          child: const SummaryCardsSection(),
-                        ),
-                      ),
-
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          child: BlocBuilder<DashboardCubit, DashboardState>(
-                            buildWhen: (prev, curr) =>
-                                prev.selectedFloorIndex !=
-                                    curr.selectedFloorIndex ||
-                                (prev is DashboardLoaded &&
-                                    curr is DashboardLoaded &&
-                                    prev.data.occupancy != curr.data.occupancy),
-                            builder: (context, state) {
-                              List<String> floors = [
-                                StringUtils.translate(
-                                  'all_floors',
-                                  context: context,
-                                ),
-                              ];
-                              if (state is DashboardLoaded) {
-                                floors.addAll(
-                                  state.data.occupancy.floors.map((e) {
-                                    if (e.floorName == 'basement' ||
-                                        (e.floorNum != null &&
-                                            e.floorNum! < 0)) {
-                                      final absNum = e.floorNum != null
-                                          ? e.floorNum!.abs()
-                                          : 1;
-                                      if (absNum > 1) {
-                                        return '${StringUtils.translate('basement', context: context)} $absNum';
-                                      }
-                                      return StringUtils.translate(
-                                        'basement',
-                                        context: context,
-                                      );
-                                    }
-                                    return StringUtils.translate(
-                                      e.floorName == 'ground_floor'
-                                          ? 'ground_floor'
-                                          : 'floor_n',
-                                      context: context,
-                                      namedArgs: {'n': '${e.floorNum ?? 0}'},
-                                    );
-                                  }),
-                                );
-                              }
-                              return FloorFilter(
-                                floors: floors,
-                                selectedIndex: state.selectedFloorIndex + 1,
-                                onSelected: (index) => context
-                                    .read<DashboardCubit>()
-                                    .selectFloor(index - 1),
-                              );
-                            },
+                      if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty)...[
+                        const SliverToBoxAdapter(child: UnifiedHeader()),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                            child: const SummaryCardsSection(),
                           ),
                         ),
-                      ),
 
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
-                          child: const DashboardSearchBar(),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: BlocBuilder<DashboardCubit, DashboardState>(
+                              buildWhen: (prev, curr) =>
+                              prev.selectedFloorIndex !=
+                                  curr.selectedFloorIndex ||
+                                  (prev is DashboardLoaded &&
+                                      curr is DashboardLoaded &&
+                                      prev.data.occupancy != curr.data.occupancy),
+                              builder: (context, state) {
+                                List<String> floors = [
+                                  StringUtils.translate(
+                                    'all_floors',
+                                    context: context,
+                                  ),
+                                ];
+                                if (state is DashboardLoaded) {
+                                  floors.addAll(
+                                    state.data.occupancy.floors.map((e) {
+                                      if (e.floorName == 'basement' ||
+                                          (e.floorNum != null &&
+                                              e.floorNum! < 0)) {
+                                        final absNum = e.floorNum != null
+                                            ? e.floorNum!.abs()
+                                            : 1;
+                                        if (absNum > 1) {
+                                          return '${StringUtils.translate('basement', context: context)} $absNum';
+                                        }
+                                        return StringUtils.translate(
+                                          'basement',
+                                          context: context,
+                                        );
+                                      }
+                                      return StringUtils.translate(
+                                        e.floorName == 'ground_floor'
+                                            ? 'ground_floor'
+                                            : 'floor_n',
+                                        context: context,
+                                        namedArgs: {'n': '${e.floorNum ?? 0}'},
+                                      );
+                                    }),
+                                  );
+                                }
+                                return FloorFilter(
+                                  floors: floors,
+                                  selectedIndex: state.selectedFloorIndex + 1,
+                                  onSelected: (index) => context
+                                      .read<DashboardCubit>()
+                                      .selectFloor(index - 1),
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                      ),
+
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
+                            child: const DashboardSearchBar(),
+                          ),
+                        ),
+                      ],
 
                       const SliverToBoxAdapter(
                         child: SummaryCardDetailsSection(),

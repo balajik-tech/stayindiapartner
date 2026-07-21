@@ -501,6 +501,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           SizedBox(height: 32.h),
                           _buildSectionTitle('room_allocation'.tr()),
                           SizedBox(height: 16.h),
+                          _buildAcToggle(),
+                          SizedBox(height: 16.h),
                           _buildDropdown<String>(
                             'room_sharing_req'.tr() == 'room_sharing_req'
                                 ? 'Room Sharing *'
@@ -540,8 +542,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             ],
                           ),
                           SizedBox(height: 16.h),
-                          _buildAcToggle(),
-                          SizedBox(height: 16.h),
+
                           _buildDropdown<String>(
                             'bed_req'.tr(),
                             _beds,

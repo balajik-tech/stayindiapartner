@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
@@ -13,6 +15,10 @@ import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/profile_entity.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
+
+import '../../../digilocker/domain/entities/digilocker_credentials.dart';
+import '../../../digilocker/domain/entities/kyc_result.dart';
+import '../../../digilocker/presentation/utils/digilocker_navigator.dart';
 
 class AccountSettingsPage extends StatefulWidget {
   const AccountSettingsPage({super.key});
@@ -53,8 +59,49 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       _lastNameController.text = state.profile.lastName;
       _phoneController.text = state.profile.phone;
       _emailController.text = state.profile.email;
-      _addressController.text = state.profile.address;
+     loadAddress();
     }
+  }
+
+  Future<void> loadAddress() async {
+    final address = await getAddress();
+    if (address != null) {
+      _addressController.text = address;
+    }
+    final result = await getDigiLockerDetails();
+    if (result?.name != null && result!.name!.trim().isNotEmpty) {
+      final fullName = result.name!.trim();
+
+      final nameParts = fullName.split(RegExp(r'\s+'));
+
+      _lastNameController.text = nameParts.first;
+
+      if (nameParts.length > 1) {
+        _firstNameController.text = nameParts.sublist(1).join(' ');
+      } else {
+        _firstNameController.text = '';
+      }
+    }
+  }
+
+  /// Get address from saved DigiLocker details
+  static Future<String?> getAddress() async {
+    final result = await getDigiLockerDetails();
+    return result?.aadharAddress;
+  }
+
+
+  /// Get DigiLocker details
+  static Future<KycResult?> getDigiLockerDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final jsonString = prefs.getString('digi_locker_details');
+    if (jsonString == null) return null;
+
+    final Map<String, dynamic> json =
+    jsonDecode(jsonString) as Map<String, dynamic>;
+
+    return KycResult.fromJson(json);
   }
 
   Future<void> _pickAndUploadImage() async {
@@ -152,6 +199,65 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 120.h),
                         children: [
                           _buildAnimatedHeader(profile),
+
+                          SizedBox(height: 8.h),
+
+                          Padding(
+                            padding: EdgeInsets.only(left: 8.w, bottom: 12.h),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: InkWell(
+                                onTap:  () async {
+
+                                  if(_addressController.text.trim().isNotEmpty) {
+                                    return;
+                                  }
+
+
+                                  // TODO: Handle eKYC button tap
+                                  final credentials = DigiLockerCredentials(
+                                    companyName: 'punithOiXa',
+                                    secretToken: 'K1tPIbkUX6eZE28sgP5qCIrwmTJnW5F1',
+                                    redirectUrl: 'https://digilocker.meon.co.in/digilocker/thank-you-page',
+                                  );
+
+                                  await DigiLockerNavigator.verifyWithDigiLocker(
+                                    context: context,
+                                    credentials: credentials,
+                                    documents: 'aadhaar',
+                                    onResult: (result) {
+                                      if (result != null) {
+                                        print(result);
+                                      }
+                                    },
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 14.w,
+                                    vertical: 8.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryBlue,
+                                    borderRadius: BorderRadius.circular(30.r),
+                                  ),
+                                  child: Text(
+                                    _addressController.text.trim().isNotEmpty ?
+                                    "eKYC Completed":"eKYC",
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+
+
                           SizedBox(height: 32.h),
                           _buildSectionLabel(
                             'personal_info'.tr().toUpperCase(),
@@ -181,7 +287,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                                   ? ""
                                   : '+91 ${_phoneController.text}',
                               icon: Icons.phone_rounded,
-                              isLocked: true,
+                              isLocked: false,
+                              onTap: () => _showEditSheet(
+                                  'phone_number'.tr(),_phoneController,
+                                  inputType: TextInputType.phone,
+                              ),
                             ),
                             _EditableRow(
                               label: 'email_address'.tr(),
@@ -206,6 +316,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                                 _addressController,
                                 isLongText: true,
                               ),
+                              isLocked: true,
+
                             ),
                           ]),
                           SizedBox(height: 32.h),

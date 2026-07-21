@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/utils/image_utils.dart';
 
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
@@ -285,6 +286,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> logout() async {
     try {
       await _logout();
+      await clearDigiLockerDetails();
     } catch (e) {
       AppLogger.error('Logout error: $e');
     }
@@ -310,6 +312,12 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthUnauthenticated());
     SessionResetCoordinator.postResetCleanup();
     AppLogger.info('Owner account deleted.');
+  }
+
+  /// Clear DigiLocker details
+  static Future<void> clearDigiLockerDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('digi_locker_details');
   }
 
   Future<void> refreshProfile() async {

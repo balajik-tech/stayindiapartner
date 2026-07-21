@@ -118,12 +118,13 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
 
     final address = "$street, $district, $stateStr - $pincode";
 
-    if (fullName.isEmpty ||
-        email.isEmpty ||
-        stateStr.isEmpty ||
-        district.isEmpty ||
-        pincode.isEmpty ||
-        street.isEmpty) {
+    if (fullName.isEmpty
+        // email.isEmpty ||
+        // stateStr.isEmpty ||
+        // district.isEmpty ||
+        // pincode.isEmpty ||
+        // street.isEmpty
+    ) {
       HapticFeedback.vibrate();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields')),
@@ -195,11 +196,11 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const AuthStepProgress(
-                          currentStep: 1,
-                          totalSteps: 3,
-                          stepLabels: ['Personal', 'Property', 'Setup'],
-                        ),
+                        // const AuthStepProgress(
+                        //   currentStep: 1,
+                        //   totalSteps: 3,
+                        //   stepLabels: ['Personal', 'Property', 'Setup'],
+                        // ),
                         SizedBox(height: 32.h),
                         _buildHeader(),
                         SizedBox(height: 32.h),
@@ -386,87 +387,87 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
         ),
         SizedBox(height: 24.h),
         AuthTextField(
-          label: 'Email Address',
+          label: 'Email Address (Optional)',
           controller: _emailController,
           hintText: 'name@example.com',
           keyboardType: TextInputType.emailAddress,
         ),
         SizedBox(height: 24.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Residential Address',
-              style: GoogleFonts.outfit(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryBlue,
-              ),
-            ),
-            GestureDetector(
-              onTap: _isFetchingLocation ? null : _fetchLocation,
-              child: Row(
-                children: [
-                  if (_isFetchingLocation)
-                    SizedBox(
-                      width: 12.sp,
-                      height: 12.sp,
-                      child: const CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  else
-                    Icon(
-                      Icons.my_location_rounded,
-                      size: 14.sp,
-                      color: AppColors.primaryBlue,
-                    ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    _isFetchingLocation ? 'Fetching...' : 'Fetch Location',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        AuthTextField(
-          label: 'Street Address',
-          controller: _streetController,
-          hintText: 'House No, Building, Street Area',
-          maxLines: 2,
-        ),
-        SizedBox(height: 16.h),
-        Row(
-          children: [
-            Expanded(
-              child: AuthTextField(
-                label: 'District/City',
-                controller: _districtController,
-                hintText: 'e.g. Bangalore',
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: AuthTextField(
-                label: 'State',
-                controller: _stateController,
-                hintText: 'e.g. Karnataka',
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        AuthTextField(
-          label: 'Pincode',
-          controller: _pincodeController,
-          hintText: 'e.g. 560001',
-          keyboardType: TextInputType.number,
-        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Residential Address',
+        //       style: GoogleFonts.outfit(
+        //         fontSize: 14.sp,
+        //         fontWeight: FontWeight.w700,
+        //         color: AppColors.primaryBlue,
+        //       ),
+        //     ),
+        //     GestureDetector(
+        //       onTap: _isFetchingLocation ? null : _fetchLocation,
+        //       child: Row(
+        //         children: [
+        //           if (_isFetchingLocation)
+        //             SizedBox(
+        //               width: 12.sp,
+        //               height: 12.sp,
+        //               child: const CircularProgressIndicator(strokeWidth: 2),
+        //             )
+        //           else
+        //             Icon(
+        //               Icons.my_location_rounded,
+        //               size: 14.sp,
+        //               color: AppColors.primaryBlue,
+        //             ),
+        //           SizedBox(width: 4.w),
+        //           Text(
+        //             _isFetchingLocation ? 'Fetching...' : 'Fetch Location',
+        //             style: GoogleFonts.outfit(
+        //               fontSize: 12.sp,
+        //               fontWeight: FontWeight.w600,
+        //               color: AppColors.primaryBlue,
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        // SizedBox(height: 12.h),
+        // AuthTextField(
+        //   label: 'Street Address',
+        //   controller: _streetController,
+        //   hintText: 'House No, Building, Street Area',
+        //   maxLines: 2,
+        // ),
+        // SizedBox(height: 16.h),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       child: AuthTextField(
+        //         label: 'District/City',
+        //         controller: _districtController,
+        //         hintText: 'e.g. Bangalore',
+        //       ),
+        //     ),
+        //     SizedBox(width: 16.w),
+        //     Expanded(
+        //       child: AuthTextField(
+        //         label: 'State',
+        //         controller: _stateController,
+        //         hintText: 'e.g. Karnataka',
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        // SizedBox(height: 16.h),
+        // AuthTextField(
+        //   label: 'Pincode',
+        //   controller: _pincodeController,
+        //   hintText: 'e.g. 560001',
+        //   keyboardType: TextInputType.number,
+        // ),
       ],
     );
   }
