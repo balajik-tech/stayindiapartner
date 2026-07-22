@@ -41,7 +41,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
 
-  String _isAddressStored = "";
+  bool _isAddressStored = false;
 
   @override
   void initState() {
@@ -50,7 +50,20 @@ class _ProfilePageState extends State<ProfilePage> {
     if (profileCubit.state is ProfileInitial) {
       profileCubit.loadProfile();
     }
-    _checkAddressStored();
+    if (profileCubit.state is ProfileLoaded) {
+      final profile = (profileCubit.state as ProfileLoaded).profile;
+
+      if (profile.dlKyc?.isAadharVerified == true) {
+       setState(() {
+         _isAddressStored = true;
+       });
+      }else{
+       setState(() {
+         _isAddressStored = false;
+       });
+      }
+    }
+    // _checkAddressStored();
 
   }
 
@@ -59,9 +72,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (!mounted) return;
 
-    setState(() {
-      _isAddressStored = isStored!;
-    });
+    // setState(() {
+    //   _isAddressStored = isStored!;
+    // });
   }
 
   @override
@@ -687,7 +700,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
 
-        if (_isAddressStored.isNotEmpty)
+        if (_isAddressStored == true)
           Positioned(
             top: 70.h,   // Relative to Stack top
             right: 35.w, // Relative to Stack right

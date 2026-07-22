@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/dl_kyc_entity.dart';
 
 class ProfileEntity extends Equatable {
   final String id;
@@ -12,6 +13,7 @@ class ProfileEntity extends Equatable {
   final String? avatar;
   final String? associationId;
   final bool isVerifiedOwner;
+  final DlKycEntity? dlKyc;
 
   const ProfileEntity({
     required this.id,
@@ -25,6 +27,7 @@ class ProfileEntity extends Equatable {
     this.avatar,
     this.associationId,
     this.isVerifiedOwner = false,
+    this.dlKyc,
   });
 
   String get fullName => '$firstName $lastName'.trim();
@@ -42,5 +45,6 @@ class ProfileEntity extends Equatable {
     avatar,
     associationId,
     isVerifiedOwner,
+    dlKyc,
   ];
 }

@@ -13,4 +13,11 @@ abstract class DigiLockerRepository {
     String panName = '',
     String panNo = '',
   });
+
+  /// Saves KYC result to local storage
+  Future<Either<Failure, void>> saveKycResult(KycResult result);
+
+  /// Loads KYC result from local storage
+  Future<Either<Failure, KycResult?>> loadKycResult();
 }
+

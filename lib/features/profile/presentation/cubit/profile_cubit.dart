@@ -5,6 +5,7 @@ import 'package:stayindia_owner/core/utils/error_helper.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/core/utils/image_utils.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/profile_entity.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/dl_kyc_entity.dart';
 import 'package:stayindia_owner/features/profile/domain/usecases/profile_usecases.dart';
 
 abstract class ProfileState extends Equatable {
@@ -79,6 +80,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     String? address,
     String? dob,
     String? gender,
+    DlKycEntity? dlKyc,
   }) async {
     emit(ProfileUpdating());
     try {
@@ -89,6 +91,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         address: address,
         dob: dob,
         gender: gender,
+        dlKyc: dlKyc,
       );
       emit(ProfileUpdateSuccess(profile));
       emit(ProfileLoaded(profile));

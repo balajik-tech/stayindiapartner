@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:stayindia_owner/features/profile/domain/entities/profile_entity.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/dl_kyc_entity.dart';
 import 'package:stayindia_owner/features/profile/domain/repositories/profile_repository.dart';
 import 'package:stayindia_owner/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -22,6 +23,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     String? address,
     String? dob,
     String? gender,
+    DlKycEntity? dlKyc,
   }) {
     return remoteDataSource.updateProfile(
       firstName: firstName,
@@ -30,6 +32,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       address: address,
       dob: dob,
       gender: gender,
+      dlKyc: dlKyc,
     );
   }
 

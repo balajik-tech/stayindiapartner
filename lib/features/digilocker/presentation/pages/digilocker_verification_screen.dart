@@ -72,12 +72,18 @@ class _DigiLockerVerificationScreenState
     final data = response.data;
     return KycResult(
       name: data?.name,
-      aadharNumber: KycResult.maskAadhaar(data?.aadharNo),
+      fatherName: data?.fathername,
+      aadharNumber: data?.aadharNo,
+      maskedAadhaar: KycResult.maskAadhaar(data?.aadharNo),
       aadharAddress: data?.aadharAddress,
       dob: data?.dob,
       gender: data?.gender,
-      panNumber: data?.panNumber,
-      nameOnPan: data?.nameOnPan,
+      dateTime: DateTime.now().toIso8601String(),
+      aadharFilename: data?.aadharFilename,
+      aadharImgFilename: data?.aadharImgFilename,
+      adharImg: data?.adharimg,
+      // panNumber: data?.panNumber,
+      // nameOnPan: data?.nameOnPan,
       capturedAt: DateTime.now(),
     );
   }

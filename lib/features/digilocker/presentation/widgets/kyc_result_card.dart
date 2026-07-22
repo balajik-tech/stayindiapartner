@@ -17,8 +17,8 @@ class KycResultCard extends StatelessWidget {
       MapEntry('Date of Birth', result.dob),
       MapEntry('Gender', result.gender),
       MapEntry('Address', result.aadharAddress),
-      MapEntry('PAN Number', result.panNumber),
-      MapEntry('Name on PAN', result.nameOnPan),
+      // MapEntry('PAN Number', result.panNumber),
+      // MapEntry('Name on PAN', result.nameOnPan),
     ].where((e) => e.value != null && e.value!.trim().isNotEmpty).toList();
 
     return Card(
