@@ -50,10 +50,18 @@ class DigiLockerCubit extends Cubit<DigiLockerState> {
   }) async {
     emit(DigiLockerSaving());
     try {
+      // Split full name into first & last name
+      final fullName = result.name?.trim() ?? '';
+      final nameParts = fullName.split(RegExp(r'\s+'));
+
+      final derivedFirstName = nameParts.isNotEmpty ? nameParts.first : null;
+      final derivedLastName = nameParts.length > 1
+          ? nameParts.sublist(1).join(' ')
+          : null;
       // Build data map for API call
       final data = <String, dynamic>{
-        if (firstName != null) 'firstName': firstName,
-        if (lastName != null) 'lastName': lastName,
+        if (derivedLastName != null) 'firstName': derivedLastName,
+        if (derivedFirstName != null) 'lastName': derivedFirstName,
         // if (phone != null) 'phone': phone,
         if (email != null) 'email': email,
         if (result.aadharAddress != null) 'address': result.aadharAddress,
