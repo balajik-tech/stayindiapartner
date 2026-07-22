@@ -9,7 +9,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cubit.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'hostel_documents_page.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
@@ -1028,12 +1028,12 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
   }
 
   Future<void> _pickImages() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.image,
-      allowMultiple: true,
-    );
-    if (result != null && result.paths.isNotEmpty) {
-      setState(() => _localImagePaths.addAll(result.paths.whereType<String>()));
+    final ImagePicker picker = ImagePicker();
+    final List<XFile> pickedFiles = await picker.pickMultiImage();
+    if (pickedFiles.isNotEmpty) {
+      setState(
+            () => _localImagePaths.addAll(pickedFiles.map((file) => file.path)),
+      );
     }
   }
 
