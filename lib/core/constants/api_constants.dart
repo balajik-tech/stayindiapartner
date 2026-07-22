@@ -133,7 +133,8 @@ class ApiConstants {
     if (path.startsWith('http')) return path;
 
     if (path.startsWith('stay-india/')) {
-      return 'https://stay-india.s3.amazonaws.com/$path';
+      // return 'https://stay-india.s3.amazonaws.com/$path';
+      return 'https://stayindia.s3.ap-south-2.amazonaws.com/$path';
     }
 
     String serverRoot = baseUrl;
