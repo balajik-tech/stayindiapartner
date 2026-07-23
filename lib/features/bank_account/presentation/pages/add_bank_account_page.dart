@@ -345,7 +345,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: ElevatedButton(
-                    onPressed: (!state.isSubmitting && state.verifySuccess) ? () => _submit(context) : () => _submit(context),
+                    onPressed: (!state.isSubmitting && state.verifySuccess) ? () => _submit(context) : null,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 52),
                       backgroundColor: Colors.white,
