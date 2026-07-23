@@ -59,6 +59,7 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
         ifscCode: ifscCode,
         accountHolderName: accountHolderName,
         accountType: accountType,
+        branchName: state.branchDetails?.branchName,
       ),
     );
 

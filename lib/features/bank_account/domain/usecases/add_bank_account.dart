@@ -13,6 +13,7 @@ class AddBankAccountParams extends Equatable {
   final String ifscCode;
   final String accountHolderName;
   final BankAccountType accountType;
+  final String? branchName;
 
   const AddBankAccountParams({
     required this.propertyId,
@@ -21,6 +22,7 @@ class AddBankAccountParams extends Equatable {
     required this.ifscCode,
     required this.accountHolderName,
     required this.accountType,
+    this.branchName,
   });
 
   @override
@@ -53,6 +55,7 @@ class AddBankAccount implements UseCase<BankAccountEntity, AddBankAccountParams>
       ifscCode: params.ifscCode.toUpperCase(),
       accountHolderName: params.accountHolderName,
       accountType: params.accountType,
+      branchName: params.branchName,
     );
   }
 }

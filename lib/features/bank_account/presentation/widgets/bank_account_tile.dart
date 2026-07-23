@@ -24,12 +24,13 @@ class BankAccountTile extends StatelessWidget {
     final isVerificationPending = account.verificationStatus == AccountVerificationStatus.pending;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      padding: const EdgeInsets.only(left: 24, right: 0,bottom: 16,top: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 2),
@@ -47,7 +48,7 @@ class BankAccountTile extends StatelessWidget {
                         Flexible(
                           child: Text(
                             '${account.bankName} ${account.maskedAccountNumber}',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600,color: Colors.black),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -62,57 +63,57 @@ class BankAccountTile extends StatelessWidget {
                       '${account.accountHolderName} · ${account.ifscCode}',
                       style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
                     ),
-                    if (isVerificationPending) ...[
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF9A6600)),
-                          const SizedBox(width: 4),
-                          const Text(
-                            'Verification in progress',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: Color(0xFF9A6600),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    // if (isVerificationPending) ...[
+                      // const SizedBox(height: 6),
+                      // Row(
+                      //   children: [
+                      //     const Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF9A6600)),
+                      //     const SizedBox(width: 4),
+                      //     const Text(
+                      //       'Verification in progress',
+                      //       style: TextStyle(
+                      //         fontSize: 12.5,
+                      //         color: Color(0xFF9A6600),
+                      //         fontWeight: FontWeight.w500,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                    // ],
                   ],
                 ),
               ),
               isUpdating
                   ? const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
+                padding: EdgeInsets.all(8),
+                child: SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
                   : PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Color(0xFF6B7280)),
-                      onSelected: (value) {
-                        if (value == 'edit') onEdit();
-                        if (value == 'remove') onRemove();
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                        const PopupMenuItem(value: 'remove', child: Text('Remove')),
-                      ],
-                    ),
+                icon: const Icon(Icons.more_vert, color: Color(0xFF6B7280)),
+                onSelected: (value) {
+                  if (value == 'edit') onEdit();
+                  if (value == 'remove') onRemove();
+                },
+                itemBuilder: (context) => [
+                  // const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                  // const PopupMenuItem(value: 'remove', child: Text('Remove')),
+                ],
+              ),
             ],
           ),
           if (!account.isPrimary && !isUpdating)
             Padding(
-              padding: const EdgeInsets.only(left: 30, top: 6),
+              padding: const EdgeInsets.only(left: 30, top: 2),
               child: OutlinedButton(
                 onPressed: onSetPrimary,
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(0, 34),
                   padding: const EdgeInsets.symmetric(horizontal: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   side: const BorderSide(color: Color(0xFFD1D5DB)),
                   foregroundColor: Colors.black87,
                 ),

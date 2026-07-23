@@ -28,6 +28,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
     required String ifscCode,
     required String accountHolderName,
     required BankAccountType accountType,
+    String? branchName,
   }) async {
     try {
       final account = await dataSource.addBankAccount(
@@ -36,6 +37,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
         ifscCode: ifscCode,
         accountHolderName: accountHolderName,
         accountType: accountType,
+        branchName: branchName,
       );
       return Right(account);
     } catch (e) {

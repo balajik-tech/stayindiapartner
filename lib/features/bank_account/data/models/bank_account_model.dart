@@ -14,24 +14,26 @@ class BankAccountModel extends BankAccountEntity {
     required super.verificationStatus,
   });
 
-  factory BankAccountModel.fromJson(Map<String, dynamic> json) {
+  factory BankAccountModel.fromJson(
+    Map<String, dynamic> json, {
+    String? defaultPropertyId,
+  }) {
+    final accountTypeValue = json['accountType']?.toString() ?? '';
+    final ifscValue = json['ifsc'] ?? json['ifscCode'] ?? '';
+    final branchValue = json['branchName'] ?? json['branch'] ?? '';
+    final bankNameValue = (json['bankName'] as String?) ?? '';
+
     return BankAccountModel(
-      id: json['id'] as String,
-      propertyId: json['propertyId'] as String,
-      bankName: json['bankName'] as String,
-      branchName: json['branchName'] as String? ?? '',
+      id: (json['id'] ?? json['_id']) as String,
+      propertyId: (json['propertyId'] ?? json['hostelId'] ?? defaultPropertyId) as String,
+      bankName: bankNameValue,
+      branchName: branchValue as String,
       accountNumber: json['accountNumber'] as String,
-      ifscCode: json['ifscCode'] as String,
+      ifscCode: ifscValue as String,
       accountHolderName: json['accountHolderName'] as String,
-      accountType: BankAccountType.values.firstWhere(
-        (e) => e.name == json['accountType'],
-        orElse: () => BankAccountType.savings,
-      ),
-      isPrimary: json['isPrimary'] as bool? ?? false,
-      verificationStatus: AccountVerificationStatus.values.firstWhere(
-        (e) => e.name == json['verificationStatus'],
-        orElse: () => AccountVerificationStatus.pending,
-      ),
+      accountType: _parseAccountType(accountTypeValue),
+      isPrimary: (json['isPrimary'] as bool?) ?? (json['setAsPrimary'] as bool?) ?? false,
+      verificationStatus: _parseVerificationStatus(json['isVerified'] ?? json['verificationStatus']),
     );
   }
 
@@ -49,6 +51,26 @@ class BankAccountModel extends BankAccountEntity {
       'verificationStatus': verificationStatus.name,
     };
   }
+
+  static BankAccountType _parseAccountType(String value) {
+    final normalized = value.toLowerCase();
+    if (normalized.contains('current')) return BankAccountType.current;
+    return BankAccountType.savings;
+  }
+
+  static AccountVerificationStatus _parseVerificationStatus(dynamic value) {
+    if (value is bool) {
+      return value ? AccountVerificationStatus.verified : AccountVerificationStatus.pending;
+    }
+    if (value is String) {
+      final normalized = value.toLowerCase();
+      if (normalized.contains('verified')) return AccountVerificationStatus.verified;
+      if (normalized.contains('failed')) return AccountVerificationStatus.failed;
+    }
+    return AccountVerificationStatus.pending;
+  }
+
+
 
   factory BankAccountModel.fromEntity(BankAccountEntity e) {
     return BankAccountModel(

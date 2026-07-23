@@ -46,8 +46,6 @@ void registerBankAccountFeature(GetIt sl) {
     () => BankAccountRepositoryImpl(sl()),
   );
   sl.registerLazySingleton<BankAccountDataSource>(
-    () => BankAccountLocalDataSourceImpl(),
-    // Swap for BankAccountRemoteDataSourceImpl(client: sl()) once the
-    // real API is wired up — nothing else in this feature needs to change.
+    () => BankAccountRemoteDataSourceImpl(dio: sl()),
   );
 }

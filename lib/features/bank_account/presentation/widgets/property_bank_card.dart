@@ -54,19 +54,22 @@ class PropertyBankCard extends StatelessWidget {
                     children: [
                       Text(
                         property.name,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700,color: Colors.black),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${property.location} · ${property.code}',
-                        style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                        '${property.location} ',
+                            // '· '
+                            // '${property.code}',
+                        style: const TextStyle(fontSize: 13, color: Color(0xFF4f504e)),
                       ),
                     ],
                   ),
                 ),
-                property.verificationStatus == PropertyVerificationStatus.verified
-                    ? StatusBadge.verified()
-                    : StatusBadge.pending(),
+                StatusBadge.verified()
+                // property.verificationStatus == PropertyVerificationStatus.verified
+                //     ? StatusBadge.verified()
+                //     : StatusBadge.pending(),
               ],
             ),
           ),
@@ -89,11 +92,11 @@ class PropertyBankCard extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               child: Row(
                 children: [
-                  Icon(Icons.add, size: 18, color: Color(0xFF2E5AF5)),
+                  Icon(Icons.add, size: 18, color:  Color(0xFF284b76)),
                   SizedBox(width: 8),
                   Text(
                     'Add account to this property',
-                    style: TextStyle(color: Color(0xFF2E5AF5), fontWeight: FontWeight.w600, fontSize: 14),
+                    style: TextStyle(color:  Color(0xFF284b76), fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ],
               ),

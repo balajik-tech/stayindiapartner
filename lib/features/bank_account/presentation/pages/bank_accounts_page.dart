@@ -101,14 +101,14 @@ class _BankAccountsView extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.arrow_back),
+                        icon: const Icon(Icons.arrow_back,color: Colors.black,),
                       ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('Bank accounts',
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700,color: Colors.black)),
                             if (state is BankAccountLoaded)
                               Text(
                                 '$totalProperties properties · $totalAccounts accounts',
@@ -154,19 +154,19 @@ class _BankAccountsView extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(14),
-                          margin: const EdgeInsets.only(bottom: 16),
+                          margin: const EdgeInsets.only(bottom: 16,top: 16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE1EAFE),
+                            color: const Color(0xFFcde2fb),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.info_outline_rounded, color: Color(0xFF2E5AF5), size: 20),
+                              Icon(Icons.info_outline_rounded, color: Color(0xFF284b76), size: 20),
                               SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   'Payouts for each property go to its primary account.',
-                                  style: TextStyle(color: Color(0xFF1D3E9C), fontSize: 13.5),
+                                  style: TextStyle(color: Color(0xFF284b76), fontSize: 13.5,fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ],

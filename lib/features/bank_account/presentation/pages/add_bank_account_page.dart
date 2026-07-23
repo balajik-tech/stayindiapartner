@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../injection_container.dart';
+import '../../../profile/presentation/cubit/hostel_cubit.dart';
 import '../../domain/entities/bank_account_entity.dart';
 import '../cubit/add_bank_account_cubit.dart';
 
@@ -55,6 +56,10 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   }
 
   void _submit(BuildContext context) {
+    // final hostelCubit = context.read<HostelCubit>();
+    // final hostelState = hostelCubit.state;
+    // final selectedHostelID = hostelState.selectedHostelId;
+
     context.read<AddBankAccountCubit>().submit(
           propertyId: widget.propertyId,
           accountNumber: _accountNumberController.text.trim(),
@@ -91,15 +96,15 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(Icons.close,color: Colors.black),
                       ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: const [
                             Text('Add bank account',
-                                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-                            Text('Step 1 of 2 · Account details',
+                                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,color: Colors.black)),
+                            Text('Account details',
                                 style: TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
                           ],
                         ),
@@ -110,15 +115,15 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: LinearProgressIndicator(
-                    value: 0.5,
-                    minHeight: 3,
+                    value: 0,
+                    minHeight: 1,
                     backgroundColor: Color(0xFFEDEEF1),
                     color: Color(0xFF2E5AF5),
                   ),
                 ),
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                     children: [
                       _FieldLabel('Account number'),
                       TextField(
@@ -217,10 +222,10 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         decoration: _inputDecoration(),
                       ),
                       const Padding(
-                        padding: EdgeInsets.only(top: 6),
+                        padding: EdgeInsets.only(top: 8),
                         child: Text(
                           'Must match the name on your PAN. Mismatches fail verification.',
-                          style: TextStyle(fontSize: 12.5, color: Color(0xFF9CA3AF)),
+                          style: TextStyle(fontSize: 12.5, color: Color(0xFF565656)),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -244,11 +249,11 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F6F8),
+                          color: const Color(0xFFfcfdfb),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Row(
@@ -274,17 +279,33 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                     onPressed: state.isSubmitting ? null : () => _submit(context),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 52),
-                      backgroundColor: const Color(0xFF111827),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      elevation: 0,
+                      side: BorderSide(
+                        color: Colors.grey.shade300, // Grey border
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     child: state.isSubmitting
                         ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Text('Continue', style: TextStyle(fontWeight: FontWeight.w600)),
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.black,
+                      ),
+                    )
+                        : const Text(
+                      'Continue',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                 ),
               ],

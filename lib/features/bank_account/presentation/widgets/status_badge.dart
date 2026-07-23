@@ -26,8 +26,8 @@ class StatusBadge extends StatelessWidget {
 
   factory StatusBadge.primary() => const StatusBadge(
         label: 'Primary',
-        background: Color(0xFFE1EAFE),
-        foreground: Color(0xFF2E5AF5),
+        background: Color(0xFFcde2fb),
+        foreground:  Color(0xFF284b76),
       );
 
   @override

@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart';
+
 import '../../domain/entities/bank_account_entity.dart';
 import '../../domain/entities/bank_branch_details.dart';
 import '../../domain/entities/property_entity.dart';
+import '../../../../../core/constants/api_constants.dart';
 import '../models/bank_account_model.dart';
 import '../models/property_model.dart';
 
@@ -13,6 +16,8 @@ abstract class BankAccountDataSource {
     required String ifscCode,
     required String accountHolderName,
     required BankAccountType accountType,
+    String? branchName,
+    bool setAsPrimary = true,
   });
 
   Future<void> setPrimaryAccount({required String propertyId, required String accountId});
@@ -20,79 +25,27 @@ abstract class BankAccountDataSource {
   Future<BankBranchDetails> lookupIfsc(String ifscCode);
 }
 
-/// In-memory implementation seeded with the demo data shown in design.
-/// Replace with `BankAccountRemoteDataSourceImpl` (http/dio calls to your
-/// backend) once the API is ready — the repository only depends on the
-/// [BankAccountDataSource] contract above, so no other layer needs to change.
-class BankAccountLocalDataSourceImpl implements BankAccountDataSource {
-  final List<PropertyModel> _properties = [
-    PropertyModel(
-      id: 'prop_1',
-      name: 'Sunrise Residency',
-      location: 'Koramangala',
-      code: 'PG10428',
-      verificationStatus: PropertyVerificationStatus.verified,
-      accounts: [
-        const BankAccountModel(
-          id: 'acc_1',
-          propertyId: 'prop_1',
-          bankName: 'HDFC Bank',
-          branchName: 'Koramangala 5th Block, Bengaluru',
-          accountNumber: '50100482194821',
-          ifscCode: 'HDFC0001234',
-          accountHolderName: 'Ramesh Kumar',
-          accountType: BankAccountType.savings,
-          isPrimary: true,
-          verificationStatus: AccountVerificationStatus.verified,
-        ),
-        const BankAccountModel(
-          id: 'acc_2',
-          propertyId: 'prop_1',
-          bankName: 'ICICI Bank',
-          branchName: 'Koramangala, Bengaluru',
-          accountNumber: '00040051239075',
-          ifscCode: 'ICIC0000456',
-          accountHolderName: 'Ramesh Kumar',
-          accountType: BankAccountType.savings,
-          isPrimary: false,
-          verificationStatus: AccountVerificationStatus.verified,
-        ),
-      ],
-    ),
-    PropertyModel(
-      id: 'prop_2',
-      name: 'Green Nest PG',
-      location: 'HSR Layout',
-      code: 'PG10933',
-      verificationStatus: PropertyVerificationStatus.pending,
-      accounts: [
-        const BankAccountModel(
-          id: 'acc_3',
-          propertyId: 'prop_2',
-          bankName: 'Axis Bank',
-          branchName: 'HSR Layout, Bengaluru',
-          accountNumber: '91802003343390',
-          ifscCode: 'UTIB0002211',
-          accountHolderName: 'Ramesh Kumar',
-          accountType: BankAccountType.savings,
-          isPrimary: true,
-          verificationStatus: AccountVerificationStatus.pending,
-        ),
-      ],
-    ),
-  ];
+class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
+  final Dio _dio;
 
-  /// A tiny fake IFSC directory purely for demo purposes.
-  static const Map<String, BankBranchDetails> _ifscDirectory = {
-    'HDFC0001234': BankBranchDetails(bankName: 'HDFC Bank', branchName: 'Koramangala 5th Block, Bengaluru'),
-    'ICIC0000456': BankBranchDetails(bankName: 'ICICI Bank', branchName: 'Koramangala, Bengaluru'),
-    'UTIB0002211': BankBranchDetails(bankName: 'Axis Bank', branchName: 'HSR Layout, Bengaluru'),
-  };
+  BankAccountRemoteDataSourceImpl({required Dio dio}) : _dio = dio;
 
   @override
   Future<List<PropertyModel>> getProperties() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return _properties;
+    final response = await _dio.get(ApiConstants.bankAccounts);
+    final dynamic rawData = response.data['data'] ?? response.data;
+    if (rawData is! List) {
+      return [];
+    }
+
+    final List<PropertyModel> properties = [];
+    for (final owner in rawData) {
+      final hostels = (owner['hostels'] as List<dynamic>?) ?? [];
+      for (final hostel in hostels) {
+        properties.add(PropertyModel.fromJson(hostel as Map<String, dynamic>));
+      }
+    }
+    return properties;
   }
 
   @override
@@ -102,69 +55,56 @@ class BankAccountLocalDataSourceImpl implements BankAccountDataSource {
     required String ifscCode,
     required String accountHolderName,
     required BankAccountType accountType,
+    String? branchName,
+    bool setAsPrimary = true,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 600));
+    final payload = {
+      'hostelId': propertyId,
+      'accountHolderName': accountHolderName,
+      'accountNumber': accountNumber,
+      'accountType': accountType == BankAccountType.current ? 'Current' : 'Savings',
+      'branch': branchName ?? '',
+      'ifsc': ifscCode,
+      'isVerified': false,
+      'setAsPrimary': setAsPrimary,
+    };
 
-    final branch = _ifscDirectory[ifscCode];
-    final propertyIndex = _properties.indexWhere((p) => p.id == propertyId);
-    if (propertyIndex == -1) {
-      throw Exception('Property not found');
-    }
-
-    final newAccount = BankAccountModel(
-      id: 'acc_${DateTime.now().millisecondsSinceEpoch}',
-      propertyId: propertyId,
-      bankName: branch?.bankName ?? 'Bank',
-      branchName: branch?.branchName ?? '',
-      accountNumber: accountNumber,
-      ifscCode: ifscCode,
-      accountHolderName: accountHolderName,
-      accountType: accountType,
-      isPrimary: _properties[propertyIndex].accounts.isEmpty,
-      verificationStatus: AccountVerificationStatus.pending,
-    );
-
-    final updatedAccounts = [..._properties[propertyIndex].accounts, newAccount];
-    _properties[propertyIndex] = PropertyModel(
-      id: _properties[propertyIndex].id,
-      name: _properties[propertyIndex].name,
-      location: _properties[propertyIndex].location,
-      code: _properties[propertyIndex].code,
-      verificationStatus: _properties[propertyIndex].verificationStatus,
-      accounts: updatedAccounts,
-    );
-
-    return newAccount;
+    final response = await _dio.post(ApiConstants.bankAccounts, data: payload);
+    final data = response.data['data'] ?? response.data;
+    return BankAccountModel.fromJson(data as Map<String, dynamic>);
   }
 
   @override
   Future<void> setPrimaryAccount({required String propertyId, required String accountId}) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final propertyIndex = _properties.indexWhere((p) => p.id == propertyId);
-    if (propertyIndex == -1) throw Exception('Property not found');
-
-    final updatedAccounts = _properties[propertyIndex]
-        .accounts
-        .map((a) => BankAccountModel.fromEntity(a.copyWith(isPrimary: a.id == accountId)))
-        .toList();
-
-    _properties[propertyIndex] = PropertyModel(
-      id: _properties[propertyIndex].id,
-      name: _properties[propertyIndex].name,
-      location: _properties[propertyIndex].location,
-      code: _properties[propertyIndex].code,
-      verificationStatus: _properties[propertyIndex].verificationStatus,
-      accounts: updatedAccounts,
-    );
+    await _dio.put('${ApiConstants.bankAccounts}/$accountId', data: {'setAsPrimary': true});
   }
 
   @override
   Future<BankBranchDetails> lookupIfsc(String ifscCode) async {
-    await Future.delayed(const Duration(milliseconds: 350));
-    final branch = _ifscDirectory[ifscCode];
-    if (branch == null) {
+    final response = await _dio.get(ApiConstants.bankAccounts);
+    final dynamic rawData = response.data['data'] ?? response.data;
+    if (rawData is! List) {
       throw Exception('IFSC code not found');
     }
-    return branch;
+
+    for (final owner in rawData) {
+      final hostels = (owner['hostels'] as List<dynamic>?) ?? [];
+      for (final hostel in hostels) {
+        final accounts = (hostel['accounts'] as List<dynamic>?) ?? [];
+        for (final account in accounts) {
+          final accountJson = account as Map<String, dynamic>;
+          final accountIfsc = (accountJson['ifsc'] ?? accountJson['ifscCode'])?.toString();
+          if (accountIfsc == ifscCode) {
+            return BankBranchDetails(
+              bankName: (accountJson['bankName'] as String?) ?? '',
+              branchName: (accountJson['branchName'] as String?) ?? (accountJson['branch'] as String?) ?? '',
+            );
+          }
+        }
+      }
+    }
+
+    throw Exception('IFSC code not found');
   }
 }
+

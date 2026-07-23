@@ -16,6 +16,7 @@ abstract class BankAccountRepository {
     required String ifscCode,
     required String accountHolderName,
     required BankAccountType accountType,
+    String? branchName,
   });
 
   /// Marks [accountId] as the primary payout account for [propertyId].
