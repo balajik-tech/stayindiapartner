@@ -14,9 +14,8 @@ import 'package:stayindia_owner/features/stock_management/presentation/pages/sto
 import 'package:stayindia_owner/features/stock_management/presentation/cubit/stock_cubit.dart';
 import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:stayindia_owner/injection_container.dart';
-import '../../../digilocker/domain/entities/digilocker_credentials.dart';
+import '../../../bank_account/presentation/pages/bank_accounts_page.dart';
 import '../../../digilocker/presentation/pages/DigiLockerStorage.dart';
-import '../../../digilocker/presentation/utils/digilocker_navigator.dart';
 import 'account_settings_page.dart';
 import 'help_support_page.dart';
 import 'subscription_page.dart';
@@ -121,15 +120,27 @@ class _ProfilePageState extends State<ProfilePage> {
                   delegate: SliverChildListDelegate([
                     if (!isStaff) ...[
                       _buildGridSection('1. ${'personal_management'.tr()}', [
+                        // _ProfileCard(
+                        //   icon: Icons.person_rounded,
+                        //   title: 'account_settings'.tr(),
+                        //   iconBgColor: const Color(0xFFE0F2FE),
+                        //   iconColor: const Color(0xFF0284C7),
+                        //   onTap: () => Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) => const AccountSettingsPage(),
+                        //     ),
+                        //   ),
+                        // ),
                         _ProfileCard(
                           icon: Icons.person_rounded,
-                          title: 'account_settings'.tr(),
+                          title: 'bank_accounts'.tr(),
                           iconBgColor: const Color(0xFFE0F2FE),
                           iconColor: const Color(0xFF0284C7),
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const AccountSettingsPage(),
+                              builder: (context) => const BankAccountsPage(),
                             ),
                           ),
                         ),
