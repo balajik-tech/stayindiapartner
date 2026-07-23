@@ -20,14 +20,14 @@ class BankAccountModel extends BankAccountEntity {
   }) {
     final accountTypeValue = json['accountType']?.toString() ?? '';
     final ifscValue = json['ifsc'] ?? json['ifscCode'] ?? '';
-    final branchValue = json['branchName'] ?? json['branch'] ?? '';
-    final bankNameValue = (json['bankName'] as String?) ?? '';
+    final branchValue = (json['branchName'] as String?) ?? (json['branch'] as String?) ?? '';
+    final bankNameValue = (json['bankName'] as String?) ?? branchValue;
 
     return BankAccountModel(
       id: (json['id'] ?? json['_id']) as String,
       propertyId: (json['propertyId'] ?? json['hostelId'] ?? defaultPropertyId) as String,
       bankName: bankNameValue,
-      branchName: branchValue as String,
+      branchName: branchValue,
       accountNumber: json['accountNumber'] as String,
       ifscCode: ifscValue as String,
       accountHolderName: json['accountHolderName'] as String,

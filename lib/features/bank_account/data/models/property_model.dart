@@ -12,24 +12,34 @@ class PropertyModel extends PropertyEntity {
   });
 
   factory PropertyModel.fromJson(Map<String, dynamic> json) {
-    final id = (json['id'] ?? json['hostelId'] ?? json['_id']) as String;
-    final name = (json['name'] ?? json['hostelName'] ?? '') as String;
-    final area = json['area'] as String?;
-    final city = json['city'] as String?;
-    final location = json['location'] as String? ??
+    final hostelJson = (json['hostel'] as Map<String, dynamic>?) ?? json;
+    final id = (hostelJson['id'] ?? hostelJson['hostelId'] ?? hostelJson['_id']) as String;
+    final name = (hostelJson['name'] ?? hostelJson['hostelName'] ?? '') as String;
+    final area = hostelJson['area'] as String?;
+    final city = hostelJson['city'] as String?;
+    final location = hostelJson['location'] as String? ??
         ((area != null && city != null) ? '$area · $city' : (area ?? city ?? ''));
-    final code = (json['code'] ?? json['hostelId'] ?? '') as String;
+    final code = (hostelJson['code'] ?? hostelJson['hostelId'] ?? '') as String;
+
+    final accountData = (json['bankAccounts'] as List<dynamic>?) ??
+        (hostelJson['bankAccounts'] as List<dynamic>?) ??
+        [];
+
+    final rawVerification = hostelJson['verificationStatus'] ?? hostelJson['isVerified'];
+    final verificationStatus = rawVerification is bool
+        ? (rawVerification ? PropertyVerificationStatus.verified : PropertyVerificationStatus.pending)
+        : PropertyVerificationStatus.values.firstWhere(
+            (e) => e.name == rawVerification,
+            orElse: () => PropertyVerificationStatus.pending,
+          );
 
     return PropertyModel(
       id: id,
       name: name,
       location: location,
       code: code,
-      verificationStatus: PropertyVerificationStatus.values.firstWhere(
-        (e) => e.name == json['verificationStatus'],
-        orElse: () => PropertyVerificationStatus.pending,
-      ),
-      accounts: (json['accounts'] as List<dynamic>? ?? [])
+      verificationStatus: verificationStatus,
+      accounts: accountData
           .map((a) => BankAccountModel.fromJson(
                 a as Map<String, dynamic>,
                 defaultPropertyId: id,
@@ -45,7 +55,7 @@ class PropertyModel extends PropertyEntity {
       'location': location,
       'code': code,
       'verificationStatus': verificationStatus.name,
-      'accounts': accounts.map((a) => BankAccountModel.fromEntity(a).toJson()).toList(),
+      'bankAccounts': accounts.map((a) => BankAccountModel.fromEntity(a).toJson()).toList(),
     };
   }
 }

@@ -101,7 +101,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     for (final owner in rawData) {
       final hostels = (owner['hostels'] as List<dynamic>?) ?? [];
       for (final hostel in hostels) {
-        final accounts = (hostel['accounts'] as List<dynamic>?) ?? [];
+        final accounts = (hostel['bankAccounts'] as List<dynamic>?) ?? [];
         for (final account in accounts) {
           final accountJson = account as Map<String, dynamic>;
           final accountIfsc = (accountJson['ifsc'] ?? accountJson['ifscCode'])?.toString();
