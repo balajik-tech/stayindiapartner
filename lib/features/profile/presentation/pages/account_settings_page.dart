@@ -447,12 +447,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    isVerified
-                        ? Icons.verified
-                        : Icons.access_time_rounded,
-                    color: isVerified
-                        ? Colors.green
-                        : const Color(0xFF9C3A32),
+                    Icons.access_time_rounded,
+                    color:  const Color(0xFF9C3A32),
                     size: 18.sp,
                   ),
                   SizedBox(width: 8.w),
