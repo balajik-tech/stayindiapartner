@@ -6,6 +6,7 @@ import 'domain/repositories/bank_account_repository.dart';
 import 'domain/usecases/add_bank_account.dart';
 import 'domain/usecases/get_properties_with_accounts.dart';
 import 'domain/usecases/set_primary_account.dart';
+import 'domain/usecases/verify_bank_account.dart';
 import 'presentation/cubit/add_bank_account_cubit.dart';
 import 'presentation/cubit/bank_account_cubit.dart';
 
@@ -30,12 +31,14 @@ void registerBankAccountFeature(GetIt sl) {
   sl.registerFactory(
     () => AddBankAccountCubit(
       addBankAccount: sl(),
+      verifyBankAccount: sl(),
     ),
   );
 
   // Domain - use cases
   sl.registerLazySingleton(() => GetPropertiesWithAccounts(sl()));
   sl.registerLazySingleton(() => AddBankAccount(sl()));
+  sl.registerLazySingleton(() => VerifyBankAccount(sl()));
   sl.registerLazySingleton(() => SetPrimaryAccount(sl()));
 
   // Data
@@ -43,6 +46,9 @@ void registerBankAccountFeature(GetIt sl) {
     () => BankAccountRepositoryImpl(sl()),
   );
   sl.registerLazySingleton<BankAccountDataSource>(
-    () => BankAccountRemoteDataSourceImpl(dio: sl()),
+    () => BankAccountRemoteDataSourceImpl(
+      dio: sl(),
+      tokenStorage: sl(),
+    ),
   );
 }

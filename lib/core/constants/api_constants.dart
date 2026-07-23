@@ -23,6 +23,8 @@ class ApiConstants {
     return url;
   }
 
+  static const String bankJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDA3MiIsInRpbWVzdGFtcCI6MTc4NDgwODM5OH0=.hXN3W7H2R9KMLXjyRFwS5bdXL0uvAQz4z4BCOKrvbk8=";
+
   static const String requestOtp = '/auth/request-otp';
   static const String verifyOtp = '/auth/verify-otp';
   static const String staffLogin = '/auth/login';
@@ -93,6 +95,7 @@ class ApiConstants {
   static const String paymentReminders = '/payments/reminders';
   static const String bills = '/bills';
   static const String bankAccounts = '/bankaccounts';
+  static const String externalBankVerification = 'https://api.digiverification.com/api/v2/account-verification/verify';
 
   static const String transactions = '/transactions';
 

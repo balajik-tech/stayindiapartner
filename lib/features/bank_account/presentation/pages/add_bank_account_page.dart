@@ -46,6 +46,14 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
       _confirmAccountNumberController.text.isNotEmpty &&
       _accountNumberController.text == _confirmAccountNumberController.text;
 
+  bool get _isFormValid {
+    return _accountNumberController.text.trim().isNotEmpty &&
+        _confirmAccountNumberController.text.trim().isNotEmpty &&
+        _numbersMatch &&
+        _ifscController.text.trim().length == 11 &&
+        _holderNameController.text.trim().isNotEmpty;
+  }
+
   @override
   void dispose() {
     _accountNumberController.dispose();
@@ -56,10 +64,6 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   }
 
   void _submit(BuildContext context) {
-    // final hostelCubit = context.read<HostelCubit>();
-    // final hostelState = hostelCubit.state;
-    // final selectedHostelID = hostelState.selectedHostelId;
-
     context.read<AddBankAccountCubit>().submit(
           propertyId: widget.propertyId,
           accountNumber: _accountNumberController.text.trim(),
@@ -67,6 +71,18 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
           ifscCode: _ifscController.text.trim().toUpperCase(),
           accountHolderName: _holderNameController.text.trim(),
           accountType: _accountType,
+        );
+  }
+
+  void _verify(BuildContext context) {
+    final accountNumber = _accountNumberController.text.trim();
+    final ifscCode = _ifscController.text.trim().toUpperCase();
+    final clientRefNum = '${widget.propertyId}_$accountNumber';
+
+    context.read<AddBankAccountCubit>().verify(
+          accountNumber: accountNumber,
+          ifscCode: ifscCode,
+          clientRefNum: clientRefNum,
         );
   }
 
@@ -80,6 +96,16 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
             if (state.submitError != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.submitError!)),
+              );
+            }
+            if (state.verifyError != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.verifyError!)),
+              );
+            }
+            if (state.verifySuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Bank account verified successfully.')),
               );
             }
             if (state.isSuccess) {
@@ -224,20 +250,109 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      if (state.verifySuccess && state.verificationResult != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE6F4EA),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFF1E8E42), width: 1),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: const [
+                                  Icon(Icons.check_circle, size: 18, color: Color(0xFF1E8E42)),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Verified',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF1E8E42),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // Text(
+                              //   'Branch: ${state.verificationResult!.branchName}',
+                              //   style: const TextStyle(fontSize: 13, color: Color(0xFF1E8E42)),
+                              // ),
+                              // const SizedBox(height: 4),
+                              // Text(
+                              //   'Bank: ${state.verificationResult!.bankName}',
+                              //   style: const TextStyle(fontSize: 13, color: Color(0xFF1E8E42)),
+                              // ),
+                              // const SizedBox(height: 4),
+                              Text(
+                                'Beneficiary: ${state.verificationResult!.beneficiaryName}',
+                                style: const TextStyle(fontSize: 13, color: Color(0xFF1E8E42)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ]
+
                     ],
                   ),
                 ),
+
+                  if (state.verifySuccess && state.verificationResult != null) ...[]
+                  else ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: ElevatedButton(
+                        onPressed: (!state.isVerifying && _isFormValid) ? () => _verify(context) : null,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 52),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          elevation: 0,
+                          side: BorderSide(
+                            color: _isFormValid ? Colors.grey.shade300 : Colors.grey.shade200,
+                            width: 1.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: state.isVerifying
+                            ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.black,
+                          ),
+                        )
+                            : Text(
+                          'Verify',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                            color: _isFormValid ? Colors.black : Colors.grey.shade500,
+                          ),
+                        ),
+                      ),
+                    )
+                  ]
+               ,
+
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: ElevatedButton(
-                    onPressed: state.isSubmitting ? null : () => _submit(context),
+                    onPressed: (!state.isSubmitting && state.verifySuccess) ? () => _submit(context) : null,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 52),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
                       elevation: 0,
                       side: BorderSide(
-                        color: Colors.grey.shade300, // Grey border
+                        color: state.verifySuccess ? Colors.grey.shade300 : Colors.grey.shade200,
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
@@ -253,11 +368,12 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         color: Colors.black,
                       ),
                     )
-                        : const Text(
+                        : Text(
                       'Continue',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 18,
+                        color: state.verifySuccess ? Colors.black : Colors.grey.shade500,
                       ),
                     ),
                   ),

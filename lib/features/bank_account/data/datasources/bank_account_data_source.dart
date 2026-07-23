@@ -1,14 +1,22 @@
 import 'package:dio/dio.dart';
 
 import '../../domain/entities/bank_account_entity.dart';
+import '../../domain/entities/bank_account_verification_result.dart';
 import '../../domain/entities/bank_branch_details.dart';
 import '../../domain/entities/property_entity.dart';
 import '../../../../../core/constants/api_constants.dart';
+import '../../../../../core/services/token_storage.dart';
 import '../models/bank_account_model.dart';
 import '../models/property_model.dart';
 
 abstract class BankAccountDataSource {
   Future<List<PropertyModel>> getProperties();
+
+  Future<BankAccountVerificationResult> verifyBankAccount({
+    required String accountNumber,
+    required String ifscCode,
+    required String clientRefNum,
+  });
 
   Future<BankAccountModel> addBankAccount({
     required String propertyId,
@@ -27,8 +35,11 @@ abstract class BankAccountDataSource {
 
 class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
   final Dio _dio;
+  final TokenStorage _tokenStorage;
 
-  BankAccountRemoteDataSourceImpl({required Dio dio}) : _dio = dio;
+  BankAccountRemoteDataSourceImpl({required Dio dio, required TokenStorage tokenStorage})
+      : _dio = dio,
+        _tokenStorage = tokenStorage;
 
   @override
   Future<List<PropertyModel>> getProperties() async {
@@ -105,6 +116,50 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     }
 
     throw Exception('IFSC code not found');
+  }
+
+  @override
+  Future<BankAccountVerificationResult> verifyBankAccount({
+    required String accountNumber,
+    required String ifscCode,
+    required String clientRefNum,
+  }) async {
+    final token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Missing authorization token for bank account verification.');
+    }
+
+    final payload = {
+      'account_number': accountNumber,
+      'ifsc_code': ifscCode,
+      'clientRefNum': clientRefNum,
+    };
+
+    final response = await _dio.post(
+      ApiConstants.externalBankVerification,
+      data: payload,
+      options: Options(
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'jwt-token': ApiConstants.bankJwtToken,
+        },
+      ),
+    );
+
+    final raw = response.data;
+    if (raw is! Map<String, dynamic> || raw['status'] != true) {
+      final message = raw['message']?.toString() ?? 'Bank account verification failed.';
+      throw Exception(message);
+    }
+
+    final result = raw['data'] as Map<String, dynamic>?;
+    if (result == null || result['status']?.toString().toUpperCase() != 'SUCCESS') {
+      final message = result?['status']?.toString() ?? 'Bank account verification did not succeed.';
+      throw Exception(message);
+    }
+
+    return BankAccountVerificationResult.fromJson(result);
   }
 }
 

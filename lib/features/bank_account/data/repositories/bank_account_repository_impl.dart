@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/bank_account_entity.dart';
+import '../../domain/entities/bank_account_verification_result.dart';
 import '../../domain/entities/bank_branch_details.dart';
 import '../../domain/entities/property_entity.dart';
 import '../../domain/repositories/bank_account_repository.dart';
@@ -53,6 +54,24 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
     try {
       await dataSource.setPrimaryAccount(propertyId: propertyId, accountId: accountId);
       return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, BankAccountVerificationResult>> verifyBankAccount({
+    required String accountNumber,
+    required String ifscCode,
+    required String clientRefNum,
+  }) async {
+    try {
+      final result = await dataSource.verifyBankAccount(
+        accountNumber: accountNumber,
+        ifscCode: ifscCode,
+        clientRefNum: clientRefNum,
+      );
+      return Right(result);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/bank_account_entity.dart';
+import '../entities/bank_account_verification_result.dart';
 import '../entities/bank_branch_details.dart';
 import '../entities/property_entity.dart';
 
@@ -17,6 +18,12 @@ abstract class BankAccountRepository {
     required String accountHolderName,
     required BankAccountType accountType,
     String? branchName,
+  });
+
+  Future<Either<Failure, BankAccountVerificationResult>> verifyBankAccount({
+    required String accountNumber,
+    required String ifscCode,
+    required String clientRefNum,
   });
 
   /// Marks [accountId] as the primary payout account for [propertyId].
