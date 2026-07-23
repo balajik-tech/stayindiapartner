@@ -40,8 +40,6 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
 
-  bool _isAddressStored = false;
-
   @override
   void initState() {
     super.initState();
@@ -49,31 +47,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (profileCubit.state is ProfileInitial) {
       profileCubit.loadProfile();
     }
-    if (profileCubit.state is ProfileLoaded) {
-      final profile = (profileCubit.state as ProfileLoaded).profile;
-
-      if (profile.dlKyc?.isAadharVerified == true) {
-       setState(() {
-         _isAddressStored = true;
-       });
-      }else{
-       setState(() {
-         _isAddressStored = false;
-       });
-      }
-    }
-    // _checkAddressStored();
-
-  }
-
-  Future<void> _checkAddressStored() async {
-    final isStored = await DigiLockerStorage.getAddress();
-
-    if (!mounted) return;
-
-    // setState(() {
-    //   _isAddressStored = isStored!;
-    // });
   }
 
   @override
@@ -106,6 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   name,
                   phone,
                   profile?.avatar,
+                  profile?.dlKyc?.isAadharVerified
                 ),
               ),
               SliverToBoxAdapter(
@@ -614,6 +588,7 @@ class _ProfilePageState extends State<ProfilePage> {
     String name,
     String phone,
     String? avatar,
+      bool? isAaadharVerified
   ) {
 
     return Stack(
@@ -711,7 +686,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
 
-        if (_isAddressStored == true)
+        if (isAaadharVerified == true)
           Positioned(
             top: 70.h,   // Relative to Stack top
             right: 35.w, // Relative to Stack right

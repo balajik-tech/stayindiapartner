@@ -65,7 +65,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       _phoneController.text = state.profile.phone;
       _emailController.text = state.profile.email;
      // loadAddress();
-      if(state.profile.isVerifiedOwner == true){
+      if(state.profile.dlKyc?.isAadharVerified == true){
         _addressController.text = state.profile.address;
       }else{
         loadAddress2();
@@ -328,7 +328,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
                           SizedBox(height: 8.h),
 
-                          if(_currentProfile?.isVerifiedOwner == true)...[
+                          if(_currentProfile?.dlKyc?.isAadharVerified == true)...[
                             buildVerifiedEkycCard(),
                           ] else ...[
                             _buildEkycCard(),
