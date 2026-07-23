@@ -168,53 +168,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         textCapitalization: TextCapitalization.characters,
                         maxLength: 11,
                         decoration: _inputDecoration().copyWith(counterText: ''),
-                        onChanged: (value) =>
-                            context.read<AddBankAccountCubit>().onIfscChanged(value.toUpperCase()),
                       ),
-                      if (state.isIfscLoading)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 8),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
-                              SizedBox(width: 8),
-                              Text('Looking up bank...', style: TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
-                            ],
-                          ),
-                        )
-                      else if (state.branchDetails != null)
-                        Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5F6F8),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.account_balance_rounded, size: 18, color: Color(0xFF6B7280)),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  state.branchDetails!.displayLabel,
-                                  style: const TextStyle(fontSize: 13.5),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      else if (state.ifscError != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            state.ifscError!,
-                            style: const TextStyle(fontSize: 12.5, color: Colors.redAccent),
-                          ),
-                        ),
                       const SizedBox(height: 16),
                       _FieldLabel('Account holder name'),
                       TextField(
