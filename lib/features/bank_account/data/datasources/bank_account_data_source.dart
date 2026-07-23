@@ -25,6 +25,7 @@ abstract class BankAccountDataSource {
     required String accountHolderName,
     required BankAccountType accountType,
     String? branchName,
+    String? bankName,
     bool setAsPrimary = true,
   });
 
@@ -67,6 +68,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     required String accountHolderName,
     required BankAccountType accountType,
     String? branchName,
+    String? bankName,
     bool setAsPrimary = true,
   }) async {
     final payload = {
@@ -75,6 +77,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       'accountNumber': accountNumber,
       'accountType': accountType == BankAccountType.current ? 'Current' : 'Savings',
       'branch': branchName ?? '',
+      'bankName': bankName ?? '',
       'ifsc': ifscCode,
       'isVerified': false,
       'setAsPrimary': setAsPrimary,

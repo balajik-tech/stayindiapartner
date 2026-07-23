@@ -25,7 +25,8 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
     required String accountHolderName,
     required BankAccountType accountType,
   }) async {
-    final branchName = state.verificationResult?.branchName ?? "Hyderabad";
+    final branchName = state.verificationResult?.branchName ?? 'Hyderabad';
+    final bankName = state.verificationResult?.bankName ?? "SBI";
     emit(state.copyWith(isSubmitting: true, clearSubmitError: true, clearVerifyError: true, clearVerifySuccess: true));
 
     final result = await addBankAccount(
@@ -37,6 +38,7 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
         accountHolderName: accountHolderName,
         accountType: accountType,
         branchName: branchName,
+        bankName: bankName,
       ),
     );
 

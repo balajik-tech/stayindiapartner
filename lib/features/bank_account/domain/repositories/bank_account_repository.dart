@@ -18,6 +18,7 @@ abstract class BankAccountRepository {
     required String accountHolderName,
     required BankAccountType accountType,
     String? branchName,
+    String? bankName,
   });
 
   Future<Either<Failure, BankAccountVerificationResult>> verifyBankAccount({
