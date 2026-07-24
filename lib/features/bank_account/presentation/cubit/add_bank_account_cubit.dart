@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/bank_account_entity.dart';
 import '../../domain/entities/bank_account_verification_result.dart';
+import '../../domain/entities/bank_branch_details.dart';
 import '../../domain/usecases/add_bank_account.dart';
+import '../../domain/usecases/lookup_ifsc.dart';
 import '../../domain/usecases/verify_bank_account.dart';
 
 part 'add_bank_account_state.dart';
@@ -11,10 +13,12 @@ part 'add_bank_account_state.dart';
 class AddBankAccountCubit extends Cubit<AddBankAccountState> {
   final AddBankAccount addBankAccount;
   final VerifyBankAccount verifyBankAccount;
+  final LookupIfsc lookupIfsc;
 
   AddBankAccountCubit({
     required this.addBankAccount,
     required this.verifyBankAccount,
+    required this.lookupIfsc,
   }) : super(const AddBankAccountState());
 
   Future<void> submit({
@@ -27,6 +31,7 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
   }) async {
     final branchName = state.verificationResult?.branchName ?? '';
     final bankName = state.verificationResult?.bankName ?? "";
+    final bankHolderName = state.verificationResult?.beneficiaryName ?? "";
     emit(state.copyWith(isSubmitting: true, clearSubmitError: true, clearVerifyError: true, clearVerifySuccess: true));
 
     final result = await addBankAccount(
@@ -35,7 +40,7 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
         accountNumber: accountNumber,
         confirmAccountNumber: confirmAccountNumber,
         ifscCode: ifscCode,
-        accountHolderName: accountHolderName,
+        accountHolderName: bankHolderName,
         accountType: accountType,
         branchName: branchName,
         bankName: bankName,
@@ -45,6 +50,39 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
     result.fold(
       (failure) => emit(state.copyWith(isSubmitting: false, submitError: failure.message)),
       (account) => emit(state.copyWith(isSubmitting: false, createdAccount: account)),
+    );
+  }
+
+  Future<void> lookupIfscCode(String ifscCode) async {
+    final trimmedCode = ifscCode.trim().toUpperCase();
+    if (trimmedCode.length != 11) {
+      emit(state.copyWith(
+        isLookupLoading: false,
+        clearLookupError: true,
+        clearIfscLookupDetails: true,
+      ));
+      return;
+    }
+
+    emit(state.copyWith(
+      isLookupLoading: true,
+      clearLookupError: true,
+      clearIfscLookupDetails: true,
+    ));
+
+    final result = await lookupIfsc(trimmedCode);
+
+    result.fold(
+      (failure) => emit(state.copyWith(
+        isLookupLoading: false,
+        lookupError: failure.message,
+        clearIfscLookupDetails: true,
+      )),
+      (details) => emit(state.copyWith(
+        isLookupLoading: false,
+        ifscLookupDetails: details,
+        clearLookupError: true,
+      )),
     );
   }
 

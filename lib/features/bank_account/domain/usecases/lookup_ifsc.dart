@@ -11,9 +11,10 @@ class LookupIfsc implements UseCase<BankBranchDetails, String> {
 
   @override
   Future<Either<Failure, BankBranchDetails>> call(String ifscCode) {
-    if (ifscCode.trim().length != 11) {
+    final trimmedCode = ifscCode.trim().toUpperCase();
+    if (trimmedCode.length != 11) {
       return Future.value(const Left(ValidationFailure(message: 'Enter a valid 11-character IFSC code.')));
     }
-    return repository.lookupIfsc(ifscCode.toUpperCase());
+    return repository.lookupIfsc(trimmedCode);
   }
 }

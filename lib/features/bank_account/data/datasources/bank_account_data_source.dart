@@ -95,30 +95,31 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
 
   @override
   Future<BankBranchDetails> lookupIfsc(String ifscCode) async {
-    final response = await _dio.get(ApiConstants.bankAccounts);
-    final dynamic rawData = response.data['data'] ?? response.data;
-    if (rawData is! List) {
+    final response = await _dio.get(
+      'https://ifsc.razorpay.com/$ifscCode',
+      options: Options(
+        headers: {
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    final raw = response.data;
+    if (raw is! Map<String, dynamic>) {
       throw Exception('IFSC code not found');
     }
 
-    for (final owner in rawData) {
-      final hostels = (owner['hostels'] as List<dynamic>?) ?? [];
-      for (final hostel in hostels) {
-        final accounts = (hostel['bankAccounts'] as List<dynamic>?) ?? [];
-        for (final account in accounts) {
-          final accountJson = account as Map<String, dynamic>;
-          final accountIfsc = (accountJson['ifsc'] ?? accountJson['ifscCode'])?.toString();
-          if (accountIfsc == ifscCode) {
-            return BankBranchDetails(
-              bankName: (accountJson['bankName'] as String?) ?? '',
-              branchName: (accountJson['branchName'] as String?) ?? (accountJson['branch'] as String?) ?? '',
-            );
-          }
-        }
-      }
+    final bankName = (raw['BANK'] ?? raw['BANK_NAME'] ?? raw['bank'] ?? '').toString().trim();
+    final branchName = (raw['ADDRESS'] ?? raw['BRANCH'] ?? raw['branch'] ?? '').toString().trim();
+
+    if (bankName.isEmpty && branchName.isEmpty) {
+      throw Exception('IFSC code not found');
     }
 
-    throw Exception('IFSC code not found');
+    return BankBranchDetails(
+      bankName: bankName,
+      branchName: branchName,
+    );
   }
 
   @override

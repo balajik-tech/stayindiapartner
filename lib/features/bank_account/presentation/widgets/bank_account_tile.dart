@@ -45,8 +45,6 @@ class BankAccountTile extends StatelessWidget {
                           color:  Color(0xFF1f3d5c),
                           size: 18,
                         )
-                    // ? const Icon(Icons.check_circle, color: Color(0xFF2E5AF5), size: 20)
-                    // : const Icon(Icons.circle_outlined, color: Color(0xFFBFC4CC), size: 20),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -74,21 +72,21 @@ class BankAccountTile extends StatelessWidget {
                       style: const TextStyle(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w600),
                     ),
                     // if (isVerificationPending) ...[
-                      // const SizedBox(height: 6),
-                      // Row(
-                      //   children: [
-                      //     const Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF9A6600)),
-                      //     const SizedBox(width: 4),
-                      //     const Text(
-                      //       'Verification in progress',
-                      //       style: TextStyle(
-                      //         fontSize: 12.5,
-                      //         color: Color(0xFF9A6600),
-                      //         fontWeight: FontWeight.w500,
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
+                    //   const SizedBox(height: 6),
+                    //   Row(
+                    //     children: [
+                    //       const Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF9A6600)),
+                    //       const SizedBox(width: 4),
+                    //       const Text(
+                    //         'Verification in progress',
+                    //         style: TextStyle(
+                    //           fontSize: 12.5,
+                    //           color: Color(0xFF9A6600),
+                    //           fontWeight: FontWeight.w500,
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
                     // ],
                   ],
                 ),
@@ -109,8 +107,8 @@ class BankAccountTile extends StatelessWidget {
                   if (value == 'remove') onRemove();
                 },
                 itemBuilder: (context) => [
-                  // const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  // const PopupMenuItem(value: 'remove', child: Text('Remove')),
+                  const PopupMenuItem(value: 'edit', child: Text('View')),
+                  const PopupMenuItem(value: 'remove', child: Text('Delete')),
                 ],
               ),
             ],

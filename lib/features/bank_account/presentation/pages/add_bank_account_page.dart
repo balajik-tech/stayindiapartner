@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../injection_container.dart';
 import '../../../profile/presentation/cubit/hostel_cubit.dart';
@@ -41,21 +42,41 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   final _ifscController = TextEditingController();
   final _holderNameController = TextEditingController();
   BankAccountType _accountType = BankAccountType.savings;
+  bool _confirmDialogShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ifscController.addListener(_onIfscChanged);
+  }
 
   bool get _numbersMatch =>
       _confirmAccountNumberController.text.isNotEmpty &&
-      _accountNumberController.text == _confirmAccountNumberController.text;
+          _accountNumberController.text == _confirmAccountNumberController.text;
 
   bool get _isFormValid {
     return _accountNumberController.text.trim().isNotEmpty &&
         _confirmAccountNumberController.text.trim().isNotEmpty &&
         _numbersMatch &&
-        _ifscController.text.trim().length == 11 &&
-        _holderNameController.text.trim().isNotEmpty;
+        _ifscController.text.trim().length == 11;
+       // && _holderNameController.text.trim().isNotEmpty;
   }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // TEMP: static preview of the confirm-bank-account dialog for
+  //   // design/QA checking. Remove this call once verified against design.
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     if (mounted) {
+  //       _showConfirmBankAccountDialogPreview(context);
+  //     }
+  //   });
+  // }
 
   @override
   void dispose() {
+    _ifscController.removeListener(_onIfscChanged);
     _accountNumberController.dispose();
     _confirmAccountNumberController.dispose();
     _ifscController.dispose();
@@ -63,27 +84,35 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
     super.dispose();
   }
 
+  void _onIfscChanged() {
+    final code = _ifscController.text.trim().toUpperCase();
+    if (mounted) {
+      context.read<AddBankAccountCubit>().lookupIfscCode(code);
+    }
+  }
+
   void _submit(BuildContext context) {
     context.read<AddBankAccountCubit>().submit(
-          propertyId: widget.propertyId,
-          accountNumber: _accountNumberController.text.trim(),
-          confirmAccountNumber: _confirmAccountNumberController.text.trim(),
-          ifscCode: _ifscController.text.trim().toUpperCase(),
-          accountHolderName: _holderNameController.text.trim(),
-          accountType: _accountType,
-        );
+      propertyId: widget.propertyId,
+      accountNumber: _accountNumberController.text.trim(),
+      confirmAccountNumber: _confirmAccountNumberController.text.trim(),
+      ifscCode: _ifscController.text.trim().toUpperCase(),
+      accountHolderName: _holderNameController.text.trim(),
+      accountType: _accountType,
+    );
   }
 
   void _verify(BuildContext context) {
+    _confirmDialogShown = false;
     final accountNumber = _accountNumberController.text.trim();
     final ifscCode = _ifscController.text.trim().toUpperCase();
     final clientRefNum = '${widget.propertyId}_$accountNumber';
 
     context.read<AddBankAccountCubit>().verify(
-          accountNumber: accountNumber,
-          ifscCode: ifscCode,
-          clientRefNum: clientRefNum,
-        );
+      accountNumber: accountNumber,
+      ifscCode: ifscCode,
+      clientRefNum: clientRefNum,
+    );
   }
 
   @override
@@ -108,6 +137,14 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 const SnackBar(content: Text('Bank account verified successfully.')),
               );
             }
+            if (state.verifySuccess && state.verificationResult != null && !_confirmDialogShown) {
+              _confirmDialogShown = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _showConfirmBankAccountDialog(context, state);
+                }
+              });
+            }
             if (state.isSuccess) {
               Navigator.of(context).pop(true);
             }
@@ -128,7 +165,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: const [
-                            Text('Add bank account',
+                            Text('Add Bank Account',
                                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,color: Colors.black)),
                             Text('Step 1 of 2 · Account details',
                                 style: TextStyle(fontSize: 13,  color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700)),
@@ -151,24 +188,24 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                     children: [
-                      _FieldLabel('Account number'),
+                      _FieldLabel('Account Number'),
                       TextField(
                         controller: _accountNumberController,
                         keyboardType: TextInputType.number,
                         decoration: _inputDecoration(),
                         onChanged: (_) => setState(() {}),
-                        style: const TextStyle(
-                          color: Colors.black,
-                        ),
+                          style:  GoogleFonts.inter(
+                            color: Colors.black,
+                          ),
                       ),
                       const SizedBox(height: 16),
-                      _FieldLabel('Confirm account number'),
+                      _FieldLabel('Confirm Account Number'),
                       TextField(
                         controller: _confirmAccountNumberController,
                         keyboardType: TextInputType.number,
                         decoration: _inputDecoration(),
                         onChanged: (_) => setState(() {}),
-                        style: const TextStyle(
+                        style:  GoogleFonts.inter(
                           color: Colors.black,
                         ),
                       ),
@@ -194,13 +231,69 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         ),
                       ],
                       const SizedBox(height: 16),
-                      _FieldLabel('IFSC code'),
+                      _FieldLabel('IFSC Code'),
                       TextField(
                         controller: _ifscController,
                         textCapitalization: TextCapitalization.characters,
                         maxLength: 11,
                         decoration: _inputDecoration().copyWith(counterText: ''),
+                        onChanged: (_) => setState(() {}),
+                        style:  GoogleFonts.inter(
+                          color: Colors.black,
+                        ),
                       ),
+                      if (state.isLookupLoading) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Looking up IFSC branch details…',
+                              style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (state.lookupError != null && _ifscController.text.trim().length == 11) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          state.lookupError!,
+                          style:  GoogleFonts.inter(fontSize: 12.5, color: Colors.redAccent),
+                        ),
+                      ],
+                      if (state.ifscLookupDetails != null && state.ifscLookupDetails!.displayLabel.trim().isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF5F7FF),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFD9E1FF)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF2E5AF5)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  state.ifscLookupDetails!.displayLabel,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.5,
+                                    color: Color(0xFF293645),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       // _FieldLabel('Account holder name'),
                       // TextField(
@@ -242,131 +335,45 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           color: const Color(0xFFfcfdfb),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Row(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.shield_outlined, size: 18, color: Color(0xFF6B7280)),
-                            SizedBox(width: 10),
+                            const Icon(Icons.shield_outlined, size: 18, color: Color(0xFF6B7280)),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 'No documents needed. We verify by depositing ₹1 and matching the name your bank returns.',
-                                style: TextStyle(fontSize: 12.5, color: Color(0xFF6B7280)),
+                                style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      // const SizedBox(height: 24),
-
-                      if (state.verifySuccess && state.verificationResult != null) ...[]
-                      else ...[
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: InkWell(
-                              onTap: (!state.isVerifying && _isFormValid)
-                                  ? () => _verify(context)
-                                  : null,
-                              borderRadius: BorderRadius.circular(8),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 8,
-                                ),
-                                child: state.isVerifying
-                                    ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.green,
-                                  ),
-                                )
-                                    : Text(
-                                  'Verify',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 18,
-                                    color: _isFormValid
-                                        ? Colors.green
-                                        : Colors.grey.shade400,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                      if (state.verifySuccess && state.verificationResult != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE6F4EA),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFF1E8E42), width: 1),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: const [
-                                  Icon(Icons.check_circle, size: 18, color: Color(0xFF1E8E42)),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Verified',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF1E8E42),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              // Text(
-                              //   'Branch: ${state.verificationResult!.branchName}',
-                              //   style: const TextStyle(fontSize: 13, color: Color(0xFF1E8E42)),
-                              // ),
-                              // const SizedBox(height: 4),
-                              // Text(
-                              //   'Bank: ${state.verificationResult!.bankName}',
-                              //   style: const TextStyle(fontSize: 13, color: Color(0xFF1E8E42)),
-                              // ),
-                              // const SizedBox(height: 4),
-                              Text(
-                                'Beneficiary: ${state.verificationResult!.beneficiaryName}',
-                                style: const TextStyle(fontSize: 13, color: Color(0xFF1E8E42)),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ]
-
                     ],
                   ),
                 ),
-
-
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: ElevatedButton(
-                    onPressed: (!state.isSubmitting && state.verifySuccess) ? () => _submit(context) : null,
+                    onPressed: (!state.isVerifying && _isFormValid)
+                        ? () => _verify(context)
+                        : null,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 52),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
                       elevation: 0,
                       side: BorderSide(
-                        color: state.verifySuccess ? Colors.grey.shade300 : Colors.grey.shade200,
+                        color: _isFormValid
+                            ? Colors.grey.shade300
+                            : Colors.grey.shade200,
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: state.isSubmitting
+                    child: state.isVerifying
                         ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -376,11 +383,13 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       ),
                     )
                         : Text(
-                      'Continue',
+                      'Verify',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 18,
-                        color: state.verifySuccess ? Colors.black : Colors.grey.shade500,
+                        color: _isFormValid
+                            ? Colors.black
+                            : Colors.grey.shade500,
                       ),
                     ),
                   ),
@@ -412,6 +421,218 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
       ),
     );
   }
+
+  void _showConfirmBankAccountDialog(BuildContext context, AddBankAccountState state) {
+    final result = state.verificationResult!;
+    final accountTypeLabel =
+    _accountType == BankAccountType.savings ? 'savings' : 'current';
+
+    _showConfirmBankAccountDialogRaw(
+      context,
+      holderName: result.beneficiaryName,
+      accountNumber: _accountNumberController.text.trim(),
+      bankName: result.bankName,
+      branchName: result.branchName,
+      accountTypeLabel: accountTypeLabel,
+      onConfirm: () => _submit(context),
+    );
+  }
+
+  /// Static preview dialog — for design/QA checking only, not wired to
+  /// verification state. Call this from initState (or anywhere) to
+  /// visually inspect the dialog without going through the real flow.
+  // void _showConfirmBankAccountDialogPreview(BuildContext context) {
+  //   _showConfirmBankAccountDialogRaw(
+  //     context,
+  //     holderName: 'Ramesh Kumar',
+  //     accountNumber: '50100482196075',
+  //     bankName: 'HDFC Bank',
+  //     branchName: 'Koramangala 5th Block, Bengaluru',
+  //     accountTypeLabel: 'savings',
+  //     onConfirm: () {},
+  //   );
+  // }
+
+  void _showConfirmBankAccountDialogRaw(
+      BuildContext context, {
+        required String holderName,
+        required String accountNumber,
+        required String bankName,
+        required String branchName,
+        required String accountTypeLabel,
+        required VoidCallback onConfirm,
+      }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Confirm bank account',
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => Navigator.of(dialogContext).pop(),
+                      borderRadius: BorderRadius.circular(20),
+                      child: const Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(Icons.close, color: Colors.black87, size: 22),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Step 2 of 2 · Verification complete',
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE6F4EA),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 1),
+                        child: Icon(Icons.check_circle, size: 18, color: Color(0xFF1E8E42)),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Name matched with bank records',
+                          style: GoogleFonts.inter(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1E8E42),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Column(
+                    children: [
+                      _DetailRow(
+                        label: 'Account holder name',
+                        value: holderName,
+                      ),
+                      _DetailRow(
+                        label: 'Account number',
+                        value: accountNumber,
+                        monospace: true,
+                      ),
+                      _DetailRow(
+                        label: 'Bank name',
+                        value: bankName,
+                      ),
+                      _DetailRow(
+                        label: 'Branch',
+                        value: branchName,
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline, size: 16, color: Color(0xFF6B7280)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Rentals will be sent to this account',
+                        style:  GoogleFonts.inter(
+                          fontSize: 13,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      onConfirm();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 52),
+                      backgroundColor: const Color(0xFF4C6EF5),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child:  Text(
+                      'Confirm and add account',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child:  Text(
+                      'Cancel',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _FieldLabel extends StatelessWidget {
@@ -422,7 +643,63 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(text, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+      child: Text(text, style:  GoogleFonts.inter(fontSize: 13.5, fontWeight: FontWeight.w600)),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool monospace;
+  final bool showDivider;
+
+  const _DetailRow({
+    required this.label,
+    required this.value,
+    this.monospace = false,
+    this.showDivider = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                  flex: 1,
+                  child:
+              Text(
+                label,
+                style:  GoogleFonts.inter(
+                  fontSize: 14,
+                  color: Color(0xFF6B7280),
+                ),
+              )),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.only(left: 10),
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (showDivider) const Divider(height: 1, color: Color(0xFFE5E7EB)),
+      ],
     );
   }
 }
@@ -449,10 +726,10 @@ class _AccountTypeChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
-            color: selected ? const Color(0xFF4c6891) : Color(0xFF505050),
-            fontWeight: FontWeight.w700,
-            fontSize: 16
+          style: GoogleFonts.inter(
+              color: selected ? const Color(0xFF4c6891) : Color(0xFF505050),
+              fontWeight: FontWeight.w700,
+              fontSize: 16
           ),
         ),
       ),
