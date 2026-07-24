@@ -461,7 +461,7 @@
   "first_name": "पहला नाम",
   "last_name": "अंतिम नाम",
   "email_address": "ईमेल पता",
-  "current_address": "वर्तमान पता",
+  "current_address": "स्थायी पता",
   "delete_my_account": "मेरा खाता हटाएं",
   "delete_account": "खाता हटाएं",
   "delete_account_confirm": "यह कार्रवाई स्थायी है और आपका सारा डेटा हमेशा के लिए खो जाएगा। पुष्टि करें?",

@@ -466,7 +466,7 @@
   "first_name": "First Name",
   "last_name": "Last Name",
   "email_address": "Email Address",
-  "current_address": "Current Address",
+  "current_address": "Permanent Address",
   "delete_my_account": "Delete My Account",
   "delete_account": "Delete Account",
   "delete_account_confirm": "This action is permanent and all your data will be lost forever. Confirm?",

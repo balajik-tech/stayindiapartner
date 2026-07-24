@@ -466,7 +466,7 @@
   "first_name": "మొదటి పేరు",
   "last_name": "చివరి పేరు",
   "email_address": "ఈమెయిల్ చిరునామా",
-  "current_address": "ప్రస్తుత చిరునామా",
+  "current_address": "శాశ్వత చిరునామా",
   "delete_my_account": "నా ఖాతాను తొలగించు",
   "delete_account": "ఖాతాను తొలగించు",
   "delete_account_confirm": "ఈ చర్య శాశ్వతమైనది మరియు మీ డేటా అంతా ఎప్పటికీ పోతుంది. ధృవీకరించాలా?",

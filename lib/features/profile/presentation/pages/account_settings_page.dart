@@ -790,8 +790,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Widget buildProfileHeader(dynamic profile) {
-    final String name =
-    '${_firstNameController.text} ${_lastNameController.text}'.trim();
+    final String name =  _currentProfile?.dlKyc?.name ?? '${_firstNameController.text} ${_lastNameController.text}'.trim();
     final bool isVerified =
         _currentProfile?.dlKyc?.isAadharVerified == true;
 
@@ -1139,7 +1138,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           child: ElevatedButton(
             onPressed: isUpdating ? null : _saveProfile,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.blackColor,
+              backgroundColor: AppColors.primaryBlue,
               minimumSize: Size(double.infinity, 48.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r),
@@ -1400,7 +1399,7 @@ class _EditableRowState extends State<_EditableRow>
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF989692),
+                        color: AppColors.primaryBlue,
                       ),
                     ),
                     SizedBox(height: 3.h),
