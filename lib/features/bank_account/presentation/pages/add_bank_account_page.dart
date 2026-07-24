@@ -481,7 +481,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Confirm bank account',
+                        'Confirm Bank Account',
                         style: GoogleFonts.inter(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -501,7 +501,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Step 2 of 2 · Verification complete',
+                  'Step 2 of 2 · Verification Complete',
                   style: GoogleFonts.inter(
                     fontSize: 13.5,
                     color: const Color(0xFF6B7280),
@@ -547,16 +547,16 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                   child: Column(
                     children: [
                       _DetailRow(
-                        label: 'Account holder name',
+                        label: 'Account Holder Name',
                         value: holderName,
                       ),
                       _DetailRow(
-                        label: 'Account number',
+                        label: 'Account Number',
                         value: accountNumber,
                         monospace: true,
                       ),
                       _DetailRow(
-                        label: 'Bank name',
+                        label: 'Bank Name',
                         value: bankName,
                       ),
                       _DetailRow(
@@ -602,7 +602,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       ),
                     ),
                     child:  Text(
-                      'Confirm and add account',
+                      'Confirm and Add Account',
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,

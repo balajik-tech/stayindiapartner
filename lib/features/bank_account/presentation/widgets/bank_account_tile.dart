@@ -62,7 +62,7 @@ class BankAccountTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  showDeleteAction ? 'Confirm to delete this account' : 'View account',
+                  showDeleteAction ? 'Confirm to delete this account' : 'View Account',
                   style: GoogleFonts.inter(
                     fontSize: 13.5,
                     color: const Color(0xFF6B7280),
@@ -78,9 +78,9 @@ class BankAccountTile extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      _DetailRow(label: 'Account holder name', value: account.accountHolderName),
-                      _DetailRow(label: 'Account number', value: account.accountNumber, monospace: true),
-                      _DetailRow(label: 'Bank name', value: account.bankName),
+                      _DetailRow(label: 'Account Holder Name', value: account.accountHolderName),
+                      _DetailRow(label: 'Account Number', value: account.accountNumber, monospace: true),
+                      _DetailRow(label: 'Bank Name', value: account.bankName),
                       _DetailRow(label: 'Branch', value: account.branchName, showDivider: false),
                     ],
                   ),
