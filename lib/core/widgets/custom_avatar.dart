@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
@@ -114,7 +115,7 @@ class CustomAvatar extends StatelessWidget {
             )
           : Text(
               initial,
-              style: TextStyle(
+              style: GoogleFonts.inter(
                 color: textColor,
                 fontSize: fontSize ?? (size * 0.4),
                 fontWeight: FontWeight.bold,

@@ -35,8 +35,18 @@ class BankAccountTile extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 2),
                 child: account.isPrimary
-                    ? const Icon(Icons.check_circle, color: Color(0xFF2E5AF5), size: 20)
-                    : const Icon(Icons.circle_outlined, color: Color(0xFFBFC4CC), size: 20),
+                    ? const Icon(
+                          Icons.check_circle_outline,
+                          color:  Color(0xFF1f3d5c),
+                          size: 18,
+                        )
+                            : const Icon(
+                          Icons.radio_button_unchecked,
+                          color:  Color(0xFF1f3d5c),
+                          size: 18,
+                        )
+                    // ? const Icon(Icons.check_circle, color: Color(0xFF2E5AF5), size: 20)
+                    // : const Icon(Icons.circle_outlined, color: Color(0xFFBFC4CC), size: 20),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -61,7 +71,7 @@ class BankAccountTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${account.accountHolderName} · ${account.ifscCode}',
-                      style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                      style: const TextStyle(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w600),
                     ),
                     // if (isVerificationPending) ...[
                       // const SizedBox(height: 6),

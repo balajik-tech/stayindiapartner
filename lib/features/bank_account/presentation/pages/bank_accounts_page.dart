@@ -112,7 +112,7 @@ class _BankAccountsView extends StatelessWidget {
                             if (state is BankAccountLoaded)
                               Text(
                                 '$totalProperties properties · $totalAccounts accounts',
-                                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                                style: const TextStyle(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700),
                               ),
                           ],
                         ),

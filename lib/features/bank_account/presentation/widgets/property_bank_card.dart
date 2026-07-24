@@ -42,10 +42,10 @@ class PropertyBankCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEAF1FF),
+                    color: const Color(0xFFcee2fa),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.apartment_rounded, color: Color(0xFF2E5AF5)),
+                  child: const Icon(Icons.apartment_outlined, color: Color(0xFF2d4f86)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -61,7 +61,7 @@ class PropertyBankCard extends StatelessWidget {
                         '${property.location} ',
                             // '· '
                             // '${property.code}',
-                        style: const TextStyle(fontSize: 13, color: Color(0xFF4f504e)),
+                        style: const TextStyle(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),

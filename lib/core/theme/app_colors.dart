@@ -23,6 +23,8 @@ class AppColors {
   static const Color kAuthOrangeDark = Color(0xFFE8760C);
   static const Color inputBoxColor = Color(0xFFF48126);
 
+  static const Color blackColor = Color(0xFF000000);
+
 
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,

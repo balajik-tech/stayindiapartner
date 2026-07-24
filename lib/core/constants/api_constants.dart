@@ -23,7 +23,7 @@ class ApiConstants {
     return url;
   }
 
-  static const String bankJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDA3MiIsInRpbWVzdGFtcCI6MTc4NDgwODM5OH0=.hXN3W7H2R9KMLXjyRFwS5bdXL0uvAQz4z4BCOKrvbk8=";
+  static const String bankJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDA3MiIsInRpbWVzdGFtcCI6MTc4NDg3NTkzMn0=.jEy96IAMvxXEeDPk_iKn62So1uxpPsTawn3Ybiquyro=";
 
   static const String requestOtp = '/auth/request-otp';
   static const String verifyOtp = '/auth/verify-otp';

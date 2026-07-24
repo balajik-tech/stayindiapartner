@@ -131,7 +131,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             Text('Add bank account',
                                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,color: Colors.black)),
                             Text('Account details',
-                                style: TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
+                                style: TextStyle(fontSize: 13,  color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700)),
                           ],
                         ),
                       ),
@@ -157,6 +157,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         keyboardType: TextInputType.number,
                         decoration: _inputDecoration(),
                         onChanged: (_) => setState(() {}),
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       _FieldLabel('Confirm account number'),
@@ -165,6 +168,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         keyboardType: TextInputType.number,
                         decoration: _inputDecoration(),
                         onChanged: (_) => setState(() {}),
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
                       ),
                       if (_confirmAccountNumberController.text.isNotEmpty) ...[
                         const SizedBox(height: 6),
@@ -250,7 +256,48 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      // const SizedBox(height: 24),
+
+                      if (state.verifySuccess && state.verificationResult != null) ...[]
+                      else ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: InkWell(
+                              onTap: (!state.isVerifying && _isFormValid)
+                                  ? () => _verify(context)
+                                  : null,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 8,
+                                ),
+                                child: state.isVerifying
+                                    ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.green,
+                                  ),
+                                )
+                                    : Text(
+                                  'Verify',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18,
+                                    color: _isFormValid
+                                        ? Colors.green
+                                        : Colors.grey.shade400,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       if (state.verifySuccess && state.verificationResult != null) ...[
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -301,46 +348,6 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                   ),
                 ),
 
-                  if (state.verifySuccess && state.verificationResult != null) ...[]
-                  else ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: ElevatedButton(
-                        onPressed: (!state.isVerifying && _isFormValid) ? () => _verify(context) : null,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 52),
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          elevation: 0,
-                          side: BorderSide(
-                            color: _isFormValid ? Colors.grey.shade300 : Colors.grey.shade200,
-                            width: 1.5,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: state.isVerifying
-                            ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.black,
-                          ),
-                        )
-                            : Text(
-                          'Verify',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                            color: _isFormValid ? Colors.black : Colors.grey.shade500,
-                          ),
-                        ),
-                      ),
-                    )
-                  ]
-               ,
 
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -433,18 +440,19 @@ class _AccountTypeChip extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: selected ? const Color(0xFF2E5AF5) : const Color(0xFFD1D5DB), width: selected ? 1.5 : 1),
-          color: selected ? const Color(0xFFEAF1FF) : Colors.white,
+          border: Border.all(color: selected ? const Color(0xFF9ab2d4) : const Color(0xFFD1D5DB), width: selected ? 1.5 : 1),
+          color:  Colors.white,
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? const Color(0xFF2E5AF5) : Colors.black87,
-            fontWeight: FontWeight.w600,
+            color: selected ? const Color(0xFF4c6891) : Color(0xFF505050),
+            fontWeight: FontWeight.w700,
+            fontSize: 16
           ),
         ),
       ),

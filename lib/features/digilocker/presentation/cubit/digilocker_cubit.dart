@@ -63,7 +63,7 @@ class DigiLockerCubit extends Cubit<DigiLockerState> {
         if (derivedLastName != null) 'firstName': derivedLastName,
         if (derivedFirstName != null) 'lastName': derivedFirstName,
         // if (phone != null) 'phone': phone,
-        if (email != null) 'email': email,
+        if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
         if (result.aadharAddress != null) 'address': result.aadharAddress,
         'dlKyc': {
           'is_aadhar_verified': true,
