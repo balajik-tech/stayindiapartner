@@ -181,7 +181,9 @@ class _BankAccountsView extends StatelessWidget {
                                 .makePrimary(propertyId: property.id, accountId: accountId),
                             onAddAccount: () => _openAddAccount(context, property: property),
                             onEditAccount: (_) {},
-                            onRemoveAccount: (_) {},
+                            onRemoveAccount: (accountId) => context
+                                .read<BankAccountCubit>()
+                                .removeAccount(accountId),
                           ),
                       ],
                     );

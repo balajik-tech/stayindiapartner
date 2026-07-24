@@ -31,6 +31,8 @@ abstract class BankAccountDataSource {
 
   Future<void> setPrimaryAccount({required String propertyId, required String accountId});
 
+  Future<void> deleteBankAccount(String accountId);
+
   Future<BankBranchDetails> lookupIfsc(String ifscCode);
 }
 
@@ -91,6 +93,11 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
   @override
   Future<void> setPrimaryAccount({required String propertyId, required String accountId}) async {
     await _dio.put('${ApiConstants.bankAccounts}/$accountId', data: {'setAsPrimary': true});
+  }
+
+  @override
+  Future<void> deleteBankAccount(String accountId) async {
+    await _dio.delete('${ApiConstants.bankAccounts}/$accountId');
   }
 
   @override

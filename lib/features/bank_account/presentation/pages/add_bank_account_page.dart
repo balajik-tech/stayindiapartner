@@ -51,7 +51,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
 
 
     //Dialog testing
-    
+
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   if (mounted) {
     //     _showConfirmBankAccountDialogPreview(context);

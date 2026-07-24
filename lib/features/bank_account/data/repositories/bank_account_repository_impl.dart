@@ -62,6 +62,16 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
   }
 
   @override
+  Future<Either<Failure, void>> deleteBankAccount(String accountId) async {
+    try {
+      await dataSource.deleteBankAccount(accountId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, BankAccountVerificationResult>> verifyBankAccount({
     required String accountNumber,
     required String ifscCode,

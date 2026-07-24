@@ -33,6 +33,9 @@ abstract class BankAccountRepository {
     required String accountId,
   });
 
+  /// Deletes a bank account by [accountId].
+  Future<Either<Failure, void>> deleteBankAccount(String accountId);
+
   /// Resolves bank + branch name from an IFSC code, used to show the
   /// confirmation chip under the IFSC field while adding an account.
   Future<Either<Failure, BankBranchDetails>> lookupIfsc(String ifscCode);

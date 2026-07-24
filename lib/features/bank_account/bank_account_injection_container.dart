@@ -4,6 +4,7 @@ import 'data/datasources/bank_account_data_source.dart';
 import 'data/repositories/bank_account_repository_impl.dart';
 import 'domain/repositories/bank_account_repository.dart';
 import 'domain/usecases/add_bank_account.dart';
+import 'domain/usecases/delete_bank_account.dart';
 import 'domain/usecases/get_properties_with_accounts.dart';
 import 'domain/usecases/lookup_ifsc.dart';
 import 'domain/usecases/set_primary_account.dart';
@@ -27,6 +28,7 @@ void registerBankAccountFeature(GetIt sl) {
     () => BankAccountCubit(
       getPropertiesWithAccounts: sl(),
       setPrimaryAccount: sl(),
+      deleteBankAccount: sl(),
     ),
   );
   sl.registerFactory(
@@ -43,6 +45,7 @@ void registerBankAccountFeature(GetIt sl) {
   sl.registerLazySingleton(() => LookupIfsc(sl()));
   sl.registerLazySingleton(() => VerifyBankAccount(sl()));
   sl.registerLazySingleton(() => SetPrimaryAccount(sl()));
+  sl.registerLazySingleton(() => DeleteBankAccount(sl()));
 
   // Data
   sl.registerLazySingleton<BankAccountRepository>(
