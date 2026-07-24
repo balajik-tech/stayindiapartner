@@ -130,7 +130,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           children: const [
                             Text('Add bank account',
                                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,color: Colors.black)),
-                            Text('Account details',
+                            Text('Step 1 of 2 · Account details',
                                 style: TextStyle(fontSize: 13,  color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700)),
                           ],
                         ),
@@ -202,18 +202,18 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         decoration: _inputDecoration().copyWith(counterText: ''),
                       ),
                       const SizedBox(height: 16),
-                      _FieldLabel('Account holder name'),
-                      TextField(
-                        controller: _holderNameController,
-                        decoration: _inputDecoration(),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: Text(
-                          'Must match the name on your PAN. Mismatches fail verification.',
-                          style: TextStyle(fontSize: 12.5, color: Color(0xFF565656)),
-                        ),
-                      ),
+                      // _FieldLabel('Account holder name'),
+                      // TextField(
+                      //   controller: _holderNameController,
+                      //   decoration: _inputDecoration(),
+                      // ),
+                      // const Padding(
+                      //   padding: EdgeInsets.only(top: 8),
+                      //   child: Text(
+                      //     'Must match the name on your PAN. Mismatches fail verification.',
+                      //     style: TextStyle(fontSize: 12.5, color: Color(0xFF565656)),
+                      //   ),
+                      // ),
                       const SizedBox(height: 16),
                       _FieldLabel('Account type'),
                       Row(
