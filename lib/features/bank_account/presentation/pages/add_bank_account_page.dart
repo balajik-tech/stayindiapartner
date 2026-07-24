@@ -350,6 +350,8 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                     ],
                   ),
                 ),
+                const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: ElevatedButton(
