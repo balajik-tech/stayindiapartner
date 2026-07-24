@@ -42,7 +42,7 @@ class BankAccountTile extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        showDeleteAction ? 'Delete bank account' : 'Account details',
+                        showDeleteAction ? 'Delete Bank Account' : 'Account Details',
                         style: GoogleFonts.inter(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -104,9 +104,9 @@ class BankAccountTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        child: const Text(
-                          'Confirm delete',
-                          style: TextStyle(
+                        child: Text(
+                          'Confirm & Remove Account',
+                          style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -116,9 +116,9 @@ class BankAccountTile extends StatelessWidget {
                       Center(
                         child: TextButton(
                           onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: const Text(
+                          child: Text(
                             'Cancel',
-                            style: TextStyle(
+                            style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
@@ -165,26 +165,26 @@ class BankAccountTile extends StatelessWidget {
     final isVerificationPending = account.verificationStatus == AccountVerificationStatus.pending;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 24, right: 0,bottom: 16,top: 16),
+      padding: const EdgeInsets.only(left: 24, right: 0,bottom: 8,top: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 2),
                 child: account.isPrimary
                     ? const Icon(
-                          Icons.check_circle_outline,
-                          color:  Color(0xFF1f3d5c),
-                          size: 18,
+                        Icons.check_circle_outline_rounded,
+                          color:  Color(0xFF254f85),
+                          size: 20,
                         )
                             : const Icon(
-                          Icons.radio_button_unchecked,
-                          color:  Color(0xFF1f3d5c),
-                          size: 18,
+                        Icons.radio_button_unchecked_rounded,
+                          color:  Color(0xFF858584),
+                          size: 20,
                         )
               ),
               const SizedBox(width: 10),
@@ -197,7 +197,7 @@ class BankAccountTile extends StatelessWidget {
                         Flexible(
                           child: Text(
                             '${account.bankName} ${account.maskedAccountNumber}',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600,color: Colors.black),
+                            style:  GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600,color: Colors.black),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -210,7 +210,7 @@ class BankAccountTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${account.accountHolderName} · ${account.ifscCode}',
-                      style: const TextStyle(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w600),
+                      style:  GoogleFonts.inter(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w600),
                     ),
                     // if (isVerificationPending) ...[
                     //   const SizedBox(height: 6),
@@ -264,19 +264,19 @@ class BankAccountTile extends StatelessWidget {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'view',
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.visibility_outlined,
                           size: 20,
                           color: Color(0xFF4B5563),
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Text(
                           'View',
-                          style: TextStyle(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -284,19 +284,19 @@ class BankAccountTile extends StatelessWidget {
                     ),
                   ),
                   const PopupMenuDivider(height: 1),
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'remove',
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.delete_outline,
                           size: 20,
                           color: Colors.red,
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Text(
                           'Delete',
-                          style: TextStyle(
+                          style: GoogleFonts.inter(
                             color: Colors.red,
                             fontWeight: FontWeight.w500,
                           ),
@@ -340,13 +340,13 @@ class BankAccountTile extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: onSetPrimary,
                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 34),
+                  minimumSize: const Size(0, 28),
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   side: const BorderSide(color: Color(0xFFD1D5DB)),
                   foregroundColor: Colors.black87,
                 ),
-                child: const Text('Set as primary', style: TextStyle(fontSize: 13)),
+                child:  Text('Set as Primary', style: GoogleFonts.inter(fontSize: 13)),
               ),
             ),
         ],

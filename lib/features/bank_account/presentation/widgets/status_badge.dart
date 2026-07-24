@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class StatusBadge extends StatelessWidget {
   final String label;
@@ -40,7 +41,7 @@ class StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: GoogleFonts.inter(
           color: foreground,
           fontSize: 12,
           fontWeight: FontWeight.w800,

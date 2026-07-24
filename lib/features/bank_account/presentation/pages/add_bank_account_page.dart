@@ -306,7 +306,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       //   ),
                       // ),
                       const SizedBox(height: 16),
-                      _FieldLabel('Account type'),
+                      _FieldLabel('Account Type'),
                       Row(
                         children: [
                           Expanded(
@@ -641,7 +641,7 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(text, style:  GoogleFonts.inter(fontSize: 13.5, fontWeight: FontWeight.w600)),
+      child: Text(text, style:  GoogleFonts.inter(fontSize: 13.5, fontWeight: FontWeight.w600,color: Color(0xFF545454))),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../injection_container.dart';
 import '../../domain/entities/property_entity.dart';
@@ -107,12 +108,12 @@ class _BankAccountsView extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Bank accounts',
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700,color: Colors.black)),
+                            Text('Bank Accounts',
+                                style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700,color: Colors.black)),
                             if (state is BankAccountLoaded)
                               Text(
-                                '$totalProperties properties · $totalAccounts accounts',
-                                style: const TextStyle(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700),
+                                '$totalProperties Properties · $totalAccounts Accounts',
+                                style:  GoogleFonts.inter(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700),
                               ),
                           ],
                         ),
@@ -120,6 +121,26 @@ class _BankAccountsView extends StatelessWidget {
                       IconButton(
                         onPressed: () {},
                         icon: const Icon(Icons.help_outline_rounded),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                  margin: const EdgeInsets.only(bottom: 16,top: 8,left: 0,right: 0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFcde2fb),
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, color: Color(0xFF2f5a84), size: 22),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Payouts for each property go to its primary account.',
+                          style: GoogleFonts.inter(color: const Color(0xFF2f5a84), fontSize: 14,fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ],
                   ),
@@ -152,26 +173,6 @@ class _BankAccountsView extends StatelessWidget {
                     return ListView(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          margin: const EdgeInsets.only(bottom: 16,top: 16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFcde2fb),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.info_outline_rounded, color: Color(0xFF284b76), size: 20),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'Payouts for each property go to its primary account.',
-                                  style: TextStyle(color: Color(0xFF284b76), fontSize: 13.5,fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                         for (final property in loaded.properties)
                           PropertyBankCard(
                             property: property,

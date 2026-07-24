@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/property_entity.dart';
 import 'bank_account_tile.dart';
@@ -54,14 +55,14 @@ class PropertyBankCard extends StatelessWidget {
                     children: [
                       Text(
                         property.name,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700,color: Colors.black),
+                        style:  GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700,color: Colors.black),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${property.location} ',
                             // '· '
                             // '${property.code}',
-                        style: const TextStyle(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w600),
+                        style: GoogleFonts.inter(fontSize: 14, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -91,15 +92,15 @@ class PropertyBankCard extends StatelessWidget {
           InkWell(
             onTap: onAddAccount,
             borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               child: Row(
                 children: [
-                  Icon(Icons.add, size: 18, color:  Color(0xFF284b76)),
-                  SizedBox(width: 8),
+                  const Icon(Icons.add, size: 18, color:  Color(0xFF284b76)),
+                  const SizedBox(width: 8),
                   Text(
                     'Add account to this property',
-                    style: TextStyle(color:  Color(0xFF284b76), fontWeight: FontWeight.w600, fontSize: 14),
+                    style: GoogleFonts.inter(color:  const Color(0xFF284b76), fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ],
               ),
