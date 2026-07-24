@@ -48,6 +48,15 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   void initState() {
     super.initState();
     _ifscController.addListener(_onIfscChanged);
+
+
+    //Dialog testing
+    
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (mounted) {
+    //     _showConfirmBankAccountDialogPreview(context);
+    //   }
+    // });
   }
 
   bool get _numbersMatch =>
@@ -62,17 +71,6 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
        // && _holderNameController.text.trim().isNotEmpty;
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // TEMP: static preview of the confirm-bank-account dialog for
-  //   // design/QA checking. Remove this call once verified against design.
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     if (mounted) {
-  //       _showConfirmBankAccountDialogPreview(context);
-  //     }
-  //   });
-  // }
 
   @override
   void dispose() {
