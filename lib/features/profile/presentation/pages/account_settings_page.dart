@@ -523,7 +523,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 onPressed
                     : () async {
                   final credentials = DigiLockerCredentials(
-                    companyName: 'punithOiXa',
+                    companyName: 'Stay India',
                     secretToken: 'K1tPIbkUX6eZE28sgP5qCIrwmTJnW5F1',
                     redirectUrl: 'https://digilocker.meon.co.in/digilocker/thank-you-page',
                   );
@@ -790,7 +790,16 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Widget buildProfileHeader(dynamic profile) {
-    final String name =  _currentProfile?.dlKyc?.name ?? '${_firstNameController.text} ${_lastNameController.text}'.trim();
+
+    final String name = (_currentProfile?.dlKyc?.name?.trim().isNotEmpty == true)
+        ? _currentProfile!.dlKyc!.name!.trim()
+        : ('${_currentProfile?.lastName ?? ''} ${_currentProfile?.firstName ?? ''}'
+        .trim()
+        .isNotEmpty
+        ? '${_currentProfile?.lastName ?? ''} ${_currentProfile?.firstName ?? ''}'
+        .trim()
+        : '');
+
     final bool isVerified =
         _currentProfile?.dlKyc?.isAadharVerified == true;
 
@@ -902,7 +911,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        name.isEmpty ? "User Name" : name,
+                        name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(

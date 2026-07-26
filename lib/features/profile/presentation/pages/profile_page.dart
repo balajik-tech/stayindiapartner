@@ -63,7 +63,14 @@ class _ProfilePageState extends State<ProfilePage> {
           final profile = state is ProfileLoaded
               ? state.profile
               : (state is ProfileUpdateSuccess ? state.profile : null);
-          final name = profile?.dlKyc?.name ??  profile?.fullName ?? owner?.name ?? 'Owner';
+          final name =
+          (profile?.dlKyc?.name?.trim().isNotEmpty == true)
+              ? profile!.dlKyc!.name!.trim()
+              : (((profile?.firstName?.trim().isNotEmpty == true) ||
+              (profile?.lastName?.trim().isNotEmpty == true))
+              ? '${profile?.lastName ?? ''} ${profile?.firstName ?? ''} '.trim()
+              : (owner?.name ?? ''));
+
           final phone = (profile?.phone != null && profile!.phone.trim().isNotEmpty)
               ? '+91 ${profile.phone}'
               : ((owner?.phone != null && owner!.phone.trim().isNotEmpty)
