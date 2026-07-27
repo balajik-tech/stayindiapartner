@@ -251,7 +251,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         IconData? icon,
       }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(12.r),
@@ -351,7 +351,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       hostel.name,
                       style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: AppColors.blackColor),
                     ),
-                    _buildLocationRow(hostel.address ?? ''),
+
                   ],
                 ),
               ),
@@ -360,7 +360,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ],
           ),
           // SizedBox(height: 6.h),
-
+          _buildLocationRow(hostel.address ?? ''),
           SizedBox(height: 0.h),
           _buildBedsRow(beds),
           SizedBox(height: 16.h),
@@ -682,7 +682,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       hostel.name,
                       style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.blackColor),
                     ),
-                    _buildLocationRow(hostel.address ?? ''),
+
                   ],
                 ),
               ),
@@ -691,7 +691,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ],
           ),
           // SizedBox(height: 4.h),
-
+          _buildLocationRow(hostel.address ?? ''),
           _buildBedsRow(beds),
           SizedBox(height: 16.h),
           Container(
