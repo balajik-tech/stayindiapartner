@@ -299,7 +299,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Widget _buildBedsRow(int beds) {
     return Row(
       children: [
-        Icon(Icons.bed_outlined, size: 14.sp, color: SubscriptionColors.blue),
+        Image.asset(
+          'assets/images/bed_icon.png',
+          width: 14.w,
+          height: 14.w,
+        ),
         SizedBox(width: 4.w),
         Text(
           '$beds Beds',
