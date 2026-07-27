@@ -28,6 +28,10 @@ abstract class TenantRemoteDataSource {
     double? deposit,
     String? userPhotoPath,
     String? aadharPhotoPath,
+    String? bookingType,
+    String? maintenance,
+    String? roomType,
+    String? endDate
   });
 }
 
@@ -106,6 +110,10 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     double? deposit,
     String? userPhotoPath,
     String? aadharPhotoPath,
+    String? bookingType,
+    String? maintenance,
+    String? roomType,
+    String? endDate
   }) async {
     AppLogger.info('Adding manual tenant for hostel: $hostelId');
     final map = <String, dynamic>{
@@ -122,6 +130,11 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     }
     if (startDate != null && startDate.isNotEmpty) map['startDate'] = startDate;
     if (deposit != null) map['deposit'] = deposit;
+
+    if (bookingType != null) map['bookingType'] = bookingType;
+    if (maintenance != null && maintenance != "") map['maintenance'] = maintenance;
+    if (roomType != null  && roomType != "") map['roomType'] = roomType;
+    if (endDate != null  && endDate != "") map['endDate'] = endDate;
 
     final formData = FormData.fromMap(map);
 
@@ -148,6 +161,24 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
         ),
       );
     }
+
+
+    // Print all fields
+        print('----- FormData Fields -----');
+        for (final field in formData.fields) {
+          print('${field.key}: ${field.value}');
+        }
+
+    // Print all files
+        print('----- FormData Files -----');
+        for (final file in formData.files) {
+          print(
+            '${file.key}: '
+                'filename=${file.value.filename}, '
+                'contentType=${file.value.contentType}',
+          );
+        }
+    print('----- FormData Fields -----');
 
     final response = await _dio.post(
       ApiConstants.tenantsManual,

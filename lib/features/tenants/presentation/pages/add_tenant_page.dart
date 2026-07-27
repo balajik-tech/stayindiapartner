@@ -261,6 +261,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     final phone = _phoneController.text.trim();
     final rentText = _rentController.text.trim();
     final depositText = _depositController.text.trim();
+
     final dayRentText = _dayRentController.text.trim();
     final maintainanceText = _maintenanceController.text.trim();
     final customDepositeText = _customDepositController.text.trim();
@@ -371,19 +372,51 @@ class _AddTenantPageState extends State<AddTenantPage> {
         ? nameParts.sublist(1).join(' ')
         : '.';
 
+    double? securityDeposit;
+    double? rent;
+    String checkInDate = "";
+    String checkOutDate = "";
+    double? maintainance= 0;
+
+    if(_stayType == StayType.MONTHLY){
+      securityDeposit = double.tryParse(_depositController.text.trim());
+      rent = double.tryParse(_rentController.text.trim());
+      checkInDate = checkInDate;
+      checkOutDate = "";
+      maintainance = double.tryParse(_maintenanceController.text.trim());
+    }else if(_stayType == StayType.CUSTOM){
+      securityDeposit = double.tryParse(_customDepositController.text.trim());
+      rent = double.tryParse(_dayRentController.text.trim());
+      checkInDate = checkInDate;
+      checkOutDate = checkOutDate;
+      maintainance = 0;
+    }
+
+    String? roomType =  _isAC == true ?"AC" :"NON-AC";
+
     _addTenantCubit.submit(
       hostel: _selectedHostel!,
       room: _selectedRoom!,
       bed: _selectedBed!,
       phone: phone,
-      rent: double.tryParse(rentText) ?? 0,
       firstName: firstName,
       lastName: lastName,
       sharingType: _selectedRoom!.sharingType,
-      deposit: depositText.isNotEmpty ? double.tryParse(depositText) : null,
-      startDate: _checkInDate!,
+
       userPhotoPath: _userPhoto?.path,
       aadharPhotoPath: _aadharPhoto?.path,
+
+      deposit: securityDeposit,
+      rent: rent ?? 0,
+      startDate: (checkInDate.isNotEmpty)
+          ? DateTime.parse(checkInDate)
+          : DateTime.now(),
+      bookingType: _stayType.toString(),
+      maintenance:maintainance.toString(),
+      roomType:roomType,
+      endDate: (checkInDate.isNotEmpty)
+          ? DateTime.parse(checkOutDate)
+          : DateTime.now(),
     );
   }
 

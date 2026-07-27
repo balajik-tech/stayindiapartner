@@ -111,6 +111,10 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     required DateTime startDate,
     String? userPhotoPath,
     String? aadharPhotoPath,
+    String? bookingType,
+    String? maintenance,
+    String? roomType,
+    required DateTime endDate
   }) async {
     emit(AddTenantSubmitting());
     try {
@@ -128,7 +132,12 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         deposit: deposit,
         userPhotoPath: userPhotoPath,
         aadharPhotoPath: aadharPhotoPath,
-      );
+        bookingType:bookingType,
+        maintenance:maintenance,
+        roomType:roomType,
+        endDate: "${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}",
+
+    );
       emit(AddTenantSuccess());
     } catch (e) {
       emit(AddTenantError(ErrorHelper.toFriendlyMessage(e)));

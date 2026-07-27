@@ -59,6 +59,10 @@ class AddTenantUseCase {
     double? deposit,
     String? userPhotoPath,
     String? aadharPhotoPath,
+    String? bookingType,
+    String? maintenance,
+    String? roomType,
+    String? endDate
   }) {
     return repository.addManualTenant(
       phone: phone,
@@ -73,6 +77,10 @@ class AddTenantUseCase {
       deposit: deposit,
       userPhotoPath: userPhotoPath,
       aadharPhotoPath: aadharPhotoPath,
+      bookingType:bookingType,
+        maintenance:maintenance,
+        roomType:roomType,
+        endDate:endDate
     );
   }
 }
