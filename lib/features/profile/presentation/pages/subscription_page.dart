@@ -340,26 +340,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hostel.name,
-                      style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: AppColors.blackColor),
-                    ),
-
-                  ],
-                ),
-              ),
-              SizedBox(width: 8.w),
-              _buildStatusBadge('Not subscribed', SubscriptionColors.orange, SubscriptionColors.orangeLight),
-            ],
+          _buildSubscriptionHeader(
+            hostelName: hostel.name,
+            status: 'Not subscribed',
+            statusColor: SubscriptionColors.orange,
+            backgroundColor: SubscriptionColors.orangeLight,
           ),
-          // SizedBox(height: 6.h),
           _buildLocationRow(hostel.address ?? ''),
           SizedBox(height: 0.h),
           _buildBedsRow(beds),
@@ -414,6 +400,44 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSubscriptionHeader({
+    required String hostelName,
+    required String status,
+    required Color statusColor,
+    required Color backgroundColor,
+    IconData? icon,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                hostelName,
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.blackColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 8.w),
+        _buildStatusBadge(
+          status,
+          statusColor,
+          backgroundColor,
+          icon: icon,
+        ),
+      ],
     );
   }
 
@@ -554,7 +578,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         children: [
           Text(
             'PRICE BREAKUP · ${plan.label.toUpperCase()} PLAN',
-            style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w700, color: SubscriptionColors.grayText, letterSpacing: 0.5),
+            style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w800, color: SubscriptionColors.grayText, letterSpacing: 0.5),
           ),
           SizedBox(height: 4.h),
           Row(
@@ -582,7 +606,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.sell_outlined, size: 14.sp, color: SubscriptionColors.green),
+                  Image.asset(
+                    'assets/images/discount.png', // or .webp
+                    width: 12.w,
+                    height: 12.w,
+                    fit: BoxFit.contain,
+                    color: SubscriptionColors.green,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
                   SizedBox(width: 4.w),
                   Text(
                     'You save (${plan.discountPercent}% off)',
@@ -671,26 +702,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hostel.name,
-                      style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.blackColor),
-                    ),
-
-                  ],
-                ),
-              ),
-              SizedBox(width: 8.w),
-              _buildStatusBadge('Active', SubscriptionColors.green, SubscriptionColors.greenLight, icon: Icons.check_circle)
-            ],
+          _buildSubscriptionHeader(
+            hostelName: hostel.name,
+            status: 'Active',
+            statusColor: SubscriptionColors.green,
+            backgroundColor: SubscriptionColors.greenLight,
+            icon: Icons.check_circle,
           ),
-          // SizedBox(height: 4.h),
           _buildLocationRow(hostel.address ?? ''),
           _buildBedsRow(beds),
           SizedBox(height: 16.h),
