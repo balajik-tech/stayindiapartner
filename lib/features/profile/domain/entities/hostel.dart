@@ -24,6 +24,20 @@ class Hostel {
   final String? hostelLicense;
   final String? tradeLicense;
 
+  // --- Subscription fields ---
+  /// Whether this property currently has an active paid subscription.
+  final bool isSubscribed;
+
+  /// The active plan key: 'monthly' | 'quarterly' | 'half_yearly' | 'annual'.
+  /// Null when [isSubscribed] is false.
+  final String? currentPlanKey;
+
+  /// Start date of the current subscription cycle.
+  final DateTime? subscriptionStart;
+
+  /// End date of the current subscription cycle (renewal date).
+  final DateTime? subscriptionEnd;
+
   Hostel({
     required this.id,
     required this.name,
@@ -48,5 +62,9 @@ class Hostel {
     this.foodLicense,
     this.hostelLicense,
     this.tradeLicense,
+    this.isSubscribed = false,
+    this.currentPlanKey,
+    this.subscriptionStart,
+    this.subscriptionEnd,
   });
 }

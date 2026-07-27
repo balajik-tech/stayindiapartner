@@ -45,4 +45,19 @@ class AppColors {
   static const Color backgroundSecondary = Color(0xFFF1F5F9);
   static const Color accentOrange = Color(0xFFF97316);
   static const Color scaffoldBackground = Color(0xFFF8FAFC);
+
+
+
+}
+class SubscriptionColors {
+  static const navy = Color(0xFF44527c);
+  static const orange = Color(0xFF936436);
+  static const orangeLight = Color(0xFFfaf3df);
+  static const blue = Color(0xFF4d5a8a);
+  static const green = Color(0xFF4E8B57);
+  static const greenLight = Color(0xFFE7F8F1);
+  static const priceBoxBg = Color(0xFFF3F5FC);
+  static const backgroundColor =  Color(0xFFf5f8f9);
+  static const grayText = Color(0xFF858587);
+  static const orange2 = Color(0xFFcc8748);
 }
