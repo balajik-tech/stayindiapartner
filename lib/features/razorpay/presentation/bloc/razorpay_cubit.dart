@@ -22,6 +22,7 @@ class RazorpayCubit extends Cubit<RazorpayState> {
     String? email,
     String? contact,
   }) {
+    print("RAZORPAY_OPENING: amount=$amount, orderId=$orderId");
     emit(RazorpayOpeningCheckout());
 
     final options = {
@@ -29,7 +30,6 @@ class RazorpayCubit extends Cubit<RazorpayState> {
       'amount': amount,
       'name': name,
       'description': description ?? '',
-      'order_id': orderId,
       'prefill': {
         if (contact != null) 'contact': contact,
         if (email != null) 'email': email,
@@ -39,14 +39,21 @@ class RazorpayCubit extends Cubit<RazorpayState> {
       }
     };
 
+    // Only add order_id if it's not empty/test
+    if (orderId.isNotEmpty && !orderId.startsWith("order_test_")) {
+      options['order_id'] = orderId;
+    }
+
     try {
       _razorpay.open(options);
     } catch (e) {
+      print("RAZORPAY_OPEN_EXCEPTION: $e");
       emit(RazorpayFailure("Could not open Razorpay checkout: ${e.toString()}"));
     }
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    print("RAZORPAY_EVENT_SUCCESS: ${response.paymentId}");
     emit(RazorpaySuccess(
       RazorpayPaymentResult.success(
         paymentId: response.paymentId,
@@ -57,6 +64,7 @@ class RazorpayCubit extends Cubit<RazorpayState> {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
+    print("RAZORPAY_EVENT_ERROR: code=${response.code}, message=${response.message}");
     emit(RazorpayFailure(
       response.message ?? 'Payment Failed',
       code: response.code?.toString(),

@@ -14,19 +14,23 @@ class RazorpayOpeningCheckout extends RazorpayState {}
 
 class RazorpaySuccess extends RazorpayState {
   final RazorpayPaymentResult result;
-  const RazorpaySuccess(this.result);
+  final DateTime timestamp;
+  
+  RazorpaySuccess(this.result) : timestamp = DateTime.now();
 
   @override
-  List<Object?> get props => [result];
+  List<Object?> get props => [result, timestamp];
 }
 
 class RazorpayFailure extends RazorpayState {
   final String message;
   final String? code;
-  const RazorpayFailure(this.message, {this.code});
+  final DateTime timestamp;
+
+  RazorpayFailure(this.message, {this.code}) : timestamp = DateTime.now();
 
   @override
-  List<Object?> get props => [message, code];
+  List<Object?> get props => [message, code, timestamp];
 }
 
 class RazorpayExternalWallet extends RazorpayState {

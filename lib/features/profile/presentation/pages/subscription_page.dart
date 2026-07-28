@@ -7,6 +7,12 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 
+import '../../../../injection_container.dart';
+import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
+import '../../../razorpay/presentation/screens/payment_failed_screen.dart';
+import '../../../razorpay/presentation/screens/payment_success_screen.dart';
+import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
+
 class _PlanOption {
   final String key;
   final String label;
@@ -382,7 +388,52 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BlocProvider(
+                      create: (context) => sl<RazorpayCubit>(),
+                      child: RazorpayPaymentScreen(
+                        apiKey: "rzp_test_TIonMLOPKwlfCt", // Replace with your real Razorpay key
+                        amount: 100, // Amount in paise (e.g., 1000 = ₹10)
+                        name: "Balaji",
+                        orderId: "order_TIuuYr9eieJErc", // Using empty string for standard test mode
+                        email: "balaji.k@stay.in",//profile?.email ?? owner?.email,
+                        contact: "9090909090",//profile?.phone ?? owner?.phone,
+                        onSuccess: (success) {
+                          debugPrint('Razorpay Payment Success: ${success.toString()}');
+                          // Print individual fields from the wrapped result
+                          debugPrint('paymentId: ${success.result.paymentId}');
+                          debugPrint('orderId: ${success.result.orderId}');
+                          debugPrint('signature: ${success.result.signature}');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Payment Successful')),
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const PaymentSuccessScreen()),
+                          );
+                        },
+                        onFailure: (failure) {
+                          debugPrint('Razorpay Payment Failure: ${failure.toString()}');
+                          // Print common failure properties
+                          debugPrint('code: ${failure.code}');
+                          debugPrint('message: ${failure.message}');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Payment Failed: ${failure.message}')),
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const PaymentFailedScreen()),
+                          );
+
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
