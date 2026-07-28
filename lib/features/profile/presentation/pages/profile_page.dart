@@ -16,6 +16,8 @@ import 'package:stayindia_owner/features/staff/presentation/pages/staff_manageme
 import 'package:stayindia_owner/injection_container.dart';
 import '../../../bank_account/presentation/pages/bank_accounts_page.dart';
 import '../../../digilocker/presentation/pages/DigiLockerStorage.dart';
+import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
+import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
 import 'account_settings_page.dart';
 import 'help_support_page.dart';
 import 'subscription_page.dart';
@@ -421,6 +423,39 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () => _handleLogout(context),
                       ),
                     ]),
+
+                    _ProfileCard(
+                      icon: Icons.payment_rounded,
+                      title: 'Make Payment',
+                      iconBgColor: const Color(0xFFE0F2FE),
+                      iconColor: const Color(0xFF0284C7),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BlocProvider(
+                            create: (context) => sl<RazorpayCubit>(),
+                            child: RazorpayPaymentScreen(
+                              apiKey: "rzp_test_TESAZr389mXuJA", // Replace with your real Razorpay key
+                              amount: 1000, // Amount in paise (e.g., 1000 = ₹10)
+                              name: name,
+                              orderId: "order_TIony929ZsNKlP",
+                              email: profile?.email ?? owner?.email,
+                              contact: profile?.phone ?? owner?.phone,
+                              onSuccess: (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Payment Successful')),
+                                );
+                              },
+                              onFailure: (failure) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Payment Failed: ${failure.message}')),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                     SizedBox(height: 140.h),
                   ]),
                 ),
