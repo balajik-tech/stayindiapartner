@@ -97,6 +97,11 @@ class ApiConstants {
   static const String bankAccounts = '/bankaccounts';
   static const String externalBankVerification = 'https://api.digiverification.com/api/v2/account-verification/verify';
 
+  static const String razorpayKey = "rzp_test_TIonMLOPKwlfCt";
+
+  static const String subscriptionPlans = '/subscriptions/plans';
+  static const String subscriptionSubscribe = '/subscriptions/subscribe';
+
   static const String transactions = '/transactions';
 
   static const String bookingsCheckin = '/bookings/checkin';

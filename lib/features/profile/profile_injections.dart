@@ -35,6 +35,11 @@ import 'presentation/cubit/room_cubit.dart';
 import 'presentation/cubit/food_menu_cubit.dart';
 import 'presentation/cubit/settings_cubit.dart';
 import 'package:stayindia_owner/features/profile/data/repositories/review_repository_impl.dart';
+import 'package:stayindia_owner/features/profile/data/repositories/subscription_repository_impl.dart';
+import 'package:stayindia_owner/features/profile/data/datasources/subscription_remote_datasource.dart';
+import 'package:stayindia_owner/features/profile/domain/repositories/subscription_repository.dart';
+import 'package:stayindia_owner/features/profile/domain/usecases/subscription_usecases.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/subscription_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/document_cubit.dart';
 
 void registerProfileFeature(GetIt sl) {
@@ -55,6 +60,12 @@ void registerProfileFeature(GetIt sl) {
       deleteHostelUseCase: sl(),
       uploadHostelImagesUseCase: sl(),
       updateHostelLocationUseCase: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => SubscriptionCubit(
+      getSubscriptionPlansUseCase: sl(),
+      subscribeToPlanUseCase: sl(),
     ),
   );
 
@@ -112,6 +123,8 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => DeleteHostelUseCase(sl()));
   sl.registerLazySingleton(() => UploadHostelImagesUseCase(sl()));
   sl.registerLazySingleton(() => UpdateHostelLocationUseCase(sl()));
+  sl.registerLazySingleton(() => GetSubscriptionPlansUseCase(sl()));
+  sl.registerLazySingleton(() => SubscribeToPlanUseCase(sl()));
 
   sl.registerLazySingleton(() => GetOccupancyUseCase(sl()));
   sl.registerLazySingleton(() => GetFloorWiseRoomsUseCase(sl()));
@@ -164,6 +177,9 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton<ReviewRepository>(
     () => ReviewRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton<SubscriptionRepository>(
+    () => SubscriptionRepositoryImpl(remoteDataSource: sl()),
+  );
 
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(dio: sl()),
@@ -185,5 +201,8 @@ void registerProfileFeature(GetIt sl) {
   );
   sl.registerLazySingleton<ReviewRemoteDataSource>(
     () => ReviewRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<SubscriptionRemoteDataSource>(
+    () => SubscriptionRemoteDataSourceImpl(dio: sl()),
   );
 }

@@ -6,69 +6,13 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
+import '../../domain/entities/subscription_response.dart';
+import '../cubit/subscription_cubit.dart';
+import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_payment_screen.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import '../../../../injection_container.dart';
-import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
-import '../../../razorpay/presentation/screens/payment_failed_screen.dart';
-import '../../../razorpay/presentation/screens/payment_success_screen.dart';
-import '../../../razorpay/presentation/utils/razorpay_manager.dart';
-
-class _PlanOption {
-  final String key;
-  final String label;
-  final String duration;
-  final int months;
-  final int discountPercent;
-  final bool isBestValue;
-
-  const _PlanOption({
-    required this.key,
-    required this.label,
-    required this.duration,
-    required this.months,
-    required this.discountPercent,
-    this.isBestValue = false,
-  });
-}
-
-
-
-const double _basePricePerBed = 99;
-
-const List<_PlanOption> _planOptions = [
-  _PlanOption(
-    key: 'monthly',
-    label: 'Monthly',
-    duration: '1 month',
-    months: 1,
-    discountPercent: 10,
-    isBestValue: false,
-  ),
-  _PlanOption(
-    key: 'quarterly',
-    label: 'Quarterly',
-    duration: '3 months',
-    months: 3,
-    discountPercent: 20,
-    isBestValue: false,
-  ),
-  _PlanOption(
-    key: 'half_yearly',
-    label: 'Half-yearly',
-    duration: '6 months',
-    months: 6,
-    discountPercent: 30,
-    isBestValue: false,
-  ),
-  _PlanOption(
-    key: 'annual',
-    label: 'Annual',
-    duration: '12 months',
-    months: 12,
-    discountPercent: 40,
-    isBestValue: true,
-  ),
-];
+import '../models/plan_option.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -80,11 +24,54 @@ class SubscriptionPage extends StatefulWidget {
 class _SubscriptionPageState extends State<SubscriptionPage> {
   // Tracks the selected plan per hostel id for hostels not yet subscribed.
   final Map<String, String> _selectedPlan = {};
+  final ScrollController _propertyScrollController = ScrollController();
 
-  String _planKeyFor(String hostelId) => _selectedPlan[hostelId] ?? 'annual';
+  @override
+  void initState() {
+    super.initState();
 
-  int _discountedPrice(_PlanOption plan) {
-    return (_basePricePerBed * (1 - plan.discountPercent / 100)).round();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = context.read<HostelCubit>().state;
+      if (state is HostelLoaded) {
+        _scrollToSelected(state.selectedHostelIndex);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _propertyScrollController.dispose();
+    super.dispose();
+  }
+
+  String _planKeyFor(String hostelId, String defaultValue) => _selectedPlan[hostelId] ?? defaultValue;
+
+  void _loadSubscriptionData(BuildContext context, String hostelId) {
+    context.read<SubscriptionCubit>().loadSubscriptionPlans(hostelId);
+  }
+
+  void _navigateToRazorpay(BuildContext context, ActiveSubscription subscription) {
+    final totalToPay = subscription.totalAmount + subscription.gstAmount;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RazorpayPaymentScreen(
+          apiKey: ApiConstants.razorpayKey,
+          amount: (totalToPay * 100).toInt(),
+          name: 'Stay India Subscription',
+          orderId: subscription.razorpayOrderId ?? '',
+          description: 'Payment for ${subscription.planSnapshot.planName}',
+          onSuccess: (success) {
+            Navigator.pop(context);
+            // Refresh data
+            _loadSubscriptionData(context, subscription.property);
+          },
+          onFailure: (failure) {
+            // Handle failure if needed
+          },
+        ),
+      ),
+    );
   }
 
   String _formatNumber(int n) {
@@ -99,82 +86,270 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+      'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
     ];
     return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HostelCubit, HostelState>(
-      builder: (context, state) {
-        List<Hostel> hostels = [];
-        if (state is HostelLoaded) {
-          hostels = state.hostels;
+    return BlocProvider(
+      create: (context) {
+        final cubit = sl<SubscriptionCubit>();
+        final hostelState = context.read<HostelCubit>().state;
+        if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+          final hostel = hostelState.hostels[hostelState.selectedHostelIndex];
+          cubit.loadSubscriptionPlans(hostel.id);
         }
+        return cubit;
+      },
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<HostelCubit, HostelState>(
+            listenWhen: (previous, current) {
+              if (previous is HostelLoaded && current is HostelLoaded) {
+                return previous.selectedHostelIndex != current.selectedHostelIndex;
+              }
+              return previous is! HostelLoaded && current is HostelLoaded;
+            },
+            listener: (context, state) {
+              if (state is HostelLoaded && state.hostels.isNotEmpty) {
+                final hostel = state.hostels[state.selectedHostelIndex];
+                _loadSubscriptionData(context, hostel.id);
+              }
+            },
+          ),
+          BlocListener<SubscriptionCubit, SubscriptionState>(
+            listener: (context, state) {
+              if (state is SubscriptionSubscribed) {
+                if (state.activeSubscription.status == 'PENDING') {
+                  final orderId = state.activeSubscription.razorpayOrderId;
+                  if (orderId != null && orderId.isNotEmpty) {
+                    _navigateToRazorpay(context, state.activeSubscription);
+                  }
+                }
+              } else if (state is SubscriptionLoaded) {
+                // Check if any property has a PENDING subscription on load
+                for (var response in state.subscriptionResponses.values) {
+                  if (response.activeSubscription?.status == 'PENDING') {
+                    final orderId = response.activeSubscription!.razorpayOrderId;
+                    if (orderId != null && orderId.isNotEmpty) {
+                      _navigateToRazorpay(context, response.activeSubscription!);
+                    }
+                    break; // Only navigate for one (the first found)
+                  }
+                }
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<HostelCubit, HostelState>(
+          builder: (context, hostelState) {
+            List<Hostel> hostels = [];
+            int selectedIndex = 0;
+            if (hostelState is HostelLoaded) {
+              hostels = hostelState.hostels;
+              selectedIndex = hostelState.selectedHostelIndex;
+            }
 
-        return Scaffold(
-          backgroundColor: Colors.white,
-          body: SafeArea(
-            child: Container(
-              padding: const EdgeInsets.all(0),
-              margin: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.grey.shade300,
-                ),
-              ),
-              child: Column(
-                children: [
-                  _buildHeader(context),
-                  Expanded(
+            return BlocBuilder<SubscriptionCubit, SubscriptionState>(
+              builder: (context, subscriptionState) {
+                final subscriptionResponses = subscriptionState.subscriptionResponses;
+
+                return Scaffold(
+                  backgroundColor: Colors.white,
+                  body: SafeArea(
                     child: Container(
-                      color: SubscriptionColors.backgroundColor,
-                      padding: const EdgeInsets.only(top: 8),
-                      child: hostels.isEmpty
-                          ? Center(
-                        child: Text(
-                          'No properties added yet.',
-                          style: GoogleFonts.inter(color: AppColors.greyText, fontSize: 14.sp),
+                      padding: const EdgeInsets.all(0),
+                      margin: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
                         ),
-                      )
-                          : ListView.builder(
-                        padding: EdgeInsets.fromLTRB(
-                          20.w,
-                          8.h,
-                          20.w,
-                          MediaQuery.of(context).padding.bottom + 24.h,
-                        ),
-                        itemCount: hostels.length,
-                        itemBuilder: (context, index) {
-                          final hostel = hostels[index];
-                          return Container(
-                            padding: EdgeInsets.only(bottom: 16.h),
-                            child: Column(
-                             children: [
-                               _buildPlanSelectionCard(hostel),
-                               _buildActiveCard(hostel),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildHeader(context),
+                          if (hostels.length > 1)
+                            _buildPropertySelector(hostels, selectedIndex, context, subscriptionResponses),
+                          Expanded(
+                            child: Container(
+                              color: SubscriptionColors.backgroundColor,
+                              padding: const EdgeInsets.only(top: 8),
+                              child: hostels.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No properties added yet.',
+                                        style: GoogleFonts.inter(
+                                            color: AppColors.greyText,
+                                            fontSize: 14.sp),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      padding: EdgeInsets.fromLTRB(
+                                        20.w,
+                                        8.h,
+                                        20.w,
+                                        MediaQuery.of(context).padding.bottom +
+                                            24.h,
+                                      ),
+                                      itemCount: hostels.isNotEmpty ? 1 : 0,
+                                      itemBuilder: (builderContext, index) {
+                                        final hostel = hostels[selectedIndex];
+                                        final response =
+                                            subscriptionResponses[hostel.id];
+                                        
+                                        if (response == null) {
+                                          return const Center(
+                                            child: CircularProgressIndicator(),
+                                          );
+                                        }
 
-                             ],
+                                        return Container(
+                                          padding: EdgeInsets.only(bottom: 16.h),
+                                          child: Column(
+                                            children: [
+                                              if (response.activeSubscription !=
+                                                      null
+                                                  &&
+                                                  response.activeSubscription!
+                                                          .status ==
+                                                      'ACTIVE'
+                                              )
+                                                _buildActiveCard(
+                                                    builderContext,
+                                                    response.property,
+                                                    response.activeSubscription!)
+                                              else if (response
+                                                          .activeSubscription !=
+                                                      null &&
+                                                  response.activeSubscription!
+                                                          .status ==
+                                                      'PENDING')
+                                                _buildPendingCard(
+                                                    builderContext,
+                                                    response.property,
+                                                    response.activeSubscription!)
+                                              else
+                                                _buildPlanSelectionCard(
+                                                    builderContext,
+                                                    response.property,
+                                                    response.plans),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
                             ),
-                            // NOTE: `isSubscribed` is assumed on Hostel — see message below.
-                            // child: hostel.isSubscribed
-                            //     ? _buildActiveCard(hostel)
-                            //     : _buildPlanSelectionCard(hostel),
-                          );
-                        },
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _scrollToSelected(int index) {
+    if (!_propertyScrollController.hasClients) return;
+
+    const double estimatedChipWidth = 120; // Adjust if needed
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final targetOffset =
+        (index * estimatedChipWidth) - (screenWidth / 2) + (estimatedChipWidth / 2);
+
+    _propertyScrollController.animateTo(
+      targetOffset.clamp(
+        0.0,
+        _propertyScrollController.position.maxScrollExtent,
+      ),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Widget _buildPropertySelector(
+      List<Hostel> hostels, 
+      int selectedIndex, 
+      BuildContext context, 
+      Map<String, SubscriptionResponse> responses) {
+    return Container(
+      height: 48.h,
+      margin: EdgeInsets.only(top: 8.h),
+      child: ListView.builder(
+        controller: _propertyScrollController,
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        itemCount: hostels.length,
+        itemBuilder: (itemContext, index) {
+          final hostelId = hostels[index].id;
+          final isSelected = index == selectedIndex;
+          final response = responses[hostelId];
+          final isActive = response?.activeSubscription?.status == 'ACTIVE';
+          final isPending = response?.activeSubscription?.status == 'PENDING';
+
+          return Padding(
+            padding: EdgeInsets.only(right: 8.w),
+            child: ChoiceChip(
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    hostels[index].name,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      color: isSelected ? Colors.white : SubscriptionColors.navy,
+                    ),
+                  ),
+                  if (isActive || isPending) ...[
+                    SizedBox(width: 6.w),
+                    Container(
+                      width: 6.w,
+                      height: 6.w,
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? (isSelected ? Colors.white : SubscriptionColors.green)
+                            : (isSelected ? Colors.white : SubscriptionColors.orange),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
                 ],
               ),
+              selected: isSelected,
+              onSelected: (bool selected) {
+                if (selected) {
+                  context.read<HostelCubit>().selectHostel(index);
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _scrollToSelected(index);
+                  });
+                }
+              },
+              selectedColor: SubscriptionColors.navy,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+                side: BorderSide(
+                  color: isSelected ? SubscriptionColors.navy : Colors.grey.shade300,
+                ),
+              ),
+              showCheckmark: false,
+              elevation: isSelected ? 2 : 0,
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -322,15 +497,60 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   // ---------------------------------------------------------------------
   // Not-subscribed card: plan picker + price breakup + pay button
   // ---------------------------------------------------------------------
-  Widget _buildPlanSelectionCard(Hostel hostel) {
-    final beds = hostel.totalBeds ?? 0;
-    final selectedKey = _planKeyFor(hostel.id);
-    final selectedPlan = _planOptions.firstWhere((p) => p.key == selectedKey);
-    final discountedPrice = _discountedPrice(selectedPlan);
+  Widget _buildPlanSelectionCard(
+      BuildContext context, SubscriptionProperty property, List<SubscriptionPlan> plans) {
+    final beds = property.totalBeds;
+    final planOptions = plans.map(PlanOption.fromEntity).toList();
 
-    final fullTotal = (_basePricePerBed * beds * selectedPlan.months).round();
-    final discountedTotal = discountedPrice * beds * selectedPlan.months;
-    final savings = fullTotal - discountedTotal;
+    if (planOptions.isEmpty) {
+      return Container(
+        padding: EdgeInsets.all(16.w),
+        margin: EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: AppColors.roomCardBorder),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSubscriptionHeader(
+              hostelName: property.name,
+              status: 'Loading plans...',
+              statusColor: SubscriptionColors.orange,
+              backgroundColor: SubscriptionColors.orangeLight,
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              'Please wait while subscription options are loaded.',
+              style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  color: AppColors.greyText,
+                  fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final defaultKey = planOptions.first.key;
+    final selectedKey = _planKeyFor(property.id, defaultKey);
+    final selectedPlan = planOptions.firstWhere((p) => p.key == selectedKey,
+        orElse: () => planOptions.first);
+
+    final totalToPay = (selectedPlan.breakdown?.totalAmount ?? 0) +
+        (selectedPlan.breakdown?.gstAmount ?? 0);
+
+    final subscriptionState = context.watch<SubscriptionCubit>().state;
+    final isProcessing = subscriptionState is SubscriptionProcessing &&
+        subscriptionState.propertyId == property.id;
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -351,12 +571,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSubscriptionHeader(
-            hostelName: hostel.name,
+            hostelName: property.name,
             status: 'Not subscribed',
             statusColor: SubscriptionColors.orange,
             backgroundColor: SubscriptionColors.orangeLight,
           ),
-          _buildLocationRow(hostel.address ?? ''),
+          _buildLocationRow(property.address),
           SizedBox(height: 0.h),
           _buildBedsRow(beds),
           SizedBox(height: 16.h),
@@ -377,45 +597,58 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             mainAxisSpacing: 14.h,
             crossAxisSpacing: 12.w,
             childAspectRatio: 1.12,
-            children: _planOptions.map((plan) {
+            children: planOptions.map((plan) {
               final isSelected = plan.key == selectedKey;
-              return _buildPlanTile(hostel.id, plan, isSelected);
+              return _buildPlanTile(property.id, plan, isSelected);
             }).toList(),
           ),
           SizedBox(height: 20.h),
-          _buildPriceBreakup(selectedPlan, beds, fullTotal, discountedTotal, savings),
+          _buildPriceBreakup(selectedPlan, beds),
           SizedBox(height: 16.h),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                sl<RazorpayManager>().openCheckout(
-                  context: context,
-                  amount: 1 * 100, // Amount in paise
-                  name: "Stay India",
-                  orderId: "order_TIwMGg77r0r8YC",
-                  email: "balaji.k@stay.in",
-                  contact: "9090909090",
-                  description: "${selectedPlan.label} Subscription - ${hostel.name}",
-                );
-              },
+              onPressed: isProcessing
+                  ? null
+                  : () {
+                      _selectedPlan[property.id] = selectedPlan.key;
+                      context.read<SubscriptionCubit>().subscribe(
+                            property.id,
+                            selectedPlan.id,
+                            'UPI',
+                          );
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r)),
                 elevation: 0,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Pay ₹${_formatNumber(discountedTotal)}',
-                    style: GoogleFonts.inter(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(width: 8.w),
-                  Icon(Icons.arrow_forward, color: Colors.white, size: 18.sp),
-                ],
-              ),
+              child: isProcessing
+                  ? SizedBox(
+                      height: 20.h,
+                      width: 20.h,
+                      child: const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Pay ₹${_formatNumber(totalToPay.round())}',
+                          style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(width: 8.w),
+                        Icon(Icons.arrow_forward,
+                            color: Colors.white, size: 18.sp),
+                      ],
+                    ),
             ),
           ),
         ],
@@ -463,10 +696,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _buildPlanTile(
       String hostelId,
-      _PlanOption plan,
+      PlanOption plan,
       bool isSelected,
       ) {
-    final price = _discountedPrice(plan);
+    final price = plan.pricePerBed.round();
     final priceColor = isSelected ? SubscriptionColors.orange : SubscriptionColors.blue;
 
     return GestureDetector(
@@ -519,7 +752,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   Row(
                     children: [
                       Text(
-                        '₹${_basePricePerBed.toInt()}',
+                        '₹${plan.mrpPerBed.round()}',
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           color: AppColors.greyText,
@@ -582,43 +815,47 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  Widget _buildPriceBreakup(_PlanOption plan, int beds, int fullTotal, int discountedTotal, int savings) {
+  Widget _buildPriceBreakup(PlanOption plan, int beds) {
+    final breakdown = plan.breakdown;
+    if (breakdown == null) return const SizedBox.shrink();
+
+    final mrpTotal = breakdown.mrpTotal;
+    final discountAmount = breakdown.discountAmount;
+    final gstAmount = breakdown.gstAmount;
+    final baseAmount = breakdown.totalAmount;
+    final totalToPay = baseAmount + gstAmount;
+    final savings = mrpTotal - totalToPay;
+
+    final savingsAmount = RegExp(r'₹[\d,]+(?:\.\d+)?')
+        .firstMatch(breakdown.savingsText ?? "")
+        ?.group(0) ?? "0";
+
     return Container(
       padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: SubscriptionColors.priceBoxBg,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: AppColors.roomCardBorder, // or any color you want
-            width: 1,
-          ),
+      decoration: BoxDecoration(
+        color: SubscriptionColors.priceBoxBg,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: AppColors.roomCardBorder,
+          width: 1,
         ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'PRICE BREAKUP · ${plan.label.toUpperCase()} PLAN',
-            style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w800, color: SubscriptionColors.grayText, letterSpacing: 0.5),
+            style: GoogleFonts.inter(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w800,
+                color: SubscriptionColors.grayText,
+                letterSpacing: 0.5),
           ),
-          SizedBox(height: 4.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  'Total (₹${_basePricePerBed.toInt()} × $beds beds × ${plan.months}mo)',
-                  style: GoogleFonts.inter(fontSize: 12.sp, color: Color(0xFF5f616c), fontWeight: FontWeight.w500),
-                ),
-              ),
-              Text(
-                '₹${_formatNumber(fullTotal)}',
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: Color(0xFF5f616c),
-                  decoration: TextDecoration.lineThrough,
-                ),
-              ),
-            ],
+          SizedBox(height: 12.h),
+          _buildBreakupRow(
+            'Total (${breakdown.formula ?? ''})',
+            '₹${_formatNumber(mrpTotal.round())}',
+            isStrikethrough: true,
           ),
           SizedBox(height: 8.h),
           Row(
@@ -627,7 +864,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               Row(
                 children: [
                   Image.asset(
-                    'assets/images/discount.png', // or .webp
+                    'assets/images/discount.png',
                     width: 12.w,
                     height: 12.w,
                     fit: BoxFit.contain,
@@ -637,16 +874,31 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   SizedBox(width: 4.w),
                   Text(
                     'You save (${plan.discountPercent}% off)',
-                    style: GoogleFonts.inter(fontSize: 13.sp, color:Color(0xFF4E8B57), fontWeight: FontWeight.w700),
+                    style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        color: const Color(0xFF4E8B57),
+                        fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
               Text(
-                '- ₹${_formatNumber(savings)}',
-                style: GoogleFonts.inter(fontSize: 13.sp, color:Color(0xFF4E8B57), fontWeight: FontWeight.w700),
+                '- ₹${_formatNumber(discountAmount.round())}',
+                style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    color: const Color(0xFF4E8B57),
+                    fontWeight: FontWeight.w700),
               ),
             ],
           ),
+          if (gstAmount > 0) ...[
+            SizedBox(height: 8.h),
+            _buildBreakupRow(
+              'GST Charges',
+              // 'GST (${plan.gstPercentage}%)',
+              '+ ₹${_formatNumber(gstAmount.round())}',
+              valueColor: SubscriptionColors.navy,
+            ),
+          ],
           Padding(
             padding: EdgeInsets.symmetric(vertical: 10.h),
             child: Divider(height: 1, color: AppColors.roomCardBorder),
@@ -654,10 +906,29 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total to pay', style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue)),
-              Text(
-                '₹${_formatNumber(discountedTotal)}',
-                style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+              Text('Total to pay',
+                  style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryBlue)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '₹${_formatNumber(totalToPay.round())}',
+                    style: GoogleFonts.inter(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryBlue),
+                  ),
+                  Text(
+                    '(Incl. GST)',
+                    style: GoogleFonts.inter(
+                        fontSize: 10.sp,
+                        color: SubscriptionColors.grayText,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
               ),
             ],
           ),
@@ -669,14 +940,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               color: SubscriptionColors.greenLight,
               borderRadius: BorderRadius.circular(8.r),
               border: Border.all(
-                color: Color(0xFFADC8AF), // Choose your border color
+                color: const Color(0xFFADC8AF),
                 width: 0.8,
               ),
             ),
             child: Text(
-              "🎉 You're saving ₹${_formatNumber(savings)} with the ${plan.label.toLowerCase()} plan",
+              "🎉 You're saving $savingsAmount with the ${plan.label.toLowerCase()}",
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w800, color:SubscriptionColors.green, ),
+              style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w800,
+                  color: SubscriptionColors.green),
             ),
           ),
         ],
@@ -684,19 +958,126 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  // ---------------------------------------------------------------------
-  // Active subscription card
-  // ---------------------------------------------------------------------
-  Widget _buildActiveCard(Hostel hostel) {
-    final beds = hostel.totalBeds ?? 0;
-    // NOTE: currentPlanKey / subscriptionStart / subscriptionEnd are assumed
-    // fields — see message below for how to wire these up.
-    final planKey = hostel.currentPlanKey ?? 'half_yearly';
-    final plan = _planOptions.firstWhere((p) => p.key == planKey, orElse: () => _planOptions[2]);
-    final price = _discountedPrice(plan);
+  Widget _buildBreakupRow(String label, String value, {bool isStrikethrough = false, Color? valueColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(fontSize: 12.sp, color: const Color(0xFF5f616c), fontWeight: FontWeight.w500),
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            color: valueColor ?? const Color(0xFF5f616c),
+            decoration: isStrikethrough ? TextDecoration.lineThrough : null,
+          ),
+        ),
+      ],
+    );
+  }
 
-    final start = hostel.subscriptionStart ?? DateTime.now();
-    final end = hostel.subscriptionEnd ?? start.add(Duration(days: plan.months * 30));
+  Widget _buildPendingCard(
+      BuildContext context, SubscriptionProperty property, ActiveSubscription subscription) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.roomCardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSubscriptionHeader(
+            hostelName: property.name,
+            status: 'Payment Pending',
+            statusColor: SubscriptionColors.orange,
+            backgroundColor: SubscriptionColors.orangeLight,
+            icon: Icons.hourglass_empty,
+          ),
+          _buildLocationRow(property.address),
+          _buildBedsRow(property.totalBeds),
+          SizedBox(height: 16.h),
+          Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: SubscriptionColors.priceBoxBg,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Amount to Pay',
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: SubscriptionColors.grayText,
+                      ),
+                    ),
+                    Text(
+                      '₹${_formatNumber(subscription.totalAmount.round())}',
+                      style: GoogleFonts.inter(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _navigateToRazorpay(context, subscription),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                    child: Text(
+                      'Complete Payment',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActiveCard(
+      BuildContext context, SubscriptionProperty property, ActiveSubscription subscription) {
+    final beds = property.totalBeds;
+    final planSnapshot = subscription.planSnapshot;
+    final plan = PlanOption.fromEntity(planSnapshot);
+    final price = plan.pricePerBed.round();
+
+    final start = subscription.startDate ?? DateTime.now();
+    final end = subscription.endDate ?? start.add(Duration(days: plan.months * 30));
 
     final now = DateTime.now();
     final totalDays = end.difference(start).inDays.clamp(1, 100000);
@@ -723,13 +1104,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSubscriptionHeader(
-            hostelName: hostel.name,
+            hostelName: property.name,
             status: 'Active',
             statusColor: SubscriptionColors.green,
             backgroundColor: SubscriptionColors.greenLight,
             icon: Icons.check_circle,
           ),
-          _buildLocationRow(hostel.address ?? ''),
+          _buildLocationRow(property.address),
           _buildBedsRow(beds),
           SizedBox(height: 16.h),
           Container(
