@@ -919,7 +919,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     '₹${_formatNumber(totalToPay.round())}',
                     style: GoogleFonts.inter(
                         fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.primaryBlue),
                   ),
                   Text(
@@ -927,7 +927,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     style: GoogleFonts.inter(
                         fontSize: 10.sp,
                         color: SubscriptionColors.grayText,
-                        fontWeight: FontWeight.w500),
+                        fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
