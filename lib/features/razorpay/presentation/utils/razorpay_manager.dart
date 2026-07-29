@@ -11,6 +11,9 @@ class RazorpayManager {
     _razorpay = Razorpay();
   }
 
+  // Expose the raw Razorpay instance for specialized use cases like Cubits
+  Razorpay get instance => _razorpay;
+
   void openCheckout({
     required BuildContext context,
     required int amount,
@@ -22,9 +25,11 @@ class RazorpayManager {
     Function(PaymentSuccessResponse)? onSuccess,
     Function(PaymentFailureResponse)? onFailure,
   }) {
+    _razorpay.clear(); // Clear existing listeners to avoid duplicates
+    
     // Setup listeners for this specific checkout
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, (PaymentSuccessResponse response) {
-      debugPrint("Razorpay SUCCESS: ${response.paymentId}");
+      logSuccess(response);
       if (onSuccess != null) {
         onSuccess(response);
       } else {
@@ -33,11 +38,10 @@ class RazorpayManager {
           MaterialPageRoute(builder: (_) => const PaymentSuccessScreen()),
         );
       }
-      _clearListeners();
     });
 
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, (PaymentFailureResponse response) {
-      debugPrint("Razorpay ERROR: ${response.code} - ${response.message}");
+      logFailure(response);
       if (onFailure != null) {
         onFailure(response);
       } else {
@@ -46,7 +50,6 @@ class RazorpayManager {
           MaterialPageRoute(builder: (_) => const PaymentFailedScreen()),
         );
       }
-      _clearListeners();
     });
 
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (ExternalWalletResponse response) {
@@ -78,7 +81,22 @@ class RazorpayManager {
     }
   }
 
-  void _clearListeners() {
+  void logSuccess(PaymentSuccessResponse response) {
+    debugPrint('========== Razorpay Success ==========');
+    debugPrint('Payment ID : ${response.paymentId}');
+    debugPrint('Order ID   : ${response.orderId}');
+    debugPrint('Signature  : ${response.signature}');
+    debugPrint('Data       : ${response.data}');
+    debugPrint('======================================');
+  }
+
+  void logFailure(PaymentFailureResponse response) {
+    debugPrint('========== Razorpay Failure ==========');
+    debugPrint("Razorpay ERROR: ${response.code} - ${response.message}");
+    debugPrint('======================================');
+  }
+
+  void clear() {
     _razorpay.clear();
   }
 }

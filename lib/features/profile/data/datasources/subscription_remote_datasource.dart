@@ -55,9 +55,20 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data['data'];
         if (data is Map<String, dynamic>) {
-          final subscription = data['subscription'];
-          if (subscription is Map<String, dynamic>) {
-            return ActiveSubscriptionModel.fromJson(subscription);
+          final subscriptionJson = data['subscription'];
+          final orderJson = data['order'];
+          
+          if (subscriptionJson is Map<String, dynamic>) {
+            // Merge Razorpay order ID and amount into subscription JSON before parsing
+            if (orderJson is Map<String, dynamic>) {
+              if (orderJson.containsKey('id')) {
+                subscriptionJson['razorpayOrderId'] = orderJson['id'];
+              }
+              if (orderJson.containsKey('amount')) {
+                subscriptionJson['razorpayAmount'] = orderJson['amount'];
+              }
+            }
+            return ActiveSubscriptionModel.fromJson(subscriptionJson);
           }
         }
       }

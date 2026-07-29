@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/razorpay_payment_result.dart';
 import '../bloc/razorpay_cubit.dart';
 import '../bloc/razorpay_state.dart';
 
@@ -11,8 +12,8 @@ class RazorpayPaymentScreen extends StatelessWidget {
   final String? description;
   final String? email;
   final String? contact;
-  final Function(RazorpaySuccess) onSuccess;
-  final Function(RazorpayFailure) onFailure;
+  final Function(RazorpayPaymentResult) onSuccess;
+  final Function(String) onFailure;
 
   const RazorpayPaymentScreen({
     super.key,
@@ -46,10 +47,10 @@ class RazorpayPaymentScreen extends StatelessWidget {
         debugPrint("RazorpayPaymentScreen Listener: State is ${state.runtimeType}");
         if (state is RazorpaySuccess) {
           debugPrint("RazorpayPaymentScreen: Success event triggering onSuccess");
-          onSuccess(state);
+          onSuccess(state.result);
         } else if (state is RazorpayFailure) {
           debugPrint("RazorpayPaymentScreen: Failure event triggering onFailure. Message: ${state.message}");
-          onFailure(state);
+          onFailure(state.message);
         }
       },
       builder: (context, state) {

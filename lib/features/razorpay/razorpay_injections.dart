@@ -8,5 +8,5 @@ void registerRazorpayFeature(GetIt sl) {
   sl.registerLazySingleton(() => RazorpayManager(apiKey: ApiConstants.razorpayKey));
 
   // Cubit
-  sl.registerFactory(() => RazorpayCubit());
+  sl.registerFactory(() => RazorpayCubit(sl<RazorpayManager>()));
 }

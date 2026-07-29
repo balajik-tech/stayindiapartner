@@ -94,6 +94,7 @@ class ActiveSubscription {
   final double totalAmount;
   final String status;
   final String? razorpayOrderId;
+  final int? razorpayAmount;
   final DateTime? startDate;
   final DateTime? endDate;
   final DateTime? nextBillingDate;
@@ -122,6 +123,7 @@ class ActiveSubscription {
     required this.totalAmount,
     required this.status,
     this.razorpayOrderId,
+    this.razorpayAmount,
     this.startDate,
     this.endDate,
     this.nextBillingDate,

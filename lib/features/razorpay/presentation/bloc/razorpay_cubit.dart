@@ -1,16 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../domain/entities/razorpay_payment_result.dart';
+import '../utils/razorpay_manager.dart';
 import 'razorpay_state.dart';
 
 class RazorpayCubit extends Cubit<RazorpayState> {
-  late Razorpay _razorpay;
+  final RazorpayManager _razorpayManager;
 
-  RazorpayCubit() : super(RazorpayInitial()) {
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  RazorpayCubit(this._razorpayManager) : super(RazorpayInitial()) {
+    // Listen to events from the shared Razorpay instance
+    _razorpayManager.instance.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpayManager.instance.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpayManager.instance.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
   void openCheckout({
@@ -22,7 +24,7 @@ class RazorpayCubit extends Cubit<RazorpayState> {
     String? email,
     String? contact,
   }) {
-    print("RAZORPAY_OPENING: amount=$amount, orderId=$orderId");
+    debugPrint("RAZORPAY_CUBIT_OPENING: amount=$amount, orderId=$orderId");
     emit(RazorpayOpeningCheckout());
 
     final options = {
@@ -39,21 +41,21 @@ class RazorpayCubit extends Cubit<RazorpayState> {
       }
     };
 
-    // Only add order_id if it's not empty/test
     if (orderId.isNotEmpty && !orderId.startsWith("order_test_")) {
       options['order_id'] = orderId;
     }
 
     try {
-      _razorpay.open(options);
+      _razorpayManager.instance.open(options);
     } catch (e) {
-      print("RAZORPAY_OPEN_EXCEPTION: $e");
+      debugPrint("RAZORPAY_CUBIT_EXCEPTION: $e");
       emit(RazorpayFailure("Could not open Razorpay checkout: ${e.toString()}"));
     }
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    print("RAZORPAY_EVENT_SUCCESS: ${response.paymentId}");
+    _razorpayManager.logSuccess(response);
+    
     emit(RazorpaySuccess(
       RazorpayPaymentResult.success(
         paymentId: response.paymentId,
@@ -64,7 +66,8 @@ class RazorpayCubit extends Cubit<RazorpayState> {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    print("RAZORPAY_EVENT_ERROR: code=${response.code}, message=${response.message}");
+    _razorpayManager.logFailure(response);
+    
     emit(RazorpayFailure(
       response.message ?? 'Payment Failed',
       code: response.code?.toString(),
@@ -72,12 +75,16 @@ class RazorpayCubit extends Cubit<RazorpayState> {
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
+    debugPrint("EXTERNAL_WALLET: ${response.walletName}");
     emit(RazorpayExternalWallet(response.walletName ?? 'External Wallet'));
   }
 
   @override
   Future<void> close() {
-    _razorpay.clear();
+    // We don't want to clear shared listeners here if other things are using them,
+    // but RazorpayCubit is a factory and usually the only listener for a specific checkout screen.
+    // However, since Manager is a singleton, clearing here might affect other flows.
+    // For now, let's keep it safe.
     return super.close();
   }
 }

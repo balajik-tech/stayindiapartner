@@ -6,9 +6,13 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
+import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../domain/entities/subscription_response.dart';
 import '../cubit/subscription_cubit.dart';
+import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
+import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_failed_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_payment_screen.dart';
+import 'package:stayindia_owner/features/razorpay/domain/entities/razorpay_payment_result.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import '../../../../injection_container.dart';
@@ -52,23 +56,49 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   void _navigateToRazorpay(BuildContext context, ActiveSubscription subscription) {
     final totalToPay = subscription.totalAmount + subscription.gstAmount;
+    final amountToPay = subscription.razorpayAmount ?? (totalToPay * 100).toInt();
+    
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RazorpayPaymentScreen(
-          apiKey: ApiConstants.razorpayKey,
-          amount: (totalToPay * 100).toInt(),
-          name: 'Stay India Subscription',
-          orderId: subscription.razorpayOrderId ?? '',
-          description: 'Payment for ${subscription.planSnapshot.planName}',
-          onSuccess: (success) {
-            Navigator.pop(context);
-            // Refresh data
-            _loadSubscriptionData(context, subscription.property);
-          },
-          onFailure: (failure) {
-            // Handle failure if needed
-          },
+        builder: (context) => BlocProvider(
+          create: (context) => sl<RazorpayCubit>(),
+          child: RazorpayPaymentScreen(
+            apiKey: ApiConstants.razorpayKey,
+            amount: amountToPay,
+            name: 'Stay India Subscription',
+            orderId: subscription.razorpayOrderId ?? '',
+            description: 'Payment for ${subscription.planSnapshot.planName}',
+            onSuccess: (RazorpayPaymentResult success) {
+              debugPrint('========== Razorpay Success ==========Subscription');
+              debugPrint('Payment ID : ${success.paymentId}');
+              debugPrint('Order ID   : ${success.orderId}');
+              debugPrint('Signature  : ${success.signature}');
+              debugPrint('======================================');
+
+              // Refresh data
+              _loadSubscriptionData(context, subscription.property);
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PaymentSuccessScreen(),
+                ),
+              );
+            },
+            onFailure: (failure) {
+              debugPrint('========== Razorpay Failure ==========Subscription');
+              debugPrint('Error: $failure');
+              debugPrint('======================================');
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PaymentFailedScreen(),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -123,7 +153,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           BlocListener<SubscriptionCubit, SubscriptionState>(
             listener: (context, state) {
               if (state is SubscriptionSubscribed) {
-                if (state.activeSubscription.status == 'PENDING') {
+                final status = state.activeSubscription.status;
+                if (status == 'PENDING' || status == 'PENDING_PAYMENT') {
                   final orderId = state.activeSubscription.razorpayOrderId;
                   if (orderId != null && orderId.isNotEmpty) {
                     _navigateToRazorpay(context, state.activeSubscription);
@@ -132,7 +163,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               } else if (state is SubscriptionLoaded) {
                 // Check if any property has a PENDING subscription on load
                 for (var response in state.subscriptionResponses.values) {
-                  if (response.activeSubscription?.status == 'PENDING') {
+                  final status = response.activeSubscription?.status;
+                  if (status == 'PENDING' || status == 'PENDING_PAYMENT') {
                     final orderId = response.activeSubscription!.razorpayOrderId;
                     if (orderId != null && orderId.isNotEmpty) {
                       _navigateToRazorpay(context, response.activeSubscription!);
@@ -156,6 +188,28 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             return BlocBuilder<SubscriptionCubit, SubscriptionState>(
               builder: (context, subscriptionState) {
                 final subscriptionResponses = subscriptionState.subscriptionResponses;
+
+                if (subscriptionState is SubscriptionError && subscriptionResponses.isEmpty) {
+                  return Scaffold(
+                    backgroundColor: Colors.white,
+                    body: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Error: ${subscriptionState.message}'),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (hostels.isNotEmpty) {
+                                _loadSubscriptionData(context, hostels[selectedIndex].id);
+                              }
+                            },
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
 
                 return Scaffold(
                   backgroundColor: Colors.white,
@@ -201,8 +255,26 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                         final hostel = hostels[selectedIndex];
                                         final response =
                                             subscriptionResponses[hostel.id];
-                                        
+
                                         if (response == null) {
+                                          if (subscriptionState is SubscriptionError) {
+                                            return Center(
+                                              child: Column(
+                                                children: [
+                                                  Text(
+                                                    'Failed to load data for this property.',
+                                                    style: GoogleFonts.inter(
+                                                        color: AppColors.greyText,
+                                                        fontSize: 14.sp),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => _loadSubscriptionData(context, hostel.id),
+                                                    child: const Text('Retry'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
                                           return const Center(
                                             child: CircularProgressIndicator(),
                                           );
@@ -226,13 +298,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                               else if (response
                                                           .activeSubscription !=
                                                       null &&
-                                                  response.activeSubscription!
+                                                  (response.activeSubscription!
                                                           .status ==
-                                                      'PENDING')
-                                                _buildPendingCard(
-                                                    builderContext,
-                                                    response.property,
-                                                    response.activeSubscription!)
+                                                      'PENDING' ||
+                                                      response.activeSubscription!
+                                                          .status ==
+                                                      'PENDING_PAYMENT'))
+                                                // _buildPendingCard(
+                                                //     builderContext,
+                                                //     response.property,
+                                                //     response.activeSubscription!)
+                                                  _buildPlanSelectionCard(
+                                                  builderContext,
+                                                  response.property,
+                                                  response.plans)
                                               else
                                                 _buildPlanSelectionCard(
                                                     builderContext,
@@ -295,7 +374,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           final isSelected = index == selectedIndex;
           final response = responses[hostelId];
           final isActive = response?.activeSubscription?.status == 'ACTIVE';
-          final isPending = response?.activeSubscription?.status == 'PENDING';
+          final status = response?.activeSubscription?.status;
+          final isPending = status == 'PENDING' || status == 'PENDING_PAYMENT';
 
           return Padding(
             padding: EdgeInsets.only(right: 8.w),
@@ -826,9 +906,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final totalToPay = baseAmount + gstAmount;
     final savings = mrpTotal - totalToPay;
 
-    final savingsAmount = RegExp(r'₹[\d,]+(?:\.\d+)?')
-        .firstMatch(breakdown.savingsText ?? "")
-        ?.group(0) ?? "0";
+    String savingsAmount = breakdown.savingsText ?? "";
+    if (!savingsAmount.contains('₹')) {
+      // If it's just a number, format it
+      final val = double.tryParse(savingsAmount);
+      if (val != null) {
+        savingsAmount = '₹${_formatNumber(val.round())}';
+      } else {
+        savingsAmount = '₹${_formatNumber(savings.round())}';
+      }
+    } else {
+       savingsAmount = RegExp(r'₹[\d,]+(?:\.\d+)?')
+        .firstMatch(savingsAmount)
+        ?.group(0) ?? "₹${_formatNumber(savings.round())}";
+    }
 
     return Container(
       padding: EdgeInsets.all(12.w),
