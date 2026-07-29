@@ -905,12 +905,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Total to pay',
                   style: GoogleFonts.inter(
                       fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryBlue)),
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.blackColor)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
