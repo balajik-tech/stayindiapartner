@@ -1,27 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/payment_summary.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/subscription_cubit.dart';
+import '../../../profile/presentation/pages/subscription_page.dart';
 
 class PaymentFailedScreen extends StatelessWidget {
   final PaymentSummary? summary;
+  final String? propertyId;
+  final String? planId;
+  final String? propertyName;
+  final String? planName;
+  final double? amount;
 
-  const PaymentFailedScreen({super.key, this.summary});
+  const PaymentFailedScreen({
+    super.key,
+    this.summary,
+    this.propertyId,
+    this.planId,
+    this.propertyName,
+    this.planName,
+    this.amount,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F8),
-      body: _PaymentFailedBody(summary: summary),
+    return BlocListener<SubscriptionCubit, SubscriptionState>(
+      listener: (context, state) {
+        if (state is SubscriptionSubscribed) {
+          // The auto-navigation to Razorpay will happen in SubscriptionPage 
+          // because it's still in the stack, or we can handle it here if we want.
+          // But usually, pushing a replacement or popping back is better.
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF4F5F8),
+        body: _PaymentFailedBody(
+          summary: summary,
+          propertyId: propertyId,
+          planId: planId,
+          propertyName: propertyName,
+          planName: planName,
+          amount: amount,
+        ),
+      ),
     );
   }
 }
 
 class _PaymentFailedBody extends StatelessWidget {
   final PaymentSummary? summary;
+  final String? propertyId;
+  final String? planId;
+  final String? propertyName;
+  final String? planName;
+  final double? amount;
 
-  const _PaymentFailedBody({this.summary});
+  const _PaymentFailedBody({
+    this.summary,
+    this.propertyId,
+    this.planId,
+    this.propertyName,
+    this.planName,
+    this.amount,
+  });
 
   static const Color _orange = Color(0xFFF08C1D);
   static const Color _red = Color(0xFFE33B3B);
@@ -33,168 +78,207 @@ class _PaymentFailedBody extends StatelessWidget {
     return DateFormat('dd MMM yyyy, h:mm a').format(date);
   }
 
+  void _onRetry(BuildContext context) {
+    final cubit = context.read<SubscriptionCubit>();
+    final pId = summary?.propertyName ?? propertyId; // Simplified, propertyName is not ID
+    // Wait, propertyId is passed explicitly.
+    final actualPropertyId = propertyId ?? ""; // We should ensure it's passed
+    final actualPlanId = planId ?? "";
+
+    if (actualPropertyId.isNotEmpty && actualPlanId.isNotEmpty) {
+      cubit.subscribe(actualPropertyId, actualPlanId, 'UPI');
+    } else {
+      // If we don't have IDs, just go back
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '₹', locale: 'en_IN', decimalDigits: 0);
+    
+    final displayAmount =  summary?.amount ?? amount ?? 0.0;
+    final displayPropertyName = summary?.propertyName ?? propertyName ?? '';
+    final displayPlanName = summary?.planName ?? planName ?? 'Subscription Plan';
+    final displayTransactionId = summary?.transactionId ?? '';
+    final displayDate = summary != null ? _formatDate(summary!.paymentDate) : _formatDate(DateTime.now());
 
     return SafeArea(
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ----- Top pink gradient with failure icon -----
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(top: 36, bottom: 24),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFFBE3E1), Color(0xFFF4F5F8)],
-                ),
-              ),
-              child: Column(
-                children: [
-                  _FailureIcon(color: _red),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Payment Failed',
-                    style: GoogleFonts.inter(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: _darkText,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 36),
-                    child: Text(
-                      'Your money was not deducted. If it was, it will be auto-refunded in 5–7 business days.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.5,
-                        height: 1.4,
-                        color: _greyText,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    summary != null ? currencyFormat.format(summary!.amount) : '₹0',
-                    style: GoogleFonts.inter(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
-                      color: _amountGrey,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Attempted on ${summary != null ? _formatDate(summary!.paymentDate) : _formatDate(DateTime.now())}',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: _greyText,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      child: BlocBuilder<SubscriptionCubit, SubscriptionState>(
+        builder: (context, state) {
+          final isRetrying = state is SubscriptionProcessing;
 
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ----- Reason warning box -----
-                  if (summary?.failureReason != null)
-                    _ReasonBox(reason: summary!.failureReason!),
-                  const SizedBox(height: 16),
-
-                  // ----- Details card -----
-                  if (summary != null)
-                    _DetailsCard(
-                      details: [
-                        _DetailItem(label: 'Property', value: summary!.propertyName),
-                        _DetailItem(label: 'Plan', value: summary!.planName),
-                        _DetailItem(label: 'Reference ID', value: summary!.transactionId),
-                      ],
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ----- Top pink gradient with failure icon -----
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.only(top: 36, bottom: 24),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFFFBE3E1), Color(0xFFF4F5F8)],
                     ),
-                  const SizedBox(height: 24),
-
-                  // ----- Primary button -----
-                  SizedBox(
-                    height: 54,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(Icons.refresh, size: 18, color: Colors.white),
-                      label: Text(
-                        "Retry payment",
+                  ),
+                  child: Column(
+                    children: [
+                      const _FailureIcon(color: _red),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Payment Failed',
                         style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: _darkText,
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _orange,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 36),
+                        child: Text(
+                          'Your money was not deducted. If it was, it will be auto-refunded in 5–7 business days.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.5,
+                            height: 1.4,
+                            color: _greyText,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ----- Secondary button -----
-                  SizedBox(
-                    height: 54,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.primaryBlue, width: 1.4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        "Change Payment Method",
+                      const SizedBox(height: 20),
+                      Text(
+                        currencyFormat.format(displayAmount),
                         style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryBlue,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          color: _amountGrey,
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // ----- Tertiary text button -----
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.help_outline, size: 18, color: _greyText),
-                      label: Text(
-                        "Contact Support",
+                      const SizedBox(height: 6),
+                      Text(
+                        'Attempted on $displayDate',
                         style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
                           color: _greyText,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ----- Reason warning box -----
+                      if (summary?.failureReason != null)
+                        _ReasonBox(reason: summary!.failureReason!),
+                      const SizedBox(height: 16),
+
+                      // ----- Details card -----
+                      _DetailsCard(
+                        details: [
+                          if (displayPropertyName.trim().isNotEmpty)
+                            _DetailItem(
+                              label: 'Property',
+                              value: displayPropertyName,
+                            ),
+                          if (displayPlanName.trim().isNotEmpty)
+                            _DetailItem(
+                              label: 'Plan',
+                              value: displayPlanName,
+                            ),
+
+                          if (displayTransactionId.trim().isNotEmpty)
+                            _DetailItem(
+                              label: 'Reference ID',
+                              value: displayTransactionId,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ----- Primary button -----
+                      SizedBox(
+                        height: 54,
+                        child: ElevatedButton.icon(
+                          onPressed: isRetrying ? null : () => _onRetry(context),
+                          icon: isRetrying 
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : const Icon(Icons.refresh, size: 18, color: Colors.white),
+                          label: Text(
+                            isRetrying ? "Retrying..." : "Retry payment",
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _orange,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // ----- Secondary button -----
+                      SizedBox(
+                        height: 54,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppColors.primaryBlue, width: 1.4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            "Change Payment Method",
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primaryBlue,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // ----- Tertiary text button -----
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.help_outline, size: 18, color: _greyText),
+                          label: Text(
+                            "Contact Support",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: _greyText,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
