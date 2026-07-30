@@ -13,8 +13,6 @@ import '../../domain/entities/subscription_response.dart';
 import '../cubit/subscription_cubit.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_failed_screen.dart';
-import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_payment_screen.dart';
-import 'package:stayindia_owner/features/razorpay/domain/entities/razorpay_payment_result.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import '../../../../injection_container.dart';
@@ -57,52 +55,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   void _navigateToRazorpay(BuildContext context, ActiveSubscription subscription ) {
-    final totalToPay = subscription.totalAmount + subscription.gstAmount;
-    final amountToPay = subscription.razorpayAmount ?? (totalToPay * 100).toInt();
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => BlocProvider(
-    //       create: (context) => sl<RazorpayCubit>(),
-    //       child: RazorpayPaymentScreen(
-    //         apiKey: ApiConstants.razorpayKey,
-    //         amount: amountToPay,
-    //         name: 'Stay India Subscription',
-    //         orderId: subscription.razorpayOrderId ?? '',
-    //         description: 'Payment for ${subscription.planSnapshot.planName}',
-    //         onSuccess: (RazorpayPaymentResult success) {
-    //           debugPrint('========== Razorpay Success ==========Subscription');
-    //           debugPrint('Payment ID : ${success.paymentId}');
-    //           debugPrint('Order ID   : ${success.orderId}');
-    //           debugPrint('Signature  : ${success.signature}');
-    //           debugPrint('======================================');
-    //
-    //           // Refresh data
-    //           _loadSubscriptionData(context, subscription.property);
-    //
-    //           Navigator.pushReplacement(
-    //             context,
-    //             MaterialPageRoute(
-    //               builder: (context) => const PaymentSuccessScreen(),
-    //             ),
-    //           );
-    //         },
-    //         onFailure: (failure) {
-    //           debugPrint('========== Razorpay Failure ==========Subscription');
-    //           debugPrint('Error: $failure');
-    //           debugPrint('======================================');
-    //
-    //           Navigator.push(
-    //             context,
-    //             MaterialPageRoute(
-    //               builder: (context) => const PaymentFailedScreen(),
-    //             ),
-    //           );
-    //         },
-    //       ),
-    //     ),
-    //   ),
-    // );
+    final int totalAmountToPay = ((subscription.totalAmount + subscription.gstAmount) * 100).round();
+    
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -111,7 +65,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           create: (context) => sl<RazorpayCubit>()
             ..openCheckout(
               apiKey: ApiConstants.razorpayKey,
-              amount: amountToPay,
+              amount: totalAmountToPay,
               name: subscription.planSnapshot.planName,
               orderId: subscription.razorpayOrderId ?? '',
               description: 'Payment for ${subscription.planSnapshot.planName}',
@@ -127,7 +81,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                 Navigator.pop(dialogContext); // close the loading dialog
 
-                // _loadSubscriptionData(context, subscription.property);
+                // Refresh data
+                _loadSubscriptionData(context, subscription.property);
 
                 Navigator.pushReplacement(
                   context,
@@ -366,14 +321,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                                       response.activeSubscription!
                                                           .status ==
                                                       'PENDING_PAYMENT'))
+                                                  _buildPlanSelectionCard(
+                                                    builderContext,
+                                                    response.property,
+                                                    response.plans)
                                                 // _buildPendingCard(
                                                 //     builderContext,
                                                 //     response.property,
                                                 //     response.activeSubscription!)
-                                                  _buildPlanSelectionCard(
-                                                  builderContext,
-                                                  response.property,
-                                                  response.plans)
                                               else
                                                 _buildPlanSelectionCard(
                                                     builderContext,
