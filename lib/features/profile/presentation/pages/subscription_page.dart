@@ -591,6 +591,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
+  double calculateTotalAmount(
+      double amount,
+      double gst,
+      bool priceIncludesGst,
+      ) =>
+      priceIncludesGst ? amount : amount + gst;
+
   // ---------------------------------------------------------------------
   // Not-subscribed card: plan picker + price breakup + pay button
   // ---------------------------------------------------------------------
@@ -642,9 +649,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final selectedPlan = planOptions.firstWhere((p) => p.key == selectedKey,
         orElse: () => planOptions.first);
 
-    final totalToPay = (selectedPlan.breakdown?.totalAmount ?? 0);
-        // +
-        // (selectedPlan.breakdown?.gstAmount ?? 0);
+    final totalToPay = calculateTotalAmount(selectedPlan.breakdown?.totalAmount ?? 0, selectedPlan.breakdown?.gstAmount ?? 0, selectedPlan.priceIncludesGst);
+
 
     final subscriptionState = context.watch<SubscriptionCubit>().state;
     final isProcessing = subscriptionState is SubscriptionProcessing &&
@@ -1063,7 +1069,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final discountAmount = breakdown.discountAmount;
     final gstAmount = breakdown.gstAmount;
     final baseAmount = breakdown.totalAmount;
-    final totalToPay = baseAmount;
+
+    final totalToPay = calculateTotalAmount(baseAmount, gstAmount, plan.priceIncludesGst);
+
+
     final savings = mrpTotal - totalToPay;
 
     String savingsAmount = breakdown.savingsText ?? "";
