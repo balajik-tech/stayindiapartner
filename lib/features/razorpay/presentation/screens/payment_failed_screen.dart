@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 
+import '../../../profile/presentation/pages/subscription_page.dart';
 import '../../data/models/payment_failed_model.dart';
 
 
@@ -165,7 +166,9 @@ class _PaymentFailedBody extends StatelessWidget {
                   SizedBox(
                     height: 54,
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppColors.primaryBlue, width: 1.4),
                         shape: RoundedRectangleBorder(
