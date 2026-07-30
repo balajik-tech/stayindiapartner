@@ -17,6 +17,7 @@ abstract class SubscriptionRemoteDataSource {
     required String signature,
   });
   Future<PaymentSummaryModel> getPaymentSummary(String paymentId);
+  Future<Map<String, String>> getPaymentReceipt(String paymentId);
 }
 
 class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
@@ -129,6 +130,28 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       throw Exception('Failed to load payment summary');
     } catch (e) {
       throw Exception('Error loading payment summary: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, String>> getPaymentReceipt(String paymentId) async {
+    try {
+      final response = await dio.get(
+        '${ApiConstants.subscriptionPaymentReceipt}/$paymentId/receipt',
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data is Map<String, dynamic>) {
+          return {
+            'fileUrl': data['fileUrl']?.toString() ?? '',
+            'fileName': data['fileName']?.toString() ?? '',
+          };
+        }
+      }
+      throw Exception('Failed to load payment receipt');
+    } catch (e) {
+      throw Exception('Error loading payment receipt: $e');
     }
   }
 }

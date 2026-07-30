@@ -2,6 +2,7 @@ import '../../domain/entities/payment_summary.dart';
 
 class PaymentSummaryModel extends PaymentSummary {
   PaymentSummaryModel({
+    super.id,
     required super.status,
     required super.amount,
     required super.paymentDate,
@@ -24,6 +25,7 @@ class PaymentSummaryModel extends PaymentSummary {
     final validity = json['validity'] as Map<String, dynamic>;
 
     return PaymentSummaryModel(
+      id: json['_id'] ?? json['id'],
       status: json['status'] ?? '',
       amount: (json['amount'] as num).toDouble(),
       paymentDate: DateTime.parse(json['paymentDate']),

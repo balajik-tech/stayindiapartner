@@ -68,6 +68,7 @@ void registerProfileFeature(GetIt sl) {
       subscribeToPlanUseCase: sl(),
       verifyPaymentUseCase: sl(),
       getPaymentSummaryUseCase: sl(),
+      getPaymentReceiptUseCase: sl(),
     ),
   );
 
@@ -129,6 +130,7 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => SubscribeToPlanUseCase(sl()));
   sl.registerLazySingleton(() => VerifySubscriptionPaymentUseCase(sl()));
   sl.registerLazySingleton(() => GetPaymentSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetPaymentReceiptUseCase(sl()));
 
   sl.registerLazySingleton(() => GetOccupancyUseCase(sl()));
   sl.registerLazySingleton(() => GetFloorWiseRoomsUseCase(sl()));

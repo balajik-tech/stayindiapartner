@@ -2,30 +2,89 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/payment_summary.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:stayindia_owner/features/profile/domain/usecases/subscription_usecases.dart';
+import '../../../../injection_container.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../profile/presentation/pages/subscription_page.dart';
 
-class PaymentSuccessScreen extends StatelessWidget {
+class PaymentSuccessScreen extends StatefulWidget {
   final PaymentSummary? summary;
 
   const PaymentSuccessScreen({super.key, this.summary});
 
   @override
+  State<PaymentSuccessScreen> createState() => _PaymentSuccessScreenState();
+}
+
+class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
+  bool _isDownloading = false;
+
+  Future<void> _downloadInvoice() async {
+    if (widget.summary?.id == null) return;
+    
+    setState(() {
+      _isDownloading = true;
+    });
+
+    try {
+      final useCase = sl<GetPaymentReceiptUseCase>();
+      final result = await useCase(widget.summary!.id!);
+      final fileUrl = result['fileUrl'];
+      
+      if (fileUrl != null && fileUrl.isNotEmpty) {
+        final uri = Uri.parse(fileUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Could not open the invoice URL.')),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error downloading invoice: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F5F8),
-      body: summary == null
+      body: widget.summary == null
           ? const Center(child: CircularProgressIndicator())
-          : _PaymentSuccessBody(summary: summary!),
+          : _PaymentSuccessBody(
+              summary: widget.summary!,
+              isDownloading: _isDownloading,
+              onDownloadInvoice: _downloadInvoice,
+            ),
     );
   }
 }
 
 class _PaymentSuccessBody extends StatelessWidget {
   final PaymentSummary summary;
+  final bool isDownloading;
+  final VoidCallback onDownloadInvoice;
 
-  const _PaymentSuccessBody({required this.summary});
+  const _PaymentSuccessBody({
+    required this.summary,
+    required this.isDownloading,
+    required this.onDownloadInvoice,
+  });
 
   static const Color _green = Color(0xFF2FA84F);
   static const Color _blue = Color(0xFF1E3A8A);
@@ -161,10 +220,16 @@ class _PaymentSuccessBody extends StatelessWidget {
                   SizedBox(
                     height: 54,
                     child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.download, size: 20, color: AppColors.primaryBlue),
+                      onPressed: isDownloading ? null : onDownloadInvoice,
+                      icon: isDownloading 
+                        ? const SizedBox(
+                            width: 20, 
+                            height: 20, 
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue)
+                          )
+                        : const Icon(Icons.download, size: 20, color: AppColors.primaryBlue),
                       label: Text(
-                        "Download Invoice",
+                        isDownloading ? "Downloading..." : "Download Invoice",
                         style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -215,7 +280,7 @@ class _SuccessIcon extends StatelessWidget {
             height: 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withOpacity(0.14),
+              color: color.withValues(alpha: 0.14),
             ),
           ),
           Container(
@@ -223,7 +288,7 @@ class _SuccessIcon extends StatelessWidget {
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withOpacity(0.14),
+              color: color.withValues(alpha: 0.14),
             ),
           ),
           Container(

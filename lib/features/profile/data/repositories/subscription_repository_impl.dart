@@ -39,4 +39,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<PaymentSummary> getPaymentSummary(String paymentId) {
     return remoteDataSource.getPaymentSummary(paymentId);
   }
+
+  @override
+  Future<Map<String, String>> getPaymentReceipt(String paymentId) {
+    return remoteDataSource.getPaymentReceipt(paymentId);
+  }
 }

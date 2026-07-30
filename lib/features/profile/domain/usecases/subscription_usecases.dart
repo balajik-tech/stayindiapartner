@@ -53,3 +53,13 @@ class GetPaymentSummaryUseCase {
     return repository.getPaymentSummary(paymentId);
   }
 }
+
+class GetPaymentReceiptUseCase {
+  final SubscriptionRepository repository;
+
+  GetPaymentReceiptUseCase(this.repository);
+
+  Future<Map<String, String>> call(String paymentId) {
+    return repository.getPaymentReceipt(paymentId);
+  }
+}

@@ -14,4 +14,5 @@ abstract class SubscriptionRepository {
     required String signature,
   });
   Future<PaymentSummary> getPaymentSummary(String paymentId);
+  Future<Map<String, String>> getPaymentReceipt(String paymentId);
 }
