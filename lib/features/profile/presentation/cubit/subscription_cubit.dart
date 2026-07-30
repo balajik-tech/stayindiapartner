@@ -8,12 +8,15 @@ part 'subscription_state.dart';
 class SubscriptionCubit extends Cubit<SubscriptionState> {
   final GetSubscriptionPlansUseCase _getSubscriptionPlans;
   final SubscribeToPlanUseCase _subscribeToPlan;
+  final VerifySubscriptionPaymentUseCase _verifyPayment;
 
   SubscriptionCubit({
     required GetSubscriptionPlansUseCase getSubscriptionPlansUseCase,
     required SubscribeToPlanUseCase subscribeToPlanUseCase,
+    required VerifySubscriptionPaymentUseCase verifyPaymentUseCase,
   })  : _getSubscriptionPlans = getSubscriptionPlansUseCase,
         _subscribeToPlan = subscribeToPlanUseCase,
+        _verifyPayment = verifyPaymentUseCase,
         super(SubscriptionInitial());
 
   Future<void> loadSubscriptionPlans(String propertyId, {bool forceRefresh = false}) async {
@@ -70,6 +73,43 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       ));
     } catch (e) {
       emit(SubscriptionError(
+        message: e.toString(),
+        subscriptionResponses: state.subscriptionResponses,
+      ));
+    }
+  }
+
+  Future<void> verifyPayment({
+    required String propertyId,
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) async {
+    emit(SubscriptionProcessing(
+      propertyId: propertyId,
+      subscriptionResponses: state.subscriptionResponses,
+    ));
+    try {
+      final isVerified = await _verifyPayment(
+        orderId: orderId,
+        paymentId: paymentId,
+        signature: signature,
+      );
+
+      if (isVerified) {
+        await loadSubscriptionPlans(propertyId, forceRefresh: true);
+        emit(SubscriptionPaymentVerified(
+          message: "Payment verified successfully",
+          subscriptionResponses: state.subscriptionResponses,
+        ));
+      } else {
+        emit(SubscriptionPaymentVerificationFailed(
+          message: "Payment verification failed",
+          subscriptionResponses: state.subscriptionResponses,
+        ));
+      }
+    } catch (e) {
+      emit(SubscriptionPaymentVerificationFailed(
         message: e.toString(),
         subscriptionResponses: state.subscriptionResponses,
       ));

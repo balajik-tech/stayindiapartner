@@ -20,4 +20,17 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   ) {
     return remoteDataSource.subscribeToPlan(propertyId, planId, paymentMethod);
   }
+
+  @override
+  Future<bool> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) {
+    return remoteDataSource.verifyPayment(
+      orderId: orderId,
+      paymentId: paymentId,
+      signature: signature,
+    );
+  }
 }

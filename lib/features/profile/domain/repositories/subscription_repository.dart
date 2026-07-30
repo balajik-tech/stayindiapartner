@@ -7,4 +7,9 @@ abstract class SubscriptionRepository {
     String planId,
     String paymentMethod,
   );
+  Future<bool> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  });
 }

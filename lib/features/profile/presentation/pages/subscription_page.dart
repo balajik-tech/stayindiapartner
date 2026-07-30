@@ -81,15 +81,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                 Navigator.pop(dialogContext); // close the loading dialog
 
-                // Refresh data
-                _loadSubscriptionData(context, subscription.property);
-
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PaymentSuccessScreen(),
-                  ),
-                );
+                // Call verify-payment API
+                context.read<SubscriptionCubit>().verifyPayment(
+                      propertyId: subscription.property,
+                      orderId: state.result.orderId ?? '',
+                      paymentId: state.result.paymentId ?? '',
+                      signature: state.result.signature ?? '',
+                    );
               } else if (state is RazorpayFailure) {
                 debugPrint('========== Razorpay Failure ==========Subscription');
                 debugPrint('Error: ${state.message}');
@@ -189,6 +187,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     break; // Only navigate for one (the first found)
                   }
                 }
+              } else if (state is SubscriptionPaymentVerified) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PaymentSuccessScreen(),
+                  ),
+                );
+              } else if (state is SubscriptionPaymentVerificationFailed) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PaymentFailedScreen(),
+                  ),
+                );
               }
             },
           ),

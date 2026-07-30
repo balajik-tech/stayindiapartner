@@ -24,3 +24,21 @@ class SubscribeToPlanUseCase {
     return repository.subscribeToPlan(propertyId, planId, paymentMethod);
   }
 }
+
+class VerifySubscriptionPaymentUseCase {
+  final SubscriptionRepository repository;
+
+  VerifySubscriptionPaymentUseCase(this.repository);
+
+  Future<bool> call({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) {
+    return repository.verifyPayment(
+      orderId: orderId,
+      paymentId: paymentId,
+      signature: signature,
+    );
+  }
+}

@@ -101,6 +101,7 @@ class ApiConstants {
 
   static const String subscriptionPlans = '/subscriptions/plans';
   static const String subscriptionSubscribe = '/subscriptions/subscribe';
+  static const String subscriptionVerifyPayment = '/subscriptions/verify-payment';
 
   static const String transactions = '/transactions';
 

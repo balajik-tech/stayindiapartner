@@ -10,6 +10,11 @@ abstract class SubscriptionRemoteDataSource {
     String planId,
     String paymentMethod,
   );
+  Future<bool> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  });
 }
 
 class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
@@ -75,6 +80,34 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       throw Exception('Failed to subscribe to plan');
     } catch (e) {
       throw Exception('Error subscribing to plan: $e');
+    }
+  }
+
+  @override
+  Future<bool> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.subscriptionVerifyPayment,
+        data: {
+          'razorpay_order_id': orderId,
+          'razorpay_payment_id': paymentId,
+          'razorpay_signature': signature,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data['data'];
+        if (data is Map<String, dynamic>) {
+          return data['verified'] == true;
+        }
+      }
+      return false;
+    } catch (e) {
+      throw Exception('Error verifying payment: $e');
     }
   }
 }
