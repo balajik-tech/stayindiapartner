@@ -8,8 +8,10 @@ import 'razorpay_state.dart';
 class RazorpayCubit extends Cubit<RazorpayState> {
   final RazorpayManager _razorpayManager;
 
-  RazorpayCubit(this._razorpayManager) : super(RazorpayInitial()) {
-    // Listen to events from the shared Razorpay instance
+  RazorpayCubit(this._razorpayManager) : super(RazorpayInitial());
+
+  void _setupListeners() {
+    _razorpayManager.instance.clear(); // Clear to ensure we are the only listener
     _razorpayManager.instance.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpayManager.instance.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpayManager.instance.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
@@ -24,6 +26,7 @@ class RazorpayCubit extends Cubit<RazorpayState> {
     String? email,
     String? contact,
   }) {
+    _setupListeners();
     debugPrint("RAZORPAY_CUBIT_OPENING: amount=$amount, orderId=$orderId");
     emit(RazorpayOpeningCheckout());
 

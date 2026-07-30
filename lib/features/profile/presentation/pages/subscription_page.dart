@@ -31,7 +31,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   final Map<String, String> _selectedPlan = {};
   final ScrollController _propertyScrollController = ScrollController();
   bool _isNavigatingToRazorpay = false;
-  final Set<String> _hostelsNavigatedToRazorpay = {};
 
   @override
   void initState() {
@@ -196,11 +195,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (state is SubscriptionSubscribed) {
                 final status = state.activeSubscription.status;
                 if (status == 'PENDING' || status == 'PENDING_PAYMENT') {
-                  final hostelId = state.activeSubscription.property;
-                  if (!_hostelsNavigatedToRazorpay.contains(hostelId)) {
-                    _hostelsNavigatedToRazorpay.add(hostelId);
-                    _navigateToRazorpay(context, state.activeSubscription);
-                  }
+                  _navigateToRazorpay(context, state.activeSubscription);
                 }
               } else if (state is SubscriptionPaymentVerified) {
                 Navigator.pushReplacement(
