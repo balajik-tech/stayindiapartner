@@ -31,6 +31,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   final Map<String, String> _selectedPlan = {};
   final ScrollController _propertyScrollController = ScrollController();
   bool _isNavigatingToRazorpay = false;
+  final Set<String> _hostelsNavigatedToRazorpay = {};
 
   @override
   void initState() {
@@ -98,7 +99,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 debugPrint('======================================');
 
                 _isNavigatingToRazorpay = false;
-                Navigator.pop(dialogContext); // close the loading dialog
+                if (Navigator.canPop(dialogContext)) {
+                  Navigator.pop(dialogContext); // close the loading dialog
+                }
 
                 // Call verify-payment API
                 context.read<SubscriptionCubit>().verifyPayment(
@@ -113,8 +116,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 debugPrint('======================================');
 
                 _isNavigatingToRazorpay = false;
-                Navigator.pop(dialogContext); // close the loading dialog
+                if (Navigator.canPop(dialogContext)) {
+                  Navigator.pop(dialogContext); // close the loading dialog
+                }
 
+                // Use the parent context to push to avoid issues with dialogContext being popped
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -190,21 +196,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (state is SubscriptionSubscribed) {
                 final status = state.activeSubscription.status;
                 if (status == 'PENDING' || status == 'PENDING_PAYMENT') {
-                  final orderId = state.activeSubscription.razorpayOrderId;
-                  if (orderId != null && orderId.isNotEmpty) {
+                  final hostelId = state.activeSubscription.property;
+                  if (!_hostelsNavigatedToRazorpay.contains(hostelId)) {
+                    _hostelsNavigatedToRazorpay.add(hostelId);
                     _navigateToRazorpay(context, state.activeSubscription);
-                  }
-                }
-              } else if (state is SubscriptionLoaded) {
-                // Check if any property has a PENDING subscription on load
-                for (var response in state.subscriptionResponses.values) {
-                  final status = response.activeSubscription?.status;
-                  if (status == 'PENDING' || status == 'PENDING_PAYMENT') {
-                    final orderId = response.activeSubscription!.razorpayOrderId;
-                    if (orderId != null && orderId.isNotEmpty) {
-                      _navigateToRazorpay(context, response.activeSubscription!);
-                    }
-                    break; // Only navigate for one (the first found)
                   }
                 }
               } else if (state is SubscriptionPaymentVerified) {
@@ -344,23 +339,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                                     builderContext,
                                                     response.property,
                                                     response.activeSubscription!)
-                                              else if (response
-                                                          .activeSubscription !=
-                                                      null &&
-                                                  (response.activeSubscription!
-                                                          .status ==
-                                                      'PENDING' ||
-                                                      response.activeSubscription!
-                                                          .status ==
-                                                      'PENDING_PAYMENT'))
-                                                  _buildPlanSelectionCard(
-                                                    builderContext,
-                                                    response.property,
-                                                    response.plans)
-                                                // _buildPendingCard(
-                                                //     builderContext,
-                                                //     response.property,
-                                                //     response.activeSubscription!)
+                                              // else if (response
+                                              //             .activeSubscription !=
+                                              //         null &&
+                                              //     (response.activeSubscription!
+                                              //             .status ==
+                                              //         'PENDING' ||
+                                              //         response.activeSubscription!
+                                              //             .status ==
+                                              //         'PENDING_PAYMENT'))
+                                              //   _buildPendingCard(
+                                              //       builderContext,
+                                              //       response.property,
+                                              //       response.activeSubscription!)
                                               else
                                                 _buildPlanSelectionCard(
                                                     builderContext,
