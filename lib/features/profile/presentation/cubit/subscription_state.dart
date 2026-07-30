@@ -57,26 +57,30 @@ class SubscriptionSubscribed extends SubscriptionState {
 
 class SubscriptionPaymentVerified extends SubscriptionState {
   final String message;
+  final PaymentSummary summary;
 
   const SubscriptionPaymentVerified({
     required this.message,
+    required this.summary,
     Map<String, SubscriptionResponse> subscriptionResponses = const {},
   }) : super(subscriptionResponses: subscriptionResponses);
 
   @override
-  List<Object?> get props => [subscriptionResponses, message];
+  List<Object?> get props => [subscriptionResponses, message, summary];
 }
 
 class SubscriptionPaymentVerificationFailed extends SubscriptionState {
   final String message;
+  final PaymentSummary? summary;
 
   const SubscriptionPaymentVerificationFailed({
     required this.message,
+    this.summary,
     Map<String, SubscriptionResponse> subscriptionResponses = const {},
   }) : super(subscriptionResponses: subscriptionResponses);
 
   @override
-  List<Object?> get props => [subscriptionResponses, message];
+  List<Object?> get props => [subscriptionResponses, message, summary];
 }
 
 class SubscriptionError extends SubscriptionState {

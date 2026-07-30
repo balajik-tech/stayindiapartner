@@ -1,4 +1,5 @@
 import '../entities/subscription_response.dart';
+import '../entities/payment_summary.dart';
 
 abstract class SubscriptionRepository {
   Future<SubscriptionResponse> getSubscriptionPlans(String propertyId);
@@ -7,9 +8,10 @@ abstract class SubscriptionRepository {
     String planId,
     String paymentMethod,
   );
-  Future<bool> verifyPayment({
+  Future<Map<String, dynamic>> verifyPayment({
     required String orderId,
     required String paymentId,
     required String signature,
   });
+  Future<PaymentSummary> getPaymentSummary(String paymentId);
 }

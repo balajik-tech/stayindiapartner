@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/subscription_response.dart';
+import '../../domain/entities/payment_summary.dart';
 import '../../domain/usecases/subscription_usecases.dart';
 
 part 'subscription_state.dart';
@@ -9,14 +10,17 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   final GetSubscriptionPlansUseCase _getSubscriptionPlans;
   final SubscribeToPlanUseCase _subscribeToPlan;
   final VerifySubscriptionPaymentUseCase _verifyPayment;
+  final GetPaymentSummaryUseCase _getPaymentSummary;
 
   SubscriptionCubit({
     required GetSubscriptionPlansUseCase getSubscriptionPlansUseCase,
     required SubscribeToPlanUseCase subscribeToPlanUseCase,
     required VerifySubscriptionPaymentUseCase verifyPaymentUseCase,
+    required GetPaymentSummaryUseCase getPaymentSummaryUseCase,
   })  : _getSubscriptionPlans = getSubscriptionPlansUseCase,
         _subscribeToPlan = subscribeToPlanUseCase,
         _verifyPayment = verifyPaymentUseCase,
+        _getPaymentSummary = getPaymentSummaryUseCase,
         super(SubscriptionInitial());
 
   Future<void> loadSubscriptionPlans(String propertyId, {bool forceRefresh = false}) async {
@@ -90,21 +94,35 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       subscriptionResponses: state.subscriptionResponses,
     ));
     try {
-      final isVerified = await _verifyPayment(
+      final verificationResult = await _verifyPayment(
         orderId: orderId,
         paymentId: paymentId,
         signature: signature,
       );
 
-      if (isVerified) {
+      final isVerified = verificationResult['verified'] == true;
+      final serverPaymentId = verificationResult['paymentId']?.toString();
+
+      if (isVerified && serverPaymentId != null) {
+        final summary = await _getPaymentSummary(serverPaymentId);
         await loadSubscriptionPlans(propertyId, forceRefresh: true);
         emit(SubscriptionPaymentVerified(
           message: "Payment verified successfully",
+          summary: summary,
           subscriptionResponses: state.subscriptionResponses,
         ));
       } else {
+        // Even if verified is false, we might want to fetch summary if paymentId exists to show reason
+        PaymentSummary? summary;
+        if (serverPaymentId != null) {
+          try {
+            summary = await _getPaymentSummary(serverPaymentId);
+          } catch (_) {}
+        }
+        
         emit(SubscriptionPaymentVerificationFailed(
           message: "Payment verification failed",
+          summary: summary,
           subscriptionResponses: state.subscriptionResponses,
         ));
       }

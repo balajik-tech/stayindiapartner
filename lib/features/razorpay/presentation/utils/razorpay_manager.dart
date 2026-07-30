@@ -62,8 +62,8 @@ class RazorpayManager {
       'name': name,
       'description': description ?? '',
       'prefill': {
-        if (contact != null) 'contact': contact,
-        if (email != null) 'email': email,
+        'contact': contact,
+        'email': email,
       },
       'external': {
         'wallets': ['paytm']

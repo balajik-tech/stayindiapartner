@@ -1,4 +1,5 @@
 import '../../domain/entities/subscription_response.dart';
+import '../../domain/entities/payment_summary.dart';
 import '../../domain/repositories/subscription_repository.dart';
 import '../datasources/subscription_remote_datasource.dart';
 
@@ -22,7 +23,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   }
 
   @override
-  Future<bool> verifyPayment({
+  Future<Map<String, dynamic>> verifyPayment({
     required String orderId,
     required String paymentId,
     required String signature,
@@ -32,5 +33,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       paymentId: paymentId,
       signature: signature,
     );
+  }
+
+  @override
+  Future<PaymentSummary> getPaymentSummary(String paymentId) {
+    return remoteDataSource.getPaymentSummary(paymentId);
   }
 }

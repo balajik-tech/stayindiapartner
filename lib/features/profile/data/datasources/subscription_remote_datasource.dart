@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import '../models/subscription_response_model.dart';
+import '../models/payment_summary_model.dart';
 import '../../domain/entities/subscription_response.dart';
 
 abstract class SubscriptionRemoteDataSource {
@@ -10,11 +11,12 @@ abstract class SubscriptionRemoteDataSource {
     String planId,
     String paymentMethod,
   );
-  Future<bool> verifyPayment({
+  Future<Map<String, dynamic>> verifyPayment({
     required String orderId,
     required String paymentId,
     required String signature,
   });
+  Future<PaymentSummaryModel> getPaymentSummary(String paymentId);
 }
 
 class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
@@ -84,7 +86,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   }
 
   @override
-  Future<bool> verifyPayment({
+  Future<Map<String, dynamic>> verifyPayment({
     required String orderId,
     required String paymentId,
     required String signature,
@@ -102,12 +104,31 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data['data'];
         if (data is Map<String, dynamic>) {
-          return data['verified'] == true;
+          return data;
         }
       }
-      return false;
+      throw Exception('Payment verification failed');
     } catch (e) {
       throw Exception('Error verifying payment: $e');
+    }
+  }
+
+  @override
+  Future<PaymentSummaryModel> getPaymentSummary(String paymentId) async {
+    try {
+      final response = await dio.get(
+        '${ApiConstants.subscriptionPaymentSummary}/$paymentId/summary',
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data is Map<String, dynamic>) {
+          return PaymentSummaryModel.fromJson(data);
+        }
+      }
+      throw Exception('Failed to load payment summary');
+    } catch (e) {
+      throw Exception('Error loading payment summary: $e');
     }
   }
 }

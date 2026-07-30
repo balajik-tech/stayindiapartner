@@ -1,4 +1,5 @@
 import '../entities/subscription_response.dart';
+import '../entities/payment_summary.dart';
 import '../repositories/subscription_repository.dart';
 
 class GetSubscriptionPlansUseCase {
@@ -30,7 +31,7 @@ class VerifySubscriptionPaymentUseCase {
 
   VerifySubscriptionPaymentUseCase(this.repository);
 
-  Future<bool> call({
+  Future<Map<String, dynamic>> call({
     required String orderId,
     required String paymentId,
     required String signature,
@@ -40,5 +41,15 @@ class VerifySubscriptionPaymentUseCase {
       paymentId: paymentId,
       signature: signature,
     );
+  }
+}
+
+class GetPaymentSummaryUseCase {
+  final SubscriptionRepository repository;
+
+  GetPaymentSummaryUseCase(this.repository);
+
+  Future<PaymentSummary> call(String paymentId) {
+    return repository.getPaymentSummary(paymentId);
   }
 }

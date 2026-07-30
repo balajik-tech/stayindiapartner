@@ -1,73 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/payment_summary.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../profile/presentation/pages/subscription_page.dart';
-import '../../data/models/payment_success_model.dart';
-
 
 class PaymentSuccessScreen extends StatelessWidget {
-  const PaymentSuccessScreen({super.key});
+  final PaymentSummary? summary;
 
-  /// Static data for this screen. Replace this with data from your
-  /// API/state layer when wiring this screen up to a real payment flow.
-  static const PaymentSuccessModel _data = PaymentSuccessModel(
-    status: 'success',
-    title: 'Payment successful!',
-    message: 'Your subscription is now active',
-    amount: 29736,
-    currencySymbol: '₹',
-    paidOn: '28 Jul 2026, 4:42 PM',
-    details: [
-      PaymentSuccessDetail(
-        label: 'Property',
-        value: 'Sunrise Boys PG · 42 beds',
-      ),
-      PaymentSuccessDetail(
-        label: 'Plan',
-        value: 'Annual · ₹59/bed/mo',
-      ),
-      PaymentSuccessDetail(
-        label: 'Validity',
-        value: '28 Jul 2026 → 27 Jul 2027',
-      ),
-      PaymentSuccessDetail(
-        label: 'You saved',
-        value: '₹20,160',
-        highlight: true,
-      ),
-      PaymentSuccessDetail(
-        label: 'Transaction ID',
-        value: 'SI2607284421876',
-      ),
-    ],
-    actions: PaymentSuccessActions(
-      primary: 'Go to my subscriptions',
-      secondary: 'Download invoice',
-    ),
-  );
+  const PaymentSuccessScreen({super.key, this.summary});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F5F8),
-      body: const _PaymentSuccessBody(data: _data),
+      body: summary == null
+          ? const Center(child: CircularProgressIndicator())
+          : _PaymentSuccessBody(summary: summary!),
     );
   }
 }
 
 class _PaymentSuccessBody extends StatelessWidget {
-  const _PaymentSuccessBody({required this.data});
+  final PaymentSummary summary;
 
-  final PaymentSuccessModel data;
+  const _PaymentSuccessBody({required this.summary});
 
   static const Color _green = Color(0xFF2FA84F);
   static const Color _blue = Color(0xFF1E3A8A);
   static const Color _darkText = Color(0xFF1B2430);
   static const Color _greyText = Color(0xFF6B7280);
 
+  String _formatDate(DateTime date) {
+    return DateFormat('dd MMM yyyy, h:mm a').format(date);
+  }
+
+  String _formatValidity(DateTime start, DateTime end) {
+    final fmt = DateFormat('dd MMM yyyy');
+    return '${fmt.format(start)} → ${fmt.format(end)}';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.currency(symbol: '₹', locale: 'en_IN', decimalDigits: 0);
+
     return SafeArea(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -87,11 +64,11 @@ class _PaymentSuccessBody extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _SuccessIcon(color: _green),
+                  const _SuccessIcon(color: _green),
                   const SizedBox(height: 20),
                   Text(
-                    data.title,
-                    style:  GoogleFonts.inter(
+                    'Payment successful!',
+                    style: GoogleFonts.inter(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
                       color: _darkText,
@@ -99,17 +76,17 @@ class _PaymentSuccessBody extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    data.message,
+                    'Your subscription is now active',
                     textAlign: TextAlign.center,
-                    style:  GoogleFonts.inter(
+                    style: GoogleFonts.inter(
                       fontSize: 15,
                       color: _greyText,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    data.formattedAmount,
-                    style:   GoogleFonts.inter(
+                    currencyFormat.format(summary.amount),
+                    style: GoogleFonts.inter(
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
                       color: _blue,
@@ -117,8 +94,8 @@ class _PaymentSuccessBody extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Paid on ${data.paidOn}',
-                    style:   GoogleFonts.inter(
+                    'Paid on ${_formatDate(summary.paymentDate)}',
+                    style: GoogleFonts.inter(
                       fontSize: 13.5,
                       color: _greyText,
                     ),
@@ -133,7 +110,20 @@ class _PaymentSuccessBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ----- Details card -----
-                  _DetailsCard(details: data.details),
+                  _DetailsCard(
+                    details: [
+                      _DetailItem(label: 'Property', value: '${summary.propertyName} · ${summary.totalBeds} beds'),
+                      _DetailItem(label: 'Plan', value: '${summary.planName} · ₹${summary.pricePerBedPerMonth.round()}/bed/mo'),
+                      _DetailItem(label: 'Validity', value: _formatValidity(summary.startDate, summary.endDate)),
+                      if (summary.savedAmount > 0)
+                        _DetailItem(
+                          label: 'You saved',
+                          value: currencyFormat.format(summary.savedAmount),
+                          highlight: true,
+                        ),
+                      _DetailItem(label: 'Transaction ID', value: summary.transactionId),
+                    ],
+                  ),
                   const SizedBox(height: 24),
 
                   // ----- Primary button -----
@@ -157,7 +147,7 @@ class _PaymentSuccessBody extends StatelessWidget {
                       ),
                       child: Text(
                         "Go to my subscriptions",
-                        style:  GoogleFonts.inter(
+                        style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -172,11 +162,10 @@ class _PaymentSuccessBody extends StatelessWidget {
                     height: 54,
                     child: OutlinedButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.crop_square,
-                          size: 20, color: AppColors.primaryBlue),
+                      icon: const Icon(Icons.download, size: 20, color: AppColors.primaryBlue),
                       label: Text(
                         "Download Invoice",
-                        style:  GoogleFonts.inter(
+                        style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: _blue,
@@ -200,6 +189,14 @@ class _PaymentSuccessBody extends StatelessWidget {
   }
 }
 
+class _DetailItem {
+  final String label;
+  final String value;
+  final bool highlight;
+
+  _DetailItem({required this.label, required this.value, this.highlight = false});
+}
+
 class _SuccessIcon extends StatelessWidget {
   const _SuccessIcon({required this.color});
 
@@ -218,7 +215,7 @@ class _SuccessIcon extends StatelessWidget {
             height: 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.14),
+              color: color.withOpacity(0.14),
             ),
           ),
           Container(
@@ -226,7 +223,7 @@ class _SuccessIcon extends StatelessWidget {
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.14),
+              color: color.withOpacity(0.14),
             ),
           ),
           Container(
@@ -238,7 +235,7 @@ class _SuccessIcon extends StatelessWidget {
             ),
             child: const Center(
               child: Icon(
-                Icons.crop_square,
+                Icons.check,
                 color: Colors.white,
                 size: 60,
               ),
@@ -253,7 +250,7 @@ class _SuccessIcon extends StatelessWidget {
 class _DetailsCard extends StatelessWidget {
   const _DetailsCard({required this.details});
 
-  final List<PaymentSuccessDetail> details;
+  final List<_DetailItem> details;
 
   static const Color _greyText = Color(0xFF6B7280);
   static const Color _darkText = Color(0xFF1B2430);
@@ -289,14 +286,14 @@ class _DetailsCard extends StatelessWidget {
               children: [
                 Text(
                   item.label,
-                  style:  GoogleFonts.inter(fontSize: 14.5, color: labelColor),
+                  style: GoogleFonts.inter(fontSize: 14.5, color: labelColor),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     item.value,
                     textAlign: TextAlign.right,
-                    style:  GoogleFonts.inter(
+                    style: GoogleFonts.inter(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w700,
                       color: valueColor,

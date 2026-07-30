@@ -201,14 +201,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const PaymentSuccessScreen(),
+                    builder: (context) => PaymentSuccessScreen(summary: state.summary),
                   ),
                 );
               } else if (state is SubscriptionPaymentVerificationFailed) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const PaymentFailedScreen(),
+                    builder: (context) => PaymentFailedScreen(summary: state.summary),
                   ),
                 );
               }

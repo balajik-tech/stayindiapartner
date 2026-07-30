@@ -1,63 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-
-import '../../../profile/presentation/pages/subscription_page.dart';
-import '../../data/models/payment_failed_model.dart';
-
+import 'package:intl/intl.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/payment_summary.dart';
 
 class PaymentFailedScreen extends StatelessWidget {
-  const PaymentFailedScreen({super.key});
+  final PaymentSummary? summary;
 
-  /// Static data for this screen. Replace this with data from your
-  /// API/state layer when wiring this screen up to a real payment flow.
-  static final PaymentFailedModel _data = PaymentFailedModel(
-    status: 'failed',
-    title: 'Payment Failed',
-    message:
-        'Your money was not deducted. If it was, it will be auto-refunded '
-        'in 5–7 business days.',
-    amount: 29736,
-    currencySymbol: '₹',
-    attemptedOn: '28 Jul 2026, 4:42 PM',
-    reason:
-        'Transaction declined by your bank (insufficient funds or limit '
-        'exceeded). Try another payment method or contact your bank.',
-    details: const [
-      PaymentFailedDetail(label: 'Property', value: 'Sunrise Boys PG · 42 beds'),
-      PaymentFailedDetail(label: 'Plan', value: 'Annual · ₹59/bed/mo'),
-      PaymentFailedDetail(label: 'Reference ID', value: 'SI2607284421877'),
-    ],
-    actions: const PaymentFailedActions(
-      primary: 'Retry payment',
-      secondary: 'Change payment method',
-      tertiary: 'Contact support',
-    ),
-  );
+  const PaymentFailedScreen({super.key, this.summary});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F5F8),
-      body: _PaymentFailedBody(data: _data),
+      body: _PaymentFailedBody(summary: summary),
     );
   }
 }
 
 class _PaymentFailedBody extends StatelessWidget {
-  const _PaymentFailedBody({required this.data});
+  final PaymentSummary? summary;
 
-  final PaymentFailedModel data;
+  const _PaymentFailedBody({this.summary});
 
   static const Color _orange = Color(0xFFF08C1D);
   static const Color _red = Color(0xFFE33B3B);
   static const Color _darkText = Color(0xFF1B2430);
   static const Color _greyText = Color(0xFF6B7280);
   static const Color _amountGrey = Color(0xFFB8BEC8);
-  static const Color _blue = Color(0xFF1E2A6E);
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd MMM yyyy, h:mm a').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.currency(symbol: '₹', locale: 'en_IN', decimalDigits: 0);
+
     return SafeArea(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -80,8 +59,8 @@ class _PaymentFailedBody extends StatelessWidget {
                   _FailureIcon(color: _red),
                   const SizedBox(height: 20),
                   Text(
-                    data.title,
-                    style:  GoogleFonts.inter(
+                    'Payment Failed',
+                    style: GoogleFonts.inter(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
                       color: _darkText,
@@ -91,20 +70,20 @@ class _PaymentFailedBody extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 36),
                     child: Text(
-                      data.message,
+                      'Your money was not deducted. If it was, it will be auto-refunded in 5–7 business days.',
                       textAlign: TextAlign.center,
-                      style:  GoogleFonts.inter(
+                      style: GoogleFonts.inter(
                         fontSize: 14.5,
                         height: 1.4,
                         color: _greyText,
-                        fontWeight: FontWeight.w600
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    data.formattedAmount,
-                    style:  GoogleFonts.inter(
+                    summary != null ? currencyFormat.format(summary!.amount) : '₹0',
+                    style: GoogleFonts.inter(
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
                       color: _amountGrey,
@@ -112,11 +91,11 @@ class _PaymentFailedBody extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Attempted on ${data.attemptedOn}',
-                    style:  GoogleFonts.inter(
+                    'Attempted on ${summary != null ? _formatDate(summary!.paymentDate) : _formatDate(DateTime.now())}',
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       color: _greyText,
-                      fontWeight: FontWeight.w600
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -129,23 +108,32 @@ class _PaymentFailedBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ----- Reason warning box -----
-                  _ReasonBox(reason: data.reason),
+                  if (summary?.failureReason != null)
+                    _ReasonBox(reason: summary!.failureReason!),
                   const SizedBox(height: 16),
 
                   // ----- Details card -----
-                  _DetailsCard(details: data.details),
+                  if (summary != null)
+                    _DetailsCard(
+                      details: [
+                        _DetailItem(label: 'Property', value: summary!.propertyName),
+                        _DetailItem(label: 'Plan', value: summary!.planName),
+                        _DetailItem(label: 'Reference ID', value: summary!.transactionId),
+                      ],
+                    ),
                   const SizedBox(height: 24),
 
                   // ----- Primary button -----
                   SizedBox(
                     height: 54,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.crop_square,
-                          size: 18, color: Colors.white),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.refresh, size: 18, color: Colors.white),
                       label: Text(
                         "Retry payment",
-                        style:  GoogleFonts.inter(
+                        style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -167,7 +155,7 @@ class _PaymentFailedBody extends StatelessWidget {
                     height: 54,
                     child: OutlinedButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        Navigator.pop(context);
                       },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppColors.primaryBlue, width: 1.4),
@@ -177,7 +165,7 @@ class _PaymentFailedBody extends StatelessWidget {
                       ),
                       child: Text(
                         "Change Payment Method",
-                        style:  GoogleFonts.inter(
+                        style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryBlue,
@@ -191,8 +179,7 @@ class _PaymentFailedBody extends StatelessWidget {
                   Center(
                     child: TextButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.crop_square,
-                          size: 18, color: _greyText),
+                      icon: const Icon(Icons.help_outline, size: 18, color: _greyText),
                       label: Text(
                         "Contact Support",
                         style: GoogleFonts.inter(
@@ -213,6 +200,13 @@ class _PaymentFailedBody extends StatelessWidget {
   }
 }
 
+class _DetailItem {
+  final String label;
+  final String value;
+
+  _DetailItem({required this.label, required this.value});
+}
+
 class _FailureIcon extends StatelessWidget {
   const _FailureIcon({required this.color});
 
@@ -231,7 +225,7 @@ class _FailureIcon extends StatelessWidget {
             height: 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.12),
+              color: color.withOpacity(0.12),
             ),
           ),
           Container(
@@ -239,7 +233,7 @@ class _FailureIcon extends StatelessWidget {
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.14),
+              color: color.withOpacity(0.14),
             ),
           ),
           Container(
@@ -251,7 +245,7 @@ class _FailureIcon extends StatelessWidget {
             ),
             child: const Center(
               child: Icon(
-                Icons.crop_square,
+                Icons.close,
                 color: Colors.white,
                 size: 60,
               ),
@@ -282,22 +276,22 @@ class _ReasonBox extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.only(top: 2),
-            child: Icon(Icons.crop_square, size: 20, color: Color(0xFFB4690E)),
+            child: Icon(Icons.warning_amber_rounded, size: 20, color: Color(0xFFB4690E)),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: RichText(
               text: TextSpan(
-                style:  GoogleFonts.inter(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   height: 1.4,
-                  color: Color(0xFF9A5A0F),
-                  fontWeight: FontWeight.w700
+                  color: const Color(0xFF9A5A0F),
+                  fontWeight: FontWeight.w700,
                 ),
                 children: [
-                  TextSpan(
+                  const TextSpan(
                     text: 'Reason: ',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                    style: TextStyle(fontWeight: FontWeight.w700),
                   ),
                   TextSpan(text: reason),
                 ],
@@ -313,7 +307,7 @@ class _ReasonBox extends StatelessWidget {
 class _DetailsCard extends StatelessWidget {
   const _DetailsCard({required this.details});
 
-  final List<PaymentFailedDetail> details;
+  final List<_DetailItem> details;
 
   @override
   Widget build(BuildContext context) {
@@ -342,10 +336,10 @@ class _DetailsCard extends StatelessWidget {
               children: [
                 Text(
                   item.label,
-                  style:  GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                     fontSize: 14.5,
-                    color: Color(0xFF6B7280),
-                    fontWeight: FontWeight.w500
+                    color: const Color(0xFF6B7280),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -353,10 +347,10 @@ class _DetailsCard extends StatelessWidget {
                   child: Text(
                     item.value,
                     textAlign: TextAlign.right,
-                    style:  GoogleFonts.inter(
+                    style: GoogleFonts.inter(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1B2430),
+                      color: const Color(0xFF1B2430),
                     ),
                   ),
                 ),
