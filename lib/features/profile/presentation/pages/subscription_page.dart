@@ -700,7 +700,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 12.h,
             crossAxisSpacing: 12.w,
-            childAspectRatio: 1.50,
+            childAspectRatio: 1.48,
             children: planOptions.map((plan) {
               final isSelected = plan.key == selectedKey;
               return _buildPlanTile(property.id, plan, isSelected);
@@ -866,7 +866,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     ),
                   ),
 
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 8.h),
 
                   /// Price
                   Wrap(
