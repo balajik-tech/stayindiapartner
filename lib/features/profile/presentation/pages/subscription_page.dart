@@ -7,6 +7,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
+import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../domain/entities/subscription_response.dart';
 import '../cubit/subscription_cubit.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
@@ -54,53 +55,113 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     context.read<SubscriptionCubit>().loadSubscriptionPlans(hostelId);
   }
 
-  void _navigateToRazorpay(BuildContext context, ActiveSubscription subscription) {
+  void _navigateToRazorpay(BuildContext context, ActiveSubscription subscription ) {
     final totalToPay = subscription.totalAmount + subscription.gstAmount;
     final amountToPay = subscription.razorpayAmount ?? (totalToPay * 100).toInt();
-    
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BlocProvider(
-          create: (context) => sl<RazorpayCubit>(),
-          child: RazorpayPaymentScreen(
-            apiKey: ApiConstants.razorpayKey,
-            amount: amountToPay,
-            name: 'Stay India Subscription',
-            orderId: subscription.razorpayOrderId ?? '',
-            description: 'Payment for ${subscription.planSnapshot.planName}',
-            onSuccess: (RazorpayPaymentResult success) {
-              debugPrint('========== Razorpay Success ==========Subscription');
-              debugPrint('Payment ID : ${success.paymentId}');
-              debugPrint('Order ID   : ${success.orderId}');
-              debugPrint('Signature  : ${success.signature}');
-              debugPrint('======================================');
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => BlocProvider(
+    //       create: (context) => sl<RazorpayCubit>(),
+    //       child: RazorpayPaymentScreen(
+    //         apiKey: ApiConstants.razorpayKey,
+    //         amount: amountToPay,
+    //         name: 'Stay India Subscription',
+    //         orderId: subscription.razorpayOrderId ?? '',
+    //         description: 'Payment for ${subscription.planSnapshot.planName}',
+    //         onSuccess: (RazorpayPaymentResult success) {
+    //           debugPrint('========== Razorpay Success ==========Subscription');
+    //           debugPrint('Payment ID : ${success.paymentId}');
+    //           debugPrint('Order ID   : ${success.orderId}');
+    //           debugPrint('Signature  : ${success.signature}');
+    //           debugPrint('======================================');
+    //
+    //           // Refresh data
+    //           _loadSubscriptionData(context, subscription.property);
+    //
+    //           Navigator.pushReplacement(
+    //             context,
+    //             MaterialPageRoute(
+    //               builder: (context) => const PaymentSuccessScreen(),
+    //             ),
+    //           );
+    //         },
+    //         onFailure: (failure) {
+    //           debugPrint('========== Razorpay Failure ==========Subscription');
+    //           debugPrint('Error: $failure');
+    //           debugPrint('======================================');
+    //
+    //           Navigator.push(
+    //             context,
+    //             MaterialPageRoute(
+    //               builder: (context) => const PaymentFailedScreen(),
+    //             ),
+    //           );
+    //         },
+    //       ),
+    //     ),
+    //   ),
+    // );
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return BlocProvider(
+          create: (context) => sl<RazorpayCubit>()
+            ..openCheckout(
+              apiKey: ApiConstants.razorpayKey,
+              amount: amountToPay,
+              name: subscription.planSnapshot.planName,
+              orderId: subscription.razorpayOrderId ?? '',
+              description: 'Payment for ${subscription.planSnapshot.planName}',
+            ),
+          child: BlocConsumer<RazorpayCubit, RazorpayState>(
+            listener: (innerContext, state) {
+              if (state is RazorpaySuccess) {
+                debugPrint('========== Razorpay Success ==========Subscription');
+                debugPrint('Payment ID : ${state.result.paymentId}');
+                debugPrint('Order ID   : ${state.result.orderId}');
+                debugPrint('Signature  : ${state.result.signature}');
+                debugPrint('======================================');
 
-              // Refresh data
-              _loadSubscriptionData(context, subscription.property);
+                Navigator.pop(dialogContext); // close the loading dialog
 
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PaymentSuccessScreen(),
-                ),
-              );
+                // _loadSubscriptionData(context, subscription.property);
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PaymentSuccessScreen(),
+                  ),
+                );
+              } else if (state is RazorpayFailure) {
+                debugPrint('========== Razorpay Failure ==========Subscription');
+                debugPrint('Error: ${state.message}');
+                debugPrint('======================================');
+
+                Navigator.pop(dialogContext); // close the loading dialog
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PaymentFailedScreen(),
+                  ),
+                );
+              }
             },
-            onFailure: (failure) {
-              debugPrint('========== Razorpay Failure ==========Subscription');
-              debugPrint('Error: $failure');
-              debugPrint('======================================');
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PaymentFailedScreen(),
+            builder: (context, state) {
+              // Simple loading UI while Razorpay's native sheet is opening
+              return const Center(
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(),
                 ),
               );
             },
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
