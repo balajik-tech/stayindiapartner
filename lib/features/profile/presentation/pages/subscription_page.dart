@@ -10,6 +10,7 @@ import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../domain/entities/subscription_response.dart';
+import '../cubit/profile_cubit.dart';
 import '../cubit/subscription_cubit.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_failed_screen.dart';
@@ -56,6 +57,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   void _navigateToRazorpay(BuildContext context, ActiveSubscription subscription ) {
     final int totalAmountToPay = ((subscription.totalAmount + subscription.gstAmount) * 100).round();
+
+
+    final profileState = context.read<ProfileCubit>().state;
+
+    final String email = profileState is ProfileLoaded ? profileState.profile.email : "";
+    final String mobile = profileState is ProfileLoaded ? profileState.profile.phone : "";
     
     showDialog(
       context: context,
@@ -69,6 +76,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               name: subscription.planSnapshot.planName,
               orderId: subscription.razorpayOrderId ?? '',
               description: 'Payment for ${subscription.planSnapshot.planName}',
+              email: email,
+              contact: mobile
             ),
           child: BlocConsumer<RazorpayCubit, RazorpayState>(
             listener: (innerContext, state) {
@@ -1465,8 +1474,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         child: Align(
           alignment: Alignment.centerLeft,
           child: FractionallySizedBox(
-            widthFactor: 0.8,
-            // widthFactor: progress.clamp(0.0, 1.0),
+            // widthFactor: 0.8,
+            widthFactor: progress.clamp(0.0, 1.0),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.r),
