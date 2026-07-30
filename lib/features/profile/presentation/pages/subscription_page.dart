@@ -30,6 +30,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   // Tracks the selected plan per hostel id for hostels not yet subscribed.
   final Map<String, String> _selectedPlan = {};
   final ScrollController _propertyScrollController = ScrollController();
+  bool _isNavigatingToRazorpay = false;
 
   @override
   void initState() {
@@ -56,6 +57,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   void _navigateToRazorpay(BuildContext context, ActiveSubscription subscription ) {
+    if (_isNavigatingToRazorpay) return;
+    _isNavigatingToRazorpay = true;
+
     final int totalAmountToPay = ((subscription.totalAmount + subscription.gstAmount) * 100).round();
 
 
@@ -68,8 +72,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return BlocProvider(
-          create: (context) => sl<RazorpayCubit>()
+        return WillPopScope(
+          onWillPop: () async {
+            _isNavigatingToRazorpay = false;
+            return true;
+          },
+          child: BlocProvider(
+            create: (context) => sl<RazorpayCubit>()
             ..openCheckout(
               apiKey: ApiConstants.razorpayKey,
               amount: totalAmountToPay,
@@ -88,6 +97,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 debugPrint('Signature  : ${state.result.signature}');
                 debugPrint('======================================');
 
+                _isNavigatingToRazorpay = false;
                 Navigator.pop(dialogContext); // close the loading dialog
 
                 // Call verify-payment API
@@ -102,6 +112,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 debugPrint('Error: ${state.message}');
                 debugPrint('======================================');
 
+                _isNavigatingToRazorpay = false;
                 Navigator.pop(dialogContext); // close the loading dialog
 
                 Navigator.push(
@@ -123,7 +134,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               );
             },
           ),
-        );
+        ));
       },
     );
   }
