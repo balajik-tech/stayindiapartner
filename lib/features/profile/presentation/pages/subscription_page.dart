@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/core/utils/text_utils.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
@@ -277,14 +278,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   body: SafeArea(
                     child: Container(
                       padding: const EdgeInsets.all(0),
-                      margin: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                        ),
-                      ),
+                      // margin: const EdgeInsets.all(12),
+                      // decoration: BoxDecoration(
+                      //   color: Colors.white,
+                      //   borderRadius: BorderRadius.circular(12),
+                      //   border: Border.all(
+                      //     color: Colors.grey.shade300,
+                      //   ),
+                      // ),
                       child: Column(
                         children: [
                           _buildHeader(context),
@@ -460,7 +461,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       decoration: BoxDecoration(
                         color: isActive
                             ? (isSelected ? Colors.white : SubscriptionColors.green)
-                            : (isSelected ? Colors.white : SubscriptionColors.orange),
+                            : (isSelected ? Colors.white : AppColors.orangeColor),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -480,7 +481,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               selectedColor: SubscriptionColors.navy,
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(16.r),
                 side: BorderSide(
                   color: isSelected ? SubscriptionColors.navy : Colors.grey.shade300,
                 ),
@@ -548,13 +549,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               Container(
                 width: 8.w,
                 height: 8.w,
-                decoration: const BoxDecoration(color: SubscriptionColors.navy, shape: BoxShape.circle),
+                decoration:  BoxDecoration(color: AppColors.primaryBlue, shape: BoxShape.circle),
               ),
               SizedBox(width: 6.w),
               Container(
                 width: 8.w,
                 height: 8.w,
-                decoration: const BoxDecoration(color: SubscriptionColors.orange, shape: BoxShape.circle),
+                decoration: const BoxDecoration(color: AppColors.orangeColor, shape: BoxShape.circle),
               ),
             ],
           ),
@@ -629,7 +630,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         SizedBox(width: 4.w),
         Text(
           '$beds Beds',
-          style: GoogleFonts.inter(fontSize: 13.sp, fontWeight: FontWeight.w700, color: SubscriptionColors.blue),
+          style: GoogleFonts.inter(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.primaryBlue),
         ),
       ],
     );
@@ -686,8 +687,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final selectedPlan = planOptions.firstWhere((p) => p.key == selectedKey,
         orElse: () => planOptions.first);
 
-    final totalToPay = (selectedPlan.breakdown?.totalAmount ?? 0) +
-        (selectedPlan.breakdown?.gstAmount ?? 0);
+    final totalToPay = (selectedPlan.breakdown?.totalAmount ?? 0);
+        // +
+        // (selectedPlan.breakdown?.gstAmount ?? 0);
 
     final subscriptionState = context.watch<SubscriptionCubit>().state;
     final isProcessing = subscriptionState is SubscriptionProcessing &&
@@ -714,7 +716,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           _buildSubscriptionHeader(
             hostelName: property.name,
             status: 'Not subscribed',
-            statusColor: SubscriptionColors.orange,
+            statusColor: AppColors.orangeColor,
             backgroundColor: SubscriptionColors.orangeLight,
           ),
           _buildLocationRow(property.address),
@@ -735,9 +737,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 14.h,
+            mainAxisSpacing: 12.h,
             crossAxisSpacing: 12.w,
-            childAspectRatio: 1.12,
+            childAspectRatio: 1.50,
             children: planOptions.map((plan) {
               final isSelected = plan.key == selectedKey;
               return _buildPlanTile(property.id, plan, isSelected);
@@ -841,20 +843,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       bool isSelected,
       ) {
     final price = plan.pricePerBed.round();
-    final priceColor = isSelected ? SubscriptionColors.orange : SubscriptionColors.blue;
+    final priceColor =
+    isSelected ? AppColors.orangeColor : SubscriptionColors.blue;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPlan[hostelId] = plan.key),
       child: Padding(
         padding: EdgeInsets.only(
-          top: plan.isBestValue ? 0.h : 0,
+          top: plan.isBestValue ? 10.h : 10.h,
         ),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(12.w),
+              padding: EdgeInsets.symmetric(
+                horizontal: 10.w,
+                vertical: 8.h,
+              ),
               decoration: BoxDecoration(
                 color: isSelected
                     ? SubscriptionColors.orangeLight
@@ -862,50 +868,63 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
                   color: isSelected
-                      ? SubscriptionColors.orange
+                      ? AppColors.orangeColor
                       : AppColors.roomCardBorder,
                   width: isSelected ? 1.5 : 1,
                 ),
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  /// Plan Name
                   Text(
                     plan.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
-                      fontSize: 13.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w800,
                       color: AppColors.darkText,
+                      height: 1.1,
                     ),
                   ),
 
                   SizedBox(height: 2.h),
 
+                  /// Duration
                   Text(
-                    plan.duration,
+                    TextUtils.capitalize(plan.duration),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
-                      fontSize: 11.sp,
+                      fontSize: 10.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.greyText,
+                      height: 1.1,
                     ),
                   ),
-                  SizedBox(height: 12),
-                  Row(
+
+                  SizedBox(height: 6.h),
+
+                  /// Price
+                  Wrap(
+                    spacing: 4.w,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         '₹${plan.mrpPerBed.round()}',
                         style: GoogleFonts.inter(
-                          fontSize: 12.sp,
+                          fontSize: 11.sp,
                           color: AppColors.greyText,
                           fontWeight: FontWeight.w700,
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
-                      SizedBox(width: 6.w),
                       Text(
                         '₹$price',
                         style: GoogleFonts.inter(
-                          fontSize: 17.sp,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w800,
                           color: priceColor,
                         ),
@@ -915,12 +934,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                   SizedBox(height: 2.h),
 
+                  /// Discount
                   Text(
                     'Save ${plan.discountPercent}%',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
-                      fontSize: 11.sp,
+                      fontSize: 10.sp,
                       fontWeight: FontWeight.w700,
                       color: SubscriptionColors.green,
+                      height: 1.1,
                     ),
                   ),
                 ],
@@ -929,21 +952,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
             if (plan.isBestValue)
               Positioned(
-                top: -12.h,
-                right: 12.w,
+                top: -10.h,
+                right: 10.w,
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 4.h,
+                    horizontal: 10.w,
+                    vertical: 3.h,
                   ),
                   decoration: BoxDecoration(
-                    color: SubscriptionColors.orange2,
+                    color: AppColors.orangeColor,
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
                     'BEST VALUE',
                     style: GoogleFonts.inter(
-                      fontSize: 9.sp,
+                      fontSize: 8.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
@@ -956,6 +979,127 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
+  // Widget _buildPlanTile(
+  //     String hostelId,
+  //     PlanOption plan,
+  //     bool isSelected,
+  //     ) {
+  //   final price = plan.pricePerBed.round();
+  //   final priceColor = isSelected ? AppColors.orangeColor : SubscriptionColors.blue;
+  //
+  //   return GestureDetector(
+  //     onTap: () => setState(() => _selectedPlan[hostelId] = plan.key),
+  //     child: Padding(
+  //       padding: EdgeInsets.only(
+  //         top: plan.isBestValue ? 0.h : 0,
+  //       ),
+  //       child: Stack(
+  //         clipBehavior: Clip.none,
+  //         children: [
+  //           Container(
+  //             width: double.infinity,
+  //             padding: EdgeInsets.all(12.w),
+  //             decoration: BoxDecoration(
+  //               color: isSelected
+  //                   ? SubscriptionColors.orangeLight
+  //                   : Colors.white,
+  //               borderRadius: BorderRadius.circular(12.r),
+  //               border: Border.all(
+  //                 color: isSelected
+  //                     ? AppColors.orangeColor
+  //                     : AppColors.roomCardBorder,
+  //                 width: isSelected ? 1.5 : 1,
+  //               ),
+  //             ),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Text(
+  //                   plan.label,
+  //                   style: GoogleFonts.inter(
+  //                     fontSize: 13.sp,
+  //                     fontWeight: FontWeight.w800,
+  //                     color: AppColors.darkText,
+  //                   ),
+  //                 ),
+  //
+  //                 SizedBox(height: 2.h),
+  //
+  //                 Text(
+  //                   TextUtils.capitalize(plan.duration),
+  //                   style: GoogleFonts.inter(
+  //                     fontSize: 11.sp,
+  //                     fontWeight: FontWeight.w700,
+  //                     color: AppColors.greyText,
+  //                   ),
+  //                 ),
+  //                 SizedBox(height: 12),
+  //                 Row(
+  //                   children: [
+  //                     Text(
+  //                       '₹${plan.mrpPerBed.round()}',
+  //                       style: GoogleFonts.inter(
+  //                         fontSize: 12.sp,
+  //                         color: AppColors.greyText,
+  //                         fontWeight: FontWeight.w700,
+  //                         decoration: TextDecoration.lineThrough,
+  //                       ),
+  //                     ),
+  //                     SizedBox(width: 6.w),
+  //                     Text(
+  //                       '₹$price',
+  //                       style: GoogleFonts.inter(
+  //                         fontSize: 17.sp,
+  //                         fontWeight: FontWeight.w800,
+  //                         color: priceColor,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //
+  //                 SizedBox(height: 2.h),
+  //
+  //                 Text(
+  //                   'Save ${plan.discountPercent}%',
+  //                   style: GoogleFonts.inter(
+  //                     fontSize: 11.sp,
+  //                     fontWeight: FontWeight.w700,
+  //                     color: SubscriptionColors.green,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //
+  //           if (plan.isBestValue)
+  //             Positioned(
+  //               top: -12.h,
+  //               right: 12.w,
+  //               child: Container(
+  //                 padding: EdgeInsets.symmetric(
+  //                   horizontal: 12.w,
+  //                   vertical: 4.h,
+  //                 ),
+  //                 decoration: BoxDecoration(
+  //                   color: AppColors.orangeColor,
+  //                   borderRadius: BorderRadius.circular(20.r),
+  //                 ),
+  //                 child: Text(
+  //                   'BEST VALUE',
+  //                   style: GoogleFonts.inter(
+  //                     fontSize: 9.sp,
+  //                     fontWeight: FontWeight.w700,
+  //                     color: Colors.white,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildPriceBreakup(PlanOption plan, int beds) {
     final breakdown = plan.breakdown;
     if (breakdown == null) return const SizedBox.shrink();
@@ -964,7 +1108,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final discountAmount = breakdown.discountAmount;
     final gstAmount = breakdown.gstAmount;
     final baseAmount = breakdown.totalAmount;
-    final totalToPay = baseAmount + gstAmount;
+    final totalToPay = baseAmount;
     final savings = mrpTotal - totalToPay;
 
     String savingsAmount = breakdown.savingsText ?? "";
@@ -1045,8 +1189,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           if (gstAmount > 0) ...[
             SizedBox(height: 8.h),
             _buildBreakupRow(
-              'GST Charges',
-              // 'GST (${plan.gstPercentage}%)',
+              'GST (${plan.gstPercentage}%)',
               '+ ₹${_formatNumber(gstAmount.round())}',
               valueColor: SubscriptionColors.navy,
             ),
