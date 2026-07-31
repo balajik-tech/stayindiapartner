@@ -120,10 +120,15 @@ class UnifiedHeader extends StatelessWidget {
                               color:  AppColors.orangeColor,
                               borderRadius: BorderRadius.circular(10.r),
                             ),
-                            child: Icon(
-                              Icons.apartment_rounded,
-                              color: Colors.white,
-                              size: 18.sp,
+                            child: Center(
+                              child: Image.asset(
+                                'assets/images/hostel.png',
+                                width: 20,
+                                height: 20,
+                                fit: BoxFit.contain,
+                                color: Colors.white,
+                                colorBlendMode: BlendMode.srcIn,
+                              ),
                             ),
                           ),
                           SizedBox(width: 10.w),
@@ -165,10 +170,15 @@ class UnifiedHeader extends StatelessWidget {
                     width: 1.0,
                   ),
                 ),
-                child: Icon(
-                  Icons.bar_chart_rounded,
-                  color: const Color(0xFF1E293B),
-                  size: 22.sp,
+                child:  Center(
+                  child: Image.asset(
+                    'assets/images/report.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                    color: Color(0xFF0a3462),
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
                 ),
               ),
 
@@ -206,10 +216,15 @@ class UnifiedHeader extends StatelessWidget {
                               width: 1.0,
                             ),
                           ),
-                          child: Icon(
-                            Icons.notifications_none_rounded,
-                            color: const Color(0xFF1E293B),
-                            size: 22.sp,
+                          child:Center(
+                            child: Image.asset(
+                              'assets/images/bell.png',
+                              width: 20,
+                              height: 20,
+                              fit: BoxFit.contain,
+                              color: Color(0xFF0a3462),
+                              colorBlendMode: BlendMode.srcIn,
+                            ),
                           ),
                         ),
                         Positioned(
