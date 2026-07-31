@@ -74,6 +74,7 @@ class _PaymentFailedBody extends StatelessWidget {
   static const Color _greyText = Color(0xFF6B7280);
   static const Color _amountGrey = Color(0xFFB8BEC8);
 
+
   String _formatDate(DateTime date) {
     return DateFormat('dd MMM yyyy, h:mm a').format(date);
   }
@@ -96,17 +97,36 @@ class _PaymentFailedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '₹', locale: 'en_IN', decimalDigits: 0);
-    
-    final displayAmount =  summary?.amount ?? amount ?? 0.0;
-    final displayPropertyName = summary?.propertyName ?? propertyName ?? '';
-    final displayPlanName = summary?.planName ?? planName ?? 'Subscription Plan';
-    final displayTransactionId = summary?.transactionId ?? '';
-    final displayDate = summary != null ? _formatDate(summary!.paymentDate) : _formatDate(DateTime.now());
 
     return SafeArea(
       child: BlocBuilder<SubscriptionCubit, SubscriptionState>(
         builder: (context, state) {
           final isRetrying = state is SubscriptionProcessing;
+          
+          final activeSubscription = propertyId != null 
+              ? state.subscriptionResponses[propertyId]?.activeSubscription 
+              : null;
+
+          double displayAmount;
+          String? displayPropertyName;
+          String? displayPlanName;
+          String? displayTransactionId;
+          String displayDate;
+
+          if (summary?.transactionId != null &&
+              summary!.transactionId.trim().isNotEmpty) {
+            displayAmount = summary!.amount;
+            displayPropertyName = summary?.propertyName;
+            displayPlanName = summary?.planName;
+            displayTransactionId = summary?.transactionId;
+            displayDate = _formatDate(summary!.paymentDate);
+          } else {
+            displayAmount = (activeSubscription?.razorpayAmount?.toDouble() ?? 0.0) / 100 ?? 0.0;
+            displayPropertyName = activeSubscription?.planSnapshot.planName ?? '';
+            displayPlanName = activeSubscription?.planSnapshot.planName ?? 'Subscription Plan';
+            displayTransactionId = '';
+            displayDate = _formatDate(DateTime.now());
+          }
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -185,18 +205,18 @@ class _PaymentFailedBody extends StatelessWidget {
                       // ----- Details card -----
                       _DetailsCard(
                         details: [
-                          if (displayPropertyName.trim().isNotEmpty)
+                          if (displayPropertyName != null && displayPropertyName.trim().isNotEmpty)
                             _DetailItem(
                               label: 'Property',
                               value: displayPropertyName,
                             ),
-                          if (displayPlanName.trim().isNotEmpty)
+                          if (displayPlanName != null && displayPlanName.trim().isNotEmpty)
                             _DetailItem(
                               label: 'Plan',
                               value: displayPlanName,
                             ),
 
-                          if (displayTransactionId.trim().isNotEmpty)
+                          if (displayTransactionId != null && displayTransactionId.trim().isNotEmpty)
                             _DetailItem(
                               label: 'Reference ID',
                               value: displayTransactionId,
