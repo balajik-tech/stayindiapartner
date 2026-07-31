@@ -4,6 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../entities/bank_account_entity.dart';
 import '../entities/bank_account_verification_result.dart';
 import '../entities/bank_branch_details.dart';
+import '../entities/pan_verification_result.dart';
 import '../entities/property_entity.dart';
 
 abstract class BankAccountRepository {
@@ -19,6 +20,7 @@ abstract class BankAccountRepository {
     required BankAccountType accountType,
     String? branchName,
     String? bankName,
+    required String panNumber,
   });
 
   Future<Either<Failure, BankAccountVerificationResult>> verifyBankAccount({
@@ -39,4 +41,7 @@ abstract class BankAccountRepository {
   /// Resolves bank + branch name from an IFSC code, used to show the
   /// confirmation chip under the IFSC field while adding an account.
   Future<Either<Failure, BankBranchDetails>> lookupIfsc(String ifscCode);
+
+  /// Verifies PAN card details
+  Future<Either<Failure, PanVerificationResult>> verifyPan(String panNumber);
 }

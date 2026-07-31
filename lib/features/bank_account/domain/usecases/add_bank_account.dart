@@ -15,6 +15,7 @@ class AddBankAccountParams extends Equatable {
   final BankAccountType accountType;
   final String? branchName;
   final String? bankName;
+  final String panNumber;
 
   const AddBankAccountParams({
     required this.propertyId,
@@ -25,11 +26,12 @@ class AddBankAccountParams extends Equatable {
     required this.accountType,
     this.branchName,
     this.bankName,
+    required this.panNumber,
   });
 
   @override
   List<Object?> get props =>
-      [propertyId, accountNumber, confirmAccountNumber, ifscCode, accountHolderName, accountType, branchName, bankName];
+      [propertyId, accountNumber, confirmAccountNumber, ifscCode, accountHolderName, accountType, branchName, bankName, panNumber];
 }
 
 class AddBankAccount implements UseCase<BankAccountEntity, AddBankAccountParams> {
@@ -59,6 +61,7 @@ class AddBankAccount implements UseCase<BankAccountEntity, AddBankAccountParams>
       accountType: params.accountType,
       branchName: params.branchName,
       bankName: params.bankName,
+      panNumber: params.panNumber
     );
   }
 }

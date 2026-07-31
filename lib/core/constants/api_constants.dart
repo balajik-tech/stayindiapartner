@@ -96,6 +96,8 @@ class ApiConstants {
   static const String bills = '/bills';
   static const String bankAccounts = '/bankaccounts';
   static const String externalBankVerification = 'https://api.digiverification.com/api/v2/account-verification/verify';
+  static const String panVerification = 'https://api.digiverification.com/api/v1/get-pan-details';
+  static const String panJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDA1NCIsInRpbWVzdGFtcCI6MTc4MjcxMjc5MX0=.RavasRjZHbesYaSRJi4Bg6NNqCScTIABPGUXioNGbAo=";
 
   static const String razorpayKey = "rzp_test_TIonMLOPKwlfCt";
 

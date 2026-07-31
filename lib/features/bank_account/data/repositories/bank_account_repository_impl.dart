@@ -4,6 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/bank_account_entity.dart';
 import '../../domain/entities/bank_account_verification_result.dart';
 import '../../domain/entities/bank_branch_details.dart';
+import '../../domain/entities/pan_verification_result.dart';
 import '../../domain/entities/property_entity.dart';
 import '../../domain/repositories/bank_account_repository.dart';
 import '../datasources/bank_account_data_source.dart';
@@ -31,6 +32,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
     required BankAccountType accountType,
     String? branchName,
     String? bankName,
+    required String panNumber,
   }) async {
     try {
       final account = await dataSource.addBankAccount(
@@ -41,6 +43,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
         accountType: accountType,
         branchName: branchName,
         bankName: bankName,
+        panNumber: panNumber,
       );
       return Right(account);
     } catch (e) {
@@ -96,6 +99,16 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
       return Right(details);
     } catch (e) {
       return Left(ServerFailure(message: 'IFSC code not found'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PanVerificationResult>> verifyPan(String panNumber) async {
+    try {
+      final result = await dataSource.verifyPan(panNumber);
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 }

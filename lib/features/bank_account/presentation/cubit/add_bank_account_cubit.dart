@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/bank_account_entity.dart';
 import '../../domain/entities/bank_account_verification_result.dart';
 import '../../domain/entities/bank_branch_details.dart';
+import '../../domain/entities/pan_verification_result.dart';
 import '../../domain/usecases/add_bank_account.dart';
 import '../../domain/usecases/lookup_ifsc.dart';
 import '../../domain/usecases/verify_bank_account.dart';
+import '../../domain/usecases/verify_pan.dart';
 
 part 'add_bank_account_state.dart';
 
@@ -14,11 +16,13 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
   final AddBankAccount addBankAccount;
   final VerifyBankAccount verifyBankAccount;
   final LookupIfsc lookupIfsc;
+  final VerifyPan verifyPanUseCase;
 
   AddBankAccountCubit({
     required this.addBankAccount,
     required this.verifyBankAccount,
     required this.lookupIfsc,
+    required this.verifyPanUseCase,
   }) : super(const AddBankAccountState());
 
   Future<void> submit({
@@ -28,6 +32,7 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
     required String ifscCode,
     required String accountHolderName,
     required BankAccountType accountType,
+    required String panNumber,
   }) async {
     final branchName = state.verificationResult?.branchName ?? '';
     final bankName = state.verificationResult?.bankName ?? "";
@@ -44,6 +49,7 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
         accountType: accountType,
         branchName: branchName,
         bankName: bankName,
+        panNumber: panNumber,
       ),
     );
 
@@ -107,6 +113,21 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
         isVerifying: false,
         verifySuccess: true,
         verificationResult: verificationResult,
+      )),
+    );
+  }
+
+  Future<void> verifyPan(String panNumber) async {
+    emit(state.copyWith(isVerifyingPan: true, clearPanVerifyError: true, clearPanVerifySuccess: true));
+
+    final result = await verifyPanUseCase(VerifyPanParams(panNumber: panNumber));
+
+    result.fold(
+      (failure) => emit(state.copyWith(isVerifyingPan: false, panVerifyError: failure.message)),
+      (panVerificationResult) => emit(state.copyWith(
+        isVerifyingPan: false,
+        panVerifySuccess: true,
+        panVerificationResult: panVerificationResult,
       )),
     );
   }

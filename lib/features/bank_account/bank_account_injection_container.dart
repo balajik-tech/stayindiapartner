@@ -9,6 +9,7 @@ import 'domain/usecases/get_properties_with_accounts.dart';
 import 'domain/usecases/lookup_ifsc.dart';
 import 'domain/usecases/set_primary_account.dart';
 import 'domain/usecases/verify_bank_account.dart';
+import 'domain/usecases/verify_pan.dart';
 import 'presentation/cubit/add_bank_account_cubit.dart';
 import 'presentation/cubit/bank_account_cubit.dart';
 
@@ -36,6 +37,7 @@ void registerBankAccountFeature(GetIt sl) {
       addBankAccount: sl(),
       verifyBankAccount: sl(),
       lookupIfsc: sl(),
+      verifyPanUseCase: sl(),
     ),
   );
 
@@ -44,6 +46,7 @@ void registerBankAccountFeature(GetIt sl) {
   sl.registerLazySingleton(() => AddBankAccount(sl()));
   sl.registerLazySingleton(() => LookupIfsc(sl()));
   sl.registerLazySingleton(() => VerifyBankAccount(sl()));
+  sl.registerLazySingleton(() => VerifyPan(sl()));
   sl.registerLazySingleton(() => SetPrimaryAccount(sl()));
   sl.registerLazySingleton(() => DeleteBankAccount(sl()));
 

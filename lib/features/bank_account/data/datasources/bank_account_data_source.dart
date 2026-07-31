@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../domain/entities/bank_account_entity.dart';
 import '../../domain/entities/bank_account_verification_result.dart';
 import '../../domain/entities/bank_branch_details.dart';
+import '../../domain/entities/pan_verification_result.dart';
 import '../../domain/entities/property_entity.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/services/token_storage.dart';
@@ -26,6 +27,7 @@ abstract class BankAccountDataSource {
     required BankAccountType accountType,
     String? branchName,
     String? bankName,
+    required String panNumber,
     bool setAsPrimary = true,
   });
 
@@ -34,6 +36,8 @@ abstract class BankAccountDataSource {
   Future<void> deleteBankAccount(String accountId);
 
   Future<BankBranchDetails> lookupIfsc(String ifscCode);
+
+  Future<PanVerificationResult> verifyPan(String panNumber);
 }
 
 class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
@@ -71,6 +75,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     required BankAccountType accountType,
     String? branchName,
     String? bankName,
+    required String panNumber,
     bool setAsPrimary = true,
   }) async {
     final payload = {
@@ -83,6 +88,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       'ifsc': ifscCode,
       'isVerified': false,
       'setAsPrimary': setAsPrimary,
+      'panNumber': panNumber,
     };
 
     final response = await _dio.post(ApiConstants.bankAccounts, data: payload);
@@ -171,6 +177,38 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     }
 
     return BankAccountVerificationResult.fromJson(result);
+  }
+
+  @override
+  Future<PanVerificationResult> verifyPan(String panNumber) async {
+    final formData = FormData.fromMap({
+      'pan': panNumber,
+    });
+
+    final response = await _dio.post(
+      ApiConstants.panVerification,
+      data: formData,
+      options: Options(
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data',
+          'jwt_token': ApiConstants.panJwtToken,
+        },
+      ),
+    );
+
+    final raw = response.data;
+    if (raw is! Map<String, dynamic> || raw['status'] != true) {
+      final message = raw['message']?.toString() ?? 'PAN verification failed.';
+      throw Exception(message);
+    }
+
+    final result = raw['data'] as Map<String, dynamic>?;
+    if (result == null) {
+      throw Exception('PAN verification data not found.');
+    }
+
+    return PanVerificationResult.fromJson(result);
   }
 }
 

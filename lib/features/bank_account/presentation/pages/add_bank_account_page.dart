@@ -41,6 +41,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   final _confirmAccountNumberController = TextEditingController();
   final _ifscController = TextEditingController();
   final _holderNameController = TextEditingController();
+  final _panController = TextEditingController();
   BankAccountType _accountType = BankAccountType.savings;
   bool _confirmDialogShown = false;
 
@@ -48,6 +49,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   void initState() {
     super.initState();
     _ifscController.addListener(_onIfscChanged);
+    _panController.addListener(_onPanChanged);
 
 
     //Dialog testing
@@ -67,7 +69,8 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
     return _accountNumberController.text.trim().isNotEmpty &&
         _confirmAccountNumberController.text.trim().isNotEmpty &&
         _numbersMatch &&
-        _ifscController.text.trim().length == 11;
+        _ifscController.text.trim().length == 11 &&
+        _panController.text.trim().length == 10;
        // && _holderNameController.text.trim().isNotEmpty;
   }
 
@@ -75,10 +78,12 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   @override
   void dispose() {
     _ifscController.removeListener(_onIfscChanged);
+    _panController.removeListener(_onPanChanged);
     _accountNumberController.dispose();
     _confirmAccountNumberController.dispose();
     _ifscController.dispose();
     _holderNameController.dispose();
+    _panController.dispose();
     super.dispose();
   }
 
@@ -89,6 +94,17 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
     }
   }
 
+  void _onPanChanged() {
+    setState(() {});
+  }
+
+  bool get _isPanValid {
+    final pan = _panController.text.trim().toUpperCase();
+    if (pan.length != 10) return false;
+    final regex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$');
+    return regex.hasMatch(pan);
+  }
+
   void _submit(BuildContext context) {
     context.read<AddBankAccountCubit>().submit(
       propertyId: widget.propertyId,
@@ -97,6 +113,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
       ifscCode: _ifscController.text.trim().toUpperCase(),
       accountHolderName: _holderNameController.text.trim(),
       accountType: _accountType,
+      panNumber: _panController.text.trim().toUpperCase(),
     );
   }
 
@@ -111,6 +128,11 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
       ifscCode: ifscCode,
       clientRefNum: clientRefNum,
     );
+  }
+
+  void _verifyPan(BuildContext context) {
+    final pan = _panController.text.trim().toUpperCase();
+    context.read<AddBankAccountCubit>().verifyPan(pan);
   }
 
   @override
@@ -130,9 +152,19 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 SnackBar(content: Text(state.verifyError!)),
               );
             }
+            if (state.panVerifyError != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.panVerifyError!)),
+              );
+            }
             if (state.verifySuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Bank account verified successfully.')),
+              );
+            }
+            if (state.panVerifySuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('PAN verified successfully.')),
               );
             }
             if (state.verifySuccess && state.verificationResult != null && !_confirmDialogShown) {
@@ -286,6 +318,120 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                     color: Color(0xFF293645),
                                     fontWeight: FontWeight.w600,
                                   ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      _FieldLabel('PAN Number'),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _panController,
+                              textCapitalization: TextCapitalization.characters,
+                              maxLength: 10,
+                              decoration: _inputDecoration().copyWith(counterText: ''),
+                              onChanged: (_) => setState(() {}),
+                              style: GoogleFonts.inter(
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          SizedBox(
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: (!state.isVerifyingPan && _isPanValid)
+                                  ? () => _verifyPan(context)
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: state.panVerifySuccess
+                                    ? const Color(0xFF1E8E42)
+                                    : Colors.white,
+                                foregroundColor: state.panVerifySuccess
+                                    ? Colors.white
+                                    : Colors.black,
+                                elevation: 0,
+                                side: BorderSide(
+                                  color: _isPanValid
+                                      ? Colors.grey.shade300
+                                      : Colors.grey.shade200,
+                                  width: 1.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: state.isVerifyingPan
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.black,
+                                      ),
+                                    )
+                                  : state.panVerifySuccess
+                                      ? const Icon(Icons.check, size: 20)
+                                      : Text(
+                                          'Verify',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            color: _isPanValid
+                                                ? Colors.black
+                                                : Colors.grey.shade500,
+                                          ),
+                                        ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (state.panVerifyError != null && _panController.text.trim().length == 10) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          state.panVerifyError!,
+                          style: GoogleFonts.inter(fontSize: 12.5, color: Colors.redAccent),
+                        ),
+                      ],
+                      if (state.panVerifySuccess && state.panVerificationResult != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE6F4EA),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFF1E8E42)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.check_circle, size: 16, color: Color(0xFF1E8E42)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'PAN Verified: ${state.panVerificationResult!.fullname}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.5,
+                                        color: Color(0xFF1E8E42),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Status: ${state.panVerificationResult!.panStatus}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11.5,
+                                        color: Color(0xFF1E8E42),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
