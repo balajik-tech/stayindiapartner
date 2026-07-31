@@ -23,7 +23,7 @@ class UnifiedHeader extends StatelessWidget {
         if (state is HostelLoaded && state.hostels.isNotEmpty) {
           if (state.selectedHostelIndices.length > 1) {
             selectedHostelName =
-                "${state.selectedHostelIndices.length} ${StringUtils.translate("properties", context: context)}";
+            "${state.selectedHostelIndices.length} ${StringUtils.translate("properties", context: context)}";
           } else {
             final index = state.selectedHostelIndices.isNotEmpty
                 ? state.selectedHostelIndices.first
@@ -42,15 +42,7 @@ class UnifiedHeader extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 65.w,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
+                width: 48.w,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -58,8 +50,8 @@ class UnifiedHeader extends StatelessWidget {
                     Container(
                       child: Image.asset(
                         'assets/images/login_logo_nobg.png',
-                        fit: BoxFit.fill,
-                        height: 45.h,
+                        fit: BoxFit.contain,
+                        height: 44.h,
                         errorBuilder: (context, error, stackTrace) => Icon(
                           Icons.image_not_supported,
                           size: 40.sp,
@@ -102,45 +94,56 @@ class UnifiedHeader extends StatelessWidget {
                     context: context,
                   ),
                   hint:
-                      '${StringUtils.translate('current_property', context: context)}: $selectedHostelName',
+                  '${StringUtils.translate('current_property', context: context)}: $selectedHostelName',
                   button: true,
                   child: GestureDetector(
                     onTap: () => _showSwitchHostelSheet(context),
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
+                        horizontal: 8.w,
                         vertical: 8.h,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        color: const Color(0xFFf4f5f9),
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: const Color(0xFFE8ECF5), // Border color
+                          width: 1.0,
+                        ),
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.apartment_rounded,
-                            color: const Color(0xFFFF7000),
-                            size: 18.sp,
+                          Container(
+                            width: 32.w,
+                            height: 32.w,
+                            decoration: BoxDecoration(
+                              color:  AppColors.orangeColor,
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Icon(
+                              Icons.apartment_rounded,
+                              color: Colors.white,
+                              size: 18.sp,
+                            ),
                           ),
-                          SizedBox(width: 8.w),
+                          SizedBox(width: 10.w),
                           Expanded(
                             child: Text(
                               selectedHostelName,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: TextStyle(
-                                fontSize: 15.sp,
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.w800,
-                                color: const Color(0xFF1E293B),
+                                color: const Color(0xFF0a3462),
                               ),
                             ),
                           ),
                           SizedBox(width: 4.w),
                           Icon(
                             Icons.keyboard_arrow_down_rounded,
-                            color: const Color(0xFF64748B),
-                            size: 18.sp,
+                            color: const Color(0xFF6B7C93),
+                            size: 22.sp,
                           ),
                         ],
                       ),
@@ -149,7 +152,27 @@ class UnifiedHeader extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(width: 16.w),
+              SizedBox(width: 12.w),
+
+              Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFf4f5f9),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: const Color(0xFFE8ECF5), // Border color
+                    width: 1.0,
+                  ),
+                ),
+                child: Icon(
+                  Icons.bar_chart_rounded,
+                  color: const Color(0xFF1E293B),
+                  size: 22.sp,
+                ),
+              ),
+
+              SizedBox(width: 12.w),
 
               Semantics(
                 label: StringUtils.translate('notifications', context: context),
@@ -169,18 +192,40 @@ class UnifiedHeader extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Container(
-                      width: 44.w,
-                      height: 44.w,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5FF),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Icon(
-                        Icons.notifications_none_rounded,
-                        color: const Color(0xFF3B71CA),
-                        size: 24.sp,
-                      ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 44.w,
+                          height: 44.w,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFf4f5f9),
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color: const Color(0xFFE8ECF5), // Border color
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.notifications_none_rounded,
+                            color: const Color(0xFF1E293B),
+                            size: 22.sp,
+                          ),
+                        ),
+                        Positioned(
+                          top: 8.h,
+                          right: 8.w,
+                          child: Container(
+                            width: 8.w,
+                            height: 8.w,
+                            decoration: BoxDecoration(
+                              color: AppColors.orangeColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.orangeColor, width: 1.5),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -272,8 +317,8 @@ class UnifiedHeader extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColors.primaryBlue.withValues(
-                                          alpha: 0.1,
-                                        )
+                                    alpha: 0.1,
+                                  )
                                       : AppColors.backgroundSecondary,
                                   shape: BoxShape.circle,
                                 ),
