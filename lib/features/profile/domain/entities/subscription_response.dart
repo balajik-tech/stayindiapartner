@@ -81,6 +81,7 @@ class ActiveSubscription {
   final String property;
   final String owner;
   final String? renewalOf;
+  final String? propertyName;
   final String plan;
   final SubscriptionPlan planSnapshot;
   final double subscribedPricePerBed;
@@ -110,6 +111,7 @@ class ActiveSubscription {
     required this.property,
     required this.owner,
     this.renewalOf,
+    this.propertyName,
     required this.plan,
     required this.planSnapshot,
     required this.subscribedPricePerBed,

@@ -122,7 +122,7 @@ class _PaymentFailedBody extends StatelessWidget {
             displayDate = _formatDate(summary!.paymentDate);
           } else {
             displayAmount = (activeSubscription?.razorpayAmount?.toDouble() ?? 0.0) / 100 ?? 0.0;
-            displayPropertyName = '';
+            displayPropertyName = activeSubscription?.propertyName;
             displayPlanName = activeSubscription?.planSnapshot.planName ?? 'Subscription Plan';
             displayTransactionId = '';
             displayDate = _formatDate(DateTime.now());
