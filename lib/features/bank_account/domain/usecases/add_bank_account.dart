@@ -61,7 +61,7 @@ class AddBankAccount implements UseCase<BankAccountEntity, AddBankAccountParams>
       accountType: params.accountType,
       branchName: params.branchName,
       bankName: params.bankName,
-      panNumber: params.panNumber
+      pan: params.panNumber
     );
   }
 }
