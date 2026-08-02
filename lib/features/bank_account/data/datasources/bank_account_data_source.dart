@@ -27,7 +27,7 @@ abstract class BankAccountDataSource {
     required BankAccountType accountType,
     String? branchName,
     String? bankName,
-    required String panNumber,
+    required String pan,
     bool setAsPrimary = true,
   });
 
@@ -75,7 +75,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     required BankAccountType accountType,
     String? branchName,
     String? bankName,
-    required String panNumber,
+    required String pan,
     bool setAsPrimary = true,
   }) async {
     final payload = {
@@ -88,7 +88,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       'ifsc': ifscCode,
       'isVerified': false,
       'setAsPrimary': setAsPrimary,
-      'panNumber': panNumber,
+      'pan': pan,
     };
 
     final response = await _dio.post(ApiConstants.bankAccounts, data: payload);

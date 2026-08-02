@@ -20,7 +20,7 @@ abstract class BankAccountRepository {
     required BankAccountType accountType,
     String? branchName,
     String? bankName,
-    required String panNumber,
+    required String pan,
   });
 
   Future<Either<Failure, BankAccountVerificationResult>> verifyBankAccount({
