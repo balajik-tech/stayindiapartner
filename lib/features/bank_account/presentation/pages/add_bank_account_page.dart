@@ -501,7 +501,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: ElevatedButton(
-                    onPressed: (!state.isVerifying && _isFormValid)
+                    onPressed: (!state.isVerifying && _isFormValid  && state.panVerifySuccess)
                         ? () => _verify(context)
                         : null,
                     style: ElevatedButton.styleFrom(
@@ -510,7 +510,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       foregroundColor: Colors.black,
                       elevation: 0,
                       side: BorderSide(
-                        color: _isFormValid
+                        color: _isFormValid  && state.panVerifySuccess
                             ? Colors.grey.shade300
                             : Colors.grey.shade200,
                         width: 1.5,
@@ -533,7 +533,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 18,
-                        color: _isFormValid
+                        color: _isFormValid && state.panVerifySuccess
                             ? Colors.black
                             : Colors.grey.shade500,
                       ),
