@@ -23,7 +23,6 @@ class ApiConstants {
     return url;
   }
 
-  static const String bankJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDA3MiIsInRpbWVzdGFtcCI6MTc4NDg3NTkzMn0=.jEy96IAMvxXEeDPk_iKn62So1uxpPsTawn3Ybiquyro=";
 
   static const String requestOtp = '/auth/request-otp';
   static const String verifyOtp = '/auth/verify-otp';
@@ -96,8 +95,10 @@ class ApiConstants {
   static const String bills = '/bills';
   static const String bankAccounts = '/bankaccounts';
   static const String externalBankVerification = 'https://api.digiverification.com/api/v2/account-verification/verify';
-  static const String panVerification = 'https://api.digiverification.com/api/v1/get-pan-details';
-  static const String panJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDA1NCIsInRpbWVzdGFtcCI6MTc4MjcxMjc5MX0=.RavasRjZHbesYaSRJi4Bg6NNqCScTIABPGUXioNGbAo=";
+  static const String panVerification = 'https://api.digiverification.com/api/v4/pan/comprehensive';
+
+  static const String panJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTg0MTU4MH0=.dlZCGlLGno2icwEPoCNZmSbctyyIK-pXkmHqvM2AxKI=";
+  static const String bankJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTg0MTU4MH0=.dlZCGlLGno2icwEPoCNZmSbctyyIK-pXkmHqvM2AxKI=";
 
   static const String razorpayKey = "rzp_test_TIonMLOPKwlfCt";
 

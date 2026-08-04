@@ -19,22 +19,34 @@ class BankAccountModel extends BankAccountEntity {
     String? defaultPropertyId,
   }) {
     final accountTypeValue = json['accountType']?.toString() ?? '';
-    final ifscValue = json['ifsc'] ?? json['ifscCode'] ?? '';
-    final branchValue = (json['branchName'] as String?) ?? (json['branch'] as String?) ?? '';
-    final bankNameValue = (json['bankName'] as String?) ?? branchValue;
+    final ifscValue = (json['ifsc'] ?? json['ifscCode'] ?? '').toString();
+    final branchValue = (json['branchName'] ?? json['branch'] ?? '').toString();
+    final bankNameValue = (json['bankName'] ?? branchValue).toString();
+    final rawPropertyId = json['propertyId'] ?? json['hostelId'] ?? defaultPropertyId;
+    final propertyIdValue = _toIdString(rawPropertyId, fallback: defaultPropertyId ?? '');
+    final rawAccountId = json['id'] ?? json['_id'];
 
     return BankAccountModel(
-      id: (json['id'] ?? json['_id']) as String,
-      propertyId: (json['propertyId'] ?? json['hostelId'] ?? defaultPropertyId) as String,
+      id: _toIdString(rawAccountId, fallback: ''),
+      propertyId: propertyIdValue,
       bankName: bankNameValue,
       branchName: branchValue,
-      accountNumber: json['accountNumber'] as String,
-      ifscCode: ifscValue as String,
-      accountHolderName: json['accountHolderName'] as String,
+      accountNumber: (json['accountNumber'] ?? '').toString(),
+      ifscCode: ifscValue,
+      accountHolderName: (json['accountHolderName'] ?? '').toString(),
       accountType: _parseAccountType(accountTypeValue),
       isPrimary: (json['isPrimary'] as bool?) ?? (json['setAsPrimary'] as bool?) ?? false,
       verificationStatus: _parseVerificationStatus(json['isVerified'] ?? json['verificationStatus']),
     );
+  }
+
+  static String _toIdString(dynamic value, {required String fallback}) {
+    if (value == null) return fallback;
+    if (value is Map) {
+      final nestedId = value['_id'] ?? value['id'];
+      return nestedId?.toString() ?? fallback;
+    }
+    return value.toString();
   }
 
   Map<String, dynamic> toJson() {

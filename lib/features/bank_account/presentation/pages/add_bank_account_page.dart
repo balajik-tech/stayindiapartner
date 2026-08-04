@@ -44,6 +44,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   final _panController = TextEditingController();
   BankAccountType _accountType = BankAccountType.savings;
   bool _confirmDialogShown = false;
+  bool _isPanVerifiedToastShown = false;
 
   @override
   void initState() {
@@ -90,11 +91,16 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   void _onIfscChanged() {
     final code = _ifscController.text.trim().toUpperCase();
     if (mounted) {
+      context.read<AddBankAccountCubit>().resetPanVerification();
       context.read<AddBankAccountCubit>().lookupIfscCode(code);
     }
   }
 
   void _onPanChanged() {
+    final currentPan = _panController.text.trim().toUpperCase();
+    if (mounted && currentPan.isNotEmpty) {
+      context.read<AddBankAccountCubit>().resetPanVerification();
+    }
     setState(() {});
   }
 
@@ -105,7 +111,49 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
     return regex.hasMatch(pan);
   }
 
+  String _panFieldHintText(AddBankAccountState state) {
+    final pan = _panController.text.trim();
+
+    if (pan.isEmpty) {
+      return 'Entered pan number name should match with bank account name';
+    }
+
+    if (!_isPanValid) {
+      return 'PAN number must be 10 characters and follow the valid format (e.g. ABCDE1234F).';
+    }
+
+    if (state.panVerifyError != null) {
+      return state.panVerifyError!;
+    }
+
+    if (state.panVerifySuccess && state.panVerificationResult != null) {
+      return 'PAN verified successfully';
+    }
+
+    return 'Enter pan number name should match with bank account name';
+  }
+
+  bool _panAndBankHolderNamesMatch(AddBankAccountState state) {
+    final bankName = state.verificationResult?.beneficiaryName ?? '';
+    final panName = state.panVerificationResult?.fullname ?? '';
+    return areNamesEquivalent(bankName, panName);
+  }
+
+  String _panAndBankHolderNameError(AddBankAccountState state) {
+    final bankName = state.verificationResult?.beneficiaryName ?? '';
+    final panName = state.panVerificationResult?.fullname ?? '';
+
+    if (bankName.trim().isEmpty || panName.trim().isEmpty) {
+      return '';
+    }
+
+    return areNamesEquivalent(bankName, panName)
+        ? ''
+        : 'PAN name and bank account holder name do not match.';
+  }
+
   void _submit(BuildContext context) {
+    _isPanVerifiedToastShown = false;
     context.read<AddBankAccountCubit>().submit(
       propertyId: widget.propertyId,
       accountNumber: _accountNumberController.text.trim(),
@@ -162,12 +210,21 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 const SnackBar(content: Text('Bank account verified successfully.')),
               );
             }
-            if (state.panVerifySuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('PAN verified successfully.')),
-              );
+            if (state.panVerifySuccess && state.panVerificationResult != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted && !_isPanVerifiedToastShown) {
+                  _isPanVerifiedToastShown = true;
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   const SnackBar(content: Text('PAN verified successfully.')),
+                  // );
+                }
+              });
             }
-            if (state.verifySuccess && state.verificationResult != null && !_confirmDialogShown) {
+            if (state.verifySuccess &&
+                state.verificationResult != null &&
+                state.panVerificationResult != null &&
+                _panAndBankHolderNamesMatch(state) &&
+                !_confirmDialogShown) {
               _confirmDialogShown = true;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
@@ -175,11 +232,22 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 }
               });
             }
-            if (state.isSuccess) {
-              Navigator.of(context).pop(true);
+            if (state.isSuccess && !state.isSubmitting && mounted) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Bank account added successfully.')),
+                  );
+                  Navigator.of(context).pop(true);
+                }
+              });
             }
           },
           builder: (context, state) {
+            final bool namesMatch = _panAndBankHolderNamesMatch(state);
+            final bool canProceedToVerification = !state.isVerifying && _isFormValid && state.panVerifySuccess && namesMatch;
+            final String nameMismatchError = _panAndBankHolderNameError(state);
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -333,7 +401,14 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                               controller: _panController,
                               textCapitalization: TextCapitalization.characters,
                               maxLength: 10,
-                              decoration: _inputDecoration().copyWith(counterText: ''),
+                              decoration: _inputDecoration().copyWith(
+                                counterText: '',
+                                hintText: '',
+                                hintStyle: GoogleFonts.inter(
+                                  fontSize: 12.5,
+                                  color: const Color(0xFF6B7280),
+                                ),
+                              ),
                               onChanged: (_) => setState(() {}),
                               style: GoogleFonts.inter(
                                 color: Colors.black,
@@ -345,7 +420,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             height: 52,
                             child: ElevatedButton(
                               onPressed: (!state.isVerifyingPan && _isPanValid)
-                                  ? () => _verifyPan(context)
+                                  ? () => (state.panVerifySuccess)? null: _verifyPan(context)
                                   : null,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: state.panVerifySuccess
@@ -390,13 +465,23 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           ),
                         ],
                       ),
-                      if (state.panVerifyError != null && _panController.text.trim().length == 10) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          state.panVerifyError!,
-                          style: GoogleFonts.inter(fontSize: 12.5, color: Colors.redAccent),
+                      const SizedBox(height: 8),
+                      Text(
+                        _panFieldHintText(state),
+                        style: GoogleFonts.inter(
+                          fontSize: 12.5,
+                          color: state.panVerifySuccess && state.panVerificationResult != null
+                              ? const Color(0xFF1E8E42)
+                              : _panController.text.trim().isNotEmpty && !_isPanValid
+                                  ? Colors.redAccent
+                                  : state.panVerifyError != null
+                                      ? Colors.redAccent
+                                      : const Color(0xFF6B7280),
+                          fontWeight: state.panVerifySuccess && state.panVerificationResult != null
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
-                      ],
+                      ),
                       if (state.panVerifySuccess && state.panVerificationResult != null) ...[
                         const SizedBox(height: 8),
                         Container(
@@ -497,7 +582,20 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                   ),
                 ),
                 const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
+                if (nameMismatchError.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Text(
+                      nameMismatchError,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.5,
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: ElevatedButton(
@@ -510,9 +608,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       foregroundColor: Colors.black,
                       elevation: 0,
                       side: BorderSide(
-                        color: _isFormValid  && state.panVerifySuccess
-                            ? Colors.grey.shade300
-                            : Colors.grey.shade200,
+                        color: (!state.isVerifying && _isFormValid  && state.panVerifySuccess) ? Colors.grey.shade300 : Colors.grey.shade200,
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
@@ -521,23 +617,21 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                     ),
                     child: state.isVerifying
                         ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.black,
-                      ),
-                    )
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.black,
+                            ),
+                          )
                         : Text(
-                      'Verify',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
-                        color: _isFormValid && state.panVerifySuccess
-                            ? Colors.black
-                            : Colors.grey.shade500,
-                      ),
-                    ),
+                            'Continue',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              color: (!state.isVerifying && _isFormValid  && state.panVerifySuccess) ? Colors.black : Colors.grey.shade500,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -779,6 +873,42 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
       },
     );
   }
+}
+
+bool areNamesEquivalent(String? firstName, String? secondName) {
+  final normalizedFirst = _normalizeName(firstName);
+  final normalizedSecond = _normalizeName(secondName);
+
+  if (normalizedFirst.isEmpty || normalizedSecond.isEmpty) {
+    return false;
+  }
+
+  if (normalizedFirst == normalizedSecond) {
+    return true;
+  }
+
+  final firstWords = normalizedFirst.split(' ')..sort();
+  final secondWords = normalizedSecond.split(' ')..sort();
+
+  if (firstWords.length != secondWords.length) {
+    return false;
+  }
+
+  for (var i = 0; i < firstWords.length; i++) {
+    if (firstWords[i] != secondWords[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+String _normalizeName(String? value) {
+  return (value ?? '')
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 class _FieldLabel extends StatelessWidget {

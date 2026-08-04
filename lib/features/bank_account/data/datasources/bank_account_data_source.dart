@@ -92,8 +92,16 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     };
 
     final response = await _dio.post(ApiConstants.bankAccounts, data: payload);
-    final data = response.data['data'] ?? response.data;
-    return BankAccountModel.fromJson(data as Map<String, dynamic>);
+    final dynamic rawPayload = response.data;
+    final Map<String, dynamic>? data = rawPayload is Map<String, dynamic>
+        ? (rawPayload['data'] as Map<String, dynamic>?)
+        : (rawPayload is Map ? Map<String, dynamic>.from(rawPayload['data'] ?? rawPayload) : null);
+
+    if (data == null) {
+      throw Exception('Bank account creation response was empty or malformed.');
+    }
+
+    return BankAccountModel.fromJson(data, defaultPropertyId: propertyId);
   }
 
   @override
@@ -146,10 +154,12 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       throw Exception('Missing authorization token for bank account verification.');
     }
 
+    final clientRef = '${clientRefNum}_CLIENT_${DateTime.now().millisecondsSinceEpoch}';
+
     final payload = {
       'account_number': accountNumber,
       'ifsc_code': ifscCode,
-      'clientRefNum': clientRefNum,
+      'clientRefNum': clientRef,
     };
 
     final response = await _dio.post(
@@ -181,18 +191,18 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
 
   @override
   Future<PanVerificationResult> verifyPan(String panNumber) async {
-    final formData = FormData.fromMap({
-      'pan': panNumber,
-    });
+    final payload = {
+      'id_number': panNumber,
+    };
 
     final response = await _dio.post(
       ApiConstants.panVerification,
-      data: formData,
+      data: payload,
       options: Options(
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data',
-          'jwt_token': ApiConstants.panJwtToken,
+          'Content-Type': 'application/json',
+          'jwt-token': ApiConstants.panJwtToken,
         },
       ),
     );

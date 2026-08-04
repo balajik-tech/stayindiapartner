@@ -36,22 +36,33 @@ class PanVerificationResult extends Equatable {
   });
 
   factory PanVerificationResult.fromJson(Map<String, dynamic> json) {
+    final fullNameValue = (json['full_name'] ?? json['fullname'] ?? '').toString().trim();
+    final splitValue = json['full_name_split'];
+    final fullNameSplit = splitValue is List ? splitValue.map((e) => e.toString()).toList() : <String>[];
+
+    final firstNameValue = (json['first_name'] ?? (fullNameSplit.isNotEmpty ? fullNameSplit[0] : '')).toString().trim();
+    final middleNameValue = (json['middle_name'] ?? (fullNameSplit.length > 1 ? fullNameSplit[1] : '')).toString().trim();
+    final lastNameValue = (json['last_name'] ?? (fullNameSplit.length > 2 ? fullNameSplit[2] : '')).toString().trim();
+    final fullName = fullNameValue.isNotEmpty
+        ? fullNameValue
+        : [firstNameValue, middleNameValue, lastNameValue].where((value) => value.isNotEmpty).join(' ');
+
     return PanVerificationResult(
-      pan: json['pan'] ?? '',
-      panType: json['pan_type'] ?? '',
-      fullname: json['fullname'] ?? '',
-      firstName: json['first_name'] ?? '',
-      middleName: json['middle_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      gender: json['gender'] ?? '',
-      aadhaarNumber: json['aadhaar_number'] ?? '',
+      pan: (json['pan_number'] ?? json['pan'] ?? '').toString().trim(),
+      panType: (json['category'] ?? json['pan_type'] ?? '').toString().trim(),
+      fullname: fullName,
+      firstName: firstNameValue,
+      middleName: middleNameValue,
+      lastName: lastNameValue,
+      gender: (json['gender'] ?? '').toString().trim(),
+      aadhaarNumber: (json['masked_aadhaar'] ?? json['aadhaar_number'] ?? '').toString().trim(),
       aadhaarLinked: json['aadhaar_linked'] ?? false,
-      dob: json['dob'] ?? '',
-      address: PanAddress.fromJson(json['address'] ?? {}),
-      mobile: json['mobile'] ?? '',
-      email: json['email'] ?? '',
-      panStatus: json['pan_status'] ?? '',
-      panAllotmentDate: json['pan_allotment_date'] ?? '',
+      dob: (json['dob'] ?? '').toString().trim(),
+      address: PanAddress.fromJson(Map<String, dynamic>.from(json['address'] ?? {})),
+      mobile: (json['phone_number'] ?? json['mobile'] ?? '').toString().trim(),
+      email: (json['email'] ?? '').toString().trim(),
+      panStatus: (json['status'] ?? json['pan_status'] ?? '').toString().trim(),
+      panAllotmentDate: (json['pan_allotment_date'] ?? '').toString().trim(),
     );
   }
 
@@ -96,13 +107,13 @@ class PanAddress extends Equatable {
 
   factory PanAddress.fromJson(Map<String, dynamic> json) {
     return PanAddress(
-      buildingName: json['building_name'] ?? '',
-      locality: json['locality'] ?? '',
-      streetName: json['street_name'] ?? '',
-      pincode: json['pincode'] ?? '',
-      city: json['city'] ?? '',
-      state: json['state'] ?? '',
-      country: json['country'] ?? 'India',
+      buildingName: (json['line_1'] ?? json['building_name'] ?? '').toString().trim(),
+      locality: (json['line_2'] ?? json['locality'] ?? '').toString().trim(),
+      streetName: (json['street_name'] ?? '').toString().trim(),
+      pincode: (json['zip'] ?? json['pincode'] ?? '').toString().trim(),
+      city: (json['city'] ?? '').toString().trim(),
+      state: (json['state'] ?? '').toString().trim(),
+      country: (json['country'] ?? 'India').toString().trim(),
     );
   }
 

@@ -118,7 +118,12 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
   }
 
   Future<void> verifyPan(String panNumber) async {
-    emit(state.copyWith(isVerifyingPan: true, clearPanVerifyError: true, clearPanVerifySuccess: true));
+    emit(state.copyWith(
+      isVerifyingPan: true,
+      clearPanVerifyError: true,
+      clearPanVerifySuccess: true,
+      clearPanVerificationResult: true,
+    ));
 
     final result = await verifyPanUseCase(VerifyPanParams(panNumber: panNumber));
 
@@ -130,5 +135,14 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
         panVerificationResult: panVerificationResult,
       )),
     );
+  }
+
+  void resetPanVerification() {
+    emit(state.copyWith(
+      clearPanVerifyError: true,
+      clearPanVerifySuccess: true,
+      clearPanVerificationResult: true,
+      isVerifyingPan: false,
+    ));
   }
 }
