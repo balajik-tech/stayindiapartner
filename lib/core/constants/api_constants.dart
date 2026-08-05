@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import '../services/app_config_service.dart';
+
 class ApiConstants {
 
   static const String _api_Version = '/api/v1';
@@ -100,7 +102,12 @@ class ApiConstants {
   static const String panJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTkyNjU2OX0=.RdCyQR79CF73Ozvf8SH_Xweby7UQ1VhVz2ljN5hq9Ro=";
   static const String bankJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTkyNjU2OX0=.RdCyQR79CF73Ozvf8SH_Xweby7UQ1VhVz2ljN5hq9Ro=";
 
-  static const String razorpayKey = "rzp_test_TIonMLOPKwlfCt";
+  static String get razorpayKey => AppConfigService.instance.razorpayKey;
+  static String get digilockerCompanyName =>
+      AppConfigService.instance.digilockerCompanyName;
+  static String get partnerCode => AppConfigService.instance.partnerCode;
+  static String get digilockerRedirectUrl =>
+      AppConfigService.instance.digilockerRedirectUrl;
 
   static const String subscriptionPlans = '/subscriptions/plans';
   static const String subscriptionSubscribe = '/subscriptions/subscribe';

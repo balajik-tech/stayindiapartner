@@ -24,6 +24,7 @@ import 'package:stayindia_owner/features/auth/domain/repositories/auth_repositor
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/text_utils.dart';
 import '../../../../injection_container.dart';
+import '../../../../core/services/app_config_service.dart';
 import '../../../digilocker/domain/entities/digilocker_credentials.dart';
 import '../../../digilocker/domain/entities/kyc_result.dart';
 import '../../../digilocker/presentation/cubit/digilocker_cubit.dart';
@@ -522,10 +523,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               child: ElevatedButton.icon(
                 onPressed
                     : () async {
+                  final config = AppConfigService.instance.data;
                   final credentials = DigiLockerCredentials(
-                    companyName: 'Stay India',
-                    secretToken: 'K1tPIbkUX6eZE28sgP5qCIrwmTJnW5F1',
-                    redirectUrl: 'https://digilocker.meon.co.in/digilocker/thank-you-page',
+                    companyName: config.digilockerCompanyName,
+                    secretToken: config.secretToken,
+                    redirectUrl: config.digilockerRedirectUrl,
                   );
 
                   await DigiLockerNavigator.verifyWithDigiLocker(

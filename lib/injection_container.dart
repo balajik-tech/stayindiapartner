@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/services/token_storage.dart';
 import 'package:stayindia_owner/core/services/cache_service.dart';
+import 'package:stayindia_owner/core/services/app_config_service.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
@@ -75,6 +76,7 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton(() => CacheService(sl()));
+  sl.registerLazySingleton(() => AppConfigService());
 
   sl.registerLazySingleton<SocketService>(() {
     final String socketBaseUrl = Uri.parse(

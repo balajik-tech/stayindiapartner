@@ -13,6 +13,7 @@ import '../../firebase_options.dart';
 import '../../injection_container.dart' as di;
 import '../services/cache_service.dart';
 import '../services/notification_service.dart';
+import '../services/app_config_service.dart';
 import '../utils/logger.dart';
 
 class AppBootstrapper extends StatefulWidget {
@@ -137,6 +138,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       });
 
       await di.init();
+      await di.sl<AppConfigService>().load();
 
       setState(() {
         _progress = 0.80;
