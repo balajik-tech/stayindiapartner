@@ -96,8 +96,11 @@ class ApiConstants {
   static const String paymentReminders = '/payments/reminders';
   static const String bills = '/bills';
   static const String bankAccounts = '/bankaccounts';
-  static const String externalBankVerification = 'https://api.digiverification.com/api/v2/account-verification/verify';
-  static const String panVerification = 'https://api.digiverification.com/api/v4/pan/comprehensive';
+
+  static const String externalBankVerification = '/digilocker/bank-verification';
+      //'https://api.digiverification.com/api/v2/account-verification/verify';
+  static const String panVerification = '/digilocker/pan-verification';
+      //'https://api.digiverification.com/api/v4/pan/comprehensive';
 
   static const String panJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTkyNjU2OX0=.RdCyQR79CF73Ozvf8SH_Xweby7UQ1VhVz2ljN5hq9Ro=";
   static const String bankJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTkyNjU2OX0=.RdCyQR79CF73Ozvf8SH_Xweby7UQ1VhVz2ljN5hq9Ro=";

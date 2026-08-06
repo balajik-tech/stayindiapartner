@@ -157,8 +157,8 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     final clientRef = '${clientRefNum}_CLIENT_${DateTime.now().millisecondsSinceEpoch}';
 
     final payload = {
-      'account_number': accountNumber,
-      'ifsc_code': ifscCode,
+      'accountNumber': accountNumber,
+      'ifscCode': ifscCode,
       'clientRefNum': clientRef,
     };
 
@@ -192,7 +192,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
   @override
   Future<PanVerificationResult> verifyPan(String panNumber) async {
     final payload = {
-      'id_number': panNumber,
+      'idNumber': panNumber,
     };
 
     final response = await _dio.post(
