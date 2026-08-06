@@ -10,7 +10,14 @@ class NoticeInitial extends NoticeState {}
 
 class NoticeSubmitting extends NoticeState {}
 
-class NoticeSuccess extends NoticeState {}
+class NoticeSuccess extends NoticeState {
+  final String message;
+
+  const NoticeSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
 
 class NoticeLoading extends NoticeState {}
 

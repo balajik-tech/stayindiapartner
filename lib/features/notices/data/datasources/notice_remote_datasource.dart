@@ -3,7 +3,7 @@ import 'package:stayindia_owner/core/constants/api_constants.dart';
 import '../models/notice_model.dart';
 
 abstract class NoticeRemoteDataSource {
-  Future<void> createNotice({
+  Future<String> createNotice({
     required String hostelId,
     required String tenantId,
     required String roomId,
@@ -23,7 +23,7 @@ class NoticeRemoteDataSourceImpl implements NoticeRemoteDataSource {
   NoticeRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<void> createNotice({
+  Future<String> createNotice({
     required String hostelId,
     required String tenantId,
     required String roomId,
@@ -43,10 +43,14 @@ class NoticeRemoteDataSourceImpl implements NoticeRemoteDataSource {
         if (reason?.isNotEmpty == true) 'reason': reason,
       };
       final response = await dio.post(ApiConstants.notices, data: body);
-      if (response.statusCode != 201 && response.statusCode != 200) {
-        throw Exception('Failed to create notice');
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return _extractResponseMessage(response.data) ?? 'Notice submitted successfully';
       }
+      throw Exception(response.data is Map
+          ? response.data['message'] ?? 'Failed to create notice'
+          : 'Failed to create notice');
     } catch (e) {
+      if (e is Exception) rethrow;
       throw Exception('Error creating notice: $e');
     }
   }
@@ -99,6 +103,18 @@ class NoticeRemoteDataSourceImpl implements NoticeRemoteDataSource {
     } catch (e) {
       throw Exception('Error loading notice: $e');
     }
+  }
+
+  String? _extractResponseMessage(dynamic responseData) {
+    if (responseData is Map) {
+      if (responseData['message'] != null) {
+        return responseData['message'].toString();
+      }
+      if (responseData['data'] is Map && responseData['data']['message'] != null) {
+        return responseData['data']['message'].toString();
+      }
+    }
+    return null;
   }
 
   @override

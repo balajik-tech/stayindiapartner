@@ -282,10 +282,15 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
         body: BlocListener<NoticeCubit, NoticeState>(
           listener: (context, state) {
             if (state is NoticeSuccess) {
+              final successMessage = state.message;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(successMessage),
+                  backgroundColor: Colors.green,
+                ),
+              );
               if (_noticeType == NoticeType.general) {
                 _showGeneralNoticeSuccessDialog(context);
-              } else {
-                _showVacantNoticeSuccessDialog(context);
               }
             } else if (state is NoticeSubmitError) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -882,13 +887,14 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
   }
 
   Future<void> _showVacantNoticeConfirmationDialog(BuildContext context) async {
+    final dialogContext = context;
     final noticeDays = _vacatingDate.difference(_noticeDate).inDays;
     final bookingAvailabilityDate = DateFormat('dd MMM').format(_vacatingDate);
 
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
+      builder: (innerContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
           titlePadding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 0),
@@ -979,7 +985,7 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => Navigator.of(innerContext).pop(),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.darkText,
                           side: BorderSide(color: AppColors.roomCardBorder),
@@ -997,9 +1003,9 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
                     SizedBox(width: 12.w),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _submitVacantNotice(context);
+                        onPressed: () async {
+                          Navigator.of(innerContext).pop();
+                          await _submitVacantNotice(dialogContext);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryBlue,
@@ -1058,26 +1064,31 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
           contentPadding: EdgeInsets.zero,
+          backgroundColor: Colors.white,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 24.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE9F7EE),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-                ),
+                padding: EdgeInsets.symmetric(vertical: 18.h),
                 child: Center(
-                  child: Icon(
-                    Icons.check_circle,
-                    color: const Color(0xFF2F855A),
-                    size: 56.sp,
+                  child: Container(
+                    width: 82.sp,
+                    height: 82.sp,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFCAEAC8),
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      color: Colors.green,
+                      size: 50.sp,
+                    ),
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 18.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -1085,7 +1096,8 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
                       'Vacate notice recorded',
                       style: TextStyle(
                         fontSize: 20.sp,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black
                       ),
                     ),
                     SizedBox(height: 12.h),
@@ -1094,59 +1106,54 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14.sp,
-                        color: AppColors.greyText,
+                        color: const Color(0xFF636260),
                       ),
                     ),
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 12.h),
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.all(16.w),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal:16,vertical: 4),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.calendar_today, size: 16.sp, color: AppColors.primaryBlue),
+                              Icon(Icons.calendar_today, size: 16.sp, color: Colors.black),
                               SizedBox(width: 8.w),
                               Text(
                                 'Vacating on $vacatingDateText',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
+                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp, color:Colors.black),
                               ),
                             ],
                           ),
                           SizedBox(height: 6.h),
                           Text(
                             '$noticeDays days from today',
-                            style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+                            style: TextStyle(fontSize: 13.sp,  color: Color(0xFF636260)),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 2.h),
+                    Divider(
+                      color: const Color(0xFFE5E7EB), // Light gray
+                      thickness: 1,
+                    ),
+                    SizedBox(height: 2.h),
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.all(16.w),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal:16,vertical: 4),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             roomLabel,
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp,color: Colors.black),
                           ),
                           SizedBox(height: 6.h),
                           Text(
                             'Open for new bookings from $vacatingDateText',
-                            style: TextStyle(fontSize: 13.sp, color: AppColors.greyText),
+                            style: TextStyle(fontSize: 13.sp, color: Color(0xFF636260)),
                           ),
                         ],
                       ),
@@ -1168,7 +1175,7 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
                         ),
                         child: Text(
                           'Done',
-                          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700,color: Colors.white),
                         ),
                       ),
                     ),
@@ -1189,13 +1196,13 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
     });
   }
 
-  void _submitVacantNotice(BuildContext context) {
+  Future<void> _submitVacantNotice(BuildContext context) async {
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is! HostelLoaded || hostelState.hostels.isEmpty) return;
 
     final hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
     if (_selectedTenant != null) {
-      context.read<NoticeCubit>().createNotice(
+      await context.read<NoticeCubit>().createNotice(
             hostelId: hostelId,
             tenantId: _selectedTenant!.id,
             roomId: _selectedTenant!.roomId,
@@ -1203,6 +1210,7 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
             vacatingDate: DateFormat('yyyy-MM-dd').format(_vacatingDate),
             reason: _reasonController.text,
           );
+      await _showVacantNoticeSuccessDialog(context);
     }
   }
 

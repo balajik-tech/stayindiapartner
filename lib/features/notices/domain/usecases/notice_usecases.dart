@@ -5,7 +5,7 @@ class CreateNoticeUseCase {
   final NoticeRepository repository;
   CreateNoticeUseCase(this.repository);
 
-  Future<void> call({
+  Future<String> call({
     required String hostelId,
     required String tenantId,
     required String roomId,

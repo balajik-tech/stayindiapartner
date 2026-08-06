@@ -1,7 +1,7 @@
 import '../entities/notice.dart';
 
 abstract class NoticeRepository {
-  Future<void> createNotice({
+  Future<String> createNotice({
     required String hostelId,
     required String tenantId,
     required String roomId,

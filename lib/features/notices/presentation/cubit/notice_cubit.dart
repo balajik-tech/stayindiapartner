@@ -39,13 +39,13 @@ class NoticeCubit extends Cubit<NoticeState> {
     emit(NoticeSubmitting());
     try {
       await _postAnnouncement(hostelId, title, content);
-      emit(NoticeSuccess());
+      emit(const NoticeSuccess(message: 'Notice submitted successfully'));
     } catch (e) {
       emit(NoticeSubmitError(message: ErrorHelper.toFriendlyMessage(e)));
     }
   }
 
-  Future<void> createNotice({
+  Future<String> createNotice({
     required String hostelId,
     required String tenantId,
     required String roomId,
@@ -55,7 +55,7 @@ class NoticeCubit extends Cubit<NoticeState> {
   }) async {
     emit(NoticeSubmitting());
     try {
-      await _createNotice(
+      final message = await _createNotice(
         hostelId: hostelId,
         tenantId: tenantId,
         roomId: roomId,
@@ -63,9 +63,12 @@ class NoticeCubit extends Cubit<NoticeState> {
         vacatingDate: vacatingDate,
         reason: reason,
       );
-      emit(NoticeSuccess());
+      emit(NoticeSuccess(message: message));
+      return message;
     } catch (e) {
-      emit(NoticeSubmitError(message: ErrorHelper.toFriendlyMessage(e)));
+      final friendly = ErrorHelper.toFriendlyMessage(e);
+      emit(NoticeSubmitError(message: friendly));
+      throw Exception(friendly);
     }
   }
 

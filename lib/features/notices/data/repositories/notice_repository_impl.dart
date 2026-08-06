@@ -8,7 +8,7 @@ class NoticeRepositoryImpl implements NoticeRepository {
   NoticeRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<void> createNotice({
+  Future<String> createNotice({
     required String hostelId,
     required String tenantId,
     required String roomId,
