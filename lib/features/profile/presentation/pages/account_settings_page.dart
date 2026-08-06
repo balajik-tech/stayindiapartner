@@ -207,7 +207,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       'email': _emailController.text.trim(),
       'address': _addressController.text.trim(),
       if (currentProfile?.dob != null) 'dob': currentProfile!.dob,
-      if (currentProfile?.gender != null) 'gender': currentProfile!.gender,
+      if ((kycResult?.gender?.isNotEmpty ?? false) ||
+          (currentProfile?.gender?.isNotEmpty ?? false))
+        'gender': (kycResult?.gender?.isNotEmpty ?? false)
+            ? kycResult!.gender
+            : currentProfile!.gender,
     };
 
     // Add KYC data if available
