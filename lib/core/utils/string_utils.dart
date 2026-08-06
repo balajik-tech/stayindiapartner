@@ -451,7 +451,7 @@ class StringUtils {
         if (locale == 'hi') return 'इस महीने';
         if (locale == 'kn') return 'ಈ ತಿಂಗಳು';
         if (locale == 'ml') return 'ഈ മാസം';
-        return 'This Month';
+        return 'Current Month';
       }
       if (key == 'occupancy') {
         if (locale == 'te') return 'ఆక్యుపెన్సీ';
@@ -468,6 +468,14 @@ class StringUtils {
         if (locale == 'kn') return 'ಬಾಕಿ ಇದೆ';
         if (locale == 'ml') return 'തീർപ്പാക്കാത്തത്';
         return 'Pending';
+      }
+      if (key == 'pending_payment') {
+        if (locale == 'te') return 'చెల్లింపు పెండింగ్‌లో ఉంది';
+        if (locale == 'ta') return 'கட்டணம் நிலுவையில் உள்ளது';
+        if (locale == 'hi') return 'भुगतान लंबित है';
+        if (locale == 'kn') return 'ಪಾವತಿ ಬಾಕಿಯಿದೆ';
+        if (locale == 'ml') return 'പേയ്മെന്റ് ബാക്കി';
+        return 'Pending Payment';
       }
       if (key == 'security_deposit') {
         if (locale == 'te') return 'సెక్యూరిటీ డిపాజిట్';

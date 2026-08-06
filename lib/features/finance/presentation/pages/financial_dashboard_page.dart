@@ -165,7 +165,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                     ],
                   ),
                 ),
-                _buildExportButton(state),
+                // _buildExportButton(state), //commend export button
               ],
             ),
           ],
@@ -235,39 +235,40 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                 letterSpacing: -0.5,
               ),
             ),
-            TextButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                      create: (context) => sl<RevenueHistoryCubit>(),
-                      child: const RevenueHistoryPage(),
-                    ),
-                  ),
-                );
-              },
-              icon: Icon(
-                Icons.history_rounded,
-                size: 18.sp,
-                color: AppColors.primaryBlue,
-              ),
-              label: Text(
-                StringUtils.translate('view_history', context: context),
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryBlue,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-            ),
+            // commented history button
+            // TextButton.icon(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => BlocProvider(
+            //           create: (context) => sl<RevenueHistoryCubit>(),
+            //           child: const RevenueHistoryPage(),
+            //         ),
+            //       ),
+            //     );
+            //   },
+            //   icon: Icon(
+            //     Icons.history_rounded,
+            //     size: 18.sp,
+            //     color: AppColors.primaryBlue,
+            //   ),
+            //   label: Text(
+            //     StringUtils.translate('view_history', context: context),
+            //     style: TextStyle(
+            //       fontSize: 13.sp,
+            //       fontWeight: FontWeight.bold,
+            //       color: AppColors.primaryBlue,
+            //     ),
+            //   ),
+            //   style: TextButton.styleFrom(
+            //     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+            //     backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(12.r),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
         SizedBox(height: 4.h),
@@ -312,29 +313,31 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
           color: const Color(0xFFF08C00),
         ),
         MetricCard(
-          title: StringUtils.translate('pending', context: context),
+          title: StringUtils.translate('pending_payment', context: context),
           value: currencyFormat.format(state.stats?.pendingPayments ?? 0),
           icon: Icons.hourglass_empty_rounded,
           color: const Color(0xFFE03131),
         ),
-        MetricCard(
-          title: StringUtils.translate('security_deposit', context: context),
-          value: currencyFormat.format(state.stats?.securityDeposit ?? 0),
-          icon: Icons.shield_rounded,
-          color: const Color(0xFF6741D9),
-        ),
-        MetricCard(
-          title: StringUtils.translate('maintenance', context: context),
-          value: currencyFormat.format(state.stats?.maintenance ?? 0),
-          icon: Icons.build_circle_rounded,
-          color: const Color(0xFFE8590C),
-        ),
-        MetricCard(
-          title: StringUtils.translate('daily_rent', context: context),
-          value: currencyFormat.format(state.stats?.dailyRent ?? 0),
-          icon: Icons.today_rounded,
-          color: const Color(0xFF0C8599),
-        ),
+        // Commented Cards
+
+        // MetricCard(
+        //   title: StringUtils.translate('security_deposit', context: context),
+        //   value: currencyFormat.format(state.stats?.securityDeposit ?? 0),
+        //   icon: Icons.shield_rounded,
+        //   color: const Color(0xFF6741D9),
+        // ),
+        // MetricCard(
+        //   title: StringUtils.translate('maintenance', context: context),
+        //   value: currencyFormat.format(state.stats?.maintenance ?? 0),
+        //   icon: Icons.build_circle_rounded,
+        //   color: const Color(0xFFE8590C),
+        // ),
+        // MetricCard(
+        //   title: StringUtils.translate('daily_rent', context: context),
+        //   value: currencyFormat.format(state.stats?.dailyRent ?? 0),
+        //   icon: Icons.today_rounded,
+        //   color: const Color(0xFF0C8599),
+        // ),
       ],
     );
   }
