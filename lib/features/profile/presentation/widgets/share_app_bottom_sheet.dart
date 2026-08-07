@@ -35,8 +35,7 @@ class ShareAppBottomSheet extends StatelessWidget {
         String appTagline = 'Manage Simply · Grow Rapidly',
         String shareLink = 'https://stayindia.in/partner',
         String shareMessage =
-        'I run my PG on Stay India Partner — bookings, beds, rent and '
-            'tenants in one place. Manage simply, grow rapidly:',
+        "Hi! I’ve been using Stay India Partner for my PG, and it's a game-changer. Get 100% verified tenants with lifetime free leads—no broker commissions! Easily manage beds, rent, and tenants all in one place.Download the app and grow your business rapidly:",
         String appIconAsset = 'assets/images/app_icon.png',
       }) {
     return showModalBottomSheet<void>(
