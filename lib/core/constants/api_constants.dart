@@ -151,6 +151,8 @@ class ApiConstants {
 
   static const String userHostels = '/users/hostels';
 
+  static const String partnerAppLink = "http://stayindia.in/partner";
+
   static String? getImageUrl(String? path) {
     if (path == null || path.isEmpty) {
       return null;

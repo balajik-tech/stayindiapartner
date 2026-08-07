@@ -19,6 +19,7 @@ import '../../../digilocker/presentation/pages/DigiLockerStorage.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/screens/payment_failed_screen.dart';
 import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
+import '../widgets/share_app_bottom_sheet.dart';
 import 'account_settings_page.dart';
 import 'help_support_page.dart';
 import 'subscription_page.dart';
@@ -413,7 +414,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           title: 'share_app'.tr(),
                           iconBgColor: const Color(0xFFF5F3FF),
                           iconColor: const Color(0xFF7C3AED),
-                          onTap: () {},
+                          onTap: () {
+                            ShareAppBottomSheet.show(
+                              context,
+                              shareLink: ApiConstants.partnerAppLink
+                            );
+                          },
                         ),
                       _ProfileCard(
                         icon: Icons.logout_rounded,
