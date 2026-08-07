@@ -15,4 +15,5 @@ abstract class ProfileRepository {
   });
   Future<ProfileEntity> uploadAvatar(File image);
   Future<void> deleteAccount();
+  Future<String> generateReferralId();
 }

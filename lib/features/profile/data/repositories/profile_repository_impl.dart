@@ -45,6 +45,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<void> deleteAccount() => remoteDataSource.deleteAccount();
 
+  @override
+  Future<String> generateReferralId() => remoteDataSource.generateReferralId();
+
   Future<File?> _compressImage(File file) async {
     try {
       final tempDir = await getTemporaryDirectory();

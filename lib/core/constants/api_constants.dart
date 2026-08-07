@@ -150,6 +150,7 @@ class ApiConstants {
   static const String userAcceptPolicy = '/users/accept-policy';
 
   static const String userHostels = '/users/hostels';
+  static const String generateReferral = '/referrals/generate';
 
   static const String partnerAppLink = "http://stayindia.in/partner";
 

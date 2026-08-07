@@ -48,3 +48,10 @@ class DeleteOwnerAccountUseCase {
 
   Future<void> call() => repository.deleteAccount();
 }
+
+class GenerateReferralUseCase {
+  final ProfileRepository repository;
+  GenerateReferralUseCase(this.repository);
+
+  Future<String> call() => repository.generateReferralId();
+}

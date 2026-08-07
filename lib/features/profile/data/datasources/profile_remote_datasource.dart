@@ -17,6 +17,7 @@ abstract class ProfileRemoteDataSource {
   });
   Future<ProfileModel> uploadAvatar(File image);
   Future<void> deleteAccount();
+  Future<String> generateReferralId();
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -103,5 +104,15 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     if (response.statusCode != 200) {
       throw Exception('Failed to delete account');
     }
+  }
+
+  @override
+  Future<String> generateReferralId() async {
+    final response = await dio.post(ApiConstants.generateReferral);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = response.data['data'] as Map<String, dynamic>;
+      return data['referralId'] as String;
+    }
+    throw Exception('Failed to generate referral ID');
   }
 }

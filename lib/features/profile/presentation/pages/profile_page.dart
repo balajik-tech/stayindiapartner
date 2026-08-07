@@ -336,12 +336,17 @@ class _ProfilePageState extends State<ProfilePage> {
                           title: 'refer_friend'.tr(),
                           iconBgColor: const Color(0xFFFCE7F3),
                           iconColor: const Color(0xFFDB2777),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ReferFriendPage(),
-                            ),
-                          ),
+                          onTap: () async {
+                            final referralId = await context.read<ProfileCubit>().generateReferral();
+                            if (context.mounted) {
+                              ShareAppBottomSheet.show(
+                                context,
+                                shareLink: referralId != null 
+                                    ? '${ApiConstants.partnerAppLink}?ref=$referralId'
+                                    : ApiConstants.partnerAppLink
+                              );
+                            }
+                          }
                         ),
                         _ProfileCard(
                           icon: Icons.star_rate_rounded,
@@ -414,11 +419,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           title: 'share_app'.tr(),
                           iconBgColor: const Color(0xFFF5F3FF),
                           iconColor: const Color(0xFF7C3AED),
-                          onTap: () {
-                            ShareAppBottomSheet.show(
-                              context,
-                              shareLink: ApiConstants.partnerAppLink
-                            );
+                          onTap: () async {
+                            final referralId = await context.read<ProfileCubit>().generateReferral();
+                            if (context.mounted) {
+                              ShareAppBottomSheet.show(
+                                context,
+                                shareLink: referralId != null 
+                                    ? '${ApiConstants.partnerAppLink}?ref=$referralId'
+                                    : ApiConstants.partnerAppLink
+                              );
+                            }
                           },
                         ),
                       _ProfileCard(
