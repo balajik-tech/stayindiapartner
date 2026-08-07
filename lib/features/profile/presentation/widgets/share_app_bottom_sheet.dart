@@ -127,7 +127,7 @@ class ShareAppBottomSheet extends StatelessWidget {
         children: [
           ClipRRect(
             child: Image.asset(
-              'assets/images/shareapp_logo.jpg',
+              'assets/images/logo.jpg',
               width: 48,
               height: 48,
             ),
