@@ -25,6 +25,8 @@ import 'package:stayindia_owner/features/communities/presentation/pages/owners_l
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
+import 'community_home_page.dart';
+
 class OwnersCommunityPage extends StatefulWidget {
   const OwnersCommunityPage({super.key});
 
@@ -478,6 +480,48 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     ],
                   ),
                 ),
+                SizedBox(width: 20.w),
+                // GestureDetector(
+                //   onTap: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (_) => const CommunityHomePage(),
+                //       ),
+                //     );
+                //   },
+                //   child: Column(
+                //     mainAxisSize: MainAxisSize.min,
+                //     children: [
+                //       Container(
+                //         width: 48.w,
+                //         height: 48.w,
+                //         decoration: BoxDecoration(
+                //           shape: BoxShape.circle,
+                //           border: Border.all(
+                //             color: AppColors.primaryBlue,
+                //             width: 2,
+                //           ),
+                //           color: Colors.white,
+                //         ),
+                //         child: Icon(
+                //           Icons.add,
+                //           color: AppColors.primaryBlue,
+                //           size: 24.sp,
+                //         ),
+                //       ),
+                //       SizedBox(height: 6.h),
+                //       Text(
+                //         'Associate'.tr(),
+                //         style: TextStyle(
+                //           fontSize: 13.sp,
+                //           fontWeight: FontWeight.w700,
+                //           color: AppColors.primaryBlue,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 SizedBox(width: 20.w),
                 ...communities.map((c) {
                   final isPending = c.isPendingJoin;

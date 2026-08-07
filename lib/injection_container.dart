@@ -38,6 +38,7 @@ import 'package:stayindia_owner/core/location/location_service.dart';
 
 import 'core/di/feature_di/digilocker_di.dart';
 import 'features/bank_account/bank_account_injection_container.dart';
+import 'features/communities/associate_injection_container.dart';
 
 final sl = GetIt.instance;
 
@@ -64,6 +65,8 @@ Future<void> init() async {
   // Register DigiLocker dependencies
   DigiLockerDI.init(sl);
   registerBankAccountFeature(sl);
+
+  registerAssociateHomeDataFeature(sl);
 
   sl.registerLazySingleton(() => ThemeCubit());
   sl.registerLazySingleton(() => GuestSessionCubit());

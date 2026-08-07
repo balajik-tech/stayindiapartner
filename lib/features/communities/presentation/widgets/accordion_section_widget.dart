@@ -1,0 +1,129 @@
+import 'package:flutter/material.dart';
+
+import '../../domain/entities/community_theme_entity.dart';
+import 'hex_color.dart';
+
+/// Generic collapsible section matching the "home icon | title+subtitle |
+/// count badge | chevron" header seen across all three sections in the
+/// screenshots.
+class AccordionSectionWidget extends StatelessWidget {
+  final CommunityThemeEntity theme;
+  final String title;
+  final String subtitle;
+  final int count;
+  final bool isExpanded;
+  final VoidCallback onToggle;
+  final List<Widget> children;
+  final Widget? footer;
+
+  const AccordionSectionWidget({
+    super.key,
+    required this.theme,
+    required this.title,
+    required this.subtitle,
+    required this.count,
+    required this.isExpanded,
+    required this.onToggle,
+    required this.children,
+    this.footer,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = theme.accentColor.toColor();
+    final primary = theme.primaryColor.toColor();
+    final textSecondary = theme.textSecondary.toColor();
+    final cardColor = theme.cardColor.toColor();
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          InkWell(
+            onTap: onToggle,
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: accent.withValues(alpha: 0.15),
+                    child: Icon(Icons.home_outlined, color: accent, size: 18),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 19,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            subtitle,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: textSecondary, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(Icons.keyboard_arrow_down, color: textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            child: isExpanded
+                ? Column(
+              children: [
+                const Divider(height: 1),
+                ...children,
+                if (footer != null) footer!,
+              ],
+            )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+}
