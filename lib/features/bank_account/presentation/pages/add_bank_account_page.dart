@@ -190,7 +190,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
       body: SafeArea(
         child: BlocConsumer<AddBankAccountCubit, AddBankAccountState>(
           listener: (context, state) {
-            if (state.submitError != null) {
+            if (state.submitError != null && !_confirmDialogShown) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.submitError!)),
               );
@@ -235,6 +235,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
             if (state.isSuccess && !state.isSubmitting && mounted) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
+                  if (_confirmDialogShown) {
+                    Navigator.of(context).pop();
+                  }
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Bank account added successfully.')),
                   );
@@ -248,392 +251,405 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
             final bool canProceedToVerification = !state.isVerifying && _isFormValid && state.panVerifySuccess && namesMatch;
             final String nameMismatchError = _panAndBankHolderNameError(state);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            return Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.close,color: Colors.black),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text('Add Bank Account',
-                                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,color: Colors.black)),
-                            Text('Step 1 of 2 · Account details',
-                                style: TextStyle(fontSize: 13,  color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: LinearProgressIndicator(
-                    value: 0,
-                    minHeight: 1,
-                    backgroundColor: Color(0xFFEDEEF1),
-                    color: Color(0xFF2E5AF5),
-                  ),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                    children: [
-                      _FieldLabel('Account Number'),
-                      TextField(
-                        controller: _accountNumberController,
-                        keyboardType: TextInputType.number,
-                        decoration: _inputDecoration(),
-                        onChanged: (_) => setState(() {}),
-                          style:  GoogleFonts.inter(
-                            color: Colors.black,
-                          ),
-                      ),
-                      const SizedBox(height: 16),
-                      _FieldLabel('Confirm Account Number'),
-                      TextField(
-                        controller: _confirmAccountNumberController,
-                        keyboardType: TextInputType.number,
-                        decoration: _inputDecoration(),
-                        onChanged: (_) => setState(() {}),
-                        style:  GoogleFonts.inter(
-                          color: Colors.black,
-                        ),
-                      ),
-                      if (_confirmAccountNumberController.text.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Icon(
-                              _numbersMatch ? Icons.check_circle : Icons.error_outline,
-                              size: 16,
-                              color: _numbersMatch ? const Color(0xFF1E8E42) : Colors.redAccent,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _numbersMatch ? 'Numbers match' : 'Numbers do not match',
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                color: _numbersMatch ? const Color(0xFF1E8E42) : Colors.redAccent,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      _FieldLabel('IFSC Code'),
-                      TextField(
-                        controller: _ifscController,
-                        textCapitalization: TextCapitalization.characters,
-                        maxLength: 11,
-                        decoration: _inputDecoration().copyWith(counterText: ''),
-                        onChanged: (_) => setState(() {}),
-                        style:  GoogleFonts.inter(
-                          color: Colors.black,
-                        ),
-                      ),
-                      if (state.isLookupLoading) ...[
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Looking up IFSC branch details…',
-                              style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
-                            ),
-                          ],
-                        ),
-                      ],
-                      if (state.lookupError != null && _ifscController.text.trim().length == 11) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          state.lookupError!,
-                          style:  GoogleFonts.inter(fontSize: 12.5, color: Colors.redAccent),
-                        ),
-                      ],
-                      if (state.ifscLookupDetails != null && state.ifscLookupDetails!.displayLabel.trim().isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5F7FF),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFD9E1FF)),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF2E5AF5)),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  state.ifscLookupDetails!.displayLabel,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12.5,
-                                    color: Color(0xFF293645),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      _FieldLabel('PAN Number'),
-                      Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                      child: Row(
                         children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _panController,
-                              textCapitalization: TextCapitalization.characters,
-                              maxLength: 10,
-                              decoration: _inputDecoration().copyWith(
-                                counterText: '',
-                                hintText: '',
-                                hintStyle: GoogleFonts.inter(
-                                  fontSize: 12.5,
-                                  color: const Color(0xFF6B7280),
-                                ),
-                              ),
-                              onChanged: (_) => setState(() {}),
-                              style: GoogleFonts.inter(
-                                color: Colors.black,
-                              ),
-                            ),
+                          IconButton(
+                            onPressed: (state.isSubmitting || state.isVerifying) ? null : () => Navigator.of(context).maybePop(),
+                            icon: const Icon(Icons.close,color: Colors.black),
                           ),
-                          const SizedBox(width: 12),
-                          SizedBox(
-                            height: 52,
-                            child: ElevatedButton(
-                              onPressed: (!state.isVerifyingPan && _isPanValid)
-                                  ? () => (state.panVerifySuccess)? null: _verifyPan(context)
-                                  : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: state.panVerifySuccess
-                                    ? const Color(0xFF1E8E42)
-                                    : Colors.white,
-                                foregroundColor: state.panVerifySuccess
-                                    ? Colors.white
-                                    : Colors.black,
-                                elevation: 0,
-                                side: BorderSide(
-                                  color: _isPanValid
-                                      ? Colors.grey.shade300
-                                      : Colors.grey.shade200,
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: state.isVerifyingPan
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.black,
-                                      ),
-                                    )
-                                  : state.panVerifySuccess
-                                      ? const Icon(Icons.check, size: 20)
-                                      : Text(
-                                          'Verify',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
-                                            color: _isPanValid
-                                                ? Colors.black
-                                                : Colors.grey.shade500,
-                                          ),
-                                        ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text('Add Bank Account',
+                                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,color: Colors.black)),
+                                Text('Step 1 of 2 · Account details',
+                                    style: TextStyle(fontSize: 13,  color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700)),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _panFieldHintText(state),
-                        style: GoogleFonts.inter(
-                          fontSize: 12.5,
-                          color: state.panVerifySuccess && state.panVerificationResult != null
-                              ? const Color(0xFF1E8E42)
-                              : _panController.text.trim().isNotEmpty && !_isPanValid
-                                  ? Colors.redAccent
-                                  : state.panVerifyError != null
-                                      ? Colors.redAccent
-                                      : const Color(0xFF6B7280),
-                          fontWeight: state.panVerifySuccess && state.panVerificationResult != null
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                        ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: LinearProgressIndicator(
+                        value: 0,
+                        minHeight: 1,
+                        backgroundColor: Color(0xFFEDEEF1),
+                        color: Color(0xFF2E5AF5),
                       ),
-                      if (state.panVerifySuccess && state.panVerificationResult != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE6F4EA),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFF1E8E42)),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                        children: [
+                          _FieldLabel('Account Number'),
+                          TextField(
+                            controller: _accountNumberController,
+                            keyboardType: TextInputType.number,
+                            decoration: _inputDecoration(),
+                            onChanged: (_) => setState(() {}),
+                              style:  GoogleFonts.inter(
+                                color: Colors.black,
+                              ),
                           ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.check_circle, size: 16, color: Color(0xFF1E8E42)),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'PAN Verified: ${state.panVerificationResult!.fullname}',
+                          const SizedBox(height: 16),
+                          _FieldLabel('Confirm Account Number'),
+                          TextField(
+                            controller: _confirmAccountNumberController,
+                            keyboardType: TextInputType.number,
+                            decoration: _inputDecoration(),
+                            onChanged: (_) => setState(() {}),
+                            style:  GoogleFonts.inter(
+                              color: Colors.black,
+                            ),
+                          ),
+                          if (_confirmAccountNumberController.text.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(
+                                  _numbersMatch ? Icons.check_circle : Icons.error_outline,
+                                  size: 16,
+                                  color: _numbersMatch ? const Color(0xFF1E8E42) : Colors.redAccent,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  _numbersMatch ? 'Numbers match' : 'Numbers do not match',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    color: _numbersMatch ? const Color(0xFF1E8E42) : Colors.redAccent,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+                          _FieldLabel('IFSC Code'),
+                          TextField(
+                            controller: _ifscController,
+                            textCapitalization: TextCapitalization.characters,
+                            maxLength: 11,
+                            decoration: _inputDecoration().copyWith(counterText: ''),
+                            onChanged: (_) => setState(() {}),
+                            style:  GoogleFonts.inter(
+                              color: Colors.black,
+                            ),
+                          ),
+                          if (state.isLookupLoading) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Looking up IFSC branch details…',
+                                  style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (state.lookupError != null && _ifscController.text.trim().length == 11) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              state.lookupError!,
+                              style:  GoogleFonts.inter(fontSize: 12.5, color: Colors.redAccent),
+                            ),
+                          ],
+                          if (state.ifscLookupDetails != null && state.ifscLookupDetails!.displayLabel.trim().isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F7FF),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: const Color(0xFFD9E1FF)),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF2E5AF5)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      state.ifscLookupDetails!.displayLabel,
                                       style: GoogleFonts.inter(
                                         fontSize: 12.5,
-                                        color: Color(0xFF1E8E42),
+                                        color: Color(0xFF293645),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Status: ${state.panVerificationResult!.panStatus}',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11.5,
-                                        color: Color(0xFF1E8E42),
-                                      ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+                          _FieldLabel('PAN Number'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _panController,
+                                  textCapitalization: TextCapitalization.characters,
+                                  maxLength: 10,
+                                  decoration: _inputDecoration().copyWith(
+                                    counterText: '',
+                                    hintText: '',
+                                    hintStyle: GoogleFonts.inter(
+                                      fontSize: 12.5,
+                                      color: const Color(0xFF6B7280),
                                     ),
-                                  ],
+                                  ),
+                                  onChanged: (_) => setState(() {}),
+                                  style: GoogleFonts.inter(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              SizedBox(
+                                height: 52,
+                                child: ElevatedButton(
+                                  onPressed: (!state.isVerifyingPan && _isPanValid)
+                                      ? () => (state.panVerifySuccess)? null: _verifyPan(context)
+                                      : null,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: state.panVerifySuccess
+                                        ? const Color(0xFF1E8E42)
+                                        : Colors.white,
+                                    foregroundColor: state.panVerifySuccess
+                                        ? Colors.white
+                                        : Colors.black,
+                                    elevation: 0,
+                                    side: BorderSide(
+                                      color: _isPanValid
+                                          ? Colors.grey.shade300
+                                          : Colors.grey.shade200,
+                                      width: 1.5,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: state.isVerifyingPan
+                                      ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.black,
+                                          ),
+                                        )
+                                      : state.panVerifySuccess
+                                          ? const Icon(Icons.check, size: 20)
+                                          : Text(
+                                              'Verify',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                color: _isPanValid
+                                                    ? Colors.black
+                                                    : Colors.grey.shade500,
+                                              ),
+                                            ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      // _FieldLabel('Account holder name'),
-                      // TextField(
-                      //   controller: _holderNameController,
-                      //   decoration: _inputDecoration(),
-                      // ),
-                      // const Padding(
-                      //   padding: EdgeInsets.only(top: 8),
-                      //   child: Text(
-                      //     'Must match the name on your PAN. Mismatches fail verification.',
-                      //     style: TextStyle(fontSize: 12.5, color: Color(0xFF565656)),
-                      //   ),
-                      // ),
-                      const SizedBox(height: 16),
-                      _FieldLabel('Account Type'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _AccountTypeChip(
-                              label: 'Savings',
-                              selected: _accountType == BankAccountType.savings,
-                              onTap: () => setState(() => _accountType = BankAccountType.savings),
+                          const SizedBox(height: 8),
+                          Text(
+                            _panFieldHintText(state),
+                            style: GoogleFonts.inter(
+                              fontSize: 12.5,
+                              color: state.panVerifySuccess && state.panVerificationResult != null
+                                  ? const Color(0xFF1E8E42)
+                                  : _panController.text.trim().isNotEmpty && !_isPanValid
+                                      ? Colors.redAccent
+                                      : state.panVerifyError != null
+                                          ? Colors.redAccent
+                                          : const Color(0xFF6B7280),
+                              fontWeight: state.panVerifySuccess && state.panVerificationResult != null
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _AccountTypeChip(
-                              label: 'Current',
-                              selected: _accountType == BankAccountType.current,
-                              onTap: () => setState(() => _accountType = BankAccountType.current),
+                          if (state.panVerifySuccess && state.panVerificationResult != null) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE6F4EA),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: const Color(0xFF1E8E42)),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.check_circle, size: 16, color: Color(0xFF1E8E42)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'PAN Verified: ${state.panVerificationResult!.fullname}',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.5,
+                                            color: Color(0xFF1E8E42),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Status: ${state.panVerificationResult!.panStatus}',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11.5,
+                                            color: Color(0xFF1E8E42),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+                          // _FieldLabel('Account holder name'),
+                          // TextField(
+                          //   controller: _holderNameController,
+                          //   decoration: _inputDecoration(),
+                          // ),
+                          // const Padding(
+                          //   padding: EdgeInsets.only(top: 8),
+                          //   child: Text(
+                          //     'Must match the name on your PAN. Mismatches fail verification.',
+                          //     style: TextStyle(fontSize: 12.5, color: Color(0xFF565656)),
+                          //   ),
+                          // ),
+                          const SizedBox(height: 16),
+                          _FieldLabel('Account Type'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _AccountTypeChip(
+                                  label: 'Savings',
+                                  selected: _accountType == BankAccountType.savings,
+                                  onTap: () => setState(() => _accountType = BankAccountType.savings),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _AccountTypeChip(
+                                  label: 'Current',
+                                  selected: _accountType == BankAccountType.current,
+                                  onTap: () => setState(() => _accountType = BankAccountType.current),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFfcfdfb),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.shield_outlined, size: 18, color: Color(0xFF6B7280)),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'No documents needed. We verify by depositing ₹1 and matching the name your bank returns.',
+                                    style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFfcfdfb),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.shield_outlined, size: 18, color: Color(0xFF6B7280)),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'No documents needed. We verify by depositing ₹1 and matching the name your bank returns.',
-                                style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
-                              ),
-                            ),
-                          ],
+                    ),
+                    const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                    const SizedBox(height: 16),
+                    if (nameMismatchError.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: Text(
+                          nameMismatchError,
+                          style: GoogleFonts.inter(
+                            fontSize: 12.5,
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                const SizedBox(height: 16),
-                if (nameMismatchError.isNotEmpty) ...[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                    child: Text(
-                      nameMismatchError,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.5,
-                        color: Colors.redAccent,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: ElevatedButton(
-                    onPressed: (!state.isVerifying && _isFormValid  && state.panVerifySuccess)
-                        ? () => _verify(context)
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 52),
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      elevation: 0,
-                      side: BorderSide(
-                        color: (!state.isVerifying && _isFormValid  && state.panVerifySuccess) ? Colors.grey.shade300 : Colors.grey.shade200,
-                        width: 1.5,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: state.isVerifying
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.black,
-                            ),
-                          )
-                        : Text(
-                            'Continue',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
-                              color: (!state.isVerifying && _isFormValid  && state.panVerifySuccess) ? Colors.black : Colors.grey.shade500,
-                            ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: ElevatedButton(
+                        onPressed: (!state.isVerifying && _isFormValid  && state.panVerifySuccess)
+                            ? () => _verify(context)
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 52),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          elevation: 0,
+                          side: BorderSide(
+                            color: (!state.isVerifying && _isFormValid  && state.panVerifySuccess) ? Colors.grey.shade300 : Colors.grey.shade200,
+                            width: 1.5,
                           ),
-                  ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: state.isVerifying
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.black,
+                                ),
+                              )
+                            : Text(
+                                'Continue',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                  color: (!state.isVerifying && _isFormValid  && state.panVerifySuccess) ? Colors.black : Colors.grey.shade500,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
+                if (state.isSubmitting || state.isVerifying)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.05),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
               ],
             );
           },
@@ -675,7 +691,13 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
       branchName: result.branchName,
       accountTypeLabel: accountTypeLabel,
       onConfirm: () => _submit(context),
-    );
+    ).then((_) {
+      if (mounted) {
+        setState(() {
+          _confirmDialogShown = false;
+        });
+      }
+    });
   }
 
   /// Static preview dialog — for design/QA checking only, not wired to
@@ -693,7 +715,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   //   );
   // }
 
-  void _showConfirmBankAccountDialogRaw(
+  Future<void> _showConfirmBankAccountDialogRaw(
       BuildContext context, {
         required String holderName,
         required String accountNumber,
@@ -702,172 +724,218 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
         required String accountTypeLabel,
         required VoidCallback onConfirm,
       }) {
-    showDialog(
+    return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return Dialog(
-          backgroundColor: Colors.white,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return BlocProvider.value(
+          value: context.read<AddBankAccountCubit>(),
+          child: BlocBuilder<AddBankAccountCubit, AddBankAccountState>(
+            builder: (context, state) {
+              return Dialog(
+                backgroundColor: Colors.white,
+                insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Stack(
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Confirm Bank Account',
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Confirm Bank Account',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: state.isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                                borderRadius: BorderRadius.circular(20),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: Icon(Icons.close, color: Colors.black87, size: 22),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Step 2 of 2 · Verification Complete',
+                            style: GoogleFonts.inter(
+                              fontSize: 13.5,
+                              color: const Color(0xFF6B7280),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE6F4EA),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 1),
+                                  child: Icon(Icons.check_circle, size: 18, color: Color(0xFF1E8E42)),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Name matched with bank records',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1E8E42),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFFE5E7EB)),
+                            ),
+                            child: Column(
+                              children: [
+                                _DetailRow(
+                                  label: 'Account Holder Name',
+                                  value: holderName,
+                                ),
+                                _DetailRow(
+                                  label: 'Account Number',
+                                  value: accountNumber,
+                                  monospace: true,
+                                ),
+                                _DetailRow(
+                                  label: 'Bank Name',
+                                  value: bankName,
+                                ),
+                                _DetailRow(
+                                  label: 'Branch',
+                                  value: branchName,
+                                  showDivider: false,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.info_outline, size: 16, color: Color(0xFF6B7280)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Rentals will be sent to this account',
+                                  style:  GoogleFonts.inter(
+                                    fontSize: 13,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: state.isSubmitting ? null : onConfirm,
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 52),
+                                backgroundColor: const Color(0xFF4C6EF5),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: state.isSubmitting
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Confirm and Add Account',
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          if (state.submitError != null) ...[
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                state.submitError!,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.5,
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 4),
+                          Center(
+                            child: TextButton(
+                              onPressed: state.isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                              child:  Text(
+                                'Cancel',
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    InkWell(
-                      onTap: () => Navigator.of(dialogContext).pop(),
-                      borderRadius: BorderRadius.circular(20),
-                      child: const Padding(
-                        padding: EdgeInsets.all(4),
-                        child: Icon(Icons.close, color: Colors.black87, size: 22),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Step 2 of 2 · Verification Complete',
-                  style: GoogleFonts.inter(
-                    fontSize: 13.5,
-                    color: const Color(0xFF6B7280),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE6F4EA),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 1),
-                        child: Icon(Icons.check_circle, size: 18, color: Color(0xFF1E8E42)),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Name matched with bank records',
-                          style: GoogleFonts.inter(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1E8E42),
+                    if (state.isSubmitting)
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF4C6EF5),
+                            ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
-                  ),
-                  child: Column(
-                    children: [
-                      _DetailRow(
-                        label: 'Account Holder Name',
-                        value: holderName,
-                      ),
-                      _DetailRow(
-                        label: 'Account Number',
-                        value: accountNumber,
-                        monospace: true,
-                      ),
-                      _DetailRow(
-                        label: 'Bank Name',
-                        value: bankName,
-                      ),
-                      _DetailRow(
-                        label: 'Branch',
-                        value: branchName,
-                        showDivider: false,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.info_outline, size: 16, color: Color(0xFF6B7280)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Rentals will be sent to this account',
-                        style:  GoogleFonts.inter(
-                          fontSize: 13,
-                          color: Color(0xFF6B7280),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                      onConfirm();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 52),
-                      backgroundColor: const Color(0xFF4C6EF5),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child:  Text(
-                      'Confirm and Add Account',
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Center(
-                  child: TextButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                    child:  Text(
-                      'Cancel',
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
         );
       },
