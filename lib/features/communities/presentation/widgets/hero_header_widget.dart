@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
@@ -31,8 +32,8 @@ class HeroHeaderWidget extends StatelessWidget {
               _iconButton(Icons.phone, accent),
               const SizedBox(width: 10),
               _iconButton(Icons.campaign_outlined, accent),
-              const SizedBox(width: 10),
-              _iconButton(Icons.wb_sunny_outlined, accent),
+              // const SizedBox(width: 10),
+              // _iconButton(Icons.wb_sunny_outlined, accent),
             ],
           ),
           const SizedBox(height: 12),
@@ -40,7 +41,7 @@ class HeroHeaderWidget extends StatelessWidget {
             children: [
               Text(
                 'TAMIL NADU',
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   color: accent,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 3,
@@ -59,9 +60,9 @@ class HeroHeaderWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                     Text(
                       'IT Hostels & PG Owners',
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 30,
                         fontWeight: FontWeight.w600,
@@ -70,7 +71,7 @@ class HeroHeaderWidget extends StatelessWidget {
                     ),
                     Text(
                       'Welfare Association',
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         color: accent,
                         fontSize: 30,
                         fontWeight: FontWeight.w600,
@@ -85,9 +86,9 @@ class HeroHeaderWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
+           Text(
             'United for the welfare of hostel & PG owners across Tamil Nadu',
-            style: TextStyle(color: Colors.white70, fontSize: 15, height: 1.4),
+            style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.4),
           ),
           const SizedBox(height: 20),
           Wrap(
@@ -156,7 +157,7 @@ class _PillButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ),
-      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+      child: Text(label, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
     );
   }
 }

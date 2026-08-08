@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/it_wing_member_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
@@ -42,10 +43,10 @@ class ItWingMemberTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(member.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                    Text(member.name, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600,
                     color: textPrimary)),
                     const SizedBox(height: 3),
-                    Text(member.role, style: TextStyle(fontSize: 12.5, color: textSecondary)),
+                    Text(member.role, style: GoogleFonts.inter(fontSize: 12.5, color: textSecondary)),
                   ],
                 ),
               ),
@@ -58,7 +59,7 @@ class ItWingMemberTile extends StatelessWidget {
                 ),
                 child: Text(
                   'ID ${member.id}',
-                  style: TextStyle(fontSize: 11.5, color: badgeText, fontFamily: 'monospace'),
+                  style: GoogleFonts.inter(fontSize: 11.5, color: badgeText,),
                 ),
               ),
             ],

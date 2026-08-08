@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
@@ -24,7 +25,7 @@ class MembershipCardWidget extends StatelessWidget {
         children: [
           Text(
             'MEMBERSHIP',
-            style: TextStyle(
+            style: GoogleFonts.inter(
               color: accent,
               fontWeight: FontWeight.w600,
               letterSpacing: 2.5,
@@ -32,14 +33,14 @@ class MembershipCardWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Join the Welfare Association',
-            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
+            style:  GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Register as a hostel & PG owner member — receive your membership ID and annual benefits across Tamil Nadu.',
-            style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
+            style:  GoogleFonts.inter(color: Colors.white70, fontSize: 14, height: 1.4),
           ),
           const SizedBox(height: 20),
           Row(
@@ -48,7 +49,7 @@ class MembershipCardWidget extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {},
                   icon: Icon(Icons.person_outline, color: primary),
-                  label: Text('Join now', style: TextStyle(color: primary, fontWeight: FontWeight.w600)),
+                  label: Text('Join now', style:  GoogleFonts.inter(color: primary, fontWeight: FontWeight.w600)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -61,7 +62,7 @@ class MembershipCardWidget extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () {},
                   icon: Icon(Icons.credit_card, color: accent, size: 18),
-                  label: Text('Pay membership', style: TextStyle(color: accent, fontWeight: FontWeight.w600)),
+                  label: Text('Pay membership', style:  GoogleFonts.inter(color: accent, fontWeight: FontWeight.w600)),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: accent.withValues(alpha: 0.5)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -74,20 +75,20 @@ class MembershipCardWidget extends StatelessWidget {
           const SizedBox(height: 20),
           const _DashedDivider(),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Questions before you join?',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
+            style:  GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Talk to the membership desk about eligibility, fees or documents.',
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+            style:  GoogleFonts.inter(color: Colors.white70, fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 14),
           OutlinedButton.icon(
             onPressed: () {},
             icon: Icon(Icons.phone, color: accent, size: 16),
-            label: Text('Call +91 98400 12345', style: TextStyle(color: accent, fontWeight: FontWeight.w600)),
+            label: Text('Call +91 98400 12345', style:  GoogleFonts.inter(color: accent, fontWeight: FontWeight.w600)),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: accent.withValues(alpha: 0.5)),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),

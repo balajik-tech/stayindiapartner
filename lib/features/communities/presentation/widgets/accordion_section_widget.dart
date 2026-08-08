@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
@@ -70,7 +71,7 @@ class AccordionSectionWidget extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
+                          style:  GoogleFonts.inter(
                             color: primary,
                             fontSize: 19,
                             fontWeight: FontWeight.w600,
@@ -81,7 +82,7 @@ class AccordionSectionWidget extends StatelessWidget {
                           child: Text(
                             subtitle,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: textSecondary, fontSize: 13),
+                            style:  GoogleFonts.inter(color: textSecondary, fontSize: 13),
                           ),
                         ),
                       ],
@@ -96,7 +97,7 @@ class AccordionSectionWidget extends StatelessWidget {
                     ),
                     child: Text(
                       '$count',
-                      style: TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 13),
+                      style:  GoogleFonts.inter(color: primary, fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),
                   const SizedBox(width: 8),

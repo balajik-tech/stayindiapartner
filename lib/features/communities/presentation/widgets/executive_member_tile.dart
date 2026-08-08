@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/executive_member_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
@@ -46,16 +47,21 @@ class ExecutiveMemberTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(member.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                      Text(member.name, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600,
                       color: textPrimary)),
                       const SizedBox(height: 4),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(Icons.circle, size: 6, color: accent),
-                          const SizedBox(width: 6),
-                          Text(
-                            member.zone,
-                            style: TextStyle(fontSize: 13, color: accent, fontWeight: FontWeight.w500),
+                          Row(
+                            children: [
+                              Icon(Icons.circle, size: 6, color: accent),
+                              const SizedBox(width: 6),
+                              Text(
+                                member.zone,
+                                style: GoogleFonts.inter(fontSize: 13, color: accent, fontWeight: FontWeight.w500),
+                              )
+                            ],
                           ),
                           const SizedBox(width: 8),
                           Container(
@@ -67,7 +73,7 @@ class ExecutiveMemberTile extends StatelessWidget {
                             ),
                             child: Text(
                               'ID ${member.id}',
-                              style: TextStyle(fontSize: 10.5, color: badgeText, fontFamily: 'monospace'),
+                              style: GoogleFonts.inter(fontSize: 10.5, color: badgeText),
                             ),
                           ),
                         ],

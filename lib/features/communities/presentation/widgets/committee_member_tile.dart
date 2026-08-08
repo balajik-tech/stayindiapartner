@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/associate_member_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
@@ -45,14 +46,14 @@ class CommitteeMemberTile extends StatelessWidget {
                   children: [
                     Text(
                       member.name,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary),
+                      style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       member.position,
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 12.5,
-                        fontWeight: member.isHighlighted ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: member.isHighlighted ? FontWeight.w500 : FontWeight.w500,
                         color: member.isHighlighted ? primary : textSecondary,
                         letterSpacing: 0.3,
                       ),
@@ -69,7 +70,7 @@ class CommitteeMemberTile extends StatelessWidget {
                 ),
                 child: Text(
                   'ID ${member.id}',
-                  style: TextStyle(fontSize: 11.5, color: badgeText, fontFamily: 'monospace'),
+                  style: GoogleFonts.inter(fontSize: 11, color: badgeText),
                 ),
               ),
             ],

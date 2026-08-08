@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../injection_container.dart';
 
 import '../cubit/associate_home_cubit.dart';
@@ -86,20 +87,20 @@ class _CommunityHomeView extends StatelessWidget {
                     count: loaded.executiveMembers.length,
                     isExpanded: loaded.expandedSections.contains(AccordionSection.executiveMembers),
                     onToggle: () => cubit.toggleSection(AccordionSection.executiveMembers),
-                    footer: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 14),
+                    footer: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       child: Text(
                         'Tap a member to open their zone & core members.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                       ),
                     ),
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(18, 12, 18, 4),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
                         child: Text(
                           'Tap a member to open their zone & core members.',
-                          style: TextStyle(fontSize: 12.5, color: Colors.grey),
+                          style: GoogleFonts.inter(fontSize: 12.5, color: Colors.grey),
                         ),
                       ),
                       for (var i = 0; i < loaded.executiveMembers.length; i++)
@@ -131,12 +132,12 @@ class _CommunityHomeView extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 16),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
                       '——  Office Bearers & Members Directory  ——',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                     ),
                   ),
                   const SizedBox(height: 24),
