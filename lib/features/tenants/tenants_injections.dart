@@ -2,6 +2,9 @@ import 'package:get_it/get_it.dart';
 import 'package:stayindia_owner/features/tenants/data/datasources/tenant_remote_datasource.dart';
 import 'package:stayindia_owner/features/tenants/data/repositories/tenant_repository_impl.dart';
 import 'package:stayindia_owner/features/tenants/domain/repositories/tenant_repository.dart';
+import 'package:stayindia_owner/features/tenants/data/datasources/complaints_remote_datasource.dart';
+import 'package:stayindia_owner/features/tenants/data/repositories/complaints_repository_impl.dart';
+import 'package:stayindia_owner/features/tenants/domain/repositories/complaints_repository.dart';
 import 'package:stayindia_owner/features/tenants/domain/usecases/tenant_usecases.dart';
 import 'package:stayindia_owner/features/tenants/domain/usecases/complaint_usecases.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_cubit.dart';
@@ -37,5 +40,13 @@ void registerTenantsFeature(GetIt sl) {
 
   sl.registerLazySingleton<TenantRemoteDataSource>(
     () => TenantRemoteDataSourceImpl(dio: sl()),
+  );
+
+  sl.registerLazySingleton<ComplaintsRepository>(
+    () => ComplaintsRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  sl.registerLazySingleton<ComplaintsRemoteDataSource>(
+    () => ComplaintsRemoteDataSourceImpl(dio: sl()),
   );
 }
