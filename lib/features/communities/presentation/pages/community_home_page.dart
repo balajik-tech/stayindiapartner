@@ -12,8 +12,8 @@ import '../widgets/executive_member_tile.dart';
 import '../widgets/it_wing_member_tile.dart';
 import '../widgets/hex_color.dart';
 
-class CommunityHomePage extends StatelessWidget {
-  const CommunityHomePage({super.key});
+class AssociateHomePage extends StatelessWidget {
+  const AssociateHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {

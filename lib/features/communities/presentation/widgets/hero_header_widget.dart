@@ -121,15 +121,23 @@ class _LogoBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 92,
-      height: 92,
+      width: 120,
+      height: 120,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: accent, width: 2),
+        border: Border.all(
+          color: accent,
+          width: 2,
+        ),
         color: Colors.white,
       ),
       alignment: Alignment.center,
-      child: Icon(Icons.home_work_outlined, color: accent, size: 32),
+      child: Image.asset(
+        'assets/images/associate_logo.png',
+        width: 92,
+        height: 92,
+        fit: BoxFit.fill,
+      ),
     );
   }
 }

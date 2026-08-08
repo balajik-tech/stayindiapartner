@@ -96,17 +96,17 @@ class AssociateStaticDataSource implements AssociateDataSource {
   @override
   Future<AssociateCommunityThemeModel> getCommunityTheme() async {
     return const AssociateCommunityThemeModel(
-      primaryColor: '#16305A',
-      primaryColorLight: '#1E4976',
-      accentColor: '#9CCB6B',
-      backgroundColor: '#EEF1F6',
-      cardColor: '#FFFFFF',
+      primaryColor: '#16305A', // top card & membership card & card title & count in card color change
+      primaryColorLight: '#1E4976', // gradient background color for top card
+      accentColor: '#6FA641', // tamil nadu text color
+      backgroundColor: '#EEF1F6', // background color
+      cardColor: '#FFFFFF',  // accordion card color
       textOnPrimary: '#FFFFFF',
-      textPrimary: '#1A1A1A',
-      textSecondary: '#6B7280',
-      badgeBackground: '#E7F0DD',
-      badgeBorder: '#9CCB6B',
-      badgeText: '#3E7A34',
+      textPrimary: '#1A1A1A', // card each user name color
+      textSecondary: '#6B7280', // subtext inside card under sub header & each user (State Vice President
+      badgeBackground: '#E7F0DD',//badge background color
+      badgeBorder: '#9CCB6B', //badge border
+      badgeText: '#3E7A34', //badge background color
     );
   }
 }

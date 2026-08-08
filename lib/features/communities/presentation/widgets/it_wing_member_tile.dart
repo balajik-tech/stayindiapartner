@@ -23,6 +23,7 @@ class ItWingMemberTile extends StatelessWidget {
     final badgeBorder = theme.badgeBorder.toColor();
     final badgeText = theme.badgeText.toColor();
     final accent = theme.accentColor.toColor();
+    final textPrimary = theme.textPrimary.toColor();
 
     return Column(
       children: [
@@ -41,7 +42,8 @@ class ItWingMemberTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(member.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    Text(member.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                    color: textPrimary)),
                     const SizedBox(height: 3),
                     Text(member.role, style: TextStyle(fontSize: 12.5, color: textSecondary)),
                   ],

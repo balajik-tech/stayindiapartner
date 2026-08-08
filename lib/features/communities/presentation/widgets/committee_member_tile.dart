@@ -24,6 +24,7 @@ class CommitteeMemberTile extends StatelessWidget {
     final badgeBorder = theme.badgeBorder.toColor();
     final badgeText = theme.badgeText.toColor();
     final accent = theme.accentColor.toColor();
+    final textPrimary = theme.textPrimary.toColor();
 
     return Column(
       children: [
@@ -44,7 +45,7 @@ class CommitteeMemberTile extends StatelessWidget {
                   children: [
                     Text(
                       member.name,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary),
                     ),
                     const SizedBox(height: 3),
                     Text(
