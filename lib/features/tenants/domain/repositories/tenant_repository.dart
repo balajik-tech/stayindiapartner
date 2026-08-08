@@ -27,6 +27,7 @@ abstract class TenantRepository {
     String? bookingType,
     String? maintenance,
     String? roomType,
-    String? endDate
+    String? endDate,
+    String? email
   });
 }

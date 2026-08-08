@@ -402,6 +402,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       firstName: firstName,
       lastName: lastName,
       sharingType: _selectedRoom!.sharingType,
+      email: _emailController.text.trim(),
 
       userPhotoPath: _userPhoto?.path,
       aadharPhotoPath: _aadharPhoto?.path,

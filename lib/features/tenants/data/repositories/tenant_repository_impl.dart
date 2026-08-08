@@ -45,7 +45,8 @@ class TenantRepositoryImpl implements TenantRepository {
     String? bookingType,
     String? maintenance,
     String? roomType,
-    String? endDate
+    String? endDate,
+    String? email
   }) => remote.addManualTenant(
     phone: phone,
     hostelId: hostelId,
@@ -62,6 +63,7 @@ class TenantRepositoryImpl implements TenantRepository {
     bookingType:bookingType,
     maintenance:maintenance,
     roomType:roomType,
-    endDate:endDate
+    endDate:endDate,
+    email:email
   );
 }

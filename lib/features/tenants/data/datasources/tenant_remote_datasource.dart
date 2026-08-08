@@ -31,7 +31,8 @@ abstract class TenantRemoteDataSource {
     String? bookingType,
     String? maintenance,
     String? roomType,
-    String? endDate
+    String? endDate,
+    String? email
   });
 }
 
@@ -113,7 +114,8 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     String? bookingType,
     String? maintenance,
     String? roomType,
-    String? endDate
+    String? endDate,
+    String? email
   }) async {
     AppLogger.info('Adding manual tenant for hostel: $hostelId');
     final map = <String, dynamic>{
@@ -123,6 +125,9 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
       'bedNumber': bedNumber,
       'rent': rent,
     };
+    if (email != null && email.trim().isNotEmpty) {
+      map['email'] = email.trim();
+    }
     if (firstName != null && firstName.isNotEmpty) map['firstName'] = firstName;
     if (lastName != null && lastName.isNotEmpty) map['lastName'] = lastName;
     if (sharingType != null && sharingType.isNotEmpty) {

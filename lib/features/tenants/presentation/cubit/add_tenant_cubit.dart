@@ -114,7 +114,8 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     String? bookingType,
     String? maintenance,
     String? roomType,
-    required DateTime endDate
+    required DateTime endDate,
+    String? email
   }) async {
     emit(AddTenantSubmitting());
     try {
@@ -136,6 +137,7 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         maintenance:maintenance,
         roomType:roomType,
         endDate: "${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}",
+        email:email
 
     );
       emit(AddTenantSuccess());
