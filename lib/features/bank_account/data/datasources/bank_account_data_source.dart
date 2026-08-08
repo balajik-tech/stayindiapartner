@@ -86,7 +86,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       'branch': branchName ?? '',
       'bankName': bankName ?? '',
       'ifsc': ifscCode,
-      'isVerified': false,
+      'isVerified': true,
       'setAsPrimary': setAsPrimary,
       'pan': pan,
     };
