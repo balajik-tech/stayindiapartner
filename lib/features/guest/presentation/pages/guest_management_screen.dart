@@ -124,7 +124,7 @@ class _GuestRequestCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Tenant Phone: ${request.tenantPhone}",
+                    "Tenant Phone: ${request.mobile}",
                     style: TextStyle(color: Colors.grey, fontSize: 12.sp),
                   ),
                 ],
