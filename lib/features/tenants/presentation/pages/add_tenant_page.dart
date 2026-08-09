@@ -412,7 +412,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       startDate: (checkInDate.isNotEmpty)
           ? DateTime.parse(checkInDate)
           : DateTime.now(),
-      bookingType: _stayType.toString(),
+      bookingType: _stayType.name.toString(),
       maintenance:maintainance.toString(),
       roomType:roomType,
       endDate: (checkInDate.isNotEmpty)
