@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
@@ -364,6 +365,30 @@ class _AddTenantPageState extends State<AddTenantPage> {
         ),
       );
       return;
+    }
+
+
+    final authState = context.read<AuthCubit>().state;
+    String? ownerPhone;
+    if (authState is AuthAuthenticated) {
+      ownerPhone = authState.owner.phone;
+    }
+
+    if (ownerPhone != null) {
+      final cleanOwnerPhone = ownerPhone.replaceAll(RegExp(r'\D'), '');
+      final last10Owner = cleanOwnerPhone.length >= 10
+          ? cleanOwnerPhone.substring(cleanOwnerPhone.length - 10)
+          : cleanOwnerPhone;
+
+      if (phone == last10Owner) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Owner cannot be added as a tenant'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
     }
 
     final nameParts = name.split(' ');
