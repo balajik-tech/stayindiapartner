@@ -1165,34 +1165,37 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 ),
               ),
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddNotePage(),
-                    ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  side: BorderSide(color: AppColors.roomCardBorder),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                ),
-                child: Text(
-                  'Add Note',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
-                  ),
-                ),
-              ),
-            ),
+            // SizedBox(width: 12.w),
+
+            // Commented Add Note
+
+            // Expanded(
+            //   child: OutlinedButton(
+            //     onPressed: () {
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //           builder: (context) => const AddNotePage(),
+            //         ),
+            //       );
+            //     },
+            //     style: OutlinedButton.styleFrom(
+            //       padding: EdgeInsets.symmetric(vertical: 14.h),
+            //       side: BorderSide(color: AppColors.roomCardBorder),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(10.r),
+            //       ),
+            //     ),
+            //     child: Text(
+            //       'Add Note',
+            //       style: TextStyle(
+            //         fontSize: 16.sp,
+            //         fontWeight: FontWeight.bold,
+            //         color: AppColors.darkText,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ],
