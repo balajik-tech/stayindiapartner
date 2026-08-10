@@ -12,6 +12,7 @@ import '../widgets/committee_member_tile.dart';
 import '../widgets/executive_member_tile.dart';
 import '../widgets/it_wing_member_tile.dart';
 import '../widgets/hex_color.dart';
+import 'executive_member_detail_page.dart';
 
 class AssociateHomePage extends StatelessWidget {
   const AssociateHomePage({super.key});
@@ -108,7 +109,17 @@ class _CommunityHomeView extends StatelessWidget {
                           member: loaded.executiveMembers[i],
                           theme: theme,
                           showDivider: i != loaded.executiveMembers.length - 1,
-                          onTap: () => _showZoneSheet(context, loaded.executiveMembers[i].name),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ExecutiveMemberDetailPage(
+                                  member: loaded.executiveMembers[i],
+                                  theme: theme,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                     ],
                   ),
@@ -147,16 +158,6 @@ class _CommunityHomeView extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  void _showZoneSheet(BuildContext context, String name) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text('$name — zone & core members go here.'),
-      ),
     );
   }
 }

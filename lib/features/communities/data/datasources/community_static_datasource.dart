@@ -70,7 +70,16 @@ class AssociateStaticDataSource implements AssociateDataSource {
   @override
   Future<List<AssociateExecutiveMemberModel>> getExecutiveMembers() async {
     return const [
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-001', name: 'N. Ganesh', zone: 'Chennai Zone', photoUrl: ''),
+      AssociateExecutiveMemberModel(
+        id: 'TNIT-EXE-001',
+        name: 'N. Ganesh',
+        zone: 'Chennai Zone',
+        photoUrl: '',
+        coreMembers: [
+          CoreMemberModel(id: 'TNIT-COR-0001', name: 'L. Bala', photoUrl: ''),
+          CoreMemberModel(id: 'TNIT-COR-0002', name: 'V. Senthil', photoUrl: ''),
+        ],
+      ),
       AssociateExecutiveMemberModel(id: 'TNIT-EXE-002', name: 'P. Selvam', zone: 'Coimbatore Zone', photoUrl: ''),
       AssociateExecutiveMemberModel(id: 'TNIT-EXE-003', name: 'K. Sivakumar', zone: 'Madurai Zone', photoUrl: ''),
       AssociateExecutiveMemberModel(id: 'TNIT-EXE-004', name: 'G. Bala', zone: 'Trichy Zone', photoUrl: ''),
