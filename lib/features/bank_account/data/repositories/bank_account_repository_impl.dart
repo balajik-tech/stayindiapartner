@@ -19,7 +19,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
       final properties = await dataSource.getProperties();
       return Right(properties);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString().replaceFirst('Exception: ', '')));
     }
   }
 
@@ -47,7 +47,10 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
       );
       return Right(account);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      if (e.toString().contains('PAN verification failed')) {
+        return const Left(ServerFailure(message: 'PAN verification failed. Please ensure the PAN details match the bank account holder.'));
+      }
+      return Left(ServerFailure(message: e.toString().replaceFirst('Exception: ', '')));
     }
   }
 
@@ -60,7 +63,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
       await dataSource.setPrimaryAccount(propertyId: propertyId, accountId: accountId);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString().replaceFirst('Exception: ', '')));
     }
   }
 
@@ -70,7 +73,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
       await dataSource.deleteBankAccount(accountId);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString().replaceFirst('Exception: ', '')));
     }
   }
 
@@ -88,7 +91,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
       );
       return Right(result);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString().replaceFirst('Exception: ', '')));
     }
   }
 
@@ -108,7 +111,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
       final result = await dataSource.verifyPan(panNumber);
       return Right(result);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString().replaceFirst('Exception: ', '')));
     }
   }
 }

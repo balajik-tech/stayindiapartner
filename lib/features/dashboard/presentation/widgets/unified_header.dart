@@ -158,28 +158,29 @@ class UnifiedHeader extends StatelessWidget {
 
               SizedBox(width: 12.w),
 
-              Container(
-                width: 44.w,
-                height: 44.w,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFf4f5f9),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(
-                    color: const Color(0xFFE8ECF5), // Border color
-                    width: 1.0,
-                  ),
-                ),
-                child:  Center(
-                  child: Image.asset(
-                    'assets/images/report.png',
-                    width: 20,
-                    height: 20,
-                    fit: BoxFit.contain,
-                    // color: Color(0xFF0a3462),
-                    colorBlendMode: BlendMode.srcIn,
-                  ),
-                ),
-              ),
+              // commented report
+              // Container(
+              //   width: 44.w,
+              //   height: 44.w,
+              //   decoration: BoxDecoration(
+              //     color: const Color(0xFFf4f5f9),
+              //     borderRadius: BorderRadius.circular(12.r),
+              //     border: Border.all(
+              //       color: const Color(0xFFE8ECF5), // Border color
+              //       width: 1.0,
+              //     ),
+              //   ),
+              //   child:  Center(
+              //     child: Image.asset(
+              //       'assets/images/report.png',
+              //       width: 20,
+              //       height: 20,
+              //       fit: BoxFit.contain,
+              //       // color: Color(0xFF0a3462),
+              //       colorBlendMode: BlendMode.srcIn,
+              //     ),
+              //   ),
+              // ),
 
               SizedBox(width: 12.w),
 

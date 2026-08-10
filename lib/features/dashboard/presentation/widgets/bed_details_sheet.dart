@@ -1211,7 +1211,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                   ),
                   icon: Icon(Icons.login_rounded, size: 18.sp),
                   label: Text(
-                    'CHECK IN',
+                    'ROOM CHANGE',
                     style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
                   ),
                 ),

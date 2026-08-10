@@ -563,26 +563,27 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             ],
                           ),
                           const SizedBox(height: 24),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFfcfdfb),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(Icons.shield_outlined, size: 18, color: Color(0xFF6B7280)),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'No documents needed. We verify by depositing ₹1 and matching the name your bank returns.',
-                                    style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+
+                          // Container(
+                          //   padding: const EdgeInsets.all(12),
+                          //   decoration: BoxDecoration(
+                          //     color: const Color(0xFFfcfdfb),
+                          //     borderRadius: BorderRadius.circular(10),
+                          //   ),
+                          //   child: Row(
+                          //     crossAxisAlignment: CrossAxisAlignment.start,
+                          //     children: [
+                          //       const Icon(Icons.shield_outlined, size: 18, color: Color(0xFF6B7280)),
+                          //       const SizedBox(width: 10),
+                          //       Expanded(
+                          //         child: Text(
+                          //           'No documents needed.',
+                          //           style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),

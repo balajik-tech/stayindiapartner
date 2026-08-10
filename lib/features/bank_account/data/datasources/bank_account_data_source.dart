@@ -91,17 +91,26 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       'pan': pan,
     };
 
-    final response = await _dio.post(ApiConstants.bankAccounts, data: payload);
-    final dynamic rawPayload = response.data;
-    final Map<String, dynamic>? data = rawPayload is Map<String, dynamic>
-        ? (rawPayload['data'] as Map<String, dynamic>?)
-        : (rawPayload is Map ? Map<String, dynamic>.from(rawPayload['data'] ?? rawPayload) : null);
+    try {
+      final response = await _dio.post(ApiConstants.bankAccounts, data: payload);
+      final dynamic rawPayload = response.data;
+      final Map<String, dynamic>? data = rawPayload is Map<String, dynamic>
+          ? (rawPayload['data'] as Map<String, dynamic>?)
+          : (rawPayload is Map
+              ? Map<String, dynamic>.from(rawPayload['data'] ?? rawPayload)
+              : null);
 
-    if (data == null) {
-      throw Exception('Bank account creation response was empty or malformed.');
+      if (data == null) {
+        throw Exception('Bank account creation response was empty or malformed.');
+      }
+
+      return BankAccountModel.fromJson(data, defaultPropertyId: propertyId);
+    } on DioException catch (e) {
+      // Custom error message for PAN verification failure during bank account addition
+      throw Exception('PAN verification failed. Please ensure the PAN details match the bank account holder.');
+    } catch (e) {
+      rethrow;
     }
-
-    return BankAccountModel.fromJson(data, defaultPropertyId: propertyId);
   }
 
   @override

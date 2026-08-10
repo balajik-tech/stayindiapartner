@@ -93,9 +93,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   profile?.dlKyc?.isAadharVerified
                 ),
               ),
-              SliverToBoxAdapter(
-                child: _buildGovernmentLicensesCard(context),
-              ),
+              // commented Govt. Licenses & Verification
+              // SliverToBoxAdapter(
+              //   child: _buildGovernmentLicensesCard(context),
+              // ),
               SliverToBoxAdapter(
                 child: _buildQuickActions(context, role, owner),
               ),
