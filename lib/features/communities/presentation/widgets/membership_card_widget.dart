@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
 
+import 'join_association_sheet.dart';
+
 class MembershipCardWidget extends StatelessWidget {
   final CommunityThemeEntity theme;
   const MembershipCardWidget({super.key, required this.theme});
@@ -47,7 +49,14 @@ class MembershipCardWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => JoinAssociationSheet(theme: theme),
+                    );
+                  },
                   icon: Icon(Icons.person_outline, color: primary),
                   label: Text('Join now', style:  GoogleFonts.inter(color: primary, fontWeight: FontWeight.w600)),
                   style: ElevatedButton.styleFrom(
