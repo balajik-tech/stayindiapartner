@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/community_theme_entity.dart';
+import 'associate_info_sheets.dart';
 import 'hex_color.dart';
 
 class HeroHeaderWidget extends StatelessWidget {
@@ -94,15 +95,36 @@ class HeroHeaderWidget extends StatelessWidget {
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: const [
-              _PillButton(label: 'About Us'),
-              _PillButton(label: 'By Laws'),
-              _PillButton(label: 'Founders'),
-              _PillButton(label: 'Donations'),
+            children: [
+              _PillButton(
+                label: 'About Us',
+                onPressed: () => _showSheet(context, 'About Us'),
+              ),
+              _PillButton(
+                label: 'By Laws',
+                onPressed: () => _showSheet(context, 'By Laws'),
+              ),
+              _PillButton(
+                label: 'Founders',
+                onPressed: () => _showSheet(context, 'Founders'),
+              ),
+              _PillButton(
+                label: 'Donations',
+                onPressed: () => _showSheet(context, 'Donations'),
+              ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  void _showSheet(BuildContext context, String type) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AssociateInfoSheet(type: type, theme: theme),
     );
   }
 
@@ -145,12 +167,13 @@ class _LogoBadge extends StatelessWidget {
 
 class _PillButton extends StatelessWidget {
   final String label;
-  const _PillButton({required this.label});
+  final VoidCallback onPressed;
+  const _PillButton({required this.label, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
-      onPressed: () {},
+      onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         foregroundColor: Colors.white,
         side: const BorderSide(color: Colors.white30),
