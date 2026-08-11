@@ -107,7 +107,7 @@ class TenantDetailModel extends TenantDetailEntity {
           kycData?['aadharCardPhoto']?.toString() ??
           kycData?['idPhotoFront']?.toString(),
       idPhotoBack:
-        kycData?['aadharCardPhoto']?.toString() ?? '',
+        kycData?['idPhotoBack']?.toString() ?? '',
       stay: stayData != null ? TenantStayDetailModel.fromJson(stayData) : null,
       payments: paymentItems
           .map(
