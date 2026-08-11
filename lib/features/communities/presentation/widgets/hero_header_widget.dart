@@ -2,18 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/community_theme_entity.dart';
+import '../../domain/entities/association_details_entity.dart';
 import 'associate_info_sheets.dart';
 import 'hex_color.dart';
 
 class HeroHeaderWidget extends StatelessWidget {
   final CommunityThemeEntity theme;
-  const HeroHeaderWidget({super.key, required this.theme});
+  final AssociationDetailsEntity? details;
+  const HeroHeaderWidget({super.key, required this.theme, this.details});
 
   @override
   Widget build(BuildContext context) {
     final primary = theme.primaryColor.toColor();
     final primaryLight = theme.primaryColorLight.toColor();
     final accent = theme.accentColor.toColor();
+
+    final name = details?.name ?? 'IT Hostels & PG Owners';
+    final nameWords = name.split(' ');
+    final firstNamePart = nameWords.length > 2 
+        ? nameWords.take(nameWords.length - 2).join(' ') 
+        : nameWords.first;
+    final lastTwoWords = nameWords.length > 2 
+        ? nameWords.skip(nameWords.length - 2).join(' ') 
+        : nameWords.skip(1).join(' ');
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
@@ -33,8 +44,6 @@ class HeroHeaderWidget extends StatelessWidget {
               _iconButton(Icons.phone, accent),
               const SizedBox(width: 10),
               _iconButton(Icons.campaign_outlined, accent),
-              // const SizedBox(width: 10),
-              // _iconButton(Icons.wb_sunny_outlined, accent),
             ],
           ),
           const SizedBox(height: 12),
@@ -62,7 +71,7 @@ class HeroHeaderWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                      Text(
-                      'IT Hostels & PG Owners',
+                      firstNamePart,
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 30,
@@ -71,7 +80,7 @@ class HeroHeaderWidget extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Welfare Association',
+                      lastTwoWords,
                       style: GoogleFonts.inter(
                         color: accent,
                         fontSize: 30,
@@ -83,12 +92,12 @@ class HeroHeaderWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              _LogoBadge(accent: accent),
+              _LogoBadge(accent: accent, logoUrl: details?.logo),
             ],
           ),
           const SizedBox(height: 16),
            Text(
-            'United for the welfare of hostel & PG owners across Tamil Nadu',
+            details?.about.description ?? 'United for the welfare of hostel & PG owners across Tamil Nadu',
             style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.4),
           ),
           const SizedBox(height: 20),
@@ -124,7 +133,7 @@ class HeroHeaderWidget extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => AssociateInfoSheet(type: type, theme: theme),
+      builder: (context) => AssociateInfoSheet(type: type, theme: theme, details: details),
     );
   }
 
@@ -139,7 +148,8 @@ class HeroHeaderWidget extends StatelessWidget {
 
 class _LogoBadge extends StatelessWidget {
   final Color accent;
-  const _LogoBadge({required this.accent});
+  final String? logoUrl;
+  const _LogoBadge({required this.accent, this.logoUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -155,12 +165,27 @@ class _LogoBadge extends StatelessWidget {
         color: Colors.white,
       ),
       alignment: Alignment.center,
-      child: Image.asset(
-        'assets/images/associate_logo.png',
-        width: 92,
-        height: 92,
-        fit: BoxFit.fill,
-      ),
+      child: logoUrl != null && logoUrl!.isNotEmpty
+          ? ClipOval(
+              child: Image.network(
+                logoUrl!,
+                width: 110,
+                height: 110,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Image.asset(
+                  'assets/images/associate_logo.png',
+                  width: 92,
+                  height: 92,
+                  fit: BoxFit.fill,
+                ),
+              ),
+            )
+          : Image.asset(
+              'assets/images/associate_logo.png',
+              width: 92,
+              height: 92,
+              fit: BoxFit.fill,
+            ),
     );
   }
 }

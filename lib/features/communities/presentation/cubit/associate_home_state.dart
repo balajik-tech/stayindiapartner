@@ -4,6 +4,7 @@ import '../../domain/entities/associate_member_entity.dart';
 import '../../domain/entities/executive_member_entity.dart';
 import '../../domain/entities/it_wing_member_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
+import '../../domain/entities/association_details_entity.dart';
 
 enum AccordionSection { executiveCommittee, executiveMembers, itWing }
 
@@ -35,6 +36,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
   final List<CommitteeMemberEntity> executiveCommittee;
   final List<ExecutiveMemberEntity> executiveMembers;
   final List<ItWingMemberEntity> itWingMembers;
+  final AssociationDetailsEntity? details;
 
   /// Tracks which accordion section(s) are currently expanded.
   final Set<AccordionSection> expandedSections;
@@ -44,6 +46,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
     required this.executiveCommittee,
     required this.executiveMembers,
     required this.itWingMembers,
+    this.details,
     this.expandedSections = const {AccordionSection.executiveCommittee},
   });
 
@@ -52,6 +55,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
     List<CommitteeMemberEntity>? executiveCommittee,
     List<ExecutiveMemberEntity>? executiveMembers,
     List<ItWingMemberEntity>? itWingMembers,
+    AssociationDetailsEntity? details,
     Set<AccordionSection>? expandedSections,
   }) {
     return AssociateHomeDataLoaded(
@@ -59,16 +63,18 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
       executiveCommittee: executiveCommittee ?? this.executiveCommittee,
       executiveMembers: executiveMembers ?? this.executiveMembers,
       itWingMembers: itWingMembers ?? this.itWingMembers,
+      details: details ?? this.details,
       expandedSections: expandedSections ?? this.expandedSections,
     );
   }
 
   @override
   List<Object?> get props => [
-    theme,
-    executiveCommittee,
-    executiveMembers,
-    itWingMembers,
-    expandedSections,
-  ];
+        theme,
+        executiveCommittee,
+        executiveMembers,
+        itWingMembers,
+        details,
+        expandedSections,
+      ];
 }

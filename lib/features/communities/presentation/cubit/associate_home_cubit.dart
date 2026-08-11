@@ -4,6 +4,7 @@ import '../../domain/usecases/get_executive_committee_usecase.dart';
 import '../../domain/usecases/get_executive_members_usecase.dart';
 import '../../domain/usecases/get_it_wing_members_usecase.dart';
 import '../../domain/usecases/get_community_theme_usecase.dart';
+import '../../domain/usecases/get_association_details_usecase.dart';
 import 'associate_home_state.dart';
 
 class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
@@ -11,12 +12,14 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
   final GetExecutiveMembersUseCase getExecutiveMembers;
   final GetItWingMembersUseCase getItWingMembers;
   final GetCommunityThemeUseCase getCommunityTheme;
+  final GetAssociationDetailsUseCase getAssociationDetails;
 
   AssociateHomeDataCubit({
     required this.getExecutiveCommittee,
     required this.getExecutiveMembers,
     required this.getItWingMembers,
     required this.getCommunityTheme,
+    required this.getAssociationDetails,
   }) : super(const AssociateHomeDataInitial());
 
   Future<void> loadCommunityData() async {
@@ -27,6 +30,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
         getExecutiveCommittee(),
         getExecutiveMembers(),
         getItWingMembers(),
+        getAssociationDetails('6a79c8e7e0aedc4df7dcd07f'),
       ]);
 
       emit(
@@ -35,6 +39,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
           executiveCommittee: (results[1] as List).cast(),
           executiveMembers: (results[2] as List).cast(),
           itWingMembers: (results[3] as List).cast(),
+          details: results[4] as dynamic,
         ),
       );
     } catch (e) {

@@ -2,27 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../domain/entities/community_theme_entity.dart';
+import '../../domain/entities/association_details_entity.dart';
 import 'hex_color.dart';
 
 class AssociateInfoSheet extends StatelessWidget {
   final String type;
   final CommunityThemeEntity theme;
+  final AssociationDetailsEntity? details;
 
   const AssociateInfoSheet({
     super.key,
     required this.type,
     required this.theme,
+    this.details,
   });
 
   @override
   Widget build(BuildContext context) {
     switch (type) {
       case 'About Us':
-        return _AboutUsSheet(theme: theme);
+        return _AboutUsSheet(theme: theme, details: details?.about);
       case 'By Laws':
-        return _ByLawsSheet(theme: theme);
+        return _ByLawsSheet(theme: theme, details: details?.bylaws);
       case 'Founders':
-        return _FoundersSheet(theme: theme);
+        return _FoundersSheet(theme: theme, details: details?.founders);
       case 'Donations':
         return _DonationsSheet(theme: theme);
       default:
@@ -110,7 +113,8 @@ class _BaseSheet extends StatelessWidget {
 
 class _AboutUsSheet extends StatelessWidget {
   final CommunityThemeEntity theme;
-  const _AboutUsSheet({required this.theme});
+  final AssociationInfoEntity? details;
+  const _AboutUsSheet({required this.theme, this.details});
 
   @override
   Widget build(BuildContext context) {
@@ -118,12 +122,16 @@ class _AboutUsSheet extends StatelessWidget {
     final accent = theme.accentColor.toColor();
     final textSecondary = theme.textSecondary.toColor();
 
+    final String description = details?.description ??
+        'The Tamil Nadu IT Hostels & PG Owners Welfare Association brings together owners of working-professional hostels and paying-guest accommodations across the state, so that a single, organised voice speaks for the trade.';
+    final contents = details?.contents ?? [];
+
     return _BaseSheet(
       title: 'About Us',
       theme: theme,
       children: [
         Text(
-          'The Tamil Nadu IT Hostels & PG Owners Welfare Association brings together owners of working-professional hostels and paying-guest accommodations across the state, so that a single, organised voice speaks for the trade.',
+          description,
           style: GoogleFonts.inter(
             fontSize: 15.sp,
             color: Colors.black87,
@@ -132,38 +140,43 @@ class _AboutUsSheet extends StatelessWidget {
           ),
         ),
         SizedBox(height: 24.h),
-        _buildHeading('What we do', primary),
-        SizedBox(height: 12.h),
-        ...[
-          'Represent owners before civic bodies, licensing authorities and the police on registration, safety and taxation matters.',
-          'Circulate rule changes, inspection notices and compliance deadlines to every zone.',
-          'Run legal and documentation help desks for members facing disputes or notices.',
-          'Set shared standards for tenant safety, hygiene and fair rental practice.',
-          'Hold zonal meets so owners can raise local issues with the state committee.',
-        ].map((item) => _buildBulletItem(item, accent)),
-        SizedBox(height: 24.h),
-        _buildHeading('How we are organised', primary),
-        SizedBox(height: 12.h),
-        Text(
-          'A state executive committee leads the association. Ten zones cover Tamil Nadu, each headed by executive members who work with their own core member teams on the ground. An IT wing maintains the member directory, ID cards and digital records.',
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            color: textSecondary,
-            height: 1.5,
-          ),
-        ),
-        SizedBox(height: 24.h),
-        _buildHeading('Contact us before you join', primary),
-        SizedBox(height: 12.h),
-        Text(
-          'Not sure whether your facility qualifies, or what the fee and documents are? Call the membership desk — you do not need to be a member to ask.',
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            color: textSecondary,
-            height: 1.5,
-          ),
-        ),
-        SizedBox(height: 16.h),
+        ...contents.map((content) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeading(content.title, primary),
+              if (content.subtitle.isNotEmpty) ...[
+                SizedBox(height: 4.h),
+                Text(
+                  content.subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+              SizedBox(height: 12.h),
+              if (content.type == 'paragraph')
+                ...content.descriptions.map((d) => Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child: Text(
+                        d,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                    ))
+              else if (content.type == 'note')
+                _buildInfoBox(content.descriptions.join('\n'), theme)
+              else
+                ...content.descriptions.map((item) => _buildBulletItem(item, accent)),
+              SizedBox(height: 24.h),
+            ],
+          );
+        }),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -213,34 +226,25 @@ class _AboutUsSheet extends StatelessWidget {
 
 class _ByLawsSheet extends StatelessWidget {
   final CommunityThemeEntity theme;
-  const _ByLawsSheet({required this.theme});
+  final AssociationInfoEntity? details;
+  const _ByLawsSheet({required this.theme, this.details});
 
   @override
   Widget build(BuildContext context) {
     final primary = theme.primaryColor.toColor();
-    final accent = theme.accentColor.toColor();
+    final badgeBg = theme.badgeBackground.toColor();
+    final badgeText = theme.badgeText.toColor();
 
-    final clauses = [
-      {'title': 'Name and area', 'content': 'The association is called the Tamil Nadu IT Hostels & PG Owners Welfare Association and operates throughout Tamil Nadu.'},
-      {'title': 'Objects', 'content': 'To protect the lawful interests of hostel and PG owners, to promote safe and fair accommodation, and to act as the trade\'s representative before authorities.'},
-      {'title': 'Eligibility', 'content': 'Any person or firm running a registered hostel or PG facility in Tamil Nadu may apply for membership.'},
-      {'title': 'Subscription', 'content': 'The annual membership fee is payable at the time of joining and every year thereafter. Membership lapses if the fee is not renewed.'},
-      {'title': 'Membership ID', 'content': 'Each member is issued a unique ID card. It is not transferable and must be surrendered when membership ends.'},
-      {'title': 'Zones', 'content': 'The state is divided into zones. Every member belongs to the zone in which the facility is located.'},
-      {'title': 'Executive committee', 'content': 'Office bearers are elected by the general body for a term of two years and may be re-elected once.'},
-      {'title': 'Meetings', 'content': 'The general body meets once a year. The executive committee meets at least once a quarter, and zonal meets are held as required.'},
-      {'title': 'Accounts', 'content': 'All receipts and payments are recorded and audited annually, and the audited statement is placed before the general body.'},
-      {'title': 'Conduct', 'content': 'Members must follow the law on registration, safety, sanitation and tenant records, and must not misuse the association\'s name.'},
-      {'title': 'Discipline', 'content': 'Membership may be suspended or cancelled for conduct that harms the association or its members, after the member has been given a hearing.'},
-      {'title': 'Amendment', 'content': 'These by laws may be amended by a two-thirds majority of members present at a general body meeting.'},
-    ];
+    final String description = details?.description ??
+        'These clauses govern membership, conduct and administration. They were adopted by the general body and may be amended only at a general body meeting.';
+    final contents = details?.contents ?? [];
 
     return _BaseSheet(
       title: 'By Laws',
       theme: theme,
       children: [
         Text(
-          'These clauses govern membership, conduct and administration. They were adopted by the general body and may be amended only at a general body meeting.',
+          description,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
             color: Colors.black87,
@@ -248,51 +252,74 @@ class _ByLawsSheet extends StatelessWidget {
           ),
         ),
         SizedBox(height: 24.h),
-        _buildHeading('Clauses', primary),
-        SizedBox(height: 16.h),
-        ...List.generate(clauses.length, (index) {
-          final clause = clauses[index];
-          final num = (index + 1).toString().padLeft(2, '0');
-          return Padding(
-            padding: EdgeInsets.only(bottom: 20.h),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: theme.badgeBackground.toColor(),
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Text(
-                    num,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: theme.badgeText.toColor(),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.black87, height: 1.4),
-                      children: [
-                        TextSpan(
-                          text: '${clause['title']}. ',
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                        TextSpan(text: clause['content']),
-                      ],
-                    ),
+        ...contents.map((content) {
+          int clauseStartIndex = 1;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeading(content.title, primary),
+              if (content.subtitle.isNotEmpty) ...[
+                SizedBox(height: 4.h),
+                Text(
+                  content.subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
-            ),
+              SizedBox(height: 16.h),
+              if (content.type == 'clauses')
+                ...List.generate(content.descriptions.length, (index) {
+                  final num = (clauseStartIndex + index).toString().padLeft(2, '0');
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 20.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: badgeBg,
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Text(
+                            num,
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color: badgeText,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Text(
+                            content.descriptions[index],
+                            style: GoogleFonts.inter(
+                                fontSize: 14.sp, color: Colors.black87, height: 1.4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                })
+              else if (content.type == 'note')
+                _buildInfoBox(content.descriptions.join('\n'), theme)
+              else
+                ...content.descriptions.map((d) => Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: Text(
+                        d,
+                        style: GoogleFonts.inter(
+                            fontSize: 14.sp, color: Colors.black87, height: 1.4),
+                      ),
+                    )),
+              SizedBox(height: 24.h),
+            ],
           );
         }),
-        SizedBox(height: 12.h),
         _buildInfoBox(
           'This is a summary for members. The full registered by laws are available from the state secretary on request.',
           theme,
@@ -304,7 +331,8 @@ class _ByLawsSheet extends StatelessWidget {
 
 class _FoundersSheet extends StatelessWidget {
   final CommunityThemeEntity theme;
-  const _FoundersSheet({required this.theme});
+  final AssociationFoundersSectionEntity? details;
+  const _FoundersSheet({required this.theme, this.details});
 
   @override
   Widget build(BuildContext context) {
@@ -313,17 +341,16 @@ class _FoundersSheet extends StatelessWidget {
     final badgeBg = theme.badgeBackground.toColor();
     final badgeText = theme.badgeText.toColor();
 
-    final founders = [
-      {'id': 'TNIT-FDR-01', 'name': 'Founder Name', 'role': 'FOUNDER', 'photoUrl': ''},
-      {'id': 'TNIT-FDR-02', 'name': 'Founder Name', 'role': 'CO-FOUNDER', 'photoUrl': ''},
-    ];
+    final String description = details?.description ??
+        'The association was formed by owners who wanted the trade to be heard as one voice. Its founders continue to guide the state committee.';
+    final founders = details?.founders ?? [];
 
     return _BaseSheet(
       title: 'Founders',
       theme: theme,
       children: [
         Text(
-          'The association was formed by owners who wanted the trade to be heard as one voice. Its founders continue to guide the state committee.',
+          description,
           style: GoogleFonts.inter(
             fontSize: 15.sp,
             color: Colors.black87,
@@ -331,77 +358,87 @@ class _FoundersSheet extends StatelessWidget {
           ),
         ),
         SizedBox(height: 32.h),
-        Row(
-          children: founders.map((f) => Expanded(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 6.w),
-              padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 12.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: Colors.grey.shade200),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: accent, width: 1.5),
-                    ),
-                    child: CircleAvatar(
-                      radius: 36.r,
-                      backgroundColor: accent.withValues(alpha: 0.1),
-                      child: Icon(Icons.person, color: accent, size: 36.sp),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    f['name']!,
-                    style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    f['role']!,
-                    style: GoogleFonts.inter(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w800,
-                      color: accent,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  SizedBox(height: 12.h),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: badgeBg,
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Text(
-                      'ID ${f['id']}',
-                      style: GoogleFonts.inter(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w700,
-                        color: badgeText,
+        Wrap(
+          spacing: 12.w,
+          runSpacing: 12.h,
+          children: founders
+              .map((f) => SizedBox(
+                    width: 0.4.sw,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 12.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(color: Colors.grey.shade200),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: accent, width: 1.5),
+                            ),
+                            child: CircleAvatar(
+                              radius: 36.r,
+                              backgroundColor: accent.withValues(alpha: 0.1),
+                              backgroundImage: f.profileImg.isNotEmpty
+                                  ? NetworkImage(f.profileImg)
+                                  : null,
+                              child: f.profileImg.isEmpty
+                                  ? Icon(Icons.person, color: accent, size: 36.sp)
+                                  : null,
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            f.name,
+                            style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            f.role.toUpperCase(),
+                            style: GoogleFonts.inter(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w800,
+                              color: accent,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          Container(
+                            padding:
+                                EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: badgeBg,
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              'ID ${f.id.substring(f.id.length - 8).toUpperCase()}',
+                              style: GoogleFonts.inter(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w700,
+                                color: badgeText,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          )).toList(),
+                  ))
+              .toList(),
         ),
       ],
     );

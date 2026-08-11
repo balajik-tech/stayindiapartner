@@ -7,6 +7,7 @@ import 'domain/usecases/get_executive_committee_usecase.dart';
 import 'domain/usecases/get_executive_members_usecase.dart';
 import 'domain/usecases/get_it_wing_members_usecase.dart';
 import 'domain/usecases/get_community_theme_usecase.dart';
+import 'domain/usecases/get_association_details_usecase.dart';
 import 'presentation/cubit/associate_home_cubit.dart';
 
 void registerAssociateHomeDataFeature(GetIt sl) {
@@ -25,6 +26,7 @@ void registerAssociateHomeDataFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetExecutiveMembersUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetItWingMembersUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetCommunityThemeUseCase(sl<AssociateRepository>()));
+  sl.registerLazySingleton(() => GetAssociationDetailsUseCase(sl<AssociateRepository>()));
 
   // Cubit — factory, so every navigation to the page gets a fresh instance
   sl.registerFactory(
@@ -33,6 +35,7 @@ void registerAssociateHomeDataFeature(GetIt sl) {
       getExecutiveMembers: sl<GetExecutiveMembersUseCase>(),
       getItWingMembers: sl<GetItWingMembersUseCase>(),
       getCommunityTheme: sl<GetCommunityThemeUseCase>(),
+      getAssociationDetails: sl<GetAssociationDetailsUseCase>(),
     ),
   );
 }

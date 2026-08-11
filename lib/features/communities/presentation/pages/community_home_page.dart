@@ -58,7 +58,7 @@ class _CommunityHomeView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  HeroHeaderWidget(theme: theme),
+                  HeroHeaderWidget(theme: theme, details: loaded.details),
                   MembershipCardWidget(theme: theme),
                   const SizedBox(height: 8),
 
