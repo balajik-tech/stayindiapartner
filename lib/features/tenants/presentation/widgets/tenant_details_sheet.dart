@@ -569,6 +569,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
   Widget _buildKycDocuments(TenantDetailEntity? detail) {
     final verified = detail?.kycVerified ?? false;
     final aadharPhotoUrl = ApiConstants.getImageUrl(detail?.aadharCardPhoto);
+    final aadharPhotoBackUrl = ApiConstants.getImageUrl(detail?.idPhotoBack);
 
     return _buildSection(
       'kyc_docs'.tr(),
@@ -652,7 +653,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
               const Divider(height: 1, color: Color(0xFFE5E7EB)),
               SizedBox(height: 12.h),
               Text(
-                'Uploaded Document:',
+                'Uploaded Front Document:',
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
@@ -730,6 +731,130 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                     borderRadius: BorderRadius.circular(12.r),
                     child: Image.network(
                       aadharPhotoUrl,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.redAccent,
+                              size: 30.sp,
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              'Failed to load Aadhar image',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.greyText,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Center(
+                child: Text(
+                  'Tap to view and zoom',
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontStyle: FontStyle.italic,
+                    color: AppColors.greyText,
+                  ),
+                ),
+              ),
+            ],
+            if (aadharPhotoBackUrl != null && aadharPhotoBackUrl.isNotEmpty) ...[
+              SizedBox(height: 12.h),
+              const Divider(height: 1, color: Color(0xFFE5E7EB)),
+              SizedBox(height: 12.h),
+              Text(
+                'Uploaded Back Document:',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.greyText,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      backgroundColor: Colors.transparent,
+                      insetPadding: EdgeInsets.all(10.w),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          InteractiveViewer(
+                            panEnabled: true,
+                            minScale: 0.5,
+                            maxScale: 4.0,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12.r),
+                              child: Image.network(
+                                aadharPhotoBackUrl,
+                                fit: BoxFit.contain,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      color: Colors.white,
+                                      padding: EdgeInsets.all(20.w),
+                                      child: const Text(
+                                        'Failed to load Aadhar Card image',
+                                      ),
+                                    ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 10.h,
+                            right: 10.w,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.black.withValues(
+                                alpha: 0.5,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 150.h,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    color: Colors.white,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: Image.network(
+                      aadharPhotoBackUrl,
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;

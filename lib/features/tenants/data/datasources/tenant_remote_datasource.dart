@@ -28,6 +28,7 @@ abstract class TenantRemoteDataSource {
     double? deposit,
     String? userPhotoPath,
     String? aadharPhotoPath,
+    String? aadharCardbackPath,
     String? bookingType,
     String? maintenance,
     String? roomType,
@@ -111,6 +112,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     double? deposit,
     String? userPhotoPath,
     String? aadharPhotoPath,
+    String? aadharCardbackPath,
     String? bookingType,
     String? maintenance,
     String? roomType,
@@ -161,6 +163,18 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
           'aadharCard',
           await MultipartFile.fromFile(
             aadharPhotoPath,
+            contentType: DioMediaType('image', 'jpeg'),
+          ),
+        ),
+      );
+    }
+
+    if (aadharCardbackPath != null && aadharCardbackPath.isNotEmpty) {
+      formData.files.add(
+        MapEntry(
+          'aadharCardback',
+          await MultipartFile.fromFile(
+            aadharCardbackPath,
             contentType: DioMediaType('image', 'jpeg'),
           ),
         ),

@@ -24,6 +24,7 @@ abstract class TenantRepository {
     double? deposit,
     String? userPhotoPath,
     String? aadharPhotoPath,
+    String? aadharCardbackPath,
     String? bookingType,
     String? maintenance,
     String? roomType,

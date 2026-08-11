@@ -53,6 +53,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
   File? _userPhoto;
   File? _aadharPhoto;
+  File? _aadharPhotoBack;
   bool _isDetectingFace = false;
 
   Hostel? _selectedHostel;
@@ -431,6 +432,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
       userPhotoPath: _userPhoto?.path,
       aadharPhotoPath: _aadharPhoto?.path,
+      aadharCardbackPath: _aadharPhotoBack?.path,
 
       deposit: securityDeposit,
       rent: rent ?? 0,
@@ -1287,6 +1289,31 @@ class _AddTenantPageState extends State<AddTenantPage> {
   }
 
   Future<void> _pickAadharPhoto() async {
+    _pickDocumentPhoto(
+      title: 'Upload Aadhar Card (Front)',
+      onImagePicked: (file) {
+        setState(() {
+          _aadharPhoto = file;
+        });
+      },
+    );
+  }
+
+  Future<void> _pickAadharPhotoBack() async {
+    _pickDocumentPhoto(
+      title: 'Upload Aadhar Card (Back)',
+      onImagePicked: (file) {
+        setState(() {
+          _aadharPhotoBack = file;
+        });
+      },
+    );
+  }
+
+  Future<void> _pickDocumentPhoto({
+    required String title,
+    required Function(File) onImagePicked,
+  }) async {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -1312,7 +1339,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 child: Row(
                   children: [
                     Text(
-                      'Upload Aadhar Card',
+                      title,
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
@@ -1346,9 +1373,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                     imageQuality: 85,
                   );
                   if (image != null) {
-                    setState(() {
-                      _aadharPhoto = File(image.path);
-                    });
+                    onImagePicked(File(image.path));
                   }
                 },
               ),
@@ -1376,9 +1401,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                     imageQuality: 85,
                   );
                   if (image != null) {
-                    setState(() {
-                      _aadharPhoto = File(image.path);
-                    });
+                    onImagePicked(File(image.path));
                   }
                 },
               ),
@@ -1403,228 +1426,174 @@ class _AddTenantPageState extends State<AddTenantPage> {
         Row(
           children: [
             Expanded(
-              child: GestureDetector(
+              child: _buildImageUploadCard(
+                file: _userPhoto,
                 onTap: _isDetectingFace ? null : _pickUserPhoto,
-                child: Container(
-                  height: 140.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: _userPhoto != null
-                          ? Colors.green.withValues(alpha: 0.5)
-                          : const Color(0xFFE2E8F0),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (_userPhoto != null) ...[
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16.r),
-                          child: Image.file(
-                            _userPhoto!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        ),
-                        Positioned(
-                          top: 8.h,
-                          right: 8.w,
-                          child: Container(
-                            padding: EdgeInsets.all(4.r),
-                            decoration: const BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 14.sp,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.vertical(
-                                bottom: Radius.circular(16.r),
-                              ),
-                            ),
-                            child: const Text(
-                              'Tap to retake',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ] else ...[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (_isDetectingFace) ...[
-                              const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Color(0xFF2C599D),
-                              ),
-                              SizedBox(height: 8.h),
-                              Text(
-                                'Detecting face...',
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF475569),
-                                ),
-                              ),
-                            ] else ...[
-                              Icon(
-                                Icons.face_retouching_natural_rounded,
-                                color: const Color(0xFF2C599D),
-                                size: 32.sp,
-                              ),
-                              SizedBox(height: 8.h),
-                              Text(
-                                'User Photo *',
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF1E293B),
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                'Face Scan (Camera)',
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: const Color(0xFF64748B),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                title: 'User Photo *',
+                subtitle: 'Face Scan (Camera)',
+                icon: Icons.face_retouching_natural_rounded,
+                iconColor: const Color(0xFF2C599D),
+                isLoading: _isDetectingFace,
+                loadingText: 'Detecting face...',
               ),
             ),
             SizedBox(width: 16.w),
-
             Expanded(
-              child: GestureDetector(
+              child: _buildImageUploadCard(
+                file: _aadharPhoto,
                 onTap: _pickAadharPhoto,
-                child: Container(
-                  height: 140.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: _aadharPhoto != null
-                          ? Colors.green.withValues(alpha: 0.5)
-                          : const Color(0xFFE2E8F0),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (_aadharPhoto != null) ...[
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16.r),
-                          child: Image.file(
-                            _aadharPhoto!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        ),
-                        Positioned(
-                          top: 8.h,
-                          right: 8.w,
-                          child: Container(
-                            padding: EdgeInsets.all(4.r),
-                            decoration: const BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 14.sp,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.vertical(
-                                bottom: Radius.circular(16.r),
-                              ),
-                            ),
-                            child: const Text(
-                              'Tap to retake',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ] else ...[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.badge_rounded,
-                              color: const Color(0xFFF98125),
-                              size: 32.sp,
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'Aadhar Card *',
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E293B),
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              'Camera or Gallery',
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                title: 'Aadhar Front *',
+                subtitle: 'Camera or Gallery',
+                icon: Icons.badge_rounded,
+                iconColor: const Color(0xFFF98125),
               ),
             ),
           ],
         ),
+        SizedBox(height: 16.h),
+        Row(
+          children: [
+            Expanded(
+              child: _buildImageUploadCard(
+                file: _aadharPhotoBack,
+                onTap: _pickAadharPhotoBack,
+                title: 'Aadhar Back *',
+                subtitle: 'Camera or Gallery',
+                icon: Icons.badge_rounded,
+                iconColor: const Color(0xFFF98125),
+              ),
+            ),
+            const Expanded(child: SizedBox()),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _buildImageUploadCard({
+    required File? file,
+    required VoidCallback? onTap,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    bool isLoading = false,
+    String? loadingText,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 140.h,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: file != null
+                ? Colors.green.withValues(alpha: 0.5)
+                : const Color(0xFFE2E8F0),
+            width: 1.5,
+          ),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (file != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16.r),
+                child: Image.file(
+                  file,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+              Positioned(
+                top: 8.h,
+                right: 8.w,
+                child: Container(
+                  padding: EdgeInsets.all(4.r),
+                  decoration: const BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 14.sp,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(16.r),
+                    ),
+                  ),
+                  child: const Text(
+                    'Tap to retake',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ] else ...[
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isLoading) ...[
+                    CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: iconColor,
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      loadingText ?? 'Loading...',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF475569),
+                      ),
+                    ),
+                  ] else ...[
+                    Icon(
+                      icon,
+                      color: iconColor,
+                      size: 32.sp,
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
