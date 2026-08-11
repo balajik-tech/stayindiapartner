@@ -587,16 +587,16 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             keyboardType: TextInputType.emailAddress,
                           ),
 
-                          if (_extractedAadharData['aadharNumber']!.isNotEmpty) ...[
-                            SizedBox(height: 24.h),
-                            _buildSectionTitle('Extracted Aadhar Details'),
-                            SizedBox(height: 16.h),
-                            _buildReadOnlyDetail('Aadhaar Number', _extractedAadharData['aadharNumber']),
-                            _buildReadOnlyDetail('Name', _extractedAadharData['name']),
-                            _buildReadOnlyDetail('DOB', _extractedAadharData['dob']),
-                            _buildReadOnlyDetail('Gender', _extractedAadharData['gender']),
-                            _buildReadOnlyDetail('Address', _extractedAadharData['address']),
-                          ],
+                          // if (_extractedAadharData['aadharNumber']!.isNotEmpty) ...[
+                          //   SizedBox(height: 24.h),
+                          //   _buildSectionTitle('Extracted Aadhar Details'),
+                          //   SizedBox(height: 16.h),
+                          //   _buildReadOnlyDetail('Aadhaar Number', _extractedAadharData['aadharNumber']),
+                          //   _buildReadOnlyDetail('Name', _extractedAadharData['name']),
+                          //   _buildReadOnlyDetail('DOB', _extractedAadharData['dob']),
+                          //   _buildReadOnlyDetail('Gender', _extractedAadharData['gender']),
+                          //   _buildReadOnlyDetail('Address', _extractedAadharData['address']),
+                          // ],
 
                           SizedBox(height: 32.h),
                           _buildSectionTitle('room_allocation'.tr()),
@@ -1017,37 +1017,37 @@ class _AddTenantPageState extends State<AddTenantPage> {
     );
   }
 
-  Widget _buildReadOnlyDetail(String label, String? value) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120.w,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColors.greyText,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value ?? 'N/A',
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: AppColors.darkText,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildReadOnlyDetail(String label, String? value) {
+  //   return Padding(
+  //     padding: EdgeInsets.only(bottom: 8.h),
+  //     child: Row(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         SizedBox(
+  //           width: 120.w,
+  //           child: Text(
+  //             '$label:',
+  //             style: TextStyle(
+  //               fontSize: 13.sp,
+  //               fontWeight: FontWeight.bold,
+  //               color: AppColors.greyText,
+  //             ),
+  //           ),
+  //         ),
+  //         Expanded(
+  //           child: Text(
+  //             value ?? 'N/A',
+  //             style: TextStyle(
+  //               fontSize: 13.sp,
+  //               color: AppColors.darkText,
+  //               fontWeight: FontWeight.w500,
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildAcToggle() {
     return Container(
@@ -1366,7 +1366,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         setState(() {
           _aadharPhoto = file;
         });
-        _extractAadharText(file, isFront: true);
+        // _extractAadharText(file, isFront: true);
       },
     );
   }
@@ -1378,7 +1378,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         setState(() {
           _aadharPhotoBack = file;
         });
-        _extractAadharText(file, isFront: false);
+        // _extractAadharText(file, isFront: false);
       },
     );
   }
