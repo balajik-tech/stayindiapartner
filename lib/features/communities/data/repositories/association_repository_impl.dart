@@ -1,6 +1,7 @@
 import '../../domain/entities/associate_member_entity.dart';
 import '../../domain/entities/executive_member_entity.dart';
 import '../../domain/entities/it_wing_member_entity.dart';
+import '../../domain/entities/port_member_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import '../../domain/entities/association_details_entity.dart';
 import '../../domain/entities/association_portal_entity.dart';
@@ -22,6 +23,10 @@ class AssociateRepositoryImpl implements AssociateRepository {
   @override
   Future<List<ItWingMemberEntity>> getItWingMembers(String associationId) =>
       dataSource.getItWingMembers(associationId);
+
+  @override
+  Future<List<PortMemberEntity>> getPortMembers(String associationId) =>
+      dataSource.getPortMembers(associationId);
 
   @override
   Future<CommunityThemeEntity> getCommunityTheme(String associationId) =>

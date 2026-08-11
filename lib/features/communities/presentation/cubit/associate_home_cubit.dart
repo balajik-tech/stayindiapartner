@@ -4,6 +4,7 @@ import '../../domain/entities/association_details_entity.dart';
 import '../../domain/usecases/get_executive_committee_usecase.dart';
 import '../../domain/usecases/get_executive_members_usecase.dart';
 import '../../domain/usecases/get_it_wing_members_usecase.dart';
+import '../../domain/usecases/get_port_members_usecase.dart';
 import '../../domain/usecases/get_community_theme_usecase.dart';
 import '../../domain/usecases/get_association_details_usecase.dart';
 import 'associate_home_state.dart';
@@ -12,6 +13,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
   final GetExecutiveCommitteeUseCase getExecutiveCommittee;
   final GetExecutiveMembersUseCase getExecutiveMembers;
   final GetItWingMembersUseCase getItWingMembers;
+  final GetPortMembersUseCase getPortMembers;
   final GetCommunityThemeUseCase getCommunityTheme;
   final GetAssociationDetailsUseCase getAssociationDetails;
 
@@ -19,6 +21,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
     required this.getExecutiveCommittee,
     required this.getExecutiveMembers,
     required this.getItWingMembers,
+    required this.getPortMembers,
     required this.getCommunityTheme,
     required this.getAssociationDetails,
   }) : super(const AssociateHomeDataInitial());
@@ -31,6 +34,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
         getExecutiveCommittee(associationId),
         getExecutiveMembers(associationId),
         getItWingMembers(associationId),
+        getPortMembers(associationId),
       ]);
 
       AssociationDetailsEntity? details;
@@ -46,12 +50,10 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
         AssociateHomeDataLoaded(
           theme: results[0] as dynamic,
           executiveCommittee: (results[1] as List).cast(),
-          executiveMembers: (results[2] as List).cast(),
-          itWingMembers: (results[3] as List).cast(),
-          details: details,
-          detailsError: detailsError,
-        ),
-      );
+        executiveMembers: (results[2] as List).cast(),
+        itWingMembers: (results[3] as List).cast(),
+        portMembers: (results[4] as List).cast(),
+      ));
     } catch (e) {
       emit(AssociateHomeDataError('Failed to load community data: $e'));
     }

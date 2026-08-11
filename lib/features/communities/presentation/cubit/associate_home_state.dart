@@ -3,10 +3,11 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/associate_member_entity.dart';
 import '../../domain/entities/executive_member_entity.dart';
 import '../../domain/entities/it_wing_member_entity.dart';
+import '../../domain/entities/port_member_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import '../../domain/entities/association_details_entity.dart';
 
-enum AccordionSection { executiveCommittee, executiveMembers, itWing }
+enum AccordionSection { executiveCommittee, executiveMembers, itWing, portMembers }
 
 abstract class AssociateHomeDataState extends Equatable {
   const AssociateHomeDataState();
@@ -36,6 +37,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
   final List<CommitteeMemberEntity> executiveCommittee;
   final List<ExecutiveMemberEntity> executiveMembers;
   final List<ItWingMemberEntity> itWingMembers;
+  final List<PortMemberEntity> portMembers;
   final AssociationDetailsEntity? details;
   final String? detailsError;
 
@@ -47,6 +49,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
     required this.executiveCommittee,
     required this.executiveMembers,
     required this.itWingMembers,
+    required this.portMembers,
     this.details,
     this.detailsError,
     this.expandedSections = const {AccordionSection.executiveCommittee},
@@ -57,6 +60,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
     List<CommitteeMemberEntity>? executiveCommittee,
     List<ExecutiveMemberEntity>? executiveMembers,
     List<ItWingMemberEntity>? itWingMembers,
+    List<PortMemberEntity>? portMembers,
     AssociationDetailsEntity? details,
     String? detailsError,
     Set<AccordionSection>? expandedSections,
@@ -66,6 +70,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
       executiveCommittee: executiveCommittee ?? this.executiveCommittee,
       executiveMembers: executiveMembers ?? this.executiveMembers,
       itWingMembers: itWingMembers ?? this.itWingMembers,
+      portMembers: portMembers ?? this.portMembers,
       details: details ?? this.details,
       detailsError: detailsError ?? this.detailsError,
       expandedSections: expandedSections ?? this.expandedSections,
@@ -78,7 +83,8 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
         executiveCommittee,
         executiveMembers,
         itWingMembers,
-        details,
+    portMembers,
+    details,
         detailsError,
         expandedSections,
       ];

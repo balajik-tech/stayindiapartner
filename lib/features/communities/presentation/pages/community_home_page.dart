@@ -11,6 +11,7 @@ import '../widgets/accordion_section_widget.dart';
 import '../widgets/committee_member_tile.dart';
 import '../widgets/executive_member_tile.dart';
 import '../widgets/it_wing_member_tile.dart';
+import '../widgets/port_member_tile.dart';
 import '../widgets/hex_color.dart';
 import 'executive_member_detail_page.dart';
 
@@ -144,6 +145,24 @@ class _CommunityHomeView extends StatelessWidget {
                           member: loaded.itWingMembers[i],
                           theme: theme,
                           showDivider: i != loaded.itWingMembers.length - 1,
+                        ),
+                    ],
+                  ),
+
+                  // IT Wing
+                  AccordionSectionWidget(
+                    theme: theme,
+                    title: 'Port Members',
+                    subtitle: '',
+                    count: loaded.portMembers.length,
+                    isExpanded: loaded.expandedSections.contains(AccordionSection.portMembers),
+                    onToggle: () => cubit.toggleSection(AccordionSection.portMembers),
+                    children: [
+                      for (var i = 0; i < loaded.portMembers.length; i++)
+                        PortMemberTile(
+                          member: loaded.portMembers[i],
+                          theme: theme,
+                          showDivider: i != loaded.portMembers.length - 1,
                         ),
                     ],
                   ),
