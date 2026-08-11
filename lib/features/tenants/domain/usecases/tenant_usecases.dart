@@ -64,7 +64,11 @@ class AddTenantUseCase {
     String? maintenance,
     String? roomType,
     String? endDate,
-    String? email
+    String? email,
+    String? aadhaarNumber,
+    String? dob,
+    String? gender,
+    String? address,
   }) {
     return repository.addManualTenant(
       phone: phone,
@@ -84,7 +88,11 @@ class AddTenantUseCase {
         maintenance:maintenance,
         roomType:roomType,
         endDate:endDate,
-        email:email
+        email:email,
+      aadhaarNumber: aadhaarNumber,
+      dob: dob,
+      gender: gender,
+      address: address,
     );
   }
 }

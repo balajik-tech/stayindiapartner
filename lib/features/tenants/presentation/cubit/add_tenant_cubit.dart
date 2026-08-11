@@ -116,7 +116,11 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     String? maintenance,
     String? roomType,
     required DateTime endDate,
-    String? email
+    String? email,
+    String? aadhaarNumber,
+    String? dob,
+    String? gender,
+    String? address,
   }) async {
     emit(AddTenantSubmitting());
     try {
@@ -139,7 +143,11 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         maintenance:maintenance,
         roomType:roomType,
         endDate: "${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}",
-        email:email
+        email:email,
+        aadhaarNumber: aadhaarNumber,
+        dob: dob,
+        gender: gender,
+        address: address,
 
     );
       emit(AddTenantSuccess());

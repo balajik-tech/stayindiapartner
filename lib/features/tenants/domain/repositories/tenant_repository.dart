@@ -29,6 +29,10 @@ abstract class TenantRepository {
     String? maintenance,
     String? roomType,
     String? endDate,
-    String? email
+    String? email,
+    String? aadhaarNumber,
+    String? dob,
+    String? gender,
+    String? address,
   });
 }

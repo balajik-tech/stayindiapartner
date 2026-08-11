@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
@@ -55,6 +56,15 @@ class _AddTenantPageState extends State<AddTenantPage> {
   File? _aadharPhoto;
   File? _aadharPhotoBack;
   bool _isDetectingFace = false;
+  bool _isExtractingText = false;
+
+  Map<String, String> _extractedAadharData = {
+    'aadharNumber': '',
+    'name': '',
+    'dob': '',
+    'gender': '',
+    'address': '',
+  };
 
   Hostel? _selectedHostel;
   bool _isLoadingRooms = false;
@@ -358,16 +368,30 @@ class _AddTenantPageState extends State<AddTenantPage> {
       return;
     }
 
-    if (_aadharPhoto == null) {
+    if (_aadharPhoto == null || _aadharPhotoBack == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please upload Aadhar Card'),
+          content: Text('Please upload both Front and Back of Aadhar Card'),
           backgroundColor: Colors.redAccent,
         ),
       );
       return;
     }
 
+    // if (_extractedAadharData['aadharNumber']!.isEmpty || _extractedAadharData['aadharNumber']!.length != 12) {
+    //   String found = _extractedAadharData['aadharNumber']!;
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text(
+    //         found.isEmpty
+    //           ? 'Could not detect Aadhaar number. Please ensure the front photo is clear and well-lit.'
+    //           : 'Extracted invalid Aadhaar number ($found). Please retake the front photo.'
+    //       ),
+    //       backgroundColor: Colors.redAccent,
+    //     ),
+    //   );
+    //   return;
+    // }
 
     final authState = context.read<AuthCubit>().state;
     String? ownerPhone;
@@ -445,6 +469,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
       endDate: (checkInDate.isNotEmpty)
           ? DateTime.parse(checkOutDate)
           : DateTime.now(),
+      aadhaarNumber: _extractedAadharData['aadharNumber'] ?? '',
+      dob: _extractedAadharData['dob'] ?? '',
+      gender: _extractedAadharData['gender'] ?? '',
+      address: _extractedAadharData['address'] ?? '',
     );
   }
 
@@ -558,6 +586,17 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             _emailController,
                             keyboardType: TextInputType.emailAddress,
                           ),
+
+                          if (_extractedAadharData['aadharNumber']!.isNotEmpty) ...[
+                            SizedBox(height: 24.h),
+                            _buildSectionTitle('Extracted Aadhar Details'),
+                            SizedBox(height: 16.h),
+                            _buildReadOnlyDetail('Aadhaar Number', _extractedAadharData['aadharNumber']),
+                            _buildReadOnlyDetail('Name', _extractedAadharData['name']),
+                            _buildReadOnlyDetail('DOB', _extractedAadharData['dob']),
+                            _buildReadOnlyDetail('Gender', _extractedAadharData['gender']),
+                            _buildReadOnlyDetail('Address', _extractedAadharData['address']),
+                          ],
 
                           SizedBox(height: 32.h),
                           _buildSectionTitle('room_allocation'.tr()),
@@ -978,6 +1017,38 @@ class _AddTenantPageState extends State<AddTenantPage> {
     );
   }
 
+  Widget _buildReadOnlyDetail(String label, String? value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120.w,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.greyText,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value ?? 'N/A',
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: AppColors.darkText,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAcToggle() {
     return Container(
       height: 48.h,
@@ -1295,6 +1366,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         setState(() {
           _aadharPhoto = file;
         });
+        _extractAadharText(file, isFront: true);
       },
     );
   }
@@ -1306,8 +1378,105 @@ class _AddTenantPageState extends State<AddTenantPage> {
         setState(() {
           _aadharPhotoBack = file;
         });
+        _extractAadharText(file, isFront: false);
       },
     );
+  }
+
+  Future<void> _extractAadharText(File imageFile, {required bool isFront}) async {
+    setState(() {
+      _isExtractingText = true;
+    });
+
+    try {
+      final inputImage = InputImage.fromFile(imageFile);
+      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+      
+      String fullText = recognizedText.text;
+      debugPrint('OCR Text: $fullText');
+      
+      // Sanitize common OCR errors for number detection
+      String sanitizedText = fullText.replaceAll(RegExp(r'[oO]'), '0').replaceAll(RegExp(r'[iIlL|]'), '1');
+      
+      // Try to find 12-digit Aadhar number in any image
+      String extractedAadhar = '';
+      
+      // 1. Try formatted XXXX XXXX XXXX
+      final aadharRegex = RegExp(r'(\d{4}\s*\d{4}\s*\d{4})');
+      final aadharMatch = aadharRegex.firstMatch(sanitizedText);
+      
+      if (aadharMatch != null) {
+        extractedAadhar = aadharMatch.group(0)!.replaceAll(RegExp(r'\s+'), '');
+      } else {
+        // 2. Fallback: Extract all digits and look for a 12-digit sequence
+        String digitsOnly = sanitizedText.replaceAll(RegExp(r'\D'), '');
+        final fallbackRegex = RegExp(r'\d{12}');
+        final fallbackMatch = fallbackRegex.firstMatch(digitsOnly);
+        if (fallbackMatch != null) {
+          extractedAadhar = fallbackMatch.group(0)!;
+        }
+      }
+
+      setState(() {
+        if (extractedAadhar.length == 12) {
+          _extractedAadharData['aadharNumber'] = extractedAadhar;
+        }
+
+        // DOB & Gender usually on front
+        final dobRegex = RegExp(r'(?:DOB|Year of Birth|D\.O\.B)[:\s]*(\d{2}[/-]\d{2}[/-]\d{4}|\d{4})', caseSensitive: false);
+        final genderRegex = RegExp(r'(Male|Female|Transgender|MALE|FEMALE)', caseSensitive: false);
+        
+        final dobMatch = dobRegex.firstMatch(fullText);
+        final genderMatch = genderRegex.firstMatch(fullText);
+
+        if (dobMatch != null) _extractedAadharData['dob'] = dobMatch.group(1)!;
+        if (genderMatch != null) _extractedAadharData['gender'] = genderMatch.group(0)!;
+
+        // Name extraction (usually front)
+        if (fullText.toLowerCase().contains('government') || fullText.toLowerCase().contains('india') || dobMatch != null) {
+           List<String> lines = fullText.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+           for (int i = 0; i < lines.length; i++) {
+             String line = lines[i];
+             if (line.toLowerCase().contains('dob') || line.toLowerCase().contains('year') || line.contains(RegExp(r'\d{4}'))) {
+               if (i > 0) {
+                 String potentialName = lines[i-1];
+                 if (potentialName.length > 3 && !potentialName.contains(RegExp(r'\d')) && 
+                     !potentialName.toLowerCase().contains('government') && !potentialName.toLowerCase().contains('india')) {
+                    _extractedAadharData['name'] = potentialName;
+                    _nameController.text = potentialName;
+                    break;
+                 }
+               }
+             }
+           }
+        }
+
+        // Address extraction (usually back)
+        if (fullText.toLowerCase().contains('address')) {
+          List<String> lines = fullText.split('\n');
+          int addressIndex = -1;
+          for (int i = 0; i < lines.length; i++) {
+            if (lines[i].toLowerCase().contains('address')) {
+              addressIndex = i;
+              break;
+            }
+          }
+          if (addressIndex != -1) {
+            String address = lines.sublist(addressIndex).join(', ').replaceAll(RegExp(r'Address:?', caseSensitive: false), '').trim();
+            _extractedAadharData['address'] = address;
+          }
+        }
+      });
+
+      await textRecognizer.close();
+    } catch (e) {
+      debugPrint('Error extracting text: $e');
+    } finally {
+      setState(() {
+        _isExtractingText = false;
+      });
+    }
   }
 
   Future<void> _pickDocumentPhoto({
@@ -1441,11 +1610,13 @@ class _AddTenantPageState extends State<AddTenantPage> {
             Expanded(
               child: _buildImageUploadCard(
                 file: _aadharPhoto,
-                onTap: _pickAadharPhoto,
+                onTap: _isExtractingText ? null : _pickAadharPhoto,
                 title: 'Aadhar Front *',
                 subtitle: 'Camera or Gallery',
                 icon: Icons.badge_rounded,
                 iconColor: const Color(0xFFF98125),
+                isLoading: _isExtractingText,
+                loadingText: 'Scanning...',
               ),
             ),
           ],
@@ -1456,11 +1627,13 @@ class _AddTenantPageState extends State<AddTenantPage> {
             Expanded(
               child: _buildImageUploadCard(
                 file: _aadharPhotoBack,
-                onTap: _pickAadharPhotoBack,
+                onTap: _isExtractingText ? null : _pickAadharPhotoBack,
                 title: 'Aadhar Back *',
                 subtitle: 'Camera or Gallery',
                 icon: Icons.badge_rounded,
                 iconColor: const Color(0xFFF98125),
+                isLoading: _isExtractingText,
+                loadingText: 'Scanning...',
               ),
             ),
             const Expanded(child: SizedBox()),

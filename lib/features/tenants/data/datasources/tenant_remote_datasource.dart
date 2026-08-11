@@ -1,5 +1,6 @@
 import 'dart:isolate';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import '../models/tenant_model.dart';
@@ -33,7 +34,11 @@ abstract class TenantRemoteDataSource {
     String? maintenance,
     String? roomType,
     String? endDate,
-    String? email
+    String? email,
+    String? aadhaarNumber,
+    String? dob,
+    String? gender,
+    String? address,
   });
 }
 
@@ -117,7 +122,11 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     String? maintenance,
     String? roomType,
     String? endDate,
-    String? email
+    String? email,
+    String? aadhaarNumber,
+    String? dob,
+    String? gender,
+    String? address,
   }) async {
     AppLogger.info('Adding manual tenant for hostel: $hostelId');
     final map = <String, dynamic>{
@@ -142,6 +151,11 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     if (maintenance != null && maintenance != "") map['maintenance'] = maintenance;
     if (roomType != null  && roomType != "") map['roomType'] = roomType;
     if (endDate != null  && endDate != "") map['endDate'] = endDate;
+
+    if (aadhaarNumber != null) map['aadharNumber'] = aadhaarNumber;
+    if (dob != null) map['dob'] = dob;
+    if (gender != null) map['gender'] = gender;
+    if (address != null) map['address'] = address;
 
     final formData = FormData.fromMap(map);
 
@@ -181,23 +195,15 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
       );
     }
 
+    debugPrint("========form fields========");
+    for (final field in formData.fields) {
+      debugPrint('${field.key}: ${field.value}');
+    }
 
-    // Print all fields
-        print('----- FormData Fields -----');
-        for (final field in formData.fields) {
-          print('${field.key}: ${field.value}');
-        }
-
-    // Print all files
-        print('----- FormData Files -----');
-        for (final file in formData.files) {
-          print(
-            '${file.key}: '
-                'filename=${file.value.filename}, '
-                'contentType=${file.value.contentType}',
-          );
-        }
-    print('----- FormData Fields -----');
+    for (final file in formData.files) {
+      debugPrint('${file.key}: ${file.value.filename}');
+    }
+    debugPrint("========form fields========");
 
     final response = await _dio.post(
       ApiConstants.tenantsManual,
