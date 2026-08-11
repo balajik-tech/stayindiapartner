@@ -7,10 +7,12 @@ import 'domain/usecases/get_executive_committee_usecase.dart';
 import 'domain/usecases/get_executive_members_usecase.dart';
 import 'domain/usecases/get_it_wing_members_usecase.dart';
 import 'domain/usecases/get_port_members_usecase.dart';
+import 'domain/usecases/get_executive_structure_usecase.dart';
 import 'domain/usecases/get_community_theme_usecase.dart';
 import 'domain/usecases/get_association_details_usecase.dart';
 import 'domain/usecases/get_associations_portal_usecase.dart';
 import 'presentation/cubit/associate_home_cubit.dart';
+import 'presentation/cubit/executive_detail_cubit.dart';
 
 void registerAssociateHomeDataFeature(GetIt sl) {
   // Data source
@@ -28,6 +30,7 @@ void registerAssociateHomeDataFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetExecutiveMembersUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetItWingMembersUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetPortMembersUseCase(sl<AssociateRepository>()));
+  sl.registerLazySingleton(() => GetExecutiveStructureUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetCommunityThemeUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetAssociationDetailsUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetAssociationsPortalUseCase(sl<AssociateRepository>()));
@@ -41,6 +44,12 @@ void registerAssociateHomeDataFeature(GetIt sl) {
       getPortMembers: sl<GetPortMembersUseCase>(),
       getCommunityTheme: sl<GetCommunityThemeUseCase>(),
       getAssociationDetails: sl<GetAssociationDetailsUseCase>(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => ExecutiveDetailCubit(
+      getExecutiveStructure: sl<GetExecutiveStructureUseCase>(),
     ),
   );
 }

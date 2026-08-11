@@ -4,6 +4,7 @@ import '../models/committee_member_model.dart';
 import '../models/executive_member_model.dart';
 import '../models/it_wing_member_model.dart';
 import '../models/port_member_model.dart';
+import '../models/executive_structure_model.dart';
 import '../models/community_theme_model.dart';
 import '../models/association_details_model.dart';
 import '../models/association_portal_model.dart';
@@ -16,6 +17,7 @@ abstract class AssociateDataSource {
   Future<List<AssociateExecutiveMemberModel>> getExecutiveMembers(String associationId);
   Future<List<AssociateItWingMemberModel>> getItWingMembers(String associationId);
   Future<List<AssociatePortMemberModel>> getPortMembers(String associationId);
+  Future<List<ExecutiveStructureLeaderModel>> getExecutiveStructure(String execId);
   Future<AssociateCommunityThemeModel> getCommunityTheme(String associationId);
   Future<AssociationDetailsModel> getAssociationDetails(String id);
   Future<List<AssociationPortalModel>> getAssociations();
@@ -83,6 +85,18 @@ class AssociateStaticDataSource implements AssociateDataSource {
       return list.map((json) => AssociatePortMemberModel.fromJson(json)).toList();
     }
     throw Exception('Failed to fetch port members');
+  }
+
+  @override
+  Future<List<ExecutiveStructureLeaderModel>> getExecutiveStructure(String execId) async {
+    final response = await _dio.get('${ApiConstants.associationExecutiveStructure}/$execId');
+    if (response.statusCode == 200) {
+      final raw = response.data;
+      final data = raw['data'] as Map<String, dynamic>;
+      final list = data['leaders'] as List;
+      return list.map((json) => ExecutiveStructureLeaderModel.fromJson(json)).toList();
+    }
+    throw Exception('Failed to fetch executive structure');
   }
 
   @override
