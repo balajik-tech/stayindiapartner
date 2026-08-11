@@ -4,6 +4,9 @@ import 'package:stayindia_owner/features/communities/domain/entities/community_e
 import 'package:stayindia_owner/features/communities/domain/usecases/community_usecases.dart';
 import 'package:stayindia_owner/core/utils/error_helper.dart';
 
+import 'package:stayindia_owner/features/communities/domain/entities/association_portal_entity.dart';
+import 'package:stayindia_owner/features/communities/domain/usecases/get_associations_portal_usecase.dart';
+
 abstract class OwnerCommunityState extends Equatable {
   const OwnerCommunityState();
   @override
@@ -17,6 +20,7 @@ class OwnerCommunityLoading extends OwnerCommunityState {}
 class OwnerCommunityLoaded extends OwnerCommunityState {
   final List<CommunityDetailsEntity> joinedCommunities;
   final List<CommunityDetailsEntity> availableCommunities;
+  final List<AssociationPortalEntity> associations;
   final List<Map<String, dynamic>> pendingRequests;
   final bool isJoining;
   final bool isCreating;
@@ -24,6 +28,7 @@ class OwnerCommunityLoaded extends OwnerCommunityState {
   const OwnerCommunityLoaded({
     required this.joinedCommunities,
     required this.availableCommunities,
+    required this.associations,
     this.pendingRequests = const [],
     this.isJoining = false,
     this.isCreating = false,
@@ -32,6 +37,7 @@ class OwnerCommunityLoaded extends OwnerCommunityState {
   OwnerCommunityLoaded copyWith({
     List<CommunityDetailsEntity>? joinedCommunities,
     List<CommunityDetailsEntity>? availableCommunities,
+    List<AssociationPortalEntity>? associations,
     List<Map<String, dynamic>>? pendingRequests,
     bool? isJoining,
     bool? isCreating,
@@ -39,6 +45,7 @@ class OwnerCommunityLoaded extends OwnerCommunityState {
     return OwnerCommunityLoaded(
       joinedCommunities: joinedCommunities ?? this.joinedCommunities,
       availableCommunities: availableCommunities ?? this.availableCommunities,
+      associations: associations ?? this.associations,
       pendingRequests: pendingRequests ?? this.pendingRequests,
       isJoining: isJoining ?? this.isJoining,
       isCreating: isCreating ?? this.isCreating,
@@ -49,6 +56,7 @@ class OwnerCommunityLoaded extends OwnerCommunityState {
   List<Object?> get props => [
     joinedCommunities,
     availableCommunities,
+    associations,
     pendingRequests,
     isJoining,
     isCreating,
@@ -69,6 +77,7 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
   final CreateOwnerCommunityUseCase _create;
   final GetPendingJoinRequestsUseCase _getPending;
   final HandleJoinRequestUseCase _handleRequest;
+  final GetAssociationsPortalUseCase _getAssociations;
 
   OwnerCommunityCubit({
     required GetJoinedOwnerCommunitiesUseCase getJoinedOwnerCommunitiesUseCase,
@@ -78,12 +87,14 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
     required CreateOwnerCommunityUseCase createOwnerCommunityUseCase,
     required GetPendingJoinRequestsUseCase getPendingJoinRequestsUseCase,
     required HandleJoinRequestUseCase handleJoinRequestUseCase,
+    required GetAssociationsPortalUseCase getAssociationsPortalUseCase,
   }) : _getJoined = getJoinedOwnerCommunitiesUseCase,
        _getAvailable = getAvailableOwnerCommunitiesUseCase,
        _join = joinOwnerCommunityUseCase,
        _create = createOwnerCommunityUseCase,
        _getPending = getPendingJoinRequestsUseCase,
        _handleRequest = handleJoinRequestUseCase,
+       _getAssociations = getAssociationsPortalUseCase,
        super(OwnerCommunityInitial());
 
   Future<void> loadCommunities() async {
@@ -93,12 +104,14 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
         _getJoined(),
         _getAvailable(),
         _getPending(),
+        _getAssociations(),
       ]);
       emit(
         OwnerCommunityLoaded(
           joinedCommunities: results[0] as List<CommunityDetailsEntity>,
           availableCommunities: results[1] as List<CommunityDetailsEntity>,
           pendingRequests: results[2] as List<Map<String, dynamic>>,
+          associations: results[3] as List<AssociationPortalEntity>,
         ),
       );
     } catch (e) {
@@ -185,14 +198,17 @@ class OwnerCommunityCubit extends Cubit<OwnerCommunityState> {
     final s = state;
     List<CommunityDetailsEntity> joined = [];
     List<CommunityDetailsEntity> available = [];
+    List<AssociationPortalEntity> assoc = [];
     if (s is OwnerCommunityLoaded) {
       joined = s.joinedCommunities;
       available = s.availableCommunities;
+      assoc = s.associations;
     }
     emit(
       OwnerCommunityLoaded(
         joinedCommunities: joined,
         availableCommunities: available,
+        associations: assoc,
         isCreating: true,
       ),
     );

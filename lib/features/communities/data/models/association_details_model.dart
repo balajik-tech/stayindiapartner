@@ -19,10 +19,50 @@ class AssociationDetailsModel extends AssociationDetailsEntity {
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
       logo: json['logo'] ?? '',
-      about: AssociationInfoModel.fromJson(json['about'] ?? {}),
-      bylaws: AssociationInfoModel.fromJson(json['bylaws'] ?? {}),
-      founders: AssociationFoundersSectionModel.fromJson(json['founders'] ?? {}),
+      about: _parseInfoSection(json['about']),
+      bylaws: _parseInfoSection(json['bylaws']),
+      founders: _parseFoundersSection(json['founders']),
     );
+  }
+
+  static AssociationInfoEntity _parseInfoSection(Object? raw) {
+    if (raw == null) {
+      return const AssociationInfoEntity(description: '', contents: []);
+    }
+
+    if (raw is List) {
+      return const AssociationInfoEntity(description: '', contents: []);
+    }
+
+    if (raw is Map<String, dynamic>) {
+      return AssociationInfoModel.fromJson(raw);
+    }
+
+    if (raw is Map) {
+      return AssociationInfoModel.fromJson(Map<String, dynamic>.from(raw));
+    }
+
+    return const AssociationInfoEntity(description: '', contents: []);
+  }
+
+  static AssociationFoundersSectionEntity _parseFoundersSection(Object? raw) {
+    if (raw == null) {
+      return const AssociationFoundersSectionEntity(description: '', founders: []);
+    }
+
+    if (raw is List) {
+      return const AssociationFoundersSectionEntity(description: '', founders: []);
+    }
+
+    if (raw is Map<String, dynamic>) {
+      return AssociationFoundersSectionModel.fromJson(raw);
+    }
+
+    if (raw is Map) {
+      return AssociationFoundersSectionModel.fromJson(Map<String, dynamic>.from(raw));
+    }
+
+    return const AssociationFoundersSectionEntity(description: '', founders: []);
   }
 }
 

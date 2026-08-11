@@ -37,6 +37,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
   final List<ExecutiveMemberEntity> executiveMembers;
   final List<ItWingMemberEntity> itWingMembers;
   final AssociationDetailsEntity? details;
+  final String? detailsError;
 
   /// Tracks which accordion section(s) are currently expanded.
   final Set<AccordionSection> expandedSections;
@@ -47,6 +48,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
     required this.executiveMembers,
     required this.itWingMembers,
     this.details,
+    this.detailsError,
     this.expandedSections = const {AccordionSection.executiveCommittee},
   });
 
@@ -56,6 +58,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
     List<ExecutiveMemberEntity>? executiveMembers,
     List<ItWingMemberEntity>? itWingMembers,
     AssociationDetailsEntity? details,
+    String? detailsError,
     Set<AccordionSection>? expandedSections,
   }) {
     return AssociateHomeDataLoaded(
@@ -64,6 +67,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
       executiveMembers: executiveMembers ?? this.executiveMembers,
       itWingMembers: itWingMembers ?? this.itWingMembers,
       details: details ?? this.details,
+      detailsError: detailsError ?? this.detailsError,
       expandedSections: expandedSections ?? this.expandedSections,
     );
   }
@@ -75,6 +79,7 @@ class AssociateHomeDataLoaded extends AssociateHomeDataState {
         executiveMembers,
         itWingMembers,
         details,
+        detailsError,
         expandedSections,
       ];
 }

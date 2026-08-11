@@ -15,12 +15,13 @@ import '../widgets/hex_color.dart';
 import 'executive_member_detail_page.dart';
 
 class AssociateHomePage extends StatelessWidget {
-  const AssociateHomePage({super.key});
+  final String associationId;
+  const AssociateHomePage({super.key, required this.associationId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<AssociateHomeDataCubit>()..loadCommunityData(),
+      create: (_) => sl<AssociateHomeDataCubit>()..loadCommunityData(associationId),
       child: const _CommunityHomeView(),
     );
   }
@@ -58,7 +59,11 @@ class _CommunityHomeView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  HeroHeaderWidget(theme: theme, details: loaded.details),
+                  HeroHeaderWidget(
+                    theme: theme,
+                    details: loaded.details,
+                    detailsError: loaded.detailsError,
+                  ),
                   MembershipCardWidget(theme: theme),
                   const SizedBox(height: 8),
 

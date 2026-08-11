@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/association_details_entity.dart';
 import '../../domain/usecases/get_executive_committee_usecase.dart';
 import '../../domain/usecases/get_executive_members_usecase.dart';
 import '../../domain/usecases/get_it_wing_members_usecase.dart';
@@ -22,7 +23,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
     required this.getAssociationDetails,
   }) : super(const AssociateHomeDataInitial());
 
-  Future<void> loadCommunityData() async {
+  Future<void> loadCommunityData(String associationId) async {
     emit(const AssociateHomeDataLoading());
     try {
       final results = await Future.wait([
@@ -32,18 +33,36 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
         getItWingMembers(),
       ]);
 
+      AssociationDetailsEntity? details;
+      String? detailsError;
+
+      try {
+        details = await getAssociationDetails(associationId);
+      } catch (e) {
+        detailsError = _extractDetailsError(e);
+      }
+
       emit(
         AssociateHomeDataLoaded(
           theme: results[0] as dynamic,
           executiveCommittee: (results[1] as List).cast(),
           executiveMembers: (results[2] as List).cast(),
           itWingMembers: (results[3] as List).cast(),
-          details: null,
+          details: details,
+          detailsError: detailsError,
         ),
       );
     } catch (e) {
       emit(AssociateHomeDataError('Failed to load community data: $e'));
     }
+  }
+
+  String _extractDetailsError(Object error) {
+    if (error is Exception && error.toString().contains('DioException')) {
+      return 'Unable to load community details.';
+    }
+
+    return error.toString().replaceFirst('Exception: ', '');
   }
 
   /// Toggles a single accordion section open/closed.

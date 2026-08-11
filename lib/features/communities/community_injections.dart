@@ -3,6 +3,7 @@ import 'data/datasources/community_remote_datasource.dart';
 import 'data/repositories/community_repository_impl.dart';
 import 'domain/repositories/community_repository.dart';
 import 'domain/usecases/community_usecases.dart';
+import 'domain/usecases/get_associations_portal_usecase.dart';
 import 'presentation/cubit/community_cubit.dart';
 import 'presentation/cubit/owner_community_cubit.dart';
 import 'presentation/cubit/association_cubit.dart';
@@ -33,6 +34,7 @@ void registerCommunityFeature(GetIt sl) {
       createOwnerCommunityUseCase: sl(),
       getPendingJoinRequestsUseCase: sl(),
       handleJoinRequestUseCase: sl(),
+      getAssociationsPortalUseCase: sl(),
     ),
   );
 

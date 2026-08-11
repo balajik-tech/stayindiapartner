@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import '../../domain/entities/community_theme_entity.dart';
 import '../../domain/entities/association_details_entity.dart';
@@ -9,7 +10,13 @@ import 'hex_color.dart';
 class HeroHeaderWidget extends StatelessWidget {
   final CommunityThemeEntity theme;
   final AssociationDetailsEntity? details;
-  const HeroHeaderWidget({super.key, required this.theme, this.details});
+  final String? detailsError;
+  const HeroHeaderWidget({
+    super.key,
+    required this.theme,
+    this.details,
+    this.detailsError,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -96,10 +103,38 @@ class HeroHeaderWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-           Text(
+          Text(
             details?.about.description ?? 'United for the welfare of hostel & PG owners across Tamil Nadu',
             style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.4),
           ),
+          if (detailsError != null && detailsError!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info_outline_rounded, color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      detailsError!,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           Wrap(
             spacing: 12,
@@ -165,10 +200,10 @@ class _LogoBadge extends StatelessWidget {
         color: Colors.white,
       ),
       alignment: Alignment.center,
-      child: logoUrl != null && logoUrl!.isNotEmpty
+      child: (logoUrl != null && logoUrl!.isNotEmpty && ApiConstants.getImageUrl(logoUrl) != null)
           ? ClipOval(
               child: Image.network(
-                logoUrl!,
+                ApiConstants.getImageUrl(logoUrl)!,
                 width: 110,
                 height: 110,
                 fit: BoxFit.contain,

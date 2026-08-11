@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 import '../models/committee_member_model.dart';
 import '../models/executive_member_model.dart';
 import '../models/it_wing_member_model.dart';
 import '../models/community_theme_model.dart';
 import '../models/association_details_model.dart';
+import '../models/association_portal_model.dart';
 
 /// Contract kept separate from the static impl so a future
 /// `CommunityRemoteDataSource` (calling the real theme/members API)
@@ -13,10 +16,24 @@ abstract class AssociateDataSource {
   Future<List<AssociateItWingMemberModel>> getItWingMembers();
   Future<AssociateCommunityThemeModel> getCommunityTheme();
   Future<AssociationDetailsModel> getAssociationDetails(String id);
+  Future<List<AssociationPortalModel>> getAssociations();
 }
 
 class AssociateStaticDataSource implements AssociateDataSource {
-  const AssociateStaticDataSource();
+  final Dio _dio;
+  const AssociateStaticDataSource(this._dio);
+
+  @override
+  Future<List<AssociationPortalModel>> getAssociations() async {
+    final response = await _dio.get(ApiConstants.associationsPortal);
+    if (response.statusCode == 200) {
+      final raw = response.data;
+      final data = raw['data'] as Map<String, dynamic>;
+      final list = data['associations'] as List;
+      return list.map((json) => AssociationPortalModel.fromJson(json)).toList();
+    }
+    throw Exception('Failed to fetch associations');
+  }
 
   @override
   Future<List<AssociateCommitteeMemberModel>> getExecutiveCommittee() async {
@@ -123,87 +140,12 @@ class AssociateStaticDataSource implements AssociateDataSource {
 
   @override
   Future<AssociationDetailsModel> getAssociationDetails(String id) async {
-    return AssociationDetailsModel.fromJson({
-      "name": "Hyderabad PG Owners Association",
-      "address": "Plot No. 12, Madhapur, Hyderabad, Telangana - 500081",
-      "email": "info@hpgowners.org",
-      "phone": "9876543210",
-      "logo": "",
-      "about": {
-        "description": "Hyderabad PG Owners Association is an organization supporting PG owners and promoting better standards in accommodation services.",
-        "contents": [
-          {
-            "title": "Our Mission",
-            "subtitle": "What we aim to achieve",
-            "description": [
-              "Support PG owners across Hyderabad.",
-              "Promote safe and quality accommodation.",
-              "Represent the interests of PG owners."
-            ],
-            "type": "paragraph"
-          },
-          {
-            "title": "Membership",
-            "subtitle": "Who can join",
-            "description": [
-              "Registered PG owners can become association members.",
-              "Members must follow the association guidelines."
-            ],
-            "type": "note"
-          },
-          {
-            "title": "Association Guidelines",
-            "subtitle": "",
-            "description": [
-              "Maintain proper documentation.",
-              "Follow applicable local regulations."
-            ],
-            "type": "clauses"
-          }
-        ]
-      },
-      "bylaws": {
-        "description": "The bylaws define the rules and responsibilities of association members.",
-        "contents": [
-          {
-            "title": "Membership Rules",
-            "subtitle": "Eligibility",
-            "description": [
-              "Membership is available to registered PG owners.",
-              "Each member must provide valid registration details."
-            ],
-            "type": "clauses"
-          },
-          {
-            "title": "Member Responsibilities",
-            "subtitle": "",
-            "description": [
-              "Members must maintain their properties according to association standards.",
-              "Members must pay applicable association fees on time."
-            ],
-            "type": "paragraph"
-          },
-          {
-            "title": "Important Notice",
-            "subtitle": "Compliance",
-            "description": [
-              "All members must comply with applicable government regulations."
-            ],
-            "type": "note"
-          }
-        ]
-      },
-      "founders": {
-        "description": "The founding members who established the Hyderabad PG Owners Association.",
-        "founders": [
-          {
-            "profileimg": "https://example.com/images/founder1.jpg",
-            "name": "Venkata Naresh",
-            "role": "President",
-            "id": "6a7593ab268b893b564ce5e7"
-          }
-        ]
-      }
-    });
+    final response = await _dio.get('${ApiConstants.associationPortalDetails}/$id');
+    if (response.statusCode == 200) {
+      final raw = response.data;
+      final data = raw['data'] as Map<String, dynamic>;
+      return AssociationDetailsModel.fromJson(data);
+    }
+    throw Exception('Failed to load association details');
   }
 }

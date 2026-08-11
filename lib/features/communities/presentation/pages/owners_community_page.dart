@@ -23,6 +23,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/owners_list_page.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
+import 'package:stayindia_owner/features/communities/domain/entities/association_portal_entity.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
 import 'community_home_page.dart';
@@ -468,6 +469,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           final communities = state is OwnerCommunityLoaded
               ? state.joinedCommunities
               : <CommunityDetailsEntity>[];
+          final associations = state is OwnerCommunityLoaded
+              ? state.associations
+              : <AssociationPortalEntity>[];
 
           return SizedBox(
             height: 80.h,
@@ -516,48 +520,64 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   ),
                 ),
                 SizedBox(width: 20.w),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AssociateHomePage(),
-                      ),
-                    );
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 48.w,
-                        height: 48.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primaryBlue,
-                            width: 2,
+                ...associations.map((a) {
+                  return Padding(
+                    padding: EdgeInsets.only(right: 20.w),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AssociateHomePage(associationId: a.id),
                           ),
-                          color: Colors.white,
-                        ),
-                        child: Icon(
-                          Icons.person,
-                          color: AppColors.primaryBlue,
-                          size: 28.sp,
-                        ),
+                        );
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 48.w,
+                            height: 48.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.primaryBlue,
+                                width: 2,
+                              ),
+                              color: Colors.white,
+                            ),
+                            child: (a.logo.isNotEmpty && ApiConstants.getImageUrl(a.logo) != null)
+                                ? CircleAvatar(
+                                    backgroundImage: CachedNetworkImageProvider(
+                                      ApiConstants.getImageUrl(a.logo)!,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.person,
+                                    color: AppColors.primaryBlue,
+                                    size: 28.sp,
+                                  ),
+                          ),
+                          SizedBox(height: 6.h),
+                          SizedBox(
+                            width: 65.w,
+                            child: Text(
+                              a.name,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryBlue,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 6.h),
-                      Text(
-                        'Associate'.tr(),
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryBlue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 20.w),
+                    ),
+                  );
+                }),
                 ...communities.map((c) {
                   final isPending = c.isPendingJoin;
 
