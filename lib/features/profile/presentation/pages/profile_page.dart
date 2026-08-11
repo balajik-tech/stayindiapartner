@@ -320,13 +320,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileCard(
-                          icon: Icons.chat_bubble_rounded,
-                          title: 'feedback'.tr(),
-                          iconBgColor: const Color(0xFFFFF1F2),
-                          iconColor: const Color(0xFFE11D48),
-                          onTap: () {},
-                        ),
+                        //hide feedback
+
+                        // _ProfileCard(
+                        //   icon: Icons.chat_bubble_rounded,
+                        //   title: 'feedback'.tr(),
+                        //   iconBgColor: const Color(0xFFFFF1F2),
+                        //   iconColor: const Color(0xFFE11D48),
+                        //   onTap: () {},
+                        // ),
                       ],
                     ]),
 
@@ -371,45 +373,46 @@ class _ProfilePageState extends State<ProfilePage> {
                             );
                           },
                         ),
-                        _ProfileCard(
-                          icon: Icons.campaign_rounded,
-                          title: 'send_announcements'.tr(),
-                          iconBgColor: const Color(0xFFEFF6FF),
-                          iconColor: const Color(0xFF2563EB),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const SendAnnouncementsPage(),
-                            ),
-                          ),
-                        ),
-                        _ProfileCard(
-                          icon: Icons.analytics_rounded,
-                          title: 'my_reports'.tr(),
-                          iconBgColor: const Color(0xFFECFDF5),
-                          iconColor: const Color(0xFF059669),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const ReportsDashboardPage(),
-                            ),
-                          ),
-                        ),
-                        _ProfileCard(
-                          icon: Icons.local_offer_rounded,
-                          title: 'hostel_offers'.tr(),
-                          iconBgColor: const Color(0xFFFFF7ED),
-                          iconColor: const Color(0xFFEA580C),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const OffersManagementPage(),
-                            ),
-                          ),
-                        ),
+
+                        // _ProfileCard(
+                        //   icon: Icons.campaign_rounded,
+                        //   title: 'send_announcements'.tr(),
+                        //   iconBgColor: const Color(0xFFEFF6FF),
+                        //   iconColor: const Color(0xFF2563EB),
+                        //   onTap: () => Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) =>
+                        //           const SendAnnouncementsPage(),
+                        //     ),
+                        //   ),
+                        // ),
+                        // _ProfileCard(
+                        //   icon: Icons.analytics_rounded,
+                        //   title: 'my_reports'.tr(),
+                        //   iconBgColor: const Color(0xFFECFDF5),
+                        //   iconColor: const Color(0xFF059669),
+                        //   onTap: () => Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) =>
+                        //           const ReportsDashboardPage(),
+                        //     ),
+                        //   ),
+                        // ),
+                        // _ProfileCard(
+                        //   icon: Icons.local_offer_rounded,
+                        //   title: 'hostel_offers'.tr(),
+                        //   iconBgColor: const Color(0xFFFFF7ED),
+                        //   iconColor: const Color(0xFFEA580C),
+                        //   onTap: () => Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) =>
+                        //           const OffersManagementPage(),
+                        //     ),
+                        //   ),
+                        // ),
                       ]),
                     ],
 
@@ -758,8 +761,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildQuickActions(BuildContext context, String role, dynamic owner) {
     final bool hasInsights = owner?.hasPermission('reports') ?? true;
-    final bool hasStock = owner?.hasPermission('stock') ?? true;
-    final bool hasStaff = owner?.hasPermission('staff') ?? true;
+    final bool hasStock = false;// owner?.hasPermission('stock') ?? true;  // hidden stock for condition changed
+    final bool hasStaff = false;// owner?.hasPermission('staff') ?? true;  // hidden staff for condition changed
 
     if (!hasInsights && !hasStock && !hasStaff) {
       return const SizedBox.shrink();
