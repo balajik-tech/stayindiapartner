@@ -12,20 +12,20 @@ class AssociateRepositoryImpl implements AssociateRepository {
   const AssociateRepositoryImpl(this.dataSource);
 
   @override
-  Future<List<CommitteeMemberEntity>> getExecutiveCommittee() =>
-      dataSource.getExecutiveCommittee();
+  Future<List<CommitteeMemberEntity>> getExecutiveCommittee(String associationId) =>
+      dataSource.getExecutiveCommittee(associationId);
 
   @override
-  Future<List<ExecutiveMemberEntity>> getExecutiveMembers() =>
-      dataSource.getExecutiveMembers();
+  Future<List<ExecutiveMemberEntity>> getExecutiveMembers(String associationId) =>
+      dataSource.getExecutiveMembers(associationId);
 
   @override
-  Future<List<ItWingMemberEntity>> getItWingMembers() =>
-      dataSource.getItWingMembers();
+  Future<List<ItWingMemberEntity>> getItWingMembers(String associationId) =>
+      dataSource.getItWingMembers(associationId);
 
   @override
-  Future<CommunityThemeEntity> getCommunityTheme() =>
-      dataSource.getCommunityTheme();
+  Future<CommunityThemeEntity> getCommunityTheme(String associationId) =>
+      dataSource.getCommunityTheme(associationId);
 
   @override
   Future<AssociationDetailsEntity> getAssociationDetails(String id) =>

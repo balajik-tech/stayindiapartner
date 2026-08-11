@@ -9,9 +9,9 @@ class CoreMemberModel extends CoreMemberEntity {
 
   factory CoreMemberModel.fromJson(Map<String, dynamic> json) {
     return CoreMemberModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      photoUrl: json['photoUrl'] as String,
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      photoUrl: json['photo'] ?? json['photoUrl'] ?? '',
     );
   }
 
@@ -33,11 +33,11 @@ class AssociateExecutiveMemberModel extends ExecutiveMemberEntity {
 
   factory AssociateExecutiveMemberModel.fromJson(Map<String, dynamic> json) {
     return AssociateExecutiveMemberModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      zone: json['zone'] as String,
-      photoUrl: json['photoUrl'] as String,
-      coreMembers: (json['coreMembers'] as List<dynamic>?)
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      zone: json['unit'] ?? json['zone'] ?? '',
+      photoUrl: json['photo'] ?? json['photoUrl'] ?? '',
+      coreMembers: (json['props'] as List<dynamic>?)
               ?.map((e) => CoreMemberModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],

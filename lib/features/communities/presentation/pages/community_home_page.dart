@@ -85,6 +85,7 @@ class _CommunityHomeView extends StatelessWidget {
                     ],
                   ),
 
+
                   // Executive Members
                   AccordionSectionWidget(
                     theme: theme,
@@ -146,6 +147,7 @@ class _CommunityHomeView extends StatelessWidget {
                         ),
                     ],
                   ),
+
 
                   const SizedBox(height: 16),
                   Padding(

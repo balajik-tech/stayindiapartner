@@ -5,5 +5,5 @@ class GetExecutiveCommitteeUseCase {
   final AssociateRepository repository;
   const GetExecutiveCommitteeUseCase(this.repository);
 
-  Future<List<CommitteeMemberEntity>> call() => repository.getExecutiveCommittee();
+  Future<List<CommitteeMemberEntity>> call(String associationId) => repository.getExecutiveCommittee(associationId);
 }

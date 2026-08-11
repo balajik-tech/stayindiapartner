@@ -5,5 +5,5 @@ class GetCommunityThemeUseCase {
   final AssociateRepository repository;
   const GetCommunityThemeUseCase(this.repository);
 
-  Future<CommunityThemeEntity> call() => repository.getCommunityTheme();
+  Future<CommunityThemeEntity> call(String associationId) => repository.getCommunityTheme(associationId);
 }

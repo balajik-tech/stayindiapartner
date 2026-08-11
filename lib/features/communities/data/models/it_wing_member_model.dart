@@ -10,10 +10,10 @@ class AssociateItWingMemberModel extends ItWingMemberEntity {
 
   factory AssociateItWingMemberModel.fromJson(Map<String, dynamic> json) {
     return AssociateItWingMemberModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      role: json['role'] as String,
-      photoUrl: json['photoUrl'] as String,
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      role: json['role'] ?? '',
+      photoUrl: json['photo'] ?? json['photoUrl'] ?? '',
     );
   }
 

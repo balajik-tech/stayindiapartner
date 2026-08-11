@@ -11,12 +11,13 @@ class AssociateCommitteeMemberModel extends CommitteeMemberEntity {
   });
 
   factory AssociateCommitteeMemberModel.fromJson(Map<String, dynamic> json) {
+    final tier = json['tier'] as int? ?? 1;
     return AssociateCommitteeMemberModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      position: json['position'] as String,
-      photoUrl: json['photoUrl'] as String,
-      isHighlighted: json['isHighlighted'] as bool? ?? false,
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      position: json['role'] ?? json['position'] ?? '',
+      photoUrl: json['photo'] ?? json['photoUrl'] ?? '',
+      isHighlighted: tier == 0,
     );
   }
 

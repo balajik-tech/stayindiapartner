@@ -11,10 +11,10 @@ import '../models/association_portal_model.dart';
 /// `CommunityRemoteDataSource` (calling the real theme/members API)
 /// can be dropped in without touching the repository.
 abstract class AssociateDataSource {
-  Future<List<AssociateCommitteeMemberModel>> getExecutiveCommittee();
-  Future<List<AssociateExecutiveMemberModel>> getExecutiveMembers();
-  Future<List<AssociateItWingMemberModel>> getItWingMembers();
-  Future<AssociateCommunityThemeModel> getCommunityTheme();
+  Future<List<AssociateCommitteeMemberModel>> getExecutiveCommittee(String associationId);
+  Future<List<AssociateExecutiveMemberModel>> getExecutiveMembers(String associationId);
+  Future<List<AssociateItWingMemberModel>> getItWingMembers(String associationId);
+  Future<AssociateCommunityThemeModel> getCommunityTheme(String associationId);
   Future<AssociationDetailsModel> getAssociationDetails(String id);
   Future<List<AssociationPortalModel>> getAssociations();
 }
@@ -36,93 +36,43 @@ class AssociateStaticDataSource implements AssociateDataSource {
   }
 
   @override
-  Future<List<AssociateCommitteeMemberModel>> getExecutiveCommittee() async {
-    return const [
-      AssociateCommitteeMemberModel(
-        id: 'TNIT-EC-01',
-        name: 'Name',
-        position: 'STATE PRESIDENT',
-        photoUrl: '',
-        isHighlighted: true,
-      ),
-      AssociateCommitteeMemberModel(
-        id: 'TNIT-EC-02',
-        name: 'Name',
-        position: 'STATE SECRETARY',
-        photoUrl: '',
-        isHighlighted: true,
-      ),
-      AssociateCommitteeMemberModel(
-        id: 'TNIT-EC-03',
-        name: 'Name',
-        position: 'STATE TREASURER',
-        photoUrl: '',
-        isHighlighted: true,
-      ),
-      AssociateCommitteeMemberModel(
-        id: 'TNIT-EC-04',
-        name: 'Name',
-        position: 'STATE VICE PRESIDENT',
-        photoUrl: '',
-      ),
-      AssociateCommitteeMemberModel(
-        id: 'TNIT-EC-05',
-        name: 'Name',
-        position: 'STATE VICE PRESIDENT',
-        photoUrl: '',
-      ),
-      AssociateCommitteeMemberModel(
-        id: 'TNIT-EC-06',
-        name: 'Name',
-        position: 'STATE JOINT SECRETARY',
-        photoUrl: '',
-      ),
-      AssociateCommitteeMemberModel(
-        id: 'TNIT-EC-07',
-        name: 'Name',
-        position: 'STATE JOINT SECRETARY',
-        photoUrl: '',
-      ),
-    ];
+  Future<List<AssociateCommitteeMemberModel>> getExecutiveCommittee(String associationId) async {
+    final response = await _dio.get('${ApiConstants.associationWorkingBody}/$associationId');
+    if (response.statusCode == 200) {
+      final raw = response.data;
+      final data = raw['data'] as Map<String, dynamic>;
+      final list = data['roles'] as List;
+      return list.map((json) => AssociateCommitteeMemberModel.fromJson(json)).toList();
+    }
+    throw Exception('Failed to fetch executive committee');
   }
 
   @override
-  Future<List<AssociateExecutiveMemberModel>> getExecutiveMembers() async {
-    return const [
-      AssociateExecutiveMemberModel(
-        id: 'TNIT-EXE-001',
-        name: 'N. Ganesh',
-        zone: 'Chennai Zone',
-        photoUrl: '',
-        coreMembers: [
-          CoreMemberModel(id: 'TNIT-COR-0001', name: 'L. Bala', photoUrl: ''),
-          CoreMemberModel(id: 'TNIT-COR-0002', name: 'V. Senthil', photoUrl: ''),
-        ],
-      ),
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-002', name: 'P. Selvam', zone: 'Coimbatore Zone', photoUrl: ''),
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-003', name: 'K. Sivakumar', zone: 'Madurai Zone', photoUrl: ''),
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-004', name: 'G. Bala', zone: 'Trichy Zone', photoUrl: ''),
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-005', name: 'E. Thiru', zone: 'Salem Zone', photoUrl: ''),
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-006', name: 'D. Vignesh', zone: 'Tirunelveli Zone', photoUrl: ''),
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-007', name: 'C. Praveen', zone: 'Erode Zone', photoUrl: ''),
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-008', name: 'V. Praveen', zone: 'Vellore Zone', photoUrl: ''),
-      AssociateExecutiveMemberModel(id: 'TNIT-EXE-009', name: 'R. Suresh', zone: 'Thanjavur Zone', photoUrl: ''),
-    ];
+  Future<List<AssociateExecutiveMemberModel>> getExecutiveMembers(String associationId) async {
+    final response = await _dio.get('${ApiConstants.associationExecutiveMembers}/$associationId');
+    if (response.statusCode == 200) {
+      final raw = response.data;
+      final data = raw['data'] as Map<String, dynamic>;
+      final list = data['roles'] as List;
+      return list.map((json) => AssociateExecutiveMemberModel.fromJson(json)).toList();
+    }
+    throw Exception('Failed to fetch executive members');
   }
 
   @override
-  Future<List<AssociateItWingMemberModel>> getItWingMembers() async {
-    return const [
-      AssociateItWingMemberModel(id: 'TNIT-ITW-01', name: 'R. Vijay', role: 'IT WING', photoUrl: ''),
-      AssociateItWingMemberModel(id: 'TNIT-ITW-02', name: 'T. Bharath', role: 'IT WING', photoUrl: ''),
-      AssociateItWingMemberModel(id: 'TNIT-ITW-03', name: 'S. Gopal', role: 'IT WING', photoUrl: ''),
-      AssociateItWingMemberModel(id: 'TNIT-ITW-04', name: 'C. Murugan', role: 'IT WING', photoUrl: ''),
-      AssociateItWingMemberModel(id: 'TNIT-ITW-05', name: 'L. Madhan', role: 'IT WING', photoUrl: ''),
-    ];
+  Future<List<AssociateItWingMemberModel>> getItWingMembers(String associationId) async {
+    final response = await _dio.get('${ApiConstants.associationTeamLeads}/$associationId');
+    if (response.statusCode == 200) {
+      final raw = response.data;
+      final data = raw['data'] as Map<String, dynamic>;
+      final list = data['roles'] as List;
+      return list.map((json) => AssociateItWingMemberModel.fromJson(json)).toList();
+    }
+    throw Exception('Failed to fetch IT wing members');
   }
 
   @override
-  Future<AssociateCommunityThemeModel> getCommunityTheme() async {
+  Future<AssociateCommunityThemeModel> getCommunityTheme(String associationId) async {
     return const AssociateCommunityThemeModel(
       primaryColor: '#16305A', // top card & membership card & card title & count in card color change
       primaryColorLight: '#1E4976', // gradient background color for top card

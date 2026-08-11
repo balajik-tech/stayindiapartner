@@ -6,10 +6,10 @@ import '../entities/association_details_entity.dart';
 import '../entities/association_portal_entity.dart';
 
 abstract class AssociateRepository {
-  Future<List<CommitteeMemberEntity>> getExecutiveCommittee();
-  Future<List<ExecutiveMemberEntity>> getExecutiveMembers();
-  Future<List<ItWingMemberEntity>> getItWingMembers();
-  Future<CommunityThemeEntity> getCommunityTheme();
+  Future<List<CommitteeMemberEntity>> getExecutiveCommittee(String associationId);
+  Future<List<ExecutiveMemberEntity>> getExecutiveMembers(String associationId);
+  Future<List<ItWingMemberEntity>> getItWingMembers(String associationId);
+  Future<CommunityThemeEntity> getCommunityTheme(String associationId);
   Future<AssociationDetailsEntity> getAssociationDetails(String id);
   Future<List<AssociationPortalEntity>> getAssociations();
 }

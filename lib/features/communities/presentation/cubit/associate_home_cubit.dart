@@ -27,10 +27,10 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
     emit(const AssociateHomeDataLoading());
     try {
       final results = await Future.wait([
-        getCommunityTheme(),
-        getExecutiveCommittee(),
-        getExecutiveMembers(),
-        getItWingMembers(),
+        getCommunityTheme(associationId),
+        getExecutiveCommittee(associationId),
+        getExecutiveMembers(associationId),
+        getItWingMembers(associationId),
       ]);
 
       AssociationDetailsEntity? details;

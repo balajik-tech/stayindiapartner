@@ -5,5 +5,5 @@ class GetItWingMembersUseCase {
   final AssociateRepository repository;
   const GetItWingMembersUseCase(this.repository);
 
-  Future<List<ItWingMemberEntity>> call() => repository.getItWingMembers();
+  Future<List<ItWingMemberEntity>> call(String associationId) => repository.getItWingMembers(associationId);
 }
