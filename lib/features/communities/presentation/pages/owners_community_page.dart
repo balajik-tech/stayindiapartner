@@ -60,7 +60,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       if (jsonStr != null) {
         final Map<String, dynamic> decoded = jsonDecode(jsonStr);
         setState(() {
-          _unreadMessageCounts = decoded.map((key, value) => MapEntry(key, value as int));
+          _unreadMessageCounts = decoded.map(
+            (key, value) => MapEntry(key, value as int),
+          );
         });
       }
     } catch (e) {
@@ -71,7 +73,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   Future<void> _saveUnreadMessageCounts() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('owner_community_unread_counts', jsonEncode(_unreadMessageCounts));
+      await prefs.setString(
+        'owner_community_unread_counts',
+        jsonEncode(_unreadMessageCounts),
+      );
     } catch (e) {
       AppLogger.error('Error saving unread counts: $e');
     }
@@ -115,8 +120,6 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       if (mounted) setState(fn);
     });
   }
-
-
 
   @override
   void initState() {
@@ -187,15 +190,19 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: isOfficial ? const Color(0xFF2563EB) : Colors.transparent,
+                  color: isOfficial
+                      ? const Color(0xFF2563EB)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12.r),
                   boxShadow: isOfficial
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF2563EB).withValues(alpha: 0.2),
+                            color: const Color(
+                              0xFF2563EB,
+                            ).withValues(alpha: 0.2),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
-                          )
+                          ),
                         ]
                       : null,
                 ),
@@ -208,13 +215,18 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       style: GoogleFonts.dmSans(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w800,
-                        color: isOfficial ? Colors.white : const Color(0xFF64748B),
+                        color: isOfficial
+                            ? Colors.white
+                            : const Color(0xFF64748B),
                       ),
                     ),
                     if (unreadOfficial > 0) ...[
                       SizedBox(width: 6.w),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
                         decoration: BoxDecoration(
                           color: isOfficial ? Colors.white : Colors.redAccent,
                           borderRadius: BorderRadius.circular(10.r),
@@ -227,7 +239,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                           child: Text(
                             '$unreadOfficial',
                             style: TextStyle(
-                              color: isOfficial ? const Color(0xFF2563EB) : Colors.white,
+                              color: isOfficial
+                                  ? const Color(0xFF2563EB)
+                                  : Colors.white,
                               fontSize: 10.sp,
                               fontWeight: FontWeight.bold,
                             ),
@@ -250,15 +264,19 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: !isOfficial ? const Color(0xFFEA580C) : Colors.transparent,
+                  color: !isOfficial
+                      ? const Color(0xFFEA580C)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12.r),
                   boxShadow: !isOfficial
                       ? [
                           BoxShadow(
-                            color: const Color(0xFFEA580C).withValues(alpha: 0.2),
+                            color: const Color(
+                              0xFFEA580C,
+                            ).withValues(alpha: 0.2),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
-                          )
+                          ),
                         ]
                       : null,
                 ),
@@ -271,13 +289,18 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       style: GoogleFonts.dmSans(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w800,
-                        color: !isOfficial ? Colors.white : const Color(0xFF64748B),
+                        color: !isOfficial
+                            ? Colors.white
+                            : const Color(0xFF64748B),
                       ),
                     ),
                     if (unreadForum > 0) ...[
                       SizedBox(width: 6.w),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
                         decoration: BoxDecoration(
                           color: !isOfficial ? Colors.white : Colors.redAccent,
                           borderRadius: BorderRadius.circular(10.r),
@@ -290,7 +313,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                           child: Text(
                             '$unreadForum',
                             style: TextStyle(
-                              color: !isOfficial ? const Color(0xFFEA580C) : Colors.white,
+                              color: !isOfficial
+                                  ? const Color(0xFFEA580C)
+                                  : Colors.white,
                               fontSize: 10.sp,
                               fontWeight: FontWeight.bold,
                             ),
@@ -321,12 +346,22 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           color: AppColors.primaryBlue,
           child: BlocBuilder<SocialFeedCubit, SocialFeedState>(
             builder: (context, state) {
-              final posts = state is SocialFeedLoaded ? state.posts : <SocialPostEntity>[];
-              final officialPosts = posts.where((p) => p.visibility?.toUpperCase() != 'GLOBAL').toList();
-              final unreadOfficial = officialPosts.where((p) => !_readPostIds.contains(p.id)).length;
+              final posts = state is SocialFeedLoaded
+                  ? state.posts
+                  : <SocialPostEntity>[];
+              final officialPosts = posts
+                  .where((p) => p.visibility?.toUpperCase() != 'GLOBAL')
+                  .toList();
+              final unreadOfficial = officialPosts
+                  .where((p) => !_readPostIds.contains(p.id))
+                  .length;
 
-              final globalPosts = posts.where((p) => p.visibility?.toUpperCase() == 'GLOBAL').toList();
-              final unreadForum = globalPosts.where((p) => !_readPostIds.contains(p.id)).length;
+              final globalPosts = posts
+                  .where((p) => p.visibility?.toUpperCase() == 'GLOBAL')
+                  .toList();
+              final unreadForum = globalPosts
+                  .where((p) => !_readPostIds.contains(p.id))
+                  .length;
 
               return CustomScrollView(
                 controller: _scrollController,
@@ -505,9 +540,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                           color: Colors.white,
                         ),
                         child: Icon(
-                          Icons.add,
+                          Icons.person,
                           color: AppColors.primaryBlue,
-                          size: 24.sp,
+                          size: 28.sp,
                         ),
                       ),
                       SizedBox(height: 6.h),
@@ -540,13 +575,14 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => CommunityDetailPage(
-                                communityId: c.id,
-                              ),
+                              builder: (_) =>
+                                  CommunityDetailPage(communityId: c.id),
                             ),
                           ).then((_) {
                             if (context.mounted) {
-                              context.read<OwnerCommunityCubit>().loadCommunities();
+                              context
+                                  .read<OwnerCommunityCubit>()
+                                  .loadCommunities();
                             }
                           });
                         } else {
@@ -572,7 +608,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                               _activeChatRoomId = null;
                             });
                             if (context.mounted) {
-                              context.read<OwnerCommunityCubit>().loadCommunities();
+                              context
+                                  .read<OwnerCommunityCubit>()
+                                  .loadCommunities();
                             }
                           });
                         }
@@ -602,7 +640,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                                       : null,
                                   backgroundColor: isPending
                                       ? Colors.orange.shade50
-                                      : AppColors.accentOrange.withValues(alpha: 0.1),
+                                      : AppColors.accentOrange.withValues(
+                                          alpha: 0.1,
+                                        ),
                                   child: c.image == null
                                       ? Icon(
                                           Icons.groups,
@@ -711,7 +751,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline_rounded, color: const Color(0xFF2563EB), size: 20.sp),
+              Icon(
+                Icons.info_outline_rounded,
+                color: const Color(0xFF2563EB),
+                size: 20.sp,
+              ),
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
@@ -1093,7 +1137,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      isOfficial ? 'no_official_updates'.tr() : 'no_forum_posts'.tr(),
+                      isOfficial
+                          ? 'no_official_updates'.tr()
+                          : 'no_forum_posts'.tr(),
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
@@ -1102,8 +1148,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      isOfficial 
-                          ? 'official_updates_appear_here'.tr() 
+                      isOfficial
+                          ? 'official_updates_appear_here'.tr()
                           : 'forum_posts_appear_here'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -1163,8 +1209,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     }
     return [const SliverToBoxAdapter(child: SizedBox.shrink())];
   }
-
-  }
+}
 
 class _PostCard extends StatefulWidget {
   final SocialPostEntity post;
@@ -1239,7 +1284,8 @@ class _PostCardState extends State<_PostCard> {
       return _buildInlineEditor(context);
     }
 
-    final pollOptionsList = widget.post.poll?['options'] as List<dynamic>? ?? [];
+    final pollOptionsList =
+        widget.post.poll?['options'] as List<dynamic>? ?? [];
     int totalVotes = 0;
     for (var opt in pollOptionsList) {
       if (opt is Map) {
@@ -1248,18 +1294,24 @@ class _PostCardState extends State<_PostCard> {
     }
 
     final isOfficialPost = widget.post.visibility?.toUpperCase() != 'GLOBAL';
-    final accentColor = isOfficialPost ? const Color(0xFF2563EB) : const Color(0xFFEA580C);
+    final accentColor = isOfficialPost
+        ? const Color(0xFF2563EB)
+        : const Color(0xFFEA580C);
     final indicatorIcon = isOfficialPost ? '🔹' : '🔸';
-    
+
     String displayRole;
     if (isOfficialPost) {
-      displayRole = (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
+      displayRole =
+          (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
           ? widget.post.userRole!
           : 'president_admin_role'.tr();
     } else {
       final city = widget.post.userCity;
       final state = widget.post.userState;
-      if (city != null && city.isNotEmpty && state != null && state.isNotEmpty) {
+      if (city != null &&
+          city.isNotEmpty &&
+          state != null &&
+          state.isNotEmpty) {
         displayRole = '$city, $state';
       } else if (city != null && city.isNotEmpty) {
         displayRole = city;
@@ -1291,331 +1343,358 @@ class _PostCardState extends State<_PostCard> {
             children: [
               Row(
                 children: [
-              CircleAvatar(
-                radius: 18.r,
-                backgroundImage:
-                    (widget.post.userAvatar != null && widget.post.userAvatar!.isNotEmpty)
-                    ? CachedNetworkImageProvider(
-                        ApiConstants.getImageUrl(widget.post.userAvatar!)!,
-                      )
-                    : null,
-                backgroundColor: accentColor.withValues(alpha: 0.08),
-                child: (widget.post.userAvatar == null || widget.post.userAvatar!.isEmpty)
-                    ? Icon(
-                        Icons.person,
-                        color: accentColor,
-                        size: 20.sp,
-                      )
-                    : null,
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RichText(
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      text: TextSpan(
-                        text: '${widget.post.userName.isNotEmpty ? widget.post.userName : 'Unknown User'} ',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.darkText,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: '$indicatorIcon [$displayRole]',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w700,
-                              color: accentColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 1.h),
-                    Text(
-                      _formatTimeAgo(widget.post.createdAt),
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.grey.shade400,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              BlocBuilder<AuthCubit, AuthState>(
-                builder: (context, authState) {
-                  final String? currentUserId = context.read<AuthCubit>().currentOwner?.id;
-                  
-                  if (currentUserId == null || currentUserId != widget.post.userId) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.more_vert_rounded,
-                      color: Colors.grey.shade400,
-                      size: 20.sp,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        setState(() {
-                          _isEditing = true;
-                          _selectedImagePath = null;
-                          _removeImage = false;
-                          _removePoll = false;
-                          _initPollControllers();
-                        });
-                      } else if (value == 'delete') {
-                        _showDeleteConfirmDialog(context, widget.post);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit_rounded, size: 18.sp, color: AppColors.darkText),
-                            SizedBox(width: 8.w),
-                            Text('Edit', style: TextStyle(fontSize: 14.sp)),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete_rounded, size: 18.sp, color: Colors.red),
-                            SizedBox(width: 8.w),
-                            Text('Delete', style: TextStyle(fontSize: 14.sp, color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            widget.post.content,
-            style: TextStyle(
-              fontSize: 15.sp,
-              color: AppColors.darkText,
-              height: 1.4,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          if (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty) ...[
-            SizedBox(height: 16.h),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16.r),
-              child: CachedNetworkImage(
-                imageUrl: ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
-                width: double.infinity,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  height: 180.h,
-                  color: Colors.grey.shade100,
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  height: 180.h,
-                  color: Colors.grey.shade100,
-                  child: Icon(
-                    Icons.broken_image_rounded,
-                    size: 32.sp,
-                    color: Colors.grey.shade400,
+                  CircleAvatar(
+                    radius: 18.r,
+                    backgroundImage:
+                        (widget.post.userAvatar != null &&
+                            widget.post.userAvatar!.isNotEmpty)
+                        ? CachedNetworkImageProvider(
+                            ApiConstants.getImageUrl(widget.post.userAvatar!)!,
+                          )
+                        : null,
+                    backgroundColor: accentColor.withValues(alpha: 0.08),
+                    child:
+                        (widget.post.userAvatar == null ||
+                            widget.post.userAvatar!.isEmpty)
+                        ? Icon(Icons.person, color: accentColor, size: 20.sp)
+                        : null,
                   ),
-                ),
-              ),
-            ),
-          ],
-          if (pollOptionsList.isNotEmpty) ...[
-            SizedBox(height: 16.h),
-            ...List.generate(pollOptionsList.length, (i) {
-              final opt = pollOptionsList[i];
-              if (opt is Map) {
-                final text = opt['text']?.toString() ?? '';
-                final count = ((opt['votesCount'] ?? opt['votes'] ?? 0) as num)
-                    .toInt();
-                final pct = totalVotes > 0 ? (count / totalVotes) : 0.0;
-                final isMyVote = widget.post.userVote == i;
-
-                return BouncingWrapper(
-                  onTap: widget.post.userVote != null
-                      ? null
-                      : () {
-                          context.read<SocialFeedCubit>().votePoll(widget.post.id, i);
-                        },
-                  child: Container(
-                    margin: EdgeInsets.only(bottom: 8.h),
-                    height: 44.h,
-                    decoration: BoxDecoration(
-                      color: isMyVote
-                          ? AppColors.primaryBlue.withValues(alpha: 0.08)
-                          : Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: isMyVote
-                            ? AppColors.primaryBlue
-                            : Colors.grey.shade200,
-                        width: isMyVote ? 2 : 1,
-                      ),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.centerLeft,
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            return Container(
-                              width: constraints.maxWidth * pct,
-                              decoration: BoxDecoration(
-                                color: isMyVote
-                                    ? AppColors.primaryBlue.withValues(
-                                        alpha: 0.15,
-                                      )
-                                    : Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                            );
-                          },
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.w),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      if (isMyVote) ...[
-                                        Icon(
-                                          Icons.check_circle_rounded,
-                                          color: AppColors.primaryBlue,
-                                          size: 18.sp,
-                                        ),
-                                        SizedBox(width: 8.w),
-                                      ],
-                                      Expanded(
-                                        child: Text(
-                                          text,
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: isMyVote
-                                                ? FontWeight.w800
-                                                : FontWeight.w600,
-                                            color: AppColors.darkText,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  '${(pct * 100).round()}% ($count)',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.greyText,
-                                  ),
-                                ),
-                              ],
+                        RichText(
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
+                            text:
+                                '${widget.post.userName.isNotEmpty ? widget.post.userName : 'Unknown User'} ',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.darkText,
                             ),
+                            children: [
+                              TextSpan(
+                                text: '$indicatorIcon [$displayRole]',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: accentColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 1.h),
+                        Text(
+                          _formatTimeAgo(widget.post.createdAt),
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey.shade400,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
-                );
-              }
-              return const SizedBox.shrink();
-            }),
-          ],
-          SizedBox(height: 16.h),
-          Divider(color: Colors.grey.shade100, height: 1),
-          SizedBox(height: 12.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              BouncingWrapper(
-                onTap: () {
-                  context.read<SocialFeedCubit>().toggleLike(widget.post.id);
-                },
-                child: Row(
-                  children: [
-                    Icon(
-                      widget.post.isLiked
-                          ? Icons.thumb_up_alt_rounded
-                          : Icons.thumb_up_off_alt_rounded,
-                      color: widget.post.isLiked
-                          ? AppColors.primaryBlue
-                          : Colors.grey.shade400,
-                      size: 20.sp,
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      '${widget.post.likesCount}',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: widget.post.isLiked
-                            ? FontWeight.w800
-                            : FontWeight.w600,
-                        color: widget.post.isLiked
-                            ? AppColors.primaryBlue
-                            : Colors.grey.shade500,
-                      ),
-                    ),
-                  ],
+                  BlocBuilder<AuthCubit, AuthState>(
+                    builder: (context, authState) {
+                      final String? currentUserId = context
+                          .read<AuthCubit>()
+                          .currentOwner
+                          ?.id;
+
+                      if (currentUserId == null ||
+                          currentUserId != widget.post.userId) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_vert_rounded,
+                          color: Colors.grey.shade400,
+                          size: 20.sp,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            setState(() {
+                              _isEditing = true;
+                              _selectedImagePath = null;
+                              _removeImage = false;
+                              _removePoll = false;
+                              _initPollControllers();
+                            });
+                          } else if (value == 'delete') {
+                            _showDeleteConfirmDialog(context, widget.post);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.edit_rounded,
+                                  size: 18.sp,
+                                  color: AppColors.darkText,
+                                ),
+                                SizedBox(width: 8.w),
+                                Text('Edit', style: TextStyle(fontSize: 14.sp)),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete_rounded,
+                                  size: 18.sp,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  'Delete',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                widget.post.content,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  color: AppColors.darkText,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              BouncingWrapper(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => CommentsSheet(post: widget.post),
-                  );
-                },
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.chat_bubble_outline_rounded,
-                      color: Colors.grey.shade400,
-                      size: 20.sp,
+              if (widget.post.imageUrl != null &&
+                  widget.post.imageUrl!.isNotEmpty) ...[
+                SizedBox(height: 16.h),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16.r),
+                  child: CachedNetworkImage(
+                    imageUrl:
+                        ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      height: 180.h,
+                      color: Colors.grey.shade100,
+                      child: const Center(child: CircularProgressIndicator()),
                     ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      '${widget.post.commentsCount} Replies',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade500,
+                    errorWidget: (context, url, error) => Container(
+                      height: 180.h,
+                      color: Colors.grey.shade100,
+                      child: Icon(
+                        Icons.broken_image_rounded,
+                        size: 32.sp,
+                        color: Colors.grey.shade400,
                       ),
                     ),
-                  ],
+                  ),
                 ),
+              ],
+              if (pollOptionsList.isNotEmpty) ...[
+                SizedBox(height: 16.h),
+                ...List.generate(pollOptionsList.length, (i) {
+                  final opt = pollOptionsList[i];
+                  if (opt is Map) {
+                    final text = opt['text']?.toString() ?? '';
+                    final count =
+                        ((opt['votesCount'] ?? opt['votes'] ?? 0) as num)
+                            .toInt();
+                    final pct = totalVotes > 0 ? (count / totalVotes) : 0.0;
+                    final isMyVote = widget.post.userVote == i;
+
+                    return BouncingWrapper(
+                      onTap: widget.post.userVote != null
+                          ? null
+                          : () {
+                              context.read<SocialFeedCubit>().votePoll(
+                                widget.post.id,
+                                i,
+                              );
+                            },
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 8.h),
+                        height: 44.h,
+                        decoration: BoxDecoration(
+                          color: isMyVote
+                              ? AppColors.primaryBlue.withValues(alpha: 0.08)
+                              : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: isMyVote
+                                ? AppColors.primaryBlue
+                                : Colors.grey.shade200,
+                            width: isMyVote ? 2 : 1,
+                          ),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Container(
+                                  width: constraints.maxWidth * pct,
+                                  decoration: BoxDecoration(
+                                    color: isMyVote
+                                        ? AppColors.primaryBlue.withValues(
+                                            alpha: 0.15,
+                                          )
+                                        : Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(10.r),
+                                  ),
+                                );
+                              },
+                            ),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          if (isMyVote) ...[
+                                            Icon(
+                                              Icons.check_circle_rounded,
+                                              color: AppColors.primaryBlue,
+                                              size: 18.sp,
+                                            ),
+                                            SizedBox(width: 8.w),
+                                          ],
+                                          Expanded(
+                                            child: Text(
+                                              text,
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                fontWeight: isMyVote
+                                                    ? FontWeight.w800
+                                                    : FontWeight.w600,
+                                                color: AppColors.darkText,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      '${(pct * 100).round()}% ($count)',
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.greyText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
+              ],
+              SizedBox(height: 16.h),
+              Divider(color: Colors.grey.shade100, height: 1),
+              SizedBox(height: 12.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  BouncingWrapper(
+                    onTap: () {
+                      context.read<SocialFeedCubit>().toggleLike(
+                        widget.post.id,
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          widget.post.isLiked
+                              ? Icons.thumb_up_alt_rounded
+                              : Icons.thumb_up_off_alt_rounded,
+                          color: widget.post.isLiked
+                              ? AppColors.primaryBlue
+                              : Colors.grey.shade400,
+                          size: 20.sp,
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          '${widget.post.likesCount}',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: widget.post.isLiked
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: widget.post.isLiked
+                                ? AppColors.primaryBlue
+                                : Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  BouncingWrapper(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => CommentsSheet(post: widget.post),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.chat_bubble_outline_rounded,
+                          color: Colors.grey.shade400,
+                          size: 20.sp,
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          '${widget.post.commentsCount} Replies',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    ),
-  ],
-);
+        ),
+      ],
+    );
   }
 
   Widget _buildInlineEditor(BuildContext context) {
@@ -1653,7 +1732,11 @@ class _PostCardState extends State<_PostCard> {
                       _removePoll = true;
                     });
                   },
-                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 16),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.red,
+                    size: 16,
+                  ),
                   label: const Text(
                     'Remove Poll',
                     style: TextStyle(color: Colors.red, fontSize: 12),
@@ -1666,10 +1749,17 @@ class _PostCardState extends State<_PostCard> {
                       _removePoll = false;
                     });
                   },
-                  icon: const Icon(Icons.restore_rounded, color: AppColors.primaryBlue, size: 16),
+                  icon: const Icon(
+                    Icons.restore_rounded,
+                    color: AppColors.primaryBlue,
+                    size: 16,
+                  ),
                   label: const Text(
                     'Restore Poll',
-                    style: TextStyle(color: AppColors.primaryBlue, fontSize: 12),
+                    style: TextStyle(
+                      color: AppColors.primaryBlue,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
             ],
@@ -1700,13 +1790,16 @@ class _PostCardState extends State<_PostCard> {
           ),
           SizedBox(height: 16.h),
 
-          if (widget.post.imageUrl != null && !_removeImage && _selectedImagePath == null)
+          if (widget.post.imageUrl != null &&
+              !_removeImage &&
+              _selectedImagePath == null)
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16.r),
                   child: CachedNetworkImage(
-                    imageUrl: ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
+                    imageUrl:
+                        ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
                     width: double.infinity,
                     height: 180.h,
                     fit: BoxFit.cover,
@@ -1727,7 +1820,11 @@ class _PostCardState extends State<_PostCard> {
                         color: Colors.black54,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
@@ -1761,14 +1858,19 @@ class _PostCardState extends State<_PostCard> {
                         color: Colors.black54,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
 
-          if ((widget.post.imageUrl == null || _removeImage) && _selectedImagePath == null)
+          if ((widget.post.imageUrl == null || _removeImage) &&
+              _selectedImagePath == null)
             OutlinedButton.icon(
               onPressed: _pickImage,
               icon: const Icon(Icons.add_photo_alternate_rounded, size: 18),
@@ -1805,7 +1907,10 @@ class _PostCardState extends State<_PostCard> {
                 ),
                 child: TextField(
                   controller: _pollOptionControllers[index],
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Option ${index + 1}',
                     border: InputBorder.none,
@@ -1860,7 +1965,9 @@ class _PostCardState extends State<_PostCard> {
                       (widget.post.poll == null || _removePoll)) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Post content cannot be completely empty'),
+                        content: Text(
+                          'Post content cannot be completely empty',
+                        ),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -1931,10 +2038,7 @@ class _PostCardState extends State<_PostCard> {
         ),
         content: Text(
           'Are you sure you want to delete this post? This action cannot be undone.',
-          style: TextStyle(
-            color: AppColors.greyText,
-            fontSize: 14.sp,
-          ),
+          style: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
         ),
         actions: [
           TextButton(
