@@ -14,280 +14,515 @@ class OnboardingPage extends StatefulWidget {
   State<OnboardingPage> createState() => _OnboardingPageState();
 }
 
+// class _OnboardingPageState extends State<OnboardingPage> {
+//   final PageController _pageController = PageController();
+//   int _currentIndex = 0;
+//
+//   final List<List<Color>> _gradients = [
+//     [const Color(0xFFFFFFFF), const Color(0xFFF0F4FA)],
+//     [const Color(0xFFFFFFFF), const Color(0xFFEBF0F9)],
+//     [const Color(0xFFFDFDFE), const Color(0xFFF0F4FA)],
+//     [const Color(0xFFFFFFFF), const Color(0xFFEDF2FB)],
+//     [const Color(0xFFFFFFFF), const Color(0xFFF0EFFF)],
+//   ];
+//
+//   String _tr(String key, String fallback) {
+//     final translated = key.tr();
+//     return translated == key ? fallback : translated;
+//   }
+//
+//   @override
+//   void dispose() {
+//     _pageController.dispose();
+//     super.dispose();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: AnimatedContainer(
+//         duration: const Duration(milliseconds: 600),
+//         curve: Curves.easeInOut,
+//         width: double.infinity,
+//         height: double.infinity,
+//         decoration: BoxDecoration(
+//           gradient: LinearGradient(
+//             begin: Alignment.topCenter,
+//             end: Alignment.bottomCenter,
+//             colors: _gradients[_currentIndex],
+//           ),
+//         ),
+//         child: SafeArea(
+//           bottom: false,
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.stretch,
+//             children: [
+//               _buildTopBar(),
+//
+//               Expanded(
+//                 child: PageView.builder(
+//                   controller: _pageController,
+//                   onPageChanged: (index) {
+//                     setState(() {
+//                       _currentIndex = index;
+//                     });
+//                   },
+//                   itemCount: 5,
+//                   itemBuilder: (context, index) {
+//                     return _buildPageContent(index);
+//                   },
+//                 ),
+//               ),
+//
+//               _buildBottomControls(),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+//
+//   Widget _buildTopBar() {
+//     return Padding(
+//       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [
+//           Row(
+//             children: [
+//               Image.asset(
+//                 'assets/images/logo_cropped.jpg',
+//                 height: 24.h,
+//                 errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+//               ),
+//               SizedBox(width: 8.w),
+//               Text(
+//                 'STAY INDIA',
+//                 style: TextStyle(
+//                   color: AppColors.primaryBlue,
+//                   fontSize: 16.sp,
+//                   fontWeight: FontWeight.w900,
+//                   letterSpacing: 1.5,
+//                 ),
+//               ),
+//             ],
+//           ),
+//
+//           if (_currentIndex < 4)
+//             GestureDetector(
+//               onTap: widget.onComplete,
+//               child: Container(
+//                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+//                 decoration: BoxDecoration(
+//                   color: AppColors.primaryBlue.withValues(alpha: 0.1),
+//                   borderRadius: BorderRadius.circular(20.r),
+//                   border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.15), width: 1),
+//                 ),
+//                 child: Text(
+//                   _tr('btn_skip', 'Skip'),
+//                   style: TextStyle(
+//                     color: AppColors.primaryBlue,
+//                     fontSize: 13.sp,
+//                     fontWeight: FontWeight.w700,
+//                   ),
+//                 ),
+//               ),
+//             )
+//           else
+//             SizedBox(width: 50.w),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildPageContent(int index) {
+//     String title = '';
+//     String subtitle = '';
+//     Widget animationWidget;
+//
+//     switch (index) {
+//       case 0:
+//         title = _tr('onboarding_title_1', 'Onboard Properties Swiftly');
+//         subtitle = _tr(
+//           'onboarding_sub_1',
+//           'Configure hostel layouts, blocks, floors, rooms, and bed pricing structures in minutes.',
+//         );
+//         animationWidget = const _PropertySetupAnimation();
+//         break;
+//       case 1:
+//         title = _tr('onboarding_title_2', 'Smart Tenant Management');
+//         subtitle = _tr(
+//           'onboarding_sub_2',
+//           'Digitally register tenants, perform AI-backed face matches, and track active residents.',
+//         );
+//         animationWidget = const _TenantKYCAnimation();
+//         break;
+//       case 2:
+//         title = _tr('onboarding_title_3', 'Automated Rent & Finances');
+//         subtitle = _tr(
+//           'onboarding_sub_3',
+//           'Generate instant rent invoices, log cash/online payments, and view dynamic cashflow charts.',
+//         );
+//         animationWidget = const _FinanceAnalyticsAnimation();
+//         break;
+//       case 3:
+//         title = _tr('onboarding_title_4', 'Seamless Daily Operations');
+//         subtitle = _tr(
+//           'onboarding_sub_4',
+//           'Broadcast notices instantly to room categories, manage staff duties, and resolve tenant tickets.',
+//         );
+//         animationWidget = const _OperationsNoticeAnimation();
+//         break;
+//       case 4:
+//       default:
+//         title = _tr('onboarding_title_5', 'Global & Owner Communities');
+//         subtitle = _tr(
+//           'onboarding_sub_5',
+//           'Connect with owners globally. Discuss strategies, find buyers, or resolve disputes collectively.',
+//         );
+//         animationWidget = const _CommunitiesAnimation();
+//         break;
+//     }
+//
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.stretch,
+//       children: [
+//         SizedBox(height: 12.h),
+//
+//         Padding(
+//           padding: EdgeInsets.symmetric(horizontal: 24.w),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Text(
+//                 title,
+//                 style: TextStyle(
+//                   color: AppColors.primaryBlue,
+//                   fontSize: 28.sp,
+//                   fontWeight: FontWeight.w900,
+//                   letterSpacing: -0.5,
+//                   height: 1.15,
+//                 ),
+//               ),
+//               SizedBox(height: 8.h),
+//               Text(
+//                 subtitle,
+//                 style: TextStyle(
+//                   color: AppColors.primaryBlue.withValues(alpha: 0.7),
+//                   fontSize: 14.sp,
+//                   height: 1.4,
+//                   fontWeight: FontWeight.w500,
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//
+//         SizedBox(height: 24.h),
+//
+//         Expanded(
+//           child: animationWidget,
+//         ),
+//       ],
+//     );
+//   }
+//
+//   Widget _buildBottomControls() {
+//     return Container(
+//       padding: EdgeInsets.only(
+//         left: 24.w,
+//         right: 24.w,
+//         top: 16.h,
+//         bottom: MediaQuery.of(context).padding.bottom + 20.h,
+//       ),
+//       decoration: BoxDecoration(
+//         gradient: LinearGradient(
+//           begin: Alignment.topCenter,
+//           end: Alignment.bottomCenter,
+//           colors: [
+//             Colors.transparent,
+//             Colors.black.withValues(alpha: 0.4),
+//           ],
+//         ),
+//       ),
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: List.generate(5, (index) => _buildDot(index)),
+//           ),
+//           SizedBox(height: 20.h),
+//
+//           _OnboardingActionButton(
+//             text: _currentIndex == 4
+//                 ? _tr('btn_onboard_start', 'Get Started')
+//                 : _tr('btn_continue', 'Continue'),
+//             onPressed: () {
+//               if (_currentIndex == 4) {
+//                 widget.onComplete();
+//               } else {
+//                 _pageController.nextPage(
+//                   duration: const Duration(milliseconds: 500),
+//                   curve: Curves.easeInOutQuart,
+//                 );
+//               }
+//             },
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildDot(int index) {
+//     final isActive = _currentIndex == index;
+//     return AnimatedContainer(
+//       duration: const Duration(milliseconds: 300),
+//       margin: EdgeInsets.symmetric(horizontal: 4.w),
+//       height: 6.h,
+//       width: isActive ? 24.w : 6.w,
+//       decoration: BoxDecoration(
+//         color: isActive ? AppColors.primaryBlue : AppColors.primaryBlue.withValues(alpha: 0.3),
+//         borderRadius: BorderRadius.circular(3.r),
+//       ),
+//     );
+//   }
+// }
+
 class _OnboardingPageState extends State<OnboardingPage> {
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
+  final _controller = PageController();
+  int _index = 0;
 
-  final List<List<Color>> _gradients = [
-    [const Color(0xFFFFFFFF), const Color(0xFFF0F4FA)],
-    [const Color(0xFFFFFFFF), const Color(0xFFEBF0F9)],
-    [const Color(0xFFFDFDFE), const Color(0xFFF0F4FA)],
-    [const Color(0xFFFFFFFF), const Color(0xFFEDF2FB)],
-    [const Color(0xFFFFFFFF), const Color(0xFFF0EFFF)],
+  static const _pages = <_Page>[
+    _Page(
+      image: 'assets/images/onboardscreen1.png',
+      title: 'Manage every bed\nin one place',
+      body: "See who's staying, what's empty and which bed "
+          'frees up tonight — across all your PGs.',
+    ),
+    _Page(
+      image: 'assets/images/onboardscreen2.png',
+      title: 'Verified tenants,\nunlimited leads',
+      body: 'Get ID-checked tenant leads for life — no cap, no expiry, '
+          'and never a rupee of broker commission.',
+    ),
+    _Page(
+      image: 'assets/images/onboardscreen3.png',
+      title: 'Collect rent\nthe easy way',
+      body: 'Take UPI, cards or cash. Online rent settles straight to your '
+          'bank, and every payment lands in one ledger.',
+    ),
   ];
-
-  String _tr(String key, String fallback) {
-    final translated = key.tr();
-    return translated == key ? fallback : translated;
-  }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _controller.dispose();
     super.dispose();
+  }
+
+  void _next() {
+    if (_index == _pages.length - 1) {
+      widget.onComplete();
+    } else {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedContainer(
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOut,
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: _gradients[_currentIndex],
-          ),
-        ),
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildTopBar(),
-              
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    return _buildPageContent(index);
-                  },
-                ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            // Same logo on every page — never rebuilt per slide.
+            Image.asset('assets/images/logo_partner.png', height: 55),
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: _pages.length,
+                onPageChanged: (i) => setState(() => _index = i),
+                itemBuilder: (context, i) {
+                  return Transform.translate(
+                    offset: const Offset(0, -30),
+                    child: _PageView(
+                      page: _pages[i],
+                    ),
+                  );
+                },
               ),
+            ),
 
-              _buildBottomControls(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+            _Dots(count: _pages.length, index: _index),
+            const SizedBox(height: 20),
 
-  Widget _buildTopBar() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Image.asset(
-                'assets/images/logo_cropped.jpg',
-                height: 24.h,
-                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                'STAY INDIA',
-                style: TextStyle(
-                  color: AppColors.primaryBlue,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ],
-          ),
-          
-          if (_currentIndex < 4)
-            GestureDetector(
-              onTap: widget.onComplete,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.15), width: 1),
-                ),
-                child: Text(
-                  _tr('btn_skip', 'Skip'),
-                  style: TextStyle(
-                    color: AppColors.primaryBlue,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            )
-          else
-            SizedBox(width: 50.w),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPageContent(int index) {
-    String title = '';
-    String subtitle = '';
-    Widget animationWidget;
-
-    switch (index) {
-      case 0:
-        title = _tr('onboarding_title_1', 'Onboard Properties Swiftly');
-        subtitle = _tr(
-          'onboarding_sub_1',
-          'Configure hostel layouts, blocks, floors, rooms, and bed pricing structures in minutes.',
-        );
-        animationWidget = const _PropertySetupAnimation();
-        break;
-      case 1:
-        title = _tr('onboarding_title_2', 'Smart Tenant Management');
-        subtitle = _tr(
-          'onboarding_sub_2',
-          'Digitally register tenants, perform AI-backed face matches, and track active residents.',
-        );
-        animationWidget = const _TenantKYCAnimation();
-        break;
-      case 2:
-        title = _tr('onboarding_title_3', 'Automated Rent & Finances');
-        subtitle = _tr(
-          'onboarding_sub_3',
-          'Generate instant rent invoices, log cash/online payments, and view dynamic cashflow charts.',
-        );
-        animationWidget = const _FinanceAnalyticsAnimation();
-        break;
-      case 3:
-        title = _tr('onboarding_title_4', 'Seamless Daily Operations');
-        subtitle = _tr(
-          'onboarding_sub_4',
-          'Broadcast notices instantly to room categories, manage staff duties, and resolve tenant tickets.',
-        );
-        animationWidget = const _OperationsNoticeAnimation();
-        break;
-      case 4:
-      default:
-        title = _tr('onboarding_title_5', 'Global & Owner Communities');
-        subtitle = _tr(
-          'onboarding_sub_5',
-          'Connect with owners globally. Discuss strategies, find buyers, or resolve disputes collectively.',
-        );
-        animationWidget = const _CommunitiesAnimation();
-        break;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(height: 12.h),
-        
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: AppColors.primaryBlue,
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
-                  height: 1.15,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.7),
-                  fontSize: 14.sp,
-                  height: 1.4,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-        
-        SizedBox(height: 24.h),
-
-        Expanded(
-          child: animationWidget,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomControls() {
-    return Container(
-      padding: EdgeInsets.only(
-        left: 24.w,
-        right: 24.w,
-        top: 16.h,
-        bottom: MediaQuery.of(context).padding.bottom + 20.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            Colors.black.withValues(alpha: 0.4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: _PrimaryButton(label: 'Get started', onTap: _next),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) => _buildDot(index)),
-          ),
-          SizedBox(height: 20.h),
-          
-          _OnboardingActionButton(
-            text: _currentIndex == 4
-                ? _tr('btn_onboard_start', 'Get Started')
-                : _tr('btn_continue', 'Continue'),
-            onPressed: () {
-              if (_currentIndex == 4) {
-                widget.onComplete();
-              } else {
-                _pageController.nextPage(
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeInOutQuart,
-                );
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDot(int index) {
-    final isActive = _currentIndex == index;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      height: 6.h,
-      width: isActive ? 24.w : 6.w,
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primaryBlue : AppColors.primaryBlue.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(3.r),
       ),
     );
   }
 }
+
+// ---------------------------------------------------------------- page body
+
+class _Page {
+  const _Page({required this.image, required this.title, required this.body});
+  final String image, title, body;
+}
+
+class _PageView extends StatelessWidget {
+  const _PageView({required this.page});
+  final _Page page;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Illustration is exported at a logical width of 340pt.
+          // It shrinks on small screens but never scales past its native size.
+          Flexible(
+            child: Image.asset(
+              page.image,
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 26),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22),
+            child: Column(
+              children: [
+                Text(
+                  page.title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'BricolageGrotesque',
+                    fontWeight: FontWeight.w800,
+                    fontSize: 31,
+                    height: 1.14,
+                    letterSpacing: -1.3,
+                    color: Color(0xFF0F1D31),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  page.body,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'PlusJakartaSans',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13.5,
+                    height: 1.55,
+                    color: Color(0xFF6C7889),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// -------------------------------------------------------------------- dots
+
+class _Dots extends StatelessWidget {
+  const _Dots({required this.count, required this.index});
+  final int count, index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (i) {
+        final active = i == index;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          margin: const EdgeInsets.symmetric(horizontal: 3.5),
+          height: 7,
+          width: active ? 22 : 7,
+          decoration: BoxDecoration(
+            color: active ? const Color(0xFF17539B) : const Color(0xFFCFD6DE),
+            borderRadius: BorderRadius.circular(99),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+// ------------------------------------------------------------------ button
+
+class _PrimaryButton extends StatelessWidget {
+  const _PrimaryButton({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 56,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF79040), Color(0xFFD96D12)],
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x8CD96D12),
+              blurRadius: 26,
+              offset: Offset(0, 14),
+              spreadRadius: -10,
+            ),
+          ],
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontWeight: FontWeight.w700,
+            fontSize: 15.5,
+            letterSpacing: -0.2,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ------------------------------------------------------------------ colours
+
+/// Brand palette, sampled from the logo.
+abstract class StayIndiaColors {
+  static const blue = Color(0xFF17539B);
+  static const blueDeep = Color(0xFF103F78);
+  static const blueWash = Color(0xFFE9F0F9);
+  static const orange = Color(0xFFF38226);
+  static const orangeDeep = Color(0xFFD96D12);
+  static const ink = Color(0xFF0F1D31);
+  static const muted = Color(0xFF6C7889);
+}
+
 
 class _PropertySetupAnimation extends StatefulWidget {
   const _PropertySetupAnimation();
