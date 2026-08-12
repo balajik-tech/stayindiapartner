@@ -18,14 +18,16 @@ class ExecutiveStructureMemberEntity extends Equatable {
 class ExecutiveStructureLeaderEntity extends Equatable {
   final String id;
   final String name;
+  final String photoUrl;
   final List<ExecutiveStructureMemberEntity> members;
 
   const ExecutiveStructureLeaderEntity({
     required this.id,
     required this.name,
+    this.photoUrl = '',
     required this.members,
   });
 
   @override
-  List<Object?> get props => [id, name, members];
+  List<Object?> get props => [id, name, photoUrl, members];
 }

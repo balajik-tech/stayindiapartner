@@ -20,6 +20,7 @@ class ExecutiveStructureLeaderModel extends ExecutiveStructureLeaderEntity {
   const ExecutiveStructureLeaderModel({
     required super.id,
     required super.name,
+    super.photoUrl = '',
     required List<ExecutiveStructureMemberModel> super.members,
   });
 
@@ -27,6 +28,7 @@ class ExecutiveStructureLeaderModel extends ExecutiveStructureLeaderEntity {
     return ExecutiveStructureLeaderModel(
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
+      photoUrl: json['photo'] ?? json['photoUrl'] ?? '',
       members: (json['members'] as List<dynamic>?)
               ?.map((e) => ExecutiveStructureMemberModel.fromJson(e as Map<String, dynamic>))
               .toList() ??

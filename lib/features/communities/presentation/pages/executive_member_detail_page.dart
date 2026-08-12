@@ -54,6 +54,11 @@ class _ExecutiveMemberDetailView extends StatelessWidget {
         List<ExecutiveStructureMemberEntity> allMembers = [];
         if (state is ExecutiveDetailLoaded) {
           for (var leader in state.leaders) {
+            allMembers.add(ExecutiveStructureMemberEntity(
+              id: leader.id,
+              name: leader.name,
+              photoUrl: leader.photoUrl,
+            ));
             allMembers.addAll(leader.members);
           }
         }
