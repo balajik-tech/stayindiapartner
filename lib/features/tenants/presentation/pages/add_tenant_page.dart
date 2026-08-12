@@ -268,6 +268,70 @@ class _AddTenantPageState extends State<AddTenantPage> {
     }
   }
 
+  bool isValidAadhaar(String? aadhaar) {
+    if (aadhaar == null || aadhaar.trim().isEmpty) {
+      return false;
+    }
+
+    // Remove spaces and non-numeric characters
+    final number = aadhaar.replaceAll(RegExp(r'\D'), '');
+
+    // Must contain exactly 12 digits
+    if (number.length != 12) {
+      return false;
+    }
+
+    // Aadhaar cannot start with 0 or 1
+    if (number.startsWith('0') || number.startsWith('1')) {
+      return false;
+    }
+
+    return _isValidVerhoeff(number);
+  }
+
+  bool _isValidVerhoeff(String number) {
+    const d = [
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
+      [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
+      [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
+      [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
+      [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
+      [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
+      [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
+      [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
+      [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+    ];
+
+    const p = [
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
+      [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
+      [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
+      [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
+      [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
+      [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
+      [7, 0, 4, 6, 9, 1, 3, 2, 5, 8],
+    ];
+
+    int checksum = 0;
+
+    // Process from right to left
+    final digits = number
+        .split('')
+        .map(int.parse)
+        .toList()
+        .reversed
+        .toList();
+
+    for (int i = 0; i < digits.length; i++) {
+      checksum = d[checksum][p[i % 8][digits[i]]];
+    }
+
+    return checksum == 0;
+  }
+
+
   void _submit() {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
@@ -277,6 +341,17 @@ class _AddTenantPageState extends State<AddTenantPage> {
     final dayRentText = _dayRentController.text.trim();
     final maintainanceText = _maintenanceController.text.trim();
     final customDepositeText = _customDepositController.text.trim();
+
+    final aadharNumber = _extractedAadharData['aadharNumber']!;
+    final extractedAadhaar = aadharNumber;
+
+    final extractedAadhaarDOB = _extractedAadharData['dob'] ?? '';
+    final extractedAadhaarGender = _extractedAadharData['gender'] ?? '';
+    final extractedAadhaarAddress = _extractedAadharData['address'] ?? '';
+
+
+
+
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -378,20 +453,36 @@ class _AddTenantPageState extends State<AddTenantPage> {
       return;
     }
 
-    // if (_extractedAadharData['aadharNumber']!.isEmpty || _extractedAadharData['aadharNumber']!.length != 12) {
-    //   String found = _extractedAadharData['aadharNumber']!;
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       content: Text(
-    //         found.isEmpty
-    //           ? 'Could not detect Aadhaar number. Please ensure the front photo is clear and well-lit.'
-    //           : 'Extracted invalid Aadhaar number ($found). Please retake the front photo.'
-    //       ),
-    //       backgroundColor: Colors.redAccent,
-    //     ),
-    //   );
-    //   return;
-    // }
+    if (aadharNumber.isEmpty || aadharNumber!.length != 12) {
+      String found = aadharNumber;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              found.isEmpty
+                  ? 'Could not detect Aadhaar number. Please ensure the clear and well-lit.'
+                  : 'Extracted invalid Aadhaar number ($found). Please retake the photo.'
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+    if (isValidAadhaar(extractedAadhaar)) {
+      debugPrint('Valid Aadhaar format/checksum');
+    } else {
+      debugPrint('Invalid Aadhaar number');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Invalid Aadhaar number.'
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+    debugPrint("Aaadhar Number ::: $extractedAadhaar");
+
 
     final authState = context.read<AuthCubit>().state;
     String? ownerPhone;
@@ -469,10 +560,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
       endDate: (checkInDate.isNotEmpty)
           ? DateTime.parse(checkOutDate)
           : DateTime.now(),
-      aadhaarNumber: _extractedAadharData['aadharNumber'] ?? '',
-      dob: _extractedAadharData['dob'] ?? '',
-      gender: _extractedAadharData['gender'] ?? '',
-      address: _extractedAadharData['address'] ?? '',
+      aadhaarNumber: extractedAadhaar ?? '',
+      dob: extractedAadhaarDOB ?? '',
+      gender: extractedAadhaarGender.toLowerCase() ?? '',
+      address: extractedAadhaarAddress ?? '',
     );
   }
 
@@ -586,17 +677,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             _emailController,
                             keyboardType: TextInputType.emailAddress,
                           ),
-
-                          // if (_extractedAadharData['aadharNumber']!.isNotEmpty) ...[
-                          //   SizedBox(height: 24.h),
-                          //   _buildSectionTitle('Extracted Aadhar Details'),
-                          //   SizedBox(height: 16.h),
-                          //   _buildReadOnlyDetail('Aadhaar Number', _extractedAadharData['aadharNumber']),
-                          //   _buildReadOnlyDetail('Name', _extractedAadharData['name']),
-                          //   _buildReadOnlyDetail('DOB', _extractedAadharData['dob']),
-                          //   _buildReadOnlyDetail('Gender', _extractedAadharData['gender']),
-                          //   _buildReadOnlyDetail('Address', _extractedAadharData['address']),
-                          // ],
 
                           SizedBox(height: 32.h),
                           _buildSectionTitle('room_allocation'.tr()),
@@ -1366,7 +1446,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         setState(() {
           _aadharPhoto = file;
         });
-        // _extractAadharText(file, isFront: true);
+        _extractAadharText(file, isFront: true);
       },
     );
   }
@@ -1444,7 +1524,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
                  if (potentialName.length > 3 && !potentialName.contains(RegExp(r'\d')) && 
                      !potentialName.toLowerCase().contains('government') && !potentialName.toLowerCase().contains('india')) {
                     _extractedAadharData['name'] = potentialName;
-                    _nameController.text = potentialName;
                     break;
                  }
                }
@@ -1468,6 +1547,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
           }
         }
       });
+
+      debugPrint("Aaadhar Number ::: Extracted Aadhar Data: isFront = $isFront ::: $_extractedAadharData");
 
       await textRecognizer.close();
     } catch (e) {
