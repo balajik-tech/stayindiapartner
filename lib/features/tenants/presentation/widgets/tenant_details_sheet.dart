@@ -570,6 +570,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     final verified = detail?.kycVerified ?? false;
     final aadharPhotoUrl = ApiConstants.getImageUrl(detail?.aadharCardPhoto);
     final aadharPhotoBackUrl = ApiConstants.getImageUrl(detail?.idPhotoBack);
+    final maskedAadhaar = detail?.aadhaarNumber;
 
     return _buildSection(
       'kyc_docs'.tr(),
@@ -617,6 +618,16 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         ),
                       ),
                       SizedBox(height: 2.h),
+                      if(maskedAadhaar!.isNotEmpty)...[
+                        Text(
+                          maskedAadhaar,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color:  AppColors.greyText,
+                          ),
+                        )
+                      ],
                       Row(
                         children: [
                           Icon(

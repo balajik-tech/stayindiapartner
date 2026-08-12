@@ -73,6 +73,7 @@ class TenantDetailModel extends TenantDetailEntity {
     required super.kycVerified,
     super.aadharCardPhoto,
     super.idPhotoBack,
+    super.aadhaarNumber,
     super.stay,
     required super.payments,
     required super.outstandingAmount,
@@ -108,6 +109,8 @@ class TenantDetailModel extends TenantDetailEntity {
           kycData?['idPhotoFront']?.toString(),
       idPhotoBack:
         kycData?['idPhotoBack']?.toString() ?? '',
+      aadhaarNumber:
+        kycData?['aadhaarNumber']?.toString() ?? '',
       stay: stayData != null ? TenantStayDetailModel.fromJson(stayData) : null,
       payments: paymentItems
           .map(
