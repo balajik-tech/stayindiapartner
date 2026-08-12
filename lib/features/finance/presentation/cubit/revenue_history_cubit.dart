@@ -4,6 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:stayindia_owner/features/finance/domain/entities/revenue_history_item.dart';
 import 'package:stayindia_owner/features/finance/domain/usecases/get_revenue_history_usecase.dart';
 
+import 'package:stayindia_owner/features/finance/domain/entities/revenue_summary.dart';
+
 abstract class RevenueHistoryState extends Equatable {
   const RevenueHistoryState();
   @override

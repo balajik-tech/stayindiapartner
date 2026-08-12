@@ -4,6 +4,12 @@ import 'data/repositories/finance_repository_impl.dart';
 import 'domain/repositories/finance_repository.dart';
 import 'domain/usecases/finance_usecases.dart';
 import 'domain/usecases/get_revenue_history_usecase.dart';
+import 'domain/repositories/payment_repository.dart';
+import 'data/repositories/payment_repository_impl.dart';
+import 'data/datasources/payment_remote_datasource.dart';
+import 'domain/usecases/get_payment_report_usecase.dart';
+import 'domain/usecases/record_payment_usecase.dart';
+import 'presentation/cubit/payment_report_cubit.dart';
 import 'presentation/cubit/finance_cubit.dart';
 import 'presentation/cubit/revenue_history_cubit.dart';
 
@@ -18,9 +24,20 @@ void initFinanceInjections() {
   );
   sl.registerFactory(() => RevenueHistoryCubit(getRevenueHistory: sl()));
 
+  sl.registerFactory(
+    () => PaymentReportCubit(
+      getPaymentReport: sl(),
+      recordPayment: sl(),
+      getTenants: sl(),
+    ),
+  );
+
   sl.registerLazySingleton(() => GetFinancialStatsUseCase(sl()));
   sl.registerLazySingleton(() => GetRevenueAnalyticsUseCase(sl()));
   sl.registerLazySingleton(() => GetRevenueHistoryUseCase(repository: sl()));
+
+  sl.registerLazySingleton(() => GetPaymentReportUseCase(repository: sl()));
+  sl.registerLazySingleton(() => RecordPaymentUseCase(repository: sl()));
 
   sl.registerLazySingleton<FinanceRepository>(
     () => FinanceRepositoryImpl(remoteDataSource: sl()),
@@ -28,5 +45,13 @@ void initFinanceInjections() {
 
   sl.registerLazySingleton<FinanceRemoteDataSource>(
     () => FinanceRemoteDataSourceImpl(dio: sl()),
+  );
+
+  sl.registerLazySingleton<PaymentRepository>(
+    () => PaymentRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  sl.registerLazySingleton<PaymentRemoteDataSource>(
+    () => PaymentRemoteDataSourceImpl(dio: sl()),
   );
 }

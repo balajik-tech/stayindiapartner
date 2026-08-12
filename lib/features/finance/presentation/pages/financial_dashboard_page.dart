@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/finance/presentation/pages/payment_report_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import '../cubit/finance_cubit.dart';
 import '../cubit/finance_state.dart';
+import '../cubit/payment_report_cubit.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/revenue_chart.dart';
 import '../widgets/revenue_breakdown_chart.dart';
 import '../../data/services/pdf_export_service.dart';
 import 'package:intl/intl.dart';
-import 'revenue_history_page.dart';
-import '../cubit/revenue_history_cubit.dart';
+import 'payment_report_page.dart';
+import '../cubit/payment_report_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
@@ -235,40 +237,41 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                 letterSpacing: -0.5,
               ),
             ),
+
             // commented history button
-            // TextButton.icon(
-            //   onPressed: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => BlocProvider(
-            //           create: (context) => sl<RevenueHistoryCubit>(),
-            //           child: const RevenueHistoryPage(),
-            //         ),
-            //       ),
-            //     );
-            //   },
-            //   icon: Icon(
-            //     Icons.history_rounded,
-            //     size: 18.sp,
-            //     color: AppColors.primaryBlue,
-            //   ),
-            //   label: Text(
-            //     StringUtils.translate('view_history', context: context),
-            //     style: TextStyle(
-            //       fontSize: 13.sp,
-            //       fontWeight: FontWeight.bold,
-            //       color: AppColors.primaryBlue,
-            //     ),
-            //   ),
-            //   style: TextButton.styleFrom(
-            //     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-            //     backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
-            //     shape: RoundedRectangleBorder(
-            //       borderRadius: BorderRadius.circular(12.r),
-            //     ),
-            //   ),
-            // ),
+            TextButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BlocProvider(
+                      create: (context) => sl<PaymentReportCubit>(),
+                      child: const PaymentReportPage(),
+                    ),
+                  ),
+                );
+              },
+              icon: Icon(
+                Icons.history_rounded,
+                size: 18.sp,
+                color: AppColors.primaryBlue,
+              ),
+              label: Text(
+                StringUtils.translate('view_history', context: context),
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryBlue,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+            ),
           ],
         ),
         SizedBox(height: 4.h),
