@@ -50,10 +50,13 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
         AssociateHomeDataLoaded(
           theme: results[0] as dynamic,
           executiveCommittee: (results[1] as List).cast(),
-        executiveMembers: (results[2] as List).cast(),
-        itWingMembers: (results[3] as List).cast(),
-        portMembers: (results[4] as List).cast(),
-      ));
+          executiveMembers: (results[2] as List).cast(),
+          itWingMembers: (results[3] as List).cast(),
+          portMembers: (results[4] as List).cast(),
+          details: details,
+          detailsError: detailsError,
+        ),
+      );
     } catch (e) {
       emit(AssociateHomeDataError('Failed to load community data: $e'));
     }

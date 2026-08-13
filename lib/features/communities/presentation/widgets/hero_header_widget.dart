@@ -24,7 +24,7 @@ class HeroHeaderWidget extends StatelessWidget {
     final primaryLight = theme.primaryColorLight.toColor();
     final accent = theme.accentColor.toColor();
 
-    final name = details?.name ?? 'IT Hostels & PG Owners';
+    final name = details?.name ?? '';
     final nameWords = name.split(' ');
     final firstNamePart = nameWords.length > 2 
         ? nameWords.take(nameWords.length - 2).join(' ') 
@@ -32,6 +32,7 @@ class HeroHeaderWidget extends StatelessWidget {
     final lastTwoWords = nameWords.length > 2 
         ? nameWords.skip(nameWords.length - 2).join(' ') 
         : nameWords.skip(1).join(' ');
+    final location = details?.address;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
@@ -56,13 +57,17 @@ class HeroHeaderWidget extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Text(
-                'TAMIL NADU',
-                style: GoogleFonts.inter(
-                  color: accent,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 3,
-                  fontSize: 13,
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.5,
+                child: Text(
+                  location ?? '',
+                  softWrap: true,
+                  style: GoogleFonts.inter(
+                    color: accent,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 3,
+                    fontSize: 13,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -104,7 +109,9 @@ class HeroHeaderWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            details?.about.description ?? 'United for the welfare of hostel & PG owners across Tamil Nadu',
+            (details?.about.description != null && details!.about.description.isNotEmpty)
+                ? details!.about.description
+                : '',
             style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.4),
           ),
           if (detailsError != null && detailsError!.isNotEmpty) ...[

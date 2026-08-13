@@ -31,6 +31,9 @@ class AssociationDetailsModel extends AssociationDetailsEntity {
     }
 
     if (raw is List) {
+      if (raw.isNotEmpty && raw.first is Map) {
+        return AssociationInfoModel.fromJson(Map<String, dynamic>.from(raw.first));
+      }
       return const AssociationInfoEntity(description: '', contents: []);
     }
 
@@ -51,6 +54,9 @@ class AssociationDetailsModel extends AssociationDetailsEntity {
     }
 
     if (raw is List) {
+      if (raw.isNotEmpty && raw.first is Map) {
+        return AssociationFoundersSectionModel.fromJson(Map<String, dynamic>.from(raw.first));
+      }
       return const AssociationFoundersSectionEntity(description: '', founders: []);
     }
 

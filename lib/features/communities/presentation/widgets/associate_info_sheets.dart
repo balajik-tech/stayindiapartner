@@ -122,8 +122,9 @@ class _AboutUsSheet extends StatelessWidget {
     final accent = theme.accentColor.toColor();
     final textSecondary = theme.textSecondary.toColor();
 
-    final String description = details?.description ??
-        'The Tamil Nadu IT Hostels & PG Owners Welfare Association brings together owners of working-professional hostels and paying-guest accommodations across the state, so that a single, organised voice speaks for the trade.';
+    final String description = (details?.description != null && details!.description.isNotEmpty)
+        ? details!.description
+        : '';
     final contents = details?.contents ?? [];
 
     return _BaseSheet(
@@ -185,7 +186,7 @@ class _AboutUsSheet extends StatelessWidget {
               style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.grey),
             ),
             Text(
-              '+91 98400 12345',
+              '',
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
@@ -205,7 +206,7 @@ class _AboutUsSheet extends StatelessWidget {
               style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.grey),
             ),
             Text(
-              'Monday to Saturday, 10am to 6pm',
+              '',
               style: GoogleFonts.inter(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
@@ -216,7 +217,7 @@ class _AboutUsSheet extends StatelessWidget {
         ),
         SizedBox(height: 32.h),
         _buildInfoBox(
-          'Membership is open to any registered hostel or PG owner in Tamil Nadu. Use Join now on the home screen to register and receive your membership ID.',
+          '',
           theme,
         ),
       ],
@@ -235,8 +236,9 @@ class _ByLawsSheet extends StatelessWidget {
     final badgeBg = theme.badgeBackground.toColor();
     final badgeText = theme.badgeText.toColor();
 
-    final String description = details?.description ??
-        'These clauses govern membership, conduct and administration. They were adopted by the general body and may be amended only at a general body meeting.';
+    final String description = (details?.description != null && details!.description.isNotEmpty)
+        ? details!.description
+        : '';
     final contents = details?.contents ?? [];
 
     return _BaseSheet(
@@ -321,7 +323,7 @@ class _ByLawsSheet extends StatelessWidget {
           );
         }),
         _buildInfoBox(
-          'This is a summary for members. The full registered by laws are available from the state secretary on request.',
+          '',
           theme,
         ),
       ],
@@ -341,8 +343,9 @@ class _FoundersSheet extends StatelessWidget {
     final badgeBg = theme.badgeBackground.toColor();
     final badgeText = theme.badgeText.toColor();
 
-    final String description = details?.description ??
-        'The association was formed by owners who wanted the trade to be heard as one voice. Its founders continue to guide the state committee.';
+    final String description = (details?.description != null && details!.description.isNotEmpty)
+        ? details!.description
+        : 'The association was formed by owners who wanted the trade to be heard as one voice. Its founders continue to guide the state committee.';
     final founders = details?.founders ?? [];
 
     return _BaseSheet(
