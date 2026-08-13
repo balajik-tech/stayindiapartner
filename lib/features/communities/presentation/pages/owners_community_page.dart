@@ -11,6 +11,7 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/owner_community_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/social_feed_cubit.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
+import 'package:stayindia_owner/features/communities/presentation/pages/register_association_bottom_sheet.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/explore_communities_page.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
@@ -37,6 +38,7 @@ class OwnersCommunityPage extends StatefulWidget {
 
 class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   final TextEditingController _postController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   String? _selectedImagePath;
@@ -153,6 +155,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     _debounceTimer?.cancel();
     _scrollController.dispose();
     _postController.dispose();
+    _searchController.dispose();
     for (var c in _pollOptionControllers) {
       c.dispose();
     }
@@ -172,12 +175,16 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
 
   Widget _buildFeedSwitcher({int unreadOfficial = 0, int unreadForum = 0}) {
     final isOfficial = _activeFeedType == 'OFFICIAL';
+    const activeColor = Color(0xFF1650A2);
+    const inactiveColor = Colors.transparent;
+    const bgColor = Color(0xFFF3F0EA);
+
     return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
-      padding: EdgeInsets.all(4.r),
+      margin: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
+      padding: EdgeInsets.all(6.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(16.r),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(32.r),
       ),
       child: Row(
         children: [
@@ -189,67 +196,27 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 });
               },
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 12.h),
+                padding: EdgeInsets.symmetric(vertical: 14.h),
                 decoration: BoxDecoration(
-                  color: isOfficial
-                      ? const Color(0xFF2563EB)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12.r),
-                  boxShadow: isOfficial
-                      ? [
-                          BoxShadow(
-                            color: const Color(
-                              0xFF2563EB,
-                            ).withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : null,
+                  color: isOfficial ? activeColor : inactiveColor,
+                  borderRadius: BorderRadius.circular(28.r),
                 ),
                 alignment: Alignment.center,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    if (!isOfficial)
+                      Icon(Icons.lock_outline_rounded,
+                          size: 14.sp, color: Colors.grey.shade600),
+                    if (!isOfficial) SizedBox(width: 4.w),
                     Text(
-                      'official_feed'.tr(),
-                      style: GoogleFonts.dmSans(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w800,
-                        color: isOfficial
-                            ? Colors.white
-                            : const Color(0xFF64748B),
+                      'Official feed',
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: isOfficial ? Colors.white : Colors.grey.shade600,
                       ),
                     ),
-                    if (unreadOfficial > 0) ...[
-                      SizedBox(width: 6.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isOfficial ? Colors.white : Colors.redAccent,
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 16.r,
-                          minHeight: 16.r,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$unreadOfficial',
-                            style: TextStyle(
-                              color: isOfficial
-                                  ? const Color(0xFF2563EB)
-                                  : Colors.white,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -263,68 +230,19 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 });
               },
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 12.h),
+                padding: EdgeInsets.symmetric(vertical: 14.h),
                 decoration: BoxDecoration(
-                  color: !isOfficial
-                      ? const Color(0xFFEA580C)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12.r),
-                  boxShadow: !isOfficial
-                      ? [
-                          BoxShadow(
-                            color: const Color(
-                              0xFFEA580C,
-                            ).withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : null,
+                  color: !isOfficial ? activeColor : inactiveColor,
+                  borderRadius: BorderRadius.circular(28.r),
                 ),
                 alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'owner_forum'.tr(),
-                      style: GoogleFonts.dmSans(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w800,
-                        color: !isOfficial
-                            ? Colors.white
-                            : const Color(0xFF64748B),
-                      ),
-                    ),
-                    if (unreadForum > 0) ...[
-                      SizedBox(width: 6.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: !isOfficial ? Colors.white : Colors.redAccent,
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 16.r,
-                          minHeight: 16.r,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$unreadForum',
-                            style: TextStyle(
-                              color: !isOfficial
-                                  ? const Color(0xFFEA580C)
-                                  : Colors.white,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+                child: Text(
+                  'PG owners forum',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: !isOfficial ? Colors.white : Colors.grey.shade600,
+                  ),
                 ),
               ),
             ),
@@ -371,6 +289,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 ),
                 slivers: [
                   SliverToBoxAdapter(child: _buildHeader()),
+                  SliverToBoxAdapter(child: _buildSearchBar()),
                   SliverToBoxAdapter(child: _buildExploreSection()),
                   SliverToBoxAdapter(
                     child: _buildFeedSwitcher(
@@ -378,7 +297,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       unreadForum: unreadForum,
                     ),
                   ),
-                  SliverToBoxAdapter(child: _buildCreatePostBox()),
+                  if (_activeFeedType == 'GLOBAL')
+                    SliverToBoxAdapter(child: _buildCreatePostBox()),
                   ..._buildFeedSlivers(state),
                 ],
               );
@@ -391,79 +311,110 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Container(
+            padding: EdgeInsets.all(10.r),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFF6FF),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(
+              Icons.groups_rounded,
+              color: const Color(0xFF1650A2),
+              size: 24.sp,
+            ),
+          ),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'app_name'.tr(),
-                    style: TextStyle(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.darkText,
-                      letterSpacing: -0.5,
-                    ),
+                Text(
+                  'Stay India',
+                  style: GoogleFonts.inter(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkText,
+                    letterSpacing: -0.5,
                   ),
                 ),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'pg_owners_community'.tr(),
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: AppColors.greyText.withValues(alpha: 0.8),
-                      fontWeight: FontWeight.w600,
-                    ),
+                Text(
+                  'PG owners community',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: AppColors.greyText,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(width: 16.w),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              BouncingWrapper(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const OwnersListPage(),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: EdgeInsets.all(8.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.info_outline_rounded,
-                    color: AppColors.primaryBlue,
-                    size: 24.sp,
-                  ),
+          BouncingWrapper(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const OwnersListPage(),
                 ),
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: BoxDecoration(
+                color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
               ),
-            ],
+              child: Icon(
+                Icons.info_outline_rounded,
+                color: AppColors.primaryBlue,
+                size: 24.sp,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildExploreSection() {
+  Widget _buildSearchBar() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30.r),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'Search associations',
+            hintStyle: GoogleFonts.inter(
+              color: Colors.grey.shade400,
+              fontSize: 15.sp,
+            ),
+            prefixIcon: Icon(Icons.search_rounded,
+                color: Colors.grey.shade400, size: 22.sp),
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(vertical: 14.h),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExploreSection() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       child: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
         builder: (context, state) {
           final communities = state is OwnerCommunityLoaded
@@ -474,87 +425,48 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               : <AssociationPortalEntity>[];
 
           return SizedBox(
-            height: 80.h,
+            height: 90.h,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
                 GestureDetector(
                   onTap: () {
-
+                    showRegisterAssociationBottomSheet(context);
                   },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 48.w,
-                        height: 48.w,
+                        width: 56.w,
+                        height: 56.w,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.primaryBlue,
-                            width: 2,
+                            color: const Color(0xFFF48126),
+                            width: 1,
+                            style: BorderStyle.solid,
                           ),
-                          color: Colors.white,
                         ),
-                        child: Icon(
-                          Icons.add,
-                          color: AppColors.primaryBlue,
-                          size: 24.sp,
+                        child: Center(
+                          child: Icon(
+                            Icons.add,
+                            color: const Color(0xFFF48126),
+                            size: 28.sp,
+                          ),
                         ),
                       ),
-                      SizedBox(height: 6.h),
+                      SizedBox(height: 8.h),
                       Text(
-                        'explore'.tr(),
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryBlue,
+                        'Create new',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
                         ),
                       ),
                     ],
                   ),
                 ),
-                // GestureDetector(
-                //   onTap: () {
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (_) => const ExploreCommunitiesPage(),
-                //       ),
-                //     );
-                //   },
-                //   child: Column(
-                //     mainAxisSize: MainAxisSize.min,
-                //     children: [
-                //       Container(
-                //         width: 48.w,
-                //         height: 48.w,
-                //         decoration: BoxDecoration(
-                //           shape: BoxShape.circle,
-                //           border: Border.all(
-                //             color: AppColors.primaryBlue,
-                //             width: 2,
-                //           ),
-                //           color: Colors.white,
-                //         ),
-                //         child: Icon(
-                //           Icons.add,
-                //           color: AppColors.primaryBlue,
-                //           size: 24.sp,
-                //         ),
-                //       ),
-                //       SizedBox(height: 6.h),
-                //       Text(
-                //         'explore'.tr(),
-                //         style: TextStyle(
-                //           fontSize: 13.sp,
-                //           fontWeight: FontWeight.w700,
-                //           color: AppColors.primaryBlue,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
                 SizedBox(width: 20.w),
                 ...associations.map((a) {
                   return Padding(
@@ -564,7 +476,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => AssociateHomePage(associationId: a.id),
+                            builder: (_) =>
+                                AssociateHomePage(associationId: a.id),
                           ),
                         );
                       },
@@ -572,203 +485,35 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 48.w,
-                            height: 48.w,
+                            width: 56.w,
+                            height: 56.w,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppColors.primaryBlue,
-                                width: 2,
-                              ),
-                              color: Colors.white,
+                              color: Colors.grey.shade100,
                             ),
-                            child: (a.logo.isNotEmpty && ApiConstants.getImageUrl(a.logo) != null)
-                                ? CircleAvatar(
-                                    backgroundImage: CachedNetworkImageProvider(
-                                      ApiConstants.getImageUrl(a.logo)!,
+                            child: ClipOval(
+                              child: (a.logo.isNotEmpty &&
+                                      ApiConstants.getImageUrl(a.logo) != null)
+                                  ? CachedNetworkImage(
+                                      imageUrl: ApiConstants.getImageUrl(a.logo)!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Icon(
+                                      Icons.business_rounded,
+                                      color: Colors.grey.shade400,
+                                      size: 28.sp,
                                     ),
-                                  )
-                                : Icon(
-                                    Icons.person,
-                                    color: AppColors.primaryBlue,
-                                    size: 28.sp,
-                                  ),
+                            ),
                           ),
-                          SizedBox(height: 6.h),
+                          SizedBox(height: 8.h),
                           SizedBox(
-                            width: 65.w,
+                            width: 70.w,
                             child: Text(
                               a.name,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primaryBlue,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-                ...communities.map((c) {
-                  final isPending = c.isPendingJoin;
-
-                  if (!_unreadMessageCounts.containsKey(c.id)) {
-                    _unreadMessageCounts[c.id] = c.name.hashCode % 3 + 1;
-                    _saveUnreadMessageCounts();
-                  }
-                  final count = _unreadMessageCounts[c.id] ?? 0;
-
-                  return Padding(
-                    padding: EdgeInsets.only(right: 20.w),
-                    child: GestureDetector(
-                      onTap: () {
-                        if (isPending) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  CommunityDetailPage(communityId: c.id),
-                            ),
-                          ).then((_) {
-                            if (context.mounted) {
-                              context
-                                  .read<OwnerCommunityCubit>()
-                                  .loadCommunities();
-                            }
-                          });
-                        } else {
-                          setState(() {
-                            _activeChatRoomId = c.id;
-                            _unreadMessageCounts[c.id] = 0;
-                          });
-                          _saveUnreadMessageCounts();
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TenantsChatPage(
-                                hostelId: c.id,
-                                communityName: c.name,
-                                communityIcon: c.image,
-                                isOwnerChat: true,
-                                status: c.status,
-                              ),
-                            ),
-                          ).then((_) {
-                            setState(() {
-                              _activeChatRoomId = null;
-                            });
-                            if (context.mounted) {
-                              context
-                                  .read<OwnerCommunityCubit>()
-                                  .loadCommunities();
-                            }
-                          });
-                        }
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Container(
-                                width: 48.w,
-                                height: 48.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isPending
-                                        ? Colors.orange.shade300
-                                        : Colors.grey.shade200,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: CircleAvatar(
-                                  radius: 22.w,
-                                  backgroundImage: c.image != null
-                                      ? CachedNetworkImageProvider(c.image!)
-                                      : null,
-                                  backgroundColor: isPending
-                                      ? Colors.orange.shade50
-                                      : AppColors.accentOrange.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                  child: c.image == null
-                                      ? Icon(
-                                          Icons.groups,
-                                          color: isPending
-                                              ? Colors.orange
-                                              : AppColors.accentOrange,
-                                          size: 24.sp,
-                                        )
-                                      : null,
-                                ),
-                              ),
-                              if (isPending)
-                                Positioned(
-                                  right: 0,
-                                  bottom: 0,
-                                  child: Container(
-                                    padding: EdgeInsets.all(2.r),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.orange,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.access_time_filled_rounded,
-                                      color: Colors.white,
-                                      size: 10.sp,
-                                    ),
-                                  ),
-                                ),
-                              if (count > 0 && !isPending)
-                                Positioned(
-                                  right: -4.w,
-                                  top: -4.h,
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 5.w,
-                                      vertical: 2.h,
-                                    ),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.redAccent,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    constraints: BoxConstraints(
-                                      minWidth: 16.r,
-                                      minHeight: 16.r,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '$count',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 9.sp,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          SizedBox(height: 6.h),
-                          SizedBox(
-                            width: 65.w,
-                            child: Text(
-                              c.name,
-                              style: TextStyle(
+                              style: GoogleFonts.inter(
                                 fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: isPending
-                                    ? Colors.orange.shade700
-                                    : AppColors.darkText,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -839,15 +584,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFF3F0EA).withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -1168,14 +907,20 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         ),
       ];
     }
+
+    final isOfficial = _activeFeedType == 'OFFICIAL';
+
+    if (isOfficial) {
+      return [
+        SliverToBoxAdapter(child: _buildOfficialLockedState()),
+        SliverToBoxAdapter(child: _buildSuggestedNearYou()),
+        SliverToBoxAdapter(child: SizedBox(height: 100.h)),
+      ];
+    }
+
     if (state is SocialFeedLoaded) {
-      final isOfficial = _activeFeedType == 'OFFICIAL';
       final filteredPosts = state.posts.where((post) {
-        if (isOfficial) {
-          return post.visibility?.toUpperCase() != 'GLOBAL';
-        } else {
-          return post.visibility?.toUpperCase() == 'GLOBAL';
-        }
+        return post.visibility?.toUpperCase() == 'GLOBAL';
       }).toList();
 
       if (filteredPosts.isEmpty) {
@@ -1193,10 +938,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      isOfficial
-                          ? 'no_official_updates'.tr()
-                          : 'no_forum_posts'.tr(),
-                      style: TextStyle(
+                      'No forum posts',
+                      style: GoogleFonts.inter(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.darkText,
@@ -1204,11 +947,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      isOfficial
-                          ? 'official_updates_appear_here'.tr()
-                          : 'forum_posts_appear_here'.tr(),
+                      'Forum posts appear here',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         color: AppColors.greyText,
                       ),
@@ -1226,11 +967,6 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final post = filteredPosts[index];
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) {
-                  _markPostAsRead(post.id);
-                }
-              });
               return _PostCard(post: post);
             }, childCount: filteredPosts.length),
           ),
@@ -1264,6 +1000,188 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       ];
     }
     return [const SliverToBoxAdapter(child: SizedBox.shrink())];
+  }
+
+  Widget _buildOfficialLockedState() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(20.r),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.lock_outline_rounded,
+              color: Colors.grey.shade400,
+              size: 32.sp,
+            ),
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'Join to see official notices',
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.darkText,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'Circulars, licence updates and meeting notices from your association.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.greyText,
+              height: 1.4,
+            ),
+          ),
+          SizedBox(height: 24.h),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ExploreCommunitiesPage(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1650A2),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 14.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.r),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              'Browse associations',
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'The forum stays open to everyone.',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: Colors.grey.shade400,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 32.h),
+          const Divider(height: 1),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestedNearYou() {
+    return BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
+      builder: (context, state) {
+        if (state is! OwnerCommunityLoaded) return const SizedBox.shrink();
+
+        final suggested = state.associations.take(2).toList();
+        if (suggested.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 12.h),
+              child: Text(
+                'Suggested near you',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+            ...suggested.map((a) => _buildSuggestedItem(a)),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSuggestedItem(AssociationPortalEntity a) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 8.h),
+      child: Row(
+        children: [
+          Container(
+            width: 48.w,
+            height: 48.w,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Icon(
+                Icons.business_rounded,
+                color: Colors.grey.shade400,
+                size: 24.sp,
+              ),
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  a.name,
+                  style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                Text(
+                  'City · 1,240 members', // Placeholder as per screenshot
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: AppColors.greyText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          OutlinedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AssociateHomePage(associationId: a.id),
+                ),
+              );
+            },
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: Colors.grey.shade300),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+            ),
+            child: Text(
+              'Join',
+              style: GoogleFonts.inter(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1382,15 +1300,16 @@ class _PostCardState extends State<_PostCard> {
       children: [
         Container(
           margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          padding: EdgeInsets.all(16.r),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24.r),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: Colors.grey.shade200),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -1401,173 +1320,102 @@ class _PostCardState extends State<_PostCard> {
                 children: [
                   CircleAvatar(
                     radius: 18.r,
-                    backgroundImage:
-                        (widget.post.userAvatar != null &&
+                    backgroundColor: Colors.grey.shade100,
+                    backgroundImage: (widget.post.userAvatar != null &&
                             widget.post.userAvatar!.isNotEmpty)
                         ? CachedNetworkImageProvider(
                             ApiConstants.getImageUrl(widget.post.userAvatar!)!,
                           )
                         : null,
-                    backgroundColor: accentColor.withValues(alpha: 0.08),
-                    child:
-                        (widget.post.userAvatar == null ||
+                    child: (widget.post.userAvatar == null ||
                             widget.post.userAvatar!.isEmpty)
-                        ? Icon(Icons.person, color: accentColor, size: 20.sp)
+                        ? Text(
+                            widget.post.userName.isNotEmpty
+                                ? widget.post.userName[0].toUpperCase()
+                                : 'U',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.sp,
+                            ),
+                          )
                         : null,
                   ),
-                  SizedBox(width: 10.w),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          text: TextSpan(
-                            text:
-                                '${widget.post.userName.isNotEmpty ? widget.post.userName : 'Unknown User'} ',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.darkText,
+                        Row(
+                          children: [
+                            Text(
+                              widget.post.userName.isNotEmpty
+                                  ? widget.post.userName
+                                  : 'Unknown User',
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.darkText,
+                              ),
                             ),
-                            children: [
-                              TextSpan(
-                                text: '$indicatorIcon [$displayRole]',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: accentColor,
+                            const Spacer(),
+                            if (widget.post.userRole?.toLowerCase() == 'member' || isOfficialPost)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10.w, vertical: 4.h),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEFF6FF),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                child: Text(
+                                  'Member',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1650A2),
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
+                          ],
                         ),
-                        SizedBox(height: 1.h),
                         Text(
-                          _formatTimeAgo(widget.post.createdAt),
-                          style: TextStyle(
+                          '$displayRole · ${_formatTimeAgo(widget.post.createdAt)}',
+                          style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: Colors.grey.shade400,
+                            color: Colors.grey.shade500,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  BlocBuilder<AuthCubit, AuthState>(
-                    builder: (context, authState) {
-                      final String? currentUserId = context
-                          .read<AuthCubit>()
-                          .currentOwner
-                          ?.id;
-
-                      if (currentUserId == null ||
-                          currentUserId != widget.post.userId) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return PopupMenuButton<String>(
-                        icon: Icon(
-                          Icons.more_vert_rounded,
-                          color: Colors.grey.shade400,
-                          size: 20.sp,
-                        ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            setState(() {
-                              _isEditing = true;
-                              _selectedImagePath = null;
-                              _removeImage = false;
-                              _removePoll = false;
-                              _initPollControllers();
-                            });
-                          } else if (value == 'delete') {
-                            _showDeleteConfirmDialog(context, widget.post);
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.edit_rounded,
-                                  size: 18.sp,
-                                  color: AppColors.darkText,
-                                ),
-                                SizedBox(width: 8.w),
-                                Text('Edit', style: TextStyle(fontSize: 14.sp)),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.delete_rounded,
-                                  size: 18.sp,
-                                  color: Colors.red,
-                                ),
-                                SizedBox(width: 8.w),
-                                Text(
-                                  'Delete',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
                 ],
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               Text(
                 widget.post.content,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  color: AppColors.darkText,
-                  height: 1.4,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF374151),
+                  height: 1.5,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               if (widget.post.imageUrl != null &&
                   widget.post.imageUrl!.isNotEmpty) ...[
-                SizedBox(height: 16.h),
+                SizedBox(height: 12.h),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(16.r),
+                  borderRadius: BorderRadius.circular(12.r),
                   child: CachedNetworkImage(
                     imageUrl:
                         ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      height: 180.h,
-                      color: Colors.grey.shade100,
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      height: 180.h,
-                      color: Colors.grey.shade100,
-                      child: Icon(
-                        Icons.broken_image_rounded,
-                        size: 32.sp,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
                   ),
                 ),
               ],
               if (pollOptionsList.isNotEmpty) ...[
-                SizedBox(height: 16.h),
+                SizedBox(height: 12.h),
                 ...List.generate(pollOptionsList.length, (i) {
                   final opt = pollOptionsList[i];
                   if (opt is Map) {
@@ -1589,17 +1437,16 @@ class _PostCardState extends State<_PostCard> {
                             },
                       child: Container(
                         margin: EdgeInsets.only(bottom: 8.h),
-                        height: 44.h,
+                        height: 40.h,
                         decoration: BoxDecoration(
                           color: isMyVote
-                              ? AppColors.primaryBlue.withValues(alpha: 0.08)
+                              ? const Color(0xFFEFF6FF)
                               : Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(10.r),
                           border: Border.all(
                             color: isMyVote
-                                ? AppColors.primaryBlue
+                                ? const Color(0xFF1650A2)
                                 : Colors.grey.shade200,
-                            width: isMyVote ? 2 : 1,
                           ),
                         ),
                         child: Stack(
@@ -1611,61 +1458,24 @@ class _PostCardState extends State<_PostCard> {
                                   width: constraints.maxWidth * pct,
                                   decoration: BoxDecoration(
                                     color: isMyVote
-                                        ? AppColors.primaryBlue.withValues(
-                                            alpha: 0.15,
-                                          )
-                                        : Colors.grey.shade200,
+                                        ? const Color(0xFF1650A2)
+                                            .withValues(alpha: 0.1)
+                                        : Colors.grey.shade100,
                                     borderRadius: BorderRadius.circular(10.r),
                                   ),
                                 );
                               },
                             ),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          if (isMyVote) ...[
-                                            Icon(
-                                              Icons.check_circle_rounded,
-                                              color: AppColors.primaryBlue,
-                                              size: 18.sp,
-                                            ),
-                                            SizedBox(width: 8.w),
-                                          ],
-                                          Expanded(
-                                            child: Text(
-                                              text,
-                                              style: TextStyle(
-                                                fontSize: 14.sp,
-                                                fontWeight: isMyVote
-                                                    ? FontWeight.w800
-                                                    : FontWeight.w600,
-                                                color: AppColors.darkText,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Text(
-                                      '${(pct * 100).round()}% ($count)',
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.greyText,
-                                      ),
-                                    ),
-                                  ],
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w),
+                              child: Text(
+                                text,
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: isMyVote
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: AppColors.darkText,
                                 ),
                               ),
                             ),
@@ -1678,44 +1488,8 @@ class _PostCardState extends State<_PostCard> {
                 }),
               ],
               SizedBox(height: 16.h),
-              Divider(color: Colors.grey.shade100, height: 1),
-              SizedBox(height: 12.h),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  BouncingWrapper(
-                    onTap: () {
-                      context.read<SocialFeedCubit>().toggleLike(
-                        widget.post.id,
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          widget.post.isLiked
-                              ? Icons.thumb_up_alt_rounded
-                              : Icons.thumb_up_off_alt_rounded,
-                          color: widget.post.isLiked
-                              ? AppColors.primaryBlue
-                              : Colors.grey.shade400,
-                          size: 20.sp,
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          '${widget.post.likesCount}',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: widget.post.isLiked
-                                ? FontWeight.w800
-                                : FontWeight.w600,
-                            color: widget.post.isLiked
-                                ? AppColors.primaryBlue
-                                : Colors.grey.shade500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   BouncingWrapper(
                     onTap: () {
                       showModalBottomSheet(
@@ -1729,16 +1503,40 @@ class _PostCardState extends State<_PostCard> {
                       children: [
                         Icon(
                           Icons.chat_bubble_outline_rounded,
-                          color: Colors.grey.shade400,
-                          size: 20.sp,
+                          color: Colors.grey.shade600,
+                          size: 18.sp,
                         ),
-                        SizedBox(width: 8.w),
+                        SizedBox(width: 6.w),
                         Text(
-                          '${widget.post.commentsCount} Replies',
-                          style: TextStyle(
+                          '${widget.post.commentsCount} replies',
+                          style: GoogleFonts.inter(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade500,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 24.w),
+                  BouncingWrapper(
+                    onTap: () {
+                      // Share logic placeholder
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.share_outlined,
+                          color: Colors.grey.shade600,
+                          size: 18.sp,
+                        ),
+                        SizedBox(width: 6.w),
+                        Text(
+                          'Share',
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600,
                           ),
                         ),
                       ],
