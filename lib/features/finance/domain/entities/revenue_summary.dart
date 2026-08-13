@@ -8,6 +8,13 @@ class RevenueSummary extends Equatable {
   final double direct;
   final double settlingAmount;
   final String period;
+  
+  // New fields from API
+  final double? totalUpi;
+  final double? totalCash;
+  final int? razorpayCount;
+  final int? upiCount;
+  final int? cashCount;
 
   const RevenueSummary({
     required this.totalCollected,
@@ -17,6 +24,11 @@ class RevenueSummary extends Equatable {
     required this.direct,
     required this.settlingAmount,
     required this.period,
+    this.totalUpi,
+    this.totalCash,
+    this.razorpayCount,
+    this.upiCount,
+    this.cashCount,
   });
 
   @override
@@ -28,5 +40,10 @@ class RevenueSummary extends Equatable {
         direct,
         settlingAmount,
         period,
+        totalUpi,
+        totalCash,
+        razorpayCount,
+        upiCount,
+        cashCount,
       ];
 }

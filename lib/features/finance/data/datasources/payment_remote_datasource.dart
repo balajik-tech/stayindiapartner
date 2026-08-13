@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../domain/entities/payment_report_entity.dart';
 import '../models/payment_report_model.dart';
 
 abstract class PaymentRemoteDataSource {
-  Future<List<PaymentReportModel>> getPaymentReport({
+  Future<PaymentReportData> getPaymentReport({
     String? hostelId,
     String? startDate,
     String? endDate,
@@ -60,7 +61,7 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
   PaymentRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<List<PaymentReportModel>> getPaymentReport({
+  Future<PaymentReportData> getPaymentReport({
     String? hostelId,
     String? startDate,
     String? endDate,
@@ -79,7 +80,15 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
         queryParameters: queryParams,
       );
       final List results = response.data['data']['payments'] ?? [];
-      return results.map((e) => PaymentReportModel.fromTenantRentalJson(e)).toList();
+      final payments = results.map((e) => PaymentReportModel.fromTenantRentalJson(e)).toList();
+      
+      final tenantCount = payments.map((e) => e.tenantName).toSet().length;
+      final summary = PaymentReportModel.summaryFromJson(
+        response.data['data']['summary'] ?? {},
+        tenantCount,
+      );
+
+      return PaymentReportData(payments: payments, summary: summary);
     } catch (e) {
       rethrow;
     }

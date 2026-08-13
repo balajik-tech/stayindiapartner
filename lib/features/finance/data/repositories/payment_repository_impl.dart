@@ -8,7 +8,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
   PaymentRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<PaymentReportItem>> getPaymentReport({
+  Future<PaymentReportData> getPaymentReport({
     String? hostelId,
     String? startDate,
     String? endDate,

@@ -261,7 +261,7 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
           ],
         ),
         // Space below Stack for the overlapping card
-        SizedBox(height: 80.h),
+        SizedBox(height: 50.h),
       ],
     );
   }
@@ -487,7 +487,9 @@ class _PaymentItemTile extends StatelessWidget {
                 ),
               ),
               Text(
-                isStayIndia ? 'To S ${item.referenceNo ?? ''}' : 'By you',
+                isStayIndia
+                    ? item.bankName != null ? ' · ${item.bankName}' : ''
+                    : 'By you',
                 style: GoogleFonts.inter(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w500,

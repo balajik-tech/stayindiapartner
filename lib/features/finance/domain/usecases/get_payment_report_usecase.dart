@@ -6,7 +6,7 @@ class GetPaymentReportUseCase {
 
   GetPaymentReportUseCase({required this.repository});
 
-  Future<List<PaymentReportItem>> call({
+  Future<PaymentReportData> call({
     String? hostelId,
     String? startDate,
     String? endDate,

@@ -37,25 +37,14 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
   Future<void> fetchReport({String? hostelId}) async {
     emit(PaymentReportLoading());
     try {
-      final items = await _getPaymentReport(hostelId: hostelId);
+      final reportData = await _getPaymentReport(hostelId: hostelId);
       final tenants = await _getTenants(hostelId: hostelId, limit: 100);
 
-      final now = DateTime.now();
-      final summary = RevenueSummary(
-        totalCollected: items.fold(0, (sum, item) => sum + item.totalPaid),
-        paymentCount: items.length,
-        tenantCount: items.map((e) => e.tenantName).toSet().length,
-        viaStayIndia: items
-            .where((e) => e.paymentMethod?.toLowerCase() == 'stayindia')
-            .fold(0, (sum, item) => sum + item.totalPaid),
-        direct: items
-            .where((e) => e.paymentMethod?.toLowerCase() != 'stayindia')
-            .fold(0, (sum, item) => sum + item.totalPaid),
-        settlingAmount: 18000,
-        period: DateFormat('MMMM').format(now),
-      );
-
-      emit(PaymentReportLoaded(items: items, summary: summary, tenants: tenants));
+      emit(PaymentReportLoaded(
+        items: reportData.payments,
+        summary: reportData.summary,
+        tenants: tenants,
+      ));
     } catch (e) {
       emit(PaymentReportError(message: GlobalErrorMapper.map(e).message));
     }

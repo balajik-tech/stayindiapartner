@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'revenue_summary.dart';
 
 class PaymentReportItem extends Equatable {
   final String id;
@@ -11,6 +12,7 @@ class PaymentReportItem extends Equatable {
   final String? paymentMethod; // stayindia, direct
   final String? status; // settled, settling, etc
   final String? referenceNo;
+  final String? bankName;
 
   const PaymentReportItem({
     required this.id,
@@ -23,6 +25,7 @@ class PaymentReportItem extends Equatable {
     this.paymentMethod,
     this.status,
     this.referenceNo,
+    this.bankName,
   });
 
   @override
@@ -37,5 +40,19 @@ class PaymentReportItem extends Equatable {
         paymentMethod,
         status,
         referenceNo,
+        bankName,
       ];
+}
+
+class PaymentReportData extends Equatable {
+  final List<PaymentReportItem> payments;
+  final RevenueSummary summary;
+
+  const PaymentReportData({
+    required this.payments,
+    required this.summary,
+  });
+
+  @override
+  List<Object?> get props => [payments, summary];
 }

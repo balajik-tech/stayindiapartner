@@ -1,7 +1,7 @@
 import '../entities/payment_report_entity.dart';
 
 abstract class PaymentRepository {
-  Future<List<PaymentReportItem>> getPaymentReport({
+  Future<PaymentReportData> getPaymentReport({
     String? hostelId,
     String? startDate,
     String? endDate,

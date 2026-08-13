@@ -170,7 +170,7 @@ class _RecordPaymentBottomSheetNewState
           value: _selectedTenant?.id,
           hint: Text(
             'Select Tenant',
-            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.grayColor2),
+            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.grayColor3),
           ),
           items: widget.tenants.map((tenant) {
             return DropdownMenuItem(
@@ -200,7 +200,7 @@ class _RecordPaymentBottomSheetNewState
                           'Room ${tenant.roomTypename} · Bed ${tenant.bedNumber}',
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: AppColors.grayColor2,
+                            color: AppColors.grayColor3,
                           ),
                         ),
                       ],
@@ -289,11 +289,11 @@ class _RecordPaymentBottomSheetNewState
           ),
           if (_selectedTenant != null)
             Text(
-              'Rent ${_selectedTenant!.roomTypename}',
+              '${_selectedCategory}: ${_amountController.text.toString()}',
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.grayColor2,
+                color: AppColors.grayColor3,
               ),
             ),
         ],
@@ -325,7 +325,7 @@ class _RecordPaymentBottomSheetNewState
               style: GoogleFonts.inter(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
-                color: isSelected ? Colors.white : AppColors.grayColor2,
+                color: isSelected ? Colors.white : AppColors.grayColor3,
               ),
             ),
           ),
@@ -366,7 +366,7 @@ class _RecordPaymentBottomSheetNewState
                     mode['icon'] as IconData,
                     color: isSelected
                         ? AppColors.primaryBlue
-                        : AppColors.grayColor2,
+                        : AppColors.grayColor3,
                   ),
                   SizedBox(height: 4.h),
                   Text(
@@ -376,7 +376,7 @@ class _RecordPaymentBottomSheetNewState
                       fontWeight: FontWeight.w700,
                       color: isSelected
                           ? AppColors.primaryBlue
-                          : AppColors.grayColor2,
+                          : AppColors.grayColor3,
                     ),
                   ),
                 ],
@@ -397,7 +397,7 @@ class _RecordPaymentBottomSheetNewState
           style: GoogleFonts.inter(
             fontSize: 12.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.grayColor2,
+            color: AppColors.grayColor3,
           ),
         ),
         SizedBox(height: 8.h),
@@ -459,7 +459,7 @@ class _RecordPaymentBottomSheetNewState
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(fontSize: 10.sp, color: AppColors.grayColor2),
+            style: GoogleFonts.inter(fontSize: 10.sp, color: AppColors.grayColor3),
           ),
           Text(
             value,
@@ -486,7 +486,7 @@ class _RecordPaymentBottomSheetNewState
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: 'Add a note (optional)',
-          hintStyle: GoogleFonts.inter(color: AppColors.grayColor2),
+          hintStyle: GoogleFonts.inter(color: AppColors.grayColor3),
         ),
       ),
     );
