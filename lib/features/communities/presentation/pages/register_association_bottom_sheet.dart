@@ -77,15 +77,15 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(
-          left: 20.w,
-          right: 20.w,
           top: 12.h,
-          bottom: 24.h,
         ),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(28.r),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(28.r),
+              topRight: Radius.circular(28.r),
+            ),
           ),
           padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
           child: Column(
@@ -107,10 +107,10 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
 
               // Title
               Text(
-                'register_association_title'.tr(),
+                'Register an Association',
                 style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A1A),
                 ),
               ),
@@ -118,7 +118,7 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
 
               // Subtitle
               Text(
-                'register_association_subtitle'.tr(),
+                "You'll need the registration certificate. committe details and a contact number.",
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w400,
@@ -132,9 +132,9 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
               _OptionTile(
                 icon: FontAwesomeIcons.whatsapp,
                 iconColor: const Color(0xFF25D366),
-                iconSize: 28.sp,
-                title: 'continue_on_whatsapp'.tr(),
-                subtitle: 'whatsapp_option_subtitle'.tr(),
+                iconSize: 20.sp,
+                title: 'Continue on Whatsapp',
+                subtitle: 'Answer a few questions, send photos of your documents. Resume any time',
                 badgeText: 'easiest'.tr(),
                 highlighted: true,
                 borderColor: _accentOrange,
@@ -151,9 +151,9 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
               _OptionTile(
                 icon: FontAwesomeIcons.arrowUpRightFromSquare,
                 iconColor: const Color(0xFF3A3A3A),
-                iconSize: 24.sp,
-                title: 'fill_web_form'.tr(),
-                subtitle: 'web_form_option_subtitle'.tr(),
+                iconSize: 18.sp,
+                title: 'Fil the web form',
+                subtitle: 'Opens stayindia.in you browser. Better on a laptop with files ready.',
                 highlighted: false,
                 borderColor: const Color(0xFFE5E1D8),
                 onTap: () {
@@ -166,7 +166,7 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
               // Footer note
               Center(
                 child: Text(
-                  'approval_time_note'.tr(),
+                  'Approval takes 2-3 working days either way.',
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
@@ -226,11 +226,13 @@ class _OptionTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FaIcon(
-              // ✅ Changed
-              icon,
-              color: iconColor,
-              size: iconSize ?? 24.sp,
+            Container(
+              margin: EdgeInsets.only(top: 5),
+              child: FaIcon(
+                icon,
+                color: iconColor,
+                size: iconSize ?? 24.sp,
+              ),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -238,12 +240,13 @@ class _OptionTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Flexible(
                         child: Text(
                           title,
                           style: TextStyle(
-                            fontSize: 17.sp,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A1A),
                           ),
@@ -258,7 +261,7 @@ class _OptionTile extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: badgeColor,
-                            borderRadius: BorderRadius.circular(24.r),
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: Text(
                             badgeText!,
@@ -272,11 +275,11 @@ class _OptionTile extends StatelessWidget {
                       ],
                     ],
                   ),
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 2.h),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF6B6B6B),
                       height: 1.4,
@@ -286,10 +289,13 @@ class _OptionTile extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            Icon(
-              Icons.chevron_right,
-              color: const Color(0xFF9A9A9A),
-              size: 22.sp,
+            Container(
+              margin: EdgeInsets.only(top: 5),
+              child: Icon(
+                Icons.chevron_right,
+                color: const Color(0xFF9A9A9A),
+                size: 22.sp,
+              ),
             ),
           ],
         ),

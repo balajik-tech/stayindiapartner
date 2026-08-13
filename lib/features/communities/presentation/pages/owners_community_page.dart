@@ -396,6 +396,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         ),
         child: TextField(
           controller: _searchController,
+          onChanged: (value) => setState(() {}),
           decoration: InputDecoration(
             hintText: 'Search associations',
             hintStyle: GoogleFonts.inter(
@@ -421,7 +422,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               ? state.joinedCommunities
               : <CommunityDetailsEntity>[];
           final associations = state is OwnerCommunityLoaded
-              ? state.associations
+              ? state.associations.where((a) {
+                  final query = _searchController.text.toLowerCase();
+                  return a.name.toLowerCase().contains(query);
+                }).toList()
               : <AssociationPortalEntity>[];
 
           return SizedBox(
