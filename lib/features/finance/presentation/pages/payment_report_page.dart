@@ -63,39 +63,42 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
             return Center(child: Text(state.message));
           }
           if (state is PaymentReportLoaded) {
-            return Stack(
-              children: [
-                CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(child: _buildSummary(state)),
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 100.h),
-                      sliver: SliverList(
-                        delegate: SliverChildListDelegate([
-                          Text(
-                            'Payments received',
-                            style: GoogleFonts.inter(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.darkText,
+            return Container(
+              color: Colors.white,
+              child: Stack(
+                children: [
+                  CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(child: _buildSummary(state)),
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 100.h),
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate([
+                            Text(
+                              'Payments received',
+                              style: GoogleFonts.inter(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.darkText,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 16.h),
-                          ...state.items.map(
-                            (item) => _PaymentItemTile(item: item),
-                          ),
-                        ]),
+                            SizedBox(height: 16.h),
+                            ...state.items.map(
+                              (item) => _PaymentItemTile(item: item),
+                            ),
+                          ]),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  bottom: 24.h,
-                  left: 20.w,
-                  right: 20.w,
-                  child: _buildRecordPaymentButton(state),
-                ),
-              ],
+                    ],
+                  ),
+                  Positioned(
+                    bottom: 24.h,
+                    left: 20.w,
+                    right: 20.w,
+                    child: _buildRecordPaymentButton(state),
+                  ),
+                ],
+              ),
             );
           }
           return const SizedBox();
@@ -122,9 +125,7 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: Color(0xFFF0F7FF),
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(0),
-                ),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -136,13 +137,13 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                         'Collected in ${summary?.period ?? DateFormat('MMMM').format(DateTime.now())}',
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.grayColor2,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.darkText,
                         ),
                       ),
                       Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: AppColors.grayColor2,
+                        color: AppColors.darkText,
                         size: 20.sp,
                       ),
                     ],
@@ -195,6 +196,7 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                   children: [
                     _buildMethodRow(
                       icon: Icons.hexagon_outlined,
+                      imageUrl: 'assets/images/record_app_icon.png',
                       iconColor: const Color(0xFF2C599D),
                       label: 'Via StayIndia',
                       subLabel: 'Settles to your bank',
@@ -204,15 +206,13 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
 
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 12.h),
-                      child: Divider(
-                        color: Colors.grey.shade100,
-                        height: 1,
-                      ),
+                      child: Divider(color: Colors.grey.shade100, height: 1),
                     ),
 
                     _buildMethodRow(
                       icon: Icons.touch_app_outlined,
-                      iconColor: Colors.grey,
+                      imageUrl: 'assets/images/palm.png',
+                      iconColor: AppColors.grayColor2,
                       label: 'Direct',
                       subLabel: 'Cash or your own UPI',
                       amount: summary?.direct ?? 0,
@@ -246,7 +246,7 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
-                                  color:  AppColors.kAuthOrangeDark,
+                                  color: AppColors.kAuthOrangeDark,
                                 ),
                               ),
                             ),
@@ -268,6 +268,7 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
 
   Widget _buildMethodRow({
     required IconData icon,
+    required String imageUrl,
     required Color iconColor,
     required String label,
     required String subLabel,
@@ -278,14 +279,28 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
       onTap: onTap,
       child: Row(
         children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(icon, color: iconColor, size: 20.sp),
-          ),
+          imageUrl.isNotEmpty
+              ? Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    // color: iconColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Image.asset(
+                    imageUrl,
+                    width: 20.sp,
+                    height: 20.sp,
+                    fit: BoxFit.contain,
+                  ),
+                )
+              : Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20.sp),
+                ),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -348,7 +363,10 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
           SizedBox(width: 8.w),
           Text(
             'Record a direct payment',
-            style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w700),
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -363,7 +381,7 @@ class _PaymentItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isStayIndia = item.paymentMethod?.toLowerCase() == 'stayindia';
+    final isStayIndia = item.paymentMethod?.toLowerCase() == 'razorpay';
     final methodIcon = isStayIndia
         ? Icons.hexagon_rounded
         : Icons.touch_app_rounded;
@@ -407,7 +425,19 @@ class _PaymentItemTile extends StatelessWidget {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(methodIcon, color: methodColor, size: 14.sp),
+                  child: isStayIndia
+                      ? Image.asset(
+                          'assets/images/record_app_icon.png',
+                          width: 16.sp,
+                          height: 16.sp,
+                          fit: BoxFit.contain,
+                        )
+                      : Image.asset(
+                          'assets/images/money.png',
+                          width: 16.sp,
+                          height: 16.sp,
+                          fit: BoxFit.contain,
+                        ),
                 ),
               ),
             ],
@@ -418,7 +448,7 @@ class _PaymentItemTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Room ${item.roomNo ?? 'N/A'} · Bed ${item.bedNo ?? 'N/A'}',
+                  '${item.roomNo?.toString().toLowerCase().contains('room') == true ? item.roomNo : 'Room ${item.roomNo ?? 'N/A'}'} · Bed ${item.bedNo ?? 'N/A'}',
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
@@ -435,7 +465,7 @@ class _PaymentItemTile extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  '${DateFormat('dd MMM').format(item.paymentDate)} · ${isStayIndia ? 'StayIndia' : 'Direct'} · ${item.status ?? 'Settled'}',
+                  '${DateFormat('dd MMM').format(item.paymentDate)} · ${isStayIndia ? 'StayIndia' : 'Direct'} · ${item.paymentMethod?.toLowerCase() == 'razorpay'?"Settled":item.paymentMethod.toString().trim()}',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,

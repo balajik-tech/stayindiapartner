@@ -27,9 +27,11 @@ class AppColors {
 
   static const Color blackColor = Color(0xFF000000);
 
-  static const Color grayColor2 = const Color(0xFF4a4f55);
+  static const Color grayColor2 = const Color(0xFF9da1a9);
 
   static const Color grayLight = const Color(0xFF737880);
+
+  static const Color grayColor3 = const Color(0xFF6c717a);
 
 
   static const LinearGradient primaryGradient = LinearGradient(
