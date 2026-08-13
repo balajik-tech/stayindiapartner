@@ -4,6 +4,7 @@ import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import '../../domain/entities/revenue_summary.dart';
 import '../../domain/usecases/get_payment_report_usecase.dart';
 import '../../domain/usecases/record_payment_usecase.dart';
+import '../../domain/usecases/record_cash_payment_usecase.dart';
 import 'package:stayindia_owner/features/tenants/domain/usecases/tenant_usecases.dart';
 import 'payment_report_state.dart';
 
@@ -11,14 +12,20 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
   final GetPaymentReportUseCase _getPaymentReport;
   final RecordPaymentUseCase _recordPayment;
   final GetTenantsUseCase _getTenants;
+  final CreateCashOrderUseCase _createCashOrder;
+  final RecordCashPaymentUseCase _recordCashPayment;
 
   PaymentReportCubit({
     required GetPaymentReportUseCase getPaymentReport,
     required RecordPaymentUseCase recordPayment,
     required GetTenantsUseCase getTenants,
+    required CreateCashOrderUseCase createCashOrder,
+    required RecordCashPaymentUseCase recordCashPayment,
   })  : _getPaymentReport = getPaymentReport,
         _recordPayment = recordPayment,
         _getTenants = getTenants,
+        _createCashOrder = createCashOrder,
+        _recordCashPayment = recordCashPayment,
         super(PaymentReportInitial());
 
   Future<void> fetchReport({String? hostelId}) async {
@@ -50,6 +57,8 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
 
   Future<void> submitPayment({
     required String tenantId,
+    String? hostelId,
+    String? bookingId,
     required double amount,
     required String category,
     required String mode,
@@ -60,18 +69,40 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
     bool sendWhatsapp = true,
   }) async {
     try {
-      await _recordPayment(
-        tenantId: tenantId,
-        amount: amount,
-        category: category,
-        mode: mode,
-        date: date,
-        referenceNo: referenceNo,
-        note: note,
-        screenshotPath: screenshotPath,
-        sendWhatsapp: sendWhatsapp,
-      );
-      fetchReport();
+      if ((mode == 'Cash' || mode == 'UPI') && hostelId != null && bookingId != null) {
+        // Step 1: Create Order
+        final rentalId = await _createCashOrder(
+          tenantId: tenantId,
+          hostelId: hostelId,
+          bookingId: bookingId,
+          amount: amount,
+          dueDate: date,
+          notes: note,
+        );
+
+        // Step 2: If Cash, record payment immediately
+        if (mode == 'Cash') {
+          await _recordCashPayment(
+            rentalId: rentalId,
+            amount: amount,
+            reference: referenceNo ?? "CASH-${DateTime.now().millisecondsSinceEpoch}",
+            notes: note,
+          );
+        }
+      } else {
+        await _recordPayment(
+          tenantId: tenantId,
+          amount: amount,
+          category: category,
+          mode: mode,
+          date: date,
+          referenceNo: referenceNo,
+          note: note,
+          screenshotPath: screenshotPath,
+          sendWhatsapp: sendWhatsapp,
+        );
+      }
+      fetchReport(hostelId: hostelId);
     } catch (e) {
       rethrow;
     }

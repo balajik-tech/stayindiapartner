@@ -20,6 +20,22 @@ abstract class PaymentRemoteDataSource {
     String? screenshotPath,
     bool sendWhatsapp = true,
   });
+
+  Future<String> createCashOrder({
+    required String tenantId,
+    required String hostelId,
+    required String bookingId,
+    required double amount,
+    required String dueDate,
+    String? notes,
+  });
+
+  Future<void> recordCashPayment({
+    required String rentalId,
+    required double amount,
+    required String reference,
+    String? notes,
+  });
 }
 
 class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
@@ -69,14 +85,63 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
         'category': category,
         'mode': mode,
         'date': date,
-        'referenceNo': ?referenceNo,
-        'note': ?note,
+        if (referenceNo != null) 'referenceNo': referenceNo,
+        if (note != null) 'note': note,
         'sendWhatsapp': sendWhatsapp,
         if (screenshotPath != null)
           'screenshot': await MultipartFile.fromFile(screenshotPath),
       });
 
       await dio.post(ApiConstants.payments, data: formData);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> createCashOrder({
+    required String tenantId,
+    required String hostelId,
+    required String bookingId,
+    required double amount,
+    required String dueDate,
+    String? notes,
+  }) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.tenantRentalOrderCash,
+        data: {
+          "tenant": tenantId,
+          "hostel": hostelId,
+          "booking": bookingId,
+          "amount": amount,
+          "dueDate": dueDate,
+          "receiptNumber": "",
+          "notes": notes ?? "",
+        },
+      );
+      return response.data['data']['rentalId'];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> recordCashPayment({
+    required String rentalId,
+    required double amount,
+    required String reference,
+    String? notes,
+  }) async {
+    try {
+      await dio.post(
+        ApiConstants.tenantRentalPaymentCash(rentalId),
+        data: {
+          "amount": amount,
+          "reference": reference,
+          "notes": notes ?? "",
+        },
+      );
     } catch (e) {
       rethrow;
     }

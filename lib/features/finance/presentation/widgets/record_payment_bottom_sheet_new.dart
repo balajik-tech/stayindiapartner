@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -72,6 +73,8 @@ class _RecordPaymentBottomSheetNewState
     final amount = double.tryParse(_amountController.text) ?? 0;
     context.read<PaymentReportCubit>().submitPayment(
       tenantId: _selectedTenant!.id,
+      hostelId: _selectedTenant!.hostelId,
+      bookingId: _selectedTenant!.bookingId,
       amount: amount,
       category: _selectedCategory,
       mode: _selectedMode,
@@ -162,16 +165,16 @@ class _RecordPaymentBottomSheetNewState
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<TenantEntity>(
+        child: DropdownButton<String>(
           isExpanded: true,
-          value: _selectedTenant,
+          value: _selectedTenant?.id,
           hint: Text(
             'Select Tenant',
             style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.grayColor2),
           ),
           items: widget.tenants.map((tenant) {
             return DropdownMenuItem(
-              value: tenant,
+              value: tenant.id,
               child: Row(
                 children: [
                   CustomAvatar(
@@ -207,7 +210,45 @@ class _RecordPaymentBottomSheetNewState
               ),
             );
           }).toList(),
-          onChanged: (val) => setState(() => _selectedTenant = val),
+          onChanged: (val) {
+            if (val == null) return;
+
+            final tenant = widget.tenants.firstWhere(
+                  (t) => t.id == val,
+            );
+
+
+
+
+            setState(() {
+              _selectedTenant = tenant;
+            });
+
+            debugPrint('========== SELECTED TENANT ==========');
+            debugPrint(
+              'Tenant ID: ${_selectedTenant?.id}',
+              );
+            debugPrint(
+              'Tenant Name: ${_selectedTenant?.fullName}',
+            );
+            debugPrint(
+              'Tenant Avatar: ${_selectedTenant?.avatar}',
+            );
+            debugPrint(
+              'Tenant Hostel ID: ${_selectedTenant?.hostelId}',
+            );
+            debugPrint(
+              'Tenant Booking ID: ${_selectedTenant?.bookingId}',
+            );
+            debugPrint(
+              'Tenant Room Type: ${_selectedTenant?.roomTypename}',
+            );
+            debugPrint(
+              'Tenant Bed Number: ${_selectedTenant?.bedNumber}',
+            );
+
+            debugPrint('======================================');
+          },
         ),
       ),
     );

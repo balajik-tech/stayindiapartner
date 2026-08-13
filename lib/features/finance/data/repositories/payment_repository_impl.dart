@@ -44,4 +44,38 @@ class PaymentRepositoryImpl implements PaymentRepository {
       sendWhatsapp: sendWhatsapp,
     );
   }
+
+  @override
+  Future<String> createCashOrder({
+    required String tenantId,
+    required String hostelId,
+    required String bookingId,
+    required double amount,
+    required String dueDate,
+    String? notes,
+  }) {
+    return remoteDataSource.createCashOrder(
+      tenantId: tenantId,
+      hostelId: hostelId,
+      bookingId: bookingId,
+      amount: amount,
+      dueDate: dueDate,
+      notes: notes,
+    );
+  }
+
+  @override
+  Future<void> recordCashPayment({
+    required String rentalId,
+    required double amount,
+    required String reference,
+    String? notes,
+  }) {
+    return remoteDataSource.recordCashPayment(
+      rentalId: rentalId,
+      amount: amount,
+      reference: reference,
+      notes: notes,
+    );
+  }
 }

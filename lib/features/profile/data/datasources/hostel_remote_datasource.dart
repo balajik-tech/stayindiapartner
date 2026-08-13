@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import '../models/hostel_model.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -159,6 +162,31 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
           ),
         );
       }
+
+      debugPrint('========== FORM DATA FIELDS ==========');
+
+      final Map<String, dynamic> formDataJson = {
+        for (final field in formData.fields) field.key: field.value,
+      };
+
+      for (final file in formData.files) {
+        formDataJson.putIfAbsent(file.key, () => []);
+
+        if (formDataJson[file.key] is List) {
+          formDataJson[file.key].add({
+            'filename': file.value.filename,
+            'contentType': file.value.contentType.toString(),
+            'length': file.value.length,
+          });
+        }
+      }
+
+      debugPrint(
+        const JsonEncoder.withIndent('  ').convert(formDataJson),
+      );
+
+      debugPrint('======================================');
+
 
       final response = await dio.post(
         '${ApiConstants.hostels}/$id/images',

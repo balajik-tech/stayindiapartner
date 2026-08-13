@@ -18,4 +18,20 @@ abstract class PaymentRepository {
     String? screenshotPath,
     bool sendWhatsapp = true,
   });
+
+  Future<String> createCashOrder({
+    required String tenantId,
+    required String hostelId,
+    required String bookingId,
+    required double amount,
+    required String dueDate,
+    String? notes,
+  });
+
+  Future<void> recordCashPayment({
+    required String rentalId,
+    required double amount,
+    required String reference,
+    String? notes,
+  });
 }
