@@ -36,7 +36,10 @@ class RecordPaymentBottomSheetNew extends StatefulWidget {
 class _RecordPaymentBottomSheetNewState
     extends State<RecordPaymentBottomSheetNew> {
   TenantEntity? _selectedTenant;
-  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _rentController = TextEditingController();
+  final TextEditingController _depositController = TextEditingController();
+  final TextEditingController _utilitiesController = TextEditingController();
+  final TextEditingController _othersController = TextEditingController();
   final TextEditingController _referenceController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   String _selectedCategory = 'Rent';
@@ -46,10 +49,36 @@ class _RecordPaymentBottomSheetNewState
 
   @override
   void dispose() {
-    _amountController.dispose();
+    _rentController.dispose();
+    _depositController.dispose();
+    _utilitiesController.dispose();
+    _othersController.dispose();
     _referenceController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  TextEditingController get _activeController {
+    switch (_selectedCategory) {
+      case 'Rent':
+        return _rentController;
+      case 'Deposit':
+        return _depositController;
+      case 'Utilities':
+        return _utilitiesController;
+      case 'Other':
+        return _othersController;
+      default:
+        return _rentController;
+    }
+  }
+
+  double get _totalAmount {
+    final r = double.tryParse(_rentController.text) ?? 0;
+    final d = double.tryParse(_depositController.text) ?? 0;
+    final u = double.tryParse(_utilitiesController.text) ?? 0;
+    final o = double.tryParse(_othersController.text) ?? 0;
+    return r + d + u + o;
   }
 
   Future<void> _pickImage() async {
@@ -61,7 +90,7 @@ class _RecordPaymentBottomSheetNewState
   }
 
   void _savePayment() {
-    if (_selectedTenant == null || _amountController.text.isEmpty) {
+    if (_selectedTenant == null || _totalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select a tenant and enter amount'),
@@ -70,12 +99,15 @@ class _RecordPaymentBottomSheetNewState
       return;
     }
 
-    final amount = double.tryParse(_amountController.text) ?? 0;
     context.read<PaymentReportCubit>().submitPayment(
       tenantId: _selectedTenant!.id,
       hostelId: _selectedTenant!.hostelId,
       bookingId: _selectedTenant!.bookingId,
-      amount: amount,
+      amount: _totalAmount,
+      rent: double.tryParse(_rentController.text) ?? 0,
+      deposit: double.tryParse(_depositController.text) ?? 0,
+      utilities: double.tryParse(_utilitiesController.text) ?? 0,
+      others: double.tryParse(_othersController.text) ?? 0,
       category: _selectedCategory,
       mode: _selectedMode,
       date: DateTime.now().toIso8601String(),
@@ -170,7 +202,10 @@ class _RecordPaymentBottomSheetNewState
           value: _selectedTenant?.id,
           hint: Text(
             'Select Tenant',
-            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.grayColor3),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.grayColor3,
+            ),
           ),
           items: widget.tenants.map((tenant) {
             return DropdownMenuItem(
@@ -213,39 +248,20 @@ class _RecordPaymentBottomSheetNewState
           onChanged: (val) {
             if (val == null) return;
 
-            final tenant = widget.tenants.firstWhere(
-                  (t) => t.id == val,
-            );
-
-
-
+            final tenant = widget.tenants.firstWhere((t) => t.id == val);
 
             setState(() {
               _selectedTenant = tenant;
             });
 
             debugPrint('========== SELECTED TENANT ==========');
-            debugPrint(
-              'Tenant ID: ${_selectedTenant?.id}',
-              );
-            debugPrint(
-              'Tenant Name: ${_selectedTenant?.fullName}',
-            );
-            debugPrint(
-              'Tenant Avatar: ${_selectedTenant?.avatar}',
-            );
-            debugPrint(
-              'Tenant Hostel ID: ${_selectedTenant?.hostelId}',
-            );
-            debugPrint(
-              'Tenant Booking ID: ${_selectedTenant?.bookingId}',
-            );
-            debugPrint(
-              'Tenant Room Type: ${_selectedTenant?.roomTypename}',
-            );
-            debugPrint(
-              'Tenant Bed Number: ${_selectedTenant?.bedNumber}',
-            );
+            debugPrint('Tenant ID: ${_selectedTenant?.id}');
+            debugPrint('Tenant Name: ${_selectedTenant?.fullName}');
+            debugPrint('Tenant Avatar: ${_selectedTenant?.avatar}');
+            debugPrint('Tenant Hostel ID: ${_selectedTenant?.hostelId}');
+            debugPrint('Tenant Booking ID: ${_selectedTenant?.bookingId}');
+            debugPrint('Tenant Room Type: ${_selectedTenant?.roomTypename}');
+            debugPrint('Tenant Bed Number: ${_selectedTenant?.bedNumber}');
 
             debugPrint('======================================');
           },
@@ -261,41 +277,56 @@ class _RecordPaymentBottomSheetNewState
         border: Border.all(color: Colors.grey.shade200),
         borderRadius: BorderRadius.circular(16.r),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '₹',
-            style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.blackColor,
-            ),
+          Row(
+            children: [
+              Text(
+                '₹',
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.blackColor,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: TextField(
+                  controller: _activeController,
+                  keyboardType: TextInputType.number,
+                  onChanged: (val) => setState(() {}),
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Enter ${_selectedCategory.toLowerCase()} amount',
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.grayColor3,
+                    ),
+                  ),
+                ),
+              ),
+              if (_totalAmount > 0)
+                Padding(
+                  padding: EdgeInsets.only(top: 8.h),
+                  child: Text(
+                    '${_selectedCategory}: ₹${_activeController.text.toString()}',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.grayColor3,
+                    ),
+                  ),
+                ),
+            ],
           ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              style: GoogleFonts.inter(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w900,
-                color: AppColors.darkText,
-              ),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: '0',
-              ),
-            ),
-          ),
-          if (_selectedTenant != null)
-            Text(
-              '${_selectedCategory}: ${_amountController.text.toString()}',
-              style: GoogleFonts.inter(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.grayColor3,
-              ),
-            ),
+
         ],
       ),
     );
@@ -425,7 +456,10 @@ class _RecordPaymentBottomSheetNewState
         SizedBox(height: 4.h),
         Text(
           '12 digits, from the tenant\'s payment app',
-          style: GoogleFonts.inter(fontSize: 10.sp, color: AppColors.grayColor3),
+          style: GoogleFonts.inter(
+            fontSize: 10.sp,
+            color: AppColors.grayColor3,
+          ),
         ),
       ],
     );
@@ -459,7 +493,10 @@ class _RecordPaymentBottomSheetNewState
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(fontSize: 10.sp, color: AppColors.grayColor3),
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              color: AppColors.grayColor3,
+            ),
           ),
           Text(
             value,
@@ -588,7 +625,7 @@ class _RecordPaymentBottomSheetNewState
             return Colors.grey.withValues(alpha: 1);
           }),
           onChanged: (val) => setState(() => _sendWhatsapp = val),
-        )
+        ),
       ],
     );
   }
@@ -609,7 +646,10 @@ class _RecordPaymentBottomSheetNewState
         ),
         child: Text(
           'Save payment',
-          style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w700),
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );

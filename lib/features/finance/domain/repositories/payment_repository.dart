@@ -24,6 +24,10 @@ abstract class PaymentRepository {
     required String hostelId,
     required String bookingId,
     required double amount,
+    double rent = 0,
+    double deposit = 0,
+    double utilities = 0,
+    double others = 0,
     required String dueDate,
     String? notes,
   });
@@ -33,6 +37,10 @@ abstract class PaymentRepository {
     required String hostelId,
     required String bookingId,
     required double amount,
+    double rent = 0,
+    double deposit = 0,
+    double utilities = 0,
+    double others = 0,
     required String dueDate,
     String? notes,
   });

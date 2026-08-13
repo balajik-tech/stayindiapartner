@@ -51,6 +51,10 @@ class PaymentRepositoryImpl implements PaymentRepository {
     required String hostelId,
     required String bookingId,
     required double amount,
+    double rent = 0,
+    double deposit = 0,
+    double utilities = 0,
+    double others = 0,
     required String dueDate,
     String? notes,
   }) {
@@ -59,6 +63,10 @@ class PaymentRepositoryImpl implements PaymentRepository {
       hostelId: hostelId,
       bookingId: bookingId,
       amount: amount,
+      rent: rent,
+      deposit: deposit,
+      utilities: utilities,
+      others: others,
       dueDate: dueDate,
       notes: notes,
     );
@@ -70,6 +78,10 @@ class PaymentRepositoryImpl implements PaymentRepository {
     required String hostelId,
     required String bookingId,
     required double amount,
+    double rent = 0,
+    double deposit = 0,
+    double utilities = 0,
+    double others = 0,
     required String dueDate,
     String? notes,
   }) {
@@ -78,6 +90,10 @@ class PaymentRepositoryImpl implements PaymentRepository {
       hostelId: hostelId,
       bookingId: bookingId,
       amount: amount,
+      rent: rent,
+      deposit: deposit,
+      utilities: utilities,
+      others: others,
       dueDate: dueDate,
       notes: notes,
     );
