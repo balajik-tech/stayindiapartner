@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
@@ -95,7 +96,7 @@ class MembershipCardWidget extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: () {_makePhoneCall('+919840012345');},
             icon: Icon(Icons.phone, color: accent, size: 16),
             label: Text('Call +91 98400 12345', style:  GoogleFonts.inter(color: accent, fontWeight: FontWeight.w600)),
             style: OutlinedButton.styleFrom(
@@ -108,7 +109,19 @@ class MembershipCardWidget extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri phoneUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    }
+  }
 }
+
 
 class _DashedDivider extends StatelessWidget {
   const _DashedDivider();
