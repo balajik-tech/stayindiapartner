@@ -480,12 +480,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ExploreCommunitiesPage(),
-                      ),
-                    );
+
                   },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -519,6 +514,47 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     ],
                   ),
                 ),
+                // GestureDetector(
+                //   onTap: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (_) => const ExploreCommunitiesPage(),
+                //       ),
+                //     );
+                //   },
+                //   child: Column(
+                //     mainAxisSize: MainAxisSize.min,
+                //     children: [
+                //       Container(
+                //         width: 48.w,
+                //         height: 48.w,
+                //         decoration: BoxDecoration(
+                //           shape: BoxShape.circle,
+                //           border: Border.all(
+                //             color: AppColors.primaryBlue,
+                //             width: 2,
+                //           ),
+                //           color: Colors.white,
+                //         ),
+                //         child: Icon(
+                //           Icons.add,
+                //           color: AppColors.primaryBlue,
+                //           size: 24.sp,
+                //         ),
+                //       ),
+                //       SizedBox(height: 6.h),
+                //       Text(
+                //         'explore'.tr(),
+                //         style: TextStyle(
+                //           fontSize: 13.sp,
+                //           fontWeight: FontWeight.w700,
+                //           color: AppColors.primaryBlue,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 SizedBox(width: 20.w),
                 ...associations.map((a) {
                   return Padding(
