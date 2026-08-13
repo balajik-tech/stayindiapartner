@@ -50,17 +50,20 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
     String? endDate,
   }) async {
     try {
-      final queryParams = <String, dynamic>{};
+      final queryParams = <String, dynamic>{
+        'page': 1,
+        'limit': 100, // Increased limit to get more items
+      };
       if (hostelId != null) queryParams['hostelId'] = hostelId;
       if (startDate != null) queryParams['startDate'] = startDate;
       if (endDate != null) queryParams['endDate'] = endDate;
 
       final response = await dio.get(
-        ApiConstants.financeRevenueHistory,
+        ApiConstants.tenantRentalPayments,
         queryParameters: queryParams,
       );
-      final List results = response.data['data'] ?? [];
-      return results.map((e) => PaymentReportModel.fromJson(e)).toList();
+      final List results = response.data['data']['payments'] ?? [];
+      return results.map((e) => PaymentReportModel.fromTenantRentalJson(e)).toList();
     } catch (e) {
       rethrow;
     }

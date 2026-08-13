@@ -43,7 +43,7 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
             .where((e) => e.paymentMethod?.toLowerCase() == 'stayindia')
             .fold(0, (sum, item) => sum + item.totalPaid),
         direct: items
-            .where((e) => e.paymentMethod?.toLowerCase() == 'direct')
+            .where((e) => e.paymentMethod?.toLowerCase() != 'stayindia')
             .fold(0, (sum, item) => sum + item.totalPaid),
         settlingAmount: 18000,
         period: DateFormat('MMMM').format(now),
@@ -85,8 +85,8 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
           await _recordCashPayment(
             rentalId: rentalId,
             amount: amount,
-            reference: referenceNo ?? "CASH-${DateTime.now().millisecondsSinceEpoch}",
-            notes: note,
+            reference: referenceNo ?? "CASH-$tenantId",
+            notes: note ?? "Cash received from tenant",
           );
         }
       } else {
