@@ -133,8 +133,10 @@ class ApiConstants {
 
   static const String tenantsManual = '/tenants/manual';
   static const String tenantRentalOrderCash = '/tenant-rental/orderby/cash';
+  static const String tenantRentalOrderUpi = '/tenant-rental/orderby/upi';
   static const String tenantRentalPayments = '/tenant-rental/payments';
   static String tenantRentalPaymentCash(String rentalId) => '/tenant-rental/$rentalId/payment/cash';
+  static String tenantRentalPaymentUpi(String rentalId) => '/tenant-rental/$rentalId/payment/upi';
 
   static const String staff = '/staff';
 

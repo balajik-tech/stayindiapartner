@@ -14,6 +14,8 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
   final GetTenantsUseCase _getTenants;
   final CreateCashOrderUseCase _createCashOrder;
   final RecordCashPaymentUseCase _recordCashPayment;
+  final CreateUpiOrderUseCase _createUpiOrder;
+  final RecordUpiPaymentUseCase _recordUpiPayment;
 
   PaymentReportCubit({
     required GetPaymentReportUseCase getPaymentReport,
@@ -21,11 +23,15 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
     required GetTenantsUseCase getTenants,
     required CreateCashOrderUseCase createCashOrder,
     required RecordCashPaymentUseCase recordCashPayment,
+    required CreateUpiOrderUseCase createUpiOrder,
+    required RecordUpiPaymentUseCase recordUpiPayment,
   })  : _getPaymentReport = getPaymentReport,
         _recordPayment = recordPayment,
         _getTenants = getTenants,
         _createCashOrder = createCashOrder,
         _recordCashPayment = recordCashPayment,
+        _createUpiOrder = createUpiOrder,
+        _recordUpiPayment = recordUpiPayment,
         super(PaymentReportInitial());
 
   Future<void> fetchReport({String? hostelId}) async {
@@ -69,8 +75,8 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
     bool sendWhatsapp = true,
   }) async {
     try {
-      if ((mode == 'Cash' || mode == 'UPI') && hostelId != null && bookingId != null) {
-        // Step 1: Create Order
+      if (mode == 'Cash' && hostelId != null && bookingId != null) {
+        // Step 1: Create Cash Order
         final rentalId = await _createCashOrder(
           tenantId: tenantId,
           hostelId: hostelId,
@@ -80,15 +86,31 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
           notes: note,
         );
 
-        // Step 2: If Cash, record payment immediately
-        if (mode == 'Cash') {
-          await _recordCashPayment(
-            rentalId: rentalId,
-            amount: amount,
-            reference: referenceNo ?? "CASH-$tenantId",
-            notes: note ?? "Cash received from tenant",
-          );
-        }
+        // Step 2: Record Cash Payment immediately
+        await _recordCashPayment(
+          rentalId: rentalId,
+          amount: amount,
+          reference: referenceNo ?? "CASH-$tenantId",
+          notes: note ?? "Cash received from tenant",
+        );
+      } else if (mode == 'UPI' && hostelId != null && bookingId != null) {
+        // Step 1: Create UPI Order
+        final rentalId = await _createUpiOrder(
+          tenantId: tenantId,
+          hostelId: hostelId,
+          bookingId: bookingId,
+          amount: amount,
+          dueDate: date,
+          notes: note,
+        );
+
+        // Step 2: Record UPI Payment immediately with UTR number
+        await _recordUpiPayment(
+          rentalId: rentalId,
+          amount: amount,
+          reference: referenceNo ?? "UPI-$tenantId",
+          notes: note ?? "UPI received from tenant",
+        );
       } else {
         await _recordPayment(
           tenantId: tenantId,

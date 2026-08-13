@@ -28,7 +28,23 @@ abstract class PaymentRepository {
     String? notes,
   });
 
+  Future<String> createUpiOrder({
+    required String tenantId,
+    required String hostelId,
+    required String bookingId,
+    required double amount,
+    required String dueDate,
+    String? notes,
+  });
+
   Future<void> recordCashPayment({
+    required String rentalId,
+    required double amount,
+    required String reference,
+    String? notes,
+  });
+
+  Future<void> recordUpiPayment({
     required String rentalId,
     required double amount,
     required String reference,

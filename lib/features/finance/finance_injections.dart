@@ -32,6 +32,8 @@ void initFinanceInjections() {
       getTenants: sl(),
       createCashOrder: sl(),
       recordCashPayment: sl(),
+      createUpiOrder: sl(),
+      recordUpiPayment: sl(),
     ),
   );
 
@@ -43,6 +45,8 @@ void initFinanceInjections() {
   sl.registerLazySingleton(() => RecordPaymentUseCase(repository: sl()));
   sl.registerLazySingleton(() => CreateCashOrderUseCase(repository: sl()));
   sl.registerLazySingleton(() => RecordCashPaymentUseCase(repository: sl()));
+  sl.registerLazySingleton(() => CreateUpiOrderUseCase(repository: sl()));
+  sl.registerLazySingleton(() => RecordUpiPaymentUseCase(repository: sl()));
 
   sl.registerLazySingleton<FinanceRepository>(
     () => FinanceRepositoryImpl(remoteDataSource: sl()),

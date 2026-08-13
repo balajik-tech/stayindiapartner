@@ -65,6 +65,25 @@ class PaymentRepositoryImpl implements PaymentRepository {
   }
 
   @override
+  Future<String> createUpiOrder({
+    required String tenantId,
+    required String hostelId,
+    required String bookingId,
+    required double amount,
+    required String dueDate,
+    String? notes,
+  }) {
+    return remoteDataSource.createUpiOrder(
+      tenantId: tenantId,
+      hostelId: hostelId,
+      bookingId: bookingId,
+      amount: amount,
+      dueDate: dueDate,
+      notes: notes,
+    );
+  }
+
+  @override
   Future<void> recordCashPayment({
     required String rentalId,
     required double amount,
@@ -72,6 +91,21 @@ class PaymentRepositoryImpl implements PaymentRepository {
     String? notes,
   }) {
     return remoteDataSource.recordCashPayment(
+      rentalId: rentalId,
+      amount: amount,
+      reference: reference,
+      notes: notes,
+    );
+  }
+
+  @override
+  Future<void> recordUpiPayment({
+    required String rentalId,
+    required double amount,
+    required String reference,
+    String? notes,
+  }) {
+    return remoteDataSource.recordUpiPayment(
       rentalId: rentalId,
       amount: amount,
       reference: reference,

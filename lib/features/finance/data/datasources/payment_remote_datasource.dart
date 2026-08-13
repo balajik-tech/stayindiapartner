@@ -30,7 +30,23 @@ abstract class PaymentRemoteDataSource {
     String? notes,
   });
 
+  Future<String> createUpiOrder({
+    required String tenantId,
+    required String hostelId,
+    required String bookingId,
+    required double amount,
+    required String dueDate,
+    String? notes,
+  });
+
   Future<void> recordCashPayment({
+    required String rentalId,
+    required double amount,
+    required String reference,
+    String? notes,
+  });
+
+  Future<void> recordUpiPayment({
     required String rentalId,
     required double amount,
     required String reference,
@@ -130,6 +146,34 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
   }
 
   @override
+  Future<String> createUpiOrder({
+    required String tenantId,
+    required String hostelId,
+    required String bookingId,
+    required double amount,
+    required String dueDate,
+    String? notes,
+  }) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.tenantRentalOrderUpi,
+        data: {
+          "tenant": tenantId,
+          "hostel": hostelId,
+          "booking": bookingId,
+          "amount": amount,
+          "dueDate": dueDate,
+          "receiptNumber": "",
+          "notes": notes ?? "",
+        },
+      );
+      return response.data['data']['rentalId'];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> recordCashPayment({
     required String rentalId,
     required double amount,
@@ -139,6 +183,27 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
     try {
       await dio.post(
         ApiConstants.tenantRentalPaymentCash(rentalId),
+        data: {
+          "amount": amount,
+          "reference": reference,
+          "notes": notes ?? "",
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> recordUpiPayment({
+    required String rentalId,
+    required double amount,
+    required String reference,
+    String? notes,
+  }) async {
+    try {
+      await dio.post(
+        ApiConstants.tenantRentalPaymentUpi(rentalId),
         data: {
           "amount": amount,
           "reference": reference,
