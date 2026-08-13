@@ -7,6 +7,7 @@ class CommitteeMemberEntity extends Equatable {
   final String name;
   final String position;
   final String photoUrl;
+  final String phone;
 
   /// true => President / Secretary / Treasurer (bold + blue in UI)
   /// false => Vice President / Joint Secretary (muted gray in UI)
@@ -17,6 +18,7 @@ class CommitteeMemberEntity extends Equatable {
     required this.name,
     required this.position,
     required this.photoUrl,
+    required this.phone,
     this.isHighlighted = false,
   });
 

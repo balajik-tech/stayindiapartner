@@ -179,6 +179,11 @@ class HeroHeaderWidget extends StatelessWidget {
                 label: 'Donations',
                 onPressed: () => _showSheet(context, 'Donations'),
               ),
+              if (details?.rulesRegulations != null)
+                _PillButton(
+                  label: 'Rules & Regulation',
+                  onPressed: () => _showSheet(context, 'Rules'),
+                ),
             ],
           ),
         ],

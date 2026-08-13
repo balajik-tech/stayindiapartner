@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import '../../domain/entities/association_details_entity.dart';
 import 'hex_color.dart';
@@ -24,6 +25,8 @@ class AssociateInfoSheet extends StatelessWidget {
         return _AboutUsSheet(theme: theme, details: details?.about);
       case 'By Laws':
         return _ByLawsSheet(theme: theme, details: details?.bylaws);
+      case 'Rules':
+        return _RulesSheet(theme: theme, details: details?.rulesRegulations);
       case 'Founders':
         return _FoundersSheet(theme: theme, details: details?.founders);
       case 'Donations':
@@ -400,7 +403,7 @@ class _FoundersSheet extends StatelessWidget {
                               radius: 36.r,
                               backgroundColor: accent.withValues(alpha: 0.1),
                               backgroundImage: f.profileImg.isNotEmpty
-                                  ? NetworkImage(f.profileImg)
+                                  ? NetworkImage(ApiConstants.getImageUrl(f.profileImg) ?? '')
                                   : null,
                               child: f.profileImg.isEmpty
                                   ? Icon(Icons.person, color: accent, size: 36.sp)
@@ -427,29 +430,104 @@ class _FoundersSheet extends StatelessWidget {
                               letterSpacing: 1,
                             ),
                           ),
-                          SizedBox(height: 12.h),
-                          Container(
-                            padding:
-                                EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: badgeBg,
-                              borderRadius: BorderRadius.circular(6.r),
-                            ),
-                            child: Text(
-                              'ID ${f.id.substring(f.id.length - 8).toUpperCase()}',
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.w700,
-                                color: badgeText,
+                          if (f.id.isNotEmpty) ...[
+                            SizedBox(height: 12.h),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8.w, vertical: 4.h),
+                              decoration: BoxDecoration(
+                                color: badgeBg,
+                                borderRadius: BorderRadius.circular(6.r),
+                              ),
+                              child: Text(
+                                'ID ${f.id.substring(f.id.length - 8).toUpperCase()}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: badgeText,
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
                   ))
               .toList(),
         ),
+      ],
+    );
+  }
+}
+
+class _RulesSheet extends StatelessWidget {
+  final CommunityThemeEntity theme;
+  final AssociationInfoEntity? details;
+  const _RulesSheet({required this.theme, this.details});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = theme.primaryColor.toColor();
+    final textSecondary = theme.textSecondary.toColor();
+    final accent = theme.accentColor.toColor();
+
+    final String description =
+        (details?.description != null && details!.description.isNotEmpty)
+            ? details!.description
+            : '';
+    final contents = details?.contents ?? [];
+
+    return _BaseSheet(
+      title: 'Rules & Regulations',
+      theme: theme,
+      children: [
+        if (description.isNotEmpty)
+          Text(
+            description,
+            style: GoogleFonts.inter(
+              fontSize: 15.sp,
+              color: Colors.black87,
+              height: 1.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        if (description.isNotEmpty) SizedBox(height: 24.h),
+        ...contents.map((content) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (content.title.isNotEmpty) _buildHeading(content.title, primary),
+              if (content.subtitle.isNotEmpty) ...[
+                SizedBox(height: 4.h),
+                Text(
+                  content.subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+              if (content.title.isNotEmpty || content.subtitle.isNotEmpty)
+                SizedBox(height: 12.h),
+              if (content.type == 'paragraph')
+                ...content.descriptions.map((d) => Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child: Text(
+                        d,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                    ))
+              else
+                ...content.descriptions.map((item) => _buildBulletItem(item, accent)),
+              SizedBox(height: 24.h),
+            ],
+          );
+        }),
       ],
     );
   }

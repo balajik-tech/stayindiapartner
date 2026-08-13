@@ -4,11 +4,13 @@ class ExecutiveStructureMemberEntity extends Equatable {
   final String id;
   final String name;
   final String photoUrl;
+  final String phone;
 
   const ExecutiveStructureMemberEntity({
     required this.id,
     required this.name,
     this.photoUrl = '',
+    required this.phone,
   });
 
   @override
@@ -19,6 +21,7 @@ class ExecutiveStructureLeaderEntity extends Equatable {
   final String id;
   final String name;
   final String photoUrl;
+  final String phone;
   final List<ExecutiveStructureMemberEntity> members;
 
   const ExecutiveStructureLeaderEntity({
@@ -26,6 +29,7 @@ class ExecutiveStructureLeaderEntity extends Equatable {
     required this.name,
     this.photoUrl = '',
     required this.members,
+    required this.phone
   });
 
   @override

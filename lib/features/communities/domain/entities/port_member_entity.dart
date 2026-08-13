@@ -5,12 +5,14 @@ class PortMemberEntity extends Equatable {
   final String name;
   final String role;
   final String photoUrl;
+  final String phone;
 
   const PortMemberEntity({
     required this.id,
     required this.name,
     required this.role,
     required this.photoUrl,
+    required this.phone
   });
 
   @override

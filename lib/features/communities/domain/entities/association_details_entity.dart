@@ -9,6 +9,7 @@ class AssociationDetailsEntity extends Equatable {
   final AssociationInfoEntity about;
   final AssociationInfoEntity bylaws;
   final AssociationFoundersSectionEntity founders;
+  final AssociationInfoEntity? rulesRegulations;
 
   const AssociationDetailsEntity({
     required this.name,
@@ -19,10 +20,12 @@ class AssociationDetailsEntity extends Equatable {
     required this.about,
     required this.bylaws,
     required this.founders,
+    this.rulesRegulations,
   });
 
   @override
-  List<Object?> get props => [name, address, email, phone, logo, about, bylaws, founders];
+  List<Object?> get props =>
+      [name, address, email, phone, logo, about, bylaws, founders, rulesRegulations];
 }
 
 class AssociationInfoEntity extends Equatable {

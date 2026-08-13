@@ -58,6 +58,7 @@ class _ExecutiveMemberDetailView extends StatelessWidget {
               id: leader.id,
               name: leader.name,
               photoUrl: leader.photoUrl,
+              phone: leader.phone,
             ));
             allMembers.addAll(leader.members);
           }
@@ -197,6 +198,17 @@ class _ExecutiveMemberDetailView extends StatelessWidget {
                                       color: textPrimary,
                                     ),
                                   ),
+                                  if (member.role.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      member.role,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 15,
+                                        color: textSecondary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
@@ -221,7 +233,7 @@ class _ExecutiveMemberDetailView extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
-                                      'ID ${member.id}',
+                                      '${member.phone}',
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
                                         color: badgeText,
@@ -335,7 +347,7 @@ class _ExecutiveMemberDetailView extends StatelessWidget {
                                               borderRadius: BorderRadius.circular(4),
                                             ),
                                             child: Text(
-                                              'ID ${core.id}',
+                                              '${core.phone}',
                                               style: GoogleFonts.inter(
                                                 fontSize: 10,
                                                 color: badgeText,

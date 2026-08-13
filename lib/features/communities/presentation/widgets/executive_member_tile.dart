@@ -27,6 +27,7 @@ class ExecutiveMemberTile extends StatelessWidget {
     final badgeText = theme.badgeText.toColor();
     final accent = theme.accentColor.toColor();
     final textPrimary = theme.textPrimary.toColor();
+    final primary = theme.primaryColor.toColor();
 
     return Column(
       children: [
@@ -49,6 +50,17 @@ class ExecutiveMemberTile extends StatelessWidget {
                     children: [
                       Text(member.name, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600,
                       color: textPrimary)),
+                      if (member.role.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          member.role,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: member.isHighlighted ? primary : textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -72,7 +84,7 @@ class ExecutiveMemberTile extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'ID ${member.id}',
+                              '${member.phone?.trim().isNotEmpty == true ? member.phone : ''}',
                               style: GoogleFonts.inter(fontSize: 10.5, color: badgeText),
                             ),
                           ),

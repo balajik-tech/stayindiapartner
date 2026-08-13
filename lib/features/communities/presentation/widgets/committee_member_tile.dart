@@ -69,7 +69,7 @@ class CommitteeMemberTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'ID ${member.id}',
+                  '${member.phone?.trim().isNotEmpty == true ? member.phone : ''}',
                   style: GoogleFonts.inter(fontSize: 11, color: badgeText),
                 ),
               ),

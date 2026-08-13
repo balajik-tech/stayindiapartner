@@ -21,6 +21,10 @@ class ExecutiveMemberEntity extends Equatable {
   final String name;
   final String zone;
   final String photoUrl;
+  final String role;
+  final String phone;
+  final int tier;
+  final bool isHighlighted;
   final List<CoreMemberEntity> coreMembers;
 
   const ExecutiveMemberEntity({
@@ -28,9 +32,14 @@ class ExecutiveMemberEntity extends Equatable {
     required this.name,
     required this.zone,
     required this.photoUrl,
+    this.role = '',
+    this.phone = '',
+    this.tier = 2,
+    this.isHighlighted = false,
     this.coreMembers = const [],
   });
 
   @override
-  List<Object?> get props => [id, name, zone, photoUrl, coreMembers];
+  List<Object?> get props =>
+      [id, name, zone, photoUrl, role, phone, tier, isHighlighted, coreMembers];
 }

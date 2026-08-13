@@ -6,6 +6,7 @@ class AssociatePortMemberModel extends PortMemberEntity {
     required super.name,
     required super.role,
     required super.photoUrl,
+    required super.phone
   });
 
   factory AssociatePortMemberModel.fromJson(Map<String, dynamic> json) {
@@ -14,6 +15,7 @@ class AssociatePortMemberModel extends PortMemberEntity {
       name: json['name'] ?? '',
       role: json['role'] ?? '',
       photoUrl: json['photo'] ?? json['photoUrl'] ?? '',
+      phone:json['phone'] ?? '',
     );
   }
 
@@ -22,5 +24,6 @@ class AssociatePortMemberModel extends PortMemberEntity {
     'name': name,
     'role': role,
     'photoUrl': photoUrl,
+    'phone':phone
   };
 }

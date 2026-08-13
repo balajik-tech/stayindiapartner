@@ -5,6 +5,7 @@ class ExecutiveStructureMemberModel extends ExecutiveStructureMemberEntity {
     required super.id,
     required super.name,
     super.photoUrl = '',
+    required super.phone
   });
 
   factory ExecutiveStructureMemberModel.fromJson(Map<String, dynamic> json) {
@@ -12,6 +13,7 @@ class ExecutiveStructureMemberModel extends ExecutiveStructureMemberEntity {
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
       photoUrl: json['photo'] ?? json['photoUrl'] ?? '',
+      phone: json['phone'] ?? '',
     );
   }
 }
@@ -21,7 +23,7 @@ class ExecutiveStructureLeaderModel extends ExecutiveStructureLeaderEntity {
     required super.id,
     required super.name,
     super.photoUrl = '',
-    required List<ExecutiveStructureMemberModel> super.members,
+    required List<ExecutiveStructureMemberModel> super.members, required super.phone,
   });
 
   factory ExecutiveStructureLeaderModel.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class ExecutiveStructureLeaderModel extends ExecutiveStructureLeaderEntity {
               ?.map((e) => ExecutiveStructureMemberModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      phone:  json['phone'] ?? '',
     );
   }
 }

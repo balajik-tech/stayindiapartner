@@ -10,6 +10,7 @@ class AssociationDetailsModel extends AssociationDetailsEntity {
     required super.about,
     required super.bylaws,
     required super.founders,
+    super.rulesRegulations,
   });
 
   factory AssociationDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +23,7 @@ class AssociationDetailsModel extends AssociationDetailsEntity {
       about: _parseInfoSection(json['about']),
       bylaws: _parseInfoSection(json['bylaws']),
       founders: _parseFoundersSection(json['founders']),
+      rulesRegulations: json['rulesRegulations'] != null ? _parseInfoSection(json['rulesRegulations']) : null,
     );
   }
 

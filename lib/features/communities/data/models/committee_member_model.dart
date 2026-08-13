@@ -7,6 +7,7 @@ class AssociateCommitteeMemberModel extends CommitteeMemberEntity {
     required super.name,
     required super.position,
     required super.photoUrl,
+    required super.phone,
     super.isHighlighted,
   });
 
@@ -17,6 +18,7 @@ class AssociateCommitteeMemberModel extends CommitteeMemberEntity {
       name: json['name'] ?? '',
       position: json['role'] ?? json['position'] ?? '',
       photoUrl: json['photo'] ?? json['photoUrl'] ?? '',
+      phone: json['phone'] ?? '',
       isHighlighted: tier == 0,
     );
   }
@@ -25,6 +27,7 @@ class AssociateCommitteeMemberModel extends CommitteeMemberEntity {
     'id': id,
     'name': name,
     'position': position,
+    'phone': phone,
     'photoUrl': photoUrl,
     'isHighlighted': isHighlighted,
   };

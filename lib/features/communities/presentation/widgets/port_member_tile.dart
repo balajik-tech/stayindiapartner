@@ -58,7 +58,7 @@ class PortMemberTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'ID ${member.id}',
+                  '${member.phone}',
                   style: GoogleFonts.inter(fontSize: 11.5, color: badgeText,),
                 ),
               ),
