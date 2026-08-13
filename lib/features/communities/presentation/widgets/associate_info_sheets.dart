@@ -178,48 +178,53 @@ class _AboutUsSheet extends StatelessWidget {
             ],
           );
         }),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Membership enquiries',
-              style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.grey),
-            ),
-            Text(
-              '',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-                color: primary,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        const Divider(color: Color(0xFFE2E8F0)),
-        SizedBox(height: 12.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Desk hours',
-              style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.grey),
-            ),
-            Text(
-              '',
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 32.h),
-        _buildInfoBox(
-          '',
-          theme,
-        ),
+
+        // commented this data not getting from api (Membership enquiries)
+
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Membership enquiries',
+        //       style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.grey),
+        //     ),
+        //     Text(
+        //       '',
+        //       style: GoogleFonts.inter(
+        //         fontSize: 14.sp,
+        //         fontWeight: FontWeight.w700,
+        //         color: primary,
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        // SizedBox(height: 12.h),
+        // const Divider(color: Color(0xFFE2E8F0)),
+        // SizedBox(height: 12.h),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Desk hours',
+        //       style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.grey),
+        //     ),
+        //     Text(
+        //       '',
+        //       style: GoogleFonts.inter(
+        //         fontSize: 13.sp,
+        //         fontWeight: FontWeight.w700,
+        //         color: Colors.black87,
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        // SizedBox(height: 32.h),
+        // _buildInfoBox(
+        //   '',
+        //   theme,
+        // ),
+
+        // commented this data not getting from api (Membership enquiries)
       ],
     );
   }
@@ -322,10 +327,12 @@ class _ByLawsSheet extends StatelessWidget {
             ],
           );
         }),
-        _buildInfoBox(
-          '',
-          theme,
-        ),
+        // commented this data not getting from api (BuildInfor Box)
+        // _buildInfoBox(
+        //   '',
+        //   theme,
+        // ),
+        // commented this data not getting from api (BuildInfor Box)
       ],
     );
   }

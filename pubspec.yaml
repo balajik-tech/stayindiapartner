@@ -67,6 +67,7 @@ dependencies:
   flutter_digilocker_aadhar_pan: ^1.0.0
   dartz: ^0.10.1
   razorpay_flutter: 1.4.0
+  flutter_tts: ^4.2.3
 
 dev_dependencies:
   flutter_test:

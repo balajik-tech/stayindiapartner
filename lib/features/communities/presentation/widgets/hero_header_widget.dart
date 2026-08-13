@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/community_theme_entity.dart';
 import '../../domain/entities/association_details_entity.dart';
@@ -11,7 +13,8 @@ class HeroHeaderWidget extends StatelessWidget {
   final CommunityThemeEntity theme;
   final AssociationDetailsEntity? details;
   final String? detailsError;
-  const HeroHeaderWidget({
+
+  HeroHeaderWidget({
     super.key,
     required this.theme,
     this.details,
@@ -33,6 +36,12 @@ class HeroHeaderWidget extends StatelessWidget {
         ? nameWords.skip(nameWords.length - 2).join(' ') 
         : nameWords.skip(1).join(' ');
     final location = details?.address;
+    final phoneNumber = details?.phone;
+
+    final description = details?.about.description.trim().isNotEmpty == true
+        ? details!.about.description
+        : '';
+
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
@@ -49,9 +58,15 @@ class HeroHeaderWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              _iconButton(Icons.phone, accent),
+              GestureDetector(
+                onTap: () => _makePhoneCall(phoneNumber!),
+                child: _iconButton(Icons.phone, accent),
+              ),
               const SizedBox(width: 10),
-              _iconButton(Icons.campaign_outlined, accent),
+              GestureDetector(
+                onTap: () => _speak(description),
+                child: _iconButton(Icons.campaign_outlined, accent),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -100,6 +115,12 @@ class HeroHeaderWidget extends StatelessWidget {
                         height: 1.15,
                       ),
                     ),
+                    Text(
+                      (details?.about.description != null && details!.about.description.isNotEmpty)
+                          ? details!.about.description
+                          : '',
+                      style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.4),
+                    ),
                   ],
                 ),
               ),
@@ -108,12 +129,7 @@ class HeroHeaderWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            (details?.about.description != null && details!.about.description.isNotEmpty)
-                ? details!.about.description
-                : '',
-            style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.4),
-          ),
+
           if (detailsError != null && detailsError!.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
@@ -168,6 +184,25 @@ class HeroHeaderWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri phoneUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    }
+  }
+
+  final FlutterTts _flutterTts = FlutterTts();
+
+  Future<void> _speak(String text) async {
+    await _flutterTts.setLanguage('en-US');
+    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.speak(text);
   }
 
   void _showSheet(BuildContext context, String type) {
