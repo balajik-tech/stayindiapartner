@@ -218,6 +218,24 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         color: isOfficial ? Colors.white : Colors.grey.shade600,
                       ),
                     ),
+                    if (unreadOfficial > 0) ...[
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: isOfficial ? Colors.white : const Color(0xFF2563EB),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Text(
+                          '$unreadOfficial',
+                          style: TextStyle(
+                            color: isOfficial ? activeColor : Colors.white,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -237,13 +255,36 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   borderRadius: BorderRadius.circular(28.r),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  'PG owners forum',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: !isOfficial ? Colors.white : Colors.grey.shade600,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'PG owners forum',
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: !isOfficial ? Colors.white : Colors.grey.shade600,
+                      ),
+                    ),
+                    if (unreadForum > 0) ...[
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: !isOfficial ? Colors.white : const Color(0xFFEA580C),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Text(
+                          '$unreadForum',
+                          style: TextStyle(
+                            color: !isOfficial ? activeColor : Colors.white,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
@@ -1009,6 +1050,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final post = filteredPosts[index];
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _markPostAsRead(post.id);
+              });
               return _PostCard(post: post);
             }, childCount: filteredPosts.length),
           ),
