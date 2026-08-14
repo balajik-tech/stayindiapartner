@@ -1319,7 +1319,10 @@ class _PostCardState extends State<_PostCard> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(
+              color: Colors.grey.shade300,
+              width: 1,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -1337,23 +1340,23 @@ class _PostCardState extends State<_PostCard> {
                     radius: 18.r,
                     backgroundColor: Colors.grey.shade100,
                     backgroundImage: (widget.post.userAvatar != null &&
-                            widget.post.userAvatar!.isNotEmpty)
+                        widget.post.userAvatar!.isNotEmpty)
                         ? CachedNetworkImageProvider(
-                            ApiConstants.getImageUrl(widget.post.userAvatar!)!,
-                          )
+                      ApiConstants.getImageUrl(widget.post.userAvatar!)!,
+                    )
                         : null,
                     child: (widget.post.userAvatar == null ||
-                            widget.post.userAvatar!.isEmpty)
+                        widget.post.userAvatar!.isEmpty)
                         ? Text(
-                            widget.post.userName.isNotEmpty
-                                ? widget.post.userName[0].toUpperCase()
-                                : 'U',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.sp,
-                            ),
-                          )
+                      widget.post.userName.isNotEmpty
+                          ? widget.post.userName[0].toUpperCase()
+                          : 'U',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                      ),
+                    )
                         : null,
                   ),
                   SizedBox(width: 12.w),
@@ -1397,7 +1400,7 @@ class _PostCardState extends State<_PostCard> {
                           '$displayRole · ${_formatTimeAgo(widget.post.createdAt)}',
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: Colors.grey.shade500,
+                            color: AppColors.greyText,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -1410,8 +1413,8 @@ class _PostCardState extends State<_PostCard> {
               Text(
                 widget.post.content,
                 style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: const Color(0xFF374151),
+                  fontSize: 12.sp,
+                  color: AppColors.grayColor3,
                   height: 1.5,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1423,7 +1426,7 @@ class _PostCardState extends State<_PostCard> {
                   borderRadius: BorderRadius.circular(12.r),
                   child: CachedNetworkImage(
                     imageUrl:
-                        ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
+                    ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
@@ -1436,8 +1439,8 @@ class _PostCardState extends State<_PostCard> {
                   if (opt is Map) {
                     final text = opt['text']?.toString() ?? '';
                     final count =
-                        ((opt['votesCount'] ?? opt['votes'] ?? 0) as num)
-                            .toInt();
+                    ((opt['votesCount'] ?? opt['votes'] ?? 0) as num)
+                        .toInt();
                     final pct = totalVotes > 0 ? (count / totalVotes) : 0.0;
                     final isMyVote = widget.post.userVote == i;
 
@@ -1445,11 +1448,11 @@ class _PostCardState extends State<_PostCard> {
                       onTap: widget.post.userVote != null
                           ? null
                           : () {
-                              context.read<SocialFeedCubit>().votePoll(
-                                widget.post.id,
-                                i,
-                              );
-                            },
+                        context.read<SocialFeedCubit>().votePoll(
+                          widget.post.id,
+                          i,
+                        );
+                      },
                       child: Container(
                         margin: EdgeInsets.only(bottom: 8.h),
                         height: 40.h,
@@ -1474,7 +1477,7 @@ class _PostCardState extends State<_PostCard> {
                                   decoration: BoxDecoration(
                                     color: isMyVote
                                         ? const Color(0xFF1650A2)
-                                            .withValues(alpha: 0.1)
+                                        .withValues(alpha: 0.1)
                                         : Colors.grey.shade100,
                                     borderRadius: BorderRadius.circular(10.r),
                                   ),
@@ -1518,7 +1521,7 @@ class _PostCardState extends State<_PostCard> {
                       children: [
                         Icon(
                           Icons.chat_bubble_outline_rounded,
-                          color: Colors.grey.shade600,
+                          color: AppColors.grayColor3,
                           size: 18.sp,
                         ),
                         SizedBox(width: 6.w),
@@ -1526,8 +1529,8 @@ class _PostCardState extends State<_PostCard> {
                           '${widget.post.commentsCount} replies',
                           style: GoogleFonts.inter(
                             fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.grayColor3,
                           ),
                         ),
                       ],
@@ -1542,7 +1545,7 @@ class _PostCardState extends State<_PostCard> {
                       children: [
                         Icon(
                           Icons.share_outlined,
-                          color: Colors.grey.shade600,
+                          color: AppColors.grayColor3,
                           size: 18.sp,
                         ),
                         SizedBox(width: 6.w),
@@ -1550,8 +1553,8 @@ class _PostCardState extends State<_PostCard> {
                           'Share',
                           style: GoogleFonts.inter(
                             fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.grayColor3,
                           ),
                         ),
                       ],
