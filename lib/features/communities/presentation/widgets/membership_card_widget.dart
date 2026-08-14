@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/constants/api_constants.dart';
+import '../../../../injection_container.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
+import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
+import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
 
 import 'join_association_sheet.dart';
 
-enum MembershipStatus {
-  newUser,
-  applied,
-  approved,
-  paid,
-  renewalDue,
-  expired
-}
+enum MembershipStatus { newUser, applied, approved, paid, renewalDue, expired }
 
 class MembershipCardWidget extends StatefulWidget {
   final CommunityThemeEntity theme;
+
   const MembershipCardWidget({super.key, required this.theme});
 
   @override
@@ -84,20 +84,22 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       case MembershipStatus.applied:
         title = 'Thank you, Ramesh';
         badgeText = 'Pending approval';
-        badgeColor =  Color(0xFFD3E0ED).withValues(alpha: 0.82);
+        badgeColor = Color(0xFFD3E0ED).withValues(alpha: 0.82);
         textColor = Colors.black;
-        smallCircleColor =  Colors.black;
+        smallCircleColor = Colors.black;
         break;
       case MembershipStatus.approved:
         title = 'Application approved';
         badgeText = 'Payment pending';
-        badgeColor =  Color(0xFFD3E0ED).withValues(alpha: 0.82);
+        badgeColor = Color(0xFFD3E0ED).withValues(alpha: 0.82);
         textColor = Colors.black;
-        smallCircleColor =  Colors.black;
+        smallCircleColor = Colors.black;
         break;
       case MembershipStatus.paid:
       case MembershipStatus.renewalDue:
-        title = _status == MembershipStatus.paid ? "You're a member" : "Ramesh Kumar";
+        title = _status == MembershipStatus.paid
+            ? "You're a member"
+            : "Ramesh Kumar";
         badgeText = 'Active';
         badgeColor = widget.theme.accentColor.toColor().withValues(alpha: 0.2);
         break;
@@ -143,7 +145,9 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               children: [
                 CircleAvatar(
                   radius: 4.r,
-                  backgroundColor: _status == MembershipStatus.expired ? Colors.white : smallCircleColor,
+                  backgroundColor: _status == MembershipStatus.expired
+                      ? Colors.white
+                      : smallCircleColor,
                 ),
                 SizedBox(width: 8.w),
                 Text(
@@ -200,7 +204,9 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
             Positioned(
               top: 8.h,
               left: 30.w,
-              width: (MediaQuery.of(context).size.width - 152.w) * (currentStep / 4),
+              width:
+                  (MediaQuery.of(context).size.width - 152.w) *
+                  (currentStep / 4),
               child: Container(
                 height: 2.h,
                 color: widget.theme.accentColor.toColor(),
@@ -226,7 +232,9 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                           : (isCurrent ? Colors.white : Color(0xFF1E3A68)),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isCompleted ? widget.theme.accentColor.toColor() : Colors.white24,
+                        color: isCompleted
+                            ? widget.theme.accentColor.toColor()
+                            : Colors.white24,
                         width: 1,
                       ),
                     ),
@@ -236,7 +244,9 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                           : Text(
                               '$stepIndex',
                               style: GoogleFonts.inter(
-                                color: isCurrent ? AppColors.primaryBlue : Colors.white,
+                                color: isCurrent
+                                    ? AppColors.primaryBlue
+                                    : Colors.white,
                                 fontWeight: FontWeight.w500,
                                 fontSize: 10.sp,
                               ),
@@ -286,7 +296,8 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
   }
 
   Widget _buildFooter(Color accent) {
-    if (_status == MembershipStatus.newUser || _status == MembershipStatus.applied) {
+    if (_status == MembershipStatus.newUser ||
+        _status == MembershipStatus.applied) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -330,11 +341,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                 flex: 4, // 40%
                 child: OutlinedButton.icon(
                   onPressed: () => _makePhoneCall('+919840012345'),
-                  icon: Icon(
-                    Icons.phone,
-                    color: accent,
-                    size: 12.sp,
-                  ),
+                  icon: Icon(Icons.phone, color: accent, size: 12.sp),
                   label: Text(
                     _status == MembershipStatus.newUser
                         ? 'Call +91 98400 12345'
@@ -346,9 +353,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: accent.withValues(alpha: 0.3),
-                    ),
+                    side: BorderSide(color: accent.withValues(alpha: 0.3)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -438,7 +443,9 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         child: Text(
           label,
           style: GoogleFonts.inter(
-            color: isSelected ? widget.theme.accentColor.toColor() : Colors.white54,
+            color: isSelected
+                ? widget.theme.accentColor.toColor()
+                : Colors.white54,
             fontSize: 12.sp,
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
             decoration: isSelected ? TextDecoration.underline : null,
@@ -479,10 +486,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
-    final Uri phoneUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
 
     if (await canLaunchUrl(phoneUri)) {
       await launchUrl(phoneUri);
@@ -518,6 +522,7 @@ class _NewUserMembershipView extends StatelessWidget {
 
 class _AppliedMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+
   const _AppliedMembershipView({required this.theme});
 
   @override
@@ -536,7 +541,10 @@ class _AppliedMembershipView extends StatelessWidget {
         SizedBox(height: 16.h),
         _PropertySummaryBox(
           count: 2,
-          properties: const ['Sri Balaji Men\'s Hostel', 'Balaji Ladies Hostel'],
+          properties: const [
+            'Sri Balaji Men\'s Hostel',
+            'Balaji Ladies Hostel',
+          ],
           locations: const ['Guindy, Chennai', 'Velachery, Chennai'],
           theme: theme,
         ),
@@ -564,10 +572,7 @@ class _ApprovedMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
   final VoidCallback onPay;
 
-  const _ApprovedMembershipView({
-    required this.theme,
-    required this.onPay,
-  });
+  const _ApprovedMembershipView({required this.theme, required this.onPay});
 
   @override
   Widget build(BuildContext context) {
@@ -612,6 +617,7 @@ class _ApprovedMembershipView extends StatelessWidget {
 
 class _ActiveMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+
   const _ActiveMembershipView({required this.theme});
 
   @override
@@ -678,6 +684,7 @@ class _ActiveMembershipView extends StatelessWidget {
 
 class _RenewalDueMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+
   const _RenewalDueMembershipView({required this.theme});
 
   @override
@@ -752,12 +759,20 @@ class _RenewalDueMembershipView extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accent,
                   foregroundColor: primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                 ),
                 child: Text(
                   'Renew · ₹2,000',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13.sp),
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.sp,
+                  ),
                 ),
               ),
             ],
@@ -790,6 +805,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
 
 class _ExpiredMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+
   const _ExpiredMembershipView({required this.theme});
 
   @override
@@ -865,12 +881,20 @@ class _ExpiredMembershipView extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accent,
                   foregroundColor: primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                 ),
                 child: Text(
                   'Renew · ₹2,000',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13.sp),
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.sp,
+                  ),
                 ),
               ),
             ],
@@ -1118,7 +1142,7 @@ class _MembershipIdBox extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child:  Image.asset(
+            child: Image.asset(
               'assets/images/whatsapp_iconn.png',
               width: 24.w,
               height: 24.h,
@@ -1177,10 +1201,7 @@ class _SummaryItem extends StatelessWidget {
           SizedBox(height: 4.h),
           Text(
             subValue,
-            style: GoogleFonts.inter(
-              color: Colors.white60,
-              fontSize: 11.sp,
-            ),
+            style: GoogleFonts.inter(color: Colors.white60, fontSize: 11.sp),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -1221,7 +1242,9 @@ class _ActionButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: theme.accentColor.toColor(),
           padding: EdgeInsets.symmetric(vertical: 12.h),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
           elevation: 0,
         ),
       ),
@@ -1256,7 +1279,9 @@ class _OutlineButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         side: const BorderSide(color: Colors.white24),
         padding: EdgeInsets.symmetric(vertical: 12.h),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
       ),
     );
   }
@@ -1288,6 +1313,7 @@ class _TextLink extends StatelessWidget {
 
 class _RequestToJoinSheet extends StatefulWidget {
   final CommunityThemeEntity theme;
+
   const _RequestToJoinSheet({required this.theme});
 
   @override
@@ -1300,31 +1326,31 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
       'name': 'Sri Balaji Men\'s Hostel',
       'location': 'Guindy, Chennai · 120 beds',
       'type': 'MEN\'S HOSTEL',
-      'selected': false
+      'selected': false,
     },
     {
       'name': 'Balaji Ladies Hostel',
       'location': 'Velachery, Chennai · 86 beds',
       'type': 'WORKING WOMEN\'S HOSTEL',
-      'selected': false
+      'selected': false,
     },
     {
       'name': 'BK Co-living',
       'location': 'Sholinganallur, Chennai · 64 beds',
       'type': 'CO-LIVING PG',
-      'selected': false
+      'selected': false,
     },
     {
       'name': 'Sri Balaji Students PG',
       'location': 'Peelamedu, Coimbatore · 48 beds',
       'type': 'STUDENTS\' PG',
-      'selected': false
+      'selected': false,
     },
     {
       'name': 'Balaji Service Suites',
       'location': 'RS Puram, Coimbatore · 22 beds',
       'type': 'SERVICE APARTMENT',
-      'selected': false
+      'selected': false,
     },
   ];
 
@@ -1388,10 +1414,7 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
             decoration: BoxDecoration(
               color: const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: const Color(0xFFE2E8F0),
-                width: 1,
-              ),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.02),
@@ -1478,7 +1501,9 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                   });
                 },
                 child: Text(
-                  _properties.every((p) => p['selected']) ? 'Deselect all' : 'Select all',
+                  _properties.every((p) => p['selected'])
+                      ? 'Deselect all'
+                      : 'Select all',
                   style: GoogleFonts.inter(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
@@ -1507,7 +1532,7 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                     margin: EdgeInsets.only(bottom: 12.h),
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color: isSelected ? Color(0x336FA641)  : Colors.white,
+                      color: isSelected ? Color(0x336FA641) : Colors.white,
                       borderRadius: BorderRadius.circular(16.r),
                       border: Border.all(
                         color: isSelected ? accent : Colors.transparent,
@@ -1527,8 +1552,12 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                             ),
                           ),
                           child: isSelected
-                            ? Icon(Icons.check, color: Colors.white, size: 16.sp)
-                            : null,
+                              ? Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 16.sp,
+                                )
+                              : null,
                         ),
                         SizedBox(width: 16.w),
                         Expanded(
@@ -1552,7 +1581,10 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                               ),
                               SizedBox(height: 8.h),
                               Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8.w,
+                                  vertical: 4.h,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFEFF6FF),
                                   borderRadius: BorderRadius.circular(4.r),
@@ -1581,19 +1613,24 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
               padding: EdgeInsets.only(bottom: 12.h),
               child: Text(
                 '$selectedCount of ${_properties.length} selected',
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: Colors.grey,
-                ),
+                style: GoogleFonts.inter(fontSize: 12.sp, color: Colors.grey),
               ),
             ),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: selectedCount > 0 ? () => Navigator.pop(context, true) : null,
-              icon: Icon(Icons.check, color: selectedCount > 0 ? primary : primary, size: 14.sp),
+              onPressed: selectedCount > 0
+                  ? () => Navigator.pop(context, true)
+                  : null,
+              icon: Icon(
+                Icons.check,
+                color: selectedCount > 0 ? primary : primary,
+                size: 14.sp,
+              ),
               label: Text(
-                selectedCount > 0 ? 'Submit application · $selectedCount properties' : 'Submit application',
+                selectedCount > 0
+                    ? 'Submit application · $selectedCount properties'
+                    : 'Submit application',
                 style: GoogleFonts.inter(
                   color: primary,
                   fontWeight: FontWeight.w700,
@@ -1604,7 +1641,9 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                 backgroundColor: accent,
                 disabledBackgroundColor: accent.withValues(alpha: 0.5),
                 padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
                 elevation: 0,
               ),
             ),
@@ -1634,13 +1673,18 @@ class _DashedDivider extends StatelessWidget {
       builder: (context, constraints) {
         const dashWidth = 6.0;
         const dashSpace = 4.0;
-        final dashCount = (constraints.maxWidth / (dashWidth + dashSpace)).floor();
+        final dashCount = (constraints.maxWidth / (dashWidth + dashSpace))
+            .floor();
         return Row(
           children: List.generate(
             dashCount,
             (_) => Padding(
               padding: const EdgeInsets.only(right: dashSpace),
-              child: Container(width: dashWidth, height: 1, color: Colors.white24),
+              child: Container(
+                width: dashWidth,
+                height: 1,
+                color: Colors.white24,
+              ),
             ),
           ),
         );
@@ -1651,6 +1695,7 @@ class _DashedDivider extends StatelessWidget {
 
 class _PayMembershipSheet extends StatelessWidget {
   final CommunityThemeEntity theme;
+
   const _PayMembershipSheet({required this.theme});
 
   @override
@@ -1754,7 +1799,15 @@ class _PayMembershipSheet extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => {
+                _navigateToRazorpay(
+                  context,
+                  amount: 2000,
+                  planName: 'Associate Plan',
+                  orderId: 'order_test_123456789',
+                ),
+
+              },
               icon: Icon(Icons.credit_card, color: primary, size: 18.sp),
               label: Text(
                 'Pay ₹2,000',
@@ -1767,7 +1820,9 @@ class _PayMembershipSheet extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: accent,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
                 elevation: 0,
               ),
             ),
@@ -1809,5 +1864,93 @@ class _PayMembershipSheet extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _navigateToRazorpay(
+    BuildContext context, {
+    required double amount,
+    required String planName,
+    required String orderId,
+  }) {
+    // Razorpay expects amount in paise
+    final int totalAmountToPay = (amount * 100).round();
+
+    final profileState = context.read<ProfileCubit>().state;
+
+    final String email = profileState is ProfileLoaded
+        ? profileState.profile.email
+        : '';
+
+    final String mobile = profileState is ProfileLoaded
+        ? profileState.profile.phone
+        : '';
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+            },
+            child: BlocProvider(
+              create: (_) => sl<RazorpayCubit>()
+                ..openCheckout(
+                  apiKey: ApiConstants.razorpayKey,
+                  amount: totalAmountToPay,
+                  name: planName,
+                  orderId: orderId,
+                  description: 'Payment for $planName',
+                  email: email,
+                  contact: mobile,
+                ),
+              child: BlocConsumer<RazorpayCubit, RazorpayState>(
+                listener: (innerContext, state) {
+                  if (state is RazorpaySuccess) {
+                    debugPrint('========== Razorpay Success ==========');
+                    debugPrint('Payment ID : ${state.result.paymentId}');
+                    debugPrint('Order ID   : ${state.result.orderId}');
+                    debugPrint('Signature  : ${state.result.signature}');
+                    debugPrint('======================================');
+
+                    if (Navigator.canPop(dialogContext)) {
+                      Navigator.pop(dialogContext, true);
+                    }
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context, true);
+                    }
+                    // No success navigation
+                    // No verify-payment API call
+                  } else if (state is RazorpayFailure) {
+                    debugPrint('========== Razorpay Failure ==========');
+                    debugPrint('Error: ${state.message}');
+                    debugPrint('=====================================');
+
+                    if (Navigator.canPop(dialogContext)) {
+                      Navigator.pop(dialogContext, true);
+                    }
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context, true);
+                    }
+                    // No failure screen navigation
+                  }
+                },
+                builder: (context, state) {
+                  return const Center(
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
 }
