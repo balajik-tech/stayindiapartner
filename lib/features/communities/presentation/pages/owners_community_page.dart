@@ -27,6 +27,7 @@ import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/association_portal_entity.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
+import '../widgets/dotted_circle_painter.dart';
 import 'community_home_page.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
@@ -255,7 +256,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFfcf7f3),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -335,7 +336,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   'Stay India',
                   style: GoogleFonts.inter(
                     fontSize: 24.sp,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.darkText,
                     letterSpacing: -0.5,
                   ),
@@ -400,11 +401,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           decoration: InputDecoration(
             hintText: 'Search associations',
             hintStyle: GoogleFonts.inter(
-              color: Colors.grey.shade400,
+              color: AppColors.greyText,
               fontSize: 15.sp,
             ),
             prefixIcon: Icon(Icons.search_rounded,
-                color: Colors.grey.shade400, size: 22.sp),
+                color:  AppColors.greyText, size: 22.sp),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(vertical: 14.h),
           ),
@@ -443,19 +444,22 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       Container(
                         width: 56.w,
                         height: 56.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFFF48126),
-                            width: 1,
-                            style: BorderStyle.solid,
-                          ),
                         ),
-                        child: Center(
-                          child: Icon(
-                            Icons.add,
-                            color: const Color(0xFFF48126),
-                            size: 28.sp,
+                        child: CustomPaint(
+                          painter: DashedLineCirclePainter(
+                            color: AppColors.greyText,
+                            strokeWidth: 1.5,
+                            dashLength: 6,
+                            gapLength: 8,
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.add,
+                              color: const Color(0xFFF48126),
+                              size: 28.sp,
+                            ),
                           ),
                         ),
                       ),
@@ -465,7 +469,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey.shade600,
+                          color: AppColors.greyText,
                         ),
                       ),
                     ],
@@ -494,6 +498,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.grey.shade100,
+                              border: Border.all(
+                                color: AppColors.greyText,
+                                width: 0.8,
+                              ),
                             ),
                             child: ClipOval(
                               child: (a.logo.isNotEmpty &&
@@ -517,7 +525,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade600,
+                                color:  AppColors.grayColor3,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -590,7 +598,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       decoration: BoxDecoration(
         color: const Color(0xFFF3F0EA).withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Colors.grey.shade300),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -1008,13 +1016,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
 
   Widget _buildOfficialLockedState() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(20.r),
+            padding: EdgeInsets.all(18.r),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Color(0xFFf3ede7),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -1023,23 +1031,26 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               size: 32.sp,
             ),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: 12.h),
           Text(
             'Join to see official notices',
             style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w800,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.darkText,
             ),
           ),
-          SizedBox(height: 12.h),
-          Text(
-            'Circulars, licence updates and meeting notices from your association.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.greyText,
-              height: 1.4,
+          SizedBox(height: 4.h),
+          SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+            child: Text(
+              'Circulars, licence updates and meeting notices from your association.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 12.sp,
+                color: AppColors.grayColor3,
+                height: 1.4,
+              ),
             ),
           ),
           SizedBox(height: 24.h),
@@ -1055,7 +1066,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1650A2),
               foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 14.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30.r),
               ),
@@ -1065,20 +1076,20 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               'Browse associations',
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Text(
             'The forum stays open to everyone.',
             style: GoogleFonts.inter(
               fontSize: 12.sp,
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w500,
+              color: AppColors.grayColor3,
+              fontWeight: FontWeight.w400,
             ),
           ),
-          SizedBox(height: 32.h),
+          SizedBox(height: 24.h),
           const Divider(height: 1),
         ],
       ),
@@ -1097,13 +1108,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 12.h),
+              padding: EdgeInsets.fromLTRB(20.w, 0.h, 20.w, 12.h),
               child: Text(
                 'Suggested near you',
                 style: GoogleFonts.inter(
-                  fontSize: 14.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
-                  color: Colors.grey.shade600,
+                  color: AppColors.grayColor3,
                 ),
               ),
             ),
@@ -1123,7 +1134,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             width: 48.w,
             height: 48.w,
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Color(0xFFf3ede7),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -1150,8 +1161,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 Text(
                   'City · 1,240 members', // Placeholder as per screenshot
                   style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: AppColors.greyText,
+                    fontSize: 11.sp,
+                    color: AppColors.grayColor3,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -1168,7 +1179,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               );
             },
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.grey.shade300),
+              side: BorderSide(color: Colors.grey.shade400),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.r),
               ),
