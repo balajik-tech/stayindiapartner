@@ -923,6 +923,36 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     final isOfficial = _activeFeedType == 'OFFICIAL';
 
     if (isOfficial) {
+      final posts = state is SocialFeedLoaded ? state.posts : <SocialPostEntity>[];
+      final officialPosts = posts
+          .where((p) => p.visibility?.toUpperCase() != 'GLOBAL')
+          .toList();
+
+      if (officialPosts.isNotEmpty) {
+        return [
+          SliverPadding(
+            padding: EdgeInsets.zero,
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final post = officialPosts[index];
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _markPostAsRead(post.id);
+                });
+                return _PostCard(post: post);
+              }, childCount: officialPosts.length),
+            ),
+          ),
+          if (state is SocialFeedLoaded && state.isFetchingMore)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.h),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+          SliverToBoxAdapter(child: SizedBox(height: 100.h)),
+        ];
+      }
+
       return [
         SliverToBoxAdapter(child: _buildOfficialLockedState()),
         SliverToBoxAdapter(child: _buildSuggestedNearYou()),
