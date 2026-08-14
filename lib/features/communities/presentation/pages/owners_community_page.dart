@@ -472,113 +472,118 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
 
           return SizedBox(
             height: 90.h,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    showRegisterAssociationBottomSheet(context);
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 56.w,
-                        height: 56.w,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
+            child:ScrollConfiguration(
+              behavior: const ScrollBehavior().copyWith(
+                overscroll: false,
+              ),child:  Center(
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      showRegisterAssociationBottomSheet(context);
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 56.w,
+                          height: 56.w,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          child: CustomPaint(
+                            painter: DashedLineCirclePainter(
+                              color: AppColors.greyText,
+                              strokeWidth: 1.5,
+                              dashLength: 6,
+                              gapLength: 8,
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.add,
+                                color: const Color(0xFFF48126),
+                                size: 28.sp,
+                              ),
+                            ),
+                          ),
                         ),
-                        child: CustomPaint(
-                          painter: DashedLineCirclePainter(
+                        SizedBox(height: 8.h),
+                        Text(
+                          'Create new',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.greyText,
-                            strokeWidth: 1.5,
-                            dashLength: 6,
-                            gapLength: 8,
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.add,
-                              color: const Color(0xFFF48126),
-                              size: 28.sp,
-                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'Create new',
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.greyText,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 20.w),
-                ...associations.map((a) {
-                  return Padding(
-                    padding: EdgeInsets.only(right: 20.w),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                AssociateHomePage(associationId: a.id),
-                          ),
-                        );
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 56.w,
-                            height: 56.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey.shade100,
-                              border: Border.all(
-                                color: AppColors.greyText,
-                                width: 0.8,
-                              ),
-                            ),
-                            child: ClipOval(
-                              child: (a.logo.isNotEmpty &&
-                                      ApiConstants.getImageUrl(a.logo) != null)
-                                  ? CachedNetworkImage(
-                                      imageUrl: ApiConstants.getImageUrl(a.logo)!,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Icon(
-                                      Icons.business_rounded,
-                                      color: Colors.grey.shade400,
-                                      size: 28.sp,
-                                    ),
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          SizedBox(
-                            width: 70.w,
-                            child: Text(
-                              a.name,
-                              style: GoogleFonts.inter(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w500,
-                                color:  AppColors.grayColor3,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
+                      ],
                     ),
-                  );
-                }),
-              ],
+                  ),
+                  SizedBox(width: 20.w),
+                  ...associations.map((a) {
+                    return Padding(
+                      padding: EdgeInsets.only(right: 20.w),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  AssociateHomePage(associationId: a.id),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 56.w,
+                              height: 56.w,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey.shade100,
+                                border: Border.all(
+                                  color: AppColors.greyText,
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: ClipOval(
+                                child: (a.logo.isNotEmpty &&
+                                        ApiConstants.getImageUrl(a.logo) != null)
+                                    ? CachedNetworkImage(
+                                        imageUrl: ApiConstants.getImageUrl(a.logo)!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Icon(
+                                        Icons.business_rounded,
+                                        color: Colors.grey.shade400,
+                                        size: 28.sp,
+                                      ),
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            SizedBox(
+                              width: 70.w,
+                              child: Text(
+                                a.name,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color:  AppColors.grayColor3,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),)
             ),
           );
         },
