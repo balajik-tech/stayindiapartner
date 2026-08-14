@@ -272,7 +272,10 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       case MembershipStatus.applied:
         return _AppliedMembershipView(theme: widget.theme);
       case MembershipStatus.approved:
-        return _ApprovedMembershipView(theme: widget.theme);
+        return _ApprovedMembershipView(
+          theme: widget.theme,
+          onPay: _showPayMembershipSheet,
+        );
       case MembershipStatus.paid:
         return _ActiveMembershipView(theme: widget.theme);
       case MembershipStatus.renewalDue:
@@ -460,6 +463,21 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     });
   }
 
+  void _showPayMembershipSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _PayMembershipSheet(theme: widget.theme),
+    ).then((paid) {
+      if (paid == true) {
+        setState(() {
+          _status = MembershipStatus.paid;
+        });
+      }
+    });
+  }
+
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri phoneUri = Uri(
       scheme: 'tel',
@@ -544,7 +562,12 @@ class _AppliedMembershipView extends StatelessWidget {
 
 class _ApprovedMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
-  const _ApprovedMembershipView({required this.theme});
+  final VoidCallback onPay;
+
+  const _ApprovedMembershipView({
+    required this.theme,
+    required this.onPay,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -580,7 +603,7 @@ class _ApprovedMembershipView extends StatelessWidget {
           label: 'Pay membership · ₹2,000',
           icon: Icons.account_balance_wallet_outlined,
           theme: theme,
-          onPressed: () {},
+          onPressed: onPay,
         ),
       ],
     );
@@ -741,25 +764,25 @@ class _RenewalDueMembershipView extends StatelessWidget {
           ),
         ),
         SizedBox(height: 16.h),
-        Row(
-          children: [
-            Expanded(
-              child: _OutlineButton(
-                label: 'View ID card',
-                icon: Icons.visibility_outlined,
-                onPressed: () {},
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _OutlineButton(
-                label: 'Download',
-                icon: Icons.download_outlined,
-                onPressed: () {},
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       child: _OutlineButton(
+        //         label: 'View ID card',
+        //         icon: Icons.visibility_outlined,
+        //         onPressed: () {},
+        //       ),
+        //     ),
+        //     SizedBox(width: 12.w),
+        //     Expanded(
+        //       child: _OutlineButton(
+        //         label: 'Download',
+        //         icon: Icons.download_outlined,
+        //         onPressed: () {},
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     );
   }
@@ -854,25 +877,25 @@ class _ExpiredMembershipView extends StatelessWidget {
           ),
         ),
         SizedBox(height: 16.h),
-        Row(
-          children: [
-            Expanded(
-              child: _OutlineButton(
-                label: 'View ID card',
-                icon: Icons.visibility_outlined,
-                onPressed: () {},
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _OutlineButton(
-                label: 'Download',
-                icon: Icons.download_outlined,
-                onPressed: () {},
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       child: _OutlineButton(
+        //         label: 'View ID card',
+        //         icon: Icons.visibility_outlined,
+        //         onPressed: () {},
+        //       ),
+        //     ),
+        //     SizedBox(width: 12.w),
+        //     Expanded(
+        //       child: _OutlineButton(
+        //         label: 'Download',
+        //         icon: Icons.download_outlined,
+        //         onPressed: () {},
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     );
   }
@@ -1091,12 +1114,16 @@ class _MembershipIdBox extends StatelessWidget {
             ),
           ),
           Container(
-            padding: EdgeInsets.all(10.r),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.chat, color: Colors.white, size: 20.sp),
+            child:  Image.asset(
+              'assets/images/whatsapp_iconn.png',
+              width: 24.w,
+              height: 24.h,
+              fit: BoxFit.contain,
+            ),
           ),
         ],
       ),
@@ -1618,6 +1645,169 @@ class _DashedDivider extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _PayMembershipSheet extends StatelessWidget {
+  final CommunityThemeEntity theme;
+  const _PayMembershipSheet({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = theme.primaryColor.toColor();
+    final accent = theme.accentColor.toColor();
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40.w,
+              height: 4.h,
+              margin: EdgeInsets.only(bottom: 20.h),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Icon(Icons.home_outlined, color: accent, size: 24.sp),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Text(
+                  'Pay membership',
+                  style: GoogleFonts.inter(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: primary,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0).withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.close, size: 18.sp, color: primary),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 24.h),
+          Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              children: [
+                _buildRow('Member', 'Ramesh Kumar'),
+                const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                _buildRow('Application', 'TNIT-APP-2026-4557'),
+                const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                _buildRow('Properties', '1'),
+                const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                _buildRow('Plan', 'Annual membership'),
+                const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                _buildRow('Valid until', '14 Aug 2027'),
+                const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Amount payable',
+                      style: GoogleFonts.inter(
+                        color: Colors.grey.shade500,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '₹2,000',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF1E3A68),
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24.h),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context, true),
+              icon: Icon(Icons.credit_card, color: primary, size: 18.sp),
+              label: Text(
+                'Pay ₹2,000',
+                style: GoogleFonts.inter(
+                  color: primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15.sp,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accent,
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                elevation: 0,
+              ),
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'You\'ll be redirected to a secure payment gateway (UPI / card / net-banking). Your membership ID is generated once payment succeeds, and the digital certificate is sent to your WhatsApp number. This preview does not process real payments.',
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              color: AppColors.greyText,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            color: Colors.grey.shade500,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            color: Colors.black87,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }
