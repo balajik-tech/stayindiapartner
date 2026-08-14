@@ -967,5 +967,14 @@
   "privacy_section_5_title": "5. Term Acceptance",
   "privacy_section_5_body": "By clicking 'Accept & Continue', you confirm that you own or are legally authorized to manage this property and that you agree to Stay India's privacy policy and owner terms of service.",
   "privacy_accept_terms": "I accept the terms and conditions",
-  "privacy_accept_continue": "Accept & Continue"
+  "privacy_accept_continue": "Accept & Continue",
+
+  "register_association": "Register an Association",
+  "association_registration_subtitle": "You'll need the registration certificate, committee details and a contact number.",
+  "continue_on_whatsapp": "Continue on WhatsApp",
+  "whatsapp_subtitle": "Answer a few questions, send photos of your documents. Resume any time",
+  "easiest": "easiest",
+  "fill_web_form": "Fill the web form",
+  "web_form_subtitle": "Opens stayindia.in in your browser. Better on a laptop with files ready.",
+  "approval_note": "Approval takes 2-3 working days either way."
 }

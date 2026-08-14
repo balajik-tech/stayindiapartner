@@ -107,7 +107,7 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
 
               // Title
               Text(
-                'Register an Association',
+                'register_association'.tr(),
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
@@ -118,7 +118,7 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
 
               // Subtitle
               Text(
-                "You'll need the registration certificate. committe details and a contact number.",
+                'association_registration_subtitle'.tr(),
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w400,
@@ -128,13 +128,13 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
               ),
               SizedBox(height: 20.h),
 
-              // Option 1 — WhatsApp (highlighted)
+              // Option 1 — WhatsApp
               _OptionTile(
                 icon: FontAwesomeIcons.whatsapp,
                 iconColor: const Color(0xFF25D366),
                 iconSize: 20.sp,
-                title: 'Continue on Whatsapp',
-                subtitle: 'Answer a few questions, send photos of your documents. Resume any time',
+                title: 'continue_on_whatsapp'.tr(),
+                subtitle: 'whatsapp_subtitle'.tr(),
                 badgeText: 'easiest'.tr(),
                 highlighted: true,
                 borderColor: _accentOrange,
@@ -152,8 +152,8 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
                 icon: FontAwesomeIcons.arrowUpRightFromSquare,
                 iconColor: const Color(0xFF3A3A3A),
                 iconSize: 18.sp,
-                title: 'Fil the web form',
-                subtitle: 'Opens stayindia.in you browser. Better on a laptop with files ready.',
+                title: 'fill_web_form'.tr(),
+                subtitle: 'web_form_subtitle'.tr(),
                 highlighted: false,
                 borderColor: const Color(0xFFE5E1D8),
                 onTap: () {
@@ -166,7 +166,7 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
               // Footer note
               Center(
                 child: Text(
-                  'Approval takes 2-3 working days either way.',
+                  'approval_note'.tr(),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
