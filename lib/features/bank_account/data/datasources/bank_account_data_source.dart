@@ -89,6 +89,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       'isVerified': true,
       'setAsPrimary': setAsPrimary,
       'pan': pan,
+      "subscriptionType": "HOSTEL",
     };
 
     try {
@@ -106,8 +107,22 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
 
       return BankAccountModel.fromJson(data, defaultPropertyId: propertyId);
     } on DioException catch (e) {
-      // Custom error message for PAN verification failure during bank account addition
-      throw Exception('PAN verification failed. Please ensure the PAN details match the bank account holder.');
+      final responseData = e.response?.data;
+
+      String errorMessage = 'Bank Account creation failed';
+
+      if (responseData is Map) {
+        errorMessage =
+            responseData['message']?.toString() ??
+                responseData['error']?.toString() ??
+                responseData['detail']?.toString() ??
+                errorMessage;
+      } else if (responseData is String &&
+          responseData.trim().isNotEmpty) {
+        errorMessage = responseData;
+      }
+
+      throw Exception(errorMessage);
     } catch (e) {
       rethrow;
     }
