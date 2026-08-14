@@ -16,6 +16,8 @@ import 'package:stayindia_owner/features/staff/presentation/pages/staff_manageme
 import 'package:stayindia_owner/injection_container.dart';
 import '../../../bank_account/presentation/pages/bank_accounts_page.dart';
 import '../../../digilocker/presentation/pages/DigiLockerStorage.dart';
+import '../../../finance/presentation/cubit/payment_report_cubit.dart';
+import '../../../finance/presentation/pages/payment_report_page.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/screens/payment_failed_screen.dart';
 import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
@@ -790,6 +792,20 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+          SizedBox(width: 12.w),
+          _QuickActionCard(
+            icon: Icons.insights_rounded,
+            label: 'collection'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BlocProvider(
+                  create: (context) => sl<PaymentReportCubit>(),
+                  child: const PaymentReportPage(),
+                ),
+              ),
+            ),
+          ),
           if (hasInsights && (hasStock || hasStaff)) SizedBox(width: 12.w),
           if (hasStock)
             _QuickActionCard(

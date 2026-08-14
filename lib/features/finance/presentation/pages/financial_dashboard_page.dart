@@ -239,39 +239,39 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
             ),
 
             // commented history button
-            TextButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                      create: (context) => sl<PaymentReportCubit>(),
-                      child: const PaymentReportPage(),
-                    ),
-                  ),
-                );
-              },
-              icon: Icon(
-                Icons.history_rounded,
-                size: 18.sp,
-                color: AppColors.primaryBlue,
-              ),
-              label: Text(
-                StringUtils.translate('view_history', context: context),
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryBlue,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-            ),
+            // TextButton.icon(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => BlocProvider(
+            //           create: (context) => sl<PaymentReportCubit>(),
+            //           child: const PaymentReportPage(),
+            //         ),
+            //       ),
+            //     );
+            //   },
+            //   icon: Icon(
+            //     Icons.history_rounded,
+            //     size: 18.sp,
+            //     color: AppColors.primaryBlue,
+            //   ),
+            //   label: Text(
+            //     StringUtils.translate('view_history', context: context),
+            //     style: TextStyle(
+            //       fontSize: 13.sp,
+            //       fontWeight: FontWeight.bold,
+            //       color: AppColors.primaryBlue,
+            //     ),
+            //   ),
+            //   style: TextButton.styleFrom(
+            //     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+            //     backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(12.r),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
         SizedBox(height: 4.h),
