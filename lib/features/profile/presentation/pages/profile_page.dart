@@ -1341,7 +1341,7 @@ class _QuickActionCard extends StatelessWidget {
       onTap: onTap,
       scaleFactor: 0.96,
       child: Container(
-        width: 100.w,
+        width: 168.w,
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
         decoration: BoxDecoration(
           color: Colors.white,
