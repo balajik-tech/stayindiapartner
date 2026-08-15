@@ -1186,34 +1186,33 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   }) {
     const Color navy = Color(0xFF1B2838);
     const Color orange = Color(0xFFE8722A);
+    final isBooked = _currentStatus == BedStatus.booked;
 
     return Column(
       children: [
         _LiveTimeDateWidget(),
-
         SizedBox(height: 20.h),
-
         Row(
           children: [
             Expanded(
               child: SizedBox(
                 height: 52.h,
                 child: ElevatedButton.icon(
-                  onPressed: _currentStatus == BedStatus.occupied || _currentStatus == BedStatus.booked
-                      ? () => _showActiveActionsBottomSheet(context, detail)
-                      : null,
+                  onPressed: () => _showActiveActionsBottomSheet(context, detail),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE8F5E9),
-                    foregroundColor: const Color(0xFF2E7D32),
+                    backgroundColor: isBooked ? const Color(0xFFE3F2FD) : const Color(0xFFE8F5E9),
+                    foregroundColor: isBooked ? const Color(0xFF1976D2) : const Color(0xFF2E7D32),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14.r),
-                      side: BorderSide(color: const Color(0xFF4CAF50).withValues(alpha: 0.3)),
+                      side: BorderSide(
+                        color: (isBooked ? const Color(0xFF2196F3) : const Color(0xFF4CAF50)).withValues(alpha: 0.3),
+                      ),
                     ),
                   ),
-                  icon: Icon(Icons.login_rounded, size: 18.sp),
+                  icon: Icon(isBooked ? Icons.add_task_rounded : Icons.login_rounded, size: 18.sp),
                   label: Text(
-                    'ROOM CHANGE',
+                    isBooked ? 'ASSIGN ROOM' : 'ROOM CHANGE',
                     style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
                   ),
                 ),
@@ -1224,9 +1223,13 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               child: SizedBox(
                 height: 52.h,
                 child: ElevatedButton.icon(
-                  onPressed: _currentStatus == BedStatus.occupied || _currentStatus == BedStatus.booked
-                      ? () => _confirmCheckout(context, detail)
-                      : null,
+                  onPressed: () {
+                    if (isBooked) {
+                      _showCancelConfirmation(context, detail);
+                    } else {
+                      _confirmCheckout(context, detail);
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFBE9E7),
                     foregroundColor: const Color(0xFFC62828),
@@ -1236,9 +1239,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                       side: BorderSide(color: const Color(0xFFEF5350).withValues(alpha: 0.3)),
                     ),
                   ),
-                  icon: Icon(Icons.logout_rounded, size: 18.sp),
+                  icon: Icon(isBooked ? Icons.close_rounded : Icons.logout_rounded, size: 18.sp),
                   label: Text(
-                    'CHECK OUT',
+                    isBooked ? 'REJECT' : 'CHECK OUT',
                     style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
                   ),
                 ),
@@ -1853,12 +1856,13 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   }
 
   void _confirmCheckout(BuildContext context, TenantDetailEntity? detail) {
+    final bookingId = detail?.stay?.bookingId ?? widget.state.tenantId ?? '';
     CheckoutSettlementModal.show(
       context,
       tenantName: detail?.name ?? widget.state.tenantName ?? 'Tenant',
       tenantId: detail?.id ?? widget.state.tenantId ?? '',
       hostelId: widget.state.hostelId ?? '',
-      bookingId: detail?.stay?.bookingId ?? widget.state.tenantId ?? '',
+      bookingId: bookingId,
       securityDeposit: detail?.stay?.deposit ?? widget.state.deposit ?? 0.0,
       onCheckoutConfirmed: ({
         required double securityDeposit,
@@ -1867,13 +1871,49 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         required double finalSettlement,
       }) {
         context.read<BookingsCubit>().checkoutBooking(
-          detail?.stay?.bookingId ?? widget.state.tenantId ?? '',
+          bookingId,
           securityDeposit: securityDeposit,
           pendingRent: pendingRent,
           utilityDue: utilityDue,
           finalSettlement: finalSettlement,
         );
       },
+    );
+  }
+
+  void _showCancelConfirmation(BuildContext context, TenantDetailEntity? detail) {
+    final name = detail?.name ?? widget.state.tenantName ?? 'Tenant';
+    final bookingId = widget.state.tenantId ?? '';
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        title: Text(StringUtils.translate('reject_booking_title', context: context)),
+        content: Text(
+          StringUtils.translate(
+            'reject_booking_confirm',
+            context: context,
+            namedArgs: {'name': name},
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(StringUtils.translate('cancel', context: context)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<BookingsCubit>().cancelBooking(bookingId);
+            },
+            child: Text(
+              StringUtils.translate('reject', context: context),
+              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1899,6 +1939,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     final avatarUrl = ApiConstants.getImageUrl(detail?.avatar ?? widget.state.profileImage);
     final name = detail?.name ?? widget.state.tenantName ?? 'Tenant';
     final initials = name.isNotEmpty ? name[0].toUpperCase() : 'T';
+    final isBooked = _currentStatus == BedStatus.booked;
 
     showModalBottomSheet(
       context: context,
@@ -1960,7 +2001,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          '${detail?.mobile ?? ""}  •  ${detail?.stay?.roomTypename ?? widget.state.roomNumber ?? "Active Resident"}',
+                          isBooked
+                              ? '${detail?.mobile ?? widget.state.tenantName ?? ""}  •  Booking Request'
+                              : '${detail?.mobile ?? ""}  •  ${detail?.stay?.roomTypename ?? widget.state.roomNumber ?? "Active Resident"}',
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: AppColors.greyText,
@@ -1979,23 +2022,30 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 leading: Container(
                   padding: EdgeInsets.all(8.r),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    color: isBooked ? Colors.green.shade50 : AppColors.primaryBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
-                  child: const Icon(Icons.bed_outlined, color: AppColors.primaryBlue),
+                  child: Icon(
+                    isBooked ? Icons.add_task_rounded : Icons.bed_outlined,
+                    color: isBooked ? Colors.green.shade700 : AppColors.primaryBlue,
+                  ),
                 ),
                 title: Text(
-                  StringUtils.translate('change_room', context: context),
+                  StringUtils.translate(isBooked ? 'assign_room' : 'change_room', context: context),
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.darkText,
+                    color: isBooked ? Colors.green.shade700 : AppColors.darkText,
                   ),
                 ),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  _navigateToRoomSelection(context, detail);
+                  if (isBooked) {
+                    _openCheckInDialog(context);
+                  } else {
+                    _navigateToRoomSelection(context, detail);
+                  }
                 },
               ),
               SizedBox(height: 8.h),
@@ -2003,17 +2053,17 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 leading: Container(
                   padding: EdgeInsets.all(8.r),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
+                    color: isBooked ? AppColors.primaryBlue.withValues(alpha: 0.1) : Colors.green.shade50,
                     borderRadius: BorderRadius.circular(10.r),
                   ),
-                  child: Icon(Icons.person_outline_rounded, color: Colors.green.shade700),
+                  child: Icon(
+                    Icons.person_outline_rounded,
+                    color: isBooked ? AppColors.primaryBlue : Colors.green.shade700,
+                  ),
                 ),
                 title: const Text(
                   'View Guest Profile',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () {
@@ -2036,10 +2086,13 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                     color: Colors.red.shade50,
                     borderRadius: BorderRadius.circular(10.r),
                   ),
-                  child: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                  child: Icon(
+                    isBooked ? Icons.close_rounded : Icons.logout_rounded,
+                    color: Colors.redAccent,
+                  ),
                 ),
                 title: Text(
-                  StringUtils.translate('checkout', context: context),
+                  StringUtils.translate(isBooked ? 'reject' : 'checkout', context: context),
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -2049,7 +2102,11 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 trailing: const Icon(Icons.chevron_right_rounded, color: Colors.redAccent),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  _confirmCheckout(context, detail);
+                  if (isBooked) {
+                    _showCancelConfirmation(context, detail);
+                  } else {
+                    _confirmCheckout(context, detail);
+                  }
                 },
               ),
             ],
@@ -2057,6 +2114,14 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         );
       },
     );
+  }
+
+  void _openCheckInDialog(BuildContext context) {
+    // We need a Booking object to use QrCheckInDialog.
+    // However, BedDetailsSheet doesn't have one.
+    // If it's a booked bed, we can try to search for the booking in the cubit's state or just open the scanner.
+    // For now, let's just open the scanner as it's the primary check-in method in this sheet.
+    _openScanner(context);
   }
 
   void _openScanner(BuildContext context) async {
