@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -14,7 +15,9 @@ import '../../injection_container.dart' as di;
 import '../services/cache_service.dart';
 import '../services/notification_service.dart';
 import '../services/app_config_service.dart';
+import '../theme/app_colors.dart';
 import '../utils/logger.dart';
+import '../widgets/animated_splash_text.dart';
 
 class AppBootstrapper extends StatefulWidget {
   final Widget child;
@@ -33,7 +36,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
   String _errorDetails = '';
   bool _initialized = false;
 
-  late AnimationController _animationController;
+  AnimationController? _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
@@ -47,25 +50,25 @@ class _AppBootstrapperState extends State<AppBootstrapper>
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _animationController,
+        parent: _animationController!,
         curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
       ),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(
-        parent: _animationController,
+        parent: _animationController!,
         curve: const Interval(0.0, 0.8, curve: Curves.easeOutBack),
       ),
     );
 
-    _animationController.forward();
+    _animationController!.forward();
     _startStagedInitialization();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _animationController?.dispose();
     super.dispose();
   }
 
@@ -202,179 +205,38 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       );
     }
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white,
-                const Color(0xFF1E3A8A).withValues(alpha: 0.05),
-              ],
-            ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Spacer(),
-
-                      Container(
-                        width: 160,
-                        height: 160,
-                        padding: const EdgeInsets.all(0),
-                        decoration: BoxDecoration(
-                          // color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(
-                                0xFF1E3A8A,
-                              ).withValues(alpha: 0.1),
-                              blurRadius: 30,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/images/login_logo_nobg.png',
-                            fit: BoxFit.contain,
-                            width: double.infinity,
-                            height: double.infinity,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.business_rounded,
-                                color: Color(0xFF1E3A8A),
-                                size: 60,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 40),
-
-                      const Text(
-                        'STAY INDIA OWNER',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2.0,
-                          color: Color(0xFF1E3A8A),
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      Text(
-                        'Enterprise Property & Tenant Console',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      if (_hasError) ...[
-                        const Icon(
-                          Icons.error_outline_rounded,
-                          color: Colors.redAccent,
-                          size: 48,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'System Boot Failed',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _errorDetails,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: _startStagedInitialization,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1E3A8A),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          icon: const Icon(Icons.refresh_rounded, size: 20),
-                          label: const Text(
-                            'Retry Booting',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ] else ...[
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: SizedBox(
-                            height: 6,
-                            width: 220,
-                            child: LinearProgressIndicator(
-                              value: _progress,
-                              backgroundColor: Colors.grey.shade200,
-                              color: const Color(0xFF1E3A8A),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: Text(
-                            _statusText,
-                            key: ValueKey<String>(_statusText),
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-
-                      const SizedBox(height: 48),
-                    ],
+    return ScreenUtilInit(
+      designSize: const Size(390, 844),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/logo.jpg',
+                    height: 160.h,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.apartment_rounded,
+                      size: 100.sp,
+                      color: AppColors.primaryBlue,
+                    ),
                   ),
-                ),
+                  SizedBox(height: 24.h),
+                  const AnimatedFutureOfLivingText(),
+                  SizedBox(height: 32.h),
+                  // const CircularProgressIndicator(color: AppColors.primaryBlue),
+                ],
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
