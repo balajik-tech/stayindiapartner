@@ -13,7 +13,7 @@ configurations.all {
 }
 
 android {
-    namespace = "com.stayindia.stayindia_owner"
+    namespace = "com.stayindia.stayindiaowner"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -26,7 +26,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.stayindia.stayindia_owner"
+        applicationId = "com.stayindia.stayindiaowner"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

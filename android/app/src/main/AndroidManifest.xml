@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
 
     <application
-        android:label="stayindia_owner"
+        android:label="stayindia owner"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

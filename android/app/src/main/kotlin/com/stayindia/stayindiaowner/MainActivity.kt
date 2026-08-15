@@ -1,4 +1,4 @@
-package com.stayindia.stayindia_owner
+package com.stayindia.stayindiaowner
 
 import io.flutter.embedding.android.FlutterActivity
 

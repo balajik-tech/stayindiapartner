@@ -39,19 +39,19 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBKIpOcnkMDeZFSnDFacJJ_GIBIevH-G_o',
-    appId: '1:730093151187:android:a9bc20872776c1f18b8526',
-    messagingSenderId: '730093151187',
-    projectId: 'stay-india-owner',
-    storageBucket: 'stay-india-owner.firebasestorage.app',
+    apiKey: 'AIzaSyBsfFis5IjB8CtYmoP_vcZNhV8gE35IZlo',
+    appId: '1:533876795078:android:7cab8fa7b279fe4cd459c7',
+    messagingSenderId: '533876795078',
+    projectId: 'stay-india-partner',
+    storageBucket: 'stay-india-partner.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB0XztbOOa4LDPtxVa_AZd4QPPyP_RcbGw',
-    appId: '1:730093151187:ios:c522b2f7c95e85368b8526',
-    messagingSenderId: '730093151187',
-    projectId: 'stay-india-owner',
-    storageBucket: 'stay-india-owner.firebasestorage.app',
+    apiKey: 'AIzaSyDDY6jTVn53jBrx4VFQfbYkzM8PSzoSUJI',
+    appId: '1:533876795078:ios:42cf2d47354d4c3cd459c7',
+    messagingSenderId: '533876795078',
+    projectId: 'stay-india-partner',
+    storageBucket: 'stay-india-partner.firebasestorage.app',
     androidClientId: '730093151187-b9i8hboeqmd6i8tk5ribcqn1teq4anig.apps.googleusercontent.com',
     iosClientId: '730093151187-dh312ecscfthjepn87g0e14jjs15f4ua.apps.googleusercontent.com',
     iosBundleId: 'com.example.stayindiaOwner',
