@@ -119,7 +119,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
         padding: EdgeInsets.fromLTRB(24.w, 54.h, 24.w, 40.h),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+            colors: [AppColors.primaryBlue, AppColors.primaryBlue],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
