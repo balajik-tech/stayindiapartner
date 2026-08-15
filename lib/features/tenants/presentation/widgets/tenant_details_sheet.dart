@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
 import 'package:stayindia_owner/features/payments/domain/repositories/payment_repository.dart';
@@ -598,10 +599,11 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       color: AppColors.roomCardBorder.withValues(alpha: 0.5),
                     ),
                   ),
-                  child: Icon(
-                    Icons.badge_outlined,
-                    color: AppColors.primaryBlue,
-                    size: 22.sp,
+                  child: SvgPicture.asset(
+                    'assets/images/Aadhaar.svg',
+                    width: 18.w,
+                    height: 18.w,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 SizedBox(width: 12.w),
