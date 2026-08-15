@@ -17,6 +17,8 @@ import 'package:stayindia_owner/features/tenants/presentation/widgets/tenant_det
 import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_state.dart';
 import 'package:stayindia_owner/features/bookings/widgets/qr_scanner_screen.dart';
+import 'package:stayindia_owner/features/bookings/pages/room_selection_page.dart';
+import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_state.dart';
 import 'package:stayindia_owner/injection_container.dart';
@@ -1198,7 +1200,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                 height: 52.h,
                 child: ElevatedButton.icon(
                   onPressed: _currentStatus == BedStatus.occupied || _currentStatus == BedStatus.booked
-                      ? () => _openScanner(context)
+                      ? () => _showActiveActionsBottomSheet(context, detail)
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE8F5E9),
@@ -1222,7 +1224,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               child: SizedBox(
                 height: 52.h,
                 child: ElevatedButton.icon(
-                  onPressed: detail != null
+                  onPressed: _currentStatus == BedStatus.occupied || _currentStatus == BedStatus.booked
                       ? () => _confirmCheckout(context, detail)
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -1851,14 +1853,13 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   }
 
   void _confirmCheckout(BuildContext context, TenantDetailEntity? detail) {
-    if (detail == null) return;
     CheckoutSettlementModal.show(
       context,
-      tenantName: detail.name,
-      tenantId: detail.id,
+      tenantName: detail?.name ?? widget.state.tenantName ?? 'Tenant',
+      tenantId: detail?.id ?? widget.state.tenantId ?? '',
       hostelId: widget.state.hostelId ?? '',
-      bookingId: detail.stay?.bookingId ?? widget.state.tenantId ?? '',
-      securityDeposit: detail.stay?.deposit ?? 0.0,
+      bookingId: detail?.stay?.bookingId ?? widget.state.tenantId ?? '',
+      securityDeposit: detail?.stay?.deposit ?? widget.state.deposit ?? 0.0,
       onCheckoutConfirmed: ({
         required double securityDeposit,
         required double pendingRent,
@@ -1866,11 +1867,193 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         required double finalSettlement,
       }) {
         context.read<BookingsCubit>().checkoutBooking(
-          detail.stay?.bookingId ?? widget.state.tenantId ?? '',
+          detail?.stay?.bookingId ?? widget.state.tenantId ?? '',
           securityDeposit: securityDeposit,
           pendingRent: pendingRent,
           utilityDue: utilityDue,
           finalSettlement: finalSettlement,
+        );
+      },
+    );
+  }
+
+  void _navigateToRoomSelection(BuildContext context, TenantDetailEntity? detail) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<BookingsCubit>(),
+          child: RoomSelectionPage(
+            bookingId: detail?.stay?.bookingId ?? widget.state.tenantId ?? '',
+            hostelId: widget.state.hostelId ?? '',
+            tenantName: detail?.name ?? widget.state.tenantName ?? 'Tenant',
+            bookedSharingType: detail?.stay?.sharingType ?? widget.state.sharingType,
+            bookedRoomType: detail?.stay?.acType ?? widget.state.roomType,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showActiveActionsBottomSheet(BuildContext context, TenantDetailEntity? detail) {
+    final avatarUrl = ApiConstants.getImageUrl(detail?.avatar ?? widget.state.profileImage);
+    final name = detail?.name ?? widget.state.tenantName ?? 'Tenant';
+    final initials = name.isNotEmpty ? name[0].toUpperCase() : 'T';
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (sheetContext) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 26.r,
+                      backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.05),
+                      backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                          ? NetworkImage(avatarUrl)
+                          : null,
+                      child: (avatarUrl == null || avatarUrl.isEmpty)
+                          ? Text(
+                              initials,
+                              style: TextStyle(
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.primaryBlue,
+                              ),
+                            )
+                          : null,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          '${detail?.mobile ?? ""}  •  ${detail?.stay?.roomTypename ?? widget.state.roomNumber ?? "Active Resident"}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.greyText,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24.h),
+              const Divider(height: 1),
+              SizedBox(height: 12.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: const Icon(Icons.bed_outlined, color: AppColors.primaryBlue),
+                ),
+                title: Text(
+                  StringUtils.translate('change_room', context: context),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _navigateToRoomSelection(context, detail);
+                },
+              ),
+              SizedBox(height: 8.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(Icons.person_outline_rounded, color: Colors.green.shade700),
+                ),
+                title: const Text(
+                  'View Guest Profile',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  TenantDetailsSheet.show(
+                    context,
+                    name: name,
+                    imageUrl: ApiConstants.getImageUrl(detail?.avatar ?? widget.state.profileImage),
+                    room: detail?.stay?.roomTypename ?? widget.state.roomNumber ?? 'N/A',
+                    tenantId: detail?.id ?? widget.state.tenantId ?? '',
+                    hostelId: widget.state.hostelId ?? '',
+                  );
+                },
+              ),
+              SizedBox(height: 8.h),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                ),
+                title: Text(
+                  StringUtils.translate('checkout', context: context),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.redAccent,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded, color: Colors.redAccent),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _confirmCheckout(context, detail);
+                },
+              ),
+            ],
+          ),
         );
       },
     );
