@@ -165,29 +165,29 @@ class LoginOnBoardingScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Expanded(child: SizedBox(
-                          height: 60,
-                          child:  TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginPage(
-                                    isStaffLogin: true,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              "Staff Login",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF0A0A0A),
-                              ),
-                            ),
-                          ),
-                        ))
+                        // Expanded(child: SizedBox(
+                        //   height: 60,
+                        //   child:  TextButton(
+                        //     onPressed: () {
+                        //       Navigator.push(
+                        //         context,
+                        //         MaterialPageRoute(
+                        //           builder: (context) => const LoginPage(
+                        //             isStaffLogin: true,
+                        //           ),
+                        //         ),
+                        //       );
+                        //     },
+                        //     child: const Text(
+                        //       "Staff Login",
+                        //       style: TextStyle(
+                        //         fontSize: 18,
+                        //         fontWeight: FontWeight.w600,
+                        //         color: Color(0xFF0A0A0A),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ))
 
                       ],
                     ),
