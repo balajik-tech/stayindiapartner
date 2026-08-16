@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
@@ -17,6 +18,7 @@ import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_c
 import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_state.dart';
 import 'package:stayindia_owner/injection_container.dart' as di;
 import 'package:stayindia_owner/features/profile/domain/usecases/room_usecases.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 enum StayType {
@@ -51,6 +53,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
   DateTime? _checkInDate;
   late AddTenantCubit _addTenantCubit;
   bool _isAC = true;
+
+  File? _csvFile;
 
   File? _userPhoto;
   File? _aadharPhoto;
@@ -331,6 +335,302 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return checksum == 0;
   }
 
+
+  Future<void> _pickCSVFile() async {
+    try {
+      // Use FilePicker.platform.pickFiles if available, otherwise try FilePicker.pickFiles
+      // Some environments might have conflicting definitions or version issues.
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final path = result.files.single.path!;
+        if (path.toLowerCase().endsWith('.csv')) {
+          setState(() {
+            _csvFile = File(path);
+          });
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please select a valid .csv file'),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking CSV: $e');
+    }
+  }
+
+  Widget _buildOrText() {
+    return Row(
+      children: [
+        Expanded(
+          child: Divider(
+            color: AppColors.greyText.withValues(alpha: 0.2),
+            thickness: 1,
+          ),
+        ),
+
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          child: Text(
+            'Or',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.grayColor2,
+            ),
+          ),
+        ),
+
+        Expanded(
+          child: Divider(
+            color: AppColors.greyText.withValues(alpha: 0.2),
+            thickness: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBulkUploadSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Bulk Tenant Upload'),
+        SizedBox(height: 16.h),
+
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16.r),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: _csvFile != null
+                  ? Colors.green.withValues(alpha: 0.5)
+                  : const Color(0xFFE2E8F0),
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            children: [
+              if (_csvFile != null) ...[
+                Row(
+                  children: [
+                    Icon(
+                      Icons.insert_drive_file_rounded,
+                      color: Colors.green,
+                      size: 32.sp,
+                    ),
+                    SizedBox(width: 12.w),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _csvFile!.path.split('/').last,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkText,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'CSV File Ready',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    IconButton(
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () {
+                        setState(() => _csvFile = null);
+                      },
+                    ),
+                  ],
+                ),
+              ] else ...[
+                Text(
+                  'Upload a CSV file containing tenant details for bulk registration.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: AppColors.greyText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+
+                SizedBox(height: 16.h),
+
+                ElevatedButton.icon(
+                  onPressed: _pickCSVFile,
+                  icon: const Icon(Icons.upload_file_rounded),
+                  label: const Text('Select CSV File'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primaryBlue,
+                    side: const BorderSide(
+                      color: AppColors.primaryBlue,
+                    ),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: _downloadSampleCSV,
+            icon: Icon(
+              Icons.download_rounded,
+              size: 14.sp,
+              color: AppColors.primaryBlue,
+            ),
+            label: Text(
+              'Download Sample CSV',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryBlue,
+              ),
+            ),
+          ),
+        ),
+
+        // Submit button
+        if (_csvFile != null) ...[
+          SizedBox(height: 16.h),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48.h,
+            child: ElevatedButton.icon(
+              onPressed: _submitBulkTenantUpload,
+              icon: const Icon(Icons.cloud_upload_rounded),
+              label: Text(
+                'Submit Bulk Upload',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _downloadSampleCSV() async {
+    const String csvUrl =
+        'https://api.stayindia.in/sample/bulk-tenant-upload.csv';
+
+    final Uri uri = Uri.parse(csvUrl);
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        debugPrint('❌ Could not launch CSV URL: $csvUrl');
+      }
+    } catch (e) {
+      debugPrint('❌ Error opening CSV: $e');
+    }
+  }
+
+  Future<void> _submitBulkTenantUpload() async {
+    if (_csvFile == null) {
+      debugPrint('❌ Bulk Upload: No CSV file selected');
+      return;
+    }
+
+    final path = _csvFile!.path;
+    final fileName = path.split('/').last;
+    final extension = path.split('.').last.toLowerCase();
+
+    debugPrint('========== BULK TENANT UPLOAD ==========');
+    debugPrint('📁 File Name : $fileName');
+    debugPrint('📍 File Path : $path');
+    debugPrint('📄 Extension : .$extension');
+
+    if (!path.toLowerCase().endsWith('.csv')) {
+      debugPrint('❌ Invalid file format');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid file format. Please upload a .csv file.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final file = File(path);
+
+    if (!await file.exists()) {
+      debugPrint('❌ File does not exist: $path');
+      return;
+    }
+
+    final fileSize = await file.length();
+
+    debugPrint('📦 File Size : $fileSize bytes');
+    debugPrint('📦 File Size : ${(fileSize / 1024).toStringAsFixed(2)} KB');
+
+    // Read CSV content for debugging
+    final csvContent = await file.readAsString();
+
+    debugPrint('📄 CSV Content:');
+    debugPrint(csvContent);
+
+    debugPrint('========================================');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Processing bulk tenant upload...'),
+        backgroundColor: Colors.blueAccent,
+      ),
+    );
+
+    // TODO: Call API here
+    // context.read<TenantCubit>().bulkUploadTenants(_csvFile!);
+  }
 
   void _submit() {
     final name = _nameController.text.trim();
@@ -636,6 +936,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _buildBulkUploadSection(),
+                          SizedBox(height: 8.h),
+                          _buildOrText(),
+                          SizedBox(height: 32.h),
                           _buildSectionTitle('property_selection'.tr()),
                           SizedBox(height: 16.h),
                           _buildDropdown<Hostel>(
