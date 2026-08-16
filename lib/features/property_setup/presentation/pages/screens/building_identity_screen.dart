@@ -340,158 +340,160 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
 
                     SizedBox(height: 32.h),
 
-                    Text(
-                      'compliance_docs'.tr(),
-                      style: TextStyle(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF1E3A8A),
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      'compliance_docs_sub'.tr(),
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: const Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 24.h),
-                    _buildSectionCard([
-                      _buildFilePicker(
-                        context,
-                        label: 'food_license'.tr(),
-                        filePath: state.foodLicense,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('food'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('food', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'hostel_license'.tr(),
-                        filePath: state.hostelLicense,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('hostel'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('hostel', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'trade_license'.tr(),
-                        filePath: state.tradeLicense,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('trade'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('trade', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'fire_safety'.tr(),
-                        filePath: state.fireSafety,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('fire'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('fire', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'police_noc'.tr(),
-                        filePath: state.policeNoc,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('police'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('police', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'shops_establishment'.tr(),
-                        filePath: state.shopsEstablishment,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('shops'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('shops', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'gst_registration'.tr(),
-                        filePath: state.gstRegistration,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('gst'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('gst', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'health_noc'.tr(),
-                        filePath: state.healthSanitation,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('health'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('health', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'utility_bill'.tr(),
-                        filePath: state.utilityBill,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('utility'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('utility', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'pollution_noc'.tr(),
-                        filePath: state.pollutionNoc,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('pollution'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('pollution', idx),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildFilePicker(
-                        context,
-                        label: 'resident_verification'.tr(),
-                        filePath: state.residentVerification,
-                        onTap: () => context
-                            .read<PropertySetupCubit>()
-                            .pickLicense('resident'),
-                        onRemoveIndex: (idx) => context
-                            .read<PropertySetupCubit>()
-                            .removeLicenseAtIndex('resident', idx),
-                      ),
-                    ]),
+                    //  commented compliance documents
+
+                    // Text(
+                    //   'compliance_docs'.tr(),
+                    //   style: TextStyle(
+                    //     fontSize: 22.sp,
+                    //     fontWeight: FontWeight.w900,
+                    //     color: const Color(0xFF1E3A8A),
+                    //     letterSpacing: -0.5,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 8.h),
+                    // Text(
+                    //   'compliance_docs_sub'.tr(),
+                    //   style: TextStyle(
+                    //     fontSize: 14.sp,
+                    //     color: const Color(0xFF64748B),
+                    //     fontWeight: FontWeight.w500,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 24.h),
+                    // _buildSectionCard([
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'food_license'.tr(),
+                    //     filePath: state.foodLicense,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('food'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('food', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'hostel_license'.tr(),
+                    //     filePath: state.hostelLicense,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('hostel'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('hostel', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'trade_license'.tr(),
+                    //     filePath: state.tradeLicense,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('trade'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('trade', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'fire_safety'.tr(),
+                    //     filePath: state.fireSafety,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('fire'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('fire', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'police_noc'.tr(),
+                    //     filePath: state.policeNoc,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('police'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('police', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'shops_establishment'.tr(),
+                    //     filePath: state.shopsEstablishment,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('shops'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('shops', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'gst_registration'.tr(),
+                    //     filePath: state.gstRegistration,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('gst'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('gst', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'health_noc'.tr(),
+                    //     filePath: state.healthSanitation,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('health'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('health', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'utility_bill'.tr(),
+                    //     filePath: state.utilityBill,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('utility'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('utility', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'pollution_noc'.tr(),
+                    //     filePath: state.pollutionNoc,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('pollution'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('pollution', idx),
+                    //   ),
+                    //   SizedBox(height: 20.h),
+                    //   _buildFilePicker(
+                    //     context,
+                    //     label: 'resident_verification'.tr(),
+                    //     filePath: state.residentVerification,
+                    //     onTap: () => context
+                    //         .read<PropertySetupCubit>()
+                    //         .pickLicense('resident'),
+                    //     onRemoveIndex: (idx) => context
+                    //         .read<PropertySetupCubit>()
+                    //         .removeLicenseAtIndex('resident', idx),
+                    //   ),
+                    // ]),
                   ],
                 ),
               ),
