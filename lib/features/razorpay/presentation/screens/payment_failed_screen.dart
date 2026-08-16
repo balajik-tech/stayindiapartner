@@ -5,6 +5,13 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/payment_summary.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/subscription_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_payment_screen.dart';
+import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
+import 'package:stayindia_owner/features/razorpay/presentation/bloc/razorpay_cubit.dart';
+import 'package:stayindia_owner/features/razorpay/domain/entities/razorpay_payment_result.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/injection_container.dart';
 import '../../../profile/presentation/pages/subscription_page.dart';
 
 class PaymentFailedScreen extends StatelessWidget {
@@ -30,10 +37,60 @@ class PaymentFailedScreen extends StatelessWidget {
     return BlocListener<SubscriptionCubit, SubscriptionState>(
       listener: (context, state) {
         if (state is SubscriptionSubscribed) {
-          // The auto-navigation to Razorpay will happen in SubscriptionPage 
-          // because it's still in the stack, or we can handle it here if we want.
-          // But usually, pushing a replacement or popping back is better.
-          Navigator.pop(context);
+          final subscription = state.activeSubscription;
+          final int totalAmountToPay = (subscription.totalAmount * 100).round();
+
+          final profileState = context.read<ProfileCubit>().state;
+          final String email =
+              profileState is ProfileLoaded ? profileState.profile.email : "";
+          final String mobile =
+              profileState is ProfileLoaded ? profileState.profile.phone : "";
+
+          // Replace current failure screen with Razorpay checkout
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BlocProvider(
+                create: (context) => sl<RazorpayCubit>(),
+                child: RazorpayPaymentScreen(
+                  apiKey: ApiConstants.razorpayKey,
+                  amount: totalAmountToPay,
+                  name: subscription.planSnapshot.planName,
+                  orderId: subscription.razorpayOrderId ?? '',
+                  description:
+                      'Payment for ${subscription.planSnapshot.planName}',
+                  email: email,
+                  contact: mobile,
+                  onSuccess: (result) {
+                    Navigator.pop(context); // Pop RazorpayPaymentScreen
+                    context.read<SubscriptionCubit>().verifyPayment(
+                      propertyId: subscription.property,
+                      orderId: result.orderId ?? '',
+                      paymentId: result.paymentId ?? '',
+                      signature: result.signature ?? '',
+                    );
+                  },
+                  onFailure: (error) {
+                    Navigator.pop(context); // Pop RazorpayPaymentScreen
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<SubscriptionCubit>(),
+                          child: PaymentFailedScreen(
+                            propertyId: subscription.property,
+                            planId: subscription.plan,
+                            planName: subscription.planSnapshot.planName,
+                            amount: subscription.totalAmount,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
         }
       },
       child: Scaffold(

@@ -12,8 +12,10 @@ import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../domain/entities/subscription_response.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/subscription_cubit.dart';
+import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_payment_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_failed_screen.dart';
+import 'package:stayindia_owner/features/razorpay/domain/entities/razorpay_payment_result.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import '../../../../injection_container.dart';
@@ -30,7 +32,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   // Tracks the selected plan per hostel id for hostels not yet subscribed.
   final Map<String, String> _selectedPlan = {};
   final ScrollController _propertyScrollController = ScrollController();
-  bool _isNavigatingToRazorpay = false;
 
   @override
   void initState() {
@@ -61,114 +62,55 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     BuildContext context,
     ActiveSubscription subscription,
   ) {
-    if (_isNavigatingToRazorpay) return;
-    _isNavigatingToRazorpay = true;
-
-    final int totalAmountToPay =
-        ((subscription.totalAmount + subscription.gstAmount) * 100).round();
+    final int totalAmountToPay = (subscription.totalAmount * 100).round();
 
     final profileState = context.read<ProfileCubit>().state;
+    final String email = profileState is ProfileLoaded ? profileState.profile.email : "";
+    final String mobile = profileState is ProfileLoaded ? profileState.profile.phone : "";
 
-    final String email = profileState is ProfileLoaded
-        ? profileState.profile.email
-        : "";
-    final String mobile = profileState is ProfileLoaded
-        ? profileState.profile.phone
-        : "";
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) {
-          return PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, result) {
-              if (didPop) return;
-              _isNavigatingToRazorpay = false;
-            },
-            child: BlocProvider(
-              create: (context) => sl<RazorpayCubit>()
-                ..openCheckout(
-                  apiKey: ApiConstants.razorpayKey,
-                  amount: totalAmountToPay,
-                  name: subscription.planSnapshot.planName,
-                  orderId: subscription.razorpayOrderId ?? '',
-                  description:
-                      'Payment for ${subscription.planSnapshot.planName}',
-                  email: email,
-                  contact: mobile,
-                ),
-              child: BlocConsumer<RazorpayCubit, RazorpayState>(
-                listener: (innerContext, state) {
-                  if (state is RazorpaySuccess) {
-                    debugPrint(
-                      '========== Razorpay Success ==========Subscription',
-                    );
-                    debugPrint('Payment ID : ${state.result.paymentId}');
-                    debugPrint('Order ID   : ${state.result.orderId}');
-                    debugPrint('Signature  : ${state.result.signature}');
-                    debugPrint('======================================');
-
-                    _isNavigatingToRazorpay = false;
-                    if (Navigator.canPop(dialogContext)) {
-                      Navigator.pop(dialogContext); // close the loading dialog
-                    }
-
-                    // Call verify-payment API
-                    context.read<SubscriptionCubit>().verifyPayment(
-                      propertyId: subscription.property,
-                      orderId: state.result.orderId ?? '',
-                      paymentId: state.result.paymentId ?? '',
-                      signature: state.result.signature ?? '',
-                    );
-                  } else if (state is RazorpayFailure) {
-                    debugPrint(
-                      '========== Razorpay Failure ==========Subscription',
-                    );
-                    debugPrint('Error: ${state.message}');
-                    debugPrint('======================================');
-
-                    _isNavigatingToRazorpay = false;
-                    if (Navigator.canPop(dialogContext)) {
-                      Navigator.pop(dialogContext); // close the loading dialog
-                    }
-
-                    // Use the parent context to push to avoid issues with dialogContext being popped
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<SubscriptionCubit>(),
-                          child: PaymentFailedScreen(
-                            propertyId: subscription.property,
-                            planId: subscription.plan,
-                            planName: subscription.planSnapshot.planName,
-                            amount:
-                                subscription.totalAmount +
-                                subscription.gstAmount,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  // Simple loading UI while Razorpay's native sheet is opening
-                  return const Center(
-                    child: SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: CircularProgressIndicator(),
-                    ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (context) => sl<RazorpayCubit>(),
+          child: RazorpayPaymentScreen(
+            apiKey: ApiConstants.razorpayKey,
+            amount: totalAmountToPay,
+            name: subscription.planSnapshot.planName,
+            orderId: subscription.razorpayOrderId ?? '',
+            description: 'Payment for ${subscription.planSnapshot.planName}',
+            email: email,
+            contact: mobile,
+            onSuccess: (result) {
+              Navigator.pop(context); // Pop RazorpayPaymentScreen
+              context.read<SubscriptionCubit>().verifyPayment(
+                    propertyId: subscription.property,
+                    orderId: result.orderId ?? '',
+                    paymentId: result.paymentId ?? '',
+                    signature: result.signature ?? '',
                   );
-                },
-              ),
-            ),
-          );
-        },
-      );
-    });
+            },
+            onFailure: (error) {
+              Navigator.pop(context); // Pop RazorpayPaymentScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<SubscriptionCubit>(),
+                    child: PaymentFailedScreen(
+                      propertyId: subscription.property,
+                      planId: subscription.plan,
+                      planName: subscription.planSnapshot.planName,
+                      amount: subscription.totalAmount,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   String _formatNumber(int n) {

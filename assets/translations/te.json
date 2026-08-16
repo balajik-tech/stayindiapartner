@@ -971,5 +971,23 @@
   "approval_note": "ఏ విధానాన్ని ఎంచుకున్నా ఆమోదానికి 2-3 పని రోజులు పడుతుంది.",
 
   "cover_images": "ఆస్తి చిత్రాలు",
-  "err_exterior_image_req": "దయచేసి కనీసం ఒక బయటి ఫోటోను జోడించండి"
+  "err_exterior_image_req": "దయచేసి కనీసం ఒక బయటి ఫోటోను జోడించండి",
+
+  "payment": {
+    "history_title": "చెల్లింపు చరిత్ర",
+    "no_transactions_yet": "ఇంకా లావాదేవీలు లేవు",
+    "total_paid": "మొత్తం చెల్లించారు",
+    "transactions_label": "లావాదేవీలు",
+    "rent_payment": "అద్దె చెల్లింపు",
+    "attempted_on": "ప్రయత్నించిన సమయం: {}",
+    "back_to_previous_screen": "మునుపటి స్క్రీన్‌కు తిరిగి వెళ్లండి",
+    "reason_prefix": "కారణం: ",
+    "paid_on": "చెల్లించిన సమయం: {}",
+    "back_to_booking_page": "బుకింగ్ పేజీకి తిరిగి వెళ్లండి",
+    "secure_payment_title": "సురక్షిత చెల్లింపు",
+    "connecting_secure_gateway": "సురక్షిత గేట్‌వేకి కనెక్ట్ అవుతోంది...",
+    "awaiting_payment_result": "చెల్లింపు ఫలితం కోసం వేచి ఉంది...",
+    "dont_close_screen_note": "చెల్లింపు పూర్తయ్యే వరకు దయచేసి ఈ స్క్రీన్‌ను మూసివేయవద్దు లేదా యాప్‌లను మార్చవద్దు.",
+    "launch_error": "లాంచ్ లోపం: {}"
+  }
 }

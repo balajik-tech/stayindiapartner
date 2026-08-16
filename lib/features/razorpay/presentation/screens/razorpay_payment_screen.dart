@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../injection_container.dart';
 import '../../domain/entities/razorpay_payment_result.dart';
 import '../bloc/razorpay_cubit.dart';
 import '../bloc/razorpay_state.dart';
 
-class RazorpayPaymentScreen extends StatelessWidget {
+class RazorpayPaymentScreen extends StatefulWidget {
   final String apiKey;
   final int amount;
   final String name;
@@ -12,8 +14,9 @@ class RazorpayPaymentScreen extends StatelessWidget {
   final String? description;
   final String? email;
   final String? contact;
-  final Function(RazorpayPaymentResult) onSuccess;
-  final Function(String) onFailure;
+  final String? prefillName;
+  final Function(RazorpayPaymentResult)? onSuccess;
+  final Function(String)? onFailure;
 
   const RazorpayPaymentScreen({
     super.key,
@@ -24,128 +27,145 @@ class RazorpayPaymentScreen extends StatelessWidget {
     this.description,
     this.email,
     this.contact,
-    required this.onSuccess,
-    required this.onFailure,
+    this.prefillName,
+    this.onSuccess,
+    this.onFailure,
   });
 
-  void _onPayPressed(BuildContext context) {
-    context.read<RazorpayCubit>().openCheckout(
-          apiKey: apiKey,
-          amount: amount,
-          name: name,
-          orderId: orderId,
-          description: description,
-          email: email,
-          contact: contact,
-        );
+  @override
+  State<RazorpayPaymentScreen> createState() => _RazorpayPaymentScreenState();
+}
+
+class _RazorpayPaymentScreenState extends State<RazorpayPaymentScreen> {
+  late RazorpayCubit _cubit;
+  bool _checkoutInitiated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit = sl<RazorpayCubit>();
+
+    // Delayed initiation to ensure the screen is fully transitioned
+    // and avoid activity conflicts on Android.
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted && !_checkoutInitiated) {
+        _startCheckout();
+      }
+    });
+  }
+
+  void _startCheckout() {
+    setState(() {
+      _checkoutInitiated = true;
+    });
+
+    try {
+      _cubit.openCheckout(
+        apiKey: widget.apiKey,
+        amount: widget.amount,
+        name: widget.name,
+        orderId: widget.orderId,
+        description: widget.description,
+        email: widget.email,
+        contact: widget.contact,
+      );
+    } catch (e) {
+      debugPrint("Razorpay UI Error: $e");
+      if (mounted) {
+        if (widget.onFailure != null) {
+          widget.onFailure!(e.toString());
+        } else {
+          Navigator.pop(context, "payment.launch_error".tr(args: [e.toString()]));
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _cubit.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
-    // return BlocConsumer<RazorpayCubit, RazorpayState>(
-    //   listener: (context, state) {
-    //     debugPrint("RazorpayPaymentScreen Listener: State is ${state.runtimeType}");
-    //     if (state is RazorpaySuccess) {
-    //       debugPrint("RazorpayPaymentScreen: Success event triggering onSuccess");
-    //       onSuccess(state.result);
-    //     } else if (state is RazorpayFailure) {
-    //       debugPrint("RazorpayPaymentScreen: Failure event triggering onFailure. Message: ${state.message}");
-    //       onFailure(state.message);
-    //     }
-    //   },
-    //   builder: (context, state) {
-    //     return Scaffold(
-    //       appBar: AppBar(
-    //         title: const Text('Razorpay Payment'),
-    //         centerTitle: true,
-    //       ),
-    //       body: Container(
-    //         width: double.infinity,
-    //         padding: const EdgeInsets.all(24.0),
-    //         child: Column(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           crossAxisAlignment: CrossAxisAlignment.center,
-    //           children: [
-    //             if (state is RazorpayOpeningCheckout) ...[
-    //               const CircularProgressIndicator(),
-    //               const SizedBox(height: 24),
-    //               const Text(
-    //                 'Opening Secure Payment Gateway...',
-    //                 textAlign: TextAlign.center,
-    //                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-    //               ),
-    //             ] else if (state is RazorpayFailure) ...[
-    //               const Icon(Icons.error_outline, color: Colors.red, size: 72),
-    //               const SizedBox(height: 16),
-    //               const Text(
-    //                 'Payment Failed',
-    //                 style: TextStyle(
-    //                     fontSize: 22,
-    //                     fontWeight: FontWeight.bold,
-    //                     color: Colors.red),
-    //               ),
-    //               const SizedBox(height: 8),
-    //               Text(
-    //                 state.message,
-    //                 textAlign: TextAlign.center,
-    //                 style: const TextStyle(fontSize: 14, color: Colors.black54),
-    //               ),
-    //               if (state.code != null) ...[
-    //                 const SizedBox(height: 4),
-    //                 Text(
-    //                   'Error Code: ${state.code}',
-    //                   style: const TextStyle(fontSize: 12, color: Colors.grey),
-    //                 ),
-    //               ],
-    //               const SizedBox(height: 32),
-    //               ElevatedButton(
-    //                 onPressed: () => _onPayPressed(context),
-    //                 style: ElevatedButton.styleFrom(
-    //                   backgroundColor: Colors.blue,
-    //                   minimumSize: const Size(double.infinity, 50),
-    //                   shape: RoundedRectangleBorder(
-    //                       borderRadius: BorderRadius.circular(12)),
-    //                 ),
-    //                 child: const Text('Try Again',
-    //                     style: TextStyle(color: Colors.white, fontSize: 16)),
-    //               ),
-    //               const SizedBox(height: 12),
-    //               TextButton(
-    //                 onPressed: () => Navigator.pop(context),
-    //                 child: const Text('Cancel'),
-    //               ),
-    //             ] else ...[
-    //               const Icon(Icons.security, color: Colors.green, size: 72),
-    //               const SizedBox(height: 24),
-    //               Text(
-    //                 'Pay ₹${(amount / 100).toStringAsFixed(2)}',
-    //                 style: const TextStyle(
-    //                     fontSize: 24, fontWeight: FontWeight.bold),
-    //               ),
-    //               const SizedBox(height: 8),
-    //               Text(
-    //                 'Order ID: ${orderId.isNotEmpty ? orderId : "Standard Checkout"}',
-    //                 style: const TextStyle(color: Colors.grey),
-    //               ),
-    //               const SizedBox(height: 32),
-    //               ElevatedButton(
-    //                 onPressed: () => _onPayPressed(context),
-    //                 style: ElevatedButton.styleFrom(
-    //                   backgroundColor: Colors.blue,
-    //                   minimumSize: const Size(double.infinity, 50),
-    //                   shape: RoundedRectangleBorder(
-    //                       borderRadius: BorderRadius.circular(12)),
-    //                 ),
-    //                 child: const Text('Pay Now',
-    //                     style: TextStyle(color: Colors.white, fontSize: 16)),
-    //               ),
-    //             ],
-    //           ],
-    //         ),
-    //       ),
-    //     );
-    //   },
-    // );
+    return BlocProvider.value(
+      value: _cubit,
+      child: BlocConsumer<RazorpayCubit, RazorpayState>(
+        listener: (context, state) {
+          if (state is RazorpaySuccess) {
+            if (widget.onSuccess != null) {
+              widget.onSuccess!(state.result);
+            } else {
+              Navigator.pop(context, state.result);
+            }
+          } else if (state is RazorpayFailure) {
+            if (widget.onFailure != null) {
+              widget.onFailure!(state.message);
+            } else {
+              Navigator.pop(context, state.message);
+            }
+          }
+        },
+        builder: (context, state) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              title: Text('payment.secure_payment_title'.tr()),
+              elevation: 0,
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    state is RazorpayOpeningCheckout || !_checkoutInitiated
+                        ? 'payment.connecting_secure_gateway'.tr()
+                        : 'payment.awaiting_payment_result'.tr(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      'payment.dont_close_screen_note'.tr(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  if (state is RazorpayFailure) ...[
+                    const SizedBox(height: 20),
+                    Text(
+                      state.message,
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                  ]
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }

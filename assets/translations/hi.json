@@ -971,5 +971,23 @@
   "approval_note": "दोनों में से किसी भी तरीके से अनुमोदन में 2-3 कार्यदिवस लगते हैं।",
 
   "cover_images": "संपत्ति की तस्वीरें",
-  "err_exterior_image_req": "कृपया कम से कम एक बाहरी तस्वीर जोड़ें"
+  "err_exterior_image_req": "कृपया कम से कम एक बाहरी तस्वीर जोड़ें",
+
+  "payment": {
+    "history_title": "भुगतान इतिहास",
+    "no_transactions_yet": "अभी तक कोई लेनदेन नहीं",
+    "total_paid": "कुल भुगतान",
+    "transactions_label": "लेनदेन",
+    "rent_payment": "किराया भुगतान",
+    "attempted_on": "इस पर प्रयास किया गया: {}",
+    "back_to_previous_screen": "पिछली स्क्रीन पर वापस जाएं",
+    "reason_prefix": "कारण: ",
+    "paid_on": "इस पर भुगतान किया गया: {}",
+    "back_to_booking_page": "बुकिंग पेज पर वापस जाएं",
+    "secure_payment_title": "सुरक्षित भुगतान",
+    "connecting_secure_gateway": "सुरक्षित गेटवे से कनेक्ट हो रहा है...",
+    "awaiting_payment_result": "भुगतान परिणाम की प्रतीक्षा है...",
+    "dont_close_screen_note": "कृपया भुगतान पूरा होने तक इस स्क्रीन को बंद न करें या ऐप न बदलें।",
+    "launch_error": "लॉन्च त्रुटि: {}"
+  }
 }
