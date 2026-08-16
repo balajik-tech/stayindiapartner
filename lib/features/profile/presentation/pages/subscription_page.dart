@@ -7,6 +7,7 @@ import 'package:stayindia_owner/core/utils/text_utils.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../domain/entities/subscription_response.dart';
@@ -156,6 +157,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     // final bool isPaused = subscription.status == 'PAUSED';
     final bool isExpiring = !isPaused && daysRemaining <= 7 && daysRemaining >= 0;
 
+    final phoneNumber = subscription.supportCall;
+    final whatsappText = subscription.supportWhatsappText;
+    final whatsappUrl = subscription.supportWhatsappUrl;
+
+
     String badgeText = 'Active';
     Color badgeBg = const Color(0xFFDCFCE7);
     Color badgeTextCol = const Color(0xFF166534);
@@ -285,7 +291,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                       _callPhoneNumber(phoneNumber!);
+                      },
                       icon: Icon(Icons.call_outlined, size: 18.sp),
                       label: Text(
                         'Call',
@@ -304,7 +312,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
+                      },
                       icon: SizedBox(
                         width: 18.w,
                         height: 18.h,
@@ -352,33 +362,35 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 ],
               ),
               SizedBox(height: 8.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Auto-renew',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.grayColor4,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    subscription.autoRenew ? 'On' : 'Off',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     Text(
+              //       'Auto-renew',
+              //       style: GoogleFonts.inter(
+              //         fontSize: 14.sp,
+              //         color: AppColors.grayColor4,
+              //         fontWeight: FontWeight.w500,
+              //       ),
+              //     ),
+              //     Text(
+              //       subscription.autoRenew ? 'On' : 'Off',
+              //       style: GoogleFonts.inter(
+              //         fontSize: 14.sp,
+              //         color: Colors.black,
+              //         fontWeight: FontWeight.w600,
+              //       ),
+              //     ),
+              //   ],
+              // ),
               SizedBox(height: 20.h),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        _callPhoneNumber(phoneNumber!);
+                      },
                       icon: Icon(Icons.call_outlined, size: 18.sp),
                       label: Text(
                         'Call',
@@ -397,7 +409,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
+                      },
                       icon:  SizedBox(
                         width: 18.w,
                         height: 18.h,
@@ -449,6 +463,51 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _callPhoneNumber(String phoneNumber) async {
+    if (phoneNumber.trim().isEmpty) return;
+
+    final Uri phoneUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+
+    try {
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
+      } else {
+        debugPrint('Could not launch phone dialer');
+      }
+    } catch (e) {
+      debugPrint('Call error: $e');
+    }
+  }
+
+  Future<void> _shareOnWhatsApp({
+    required String phoneNumber,
+    String? message,
+  }) async {
+    final cleanNumber = phoneNumber.replaceAll(RegExp(r'\D'), '');
+
+    if (cleanNumber.isEmpty) return;
+
+    final Uri whatsappUri = Uri.parse(
+      'https://wa.me/$cleanNumber?text=${Uri.encodeComponent(message ?? '')}',
+    );
+
+    try {
+      if (await canLaunchUrl(whatsappUri)) {
+        await launchUrl(
+          whatsappUri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        debugPrint('WhatsApp is not installed');
+      }
+    } catch (e) {
+      debugPrint('WhatsApp share error: $e');
+    }
   }
 
   @override

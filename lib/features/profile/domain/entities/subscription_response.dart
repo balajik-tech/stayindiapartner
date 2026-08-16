@@ -106,6 +106,10 @@ class ActiveSubscription {
   final String? cancelledBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? supportCall;
+  final String? supportWhatsappText;
+  final String? supportWhatsappUrl;
+
 
   ActiveSubscription({
     required this.id,
@@ -137,6 +141,9 @@ class ActiveSubscription {
     this.cancelledBy,
     this.createdAt,
     this.updatedAt,
+    this.supportCall,
+    this.supportWhatsappText,
+    this.supportWhatsappUrl,
   });
 }
 

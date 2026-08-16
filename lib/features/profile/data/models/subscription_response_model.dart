@@ -150,6 +150,10 @@ class ActiveSubscriptionModel extends ActiveSubscription {
     super.cancelledBy,
     super.createdAt,
     super.updatedAt,
+    super.supportCall,
+    super.supportWhatsappText,
+    super.supportWhatsappUrl
+
   });
 
   factory ActiveSubscriptionModel.fromJson(Map<String, dynamic> json) {
@@ -183,6 +187,9 @@ class ActiveSubscriptionModel extends ActiveSubscription {
       cancelledBy: json['cancelledBy'] as String?,
       createdAt: _parseDateTime(json['createdAt']),
       updatedAt: _parseDateTime(json['updatedAt']),
+      supportCall: json['supportCall'] as String?,
+      supportWhatsappText: json['supportWhatsappText'] as String?,
+      supportWhatsappUrl: json['supportWhatsappUrl'] as String?,
     );
   }
 }
