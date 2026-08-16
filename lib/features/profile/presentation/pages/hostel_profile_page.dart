@@ -236,19 +236,19 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
                             SizedBox(height: 20.h),
                             Row(
                               children: [
-                                Expanded(
-                                  child: _buildDropdownField(
-                                    label: StringUtils.translate(
-                                      'hostel_type',
-                                      context: context,
-                                    ),
-                                    value: _hostelType,
-                                    items: ['men', 'women', 'co-ed'],
-                                    onChanged: (v) =>
-                                        setState(() => _hostelType = v!),
-                                  ),
-                                ),
-                                SizedBox(width: 16.w),
+                                // Expanded(
+                                //   child: _buildDropdownField(
+                                //     label: StringUtils.translate(
+                                //       'hostel_type',
+                                //       context: context,
+                                //     ),
+                                //     value: _hostelType,
+                                //     items: ['men', 'women', 'co-ed'],
+                                //     onChanged: (v) =>
+                                //         setState(() => _hostelType = v!),
+                                //   ),
+                                // ),
+                                // SizedBox(width: 16.w),
                                 Expanded(
                                   child: _buildDropdownField(
                                     label: StringUtils.translate(

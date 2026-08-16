@@ -813,6 +813,7 @@ class _ProfilePageState extends State<ProfilePage> {
           if (hasInsights)
             _QuickActionCard(
               icon: Icons.insights_rounded,
+              image: 'assets/images/bargraph.png',
               label: 'insights_quick'.tr(),
               onTap: () => Navigator.push(
                 context,
@@ -827,6 +828,7 @@ class _ProfilePageState extends State<ProfilePage> {
           SizedBox(width: 12.w),
           _QuickActionCard(
             icon: Icons.insights_rounded,
+            image: 'assets/images/collection_rupee.png',
             label: 'collection'.tr(),
             onTap: () => Navigator.push(
               context,
@@ -1360,11 +1362,14 @@ class _QuickActionCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final String? image;
+
 
   const _QuickActionCard({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.image="",
   });
 
   @override
@@ -1390,7 +1395,11 @@ class _QuickActionCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: AppColors.accentOrange, size: 24.sp),
+            if(image!.isNotEmpty)...[
+              Image.asset(image!, width: 24.sp),
+            ]else...[
+              Icon(icon, color: AppColors.accentOrange, size: 24.sp),
+            ],
             SizedBox(height: 6.h),
             Flexible(
               child: FittedBox(
