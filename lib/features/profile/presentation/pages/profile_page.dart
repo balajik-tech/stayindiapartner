@@ -100,6 +100,9 @@ class _ProfilePageState extends State<ProfilePage> {
               //   child: _buildGovernmentLicensesCard(context),
               // ),
               SliverToBoxAdapter(
+                child: _buildQuickActionsFullWidth(context, role, owner),
+              ),
+              SliverToBoxAdapter(
                 child: _buildQuickActions(context, role, owner),
               ),
               SliverPadding(
@@ -132,18 +135,18 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        _ProfileCard(
-                          icon: Icons.credit_card_rounded,
-                          title: 'subscription'.tr(),
-                          iconBgColor: const Color(0xFFF0FDF4),
-                          iconColor: const Color(0xFF16A34A),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SubscriptionPage(),
-                            ),
-                          ),
-                        ),
+                        // _ProfileCard(
+                        //   icon: Icons.credit_card_rounded,
+                        //   title: 'subscription'.tr(),
+                        //   iconBgColor: const Color(0xFFF0FDF4),
+                        //   iconColor: const Color(0xFF16A34A),
+                        //   onTap: () => Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) => const SubscriptionPage(),
+                        //     ),
+                        //   ),
+                        // ),
                         // _ProfileCard(
                         //   icon: Icons.stars_rounded,
                         //   title: 'membership_id'.tr() == 'membership_id'
@@ -761,6 +764,35 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Widget _buildQuickActionsFullWidth(
+      BuildContext context,
+      String role,
+      dynamic owner,
+      ) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _FullWidthActionCard(
+            icon: Icons.credit_card_rounded,
+            label: 'subscription'.tr(),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SubscriptionPage(),
+                ),
+              );
+            },
+          ),
+          // Add another card vertically
+          SizedBox(height: 12.h),
+        ],
+      ),
+    );
+  }
+
   Widget _buildQuickActions(BuildContext context, String role, dynamic owner) {
     final bool hasInsights = owner?.hasPermission('reports') ?? true;
     final bool hasStock = false;// owner?.hasPermission('stock') ?? true;  // hidden stock for condition changed
@@ -1373,6 +1405,83 @@ class _QuickActionCard extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FullWidthActionCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _FullWidthActionCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BouncingWrapper(
+      onTap: onTap,
+      scaleFactor: 0.97,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(
+          vertical: 16.h,
+          horizontal: 16.w,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: AppColors.border.withValues(alpha: 0.5),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFF16A34A),
+                size: 24.sp,
+              ),
+            ),
+
+            SizedBox(width: 14.w),
+
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16.sp,
+              color: AppColors.textSecondary.withValues(alpha: 0.6),
             ),
           ],
         ),
