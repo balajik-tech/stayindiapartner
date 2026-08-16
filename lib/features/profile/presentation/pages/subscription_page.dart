@@ -50,24 +50,32 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     super.dispose();
   }
 
-  String _planKeyFor(String hostelId, String defaultValue) => _selectedPlan[hostelId] ?? defaultValue;
+  String _planKeyFor(String hostelId, String defaultValue) =>
+      _selectedPlan[hostelId] ?? defaultValue;
 
   void _loadSubscriptionData(BuildContext context, String hostelId) {
     context.read<SubscriptionCubit>().loadSubscriptionPlans(hostelId);
   }
 
-  void _navigateToRazorpay(BuildContext context, ActiveSubscription subscription ) {
+  void _navigateToRazorpay(
+    BuildContext context,
+    ActiveSubscription subscription,
+  ) {
     if (_isNavigatingToRazorpay) return;
     _isNavigatingToRazorpay = true;
 
-    final int totalAmountToPay = ((subscription.totalAmount + subscription.gstAmount) * 100).round();
-
+    final int totalAmountToPay =
+        ((subscription.totalAmount + subscription.gstAmount) * 100).round();
 
     final profileState = context.read<ProfileCubit>().state;
 
-    final String email = profileState is ProfileLoaded ? profileState.profile.email : "";
-    final String mobile = profileState is ProfileLoaded ? profileState.profile.phone : "";
-    
+    final String email = profileState is ProfileLoaded
+        ? profileState.profile.email
+        : "";
+    final String mobile = profileState is ProfileLoaded
+        ? profileState.profile.phone
+        : "";
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showDialog(
         context: context,
@@ -81,75 +89,83 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             },
             child: BlocProvider(
               create: (context) => sl<RazorpayCubit>()
-              ..openCheckout(
-                apiKey: ApiConstants.razorpayKey,
-                amount: totalAmountToPay,
-                name: subscription.planSnapshot.planName,
-                orderId: subscription.razorpayOrderId ?? '',
-                description: 'Payment for ${subscription.planSnapshot.planName}',
-                email: email,
-                contact: mobile
-              ),
-            child: BlocConsumer<RazorpayCubit, RazorpayState>(
-              listener: (innerContext, state) {
-                if (state is RazorpaySuccess) {
-                  debugPrint('========== Razorpay Success ==========Subscription');
-                  debugPrint('Payment ID : ${state.result.paymentId}');
-                  debugPrint('Order ID   : ${state.result.orderId}');
-                  debugPrint('Signature  : ${state.result.signature}');
-                  debugPrint('======================================');
-  
-                  _isNavigatingToRazorpay = false;
-                  if (Navigator.canPop(dialogContext)) {
-                    Navigator.pop(dialogContext); // close the loading dialog
-                  }
-  
-                  // Call verify-payment API
-                  context.read<SubscriptionCubit>().verifyPayment(
-                        propertyId: subscription.property,
-                        orderId: state.result.orderId ?? '',
-                        paymentId: state.result.paymentId ?? '',
-                        signature: state.result.signature ?? '',
-                      );
-                } else if (state is RazorpayFailure) {
-                  debugPrint('========== Razorpay Failure ==========Subscription');
-                  debugPrint('Error: ${state.message}');
-                  debugPrint('======================================');
-  
-                  _isNavigatingToRazorpay = false;
-                  if (Navigator.canPop(dialogContext)) {
-                    Navigator.pop(dialogContext); // close the loading dialog
-                  }
-  
-                  // Use the parent context to push to avoid issues with dialogContext being popped
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider.value(
-                        value: context.read<SubscriptionCubit>(),
-                        child: PaymentFailedScreen(
-                          propertyId: subscription.property,
-                          planId: subscription.plan,
-                          planName: subscription.planSnapshot.planName,
-                          amount: subscription.totalAmount + subscription.gstAmount,
+                ..openCheckout(
+                  apiKey: ApiConstants.razorpayKey,
+                  amount: totalAmountToPay,
+                  name: subscription.planSnapshot.planName,
+                  orderId: subscription.razorpayOrderId ?? '',
+                  description:
+                      'Payment for ${subscription.planSnapshot.planName}',
+                  email: email,
+                  contact: mobile,
+                ),
+              child: BlocConsumer<RazorpayCubit, RazorpayState>(
+                listener: (innerContext, state) {
+                  if (state is RazorpaySuccess) {
+                    debugPrint(
+                      '========== Razorpay Success ==========Subscription',
+                    );
+                    debugPrint('Payment ID : ${state.result.paymentId}');
+                    debugPrint('Order ID   : ${state.result.orderId}');
+                    debugPrint('Signature  : ${state.result.signature}');
+                    debugPrint('======================================');
+
+                    _isNavigatingToRazorpay = false;
+                    if (Navigator.canPop(dialogContext)) {
+                      Navigator.pop(dialogContext); // close the loading dialog
+                    }
+
+                    // Call verify-payment API
+                    context.read<SubscriptionCubit>().verifyPayment(
+                      propertyId: subscription.property,
+                      orderId: state.result.orderId ?? '',
+                      paymentId: state.result.paymentId ?? '',
+                      signature: state.result.signature ?? '',
+                    );
+                  } else if (state is RazorpayFailure) {
+                    debugPrint(
+                      '========== Razorpay Failure ==========Subscription',
+                    );
+                    debugPrint('Error: ${state.message}');
+                    debugPrint('======================================');
+
+                    _isNavigatingToRazorpay = false;
+                    if (Navigator.canPop(dialogContext)) {
+                      Navigator.pop(dialogContext); // close the loading dialog
+                    }
+
+                    // Use the parent context to push to avoid issues with dialogContext being popped
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<SubscriptionCubit>(),
+                          child: PaymentFailedScreen(
+                            propertyId: subscription.property,
+                            planId: subscription.plan,
+                            planName: subscription.planSnapshot.planName,
+                            amount:
+                                subscription.totalAmount +
+                                subscription.gstAmount,
+                          ),
                         ),
                       ),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  // Simple loading UI while Razorpay's native sheet is opening
+                  return const Center(
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CircularProgressIndicator(),
                     ),
                   );
-                }
-              },
-              builder: (context, state) {
-                // Simple loading UI while Razorpay's native sheet is opening
-                return const Center(
-                  child: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ));
+          );
         },
       );
     });
@@ -167,10 +183,328 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   String _formatDate(DateTime date) {
     const months = [
-      'jan', 'feb', 'mar', 'apr', 'may', 'jun',
-      'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
+  }
+
+  Widget _buildActiveNewCard(
+    BuildContext context,
+    SubscriptionProperty property,
+    ActiveSubscription subscription,
+  ) {
+    final now = DateTime.now();
+    final endDate = subscription.endDate ?? now;
+    final daysRemaining = endDate.difference(now).inDays;
+
+    final bool isPaused = subscription.status == 'PAUSED';
+    final bool isExpiring =
+        !isPaused && daysRemaining <= 7 && daysRemaining >= 0;
+
+    String badgeText = 'Active';
+    Color badgeBg = const Color(0xFFDCFCE7);
+    Color badgeTextCol = const Color(0xFF166534);
+
+    if (isPaused) {
+      badgeText = 'Paused';
+      badgeBg = const Color(0xFFFEF3C7);
+      badgeTextCol = const Color(0xFF6d4714);
+    } else if (isExpiring) {
+      badgeText = 'Ends in $daysRemaining days';
+      badgeBg = const Color(0xFFFEF3C7);
+      badgeTextCol = const Color(0xFF6d4714);
+    }
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: isPaused
+              ? const Color(0xFFF59E0B).withOpacity(0.5)
+              : Colors.grey.shade200,
+          width: 1.5,
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16.r),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    property.name,
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 4.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeBg,
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    badgeText,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: badgeTextCol,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              '${property.address} · ${property.totalBeds} beds',
+              style: GoogleFonts.inter(
+                fontSize: 13.sp,
+                color: AppColors.grayColor4,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Divider(height: 1, color: Colors.grey.shade100),
+            SizedBox(height: 8.h),
+            if (isPaused) ...[
+              Text(
+                'Bookings and listing tools are paused since ${_formatDate(subscription.updatedAt ?? now)}.',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18.r,
+                    backgroundColor: Colors.blue.shade100,
+                    child: Text(
+                      'RK',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.blue.shade800,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ravi Kumar',
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        'Your account manager',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {},
+                      icon: Icon(Icons.call_outlined, size: 18.sp),
+                      label: Text(
+                        'Call',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black87,
+                        side: BorderSide(color: Colors.grey.shade300),
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {},
+                      icon: SizedBox(
+                        width: 18.w,
+                        height: 18.h,
+                        child: Image.asset(
+                          'assets/images/whatsapp_black.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      label: Text(
+                        'WhatsApp',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black87,
+                        side: BorderSide(color: Colors.grey.shade300),
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (isExpiring) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Valid till',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.grayColor4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    _formatDate(endDate),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Auto-renew',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.grayColor4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    subscription.autoRenew ? 'On' : 'Off',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {},
+                      icon: Icon(Icons.call_outlined, size: 18.sp),
+                      label: Text(
+                        'Call',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black87,
+                        side: BorderSide(color: Colors.grey.shade300),
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {},
+                      icon:  SizedBox(
+                        width: 18.w,
+                        height: 18.h,
+                        child: Image.asset(
+                          'assets/images/whatsapp_black.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      label: Text(
+                        'WhatsApp',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black87,
+                        side: BorderSide(color: Colors.grey.shade300),
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Valid till',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.grayColor4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    _formatDate(endDate),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -180,8 +514,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         final cubit = sl<SubscriptionCubit>();
         final hostelState = context.read<HostelCubit>().state;
         if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-          final hostel = hostelState.hostels[hostelState.selectedHostelIndex];
-          cubit.loadSubscriptionPlans(hostel.id);
+          for (var hostel in hostelState.hostels) {
+            cubit.loadSubscriptionPlans(hostel.id);
+          }
         }
         return cubit;
       },
@@ -190,7 +525,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           BlocListener<HostelCubit, HostelState>(
             listenWhen: (previous, current) {
               if (previous is HostelLoaded && current is HostelLoaded) {
-                return previous.selectedHostelIndex != current.selectedHostelIndex;
+                return previous.selectedHostelIndex !=
+                    current.selectedHostelIndex;
               }
               return previous is! HostelLoaded && current is HostelLoaded;
             },
@@ -212,7 +548,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PaymentSuccessScreen(summary: state.summary),
+                    builder: (context) =>
+                        PaymentSuccessScreen(summary: state.summary),
                   ),
                 );
               } else if (state is SubscriptionPaymentVerificationFailed) {
@@ -223,17 +560,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 String? planName;
                 double? amount;
 
-                if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
-                  final hostel = hostelState.hostels[hostelState.selectedHostelIndex];
+                if (hostelState is HostelLoaded &&
+                    hostelState.hostels.isNotEmpty) {
+                  final hostel =
+                      hostelState.hostels[hostelState.selectedHostelIndex];
                   propertyId = hostel.id;
                   propertyName = hostel.name;
-                  
+
                   final selectedKey = _selectedPlan[hostel.id];
                   final response = state.subscriptionResponses[hostel.id];
                   if (response != null && selectedKey != null) {
                     try {
                       final plan = response.plans.firstWhere(
-                        (p) => p.planCode.toLowerCase() == selectedKey.toLowerCase(),
+                        (p) =>
+                            p.planCode.toLowerCase() ==
+                            selectedKey.toLowerCase(),
                         orElse: () => response.plans.first,
                       );
                       planId = plan.id;
@@ -278,9 +619,30 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
             return BlocBuilder<SubscriptionCubit, SubscriptionState>(
               builder: (context, subscriptionState) {
-                final subscriptionResponses = subscriptionState.subscriptionResponses;
+                final subscriptionResponses =
+                    subscriptionState.subscriptionResponses;
 
-                if (subscriptionState is SubscriptionError && subscriptionResponses.isEmpty) {
+                int needsAttentionCount = 0;
+                for (var hostel in hostels) {
+                  final response = subscriptionResponses[hostel.id];
+                  if (response?.activeSubscription != null) {
+                    final sub = response!.activeSubscription!;
+                    final now = DateTime.now();
+                    final daysRemaining = sub.endDate != null
+                        ? sub.endDate!.difference(now).inDays
+                        : 0;
+                    if (sub.status == 'PAUSED' ||
+                        (sub.status == 'ACTIVE' && daysRemaining <= 7)) {
+                      needsAttentionCount++;
+                    }
+                  } else if (response != null &&
+                      response.activeSubscription == null) {
+                    needsAttentionCount++;
+                  }
+                }
+
+                if (subscriptionState is SubscriptionError &&
+                    subscriptionResponses.isEmpty) {
                   return Scaffold(
                     backgroundColor: Colors.white,
                     body: Center(
@@ -291,7 +653,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           ElevatedButton(
                             onPressed: () {
                               if (hostels.isNotEmpty) {
-                                _loadSubscriptionData(context, hostels[selectedIndex].id);
+                                for (var h in hostels) {
+                                  _loadSubscriptionData(context, h.id);
+                                }
                               }
                             },
                             child: const Text('Retry'),
@@ -305,114 +669,106 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 return Scaffold(
                   backgroundColor: Colors.white,
                   body: SafeArea(
-                    child: Container(
-                      padding: const EdgeInsets.all(0),
-                      // margin: const EdgeInsets.all(12),
-                      // decoration: BoxDecoration(
-                      //   color: Colors.white,
-                      //   borderRadius: BorderRadius.circular(12),
-                      //   border: Border.all(
-                      //     color: Colors.grey.shade300,
-                      //   ),
-                      // ),
-                      child: Column(
-                        children: [
-                          _buildHeader(context),
-                          if (hostels.length > 1)
-                            _buildPropertySelector(hostels, selectedIndex, context, subscriptionResponses),
-                          Expanded(
-                            child: Container(
-                              color: SubscriptionColors.backgroundColor,
-                              padding: const EdgeInsets.only(top: 8),
-                              child: hostels.isEmpty
-                                  ? Center(
-                                      child: Text(
-                                        'No properties added yet.',
-                                        style: GoogleFonts.inter(
-                                            color: AppColors.greyText,
-                                            fontSize: 14.sp),
+                    child: Column(
+                      children: [
+                        _buildHeader(
+                          context,
+                          total: hostels.length,
+                          needsAttention: needsAttentionCount,
+                        ),
+                        Expanded(
+                          child: Container(
+                            color: SubscriptionColors.backgroundColor,
+                            child: hostels.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      'No properties added yet.',
+                                      style: GoogleFonts.inter(
+                                        color: AppColors.greyText,
+                                        fontSize: 14.sp,
                                       ),
-                                    )
-                                  : ListView.builder(
-                                      padding: EdgeInsets.fromLTRB(
-                                        20.w,
-                                        8.h,
-                                        20.w,
-                                        MediaQuery.of(context).padding.bottom +
-                                            24.h,
-                                      ),
-                                      itemCount: hostels.isNotEmpty ? 1 : 0,
-                                      itemBuilder: (builderContext, index) {
-                                        final hostel = hostels[selectedIndex];
-                                        final response =
-                                            subscriptionResponses[hostel.id];
-
-                                        if (response == null) {
-                                          if (subscriptionState is SubscriptionError) {
-                                            return Center(
-                                              child: Column(
-                                                children: [
-                                                  Text(
-                                                    'Failed to load data for this property.',
-                                                    style: GoogleFonts.inter(
-                                                        color: AppColors.greyText,
-                                                        fontSize: 14.sp),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () => _loadSubscriptionData(context, hostel.id),
-                                                    child: const Text('Retry'),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }
-                                          return const Center(
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        }
-
-                                        return Container(
-                                          padding: EdgeInsets.only(bottom: 16.h),
-                                          child: Column(
-                                            children: [
-                                              if (response.activeSubscription !=
-                                                      null
-                                                  &&
-                                                  response.activeSubscription!
-                                                          .status ==
-                                                      'ACTIVE'
-                                              )
-                                                _buildActiveCard(
-                                                    builderContext,
-                                                    response.property,
-                                                    response.activeSubscription!)
-                                              // else if (response
-                                              //             .activeSubscription !=
-                                              //         null &&
-                                              //     (response.activeSubscription!
-                                              //             .status ==
-                                              //         'PENDING' ||
-                                              //         response.activeSubscription!
-                                              //             .status ==
-                                              //         'PENDING_PAYMENT'))
-                                              //   _buildPendingCard(
-                                              //       builderContext,
-                                              //       response.property,
-                                              //       response.activeSubscription!)
-                                              else
-                                                _buildPlanSelectionCard(
-                                                    builderContext,
-                                                    response.property,
-                                                    response.plans),
-                                            ],
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    padding: EdgeInsets.fromLTRB(
+                                      20.w,
+                                      16.h,
+                                      20.w,
+                                      MediaQuery.of(context).padding.bottom +
+                                          24.h,
+                                    ),
+                                    itemCount: hostels.length + 1,
+                                    itemBuilder: (builderContext, index) {
+                                      if (index == hostels.length) {
+                                        return Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 24.h,
+                                          ),
+                                          child: Text(
+                                            'Billing is handled by your Stay India account team.',
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12.sp,
+                                              color: Colors.grey.shade500,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         );
-                                      },
-                                    ),
-                            ),
+                                      }
+
+                                      final hostel = hostels[index];
+                                      final response =
+                                          subscriptionResponses[hostel.id];
+
+                                      if (response == null) {
+                                        return Container(
+                                          height: 100.h,
+                                          margin: EdgeInsets.only(bottom: 16.h),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              16.r,
+                                            ),
+                                          ),
+                                          child: const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+                                      }
+
+                                      return Container(
+                                        padding: EdgeInsets.only(bottom: 0.h),
+                                        child: Column(
+                                          children: [
+                                            if (response.activeSubscription !=
+                                                    null &&
+                                                (response
+                                                            .activeSubscription!
+                                                            .status ==
+                                                        'ACTIVE' ||
+                                                    response
+                                                            .activeSubscription!
+                                                            .status ==
+                                                        'PAUSED'))
+                                              _buildActiveNewCard(
+                                                builderContext,
+                                                response.property,
+                                                response.activeSubscription!,
+                                              )
+                                            else
+                                              _buildPlanSelectionCard(
+                                                builderContext,
+                                                response.property,
+                                                response.plans,
+                                              ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -431,7 +787,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     final targetOffset =
-        (index * estimatedChipWidth) - (screenWidth / 2) + (estimatedChipWidth / 2);
+        (index * estimatedChipWidth) -
+        (screenWidth / 2) +
+        (estimatedChipWidth / 2);
 
     _propertyScrollController.animateTo(
       targetOffset.clamp(
@@ -444,10 +802,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildPropertySelector(
-      List<Hostel> hostels, 
-      int selectedIndex, 
-      BuildContext context, 
-      Map<String, SubscriptionResponse> responses) {
+    List<Hostel> hostels,
+    int selectedIndex,
+    BuildContext context,
+    Map<String, SubscriptionResponse> responses,
+  ) {
     return Container(
       height: 48.h,
       margin: EdgeInsets.only(top: 8.h),
@@ -474,8 +833,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     hostels[index].name,
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                      color: isSelected ? Colors.white : SubscriptionColors.navy,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white
+                          : SubscriptionColors.navy,
                     ),
                   ),
                   if (isActive || isPending) ...[
@@ -485,8 +848,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       height: 6.w,
                       decoration: BoxDecoration(
                         color: isActive
-                            ? (isSelected ? Colors.white : SubscriptionColors.green)
-                            : (isSelected ? Colors.white : AppColors.orangeColor),
+                            ? (isSelected
+                                  ? Colors.white
+                                  : SubscriptionColors.green)
+                            : (isSelected
+                                  ? Colors.white
+                                  : AppColors.orangeColor),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -508,7 +875,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r),
                 side: BorderSide(
-                  color: isSelected ? SubscriptionColors.navy : Colors.grey.shade300,
+                  color: isSelected
+                      ? SubscriptionColors.navy
+                      : Colors.grey.shade300,
                 ),
               ),
               showCheckmark: false,
@@ -523,24 +892,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   // ---------------------------------------------------------------------
   // Header
   // ---------------------------------------------------------------------
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(
+    BuildContext context, {
+    int total = 0,
+    int needsAttention = 0,
+  }) {
     return Container(
-      padding: EdgeInsets.only(left: 4,right: 16,top: 12, bottom: 8),
+      padding: EdgeInsets.only(left: 4, right: 16, top: 12, bottom: 8),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade300,
-            width: 1,
-          ),
+          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
         ),
       ),
-      // color: Colors.white,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: SubscriptionColors.navy),
+            icon: Icon(Icons.arrow_back, color: Colors.black87),
             onPressed: () => Navigator.pop(context),
           ),
           Expanded(
@@ -548,41 +916,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Subscriptions',
+                  'Properties',
                   style: GoogleFonts.inter(
-                    color: SubscriptionColors.navy,
-                    fontSize: 22.sp,
+                    color: Colors.black,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                // SizedBox(height: 2.h),
                 Text(
-                  'Per-bed plans for your properties',
+                  '$total properties · $needsAttention needs attention',
                   style: GoogleFonts.inter(
-                    color: SubscriptionColors.grayText,
+                    color: Colors.grey.shade600,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 8.w,
-                height: 8.w,
-                decoration:  BoxDecoration(color: AppColors.primaryBlue, shape: BoxShape.circle),
-              ),
-              SizedBox(width: 6.w),
-              Container(
-                width: 8.w,
-                height: 8.w,
-                decoration: const BoxDecoration(color: AppColors.orangeColor, shape: BoxShape.circle),
-              ),
-            ],
           ),
         ],
       ),
@@ -592,12 +942,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   // ---------------------------------------------------------------------
   // Shared row builders
   // ---------------------------------------------------------------------
-  Widget _buildStatusBadge(
-      String label,
-      Color fg,
-      Color bg, {
-        IconData? icon,
-      }) {
+  Widget _buildStatusBadge(String label, Color fg, Color bg, {IconData? icon}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       decoration: BoxDecoration(
@@ -631,12 +976,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Widget _buildLocationRow(String address) {
     return Row(
       children: [
-        Icon(Icons.location_on_outlined, size: 14.sp, color: AppColors.greyText),
+        Icon(
+          Icons.location_on_outlined,
+          size: 14.sp,
+          color: AppColors.greyText,
+        ),
         SizedBox(width: 4.w),
         Expanded(
           child: Text(
             address,
-            style: GoogleFonts.inter(fontSize: 13.sp, color: SubscriptionColors.grayText,fontWeight: FontWeight.w600),
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              color: SubscriptionColors.grayText,
+              fontWeight: FontWeight.w600,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -647,32 +1000,34 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Widget _buildBedsRow(int beds) {
     return Row(
       children: [
-        Image.asset(
-          'assets/images/bed_icon.png',
-          width: 14.w,
-          height: 14.w,
-        ),
+        Image.asset('assets/images/bed_icon.png', width: 14.w, height: 14.w),
         SizedBox(width: 4.w),
         Text(
           '$beds Beds',
-          style: GoogleFonts.inter(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.primaryBlue),
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primaryBlue,
+          ),
         ),
       ],
     );
   }
 
   double calculateTotalAmount(
-      double amount,
-      double gst,
-      bool priceIncludesGst,
-      ) =>
-      priceIncludesGst ? amount : amount + gst;
+    double amount,
+    double gst,
+    bool priceIncludesGst,
+  ) => priceIncludesGst ? amount : amount + gst;
 
   // ---------------------------------------------------------------------
   // Not-subscribed card: plan picker + price breakup + pay button
   // ---------------------------------------------------------------------
   Widget _buildPlanSelectionCard(
-      BuildContext context, SubscriptionProperty property, List<SubscriptionPlan> plans) {
+    BuildContext context,
+    SubscriptionProperty property,
+    List<SubscriptionPlan> plans,
+  ) {
     final beds = property.totalBeds;
     final planOptions = plans.map(PlanOption.fromEntity).toList();
 
@@ -705,9 +1060,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             Text(
               'Please wait while subscription options are loaded.',
               style: GoogleFonts.inter(
-                  fontSize: 13.sp,
-                  color: AppColors.greyText,
-                  fontWeight: FontWeight.w600),
+                fontSize: 13.sp,
+                color: AppColors.greyText,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -716,14 +1072,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
     final defaultKey = planOptions.first.key;
     final selectedKey = _planKeyFor(property.id, defaultKey);
-    final selectedPlan = planOptions.firstWhere((p) => p.key == selectedKey,
-        orElse: () => planOptions.first);
+    final selectedPlan = planOptions.firstWhere(
+      (p) => p.key == selectedKey,
+      orElse: () => planOptions.first,
+    );
 
-    final totalToPay = calculateTotalAmount(selectedPlan.breakdown?.totalAmount ?? 0, selectedPlan.breakdown?.gstAmount ?? 0, selectedPlan.priceIncludesGst);
-
+    final totalToPay = calculateTotalAmount(
+      selectedPlan.breakdown?.totalAmount ?? 0,
+      selectedPlan.breakdown?.gstAmount ?? 0,
+      selectedPlan.priceIncludesGst,
+    );
 
     final subscriptionState = context.watch<SubscriptionCubit>().state;
-    final isProcessing = subscriptionState is SubscriptionProcessing &&
+    final isProcessing =
+        subscriptionState is SubscriptionProcessing &&
         subscriptionState.propertyId == property.id;
 
     return Container(
@@ -787,16 +1149,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   : () {
                       _selectedPlan[property.id] = selectedPlan.key;
                       context.read<SubscriptionCubit>().subscribe(
-                            property.id,
-                            selectedPlan.id,
-                            'UPI',
-                          );
+                        property.id,
+                        selectedPlan.id,
+                        'UPI',
+                      );
                     },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r)),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
                 elevation: 0,
               ),
               child: isProcessing
@@ -814,13 +1177,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         Text(
                           'Pay ₹${_formatNumber(totalToPay.round())}',
                           style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         SizedBox(width: 8.w),
-                        Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 18.sp),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                          size: 18.sp,
+                        ),
                       ],
                     ),
             ),
@@ -858,40 +1225,27 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ),
         SizedBox(width: 8.w),
-        _buildStatusBadge(
-          status,
-          statusColor,
-          backgroundColor,
-          icon: icon,
-        ),
+        _buildStatusBadge(status, statusColor, backgroundColor, icon: icon),
       ],
     );
   }
 
-  Widget _buildPlanTile(
-      String hostelId,
-      PlanOption plan,
-      bool isSelected,
-      ) {
+  Widget _buildPlanTile(String hostelId, PlanOption plan, bool isSelected) {
     final price = plan.pricePerBed.round();
-    final priceColor =
-    isSelected ? AppColors.orangeColor : SubscriptionColors.blue;
+    final priceColor = isSelected
+        ? AppColors.orangeColor
+        : SubscriptionColors.blue;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPlan[hostelId] = plan.key),
       child: Padding(
-        padding: EdgeInsets.only(
-          top: plan.isBestValue ? 10.h : 10.h,
-        ),
+        padding: EdgeInsets.only(top: plan.isBestValue ? 10.h : 10.h),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: 10.w,
-                vertical: 8.h,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
               decoration: BoxDecoration(
                 color: isSelected
                     ? SubscriptionColors.orangeLight
@@ -1140,8 +1494,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final gstAmount = breakdown.gstAmount;
     final baseAmount = breakdown.totalAmount;
 
-    final totalToPay = calculateTotalAmount(baseAmount, gstAmount, plan.priceIncludesGst);
-
+    final totalToPay = calculateTotalAmount(
+      baseAmount,
+      gstAmount,
+      plan.priceIncludesGst,
+    );
 
     final savings = mrpTotal - totalToPay;
 
@@ -1155,9 +1512,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         savingsAmount = '₹${_formatNumber(savings.round())}';
       }
     } else {
-       savingsAmount = RegExp(r'₹[\d,]+(?:\.\d+)?')
-        .firstMatch(savingsAmount)
-        ?.group(0) ?? "₹${_formatNumber(savings.round())}";
+      savingsAmount =
+          RegExp(r'₹[\d,]+(?:\.\d+)?').firstMatch(savingsAmount)?.group(0) ??
+          "₹${_formatNumber(savings.round())}";
     }
 
     return Container(
@@ -1165,10 +1522,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       decoration: BoxDecoration(
         color: SubscriptionColors.priceBoxBg,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: AppColors.roomCardBorder,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.roomCardBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1176,10 +1530,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           Text(
             'PRICE BREAKUP · ${plan.label.toUpperCase()} PLAN',
             style: GoogleFonts.inter(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w800,
-                color: SubscriptionColors.grayText,
-                letterSpacing: 0.5),
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w800,
+              color: SubscriptionColors.grayText,
+              letterSpacing: 0.5,
+            ),
           ),
           SizedBox(height: 12.h),
           _buildBreakupRow(
@@ -1205,18 +1560,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   Text(
                     'You save (${plan.discountPercent}% off)',
                     style: GoogleFonts.inter(
-                        fontSize: 13.sp,
-                        color: const Color(0xFF4E8B57),
-                        fontWeight: FontWeight.w700),
+                      fontSize: 13.sp,
+                      color: const Color(0xFF4E8B57),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
               ),
               Text(
                 '- ₹${_formatNumber(discountAmount.round())}',
                 style: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    color: const Color(0xFF4E8B57),
-                    fontWeight: FontWeight.w700),
+                  fontSize: 13.sp,
+                  color: const Color(0xFF4E8B57),
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -1236,27 +1593,32 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Total to pay',
-                  style: GoogleFonts.inter(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.blackColor)),
+              Text(
+                'Total to pay',
+                style: GoogleFonts.inter(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.blackColor,
+                ),
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     '₹${_formatNumber(totalToPay.round())}',
                     style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primaryBlue),
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryBlue,
+                    ),
                   ),
                   Text(
                     '(Incl. GST)',
                     style: GoogleFonts.inter(
-                        fontSize: 10.sp,
-                        color: SubscriptionColors.grayText,
-                        fontWeight: FontWeight.w600),
+                      fontSize: 10.sp,
+                      color: SubscriptionColors.grayText,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -1269,18 +1631,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             decoration: BoxDecoration(
               color: SubscriptionColors.greenLight,
               borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(
-                color: const Color(0xFFADC8AF),
-                width: 0.8,
-              ),
+              border: Border.all(color: const Color(0xFFADC8AF), width: 0.8),
             ),
             child: Text(
               "🎉 You're saving $savingsAmount with the ${plan.label.toLowerCase()}",
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w800,
-                  color: SubscriptionColors.green),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w800,
+                color: SubscriptionColors.green,
+              ),
             ),
           ),
         ],
@@ -1288,14 +1648,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  Widget _buildBreakupRow(String label, String value, {bool isStrikethrough = false, Color? valueColor}) {
+  Widget _buildBreakupRow(
+    String label,
+    String value, {
+    bool isStrikethrough = false,
+    Color? valueColor,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.inter(fontSize: 12.sp, color: const Color(0xFF5f616c), fontWeight: FontWeight.w500),
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: const Color(0xFF5f616c),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         Text(
@@ -1311,7 +1680,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildPendingCard(
-      BuildContext context, SubscriptionProperty property, ActiveSubscription subscription) {
+    BuildContext context,
+    SubscriptionProperty property,
+    ActiveSubscription subscription,
+  ) {
     return Container(
       padding: EdgeInsets.all(16.w),
       margin: EdgeInsets.only(bottom: 16),
@@ -1400,14 +1772,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildActiveCard(
-      BuildContext context, SubscriptionProperty property, ActiveSubscription subscription) {
+    BuildContext context,
+    SubscriptionProperty property,
+    ActiveSubscription subscription,
+  ) {
     final beds = property.totalBeds;
     final planSnapshot = subscription.planSnapshot;
     final plan = PlanOption.fromEntity(planSnapshot);
     final price = plan.pricePerBed.round();
 
     final start = subscription.startDate ?? DateTime.now();
-    final end = subscription.endDate ?? start.add(Duration(days: plan.months * 30));
+    final end =
+        subscription.endDate ?? start.add(Duration(days: plan.months * 30));
 
     final now = DateTime.now();
     final totalDays = end.difference(start).inDays.clamp(1, 100000);
@@ -1447,10 +1823,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(
-                color: const Color(0xFFE5E7EB),
-                width: 1,
-              ),
+              border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
               gradient: const LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
@@ -1470,11 +1843,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   children: [
                     Text(
                       '${plan.label} plan',
-                      style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.bold, color: SubscriptionColors.navy),
+                      style: GoogleFonts.inter(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                        color: SubscriptionColors.navy,
+                      ),
                     ),
                     Text(
                       '₹$price / bed / mo',
-                      style: GoogleFonts.inter(fontSize: 13.sp, fontWeight: FontWeight.bold, color: SubscriptionColors.orange),
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: SubscriptionColors.orange,
+                      ),
                     ),
                   ],
                 ),
@@ -1485,17 +1866,45 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('FROM', style: GoogleFonts.inter(fontSize: 10.sp, color: SubscriptionColors.grayText, fontWeight: FontWeight.w600)),
+                        Text(
+                          'FROM',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            color: SubscriptionColors.grayText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         SizedBox(height: 2.h),
-                        Text(_formatDate(start), style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+                        Text(
+                          _formatDate(start),
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkText,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('TO', style: GoogleFonts.inter(fontSize: 10.sp, color: SubscriptionColors.grayText, fontWeight: FontWeight.w600)),
+                        Text(
+                          'TO',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            color: SubscriptionColors.grayText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         SizedBox(height: 2.h),
-                        Text(_formatDate(end), style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+                        Text(
+                          _formatDate(end),
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkText,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -1505,7 +1914,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 SizedBox(height: 8.h),
                 Text(
                   '$daysRemaining days remaining · renews at ${plan.label.toLowerCase()} rate',
-                  style: GoogleFonts.inter(fontSize: 12.sp, color: SubscriptionColors.grayText,fontWeight: FontWeight.w700),
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: SubscriptionColors.grayText,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -1514,6 +1927,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       ),
     );
   }
+
   Widget _buildGradientProgress(double progress) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10.r),

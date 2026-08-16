@@ -33,6 +33,8 @@ class AppColors {
 
   static const Color grayColor3 = const Color(0xFF6c717a);
 
+  static const Color grayColor4 = const Color(0xFF595856);
+
 
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
