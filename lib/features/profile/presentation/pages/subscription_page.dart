@@ -534,6 +534,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (state is HostelLoaded && state.hostels.isNotEmpty) {
                 final hostel = state.hostels[state.selectedHostelIndex];
                 _loadSubscriptionData(context, hostel.id);
+                _scrollToSelected(state.selectedHostelIndex);
               }
             },
           ),
@@ -614,7 +615,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             int selectedIndex = 0;
             if (hostelState is HostelLoaded) {
               hostels = hostelState.hostels;
-              selectedIndex = hostelState.selectedHostelIndex;
+              
+              // Determine selectedIndex based on selectedHostelId for robustness
+              final selectedId = hostelState.selectedHostelId;
+              if (selectedId != null) {
+                final foundIndex = hostels.indexWhere((h) => h.id == selectedId);
+                selectedIndex = foundIndex != -1 ? foundIndex : hostelState.selectedHostelIndex;
+              } else {
+                selectedIndex = hostelState.selectedHostelIndex;
+              }
             }
 
             return BlocBuilder<SubscriptionCubit, SubscriptionState>(
@@ -676,6 +685,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           total: hostels.length,
                           needsAttention: needsAttentionCount,
                         ),
+                        if (hostels.length > 1)
+                          _buildPropertySelector(
+                            hostels,
+                            selectedIndex,
+                            context,
+                            subscriptionResponses,
+                          ),
                         Expanded(
                           child: Container(
                             color: SubscriptionColors.backgroundColor,
@@ -697,9 +713,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                       MediaQuery.of(context).padding.bottom +
                                           24.h,
                                     ),
-                                    itemCount: hostels.length + 1,
+                                    itemCount: 2,
                                     itemBuilder: (builderContext, index) {
-                                      if (index == hostels.length) {
+                                      if (index == 1) {
                                         return Padding(
                                           padding: EdgeInsets.symmetric(
                                             vertical: 24.h,
@@ -716,7 +732,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                         );
                                       }
 
-                                      final hostel = hostels[index];
+                                      final hostel = hostels[selectedIndex];
                                       final response =
                                           subscriptionResponses[hostel.id];
 
