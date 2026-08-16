@@ -148,11 +148,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   ) {
     final now = DateTime.now();
     final endDate = subscription.endDate ?? now;
-    final daysRemaining = endDate.difference(now).inDays;
+    final daysRemaining = subscription.daysRemaining ?? 0;
 
-    final bool isPaused = subscription.status == 'PAUSED';
-    final bool isExpiring =
-        !isPaused && daysRemaining <= 7 && daysRemaining >= 0;
+    final lapseTime = endDate.difference(now).inDays;
+    final bool isPaused = lapseTime <= -7;
+
+    // final bool isPaused = subscription.status == 'PAUSED';
+    final bool isExpiring = !isPaused && daysRemaining <= 7 && daysRemaining >= 0;
 
     String badgeText = 'Active';
     Color badgeBg = const Color(0xFFDCFCE7);
@@ -240,45 +242,45 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 ),
               ),
               SizedBox(height: 16.h),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 18.r,
-                    backgroundColor: Colors.blue.shade100,
-                    child: Text(
-                      'RK',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.blue.shade800,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Ravi Kumar',
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                      Text(
-                        'Your account manager',
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 20.h),
+              // Row(
+              //   children: [
+              //     CircleAvatar(
+              //       radius: 18.r,
+              //       backgroundColor: Colors.blue.shade100,
+              //       child: Text(
+              //         'RK',
+              //         style: TextStyle(
+              //           fontSize: 12.sp,
+              //           color: Colors.blue.shade800,
+              //           fontWeight: FontWeight.bold,
+              //         ),
+              //       ),
+              //     ),
+              //     SizedBox(width: 12.w),
+              //     Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         Text(
+              //           'Ravi Kumar',
+              //           style: GoogleFonts.inter(
+              //             fontSize: 16.sp,
+              //             fontWeight: FontWeight.w500,
+              //             color: Colors.black,
+              //           ),
+              //         ),
+              //         Text(
+              //           'Your account manager',
+              //           style: GoogleFonts.inter(
+              //             fontSize: 12.sp,
+              //             color: Colors.grey.shade600,
+              //             fontWeight: FontWeight.w500,
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ],
+              // ),
+              // SizedBox(height: 20.h),
               Row(
                 children: [
                   Expanded(

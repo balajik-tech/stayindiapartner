@@ -98,6 +98,7 @@ class ActiveSubscription {
   final int? razorpayAmount;
   final DateTime? startDate;
   final DateTime? endDate;
+  final int? daysRemaining;
   final DateTime? nextBillingDate;
   final bool autoRenew;
   final DateTime? cancelledAt;
@@ -128,6 +129,7 @@ class ActiveSubscription {
     this.razorpayAmount,
     this.startDate,
     this.endDate,
+    this.daysRemaining,
     this.nextBillingDate,
     required this.autoRenew,
     this.cancelledAt,
