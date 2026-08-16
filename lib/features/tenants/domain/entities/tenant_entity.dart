@@ -82,6 +82,7 @@ class TenantDetailEntity extends Equatable {
   final String? parentMobile;
   final bool isAway;
   final String? awayMessage;
+  final DlKycEntity? dlKyc;
 
   const TenantDetailEntity({
     required this.id,
@@ -99,6 +100,7 @@ class TenantDetailEntity extends Equatable {
     this.parentMobile,
     this.isAway = false,
     this.awayMessage,
+    this.dlKyc,
   });
 
   TenantEntity toTenantEntity(String hostelId) {
@@ -141,6 +143,7 @@ class TenantDetailEntity extends Equatable {
     parentMobile,
     isAway,
     awayMessage,
+    dlKyc,
   ];
 }
 
@@ -233,5 +236,51 @@ class TenantPaymentItemEntity extends Equatable {
     paymentType,
     paymentDate,
     dueDate,
+  ];
+}
+
+class DlKycEntity extends Equatable {
+  final bool isAadharVerified;
+  final String? gender;
+  final String? maskedAadhaar;
+  final String? dob;
+  final String? dateTime;
+  final String? aadharFilename;
+  final String? aadharImgFilename;
+  final String? adharimg;
+  final String? aadharAddress;
+  final String? aadharNo;
+  final String? fatherName;
+  final String? name;
+
+  const DlKycEntity({
+    required this.isAadharVerified,
+    this.gender,
+    this.maskedAadhaar,
+    this.dob,
+    this.dateTime,
+    this.aadharFilename,
+    this.aadharImgFilename,
+    this.adharimg,
+    this.aadharAddress,
+    this.aadharNo,
+    this.fatherName,
+    this.name,
+  });
+
+  @override
+  List<Object?> get props => [
+    isAadharVerified,
+    gender,
+    maskedAadhaar,
+    dob,
+    dateTime,
+    aadharFilename,
+    aadharImgFilename,
+    adharimg,
+    aadharAddress,
+    aadharNo,
+    fatherName,
+    name,
   ];
 }

@@ -572,6 +572,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     final aadharPhotoUrl = ApiConstants.getImageUrl(detail?.aadharCardPhoto);
     final aadharPhotoBackUrl = ApiConstants.getImageUrl(detail?.idPhotoBack);
     final maskedAadhaar = detail?.aadhaarNumber;
+    final dlKyc = detail?.dlKyc;
 
     return _buildSection(
       'kyc_docs'.tr(),
@@ -620,13 +621,13 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         ),
                       ),
                       SizedBox(height: 2.h),
-                      if(maskedAadhaar!.isNotEmpty)...[
+                      if (maskedAadhaar != null && maskedAadhaar.isNotEmpty) ...[
                         Text(
                           maskedAadhaar,
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
-                            color:  AppColors.greyText,
+                            color: AppColors.greyText,
                           ),
                         )
                       ],
@@ -659,6 +660,18 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                     ],
                   ),
                 ),
+                if (dlKyc != null && dlKyc.isAadharVerified)
+                  TextButton(
+                    onPressed: () => _showDlKycDetails(context, dlKyc),
+                    child: Text(
+                      'View'.tr(),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ),
               ],
             ),
             if (aadharPhotoUrl != null && aadharPhotoUrl.isNotEmpty) ...[
@@ -1337,6 +1350,110 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
           ],
         ),
       ],
+    );
+  }
+
+  void _showDlKycDetails(BuildContext context, DlKycEntity dlKyc) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: 0.75.sh,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30.r),
+            topRight: Radius.circular(30.r),
+          ),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(20.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Aadhaar Verified Details',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkText,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close, size: 28.sp, color: AppColors.greyText),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                children: [
+                  // if (dlKyc.adharimg != null && dlKyc.adharimg!.isNotEmpty) ...[
+                  //   Center(
+                  //     child: ClipRRect(
+                  //       borderRadius: BorderRadius.circular(10.r),
+                  //       child: Image.network(
+                  //         dlKyc.120.w,
+                  //         height: 120.h,
+                  //         width: double.infinity,
+                  //         fit: BoxFit.contain,
+                  //         errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  //       ),
+                  //     ),
+                  //   ),
+                  //   SizedBox(height: 20.h),
+                  // ],
+                  _buildDlKycItem('Full Name', dlKyc.name),
+                  _buildDlKycItem('Father\'s Name', dlKyc.fatherName),
+                  _buildDlKycItem('Gender', dlKyc.gender),
+                  _buildDlKycItem('DOB', dlKyc.dob),
+                  _buildDlKycItem('Aadhaar No', dlKyc.maskedAadhaar ?? dlKyc.aadharNo),
+                  _buildDlKycItem('Address', dlKyc.aadharAddress),
+                  _buildDlKycItem('Verified On', dlKyc.dateTime != null ? _formatDate(dlKyc.dateTime!) : null),
+                  SizedBox(height: 20.h),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDlKycItem(String label, String? value) {
+    if (value == null || value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(bottom: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.greyText,
+              letterSpacing: 0.5,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkText,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          const Divider(height: 1),
+        ],
+      ),
     );
   }
 

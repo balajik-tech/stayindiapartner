@@ -80,6 +80,7 @@ class TenantDetailModel extends TenantDetailEntity {
     super.parentMobile,
     super.isAway = false,
     super.awayMessage,
+    super.dlKyc,
   });
 
   factory TenantDetailModel.fromJson(Map<String, dynamic> json) {
@@ -96,6 +97,7 @@ class TenantDetailModel extends TenantDetailEntity {
         ].where((e) => e != null && e.toString().isNotEmpty).join(' ');
 
     final kycData = tenantData['kyc'] as Map<String, dynamic>?;
+    final dlKycData = tenantData['dlKyc'] as Map<String, dynamic>?;
 
     return TenantDetailModel(
       id: (tenantData['_id'] ?? tenantData['id'] ?? '').toString(),
@@ -121,6 +123,7 @@ class TenantDetailModel extends TenantDetailEntity {
       parentMobile: tenantData['parentMobile']?.toString(),
       isAway: tenantData['isAway'] == true,
       awayMessage: tenantData['awayMessage']?.toString(),
+      dlKyc: dlKycData != null ? DlKycModel.fromJson(dlKycData) : null,
     );
   }
 }
@@ -208,6 +211,40 @@ class TenantPaymentItemModel extends TenantPaymentItemEntity {
       paymentType: json['paymentType']?.toString() ?? '',
       paymentDate: json['paymentDate']?.toString(),
       dueDate: json['dueDate']?.toString(),
+    );
+  }
+}
+
+class DlKycModel extends DlKycEntity {
+  const DlKycModel({
+    required super.isAadharVerified,
+    super.gender,
+    super.maskedAadhaar,
+    super.dob,
+    super.dateTime,
+    super.aadharFilename,
+    super.aadharImgFilename,
+    super.adharimg,
+    super.aadharAddress,
+    super.aadharNo,
+    super.fatherName,
+    super.name,
+  });
+
+  factory DlKycModel.fromJson(Map<String, dynamic> json) {
+    return DlKycModel(
+      isAadharVerified: json['is_aadhar_verified'] == true,
+      gender: json['gender']?.toString(),
+      maskedAadhaar: json['masked_aadhaar']?.toString(),
+      dob: json['dob']?.toString(),
+      dateTime: json['date_time']?.toString(),
+      aadharFilename: json['aadhar_filename']?.toString(),
+      aadharImgFilename: json['aadhar_img_filename']?.toString(),
+      adharimg: json['adharimg']?.toString(),
+      aadharAddress: json['aadhar_address']?.toString(),
+      aadharNo: json['aadhar_no']?.toString(),
+      fatherName: json['fathername']?.toString(),
+      name: json['name']?.toString(),
     );
   }
 }
