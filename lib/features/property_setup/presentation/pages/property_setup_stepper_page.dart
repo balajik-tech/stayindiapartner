@@ -379,20 +379,32 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                                   );
                                 }
                               } else if (state.currentStep == 0) {
-                                final buildingName = context
-                                    .read<PropertySetupCubit>()
-                                    .state
-                                    .buildingName;
-                                if (buildingName.isEmpty) {
+                                final cubit = context.read<PropertySetupCubit>();
+                                final s = cubit.state;
+                                final exteriorImages = s.categorizedImages['Exterior'] ?? [];
+
+                                String? error;
+                                if (s.buildingName.isEmpty) {
+                                  error = 'err_property_name_req'.tr();
+                                } else if (s.lat == null || s.lng == null) {
+                                  error = 'location_hint'.tr();
+                                } else if (s.detailedAddress.isEmpty) {
+                                  error = 'detailed_address_hint'.tr();
+                                } else if (s.area.isEmpty || s.city.isEmpty || s.state.isEmpty || s.pincode.isEmpty) {
+                                  error = 'validation_error'.tr();
+                                } else if (exteriorImages.isEmpty) {
+                                  error = 'err_exterior_image_req'.tr();
+                                }
+
+                                if (error != null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(
-                                        'err_property_name_req'.tr(),
-                                      ),
+                                      content: Text(error),
+                                      backgroundColor: Colors.redAccent,
                                     ),
                                   );
                                 } else {
-                                  context.read<PropertySetupCubit>().nextStep();
+                                  cubit.nextStep();
                                 }
                               } else if (state.currentStep == 1) {
                                 if (state.roomCategories.isEmpty) {

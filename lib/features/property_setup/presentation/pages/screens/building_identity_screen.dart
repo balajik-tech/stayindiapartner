@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -111,6 +112,28 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+                      'property_images'.tr(),
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E3A8A),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Add photos so guests know what to expect.',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    _buildImageTopCategories(context, state),
+                    SizedBox(height: 32.h),
+
                     Text(
                       'basic_details'.tr(),
                       style: TextStyle(
@@ -726,11 +749,11 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
 
   Widget _buildImageCategories(BuildContext context, PropertySetupState state) {
     final categories = [
-      {
-        'id': 'Exterior',
-        'name': 'exterior_entrance'.tr(),
-        'icon': Icons.business_rounded,
-      },
+      // {
+      //   'id': 'Exterior',
+      //   'name': 'exterior_entrance'.tr(),
+      //   'icon': Icons.business_rounded,
+      // },
       {
         'id': 'Reception',
         'name': 'reception_lobby'.tr(),
@@ -901,6 +924,288 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildImageTopCategories(
+    BuildContext context,
+    PropertySetupState state,
+  ) {
+    final images = state.categorizedImages['Exterior'] ?? [];
+    final cubit = context.read<PropertySetupCubit>();
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomPaint(
+            painter: DashedRectPainter(
+              color: images.isNotEmpty
+                  ? const Color(0xFFFF7A00).withValues(alpha: 0.5)
+                  : const Color(0xFFCBD5E1),
+              strokeWidth: 1.5,
+              gap: 4,
+            ),
+            child: Container(
+              width: double.infinity,
+              height: 180.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.r),
+                image: images.isNotEmpty
+                    ? DecorationImage(
+                        image: FileImage(File(images.last)),
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withValues(alpha: 0.1),
+                          BlendMode.darken,
+                        ),
+                      )
+                    : null,
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (images.isEmpty)
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(12.r),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFF7ED),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add_photo_alternate_outlined,
+                            color: const Color(0xFFEA580C),
+                            size: 32.sp,
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          'Add photos',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w900,
+                            color: const Color(0xFF1E293B),
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          'JPG or PNG · up to 5 MB each',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: const Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Positioned(
+                      top: 12.r,
+                      right: 12.r,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(20.r),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.collections_rounded,
+                              color: Colors.white,
+                              size: 14.sp,
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              '${images.length} Photos',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 24.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSourceActionButton(
+                  context,
+                  icon: Icons.photo_library_rounded,
+                  label: 'Gallery',
+                  isPrimary: true,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    cubit.pickCategoryImage(
+                      'Exterior',
+                      source: ImageSource.gallery,
+                    );
+                  },
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _buildSourceActionButton(
+                  context,
+                  icon: Icons.camera_alt_rounded,
+                  label: 'Camera',
+                  isPrimary: false,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    cubit.pickCategoryImage(
+                      'Exterior',
+                      source: ImageSource.camera,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            '${images.length} of 10 added · first photo becomes the cover',
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: const Color(0xFF94A3B8),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (images.isNotEmpty) ...[
+            SizedBox(height: 20.h),
+            SizedBox(
+              height: 40.h,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: images.length,
+                itemBuilder: (context, idx) {
+                  final imgPath = images[idx];
+                  return Container(
+                    width: 40.w,
+                    margin: EdgeInsets.only(right: 12.w),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showFullScreenImage(context, imgPath),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                              image: DecorationImage(
+                                image: ResizeImage(
+                                  FileImage(File(imgPath)),
+                                  width: 180,
+                                  height: 180,
+                                ),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: -4.r,
+                          right: -4.r,
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              cubit.removeCategoryImage('Exterior', idx);
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(4.r),
+                              decoration: const BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: Colors.white,
+                                size: 12.sp,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSourceActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isPrimary,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 14.h),
+        decoration: BoxDecoration(
+          color: isPrimary ? const Color(0xFFF97316) : Colors.white,
+          borderRadius: BorderRadius.circular(14.r),
+          border: isPrimary ? null : Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isPrimary ? Colors.white : const Color(0xFF1E293B),
+              size: 20.sp,
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w800,
+                color: isPrimary ? Colors.white : const Color(0xFF1E293B),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1456,4 +1761,50 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
       ),
     );
   }
+}
+
+class DashedRectPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double gap;
+
+  DashedRectPainter({
+    this.color = Colors.grey,
+    this.strokeWidth = 1.0,
+    this.gap = 5.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final Path path = Path();
+    final double radius = 16.0;
+
+    path.addRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        Radius.circular(radius),
+      ),
+    );
+
+    Path dashPath = Path();
+    double distance = 0.0;
+    for (PathMetric pathMetric in path.computeMetrics()) {
+      while (distance < pathMetric.length) {
+        dashPath.addPath(
+          pathMetric.extractPath(distance, distance + gap),
+          Offset.zero,
+        );
+        distance += gap * 2;
+      }
+    }
+    canvas.drawPath(dashPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

@@ -739,14 +739,7 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   bool get isStepValid {
     if (state.currentStep == 0) {
       return state.hostelType.isNotEmpty &&
-          state.buildingName.trim().isNotEmpty &&
-          state.lat != null &&
-          state.lng != null &&
-          state.detailedAddress.trim().isNotEmpty &&
-          state.area.trim().isNotEmpty &&
-          state.city.trim().isNotEmpty &&
-          state.state.trim().isNotEmpty &&
-          state.pincode.trim().isNotEmpty;
+          state.buildingName.trim().isNotEmpty;
     }
     if (state.currentStep == 1) {
       if (state.roomCategories.isEmpty) return false;
