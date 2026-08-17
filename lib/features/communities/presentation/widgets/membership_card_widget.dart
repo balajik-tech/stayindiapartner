@@ -410,7 +410,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         return _ApprovedMembershipView(
           theme: widget.theme,
           membership: membership,
-          onPay: _showPayMembershipSheet,
+          onPay: () => _showPayMembershipSheet(membership),
         );
       case MembershipStatus.paid:
         return _ActiveMembershipView(
@@ -576,8 +576,17 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     );
   }
 
-  void _showPayMembershipSheet() {
-    // Keep internal for now as it uses membershipData which will be handled in building views
+  void _showPayMembershipSheet(AssociationMembershipEntity? membership) {
+    if (membership == null) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _PayMembershipSheet(
+        theme: widget.theme,
+        membership: membership,
+      ),
+    );
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -1908,7 +1917,7 @@ class _DashedDivider extends StatelessWidget {
 
 class _PayMembershipSheet extends StatelessWidget {
   final CommunityThemeEntity theme;
-  final Map<String, dynamic>? membership;
+  final AssociationMembershipEntity? membership;
 
   const _PayMembershipSheet({
     required this.theme,
@@ -1927,14 +1936,11 @@ class _PayMembershipSheet extends StatelessWidget {
       memberName = profileState.profile.fullName.trim();
     }
 
-    final appRef = membership?['applicationReference']?.toString() ??
-        'TNIT-APP-2026-4557';
-    final propCount = membership?['propertyCount']?.toString() ??
-        (membership?['properties'] as List?)?.length.toString() ??
-        '1';
-    final totalFee = membership?['totalFee'] ?? membership?['fee'] ?? 0;
+    final appRef = membership?.applicationReference ?? 'TNIT-APP-2026-4557';
+    final propCount = membership?.properties.length.toString() ?? '1';
+    final totalFee = membership?.totalFee ?? 0;
     final feeText = _ApprovedMembershipView._formatAmount(totalFee);
-    final feeAmount = num.tryParse(totalFee.toString())?.toInt() ?? 0;
+    final feeAmount = totalFee.toInt();
 
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
