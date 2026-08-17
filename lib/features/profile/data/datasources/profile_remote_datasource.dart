@@ -18,6 +18,7 @@ abstract class ProfileRemoteDataSource {
   Future<ProfileModel> uploadAvatar(File image);
   Future<void> deleteAccount();
   Future<String> generateReferralId();
+  Future<String> getRateUsUrl();
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -114,5 +115,15 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return data['referralId'] as String;
     }
     throw Exception('Failed to generate referral ID');
+  }
+
+  @override
+  Future<String> getRateUsUrl() async {
+    final response = await dio.get(ApiConstants.rateUs);
+    if (response.statusCode == 200) {
+      final data = response.data['data'] as Map<String, dynamic>;
+      return data['rateUsUrl'] as String;
+    }
+    throw Exception('Failed to fetch rate us URL');
   }
 }

@@ -48,6 +48,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<String> generateReferralId() => remoteDataSource.generateReferralId();
 
+  @override
+  Future<String> getRateUsUrl() => remoteDataSource.getRateUsUrl();
+
   Future<File?> _compressImage(File file) async {
     try {
       final tempDir = await getTemporaryDirectory();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
@@ -361,8 +362,14 @@ class _ProfilePageState extends State<ProfilePage> {
                           title: 'rate_us'.tr(),
                           iconBgColor: const Color(0xFFFEF9C3),
                           iconColor: const Color(0xFFCA8A04),
-                          onTap: () {
-
+                          onTap: () async {
+                            final url = await context.read<ProfileCubit>().getRateUsUrl();
+                            if (url != null && url.isNotEmpty) {
+                              final uri = Uri.parse(url);
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              }
+                            }
                           },
                         ),
                         _ProfileCard(

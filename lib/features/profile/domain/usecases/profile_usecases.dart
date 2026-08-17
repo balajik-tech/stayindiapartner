@@ -55,3 +55,10 @@ class GenerateReferralUseCase {
 
   Future<String> call() => repository.generateReferralId();
 }
+
+class GetRateUsUrlUseCase {
+  final ProfileRepository repository;
+  GetRateUsUrlUseCase(this.repository);
+
+  Future<String> call() => repository.getRateUsUrl();
+}

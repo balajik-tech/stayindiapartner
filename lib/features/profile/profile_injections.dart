@@ -50,6 +50,7 @@ void registerProfileFeature(GetIt sl) {
       uploadAvatarUseCase: sl(),
       deleteOwnerAccountUseCase: sl(),
       generateReferralUseCase: sl(),
+      getRateUsUrlUseCase: sl(),
     ),
   );
 
@@ -121,6 +122,7 @@ void registerProfileFeature(GetIt sl) {
   sl.registerLazySingleton(() => UploadAvatarUseCase(sl()));
   sl.registerLazySingleton(() => DeleteOwnerAccountUseCase(sl()));
   sl.registerLazySingleton(() => GenerateReferralUseCase(sl()));
+  sl.registerLazySingleton(() => GetRateUsUrlUseCase(sl()));
 
   sl.registerLazySingleton(() => GetHostelsUseCase(sl()));
   sl.registerLazySingleton(() => CreateHostelUseCase(sl()));

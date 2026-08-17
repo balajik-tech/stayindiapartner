@@ -51,6 +51,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   final UploadAvatarUseCase _uploadAvatar;
   final DeleteOwnerAccountUseCase _deleteAccount;
   final GenerateReferralUseCase _generateReferral;
+  final GetRateUsUrlUseCase _getRateUsUrl;
 
   ProfileCubit({
     required GetProfileUseCase getProfileUseCase,
@@ -58,11 +59,13 @@ class ProfileCubit extends Cubit<ProfileState> {
     required UploadAvatarUseCase uploadAvatarUseCase,
     required DeleteOwnerAccountUseCase deleteOwnerAccountUseCase,
     required GenerateReferralUseCase generateReferralUseCase,
+    required GetRateUsUrlUseCase getRateUsUrlUseCase,
   }) : _getProfile = getProfileUseCase,
        _updateProfile = updateProfileUseCase,
        _uploadAvatar = uploadAvatarUseCase,
        _deleteAccount = deleteOwnerAccountUseCase,
        _generateReferral = generateReferralUseCase,
+       _getRateUsUrl = getRateUsUrlUseCase,
        super(ProfileInitial());
 
   Future<void> loadProfile() async {
@@ -81,6 +84,15 @@ class ProfileCubit extends Cubit<ProfileState> {
       return await _generateReferral();
     } catch (e) {
       AppLogger.error('generateReferral failed', e);
+      return null;
+    }
+  }
+
+  Future<String?> getRateUsUrl() async {
+    try {
+      return await _getRateUsUrl();
+    } catch (e) {
+      AppLogger.error('getRateUsUrl failed', e);
       return null;
     }
   }

@@ -163,6 +163,7 @@ class ApiConstants {
 
   static const String userHostels = '/users/hostels';
   static const String generateReferral = '/referrals/generate';
+  static const String rateUs = '/app-config/rate-us?app=PARTNER';
 
   static const String partnerAppLink = "http://stayindia.in/partner";
 
