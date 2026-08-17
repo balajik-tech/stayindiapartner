@@ -32,11 +32,111 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
   List<Map<String, dynamic>> _eligibleProperties = [];
   List<Map<String, dynamic>> _selectedProperties = [];
   Map<String, dynamic>? _membershipData;
+  Map<String, dynamic>? _membershipTimeline;
 
   @override
   void initState() {
     super.initState();
     _fetchEligibleProperties();
+    _fetchMembershipStatus();
+  }
+
+  @override
+  void didUpdateWidget(MembershipCardWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.portalId != widget.portalId) {
+      _fetchMembershipStatus();
+    }
+  }
+
+  String _getPortalId() {
+    if (widget.portalId != null && widget.portalId!.trim().isNotEmpty) {
+      return widget.portalId!.trim();
+    }
+    final profileState = context.read<ProfileCubit>().state;
+    if (profileState is ProfileLoaded &&
+        profileState.profile.associationId != null &&
+        profileState.profile.associationId!.trim().isNotEmpty) {
+      return profileState.profile.associationId!.trim();
+    }
+    return '';
+  }
+
+  Future<void> _fetchMembershipStatus() async {
+    try {
+      final portalId = _getPortalId();
+      final dio = sl<Dio>();
+      final response = await dio.get(
+        ApiConstants.associationMyApplications,
+        queryParameters: {'portalId': portalId},
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final resData = response.data;
+        List<dynamic> list = [];
+        if (resData is Map) {
+          if (resData['data'] is Map && resData['data']['memberships'] is List) {
+            list = resData['data']['memberships'] as List;
+          } else if (resData['memberships'] is List) {
+            list = resData['memberships'] as List;
+          } else if (resData['data'] is List) {
+            list = resData['data'] as List;
+          }
+        }
+
+        if (list.isNotEmpty) {
+          final firstMembership = Map<String, dynamic>.from(list.first as Map);
+          final timeline = firstMembership['timeline'] is Map
+              ? Map<String, dynamic>.from(firstMembership['timeline'] as Map)
+              : null;
+          final statusStr =
+              (firstMembership['status'] ?? '').toString().toUpperCase().trim();
+
+          MembershipStatus newStatus = MembershipStatus.newUser;
+
+          if (statusStr == 'EXPIRED' || statusStr == 'LAPSED') {
+            newStatus = MembershipStatus.expired;
+          } else if (statusStr == 'RENEWAL_DUE') {
+            newStatus = MembershipStatus.renewalDue;
+          } else if (timeline != null) {
+            if (timeline['idIssued'] == true ||
+                timeline['paid'] == true ||
+                statusStr == 'PAID' ||
+                statusStr == 'ACTIVE') {
+              newStatus = MembershipStatus.paid;
+            } else if (timeline['approved'] == true ||
+                statusStr == 'APPROVED' ||
+                statusStr == 'PAYMENT_PENDING') {
+              newStatus = MembershipStatus.approved;
+            } else if (timeline['applied'] == true ||
+                statusStr == 'PENDING_APPROVAL' ||
+                statusStr == 'APPLIED') {
+              newStatus = MembershipStatus.applied;
+            }
+          } else {
+            if (statusStr == 'PAID' || statusStr == 'ACTIVE') {
+              newStatus = MembershipStatus.paid;
+            } else if (statusStr == 'APPROVED' ||
+                statusStr == 'PAYMENT_PENDING') {
+              newStatus = MembershipStatus.approved;
+            } else if (statusStr == 'PENDING_APPROVAL' ||
+                statusStr == 'APPLIED') {
+              newStatus = MembershipStatus.applied;
+            }
+          }
+
+          if (mounted) {
+            setState(() {
+              _membershipData = firstMembership;
+              _membershipTimeline = timeline;
+              _status = newStatus;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Failed to fetch membership applications: $e');
+    }
   }
 
   Future<void> _fetchEligibleProperties() async {
@@ -267,21 +367,35 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
 
   Widget _buildStatusProgress() {
     int currentStep = 0;
-    switch (_status) {
-      case MembershipStatus.newUser:
-        currentStep = 0;
-        break;
-      case MembershipStatus.applied:
-        currentStep = 1;
-        break;
-      case MembershipStatus.approved:
-        currentStep = 2;
-        break;
-      case MembershipStatus.paid:
-      case MembershipStatus.renewalDue:
-      case MembershipStatus.expired:
+    if (_membershipTimeline != null) {
+      if (_membershipTimeline!['idIssued'] == true) {
         currentStep = 4;
-        break;
+      } else if (_membershipTimeline!['paid'] == true) {
+        currentStep = 3;
+      } else if (_membershipTimeline!['approved'] == true) {
+        currentStep = 2;
+      } else if (_membershipTimeline!['applied'] == true) {
+        currentStep = 1;
+      } else {
+        currentStep = 0;
+      }
+    } else {
+      switch (_status) {
+        case MembershipStatus.newUser:
+          currentStep = 0;
+          break;
+        case MembershipStatus.applied:
+          currentStep = 1;
+          break;
+        case MembershipStatus.approved:
+          currentStep = 2;
+          break;
+        case MembershipStatus.paid:
+        case MembershipStatus.renewalDue:
+        case MembershipStatus.expired:
+          currentStep = 4;
+          break;
+      }
     }
 
     final List<String> steps = ['APPLIED', 'APPROVED', 'PAID', 'ID ISSUED'];
@@ -388,10 +502,14 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       case MembershipStatus.approved:
         return _ApprovedMembershipView(
           theme: widget.theme,
+          membership: _membershipData,
           onPay: _showPayMembershipSheet,
         );
       case MembershipStatus.paid:
-        return _ActiveMembershipView(theme: widget.theme);
+        return _ActiveMembershipView(
+          theme: widget.theme,
+          membership: _membershipData,
+        );
       case MembershipStatus.renewalDue:
         return _RenewalDueMembershipView(theme: widget.theme);
       case MembershipStatus.expired:
@@ -450,8 +568,8 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                 ),
                 label: Text(
                   _status == MembershipStatus.newUser
-                      ? 'Call +91 98400 12345'
-                      : 'Call desk',
+                        ? 'Call +91 98400 12345'
+                        : 'Call desk',
                   style: GoogleFonts.inter(
                     color: accent,
                     fontWeight: FontWeight.w700,
@@ -473,37 +591,9 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               ),
             ],
           )
-          // if (_status == MembershipStatus.applied) ...[
-          //   SizedBox(height: 24.h),
-          //   Center(
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       children: [
-          //         _TextLink(
-          //           label: 'Admin demo: approve this application',
-          //           onTap: () => setState(() => _status = MembershipStatus.approved),
-          //         ),
-          //         SizedBox(width: 24.w),
-          //         _TextLink(
-          //           label: 'Reset preview',
-          //           onTap: () => setState(() => _status = MembershipStatus.newUser),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ],
         ],
       );
     }
-
-    // if (_status == MembershipStatus.approved) {
-    //   return Center(
-    //     child: _TextLink(
-    //       label: 'Reset preview',
-    //       onTap: () => setState(() => _status = MembershipStatus.newUser),
-    //     ),
-    //   );
-    // }
 
     return const SizedBox.shrink();
   }
@@ -546,7 +636,10 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     return Padding(
       padding: EdgeInsets.only(right: 12.w),
       child: InkWell(
-        onTap: () => setState(() => _status = status),
+        onTap: () => setState(() {
+          _status = status;
+          _membershipTimeline = null;
+        }),
         child: Text(
           label,
           style: GoogleFonts.inter(
@@ -578,10 +671,15 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
           _status = MembershipStatus.applied;
           if (result is Map<String, dynamic>) {
             _membershipData = result;
+            if (result['timeline'] is Map) {
+              _membershipTimeline =
+                  Map<String, dynamic>.from(result['timeline'] as Map);
+            }
           } else if (result is List<Map<String, dynamic>>) {
             _selectedProperties = result;
           }
         });
+        _fetchMembershipStatus();
       }
     });
   }
@@ -596,7 +694,14 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       if (paid == true) {
         setState(() {
           _status = MembershipStatus.paid;
+          _membershipTimeline = {
+            'applied': true,
+            'approved': true,
+            'paid': true,
+            'idIssued': true,
+          };
         });
+        _fetchMembershipStatus();
       }
     });
   }
@@ -756,19 +861,30 @@ class _AppliedMembershipView extends StatelessWidget {
 
 class _ApprovedMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+  final Map<String, dynamic>? membership;
   final VoidCallback onPay;
 
-  const _ApprovedMembershipView({required this.theme, required this.onPay});
+  const _ApprovedMembershipView({
+    required this.theme,
+    this.membership,
+    required this.onPay,
+  });
 
   @override
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
+    final appRef = membership?['applicationReference']?.toString() ??
+        'TNIT-APP-2026-3623';
+    final fee = membership?['fee'] != null
+        ? '₹${membership!['fee']}'
+        : '₹2,000';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _InfoBox(
           label: 'APPLICATION REFERENCE',
-          value: 'TNIT-APP-2026-3623',
+          value: appRef,
           subValue: 'Approved 14 Aug 2026',
           icon: Icons.check_circle_outline,
           accent: accent,
@@ -791,7 +907,7 @@ class _ApprovedMembershipView extends StatelessWidget {
         ),
         SizedBox(height: 24.h),
         _ActionButton(
-          label: 'Pay membership · ₹2,000',
+          label: 'Pay membership · $fee',
           icon: Icons.account_balance_wallet_outlined,
           theme: theme,
           onPressed: onPay,
@@ -803,12 +919,21 @@ class _ApprovedMembershipView extends StatelessWidget {
 
 class _ActiveMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+  final Map<String, dynamic>? membership;
 
-  const _ActiveMembershipView({required this.theme});
+  const _ActiveMembershipView({
+    required this.theme,
+    this.membership,
+  });
 
   @override
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
+    final memId = membership?['membershipId']?.toString() ??
+        (membership?['status'] == 'ACTIVE' && membership?['id'] != null
+            ? membership!['id'].toString()
+            : 'TNIT-MEM-2026-1614');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -828,7 +953,7 @@ class _ActiveMembershipView extends StatelessWidget {
         ),
         SizedBox(height: 20.h),
         _MembershipIdBox(
-          id: 'TNIT-MEM-2026-1614',
+          id: memId,
           validUntil: '14 Aug 2027',
           theme: theme,
         ),
@@ -1939,7 +2064,7 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                             profileState.profile.associationId!.isNotEmpty) {
                           portalId = profileState.profile.associationId!;
                         } else {
-                          portalId = '66ba10000000000000000001';
+                          portalId = '';
                         }
                       }
 
