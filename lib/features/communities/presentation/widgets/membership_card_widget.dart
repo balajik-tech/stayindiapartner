@@ -303,69 +303,70 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         children: [
           const Divider(color: Colors.white12),
           SizedBox(height: 12.h),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                flex: 6, // 60%
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _status == MembershipStatus.newUser
-                          ? 'Questions before you join?'
-                          : 'Need to check on your application?',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12.sp,
-                      ),
-                    ),
-                    SizedBox(height: 6.h),
-                    Text(
-                      _status == MembershipStatus.newUser
-                          ? 'Talk to the membership desk about eligibility, fees or documents.'
-                          : 'Quote reference TNIT-APP-2026-5170 when you call.',
-                      style: GoogleFonts.inter(
-                        color: Colors.white70,
-                        fontSize: 11.sp,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(width: 6.w),
-
-              Expanded(
-                flex: 4, // 40%
-                child: OutlinedButton.icon(
-                  onPressed: () => _makePhoneCall('+919840012345'),
-                  icon: Icon(Icons.phone, color: accent, size: 12.sp),
-                  label: Text(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     _status == MembershipStatus.newUser
-                        ? 'Call +91 98400 12345'
-                        : 'Call desk',
+                        ? 'Questions before you join?'
+                        : 'Need to check on your application?',
                     style: GoogleFonts.inter(
-                      color: accent,
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 10.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: accent.withValues(alpha: 0.3)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                  SizedBox(height: 6.h),
+                  Text(
+                    _status == MembershipStatus.newUser
+                        ? 'Talk to the membership desk about eligibility, fees or documents.'
+                        : 'Quote reference TNIT-APP-2026-5170 when you call.',
+                    style: GoogleFonts.inter(
+                      color: Colors.white70,
+                      fontSize: 11.sp,
+                      height: 1.4,
                     ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 6.h,
-                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 12.h),
+
+              OutlinedButton.icon(
+                onPressed: () => _makePhoneCall('+919840012345'),
+                icon: Icon(
+                  Icons.phone,
+                  color: accent,
+                  size: 12.sp,
+                ),
+                label: Text(
+                  _status == MembershipStatus.newUser
+                      ? 'Call +91 98400 12345'
+                      : 'Call desk',
+                  style: GoogleFonts.inter(
+                    color: accent,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 10.sp,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: accent.withValues(alpha: 0.3),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 8.w,
+                    vertical: 6.h,
                   ),
                 ),
               ),
             ],
-          ),
+          )
           // if (_status == MembershipStatus.applied) ...[
           //   SizedBox(height: 24.h),
           //   Center(

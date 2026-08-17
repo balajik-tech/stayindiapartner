@@ -1135,12 +1135,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           SizedBox(height: 24.h),
           ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ExploreCommunitiesPage(),
-                ),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (_) => const ExploreCommunitiesPage(),
+              //   ),
+              // );
+              // _searchFocusNode.requestFocus();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1650A2),
