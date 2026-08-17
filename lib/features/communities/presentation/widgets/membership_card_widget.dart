@@ -877,7 +877,7 @@ class _ApprovedMembershipView extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
     final appRef = membership?['applicationReference']?.toString() ??
-        'TNIT-APP-2026-3623';
+        '';
     final approvedDate = _formatApprovedDate(membership?['approvedAt']);
     final totalFee = membership?['totalFee'] ?? membership?['fee'] ?? 0;
     final feeText = _formatAmount(totalFee);
@@ -934,7 +934,7 @@ class _ApprovedMembershipView extends StatelessWidget {
   }
 
   static String _formatAmount(dynamic amount) {
-    if (amount == null) return '₹2,000';
+    if (amount == null) return '';
     final numVal = num.tryParse(amount.toString());
     if (numVal == null) return '₹$amount';
     final str = numVal.toInt().toString();
@@ -964,7 +964,7 @@ class _ActiveMembershipView extends StatelessWidget {
     final memId = membership?['membershipId']?.toString() ??
         (membership?['status'] == 'ACTIVE' && membership?['id'] != null
             ? membership!['id'].toString()
-            : 'TNIT-MEM-2026-1614');
+            : '');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
