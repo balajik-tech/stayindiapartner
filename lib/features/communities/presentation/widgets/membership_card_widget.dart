@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,13 +8,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../injection_container.dart';
+import '../../../../core/utils/logger.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
-
-import 'join_association_sheet.dart';
 
 enum MembershipStatus { newUser, applied, approved, paid, renewalDue, expired }
 
@@ -28,6 +28,91 @@ class MembershipCardWidget extends StatefulWidget {
 
 class _MembershipCardWidgetState extends State<MembershipCardWidget> {
   MembershipStatus _status = MembershipStatus.newUser;
+  List<Map<String, dynamic>> _eligibleProperties = [];
+  List<Map<String, dynamic>> _selectedProperties = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEligibleProperties();
+  }
+
+  Future<void> _fetchEligibleProperties() async {
+    try {
+      final dio = sl<Dio>();
+      final response = await dio.get(ApiConstants.associationEligibleProperties);
+      if (response.statusCode == 200 && response.data != null) {
+        final resData = response.data;
+        List<dynamic> rawList = [];
+        if (resData is Map) {
+          if (resData['data'] is Map && resData['data']['properties'] is List) {
+            rawList = resData['data']['properties'] as List;
+          } else if (resData['properties'] is List) {
+            rawList = resData['properties'] as List;
+          } else if (resData['data'] is List) {
+            rawList = resData['data'] as List;
+          }
+        }
+        final properties = rawList.map((item) {
+          final map = Map<String, dynamic>.from(item as Map);
+          final address = map['address']?.toString().trim() ?? '';
+          final city = map['city']?.toString().trim() ?? '';
+          final locationParts = [
+            if (address.isNotEmpty) address,
+            if (city.isNotEmpty) city,
+          ];
+          final location = locationParts.isNotEmpty
+              ? locationParts.join(', ')
+              : 'Chennai';
+
+          final hostelType = map['hostel_type']?.toString();
+          final propertyTag = map['propertyTag']?.toString();
+
+          return {
+            '_id': map['_id']?.toString() ?? map['id']?.toString() ?? '',
+            'name': map['name']?.toString() ?? '',
+            'address': address,
+            'city': city,
+            'hostel_type': hostelType,
+            'propertyTag': propertyTag,
+            'location': location,
+            'type': _formatPropertyType(hostelType, propertyTag),
+            'selected': false,
+            'isActive': map['isActive'] ?? true,
+          };
+        }).toList();
+
+        if (mounted) {
+          setState(() {
+            _eligibleProperties = properties;
+          });
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Failed to fetch eligible properties: $e');
+    }
+  }
+
+  static String _formatPropertyType(String? hostelType, String? propertyTag) {
+    final typeStr = (hostelType ?? '').toLowerCase().trim();
+    if (typeStr == 'men' || typeStr == 'boys' || typeStr == 'male') {
+      return "MEN'S HOSTEL";
+    } else if (typeStr == 'women' || typeStr == 'girls' || typeStr == 'female') {
+      return "WORKING WOMEN'S HOSTEL";
+    } else if (typeStr == 'co-living' || typeStr == 'coliving') {
+      return "CO-LIVING PG";
+    } else if (typeStr == 'students' || typeStr == 'student') {
+      return "STUDENTS' PG";
+    }
+    if (propertyTag != null && propertyTag.trim().isNotEmpty) {
+      final tagStr = propertyTag.trim().toUpperCase();
+      if (tagStr == 'BOYS' || tagStr == 'MEN') return "MEN'S HOSTEL";
+      if (tagStr == 'GIRLS' || tagStr == 'WOMEN') return "WORKING WOMEN'S HOSTEL";
+      if (tagStr == 'PG') return "PG HOSTEL";
+      return tagStr;
+    }
+    return "HOSTEL";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +133,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
           if (_status == MembershipStatus.newUser) ...[
             SizedBox(height: 8.h),
             Text(
-              '5 properties are listed on your account. Choose which of them to register — applications are reviewed by the association before the membership fee becomes payable.',
+              '${_eligibleProperties.isNotEmpty ? _eligibleProperties.length : 5} properties are listed on your account. Choose which of them to register — applications are reviewed by the association before the membership fee becomes payable.',
               style: GoogleFonts.inter(
                 color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 12.sp,
@@ -77,12 +162,24 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     Color? smallCircleColor = accent;
     Color? progressNumberCirlceColor = Color(0xFF1E3A68);
 
+    final profileState = context.read<ProfileCubit>().state;
+    String userFirstName = 'Ramesh';
+    String userFullName = 'Ramesh Kumar';
+    if (profileState is ProfileLoaded) {
+      if (profileState.profile.firstName.trim().isNotEmpty) {
+        userFirstName = profileState.profile.firstName.trim();
+      }
+      if (profileState.profile.fullName.trim().isNotEmpty) {
+        userFullName = profileState.profile.fullName.trim();
+      }
+    }
+
     switch (_status) {
       case MembershipStatus.newUser:
         title = 'Join the Welfare Association';
         break;
       case MembershipStatus.applied:
-        title = 'Thank you, Ramesh';
+        title = 'Thank you, $userFirstName';
         badgeText = 'Pending approval';
         badgeColor = Color(0xFFD3E0ED).withValues(alpha: 0.82);
         textColor = Colors.black;
@@ -99,12 +196,12 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       case MembershipStatus.renewalDue:
         title = _status == MembershipStatus.paid
             ? "You're a member"
-            : "Ramesh Kumar";
+            : userFullName;
         badgeText = 'Active';
         badgeColor = widget.theme.accentColor.toColor().withValues(alpha: 0.2);
         break;
       case MembershipStatus.expired:
-        title = 'Ramesh Kumar';
+        title = userFullName;
         badgeText = 'Expired';
         badgeColor = Colors.white.withValues(alpha: 0.2);
         break;
@@ -280,7 +377,11 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
           onRequestToJoin: _showRequestToJoinSheet,
         );
       case MembershipStatus.applied:
-        return _AppliedMembershipView(theme: widget.theme);
+        return _AppliedMembershipView(
+          theme: widget.theme,
+          selectedProperties:
+              _selectedProperties.isNotEmpty ? _selectedProperties : null,
+        );
       case MembershipStatus.approved:
         return _ApprovedMembershipView(
           theme: widget.theme,
@@ -461,11 +562,18 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _RequestToJoinSheet(theme: widget.theme),
+      builder: (context) => _RequestToJoinSheet(
+        theme: widget.theme,
+        initialProperties: _eligibleProperties,
+      ),
     ).then((submitted) {
-      if (submitted == true) {
+      if (submitted != null &&
+          (submitted == true || (submitted is List && submitted.isNotEmpty))) {
         setState(() {
           _status = MembershipStatus.applied;
+          if (submitted is List<Map<String, dynamic>>) {
+            _selectedProperties = submitted;
+          }
         });
       }
     });
@@ -523,12 +631,33 @@ class _NewUserMembershipView extends StatelessWidget {
 
 class _AppliedMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+  final List<Map<String, dynamic>>? selectedProperties;
 
-  const _AppliedMembershipView({required this.theme});
+  const _AppliedMembershipView({
+    required this.theme,
+    this.selectedProperties,
+  });
 
   @override
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
+    final hasSelected =
+        selectedProperties != null && selectedProperties!.isNotEmpty;
+    final count = hasSelected ? selectedProperties!.length : 2;
+    final properties = hasSelected
+        ? selectedProperties!
+            .map((p) => p['name']?.toString() ?? '')
+            .toList()
+        : const [
+            'Sri Balaji Men\'s Hostel',
+            'Balaji Ladies Hostel',
+          ];
+    final locations = hasSelected
+        ? selectedProperties!
+            .map((p) => p['location']?.toString() ?? '')
+            .toList()
+        : const ['Guindy, Chennai', 'Velachery, Chennai'];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -541,12 +670,9 @@ class _AppliedMembershipView extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         _PropertySummaryBox(
-          count: 2,
-          properties: const [
-            'Sri Balaji Men\'s Hostel',
-            'Balaji Ladies Hostel',
-          ],
-          locations: const ['Guindy, Chennai', 'Velachery, Chennai'],
+          count: count,
+          properties: properties,
+          locations: locations,
           theme: theme,
         ),
         SizedBox(height: 20.h),
@@ -1314,54 +1440,131 @@ class _TextLink extends StatelessWidget {
 
 class _RequestToJoinSheet extends StatefulWidget {
   final CommunityThemeEntity theme;
+  final List<Map<String, dynamic>>? initialProperties;
 
-  const _RequestToJoinSheet({required this.theme});
+  const _RequestToJoinSheet({
+    required this.theme,
+    this.initialProperties,
+  });
 
   @override
   State<_RequestToJoinSheet> createState() => _RequestToJoinSheetState();
 }
 
 class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
-  final List<Map<String, dynamic>> _properties = [
-    {
-      'name': 'Sri Balaji Men\'s Hostel',
-      'location': 'Guindy, Chennai · 120 beds',
-      'type': 'MEN\'S HOSTEL',
-      'selected': false,
-    },
-    {
-      'name': 'Balaji Ladies Hostel',
-      'location': 'Velachery, Chennai · 86 beds',
-      'type': 'WORKING WOMEN\'S HOSTEL',
-      'selected': false,
-    },
-    {
-      'name': 'BK Co-living',
-      'location': 'Sholinganallur, Chennai · 64 beds',
-      'type': 'CO-LIVING PG',
-      'selected': false,
-    },
-    {
-      'name': 'Sri Balaji Students PG',
-      'location': 'Peelamedu, Coimbatore · 48 beds',
-      'type': 'STUDENTS\' PG',
-      'selected': false,
-    },
-    {
-      'name': 'Balaji Service Suites',
-      'location': 'RS Puram, Coimbatore · 22 beds',
-      'type': 'SERVICE APARTMENT',
-      'selected': false,
-    },
-  ];
+  late List<Map<String, dynamic>> _properties;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialProperties != null &&
+        widget.initialProperties!.isNotEmpty) {
+      _properties = widget.initialProperties!
+          .map((p) => Map<String, dynamic>.from(p))
+          .toList();
+    } else {
+      _properties = [];
+      _fetchEligibleProperties();
+    }
+  }
+
+  Future<void> _fetchEligibleProperties() async {
+    setState(() => _isLoading = true);
+    try {
+      final dio = sl<Dio>();
+      final response = await dio.get(ApiConstants.associationEligibleProperties);
+      if (response.statusCode == 200 && response.data != null) {
+        final resData = response.data;
+        List<dynamic> rawList = [];
+        if (resData is Map) {
+          if (resData['data'] is Map && resData['data']['properties'] is List) {
+            rawList = resData['data']['properties'] as List;
+          } else if (resData['properties'] is List) {
+            rawList = resData['properties'] as List;
+          } else if (resData['data'] is List) {
+            rawList = resData['data'] as List;
+          }
+        }
+        final properties = rawList.map((item) {
+          final map = Map<String, dynamic>.from(item as Map);
+          final address = map['address']?.toString().trim() ?? '';
+          final city = map['city']?.toString().trim() ?? '';
+          final locationParts = [
+            if (address.isNotEmpty) address,
+            if (city.isNotEmpty) city,
+          ];
+          final location = locationParts.isNotEmpty
+              ? locationParts.join(', ')
+              : 'Chennai';
+
+          final hostelType = map['hostel_type']?.toString();
+          final propertyTag = map['propertyTag']?.toString();
+
+          return {
+            '_id': map['_id']?.toString() ?? map['id']?.toString() ?? '',
+            'name': map['name']?.toString() ?? '',
+            'address': address,
+            'city': city,
+            'hostel_type': hostelType,
+            'propertyTag': propertyTag,
+            'location': location,
+            'type': _MembershipCardWidgetState._formatPropertyType(
+              hostelType,
+              propertyTag,
+            ),
+            'selected': false,
+            'isActive': map['isActive'] ?? true,
+          };
+        }).toList();
+
+        if (mounted) {
+          setState(() {
+            _properties = properties;
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      AppLogger.error('Failed to fetch eligible properties in sheet: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final primary = widget.theme.primaryColor.toColor();
     final accent = widget.theme.accentColor.toColor();
-    final selectedCount = _properties.where((p) => p['selected']).length;
+    final selectedCount =
+        _properties.where((p) => p['selected'] == true).length;
+    final profileState = context.read<ProfileCubit>().state;
+
+    String userName = 'Ramesh Kumar';
+    String userPhone = '+91 9840012345';
+    String userInitials = 'RK';
+
+    if (profileState is ProfileLoaded) {
+      final p = profileState.profile;
+      if (p.fullName.trim().isNotEmpty) {
+        userName = p.fullName.trim();
+      }
+      if (p.phone.trim().isNotEmpty) {
+        userPhone = p.phone.trim().startsWith('+')
+            ? p.phone.trim()
+            : '+91 ${p.phone.trim()}';
+      }
+      String ini = '';
+      if (p.firstName.trim().isNotEmpty) ini += p.firstName.trim()[0].toUpperCase();
+      if (p.lastName.trim().isNotEmpty) ini += p.lastName.trim()[0].toUpperCase();
+      if (ini.isNotEmpty) userInitials = ini;
+    }
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9),
@@ -1430,7 +1633,7 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                   radius: 24.r,
                   backgroundColor: primary,
                   child: Text(
-                    'RK',
+                    userInitials,
                     style: GoogleFonts.inter(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -1444,7 +1647,7 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Ramesh Kumar',
+                        userName,
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -1452,7 +1655,7 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                         ),
                       ),
                       Text(
-                        '+91 9840012345',
+                        userPhone,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: AppColors.greyText,
@@ -1492,126 +1695,161 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                   letterSpacing: 0.5,
                 ),
               ),
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    final allSelected = _properties.every((p) => p['selected']);
-                    for (var p in _properties) {
-                      p['selected'] = !allSelected;
-                    }
-                  });
-                },
-                child: Text(
-                  _properties.every((p) => p['selected'])
-                      ? 'Deselect all'
-                      : 'Select all',
-                  style: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                    color: primary,
-                    decoration: TextDecoration.underline,
+              if (_properties.isNotEmpty)
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      final allSelected =
+                          _properties.every((p) => p['selected'] == true);
+                      for (var p in _properties) {
+                        p['selected'] = !allSelected;
+                      }
+                    });
+                  },
+                  child: Text(
+                    _properties.every((p) => p['selected'] == true)
+                        ? 'Deselect all'
+                        : 'Select all',
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w700,
+                      color: primary,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           SizedBox(height: 12.h),
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _properties.length,
-              itemBuilder: (context, index) {
-                final p = _properties[index];
-                final isSelected = p['selected'];
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      p['selected'] = !isSelected;
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(bottom: 12.h),
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Color(0x336FA641) : Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(
-                        color: isSelected ? accent : Colors.transparent,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 24.r,
-                          height: 24.r,
-                          decoration: BoxDecoration(
-                            color: isSelected ? accent : Colors.white,
-                            borderRadius: BorderRadius.circular(6.r),
-                            border: Border.all(
-                              color: isSelected ? accent : Colors.grey.shade300,
-                            ),
-                          ),
-                          child: isSelected
-                              ? Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 16.sp,
-                                )
-                              : null,
+          if (_isLoading)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 40.h),
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(accent),
+                ),
+              ),
+            )
+          else if (_properties.isEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 32.h),
+              child: Center(
+                child: Text(
+                  'No eligible properties found',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: AppColors.greyText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            )
+          else
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _properties.length,
+                itemBuilder: (context, index) {
+                  final p = _properties[index];
+                  final isSelected = p['selected'] == true;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        p['selected'] = !isSelected;
+                      });
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 12.h),
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0x336FA641)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: isSelected ? accent : Colors.transparent,
+                          width: 1.5,
                         ),
-                        SizedBox(width: 16.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                p['name'],
-                                style: GoogleFonts.inter(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 24.r,
+                            height: 24.r,
+                            decoration: BoxDecoration(
+                              color: isSelected ? accent : Colors.white,
+                              borderRadius: BorderRadius.circular(6.r),
+                              border: Border.all(
+                                color: isSelected
+                                    ? accent
+                                    : Colors.grey.shade300,
                               ),
-                              Text(
-                                p['location'],
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: AppColors.greyText,
-                                ),
-                              ),
-                              SizedBox(height: 8.h),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w,
-                                  vertical: 4.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEFF6FF),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: Text(
-                                  p['type'],
+                            ),
+                            child: isSelected
+                                ? Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 16.sp,
+                                  )
+                                : null,
+                          ),
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  p['name'] ?? '',
                                   style: GoogleFonts.inter(
-                                    color: primary,
-                                    fontSize: 9.sp,
-                                    fontWeight: FontWeight.w800,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
                                   ),
                                 ),
-                              ),
-                            ],
+                                if ((p['location'] ?? '')
+                                    .toString()
+                                    .isNotEmpty) ...[
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    p['location'] ?? '',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      color: AppColors.greyText,
+                                    ),
+                                  ),
+                                ],
+                                SizedBox(height: 8.h),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w,
+                                    vertical: 4.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEFF6FF),
+                                    borderRadius: BorderRadius.circular(4.r),
+                                  ),
+                                  child: Text(
+                                    p['type'] ?? 'HOSTEL',
+                                    style: GoogleFonts.inter(
+                                      color: primary,
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
           if (selectedCount > 0)
             Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
+              padding: EdgeInsets.only(top: 8.h, bottom: 12.h),
               child: Text(
                 '$selectedCount of ${_properties.length} selected',
                 style: GoogleFonts.inter(fontSize: 12.sp, color: Colors.grey),
@@ -1621,7 +1859,12 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: selectedCount > 0
-                  ? () => Navigator.pop(context, true)
+                  ? () {
+                      final selected = _properties
+                          .where((p) => p['selected'] == true)
+                          .toList();
+                      Navigator.pop(context, selected);
+                    }
                   : null,
               icon: Icon(
                 Icons.check,
@@ -1630,7 +1873,7 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
               ),
               label: Text(
                 selectedCount > 0
-                    ? 'Submit application · $selectedCount properties'
+                    ? 'Submit application · $selectedCount ${selectedCount == 1 ? 'property' : 'properties'}'
                     : 'Submit application',
                 style: GoogleFonts.inter(
                   color: primary,
