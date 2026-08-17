@@ -167,12 +167,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     Color badgeBg = const Color(0xFFDCFCE7);
     Color badgeTextCol = const Color(0xFF166534);
 
+    Color borderCardColor = const Color(0xFFF59E0B).withOpacity(0.5);
+
     if (isPaused) {
       badgeText = 'Paused';
-      badgeBg = const Color(0xFFFEF3C7);
-      badgeTextCol = const Color(0xFF6d4714);
+      badgeBg = const Color(0xFFFFCCCC);
+      badgeTextCol = Colors.red.shade900 ;
+      // borderCardColor =  Colors.red.shade900;
     } else if (isExpiring) {
-      badgeText = 'Ends in $daysRemaining days';
+      if(daysRemaining  == 0){
+        badgeText = 'Lapsed';
+      }else{
+        badgeText = 'Ends in $daysRemaining days';
+      }
       badgeBg = const Color(0xFFFEF3C7);
       badgeTextCol = const Color(0xFF6d4714);
     }
@@ -184,7 +191,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: isPaused
-              ? const Color(0xFFF59E0B).withOpacity(0.5)
+              ? borderCardColor
               : Colors.grey.shade200,
           width: 1.5,
         ),
@@ -293,16 +300,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
-                       _callPhoneNumber(phoneNumber!);
+                       // _callPhoneNumber(phoneNumber!);
                       },
-                      icon: Icon(Icons.call_outlined, size: 18.sp),
+                      icon: Icon(Icons.call_outlined, size: 18.sp, color: AppColors.primaryBlue),
                       label: Text(
                         'Call',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.primaryBlue),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black87,
-                        side: BorderSide(color: Colors.grey.shade300),
+                        foregroundColor: AppColors.primaryBlue,
+                        side: BorderSide(color: AppColors.primaryBlue),
                         padding: EdgeInsets.symmetric(vertical: 10.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
@@ -314,7 +321,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
+                        // _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
                       },
                       icon: SizedBox(
                         width: 18.w,
@@ -322,15 +329,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         child: Image.asset(
                           'assets/images/whatsapp_black.png',
                           fit: BoxFit.contain,
+                            color: AppColors.white
                         ),
                       ),
                       label: Text(
                         'WhatsApp',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.white),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black87,
-                        side: BorderSide(color: Colors.grey.shade300),
+                        foregroundColor: AppColors.freeGreen,
+                        backgroundColor: AppColors.freeGreen,
+                        side: BorderSide(color: AppColors.freeGreen),
                         padding: EdgeInsets.symmetric(vertical: 10.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
@@ -392,14 +401,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       onPressed: () {
                         _callPhoneNumber(phoneNumber!);
                       },
-                      icon: Icon(Icons.call_outlined, size: 18.sp),
+                      icon: Icon(Icons.call_outlined, size: 18.sp, color: AppColors.primaryBlue),
                       label: Text(
                         'Call',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.primaryBlue),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black87,
-                        side: BorderSide(color: Colors.grey.shade300),
+                        foregroundColor: AppColors.primaryBlue,
+                        side: BorderSide(color: AppColors.primaryBlue),
                         padding: EdgeInsets.symmetric(vertical: 10.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
@@ -413,21 +422,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       onPressed: () {
                         _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
                       },
-                      icon:  SizedBox(
+                      icon: SizedBox(
                         width: 18.w,
                         height: 18.h,
                         child: Image.asset(
-                          'assets/images/whatsapp_black.png',
-                          fit: BoxFit.contain,
+                            'assets/images/whatsapp_black.png',
+                            fit: BoxFit.contain,
+                            color: AppColors.white
                         ),
                       ),
                       label: Text(
                         'WhatsApp',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.white),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black87,
-                        side: BorderSide(color: Colors.grey.shade300),
+                        foregroundColor: AppColors.freeGreen,
+                        backgroundColor: AppColors.freeGreen,
+                        side: BorderSide(color: AppColors.freeGreen),
                         padding: EdgeInsets.symmetric(vertical: 10.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
@@ -730,7 +741,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                             vertical: 24.h,
                                           ),
                                           child: Text(
-                                            'Billing is handled by your Stay India account team.',
+                                            '',
                                             textAlign: TextAlign.center,
                                             style: GoogleFonts.inter(
                                               fontSize: 12.sp,
@@ -848,6 +859,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           final status = response?.activeSubscription?.status;
           final isPending = status == 'PENDING' || status == 'PENDING_PAYMENT';
 
+          final now = DateTime.now();
+          final endDate = response?.activeSubscription?.endDate ?? now;
+          final daysRemaining = response?.activeSubscription?.daysRemaining ?? 0;
+
+          final lapseTime = endDate.difference(now).inDays;
+          final bool isPaused = lapseTime <= -7;
+
+          Color? pauseSelectedDotColor = Colors.white;
+          Color? pauseUnselectedDotColor = SubscriptionColors.green;
+
+          if(isPaused){
+            pauseSelectedDotColor = Colors.red.shade900;
+            pauseUnselectedDotColor =  Colors.red.shade900;
+          }
+
           return Padding(
             padding: EdgeInsets.only(right: 8.w),
             child: ChoiceChip(
@@ -874,8 +900,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       decoration: BoxDecoration(
                         color: isActive
                             ? (isSelected
-                                  ? Colors.white
-                                  : SubscriptionColors.green)
+                                  ? pauseSelectedDotColor
+                                  : pauseUnselectedDotColor)
                             : (isSelected
                                   ? Colors.white
                                   : AppColors.orangeColor),

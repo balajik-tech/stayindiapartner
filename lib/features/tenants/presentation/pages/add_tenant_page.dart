@@ -506,25 +506,25 @@ class _AddTenantPageState extends State<AddTenantPage> {
           ),
         ),
 
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: _downloadSampleCSV,
-            icon: Icon(
-              Icons.download_rounded,
-              size: 14.sp,
-              color: AppColors.primaryBlue,
-            ),
-            label: Text(
-              'Download Sample CSV',
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryBlue,
-              ),
-            ),
-          ),
-        ),
+        // Align(
+        //   alignment: Alignment.centerRight,
+        //   child: TextButton.icon(
+        //     onPressed: _downloadSampleCSV,
+        //     icon: Icon(
+        //       Icons.download_rounded,
+        //       size: 14.sp,
+        //       color: AppColors.primaryBlue,
+        //     ),
+        //     label: Text(
+        //       'Download Sample CSV',
+        //       style: TextStyle(
+        //         fontSize: 12.sp,
+        //         fontWeight: FontWeight.w600,
+        //         color: AppColors.primaryBlue,
+        //       ),
+        //     ),
+        //   ),
+        // ),
 
         // Submit button
         if (_csvFile != null) ...[
