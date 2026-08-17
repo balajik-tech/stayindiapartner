@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -41,6 +42,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
   final TextEditingController _postController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  final FocusNode _searchFocusNode = FocusNode();
 
   String? _selectedImagePath;
   bool _isPoll = false;
@@ -438,6 +441,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         ),
         child: TextField(
           controller: _searchController,
+          focusNode: _searchFocusNode,
           onChanged: (value) => setState(() {}),
           decoration: InputDecoration(
             hintText: 'Search associations',
@@ -1141,7 +1145,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               //     builder: (_) => const ExploreCommunitiesPage(),
               //   ),
               // );
-              // _searchFocusNode.requestFocus();
+              _searchFocusNode.requestFocus();
+
+              Future.delayed(const Duration(milliseconds: 100), () {
+                SystemChannels.textInput.invokeMethod('TextInput.show');
+              });
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1650A2),
