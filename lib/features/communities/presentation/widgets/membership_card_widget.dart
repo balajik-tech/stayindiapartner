@@ -689,7 +689,10 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _PayMembershipSheet(theme: widget.theme),
+      builder: (context) => _PayMembershipSheet(
+        theme: widget.theme,
+        membership: _membershipData,
+      ),
     ).then((paid) {
       if (paid == true) {
         setState(() {
@@ -875,9 +878,9 @@ class _ApprovedMembershipView extends StatelessWidget {
     final accent = theme.accentColor.toColor();
     final appRef = membership?['applicationReference']?.toString() ??
         'TNIT-APP-2026-3623';
-    final fee = membership?['fee'] != null
-        ? '₹${membership!['fee']}'
-        : '₹2,000';
+    final approvedDate = _formatApprovedDate(membership?['approvedAt']);
+    final totalFee = membership?['totalFee'] ?? membership?['fee'] ?? 0;
+    final feeText = _formatAmount(totalFee);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -885,7 +888,7 @@ class _ApprovedMembershipView extends StatelessWidget {
         _InfoBox(
           label: 'APPLICATION REFERENCE',
           value: appRef,
-          subValue: 'Approved 14 Aug 2026',
+          subValue: approvedDate,
           icon: Icons.check_circle_outline,
           accent: accent,
           theme: theme,
@@ -907,13 +910,42 @@ class _ApprovedMembershipView extends StatelessWidget {
         ),
         SizedBox(height: 24.h),
         _ActionButton(
-          label: 'Pay membership · $fee',
+          label: 'Pay membership · $feeText',
           icon: Icons.account_balance_wallet_outlined,
           theme: theme,
           onPressed: onPay,
         ),
       ],
     );
+  }
+
+  static String _formatApprovedDate(dynamic date) {
+    if (date == null) return 'Approved 14 Aug 2026';
+    try {
+      final dt = DateTime.parse(date.toString()).toLocal();
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      return 'Approved ${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
+    } catch (_) {
+      return 'Approved ${date.toString()}';
+    }
+  }
+
+  static String _formatAmount(dynamic amount) {
+    if (amount == null) return '₹2,000';
+    final numVal = num.tryParse(amount.toString());
+    if (numVal == null) return '₹$amount';
+    final str = numVal.toInt().toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) {
+        buffer.write(',');
+      }
+      buffer.write(str[i]);
+    }
+    return '₹${buffer.toString()}';
   }
 }
 
@@ -2212,13 +2244,33 @@ class _DashedDivider extends StatelessWidget {
 
 class _PayMembershipSheet extends StatelessWidget {
   final CommunityThemeEntity theme;
+  final Map<String, dynamic>? membership;
 
-  const _PayMembershipSheet({required this.theme});
+  const _PayMembershipSheet({
+    required this.theme,
+    this.membership,
+  });
 
   @override
   Widget build(BuildContext context) {
     final primary = theme.primaryColor.toColor();
     final accent = theme.accentColor.toColor();
+    final profileState = context.read<ProfileCubit>().state;
+
+    String memberName = 'Ramesh Kumar';
+    if (profileState is ProfileLoaded &&
+        profileState.profile.fullName.trim().isNotEmpty) {
+      memberName = profileState.profile.fullName.trim();
+    }
+
+    final appRef = membership?['applicationReference']?.toString() ??
+        'TNIT-APP-2026-4557';
+    final propCount = membership?['propertyCount']?.toString() ??
+        (membership?['properties'] as List?)?.length.toString() ??
+        '1';
+    final totalFee = membership?['totalFee'] ?? membership?['fee'] ?? 0;
+    final feeText = _ApprovedMembershipView._formatAmount(totalFee);
+    final feeAmount = num.tryParse(totalFee.toString())?.toInt() ?? 0;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
@@ -2278,11 +2330,11 @@ class _PayMembershipSheet extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildRow('Member', 'Ramesh Kumar'),
+                _buildRow('Member', memberName),
                 const Divider(height: 32, color: Color(0xFFE2E8F0)),
-                _buildRow('Application', 'TNIT-APP-2026-4557'),
+                _buildRow('Application', appRef),
                 const Divider(height: 32, color: Color(0xFFE2E8F0)),
-                _buildRow('Properties', '1'),
+                _buildRow('Properties', propCount),
                 const Divider(height: 32, color: Color(0xFFE2E8F0)),
                 _buildRow('Plan', 'Annual membership'),
                 const Divider(height: 32, color: Color(0xFFE2E8F0)),
@@ -2300,7 +2352,7 @@ class _PayMembershipSheet extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '₹2,000',
+                      feeText,
                       style: GoogleFonts.inter(
                         color: const Color(0xFF1E3A68),
                         fontSize: 24.sp,
@@ -2319,15 +2371,14 @@ class _PayMembershipSheet extends StatelessWidget {
               onPressed: () => {
                 _navigateToRazorpay(
                   context,
-                  amount: 2000,
+                  amount: feeAmount.toDouble(),
                   planName: 'Associate Plan',
                   orderId: 'order_test_123456789',
                 ),
-
               },
               icon: Icon(Icons.credit_card, color: primary, size: 18.sp),
               label: Text(
-                'Pay ₹2,000',
+                'Pay $feeText',
                 style: GoogleFonts.inter(
                   color: primary,
                   fontWeight: FontWeight.w700,
