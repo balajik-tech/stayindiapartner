@@ -97,6 +97,7 @@ class ApiConstants {
   static const String associationPortMembers = '/association-portal/portal-members';
   static const String associationExecutiveStructure = '/association-portal/structure/leaders';
   static const String associationEligibleProperties = '/association-memberships/eligible-properties';
+  static const String associationMembershipApplications = '/association-memberships/applications';
   static const String sos = '/sos';
   static const String socialPosts = '/posts';
 

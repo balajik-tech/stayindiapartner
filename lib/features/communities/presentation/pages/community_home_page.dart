@@ -23,13 +23,14 @@ class AssociateHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<AssociateHomeDataCubit>()..loadCommunityData(associationId),
-      child: const _CommunityHomeView(),
+      child: _CommunityHomeView(portalId: associationId),
     );
   }
 }
 
 class _CommunityHomeView extends StatelessWidget {
-  const _CommunityHomeView();
+  final String portalId;
+  const _CommunityHomeView({required this.portalId});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +66,7 @@ class _CommunityHomeView extends StatelessWidget {
                     details: loaded.details,
                     detailsError: loaded.detailsError,
                   ),
-                  MembershipCardWidget(theme: theme),
+                  MembershipCardWidget(theme: theme, portalId: portalId),
                   const SizedBox(height: 8),
 
                   // Executive Committee

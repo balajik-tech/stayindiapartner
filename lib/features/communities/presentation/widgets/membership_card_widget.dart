@@ -19,8 +19,9 @@ enum MembershipStatus { newUser, applied, approved, paid, renewalDue, expired }
 
 class MembershipCardWidget extends StatefulWidget {
   final CommunityThemeEntity theme;
+  final String? portalId;
 
-  const MembershipCardWidget({super.key, required this.theme});
+  const MembershipCardWidget({super.key, required this.theme, this.portalId});
 
   @override
   State<MembershipCardWidget> createState() => _MembershipCardWidgetState();
@@ -30,6 +31,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
   MembershipStatus _status = MembershipStatus.newUser;
   List<Map<String, dynamic>> _eligibleProperties = [];
   List<Map<String, dynamic>> _selectedProperties = [];
+  Map<String, dynamic>? _membershipData;
 
   @override
   void initState() {
@@ -379,6 +381,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       case MembershipStatus.applied:
         return _AppliedMembershipView(
           theme: widget.theme,
+          membership: _membershipData,
           selectedProperties:
               _selectedProperties.isNotEmpty ? _selectedProperties : null,
         );
@@ -399,6 +402,8 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
   Widget _buildFooter(Color accent) {
     if (_status == MembershipStatus.newUser ||
         _status == MembershipStatus.applied) {
+      final appRef = _membershipData?['applicationReference']?.toString() ??
+          'TNIT-APP-2026-5170';
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -424,7 +429,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                   Text(
                     _status == MembershipStatus.newUser
                         ? 'Talk to the membership desk about eligibility, fees or documents.'
-                        : 'Quote reference TNIT-APP-2026-5170 when you call.',
+                        : 'Quote reference $appRef when you call.',
                     style: GoogleFonts.inter(
                       color: Colors.white70,
                       fontSize: 11.sp,
@@ -564,15 +569,17 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       backgroundColor: Colors.transparent,
       builder: (context) => _RequestToJoinSheet(
         theme: widget.theme,
+        portalId: widget.portalId,
         initialProperties: _eligibleProperties,
       ),
-    ).then((submitted) {
-      if (submitted != null &&
-          (submitted == true || (submitted is List && submitted.isNotEmpty))) {
+    ).then((result) {
+      if (result != null) {
         setState(() {
           _status = MembershipStatus.applied;
-          if (submitted is List<Map<String, dynamic>>) {
-            _selectedProperties = submitted;
+          if (result is Map<String, dynamic>) {
+            _membershipData = result;
+          } else if (result is List<Map<String, dynamic>>) {
+            _selectedProperties = result;
           }
         });
       }
@@ -631,48 +638,86 @@ class _NewUserMembershipView extends StatelessWidget {
 
 class _AppliedMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+  final Map<String, dynamic>? membership;
   final List<Map<String, dynamic>>? selectedProperties;
 
   const _AppliedMembershipView({
     required this.theme,
+    this.membership,
     this.selectedProperties,
   });
 
   @override
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
-    final hasSelected =
-        selectedProperties != null && selectedProperties!.isNotEmpty;
-    final count = hasSelected ? selectedProperties!.length : 2;
-    final properties = hasSelected
-        ? selectedProperties!
-            .map((p) => p['name']?.toString() ?? '')
-            .toList()
-        : const [
-            'Sri Balaji Men\'s Hostel',
-            'Balaji Ladies Hostel',
-          ];
-    final locations = hasSelected
-        ? selectedProperties!
-            .map((p) => p['location']?.toString() ?? '')
-            .toList()
-        : const ['Guindy, Chennai', 'Velachery, Chennai'];
+
+    String appRef = 'TNIT-APP-2026-5170';
+    String submittedDate = 'Submitted 14 Aug 2026';
+    List<String> propertyNames = const [
+      'Sri Balaji Men\'s Hostel',
+      'Balaji Ladies Hostel',
+    ];
+    List<String> propertyLocations = const [
+      'Guindy, Chennai',
+      'Velachery, Chennai',
+    ];
+    int count = 2;
+
+    if (membership != null) {
+      if (membership!['applicationReference'] != null &&
+          membership!['applicationReference'].toString().isNotEmpty) {
+        appRef = membership!['applicationReference'].toString();
+      }
+      if (membership!['submittedAt'] != null) {
+        submittedDate = _formatDate(membership!['submittedAt']);
+      }
+      if (membership!['properties'] is List &&
+          (membership!['properties'] as List).isNotEmpty) {
+        final propsList = membership!['properties'] as List;
+        count = propsList.length;
+        propertyNames = propsList
+            .map((p) => p is Map ? (p['name']?.toString() ?? '') : '')
+            .where((n) => n.isNotEmpty)
+            .toList();
+        propertyLocations = propsList.map((p) {
+          if (p is Map) {
+            final addr = p['address']?.toString().trim() ?? '';
+            final city = p['city']?.toString().trim() ?? '';
+            final parts = [
+              if (addr.isNotEmpty) addr,
+              if (city.isNotEmpty) city,
+            ];
+            return parts.isNotEmpty ? parts.join(', ') : 'Chennai';
+          }
+          return 'Chennai';
+        }).toList();
+      }
+    } else if (selectedProperties != null && selectedProperties!.isNotEmpty) {
+      count = selectedProperties!.length;
+      propertyNames = selectedProperties!
+          .map((p) => p['name']?.toString() ?? '')
+          .where((n) => n.isNotEmpty)
+          .toList();
+      propertyLocations = selectedProperties!
+          .map((p) => p['location']?.toString() ?? '')
+          .toList();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _InfoBox(
           label: 'APPLICATION REFERENCE',
-          value: 'TNIT-APP-2026-5170',
-          subValue: 'Submitted 14 Aug 2026',
+          value: appRef,
+          subValue: submittedDate,
           icon: Icons.calendar_today_outlined,
           theme: theme,
         ),
         SizedBox(height: 16.h),
         _PropertySummaryBox(
           count: count,
-          properties: properties,
-          locations: locations,
+          properties: propertyNames,
+          locations: propertyLocations,
           theme: theme,
         ),
         SizedBox(height: 20.h),
@@ -692,6 +737,20 @@ class _AppliedMembershipView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  static String _formatDate(dynamic date) {
+    if (date == null) return 'Submitted 14 Aug 2026';
+    try {
+      final dt = DateTime.parse(date.toString()).toLocal();
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      return 'Submitted ${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
+    } catch (_) {
+      return 'Submitted ${date.toString()}';
+    }
   }
 }
 
@@ -1440,10 +1499,12 @@ class _TextLink extends StatelessWidget {
 
 class _RequestToJoinSheet extends StatefulWidget {
   final CommunityThemeEntity theme;
+  final String? portalId;
   final List<Map<String, dynamic>>? initialProperties;
 
   const _RequestToJoinSheet({
     required this.theme,
+    this.portalId,
     this.initialProperties,
   });
 
@@ -1454,6 +1515,7 @@ class _RequestToJoinSheet extends StatefulWidget {
 class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
   late List<Map<String, dynamic>> _properties;
   bool _isLoading = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -1858,29 +1920,115 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: selectedCount > 0
-                  ? () {
+              onPressed: (selectedCount > 0 && !_isSubmitting)
+                  ? () async {
+                      setState(() => _isSubmitting = true);
                       final selected = _properties
                           .where((p) => p['selected'] == true)
                           .toList();
-                      Navigator.pop(context, selected);
+                      final propertyIds = selected
+                          .map((p) => (p['_id'] ?? p['id'] ?? '').toString())
+                          .where((id) => id.isNotEmpty)
+                          .toList();
+
+                      String portalId = widget.portalId ?? '';
+                      if (portalId.isEmpty) {
+                        final profileState = context.read<ProfileCubit>().state;
+                        if (profileState is ProfileLoaded &&
+                            profileState.profile.associationId != null &&
+                            profileState.profile.associationId!.isNotEmpty) {
+                          portalId = profileState.profile.associationId!;
+                        } else {
+                          portalId = '66ba10000000000000000001';
+                        }
+                      }
+
+                      final navigator = Navigator.of(context);
+                      final messenger = ScaffoldMessenger.of(context);
+
+                      try {
+                        final dio = sl<Dio>();
+                        final response = await dio.post(
+                          ApiConstants.associationMembershipApplications,
+                          data: {
+                            'portalId': portalId,
+                            'propertyIds': propertyIds,
+                          },
+                        );
+
+                        if (response.statusCode == 200 ||
+                            response.statusCode == 201) {
+                          final resData = response.data;
+                          Map<String, dynamic>? membership;
+                          if (resData is Map &&
+                              resData['data'] is Map &&
+                              resData['data']['membership'] is Map) {
+                            membership = Map<String, dynamic>.from(
+                                resData['data']['membership'] as Map);
+                          } else if (resData is Map && resData['data'] is Map) {
+                            membership =
+                                Map<String, dynamic>.from(resData['data'] as Map);
+                          } else if (resData is Map &&
+                              resData['membership'] is Map) {
+                            membership = Map<String, dynamic>.from(
+                                resData['membership'] as Map);
+                          }
+                          navigator.pop(membership ?? selected);
+                        } else {
+                          if (mounted) {
+                            setState(() => _isSubmitting = false);
+                            final msg = response.data is Map
+                                ? response.data['message']?.toString()
+                                : null;
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    msg ?? 'Failed to submit application'),
+                              ),
+                            );
+                          }
+                        }
+                      } catch (e) {
+                        AppLogger.error(
+                            'Failed to submit membership application: $e');
+                        if (mounted) {
+                          setState(() => _isSubmitting = false);
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Failed to submit application. Please try again.'),
+                            ),
+                          );
+                        }
+                      }
                     }
                   : null,
-              icon: Icon(
-                Icons.check,
-                color: selectedCount > 0 ? primary : primary,
-                size: 14.sp,
-              ),
-              label: Text(
-                selectedCount > 0
-                    ? 'Submit application · $selectedCount ${selectedCount == 1 ? 'property' : 'properties'}'
-                    : 'Submit application',
-                style: GoogleFonts.inter(
-                  color: primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13.sp,
-                ),
-              ),
+              icon: _isSubmitting
+                  ? const SizedBox.shrink()
+                  : Icon(
+                      Icons.check,
+                      color: selectedCount > 0 ? primary : primary,
+                      size: 14.sp,
+                    ),
+              label: _isSubmitting
+                  ? SizedBox(
+                      width: 18.w,
+                      height: 18.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(primary),
+                      ),
+                    )
+                  : Text(
+                      selectedCount > 0
+                          ? 'Submit application · $selectedCount ${selectedCount == 1 ? 'property' : 'properties'}'
+                          : 'Submit application',
+                      style: GoogleFonts.inter(
+                        color: primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.sp,
+                      ),
+                    ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: accent,
                 disabledBackgroundColor: accent.withValues(alpha: 0.5),
