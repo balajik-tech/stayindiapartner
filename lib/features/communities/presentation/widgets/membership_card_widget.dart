@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,10 +7,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../injection_container.dart';
-import '../../../../core/utils/logger.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_state.dart';
+import '../cubit/association_membership_cubit.dart';
+import '../../domain/entities/association_membership_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
 
@@ -28,24 +28,26 @@ class MembershipCardWidget extends StatefulWidget {
 }
 
 class _MembershipCardWidgetState extends State<MembershipCardWidget> {
-  MembershipStatus _status = MembershipStatus.newUser;
-  List<Map<String, dynamic>> _eligibleProperties = [];
-  List<Map<String, dynamic>> _selectedProperties = [];
-  Map<String, dynamic>? _membershipData;
-  Map<String, dynamic>? _membershipTimeline;
+  MembershipStatus? _previewStatus;
 
   @override
   void initState() {
     super.initState();
-    _fetchEligibleProperties();
-    _fetchMembershipStatus();
+    _initData();
   }
 
   @override
   void didUpdateWidget(MembershipCardWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.portalId != widget.portalId) {
-      _fetchMembershipStatus();
+      _initData();
+    }
+  }
+
+  void _initData() {
+    final portalId = _getPortalId();
+    if (portalId.isNotEmpty) {
+      context.read<AssociationMembershipCubit>().loadMembershipData(portalId);
     }
   }
 
@@ -62,207 +64,114 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     return '';
   }
 
-  Future<void> _fetchMembershipStatus() async {
-    try {
-      final portalId = _getPortalId();
-      final dio = sl<Dio>();
-      final response = await dio.get(
-        ApiConstants.associationMyApplications,
-        queryParameters: {'portalId': portalId},
-      );
-
-      if (response.statusCode == 200 && response.data != null) {
-        final resData = response.data;
-        List<dynamic> list = [];
-        if (resData is Map) {
-          if (resData['data'] is Map && resData['data']['memberships'] is List) {
-            list = resData['data']['memberships'] as List;
-          } else if (resData['memberships'] is List) {
-            list = resData['memberships'] as List;
-          } else if (resData['data'] is List) {
-            list = resData['data'] as List;
-          }
-        }
-
-        if (list.isNotEmpty) {
-          final firstMembership = Map<String, dynamic>.from(list.first as Map);
-          final timeline = firstMembership['timeline'] is Map
-              ? Map<String, dynamic>.from(firstMembership['timeline'] as Map)
-              : null;
-          final statusStr =
-              (firstMembership['status'] ?? '').toString().toUpperCase().trim();
-
-          MembershipStatus newStatus = MembershipStatus.newUser;
-
-          if (statusStr == 'EXPIRED' || statusStr == 'LAPSED') {
-            newStatus = MembershipStatus.expired;
-          } else if (statusStr == 'RENEWAL_DUE') {
-            newStatus = MembershipStatus.renewalDue;
-          } else if (timeline != null) {
-            if (timeline['idIssued'] == true ||
-                timeline['paid'] == true ||
-                statusStr == 'PAID' ||
-                statusStr == 'ACTIVE') {
-              newStatus = MembershipStatus.paid;
-            } else if (timeline['approved'] == true ||
-                statusStr == 'APPROVED' ||
-                statusStr == 'PAYMENT_PENDING') {
-              newStatus = MembershipStatus.approved;
-            } else if (timeline['applied'] == true ||
-                statusStr == 'PENDING_APPROVAL' ||
-                statusStr == 'APPLIED') {
-              newStatus = MembershipStatus.applied;
-            }
-          } else {
-            if (statusStr == 'PAID' || statusStr == 'ACTIVE') {
-              newStatus = MembershipStatus.paid;
-            } else if (statusStr == 'APPROVED' ||
-                statusStr == 'PAYMENT_PENDING') {
-              newStatus = MembershipStatus.approved;
-            } else if (statusStr == 'PENDING_APPROVAL' ||
-                statusStr == 'APPLIED') {
-              newStatus = MembershipStatus.applied;
-            }
-          }
-
-          if (mounted) {
-            setState(() {
-              _membershipData = firstMembership;
-              _membershipTimeline = timeline;
-              _status = newStatus;
-            });
-          }
-        }
-      }
-    } catch (e) {
-      AppLogger.error('Failed to fetch membership applications: $e');
-    }
-  }
-
-  Future<void> _fetchEligibleProperties() async {
-    try {
-      final dio = sl<Dio>();
-      final response = await dio.get(ApiConstants.associationEligibleProperties);
-      if (response.statusCode == 200 && response.data != null) {
-        final resData = response.data;
-        List<dynamic> rawList = [];
-        if (resData is Map) {
-          if (resData['data'] is Map && resData['data']['properties'] is List) {
-            rawList = resData['data']['properties'] as List;
-          } else if (resData['properties'] is List) {
-            rawList = resData['properties'] as List;
-          } else if (resData['data'] is List) {
-            rawList = resData['data'] as List;
-          }
-        }
-        final properties = rawList.map((item) {
-          final map = Map<String, dynamic>.from(item as Map);
-          final address = map['address']?.toString().trim() ?? '';
-          final city = map['city']?.toString().trim() ?? '';
-          final locationParts = [
-            if (address.isNotEmpty) address,
-            if (city.isNotEmpty) city,
-          ];
-          final location = locationParts.isNotEmpty
-              ? locationParts.join(', ')
-              : 'Chennai';
-
-          final hostelType = map['hostel_type']?.toString();
-          final propertyTag = map['propertyTag']?.toString();
-
-          return {
-            '_id': map['_id']?.toString() ?? map['id']?.toString() ?? '',
-            'name': map['name']?.toString() ?? '',
-            'address': address,
-            'city': city,
-            'hostel_type': hostelType,
-            'propertyTag': propertyTag,
-            'location': location,
-            'type': _formatPropertyType(hostelType, propertyTag),
-            'selected': false,
-            'isActive': map['isActive'] ?? true,
-          };
-        }).toList();
-
-        if (mounted) {
-          setState(() {
-            _eligibleProperties = properties;
-          });
-        }
-      }
-    } catch (e) {
-      AppLogger.error('Failed to fetch eligible properties: $e');
-    }
-  }
-
-  static String _formatPropertyType(String? hostelType, String? propertyTag) {
-    final typeStr = (hostelType ?? '').toLowerCase().trim();
-    if (typeStr == 'men' || typeStr == 'boys' || typeStr == 'male') {
-      return "MEN'S HOSTEL";
-    } else if (typeStr == 'women' || typeStr == 'girls' || typeStr == 'female') {
-      return "WORKING WOMEN'S HOSTEL";
-    } else if (typeStr == 'co-living' || typeStr == 'coliving') {
-      return "CO-LIVING PG";
-    } else if (typeStr == 'students' || typeStr == 'student') {
-      return "STUDENTS' PG";
-    }
-    if (propertyTag != null && propertyTag.trim().isNotEmpty) {
-      final tagStr = propertyTag.trim().toUpperCase();
-      if (tagStr == 'BOYS' || tagStr == 'MEN') return "MEN'S HOSTEL";
-      if (tagStr == 'GIRLS' || tagStr == 'WOMEN') return "WORKING WOMEN'S HOSTEL";
-      if (tagStr == 'PG') return "PG HOSTEL";
-      return tagStr;
-    }
-    return "HOSTEL";
-  }
-
   @override
   Widget build(BuildContext context) {
     final primary = widget.theme.primaryColor.toColor();
     final accent = widget.theme.accentColor.toColor();
 
-    return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: primary,
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(accent),
-          if (_status == MembershipStatus.newUser) ...[
-            SizedBox(height: 8.h),
-            Text(
-              '${_eligibleProperties.isNotEmpty ? _eligibleProperties.length : 5} properties are listed on your account. Choose which of them to register — applications are reviewed by the association before the membership fee becomes payable.',
-              style: GoogleFonts.inter(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 12.sp,
-                height: 1.4,
-              ),
+    return BlocBuilder<AssociationMembershipCubit, AssociationMembershipState>(
+      builder: (context, state) {
+        if (state is AssociationMembershipLoading) {
+          return Container(
+            margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+            padding: EdgeInsets.all(20.w),
+            height: 200.h,
+            decoration: BoxDecoration(
+              color: primary,
+              borderRadius: BorderRadius.circular(20.r),
             ),
-          ],
-          SizedBox(height: 24.h),
-          _buildStatusProgress(),
-          SizedBox(height: 8.h),
-          _buildContent(),
-          SizedBox(height: 20.h),
-          _buildFooter(accent),
-          SizedBox(height: 16.h),
-          _buildPreviewToggles(),
-        ],
-      ),
+            child: const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          );
+        }
+
+        AssociationMembershipEntity? membership;
+        List<MembershipPropertyEntity> eligibleProperties = [];
+        MembershipStatus membershipStatus = MembershipStatus.newUser;
+
+        if (state is AssociationMembershipLoaded) {
+          membership = state.membership;
+          eligibleProperties = state.eligibleProperties;
+          membershipStatus = _previewStatus ?? _mapStatusString(state.status, membership?.timeline);
+        }
+
+        return Container(
+          margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            color: primary,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(accent, membershipStatus),
+              if (membershipStatus == MembershipStatus.newUser) ...[
+                SizedBox(height: 8.h),
+                Text(
+                  '${eligibleProperties.isNotEmpty ? eligibleProperties.length : 5} properties are listed on your account. Choose which of them to register — applications are reviewed by the association before the membership fee becomes payable.',
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12.sp,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+              SizedBox(height: 24.h),
+              _buildStatusProgress(membershipStatus, membership?.timeline),
+              SizedBox(height: 8.h),
+              _buildContent(membershipStatus, membership),
+              SizedBox(height: 20.h),
+              _buildFooter(accent, membershipStatus, membership),
+              SizedBox(height: 16.h),
+              _buildPreviewToggles(membershipStatus),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader(Color accent) {
+  MembershipStatus _mapStatusString(String statusStr, Map<String, dynamic>? timeline) {
+    statusStr = statusStr.toUpperCase().trim();
+    if (statusStr == 'EXPIRED' || statusStr == 'LAPSED') {
+      return MembershipStatus.expired;
+    } else if (statusStr == 'RENEWAL_DUE') {
+      return MembershipStatus.renewalDue;
+    } else if (timeline != null) {
+      if (timeline['idIssued'] == true ||
+          timeline['paid'] == true ||
+          statusStr == 'PAID' ||
+          statusStr == 'ACTIVE') {
+        return MembershipStatus.paid;
+      } else if (timeline['approved'] == true ||
+          statusStr == 'APPROVED' ||
+          statusStr == 'PAYMENT_PENDING') {
+        return MembershipStatus.approved;
+      } else if (timeline['applied'] == true ||
+          statusStr == 'PENDING_APPROVAL' ||
+          statusStr == 'APPLIED') {
+        return MembershipStatus.applied;
+      }
+    } else {
+      if (statusStr == 'PAID' || statusStr == 'ACTIVE') {
+        return MembershipStatus.paid;
+      } else if (statusStr == 'APPROVED' || statusStr == 'PAYMENT_PENDING') {
+        return MembershipStatus.approved;
+      } else if (statusStr == 'PENDING_APPROVAL' || statusStr == 'APPLIED') {
+        return MembershipStatus.applied;
+      }
+    }
+    return MembershipStatus.newUser;
+  }
+
+  Widget _buildHeader(Color accent, MembershipStatus status) {
     String title = '';
     String? badgeText;
     Color? badgeColor;
     Color? textColor = Colors.white;
     Color? smallCircleColor = accent;
-    Color? progressNumberCirlceColor = Color(0xFF1E3A68);
 
     final profileState = context.read<ProfileCubit>().state;
     String userFirstName = 'Ramesh';
@@ -276,27 +185,27 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       }
     }
 
-    switch (_status) {
+    switch (status) {
       case MembershipStatus.newUser:
         title = 'Join the Welfare Association';
         break;
       case MembershipStatus.applied:
         title = 'Thank you, $userFirstName';
         badgeText = 'Pending approval';
-        badgeColor = Color(0xFFD3E0ED).withValues(alpha: 0.82);
+        badgeColor = const Color(0xFFD3E0ED).withValues(alpha: 0.82);
         textColor = Colors.black;
         smallCircleColor = Colors.black;
         break;
       case MembershipStatus.approved:
         title = 'Application approved';
         badgeText = 'Payment pending';
-        badgeColor = Color(0xFFD3E0ED).withValues(alpha: 0.82);
+        badgeColor = const Color(0xFFD3E0ED).withValues(alpha: 0.82);
         textColor = Colors.black;
         smallCircleColor = Colors.black;
         break;
       case MembershipStatus.paid:
       case MembershipStatus.renewalDue:
-        title = _status == MembershipStatus.paid
+        title = status == MembershipStatus.paid
             ? "You're a member"
             : userFullName;
         badgeText = 'Active';
@@ -344,7 +253,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               children: [
                 CircleAvatar(
                   radius: 4.r,
-                  backgroundColor: _status == MembershipStatus.expired
+                  backgroundColor: status == MembershipStatus.expired
                       ? Colors.white
                       : smallCircleColor,
                 ),
@@ -365,22 +274,22 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     );
   }
 
-  Widget _buildStatusProgress() {
+  Widget _buildStatusProgress(MembershipStatus status, Map<String, dynamic>? timeline) {
     int currentStep = 0;
-    if (_membershipTimeline != null) {
-      if (_membershipTimeline!['idIssued'] == true) {
+    if (timeline != null) {
+      if (timeline['idIssued'] == true) {
         currentStep = 4;
-      } else if (_membershipTimeline!['paid'] == true) {
+      } else if (timeline['paid'] == true) {
         currentStep = 3;
-      } else if (_membershipTimeline!['approved'] == true) {
+      } else if (timeline['approved'] == true) {
         currentStep = 2;
-      } else if (_membershipTimeline!['applied'] == true) {
+      } else if (timeline['applied'] == true) {
         currentStep = 1;
       } else {
         currentStep = 0;
       }
     } else {
-      switch (_status) {
+      switch (status) {
         case MembershipStatus.newUser:
           currentStep = 0;
           break;
@@ -401,7 +310,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     final List<String> steps = ['APPLIED', 'APPROVED', 'PAID', 'ID ISSUED'];
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Stack(
         children: [
           Positioned(
@@ -442,7 +351,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                     decoration: BoxDecoration(
                       color: isCompleted
                           ? widget.theme.accentColor.toColor()
-                          : (isCurrent ? Colors.white : Color(0xFF1E3A68)),
+                          : (isCurrent ? Colors.white : const Color(0xFF1E3A68)),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isCompleted
@@ -485,30 +394,28 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     );
   }
 
-  Widget _buildContent() {
-    switch (_status) {
+  Widget _buildContent(MembershipStatus status, AssociationMembershipEntity? membership) {
+    switch (status) {
       case MembershipStatus.newUser:
         return _NewUserMembershipView(
           theme: widget.theme,
-          onRequestToJoin: _showRequestToJoinSheet,
+          onRequestToJoin: () => _showRequestToJoinSheet(context),
         );
       case MembershipStatus.applied:
         return _AppliedMembershipView(
           theme: widget.theme,
-          membership: _membershipData,
-          selectedProperties:
-              _selectedProperties.isNotEmpty ? _selectedProperties : null,
+          membership: membership,
         );
       case MembershipStatus.approved:
         return _ApprovedMembershipView(
           theme: widget.theme,
-          membership: _membershipData,
+          membership: membership,
           onPay: _showPayMembershipSheet,
         );
       case MembershipStatus.paid:
         return _ActiveMembershipView(
           theme: widget.theme,
-          membership: _membershipData,
+          membership: membership,
         );
       case MembershipStatus.renewalDue:
         return _RenewalDueMembershipView(theme: widget.theme);
@@ -517,11 +424,10 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     }
   }
 
-  Widget _buildFooter(Color accent) {
-    if (_status == MembershipStatus.newUser ||
-        _status == MembershipStatus.applied) {
-      final appRef = _membershipData?['applicationReference']?.toString() ??
-          'TNIT-APP-2026-5170';
+  Widget _buildFooter(Color accent, MembershipStatus status, AssociationMembershipEntity? membership) {
+    if (status == MembershipStatus.newUser ||
+        status == MembershipStatus.applied) {
+      final appRef = membership?.applicationReference ?? 'TNIT-APP-2026-5170';
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -534,7 +440,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _status == MembershipStatus.newUser
+                    status == MembershipStatus.newUser
                         ? 'Questions before you join?'
                         : 'Need to check on your application?',
                     style: GoogleFonts.inter(
@@ -545,7 +451,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    _status == MembershipStatus.newUser
+                    status == MembershipStatus.newUser
                         ? 'Talk to the membership desk about eligibility, fees or documents.'
                         : 'Quote reference $appRef when you call.',
                     style: GoogleFonts.inter(
@@ -567,7 +473,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                   size: 12.sp,
                 ),
                 label: Text(
-                  _status == MembershipStatus.newUser
+                  status == MembershipStatus.newUser
                         ? 'Call +91 98400 12345'
                         : 'Call desk',
                   style: GoogleFonts.inter(
@@ -598,7 +504,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     return const SizedBox.shrink();
   }
 
-  Widget _buildPreviewToggles() {
+  Widget _buildPreviewToggles(MembershipStatus currentStatus) {
     return Column(
       children: [
         const Divider(color: Colors.white12),
@@ -618,12 +524,12 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
                 ),
               ),
               SizedBox(width: 16.w),
-              _previewButton('Active', MembershipStatus.paid),
-              _previewButton('Renewal due', MembershipStatus.renewalDue),
-              _previewButton('Lapsed', MembershipStatus.expired),
-              _previewButton('New user', MembershipStatus.newUser),
-              _previewButton('Applied', MembershipStatus.applied),
-              _previewButton('Approved', MembershipStatus.approved),
+              _previewButton('Active', MembershipStatus.paid, currentStatus),
+              _previewButton('Renewal due', MembershipStatus.renewalDue, currentStatus),
+              _previewButton('Lapsed', MembershipStatus.expired, currentStatus),
+              _previewButton('New user', MembershipStatus.newUser, currentStatus),
+              _previewButton('Applied', MembershipStatus.applied, currentStatus),
+              _previewButton('Approved', MembershipStatus.approved, currentStatus),
             ],
           ),
         ),
@@ -631,14 +537,13 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     );
   }
 
-  Widget _previewButton(String label, MembershipStatus status) {
-    final isSelected = _status == status;
+  Widget _previewButton(String label, MembershipStatus status, MembershipStatus currentStatus) {
+    final isSelected = currentStatus == status;
     return Padding(
       padding: EdgeInsets.only(right: 12.w),
       child: InkWell(
         onTap: () => setState(() {
-          _status = status;
-          _membershipTimeline = null;
+          _previewStatus = status;
         }),
         child: Text(
           label,
@@ -655,58 +560,24 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     );
   }
 
-  void _showRequestToJoinSheet() {
+  void _showRequestToJoinSheet(BuildContext context) {
+    final cubit = context.read<AssociationMembershipCubit>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _RequestToJoinSheet(
-        theme: widget.theme,
-        portalId: widget.portalId,
-        initialProperties: _eligibleProperties,
+      builder: (context) => BlocProvider.value(
+        value: cubit,
+        child: _RequestToJoinSheet(
+          theme: widget.theme,
+          portalId: _getPortalId(),
+        ),
       ),
-    ).then((result) {
-      if (result != null) {
-        setState(() {
-          _status = MembershipStatus.applied;
-          if (result is Map<String, dynamic>) {
-            _membershipData = result;
-            if (result['timeline'] is Map) {
-              _membershipTimeline =
-                  Map<String, dynamic>.from(result['timeline'] as Map);
-            }
-          } else if (result is List<Map<String, dynamic>>) {
-            _selectedProperties = result;
-          }
-        });
-        _fetchMembershipStatus();
-      }
-    });
+    );
   }
 
   void _showPayMembershipSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _PayMembershipSheet(
-        theme: widget.theme,
-        membership: _membershipData,
-      ),
-    ).then((paid) {
-      if (paid == true) {
-        setState(() {
-          _status = MembershipStatus.paid;
-          _membershipTimeline = {
-            'applied': true,
-            'approved': true,
-            'paid': true,
-            'idIssued': true,
-          };
-        });
-        _fetchMembershipStatus();
-      }
-    });
+    // Keep internal for now as it uses membershipData which will be handled in building views
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -746,13 +617,11 @@ class _NewUserMembershipView extends StatelessWidget {
 
 class _AppliedMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
-  final Map<String, dynamic>? membership;
-  final List<Map<String, dynamic>>? selectedProperties;
+  final AssociationMembershipEntity? membership;
 
   const _AppliedMembershipView({
     required this.theme,
     this.membership,
-    this.selectedProperties,
   });
 
   @override
@@ -772,43 +641,15 @@ class _AppliedMembershipView extends StatelessWidget {
     int count = 2;
 
     if (membership != null) {
-      if (membership!['applicationReference'] != null &&
-          membership!['applicationReference'].toString().isNotEmpty) {
-        appRef = membership!['applicationReference'].toString();
+      appRef = membership!.applicationReference ?? appRef;
+      if (membership!.submittedAt != null) {
+        submittedDate = _formatDate(membership!.submittedAt);
       }
-      if (membership!['submittedAt'] != null) {
-        submittedDate = _formatDate(membership!['submittedAt']);
+      if (membership!.properties.isNotEmpty) {
+        count = membership!.properties.length;
+        propertyNames = membership!.properties.map((p) => p.name).toList();
+        propertyLocations = membership!.properties.map((p) => p.location).toList();
       }
-      if (membership!['properties'] is List &&
-          (membership!['properties'] as List).isNotEmpty) {
-        final propsList = membership!['properties'] as List;
-        count = propsList.length;
-        propertyNames = propsList
-            .map((p) => p is Map ? (p['name']?.toString() ?? '') : '')
-            .where((n) => n.isNotEmpty)
-            .toList();
-        propertyLocations = propsList.map((p) {
-          if (p is Map) {
-            final addr = p['address']?.toString().trim() ?? '';
-            final city = p['city']?.toString().trim() ?? '';
-            final parts = [
-              if (addr.isNotEmpty) addr,
-              if (city.isNotEmpty) city,
-            ];
-            return parts.isNotEmpty ? parts.join(', ') : 'Chennai';
-          }
-          return 'Chennai';
-        }).toList();
-      }
-    } else if (selectedProperties != null && selectedProperties!.isNotEmpty) {
-      count = selectedProperties!.length;
-      propertyNames = selectedProperties!
-          .map((p) => p['name']?.toString() ?? '')
-          .where((n) => n.isNotEmpty)
-          .toList();
-      propertyLocations = selectedProperties!
-          .map((p) => p['location']?.toString() ?? '')
-          .toList();
     }
 
     return Column(
@@ -850,7 +691,7 @@ class _AppliedMembershipView extends StatelessWidget {
   static String _formatDate(dynamic date) {
     if (date == null) return 'Submitted 14 Aug 2026';
     try {
-      final dt = DateTime.parse(date.toString()).toLocal();
+      final dt = date is DateTime ? date : DateTime.parse(date.toString());
       const months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -864,7 +705,7 @@ class _AppliedMembershipView extends StatelessWidget {
 
 class _ApprovedMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
-  final Map<String, dynamic>? membership;
+  final AssociationMembershipEntity? membership;
   final VoidCallback onPay;
 
   const _ApprovedMembershipView({
@@ -876,10 +717,9 @@ class _ApprovedMembershipView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
-    final appRef = membership?['applicationReference']?.toString() ??
-        '';
-    final approvedDate = _formatApprovedDate(membership?['approvedAt']);
-    final totalFee = membership?['totalFee'] ?? membership?['fee'] ?? 0;
+    final appRef = membership?.applicationReference ?? '';
+    final approvedDate = _formatApprovedDate(membership?.approvedAt);
+    final totalFee = membership?.totalFee ?? 0;
     final feeText = _formatAmount(totalFee);
 
     return Column(
@@ -922,7 +762,7 @@ class _ApprovedMembershipView extends StatelessWidget {
   static String _formatApprovedDate(dynamic date) {
     if (date == null) return 'Approved 14 Aug 2026';
     try {
-      final dt = DateTime.parse(date.toString()).toLocal();
+      final dt = date is DateTime ? date : DateTime.parse(date.toString());
       const months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -951,7 +791,7 @@ class _ApprovedMembershipView extends StatelessWidget {
 
 class _ActiveMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
-  final Map<String, dynamic>? membership;
+  final AssociationMembershipEntity? membership;
 
   const _ActiveMembershipView({
     required this.theme,
@@ -961,10 +801,7 @@ class _ActiveMembershipView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
-    final memId = membership?['membershipId']?.toString() ??
-        (membership?['status'] == 'ACTIVE' && membership?['id'] != null
-            ? membership!['id'].toString()
-            : '');
+    final memId = membership?.membershipId ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -990,36 +827,6 @@ class _ActiveMembershipView extends StatelessWidget {
           theme: theme,
         ),
         SizedBox(height: 16.h),
-        // Row(
-        //   children: [
-        //     Expanded(
-        //       child: _OutlineButton(
-        //         label: 'View ID card',
-        //         icon: Icons.visibility_outlined,
-        //         onPressed: () {},
-        //       ),
-        //     ),
-        //     SizedBox(width: 12.w),
-        //     Expanded(
-        //       child: _OutlineButton(
-        //         label: 'Download',
-        //         icon: Icons.download_outlined,
-        //         onPressed: () {},
-        //       ),
-        //     ),
-        //   ],
-        // ),
-        // SizedBox(height: 16.h),
-        // Center(
-        //   child: Row(
-        //     mainAxisAlignment: MainAxisAlignment.center,
-        //     children: [
-        //       _TextLink(label: 'Membership timeline'),
-        //       SizedBox(width: 24.w),
-        //       _TextLink(label: 'Preview what is sent'),
-        //     ],
-        //   ),
-        // ),
       ],
     );
   }
@@ -1670,85 +1477,19 @@ class _RequestToJoinSheet extends StatefulWidget {
 }
 
 class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
-  late List<Map<String, dynamic>> _properties;
+  late List<MembershipPropertyEntity> _properties;
+  late List<bool> _selected;
   bool _isLoading = false;
-  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialProperties != null &&
-        widget.initialProperties!.isNotEmpty) {
-      _properties = widget.initialProperties!
-          .map((p) => Map<String, dynamic>.from(p))
-          .toList();
-    } else {
-      _properties = [];
-      _fetchEligibleProperties();
-    }
-  }
-
-  Future<void> _fetchEligibleProperties() async {
-    setState(() => _isLoading = true);
-    try {
-      final dio = sl<Dio>();
-      final response = await dio.get(ApiConstants.associationEligibleProperties);
-      if (response.statusCode == 200 && response.data != null) {
-        final resData = response.data;
-        List<dynamic> rawList = [];
-        if (resData is Map) {
-          if (resData['data'] is Map && resData['data']['properties'] is List) {
-            rawList = resData['data']['properties'] as List;
-          } else if (resData['properties'] is List) {
-            rawList = resData['properties'] as List;
-          } else if (resData['data'] is List) {
-            rawList = resData['data'] as List;
-          }
-        }
-        final properties = rawList.map((item) {
-          final map = Map<String, dynamic>.from(item as Map);
-          final address = map['address']?.toString().trim() ?? '';
-          final city = map['city']?.toString().trim() ?? '';
-          final locationParts = [
-            if (address.isNotEmpty) address,
-            if (city.isNotEmpty) city,
-          ];
-          final location = locationParts.isNotEmpty
-              ? locationParts.join(', ')
-              : 'Chennai';
-
-          final hostelType = map['hostel_type']?.toString();
-          final propertyTag = map['propertyTag']?.toString();
-
-          return {
-            '_id': map['_id']?.toString() ?? map['id']?.toString() ?? '',
-            'name': map['name']?.toString() ?? '',
-            'address': address,
-            'city': city,
-            'hostel_type': hostelType,
-            'propertyTag': propertyTag,
-            'location': location,
-            'type': _MembershipCardWidgetState._formatPropertyType(
-              hostelType,
-              propertyTag,
-            ),
-            'selected': false,
-            'isActive': map['isActive'] ?? true,
-          };
-        }).toList();
-
-        if (mounted) {
-          setState(() {
-            _properties = properties;
-            _isLoading = false;
-          });
-        }
-      } else {
-        if (mounted) setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      AppLogger.error('Failed to fetch eligible properties in sheet: $e');
-      if (mounted) setState(() => _isLoading = false);
+    _properties = [];
+    _selected = [];
+    final state = context.read<AssociationMembershipCubit>().state;
+    if (state is AssociationMembershipLoaded) {
+      _properties = state.eligibleProperties;
+      _selected = List.generate(_properties.length, (index) => false);
     }
   }
 
@@ -1756,8 +1497,7 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
   Widget build(BuildContext context) {
     final primary = widget.theme.primaryColor.toColor();
     final accent = widget.theme.accentColor.toColor();
-    final selectedCount =
-        _properties.where((p) => p['selected'] == true).length;
+    final selectedCount = _selected.where((s) => s).length;
     final profileState = context.read<ProfileCubit>().state;
 
     String userName = 'Ramesh Kumar';
@@ -1780,434 +1520,358 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
       if (ini.isNotEmpty) userInitials = ini;
     }
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
-      ),
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40.w,
-              height: 4.h,
-              margin: EdgeInsets.only(bottom: 20.h),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2.r),
+    return BlocListener<AssociationMembershipCubit, AssociationMembershipState>(
+      listener: (context, state) {
+        if (state is AssociationMembershipLoaded) {
+          if (state.membership != null && state.status != 'NEW_USER') {
+            Navigator.pop(context, state.membership);
+          }
+        } else if (state is AssociationMembershipError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
+        ),
+        padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 4.h,
+                margin: EdgeInsets.only(bottom: 20.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
               ),
             ),
-          ),
-          Row(
-            children: [
-              Icon(Icons.home_outlined, color: accent, size: 24.sp),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Text(
-                  'Request to join',
-                  style: GoogleFonts.inter(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    color: primary,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: EdgeInsets.all(8.r),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0).withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.close, size: 18.sp, color: primary),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
+            Row(
               children: [
-                CircleAvatar(
-                  radius: 24.r,
-                  backgroundColor: primary,
-                  child: Text(
-                    userInitials,
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16.sp,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16.w),
+                Icon(Icons.home_outlined, color: accent, size: 24.sp),
+                SizedBox(width: 12.w),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        userName,
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Text(
-                        userPhone,
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.greyText,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'Request to join',
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: primary,
+                    ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                  child: Text(
-                    'YOUR ACCOUNT',
-                    style: GoogleFonts.inter(
-                      color: accent,
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w800,
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2E8F0).withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
                     ),
+                    child: Icon(Icons.close, size: 18.sp, color: primary),
                   ),
                 ),
               ],
             ),
-          ),
-          SizedBox(height: 18.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'PROPERTIES TO REGISTER',
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade500,
-                  letterSpacing: 0.5,
-                ),
+            SizedBox(height: 12.h),
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              if (_properties.isNotEmpty)
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      final allSelected =
-                          _properties.every((p) => p['selected'] == true);
-                      for (var p in _properties) {
-                        p['selected'] = !allSelected;
-                      }
-                    });
-                  },
-                  child: Text(
-                    _properties.every((p) => p['selected'] == true)
-                        ? 'Deselect all'
-                        : 'Select all',
-                    style: GoogleFonts.inter(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                      color: primary,
-                      decoration: TextDecoration.underline,
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24.r,
+                    backgroundColor: primary,
+                    child: Text(
+                      userInitials,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16.sp,
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          if (_isLoading)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 40.h),
-              child: Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(accent),
-                ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userName,
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          userPhone,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: AppColors.greyText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      'YOUR ACCOUNT',
+                      style: GoogleFonts.inter(
+                        color: accent,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            )
-          else if (_properties.isEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 32.h),
-              child: Center(
-                child: Text(
-                  'No eligible properties found',
+            ),
+            SizedBox(height: 18.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'PROPERTIES TO REGISTER',
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    color: AppColors.greyText,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 0.5,
                   ),
                 ),
-              ),
-            )
-          else
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _properties.length,
-                itemBuilder: (context, index) {
-                  final p = _properties[index];
-                  final isSelected = p['selected'] == true;
-                  return GestureDetector(
+                if (_properties.isNotEmpty)
+                  InkWell(
                     onTap: () {
                       setState(() {
-                        p['selected'] = !isSelected;
+                        final allSelected = _selected.every((s) => s);
+                        for (var i = 0; i < _selected.length; i++) {
+                          _selected[i] = !allSelected;
+                        }
                       });
                     },
-                    child: Container(
-                      margin: EdgeInsets.only(bottom: 12.h),
-                      padding: EdgeInsets.all(16.w),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0x336FA641)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(
-                          color: isSelected ? accent : Colors.transparent,
-                          width: 1.5,
-                        ),
+                    child: Text(
+                      _selected.every((s) => s) ? 'Deselect all' : 'Select all',
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        color: primary,
+                        decoration: TextDecoration.underline,
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 24.r,
-                            height: 24.r,
-                            decoration: BoxDecoration(
-                              color: isSelected ? accent : Colors.white,
-                              borderRadius: BorderRadius.circular(6.r),
-                              border: Border.all(
-                                color: isSelected
-                                    ? accent
-                                    : Colors.grey.shade300,
-                              ),
-                            ),
-                            child: isSelected
-                                ? Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16.sp,
-                                  )
-                                : null,
+                    ),
+                  ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            if (_isLoading)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 40.h),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(accent),
+                  ),
+                ),
+              )
+            else if (_properties.isEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 32.h),
+                child: Center(
+                  child: Text(
+                    'No eligible properties found',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.greyText,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _properties.length,
+                  itemBuilder: (context, index) {
+                    final p = _properties[index];
+                    final isSelected = _selected[index];
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selected[index] = !isSelected;
+                        });
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0x336FA641) : Colors.white,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: isSelected ? accent : Colors.transparent,
+                            width: 1.5,
                           ),
-                          SizedBox(width: 16.w),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  p['name'] ?? '',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 24.r,
+                              height: 24.r,
+                              decoration: BoxDecoration(
+                                color: isSelected ? accent : Colors.white,
+                                borderRadius: BorderRadius.circular(6.r),
+                                border: Border.all(
+                                  color: isSelected ? accent : Colors.grey.shade300,
                                 ),
-                                if ((p['location'] ?? '')
-                                    .toString()
-                                    .isNotEmpty) ...[
-                                  SizedBox(height: 2.h),
+                              ),
+                              child: isSelected
+                                  ? Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    )
+                                  : null,
+                            ),
+                            SizedBox(width: 16.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    p['location'] ?? '',
+                                    p.name,
                                     style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      color: AppColors.greyText,
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  if (p.location.isNotEmpty) ...[
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      p.location,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.sp,
+                                        color: AppColors.greyText,
+                                      ),
+                                    ),
+                                  ],
+                                  SizedBox(height: 8.h),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8.w,
+                                      vertical: 4.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEFF6FF),
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    ),
+                                    child: Text(
+                                      p.type,
+                                      style: GoogleFonts.inter(
+                                        color: primary,
+                                        fontSize: 9.sp,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
                                   ),
                                 ],
-                                SizedBox(height: 8.h),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8.w,
-                                    vertical: 4.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEFF6FF),
-                                    borderRadius: BorderRadius.circular(4.r),
-                                  ),
-                                  child: Text(
-                                    p['type'] ?? 'HOSTEL',
-                                    style: GoogleFonts.inter(
-                                      color: primary,
-                                      fontSize: 9.sp,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          if (selectedCount > 0)
-            Padding(
-              padding: EdgeInsets.only(top: 8.h, bottom: 12.h),
-              child: Text(
-                '$selectedCount of ${_properties.length} selected',
-                style: GoogleFonts.inter(fontSize: 12.sp, color: Colors.grey),
-              ),
-            ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: (selectedCount > 0 && !_isSubmitting)
-                  ? () async {
-                      setState(() => _isSubmitting = true);
-                      final selected = _properties
-                          .where((p) => p['selected'] == true)
-                          .toList();
-                      final propertyIds = selected
-                          .map((p) => (p['_id'] ?? p['id'] ?? '').toString())
-                          .where((id) => id.isNotEmpty)
-                          .toList();
-
-                      String portalId = widget.portalId ?? '';
-                      if (portalId.isEmpty) {
-                        final profileState = context.read<ProfileCubit>().state;
-                        if (profileState is ProfileLoaded &&
-                            profileState.profile.associationId != null &&
-                            profileState.profile.associationId!.isNotEmpty) {
-                          portalId = profileState.profile.associationId!;
-                        } else {
-                          portalId = '';
-                        }
-                      }
-
-                      final navigator = Navigator.of(context);
-                      final messenger = ScaffoldMessenger.of(context);
-
-                      try {
-                        final dio = sl<Dio>();
-                        final response = await dio.post(
-                          ApiConstants.associationMembershipApplications,
-                          data: {
-                            'portalId': portalId,
-                            'propertyIds': propertyIds,
-                          },
-                        );
-
-                        if (response.statusCode == 200 ||
-                            response.statusCode == 201) {
-                          final resData = response.data;
-                          Map<String, dynamic>? membership;
-                          if (resData is Map &&
-                              resData['data'] is Map &&
-                              resData['data']['membership'] is Map) {
-                            membership = Map<String, dynamic>.from(
-                                resData['data']['membership'] as Map);
-                          } else if (resData is Map && resData['data'] is Map) {
-                            membership =
-                                Map<String, dynamic>.from(resData['data'] as Map);
-                          } else if (resData is Map &&
-                              resData['membership'] is Map) {
-                            membership = Map<String, dynamic>.from(
-                                resData['membership'] as Map);
-                          }
-                          navigator.pop(membership ?? selected);
-                        } else {
-                          if (mounted) {
-                            setState(() => _isSubmitting = false);
-                            final msg = response.data is Map
-                                ? response.data['message']?.toString()
-                                : null;
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    msg ?? 'Failed to submit application'),
                               ),
-                            );
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            if (selectedCount > 0)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h, bottom: 12.h),
+                child: Text(
+                  '$selectedCount of ${_properties.length} selected',
+                  style: GoogleFonts.inter(fontSize: 12.sp, color: Colors.grey),
+                ),
+              ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: (selectedCount > 0)
+                    ? () {
+                        final List<String> propertyIds = [];
+                        for (int i = 0; i < _selected.length; i++) {
+                          if (_selected[i]) {
+                            propertyIds.add(_properties[i].id);
                           }
                         }
-                      } catch (e) {
-                        AppLogger.error(
-                            'Failed to submit membership application: $e');
-                        if (mounted) {
-                          setState(() => _isSubmitting = false);
-                          messenger.showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Failed to submit application. Please try again.'),
-                            ),
-                          );
-                        }
+                        context.read<AssociationMembershipCubit>().submit(
+                          widget.portalId ?? '',
+                          propertyIds,
+                        );
                       }
-                    }
-                  : null,
-              icon: _isSubmitting
-                  ? const SizedBox.shrink()
-                  : Icon(
-                      Icons.check,
-                      color: selectedCount > 0 ? primary : primary,
-                      size: 14.sp,
-                    ),
-              label: _isSubmitting
-                  ? SizedBox(
-                      width: 18.w,
-                      height: 18.w,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(primary),
-                      ),
-                    )
-                  : Text(
-                      selectedCount > 0
-                          ? 'Submit application · $selectedCount ${selectedCount == 1 ? 'property' : 'properties'}'
-                          : 'Submit application',
-                      style: GoogleFonts.inter(
-                        color: primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13.sp,
-                      ),
-                    ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: accent,
-                disabledBackgroundColor: accent.withValues(alpha: 0.5),
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
+                    : null,
+                icon: Icon(
+                  Icons.check,
+                  color: primary,
+                  size: 14.sp,
                 ),
-                elevation: 0,
+                label: Text(
+                  selectedCount > 0
+                      ? 'Submit application · $selectedCount ${selectedCount == 1 ? 'property' : 'properties'}'
+                      : 'Submit application',
+                  style: GoogleFonts.inter(
+                    color: primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  disabledBackgroundColor: accent.withValues(alpha: 0.5),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                  elevation: 0,
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'Your name and mobile number come from your account. The application goes to the association for approval — no fee is payable until it is approved.',
-            style: GoogleFonts.inter(
-              fontSize: 10.sp,
-              color: AppColors.greyText,
-              height: 1.4,
+            SizedBox(height: 16.h),
+            Text(
+              'Your name and mobile number come from your account. The application goes to the association for approval — no fee is payable until it is approved.',
+              style: GoogleFonts.inter(
+                fontSize: 10.sp,
+                color: AppColors.greyText,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

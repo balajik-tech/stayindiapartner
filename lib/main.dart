@@ -22,6 +22,7 @@ import 'package:stayindia_owner/features/communities/presentation/cubit/associat
 import 'core/theme/theme_cubit.dart';
 import 'features/auth/presentation/cubit/guest_session_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cubit.dart';
+import 'package:stayindia_owner/features/communities/presentation/cubit/association_membership_cubit.dart';
 import 'injection_container.dart' as di;
 import 'core/services/app_bootstrapper.dart';
 
@@ -114,6 +115,9 @@ class StayIndiaOwnerApp extends StatelessWidget {
                         ),
                         BlocProvider(
                           create: (context) => di.sl<AssociationCubit>(),
+                        ),
+                        BlocProvider(
+                          create: (context) => di.sl<AssociationMembershipCubit>(),
                         ),
                       ],
                       child: MaterialApp(
