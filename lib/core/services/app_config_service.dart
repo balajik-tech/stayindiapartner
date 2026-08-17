@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import '../utils/logger.dart';
 
@@ -48,7 +49,6 @@ class AppConfigData {
 }
 
 class AppConfigService {
-  static const String _endpoint = 'https://api.stayindia.in/api/v1/app-config';
   static const String _appKey = String.fromEnvironment(
     'APP_CONFIG_APP',
     defaultValue: 'PARTNER',
@@ -82,33 +82,49 @@ class AppConfigService {
   String get secretToken => data.secretToken;
   String get digilockerRedirectUrl => data.digilockerRedirectUrl;
 
-  Future<AppConfigData?> load() async {
-    if (_isLoading) return _config;
+  Future<AppConfigData?> load({bool force = true}) async {
+    if (_isLoading) {
+      AppLogger.debug('AppConfig load already in progress...');
+      return _config;
+    }
+    
+    // If not forcing and already loaded, return existing
+    if (!force && _config != null) return _config;
+
     _isLoading = true;
+    AppLogger.info('Initializing app-config from remote API...');
 
     try {
+      final String url = ApiConstants.effectiveBaseUrl + ApiConstants.remoteConfig;
+      AppLogger.debug('AppConfig GET: $url');
+
       final response = await _dio.get(
-        _endpoint,
+        url,
         options: Options(
           headers: {
             'x-app': _appKey,
             'x-api-key': _apiKey,
             'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'Expires': '0',
           },
         ),
       );
 
       final payload = response.data;
       if (payload is! Map || payload['success'] != true || payload['data'] is! Map) {
+        AppLogger.error('Invalid app-config response structure: $payload');
         throw StateError('Invalid app-config response payload');
       }
 
       final configMap = Map<String, dynamic>.from(payload['data'] as Map);
       _config = AppConfigData.fromMap(configMap);
-      AppLogger.info('App config loaded successfully for ${_config!.app}.');
+      AppLogger.success('App config loaded successfully for ${_config!.app}.');
       return _config;
     } catch (error, stackTrace) {
-      AppLogger.error('Failed to load app config from remote API.', error, stackTrace);
+      AppLogger.error('CRITICAL: Failed to load remote app config.', error, stackTrace);
+      // Ensure we have at least fallback data if it's the first run
       _config ??= AppConfigData.fallback();
       return _config;
     } finally {

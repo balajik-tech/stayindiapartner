@@ -6,7 +6,12 @@ class ApiConstants {
 
   static const String _api_Version = '/api/v1';
 
-  static const String _prodUrl = 'https://api.stayindia.in$_api_Version';
+  static const String productionUrl = 'https://aws-api.stayindia.in';
+
+  static const String stagingUrl = 'https://api.stayindia.in';
+
+  static const String _prodUrl = '$stagingUrl$_api_Version';
+
 
   static String get baseUrl {
     const url = String.fromEnvironment('API_BASE_URL', defaultValue: _prodUrl);
@@ -25,6 +30,9 @@ class ApiConstants {
     return url;
   }
 
+  static final String sampleCSVURL = '$baseUrl/sample.csv';
+
+  static const String remoteConfig = '/app-config';
 
   static const String requestOtp = '/auth/request-otp';
   static const String verifyOtp = '/auth/verify-otp';

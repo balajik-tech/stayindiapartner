@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
@@ -555,8 +556,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
   }
 
   Future<void> _downloadSampleCSV() async {
-    const String csvUrl =
-        'https://api.stayindia.in/sample/bulk-tenant-upload.csv';
+    final String csvUrl = ApiConstants.sampleCSVURL;
 
     final Uri uri = Uri.parse(csvUrl);
 

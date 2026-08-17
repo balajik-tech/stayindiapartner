@@ -81,6 +81,11 @@ class _AppBootstrapperState extends State<AppBootstrapper>
     });
 
     try {
+      // 1. App-Config MUST be first to ensure keys/tokens are ready for other services
+      AppLogger.info('Bootstrapping App Config...');
+      final configService = AppConfigService();
+      await configService.load(force: true);
+
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
@@ -141,7 +146,12 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       });
 
       await di.init();
-      await di.sl<AppConfigService>().load();
+
+      // Update the singleton in DI with the one we just loaded
+      if (di.sl.isRegistered<AppConfigService>()) {
+        await di.sl.unregister<AppConfigService>();
+      }
+      di.sl.registerSingleton<AppConfigService>(configService);
 
       setState(() {
         _progress = 0.80;
@@ -230,7 +240,6 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                   SizedBox(height: 24.h),
                   const AnimatedFutureOfLivingText(),
                   SizedBox(height: 32.h),
-                  // const CircularProgressIndicator(color: AppColors.primaryBlue),
                 ],
               ),
             ),
