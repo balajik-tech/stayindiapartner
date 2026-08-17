@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:isolate';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -40,6 +41,8 @@ abstract class TenantRemoteDataSource {
     String? gender,
     String? address,
   });
+
+  Future<Map<String, dynamic>> bulkUploadTenants(File file);
 }
 
 class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
@@ -213,5 +216,27 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
       final msg = response.data?['message'] ?? 'Failed to add tenant';
       throw Exception(msg);
     }
+  }
+
+  @override
+  Future<Map<String, dynamic>> bulkUploadTenants(File file) async {
+    final fileName = file.path.split('/').last;
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        file.path,
+        filename: fileName,
+      ),
+    });
+
+    final response = await _dio.post(
+      ApiConstants.bulkTenants,
+      data: formData,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.data as Map<String, dynamic>;
+    }
+    
+    throw Exception(response.data?['message'] ?? 'Bulk upload failed');
   }
 }

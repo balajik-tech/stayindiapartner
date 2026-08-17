@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../entities/tenant_entity.dart';
 
 abstract class TenantRepository {
@@ -35,4 +36,6 @@ abstract class TenantRepository {
     String? gender,
     String? address,
   });
+
+  Future<Map<String, dynamic>> bulkUploadTenants(File file);
 }

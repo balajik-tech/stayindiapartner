@@ -20,6 +20,7 @@ void registerTenantsFeature(GetIt sl) {
       getRoomsByFloorUseCase: sl(),
       getFreeBedsUseCase: sl(),
       addTenantUseCase: sl(),
+      bulkUploadTenantsUseCase: sl(),
     ),
   );
   sl.registerFactory(
@@ -31,6 +32,7 @@ void registerTenantsFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetTenantsForHostelUseCase(sl()));
   sl.registerLazySingleton(() => GetTenantDetailUseCase(sl()));
   sl.registerLazySingleton(() => AddTenantUseCase(sl()));
+  sl.registerLazySingleton(() => BulkUploadTenantsUseCase(sl()));
   sl.registerLazySingleton(() => GetComplaintsUseCase(sl()));
   sl.registerLazySingleton(() => UpdateComplaintStatusUseCase(sl()));
 

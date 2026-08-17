@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
 import 'package:stayindia_owner/features/tenants/domain/repositories/tenant_repository.dart';
 import 'package:stayindia_owner/features/tenants/data/datasources/tenant_remote_datasource.dart';
@@ -76,4 +77,9 @@ class TenantRepositoryImpl implements TenantRepository {
     gender: gender,
     address: address,
   );
+
+  @override
+  Future<Map<String, dynamic>> bulkUploadTenants(File file) {
+    return remote.bulkUploadTenants(file);
+  }
 }

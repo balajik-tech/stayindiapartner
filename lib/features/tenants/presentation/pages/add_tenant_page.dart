@@ -343,12 +343,13 @@ class _AddTenantPageState extends State<AddTenantPage> {
       // Some environments might have conflicting definitions or version issues.
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['csv'],
+        allowedExtensions: ['csv', 'xlsx'],
       );
 
       if (result != null && result.files.single.path != null) {
         final path = result.files.single.path!;
-        if (path.toLowerCase().endsWith('.csv')) {
+        final ext = path.split('.').last.toLowerCase();
+        if (ext == 'csv' || ext == 'xlsx') {
           setState(() {
             _csvFile = File(path);
           });
@@ -356,7 +357,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Please select a valid .csv file'),
+                content: Text('Please select a valid .csv or .xlsx file'),
                 backgroundColor: Colors.redAccent,
               ),
             );
@@ -364,7 +365,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         }
       }
     } catch (e) {
-      debugPrint('Error picking CSV: $e');
+      debugPrint('Error picking file: $e');
     }
   }
 
@@ -426,7 +427,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 Row(
                   children: [
                     Icon(
-                      Icons.insert_drive_file_rounded,
+                      _csvFile!.path.toLowerCase().endsWith('.csv')
+                          ? Icons.insert_drive_file_rounded
+                          : Icons.table_view_rounded,
                       color: Colors.green,
                       size: 32.sp,
                     ),
@@ -447,7 +450,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'CSV File Ready',
+                            'File Ready',
                             style: TextStyle(
                               fontSize: 12.sp,
                               color: Colors.green,
@@ -471,7 +474,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 ),
               ] else ...[
                 Text(
-                  'Upload a CSV file containing tenant details for bulk registration.',
+                  'Upload a CSV or Excel file containing tenant details for bulk registration.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13.sp,
@@ -485,7 +488,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 ElevatedButton.icon(
                   onPressed: _pickCSVFile,
                   icon: const Icon(Icons.upload_file_rounded),
-                  label: const Text('Select CSV File'),
+                  label: const Text('Select File'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.primaryBlue,
@@ -576,25 +579,17 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
   Future<void> _submitBulkTenantUpload() async {
     if (_csvFile == null) {
-      debugPrint('❌ Bulk Upload: No CSV file selected');
+      debugPrint('❌ Bulk Upload: No file selected');
       return;
     }
 
     final path = _csvFile!.path;
-    final fileName = path.split('/').last;
     final extension = path.split('.').last.toLowerCase();
 
-    debugPrint('========== BULK TENANT UPLOAD ==========');
-    debugPrint('📁 File Name : $fileName');
-    debugPrint('📍 File Path : $path');
-    debugPrint('📄 Extension : .$extension');
-
-    if (!path.toLowerCase().endsWith('.csv')) {
-      debugPrint('❌ Invalid file format');
-
+    if (extension != 'csv' && extension != 'xlsx') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Invalid file format. Please upload a .csv file.'),
+          content: Text('Invalid file format. Please upload a .csv or .xlsx file.'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -602,37 +597,20 @@ class _AddTenantPageState extends State<AddTenantPage> {
     }
 
     final file = File(path);
-
     if (!await file.exists()) {
       debugPrint('❌ File does not exist: $path');
       return;
     }
 
-    final fileSize = await file.length();
-
-    debugPrint('📦 File Size : $fileSize bytes');
-    debugPrint('📦 File Size : ${(fileSize / 1024).toStringAsFixed(2)} KB');
-
-    // Read CSV content for debugging
-    final csvContent = await file.readAsString();
-
-    debugPrint('📄 CSV Content:');
-    debugPrint(csvContent);
-
-    debugPrint('========================================');
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Processing bulk tenant upload...'),
-        backgroundColor: Colors.blueAccent,
-      ),
-    );
-
-    // TODO: Call API here
-    // context.read<TenantCubit>().bulkUploadTenants(_csvFile!);
+    _addTenantCubit.bulkUpload(file);
   }
 
   void _submit() {
+    if (_csvFile != null) {
+      _submitBulkTenantUpload();
+      return;
+    }
+
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final rentText = _rentController.text.trim();
@@ -876,7 +854,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
           if (state is AddTenantSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('tenant_added_success'.tr()),
+                content: Text(state.message ?? 'tenant_added_success'.tr()),
                 backgroundColor: Colors.green,
               ),
             );

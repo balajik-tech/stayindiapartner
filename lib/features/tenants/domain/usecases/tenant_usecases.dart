@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
 import 'package:stayindia_owner/features/tenants/domain/repositories/tenant_repository.dart';
 
@@ -94,5 +96,14 @@ class AddTenantUseCase {
       gender: gender,
       address: address,
     );
+  }
+}
+
+class BulkUploadTenantsUseCase {
+  final TenantRepository repository;
+  BulkUploadTenantsUseCase(this.repository);
+
+  Future<Map<String, dynamic>> call(File file) {
+    return repository.bulkUploadTenants(file);
   }
 }

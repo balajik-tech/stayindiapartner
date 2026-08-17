@@ -103,7 +103,12 @@ class AddTenantReady extends AddTenantState {
 
 class AddTenantSubmitting extends AddTenantState {}
 
-class AddTenantSuccess extends AddTenantState {}
+class AddTenantSuccess extends AddTenantState {
+  final String? message;
+  const AddTenantSuccess({this.message});
+  @override
+  List<Object?> get props => [message];
+}
 
 class AddTenantError extends AddTenantState {
   final String message;

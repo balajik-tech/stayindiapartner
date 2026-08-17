@@ -79,6 +79,7 @@ class ApiConstants {
 
   static const String tenants = '/tenants';
   static const String tenantDetail = '/tenants';
+  static const String bulkTenants = '/tenants/bulk';
 
   static const String community = '/community';
 

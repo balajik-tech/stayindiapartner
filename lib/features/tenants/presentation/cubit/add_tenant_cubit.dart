@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:stayindia_owner/core/utils/error_handler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
@@ -12,16 +14,19 @@ class AddTenantCubit extends Cubit<AddTenantState> {
   final GetRoomsByFloorUseCase _getRoomsByFloor;
   final GetFreeBedsUseCase _getFreeBeds;
   final AddTenantUseCase _addTenant;
+  final BulkUploadTenantsUseCase _bulkUpload;
 
   AddTenantCubit({
     required GetFloorsUseCase getFloorsUseCase,
     required GetRoomsByFloorUseCase getRoomsByFloorUseCase,
     required GetFreeBedsUseCase getFreeBedsUseCase,
     required AddTenantUseCase addTenantUseCase,
+    required BulkUploadTenantsUseCase bulkUploadTenantsUseCase,
   }) : _getFloors = getFloorsUseCase,
        _getRoomsByFloor = getRoomsByFloorUseCase,
        _getFreeBeds = getFreeBedsUseCase,
        _addTenant = addTenantUseCase,
+       _bulkUpload = bulkUploadTenantsUseCase,
        super(AddTenantInitial());
 
   void selectHostel(Hostel hostel) async {
@@ -151,6 +156,23 @@ class AddTenantCubit extends Cubit<AddTenantState> {
 
     );
       emit(AddTenantSuccess());
+    } catch (e) {
+      emit(AddTenantError(ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> bulkUpload(File file) async {
+    emit(const AddTenantLoading(message: "Processing bulk upload..."));
+    try {
+      final response = await _bulkUpload(file);
+      final success = response['success'] == true || response['status'] == 'success';
+      final message = response['message'] ?? 'Bulk upload processed';
+      
+      if (success) {
+        emit(AddTenantSuccess(message: message));
+      } else {
+        emit(AddTenantError(message));
+      }
     } catch (e) {
       emit(AddTenantError(ErrorHelper.toFriendlyMessage(e)));
     }
