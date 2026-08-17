@@ -31,4 +31,10 @@ class AssociationMembershipRepositoryImpl implements AssociationMembershipReposi
     );
     return AssociationMembershipModel.fromJson(data);
   }
+
+  @override
+  Future<MembershipPaymentDetailsEntity> getPaymentDetails(String membershipId) async {
+    final data = await remoteDataSource.getPaymentDetails(membershipId);
+    return MembershipPaymentDetailsModel.fromJson(data);
+  }
 }

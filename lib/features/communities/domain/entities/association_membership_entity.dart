@@ -73,3 +73,48 @@ class MembershipPropertyEntity extends Equatable {
         isActive,
       ];
 }
+
+class MembershipPaymentDetailsEntity extends Equatable {
+  final String applicationReference;
+  final int properties;
+  final int validForMonths;
+  final double amount;
+  final double totalfee;
+  final String currency;
+  final bool collectViaApp;
+  final String? accountHolder;
+  final String? accountNumberLast4;
+  final String? ifsc;
+  final String? bankName;
+  final String? upi;
+
+  const MembershipPaymentDetailsEntity({
+    required this.applicationReference,
+    required this.properties,
+    required this.validForMonths,
+    required this.amount,
+    required this.totalfee,
+    required this.currency,
+    required this.collectViaApp,
+    this.accountHolder,
+    this.accountNumberLast4,
+    this.ifsc,
+    this.bankName,
+    this.upi,
+  });
+
+  @override
+  List<Object?> get props => [
+        applicationReference,
+        properties,
+        validForMonths,
+        amount,
+        currency,
+        collectViaApp,
+        accountHolder,
+        accountNumberLast4,
+        ifsc,
+        bankName,
+        upi,
+      ];
+}

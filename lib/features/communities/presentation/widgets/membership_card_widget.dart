@@ -121,7 +121,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               SizedBox(height: 24.h),
               _buildStatusProgress(membershipStatus, membership?.timeline),
               SizedBox(height: 8.h),
-              _buildContent(membershipStatus, membership),
+              _buildContent(membershipStatus, membership, state is AssociationMembershipLoaded ? state.paymentDetails : null),
               SizedBox(height: 20.h),
               _buildFooter(accent, membershipStatus, membership),
               SizedBox(height: 16.h),
@@ -394,7 +394,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     );
   }
 
-  Widget _buildContent(MembershipStatus status, AssociationMembershipEntity? membership) {
+  Widget _buildContent(MembershipStatus status, AssociationMembershipEntity? membership, MembershipPaymentDetailsEntity? paymentDetails) {
     switch (status) {
       case MembershipStatus.newUser:
         return _NewUserMembershipView(
@@ -410,7 +410,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         return _ApprovedMembershipView(
           theme: widget.theme,
           membership: membership,
-          onPay: () => _showPayMembershipSheet(membership),
+          onPay: () => _showPayMembershipSheet(membership, paymentDetails),
         );
       case MembershipStatus.paid:
         return _ActiveMembershipView(
@@ -576,15 +576,20 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     );
   }
 
-  void _showPayMembershipSheet(AssociationMembershipEntity? membership) {
+  void _showPayMembershipSheet(AssociationMembershipEntity? membership, MembershipPaymentDetailsEntity? paymentDetails) {
     if (membership == null) return;
+    final cubit = context.read<AssociationMembershipCubit>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _PayMembershipSheet(
-        theme: widget.theme,
-        membership: membership,
+      builder: (context) => BlocProvider.value(
+        value: cubit,
+        child: _PayMembershipSheet(
+          theme: widget.theme,
+          membership: membership,
+          paymentDetails: paymentDetails,
+        ),
       ),
     );
   }
@@ -1915,169 +1920,210 @@ class _DashedDivider extends StatelessWidget {
   }
 }
 
-class _PayMembershipSheet extends StatelessWidget {
+class _PayMembershipSheet extends StatefulWidget {
   final CommunityThemeEntity theme;
   final AssociationMembershipEntity? membership;
+  final MembershipPaymentDetailsEntity? paymentDetails;
 
   const _PayMembershipSheet({
     required this.theme,
     this.membership,
+    this.paymentDetails,
   });
 
   @override
+  State<_PayMembershipSheet> createState() => _PayMembershipSheetState();
+}
+
+class _PayMembershipSheetState extends State<_PayMembershipSheet> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh details if they are missing or if we want to ensure latest
+    if (widget.paymentDetails == null && widget.membership != null) {
+      context.read<AssociationMembershipCubit>().refreshPaymentDetails(widget.membership!.id);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final primary = theme.primaryColor.toColor();
-    final accent = theme.accentColor.toColor();
+    final primary = widget.theme.primaryColor.toColor();
+    final accent = widget.theme.accentColor.toColor();
     final profileState = context.read<ProfileCubit>().state;
 
-    String memberName = 'Ramesh Kumar';
+    String memberName = '';
     if (profileState is ProfileLoaded &&
         profileState.profile.fullName.trim().isNotEmpty) {
       memberName = profileState.profile.fullName.trim();
     }
 
-    final appRef = membership?.applicationReference ?? 'TNIT-APP-2026-4557';
-    final propCount = membership?.properties.length.toString() ?? '1';
-    final totalFee = membership?.totalFee ?? 0;
-    final feeText = _ApprovedMembershipView._formatAmount(totalFee);
-    final feeAmount = totalFee.toInt();
+    return BlocBuilder<AssociationMembershipCubit, AssociationMembershipState>(
+      builder: (context, state) {
+        MembershipPaymentDetailsEntity? details = widget.paymentDetails;
+        if (state is AssociationMembershipLoaded && state.paymentDetails != null) {
+          details = state.paymentDetails;
+        }
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40.w,
-              height: 4.h,
-              margin: EdgeInsets.only(bottom: 20.h),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
+        final appRef = details?.applicationReference ??
+            widget.membership?.applicationReference ??
+            '';
+        final propCount = details?.properties.toString() ??
+            widget.membership?.properties.length.toString() ??
+            '1';
+        final totalFee = details?.totalfee ?? widget.membership?.totalFee ?? 0;
+        final feeText = _ApprovedMembershipView._formatAmount(totalFee);
+        final validUntil = details != null
+            ? _formatValidUntil(details.validForMonths)
+            : '';
+
+        return Container(
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
           ),
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.home_outlined, color: accent, size: 24.sp),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Text(
-                  'Pay membership',
-                  style: GoogleFonts.inter(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    color: primary,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
+              Center(
                 child: Container(
-                  padding: EdgeInsets.all(8.r),
+                  width: 40.w,
+                  height: 4.h,
+                  margin: EdgeInsets.only(bottom: 20.h),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0).withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2.r),
                   ),
-                  child: Icon(Icons.close, size: 18.sp, color: primary),
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 24.h),
-          Container(
-            padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Column(
-              children: [
-                _buildRow('Member', memberName),
-                const Divider(height: 32, color: Color(0xFFE2E8F0)),
-                _buildRow('Application', appRef),
-                const Divider(height: 32, color: Color(0xFFE2E8F0)),
-                _buildRow('Properties', propCount),
-                const Divider(height: 32, color: Color(0xFFE2E8F0)),
-                _buildRow('Plan', 'Annual membership'),
-                const Divider(height: 32, color: Color(0xFFE2E8F0)),
-                _buildRow('Valid until', '14 Aug 2027'),
-                const Divider(height: 32, color: Color(0xFFE2E8F0)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Amount payable',
+              Row(
+                children: [
+                  Icon(Icons.home_outlined, color: accent, size: 24.sp),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      'Pay membership',
                       style: GoogleFonts.inter(
-                        color: Colors.grey.shade500,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                        color: primary,
                       ),
                     ),
-                    Text(
-                      feeText,
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFF1E3A68),
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w700,
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: EdgeInsets.all(8.r),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E8F0).withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
                       ),
+                      child: Icon(Icons.close, size: 18.sp, color: primary),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24.h),
+              Container(
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Column(
+                  children: [
+                    _buildRow('Member', memberName),
+                    const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                    _buildRow('Application', appRef),
+                    const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                    _buildRow('Properties', propCount),
+                    const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                    _buildRow('Plan', 'Annual membership'),
+                    const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                    _buildRow('Valid until', validUntil),
+                    const Divider(height: 32, color: Color(0xFFE2E8F0)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Amount payable',
+                          style: GoogleFonts.inter(
+                            color: Colors.grey.shade500,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          feeText,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF1E3A68),
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          SizedBox(height: 24.h),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => {
-                _navigateToRazorpay(
-                  context,
-                  amount: feeAmount.toDouble(),
-                  planName: 'Associate Plan',
-                  orderId: 'order_test_123456789',
+              ),
+              SizedBox(height: 24.h),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    _navigateToRazorpay(
+                      context,
+                      amount: totalFee.toDouble(),
+                      planName: 'Associate Plan',
+                      orderId: 'order_test_123456789',
+                    );
+                  },
+                  icon: Icon(Icons.credit_card, color: primary, size: 18.sp),
+                  label: Text(
+                    'Pay $feeText',
+                    style: GoogleFonts.inter(
+                      color: primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15.sp,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accent,
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                    elevation: 0,
+                  ),
                 ),
-              },
-              icon: Icon(Icons.credit_card, color: primary, size: 18.sp),
-              label: Text(
-                'Pay $feeText',
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'You\'ll be redirected to a secure payment gateway (UPI / card / net-banking). Your membership ID is generated once payment succeeds, and the digital certificate is sent to your WhatsApp number. This preview does not process real payments.',
                 style: GoogleFonts.inter(
-                  color: primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15.sp,
+                  fontSize: 11.sp,
+                  color: AppColors.greyText,
+                  height: 1.4,
                 ),
+                textAlign: TextAlign.center,
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: accent,
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                elevation: 0,
-              ),
-            ),
+            ],
           ),
-          SizedBox(height: 16.h),
-          Text(
-            'You\'ll be redirected to a secure payment gateway (UPI / card / net-banking). Your membership ID is generated once payment succeeds, and the digital certificate is sent to your WhatsApp number. This preview does not process real payments.',
-            style: GoogleFonts.inter(
-              fontSize: 11.sp,
-              color: AppColors.greyText,
-              height: 1.4,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  String _formatValidUntil(int months) {
+    final now = DateTime.now();
+    final expiry = DateTime(now.year, now.month + months, now.day);
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${expiry.day} ${monthNames[expiry.month - 1]} ${expiry.year}';
   }
 
   Widget _buildRow(String label, String value) {

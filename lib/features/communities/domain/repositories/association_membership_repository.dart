@@ -7,4 +7,5 @@ abstract class AssociationMembershipRepository {
     required String portalId,
     required List<String> propertyIds,
   });
+  Future<MembershipPaymentDetailsEntity> getPaymentDetails(String membershipId);
 }

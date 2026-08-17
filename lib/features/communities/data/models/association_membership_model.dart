@@ -97,3 +97,37 @@ class MembershipPropertyModel extends MembershipPropertyEntity {
     return "HOSTEL";
   }
 }
+
+class MembershipPaymentDetailsModel extends MembershipPaymentDetailsEntity {
+  const MembershipPaymentDetailsModel({
+    required super.applicationReference,
+    required super.properties,
+    required super.validForMonths,
+    required super.amount,
+    required super.totalfee,
+    required super.currency,
+    required super.collectViaApp,
+    super.accountHolder,
+    super.accountNumberLast4,
+    super.ifsc,
+    super.bankName,
+    super.upi,
+  });
+
+  factory MembershipPaymentDetailsModel.fromJson(Map<String, dynamic> json) {
+    return MembershipPaymentDetailsModel(
+      applicationReference: json['applicationReference']?.toString() ?? '',
+      properties: json['properties'] is int ? json['properties'] : int.tryParse(json['properties']?.toString() ?? '0') ?? 0,
+      validForMonths: json['validForMonths'] is int ? json['validForMonths'] : int.tryParse(json['validForMonths']?.toString() ?? '0') ?? 0,
+      amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
+      currency: json['currency']?.toString() ?? 'INR',
+      collectViaApp: json['collectViaApp'] == true,
+      accountHolder: json['accountHolder']?.toString(),
+      accountNumberLast4: json['accountNumberLast4']?.toString(),
+      ifsc: json['ifsc']?.toString(),
+      bankName: json['bankName']?.toString(),
+      upi: json['upi']?.toString(),
+      totalfee: double.tryParse(json['totalFee']?.toString() ?? '0') ?? 0.0,
+    );
+  }
+}

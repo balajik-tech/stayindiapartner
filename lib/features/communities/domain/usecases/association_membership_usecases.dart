@@ -34,3 +34,12 @@ class SubmitMembershipApplicationUseCase {
     );
   }
 }
+
+class GetMembershipPaymentDetailsUseCase {
+  final AssociationMembershipRepository repository;
+  GetMembershipPaymentDetailsUseCase(this.repository);
+
+  Future<MembershipPaymentDetailsEntity> call(String membershipId) {
+    return repository.getPaymentDetails(membershipId);
+  }
+}

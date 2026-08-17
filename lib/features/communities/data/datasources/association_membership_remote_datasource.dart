@@ -8,6 +8,7 @@ abstract class AssociationMembershipRemoteDataSource {
     required String portalId,
     required List<String> propertyIds,
   });
+  Future<Map<String, dynamic>> getPaymentDetails(String membershipId);
 }
 
 class AssociationMembershipRemoteDataSourceImpl
@@ -88,5 +89,20 @@ class AssociationMembershipRemoteDataSourceImpl
       if (membership != null) return membership;
     }
     throw Exception(response.data?['message'] ?? 'Failed to submit application');
+  }
+
+  @override
+  Future<Map<String, dynamic>> getPaymentDetails(String membershipId) async {
+    final response = await dio.get(
+      ApiConstants.associationPaymentDetails(membershipId),
+    );
+
+    if (response.statusCode == 200 && response.data != null) {
+      final resData = response.data;
+      if (resData is Map && resData['data'] is Map && resData['data']['paymentDetails'] is Map) {
+        return Map<String, dynamic>.from(resData['data']['paymentDetails'] as Map);
+      }
+    }
+    throw Exception(response.data?['message'] ?? 'Failed to fetch payment details');
   }
 }
