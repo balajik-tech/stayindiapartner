@@ -33,6 +33,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   // Tracks the selected plan per hostel id for hostels not yet subscribed.
   final Map<String, String> _selectedPlan = {};
   final ScrollController _propertyScrollController = ScrollController();
+  int? _localSelectedIndex;
 
   @override
   void initState() {
@@ -535,9 +536,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             },
             listener: (context, state) {
               if (state is HostelLoaded && state.hostels.isNotEmpty) {
-                final hostel = state.hostels[state.selectedHostelIndex];
-                _loadSubscriptionData(context, hostel.id);
-                _scrollToSelected(state.selectedHostelIndex);
+                // Only follow global selection if the user hasn't made a local choice on this page
+                if (_localSelectedIndex == null) {
+                  final hostel = state.hostels[state.selectedHostelIndex];
+                  _loadSubscriptionData(context, hostel.id);
+                  _scrollToSelected(state.selectedHostelIndex);
+                }
               }
             },
           ),
@@ -618,15 +622,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             int selectedIndex = 0;
             if (hostelState is HostelLoaded) {
               hostels = hostelState.hostels;
-              
-              // Determine selectedIndex based on selectedHostelId for robustness
+
+              // Determine global index from cubit
+              int globalIndex = hostelState.selectedHostelIndex;
               final selectedId = hostelState.selectedHostelId;
               if (selectedId != null) {
                 final foundIndex = hostels.indexWhere((h) => h.id == selectedId);
-                selectedIndex = foundIndex != -1 ? foundIndex : hostelState.selectedHostelIndex;
-              } else {
-                selectedIndex = hostelState.selectedHostelIndex;
+                if (foundIndex != -1) globalIndex = foundIndex;
               }
+
+              // Use local index if user changed it on this page, otherwise default to global
+              selectedIndex = _localSelectedIndex ?? globalIndex;
             }
 
             return BlocBuilder<SubscriptionCubit, SubscriptionState>(
@@ -882,7 +888,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               selected: isSelected,
               onSelected: (bool selected) {
                 if (selected) {
-                  context.read<HostelCubit>().selectHostel(index);
+                  setState(() {
+                    _localSelectedIndex = index;
+                  });
+                  _loadSubscriptionData(context, hostels[index].id);
 
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     _scrollToSelected(index);
