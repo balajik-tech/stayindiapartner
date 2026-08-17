@@ -455,6 +455,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         iconColor: const Color(0xFFDC2626),
                         onTap: () => _handleLogout(context),
                       ),
+                      _ProfileCard(
+                        icon: Icons.logout_rounded,
+                        title: 'delete_account'.tr(),
+                        titleColor: AppColors.error,
+                        imageUrl: 'assets/images/delete.png',
+                        iconBgColor: const Color(0xFFFEF2F2),
+                        iconColor: const Color(0xFFDC2626),
+                        onTap: () => _handleDeleteAccount(context),
+                      ),
                     ]),
 
                     SizedBox(height: 140.h),
@@ -1288,6 +1297,40 @@ class _ProfilePageState extends State<ProfilePage> {
     );
     if (confirm == true && context.mounted) context.read<AuthCubit>().logout();
   }
+
+  void _handleDeleteAccount(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        title: Text(
+          'delete_account'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.error),
+        ),
+        content: Text('delete_account_confirm'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: Text(
+              'delete_permanently'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && context.mounted) {
+      context.read<AuthCubit>().deleteAccount();
+    }
+  }
 }
 
 class _ProfileCard extends StatelessWidget {
@@ -1297,6 +1340,7 @@ class _ProfileCard extends StatelessWidget {
   final Color? titleColor;
   final Color? iconBgColor;
   final Color? iconColor;
+  final String? imageUrl;
 
   const _ProfileCard({
     required this.icon,
@@ -1305,18 +1349,27 @@ class _ProfileCard extends StatelessWidget {
     this.titleColor,
     this.iconBgColor,
     this.iconColor,
+    this.imageUrl,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool hasImage = imageUrl?.trim().isNotEmpty ?? false;
+
     return BouncingWrapper(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: 10.w,
+          vertical: 10.h,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+          border: Border.all(
+            color: const Color(0xFFE2E8F0),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.02),
@@ -1333,7 +1386,9 @@ class _ProfileCard extends StatelessWidget {
                 color: iconBgColor ?? AppColors.backgroundSecondary,
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(
+              child: hasImage
+                  ? _buildImage(imageUrl!)
+                  : Icon(
                 icon,
                 color: iconColor ?? AppColors.primaryBlue,
                 size: 18.sp,
@@ -1362,6 +1417,32 @@ class _ProfileCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildImage(String url) {
+    final double imageSize = 18.r;
+    if (url.startsWith('http') || url.startsWith('https')) {
+      return Image.network(
+        url,
+        width: imageSize,
+        height: imageSize,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, size: imageSize),
+      );
+    } else {
+      // Check if it's a standard asset path
+      final String assetPath = url.startsWith('assets/') ? url : 'assets/images/$url';
+      return Image.asset(
+        assetPath,
+        width: imageSize,
+        height: imageSize,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          // If the direct asset path fails, try to fallback to the original URL or show an error icon
+          return Icon(Icons.image_not_supported, size: imageSize);
+        },
+      );
+    }
   }
 }
 

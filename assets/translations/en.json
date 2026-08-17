@@ -996,5 +996,6 @@
     "awaiting_payment_result": "Awaiting Payment Result...",
     "dont_close_screen_note": "Please do not close this screen or switch apps until the payment is complete.",
     "launch_error": "Launch Error: {}"
-  }
+  },
+  "delete_account": "Delete Account"
 }
