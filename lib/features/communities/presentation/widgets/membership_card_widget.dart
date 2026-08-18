@@ -855,6 +855,8 @@ class _ActiveMembershipView extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
     final memId = membership?.membershipId ?? '';
+    final expiry = membership?.expiredAt;
+    final validUntil = membership?.validUntil;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -876,7 +878,9 @@ class _ActiveMembershipView extends StatelessWidget {
         SizedBox(height: 20.h),
         _MembershipIdBox(
           id: memId,
-          validUntil: '',
+          validUntil: validUntil != null
+              ? 'Valid until ${_RenewalDueMembershipView._formatExpiryDate(validUntil)}'
+              : '',
           theme: theme,
         ),
         SizedBox(height: 16.h),
@@ -937,7 +941,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
         SizedBox(height: 16.h),
         _MembershipIdBox(
           id: memId,
-          validUntil: _formatExpiryDate(expiry),
+          validUntil: 'Valid until ${_formatExpiryDate(expiry)}',
           theme: theme,
         ),
         SizedBox(height: 16.h),
@@ -1071,7 +1075,7 @@ class _ExpiredMembershipView extends StatelessWidget {
         _MembershipIdBox(
           id: memId,
           validUntil: expiry != null
-              ? 'Expired ${_RenewalDueMembershipView._formatExpiryDate(expiry)}'
+              ? 'Lapsed on ${_RenewalDueMembershipView._formatExpiryDate(expiry)}'
               : '',
           isExpired: true,
           theme: theme,
@@ -1330,24 +1334,25 @@ class _MembershipIdBox extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 6.h),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      color: isExpired ? Colors.white54 : Colors.white70,
-                      size: 14.sp,
-                    ),
-                    SizedBox(width: 6.w),
-                    Text(
-                      validUntil,
-                      style: GoogleFonts.inter(
+                if (validUntil.isNotEmpty)
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
                         color: isExpired ? Colors.white54 : Colors.white70,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
+                        size: 14.sp,
                       ),
-                    ),
-                  ],
-                ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        validUntil,
+                        style: GoogleFonts.inter(
+                          color: isExpired ? Colors.white54 : Colors.white70,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),

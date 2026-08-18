@@ -8,6 +8,7 @@ class AssociationMembershipModel extends AssociationMembershipEntity {
     super.submittedAt,
     super.approvedAt,
     super.expiredAt,
+    super.validUntil,
     super.totalFee,
     super.membershipId,
     super.timeline,
@@ -27,6 +28,9 @@ class AssociationMembershipModel extends AssociationMembershipEntity {
           : null,
       expiredAt: json['expiredAt'] != null
           ? DateTime.tryParse(json['expiredAt'].toString())
+          : null,
+      validUntil: json['validUntil'] != null
+          ? DateTime.tryParse(json['validUntil'].toString())
           : null,
       totalFee: double.tryParse(
           (json['totalFee'] ?? json['fee'] ?? '0').toString()),
