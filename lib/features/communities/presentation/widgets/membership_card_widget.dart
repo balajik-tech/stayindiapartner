@@ -188,8 +188,8 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     Color? smallCircleColor = accent;
 
     final profileState = context.read<ProfileCubit>().state;
-    String userFirstName = 'Ramesh';
-    String userFullName = 'Ramesh Kumar';
+    String userFirstName = '';
+    String userFullName = '';
     if (profileState is ProfileLoaded) {
       if (profileState.profile.firstName.trim().isNotEmpty) {
         userFirstName = profileState.profile.firstName.trim();
@@ -2137,26 +2137,36 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                  final cubit = context.read<AssociationMembershipCubit>();
-                  final Map<String, dynamic>? order;
-                  
-                  if (widget.isRenewal) {
-                    order = await cubit.generateRenewalOrder(widget.membership!.id);
-                  } else {
-                    order = await cubit.generatePaymentOrder(widget.membership!.id);
-                  }
+                    final cubit = context.read<AssociationMembershipCubit>();
+                    final profileState = context.read<ProfileCubit>().state;
+                    final String email = profileState is ProfileLoaded ? profileState.profile.email : '';
+                    final String mobile = profileState is ProfileLoaded ? profileState.profile.phone : '';
+                    final portalId = widget.portalId;
+                    final membershipId = widget.membership!.id;
+                    final bool isRenewal = widget.isRenewal;
 
-                  if (order != null) {
-                    _navigateToRazorpay(
-                      context,
-                      amount: (order['amount'] as num).toDouble() / 100,
-                      planName: 'Association Membership',
-                      orderId: order['orderId'].toString(),
-                      portalId: widget.portalId,
-                    );
-                  }
-                  Navigator.of(context).pop();
-                },
+                    final Map<String, dynamic>? order;
+                    if (isRenewal) {
+                      order = await cubit.generateRenewalOrder(membershipId);
+                    } else {
+                      order = await cubit.generatePaymentOrder(membershipId);
+                    }
+
+                    if (order != null && mounted) {
+                      // Pop the current sheet before navigating to Razorpay
+                      Navigator.of(context).pop();
+
+                      _navigateToRazorpay(
+                        context,
+                        amount: (order['amount'] as num).toDouble() / 100,
+                        planName: 'Association Membership',
+                        orderId: order['orderId'].toString(),
+                        portalId: portalId,
+                        email: email,
+                        mobile: mobile,
+                      );
+                    }
+                  },
                   icon: Icon(Icons.credit_card, color: primary, size: 18.sp),
                   label: Text(
                     '${widget.isRenewal ? 'Renew' : 'Pay'} $feeText',
@@ -2233,13 +2243,11 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
     required String planName,
     required String orderId,
     required String portalId,
+    String? email,
+    String? mobile,
   }) {
     // Razorpay expects amount in paise
     final int totalAmountToPay = (amount * 100).round();
-
-    final profileState = context.read<ProfileCubit>().state;
-    final String email = profileState is ProfileLoaded ? profileState.profile.email : '';
-    final String mobile = profileState is ProfileLoaded ? profileState.profile.phone : '';
     final cubit = context.read<AssociationMembershipCubit>();
 
     Navigator.push(
@@ -2251,8 +2259,8 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
           name: planName,
           orderId: orderId,
           description: 'Payment for $planName',
-          email: email,
-          contact: mobile,
+          email: email ?? '',
+          contact: mobile ?? '',
           onSuccess: (result) {
             debugPrint('========== Razorpay Success ==========');
             debugPrint('Payment ID : ${result.paymentId}');
