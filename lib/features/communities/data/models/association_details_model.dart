@@ -14,12 +14,35 @@ class AssociationDetailsModel extends AssociationDetailsEntity {
   });
 
   factory AssociationDetailsModel.fromJson(Map<String, dynamic> json) {
+    String addressStr = '';
+    final rawAddress = json['address'];
+    if (rawAddress is String) {
+      addressStr = rawAddress;
+    } else if (rawAddress is Map<String, dynamic>) {
+      final line1 = rawAddress['line1']?.toString() ?? '';
+      final line2 = rawAddress['line2']?.toString() ?? '';
+      final city = rawAddress['city']?.toString() ?? '';
+      final state = rawAddress['state']?.toString() ?? '';
+      final pincode = rawAddress['pincode']?.toString() ?? '';
+
+      final parts = [
+        if (line1.isNotEmpty) line1,
+        if (line2.isNotEmpty) line2,
+        if (city.isNotEmpty) city,
+        if (state.isNotEmpty) state,
+        if (pincode.isNotEmpty) pincode,
+      ];
+      addressStr = parts.join(', ');
+    } else if (rawAddress != null) {
+      addressStr = rawAddress.toString();
+    }
+
     return AssociationDetailsModel(
-      name: json['name'] ?? '',
-      address: json['address'] ?? '',
-      email: json['email'] ?? '',
-      phone: json['phone'] ?? '',
-      logo: json['logo'] ?? '',
+      name: json['name']?.toString() ?? '',
+      address: addressStr,
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      logo: json['logo']?.toString() ?? '',
       about: _parseInfoSection(json['about']),
       bylaws: _parseInfoSection(json['bylaws']),
       founders: _parseFoundersSection(json['founders']),
