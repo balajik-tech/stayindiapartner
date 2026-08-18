@@ -43,3 +43,29 @@ class GetMembershipPaymentDetailsUseCase {
     return repository.getPaymentDetails(membershipId);
   }
 }
+
+class CreateMembershipPaymentOrderUseCase {
+  final AssociationMembershipRepository repository;
+  CreateMembershipPaymentOrderUseCase(this.repository);
+
+  Future<Map<String, dynamic>> call(String membershipId) {
+    return repository.createPaymentOrder(membershipId);
+  }
+}
+
+class VerifyMembershipPaymentUseCase {
+  final AssociationMembershipRepository repository;
+  VerifyMembershipPaymentUseCase(this.repository);
+
+  Future<bool> call({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) {
+    return repository.verifyPayment(
+      orderId: orderId,
+      paymentId: paymentId,
+      signature: signature,
+    );
+  }
+}

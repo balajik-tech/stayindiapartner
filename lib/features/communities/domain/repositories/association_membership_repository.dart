@@ -8,4 +8,10 @@ abstract class AssociationMembershipRepository {
     required List<String> propertyIds,
   });
   Future<MembershipPaymentDetailsEntity> getPaymentDetails(String membershipId);
+  Future<Map<String, dynamic>> createPaymentOrder(String membershipId);
+  Future<bool> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  });
 }

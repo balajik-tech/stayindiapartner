@@ -9,6 +9,12 @@ abstract class AssociationMembershipRemoteDataSource {
     required List<String> propertyIds,
   });
   Future<Map<String, dynamic>> getPaymentDetails(String membershipId);
+  Future<Map<String, dynamic>> createPaymentOrder(String membershipId);
+  Future<Map<String, dynamic>> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  });
 }
 
 class AssociationMembershipRemoteDataSourceImpl
@@ -104,5 +110,42 @@ class AssociationMembershipRemoteDataSourceImpl
       }
     }
     throw Exception(response.data?['message'] ?? 'Failed to fetch payment details');
+  }
+
+  @override
+  Future<Map<String, dynamic>> createPaymentOrder(String membershipId) async {
+    final response = await dio.post(
+      ApiConstants.associationCreatePaymentOrder(membershipId),
+      data: {},
+    );
+
+    if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+      final resData = response.data;
+      if (resData is Map && resData['data'] is Map && resData['data']['order'] is Map) {
+        return Map<String, dynamic>.from(resData['data']['order'] as Map);
+      }
+    }
+    throw Exception(response.data?['message'] ?? 'Failed to create payment order');
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) async {
+    final response = await dio.post(
+      ApiConstants.associationVerifyPayment,
+      data: {
+        'razorpay_order_id': orderId,
+        'razorpay_payment_id': paymentId,
+        'razorpay_signature': signature,
+      },
+    );
+
+    if (response.statusCode == 200 && response.data != null) {
+      return response.data as Map<String, dynamic>;
+    }
+    throw Exception(response.data?['message'] ?? 'Payment verification failed');
   }
 }

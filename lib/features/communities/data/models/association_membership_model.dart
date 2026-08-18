@@ -104,7 +104,7 @@ class MembershipPaymentDetailsModel extends MembershipPaymentDetailsEntity {
     required super.properties,
     required super.validForMonths,
     required super.amount,
-    required super.totalfee,
+    required super.totalFee,
     required super.currency,
     required super.collectViaApp,
     super.accountHolder,
@@ -127,7 +127,7 @@ class MembershipPaymentDetailsModel extends MembershipPaymentDetailsEntity {
       ifsc: json['ifsc']?.toString(),
       bankName: json['bankName']?.toString(),
       upi: json['upi']?.toString(),
-      totalfee: double.tryParse(json['totalFee']?.toString() ?? '0') ?? 0.0,
+      totalFee: double.tryParse(json['totalFee']?.toString() ?? json['amount']?.toString() ?? '0') ?? 0.0,
     );
   }
 }

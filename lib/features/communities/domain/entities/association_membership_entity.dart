@@ -79,7 +79,7 @@ class MembershipPaymentDetailsEntity extends Equatable {
   final int properties;
   final int validForMonths;
   final double amount;
-  final double totalfee;
+  final double totalFee;
   final String currency;
   final bool collectViaApp;
   final String? accountHolder;
@@ -93,7 +93,7 @@ class MembershipPaymentDetailsEntity extends Equatable {
     required this.properties,
     required this.validForMonths,
     required this.amount,
-    required this.totalfee,
+    required this.totalFee,
     required this.currency,
     required this.collectViaApp,
     this.accountHolder,
@@ -109,6 +109,7 @@ class MembershipPaymentDetailsEntity extends Equatable {
         properties,
         validForMonths,
         amount,
+        totalFee,
         currency,
         collectViaApp,
         accountHolder,

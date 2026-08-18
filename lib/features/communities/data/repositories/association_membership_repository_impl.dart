@@ -37,4 +37,23 @@ class AssociationMembershipRepositoryImpl implements AssociationMembershipReposi
     final data = await remoteDataSource.getPaymentDetails(membershipId);
     return MembershipPaymentDetailsModel.fromJson(data);
   }
+
+  @override
+  Future<Map<String, dynamic>> createPaymentOrder(String membershipId) {
+    return remoteDataSource.createPaymentOrder(membershipId);
+  }
+
+  @override
+  Future<bool> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) async {
+    final response = await remoteDataSource.verifyPayment(
+      orderId: orderId,
+      paymentId: paymentId,
+      signature: signature,
+    );
+    return response['success'] == true;
+  }
 }

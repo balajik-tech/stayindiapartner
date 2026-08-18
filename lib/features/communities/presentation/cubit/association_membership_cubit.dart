@@ -43,12 +43,16 @@ class AssociationMembershipCubit extends Cubit<AssociationMembershipState> {
   final GetEligibleMembershipPropertiesUseCase getEligibleProperties;
   final SubmitMembershipApplicationUseCase submitApplication;
   final GetMembershipPaymentDetailsUseCase getPaymentDetails;
+  final CreateMembershipPaymentOrderUseCase createPaymentOrder;
+  final VerifyMembershipPaymentUseCase verifyPaymentUseCase;
 
   AssociationMembershipCubit({
     required this.getMyApplications,
     required this.getEligibleProperties,
     required this.submitApplication,
     required this.getPaymentDetails,
+    required this.createPaymentOrder,
+    required this.verifyPaymentUseCase,
   }) : super(AssociationMembershipInitial());
 
   Future<void> loadMembershipData(String portalId) async {
@@ -69,24 +73,27 @@ class AssociationMembershipCubit extends Cubit<AssociationMembershipState> {
         firstMembership = applications.first;
         status = firstMembership.status.toUpperCase().trim();
 
-        AppLogger.debug('Membership status: $status');
+        AppLogger.debug('Association Status: $status');
 
         // Fetch payment details for statuses that require payment
         final paymentRequiredStatuses = [
           'APPROVED',
           'PAYMENT_PENDING',
           'APPROVED_PENDING_PAYMENT',
+          'PENDING_APPROVAL', // Added this just in case
           'PENDING_PAYMENT'
         ];
 
         if (paymentRequiredStatuses.contains(status)) {
           try {
-            AppLogger.info('Fetching payment details for membership ID: ${firstMembership.id}');
+            AppLogger.info('Attempting to fetch payment details for membership ID: ${firstMembership.id}');
             paymentDetails = await getPaymentDetails(firstMembership.id);
-            AppLogger.success('Fetched payment details successfully. Amount: ${paymentDetails.amount}');
+            AppLogger.success('Successfully fetched payment details. Amount: ${paymentDetails.amount}');
           } catch (e) {
-            AppLogger.error('Failed to load payment details for ${firstMembership.id}: $e');
+            AppLogger.error('API Error fetching payment details for ${firstMembership.id}: $e');
           }
+        } else {
+          AppLogger.warning('Status $status not in paymentRequiredStatuses list');
         }
       }
       
@@ -120,14 +127,47 @@ class AssociationMembershipCubit extends Cubit<AssociationMembershipState> {
     }
   }
 
-  Future<void> submit(String portalId, List<String> propertyIds) async {
-    // We might want a "Submitting" sub-state or just keep loading
+  Future<Map<String, dynamic>?> generatePaymentOrder(String membershipId) async {
     try {
-      final newMembership = await submitApplication(
+      AppLogger.info('Creating payment order for membership: $membershipId');
+      return await createPaymentOrder(membershipId);
+    } catch (e) {
+      AppLogger.error('Failed to create payment order: $e');
+      emit(AssociationMembershipError(e.toString()));
+      return null;
+    }
+  }
+
+  Future<void> verifyPayment({
+    required String portalId,
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) async {
+    emit(AssociationMembershipLoading());
+    try {
+      final success = await verifyPaymentUseCase(
+        orderId: orderId,
+        paymentId: paymentId,
+        signature: signature,
+      );
+      if (success) {
+        await loadMembershipData(portalId);
+      } else {
+        emit(const AssociationMembershipError('Payment verification failed'));
+      }
+    } catch (e) {
+      emit(AssociationMembershipError(e.toString()));
+    }
+  }
+
+  Future<void> submit(String portalId, List<String> propertyIds) async {
+    emit(AssociationMembershipLoading());
+    try {
+      await submitApplication(
         portalId: portalId,
         propertyIds: propertyIds,
       );
-      // After submission, reload all data to be sure
       await loadMembershipData(portalId);
     } catch (e) {
       emit(AssociationMembershipError(e.toString()));

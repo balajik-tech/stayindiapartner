@@ -10,6 +10,7 @@ import '../../../../injection_container.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_state.dart';
+import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
 import '../cubit/association_membership_cubit.dart';
 import '../../domain/entities/association_membership_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
@@ -589,6 +590,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
           theme: widget.theme,
           membership: membership,
           paymentDetails: paymentDetails,
+          portalId: _getPortalId(),
         ),
       ),
     );
@@ -1924,11 +1926,13 @@ class _PayMembershipSheet extends StatefulWidget {
   final CommunityThemeEntity theme;
   final AssociationMembershipEntity? membership;
   final MembershipPaymentDetailsEntity? paymentDetails;
+  final String portalId;
 
   const _PayMembershipSheet({
     required this.theme,
     this.membership,
     this.paymentDetails,
+    required this.portalId,
   });
 
   @override
@@ -1970,8 +1974,14 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
         final propCount = details?.properties.toString() ??
             widget.membership?.properties.length.toString() ??
             '1';
-        final totalFee = details?.totalfee ?? widget.membership?.totalFee ?? 0;
-        final feeText = _ApprovedMembershipView._formatAmount(totalFee);
+        final double totalFeeValue =
+        (details != null && details.totalFee > 0)
+            ? details.totalFee
+            : (details != null && details.amount > 0)
+            ? details.amount
+            : (widget.membership?.totalFee ?? 0);
+
+        final feeText = _ApprovedMembershipView._formatAmount(totalFeeValue);
         final validUntil = details != null
             ? _formatValidUntil(details.validForMonths)
             : '';
@@ -2072,14 +2082,20 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: () async {
+                  final cubit = context.read<AssociationMembershipCubit>();
+                  final order = await cubit.generatePaymentOrder(widget.membership!.id);
+                  if (order != null) {
                     _navigateToRazorpay(
                       context,
-                      amount: totalFee.toDouble(),
-                      planName: 'Associate Plan',
-                      orderId: 'order_test_123456789',
+                      amount: (order['amount'] as num).toDouble() / 100,
+                      planName: 'Association Membership',
+                      orderId: order['orderId'].toString(),
+                      portalId: widget.portalId,
                     );
-                  },
+                  }
+                  Navigator.of(context).pop();
+                },
                   icon: Icon(Icons.credit_card, color: primary, size: 18.sp),
                   label: Text(
                     'Pay $feeText',
@@ -2155,86 +2171,60 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
     required double amount,
     required String planName,
     required String orderId,
+    required String portalId,
   }) {
     // Razorpay expects amount in paise
     final int totalAmountToPay = (amount * 100).round();
 
     final profileState = context.read<ProfileCubit>().state;
+    final String email = profileState is ProfileLoaded ? profileState.profile.email : '';
+    final String mobile = profileState is ProfileLoaded ? profileState.profile.phone : '';
+    final cubit = context.read<AssociationMembershipCubit>();
 
-    final String email = profileState is ProfileLoaded
-        ? profileState.profile.email
-        : '';
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RazorpayPaymentScreen(
+          apiKey: ApiConstants.razorpayKey,
+          amount: totalAmountToPay,
+          name: planName,
+          orderId: orderId,
+          description: 'Payment for $planName',
+          email: email,
+          contact: mobile,
+          onSuccess: (result) {
+            debugPrint('========== Razorpay Success ==========');
+            debugPrint('Payment ID : ${result.paymentId}');
+            debugPrint('Order ID   : ${result.orderId}');
+            debugPrint('Signature  : ${result.signature}');
+            debugPrint('======================================');
 
-    final String mobile = profileState is ProfileLoaded
-        ? profileState.profile.phone
-        : '';
+            Navigator.pop(context); // Pop RazorpayPaymentScreen
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) {
-          return PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, result) {
-              if (didPop) return;
-            },
-            child: BlocProvider(
-              create: (_) => sl<RazorpayCubit>()
-                ..openCheckout(
-                  apiKey: ApiConstants.razorpayKey,
-                  amount: totalAmountToPay,
-                  name: planName,
-                  orderId: orderId,
-                  description: 'Payment for $planName',
-                  email: email,
-                  contact: mobile,
-                ),
-              child: BlocConsumer<RazorpayCubit, RazorpayState>(
-                listener: (innerContext, state) {
-                  if (state is RazorpaySuccess) {
-                    debugPrint('========== Razorpay Success ==========');
-                    debugPrint('Payment ID : ${state.result.paymentId}');
-                    debugPrint('Order ID   : ${state.result.orderId}');
-                    debugPrint('Signature  : ${state.result.signature}');
-                    debugPrint('======================================');
+            // Call verify-payment API
+            cubit.verifyPayment(
+              portalId: portalId,
+              orderId: result.orderId ?? '',
+              paymentId: result.paymentId ?? '',
+              signature: result.signature ?? '',
+            );
+          },
+          onFailure: (message) {
+            debugPrint('========== Razorpay Failure ==========');
+            debugPrint('Error: $message');
+            debugPrint('=====================================');
 
-                    if (Navigator.canPop(dialogContext)) {
-                      Navigator.pop(dialogContext, true);
-                    }
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context, true);
-                    }
-                    // No success navigation
-                    // No verify-payment API call
-                  } else if (state is RazorpayFailure) {
-                    debugPrint('========== Razorpay Failure ==========');
-                    debugPrint('Error: ${state.message}');
-                    debugPrint('=====================================');
-
-                    if (Navigator.canPop(dialogContext)) {
-                      Navigator.pop(dialogContext, true);
-                    }
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context, true);
-                    }
-                    // No failure screen navigation
-                  }
-                },
-                builder: (context, state) {
-                  return const Center(
-                    child: SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                },
+            Navigator.pop(context); // Pop RazorpayPaymentScreen
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Payment failed: $message'),
+                backgroundColor: Colors.red,
               ),
-            ),
-          );
-        },
-      );
-    });
+            );
+          },
+        ),
+      ),
+    );
   }
 }
