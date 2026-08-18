@@ -907,6 +907,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
 
     final now = DateTime.now();
     final expiry = membership?.expiredAt ?? now.add(const Duration(days: 28));
+    final validUntil = membership?.validUntil ?? now.add(const Duration(days: 28));
     final daysRemaining = expiry.difference(now).inDays;
     final totalFee = membership?.totalFee ?? 0;
     final feeText = _ApprovedMembershipView._formatAmount(totalFee);
@@ -941,7 +942,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
         SizedBox(height: 16.h),
         _MembershipIdBox(
           id: memId,
-          validUntil: 'Valid until ${_formatExpiryDate(expiry)}',
+          validUntil: 'Valid until ${_formatExpiryDate(validUntil)}',
           theme: theme,
         ),
         SizedBox(height: 16.h),
