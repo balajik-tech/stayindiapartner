@@ -449,7 +449,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
   Widget _buildFooter(Color accent, MembershipStatus status, AssociationMembershipEntity? membership) {
     if (status == MembershipStatus.newUser ||
         status == MembershipStatus.applied) {
-      final appRef = membership?.applicationReference ?? 'TNIT-APP-2026-5170';
+      final appRef = membership?.applicationReference ?? '';
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -685,15 +685,11 @@ class _AppliedMembershipView extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
 
-    String appRef = 'TNIT-APP-2026-5170';
-    String submittedDate = 'Submitted 14 Aug 2026';
+    String appRef = '';
+    String submittedDate = '';
     List<String> propertyNames = const [
-      'Sri Balaji Men\'s Hostel',
-      'Balaji Ladies Hostel',
     ];
     List<String> propertyLocations = const [
-      'Guindy, Chennai',
-      'Velachery, Chennai',
     ];
     int count = 2;
 
@@ -746,7 +742,7 @@ class _AppliedMembershipView extends StatelessWidget {
   }
 
   static String _formatDate(dynamic date) {
-    if (date == null) return 'Submitted 14 Aug 2026';
+    if (date == null) return '';
     try {
       final dt = date is DateTime ? date : DateTime.parse(date.toString());
       const months = [
@@ -817,7 +813,7 @@ class _ApprovedMembershipView extends StatelessWidget {
   }
 
   static String _formatApprovedDate(dynamic date) {
-    if (date == null) return 'Approved 14 Aug 2026';
+    if (date == null) return '';
     try {
       final dt = date is DateTime ? date : DateTime.parse(date.toString());
       const months = [
@@ -880,7 +876,7 @@ class _ActiveMembershipView extends StatelessWidget {
         SizedBox(height: 20.h),
         _MembershipIdBox(
           id: memId,
-          validUntil: '14 Aug 2027',
+          validUntil: '',
           theme: theme,
         ),
         SizedBox(height: 16.h),
@@ -920,7 +916,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
             Expanded(
               child: _SummaryItem(
                 label: 'MEMBER SINCE',
-                value: _formatDate(membership?.approvedAt) ?? '13 Sept 2025',
+                value: _formatDate(membership?.approvedAt) ?? '',
                 subValue: 'Chennai',
                 theme: theme,
               ),
@@ -1053,7 +1049,7 @@ class _ExpiredMembershipView extends StatelessWidget {
             Expanded(
               child: _SummaryItem(
                 label: 'MEMBER SINCE',
-                value: _RenewalDueMembershipView._formatDate(membership?.approvedAt) ?? '15 Jun 2025',
+                value: _RenewalDueMembershipView._formatDate(membership?.approvedAt) ?? '',
                 subValue: 'Chennai',
                 theme: theme,
               ),
@@ -1076,7 +1072,7 @@ class _ExpiredMembershipView extends StatelessWidget {
           id: memId,
           validUntil: expiry != null
               ? 'Expired ${_RenewalDueMembershipView._formatExpiryDate(expiry)}'
-              : 'Expired 04 Jul 2026',
+              : '',
           isExpired: true,
           theme: theme,
         ),
@@ -1568,9 +1564,9 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
     final selectedCount = _selected.where((s) => s).length;
     final profileState = context.read<ProfileCubit>().state;
 
-    String userName = 'Ramesh Kumar';
-    String userPhone = '+91 9840012345';
-    String userInitials = 'RK';
+    String userName = '';
+    String userPhone = '';
+    String userInitials = '';
 
     if (profileState is ProfileLoaded) {
       final p = profileState.profile;
