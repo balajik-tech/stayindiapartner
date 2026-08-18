@@ -94,7 +94,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         if (state is AssociationMembershipLoaded) {
           membership = state.membership;
           eligibleProperties = state.eligibleProperties;
-          membershipStatus = _previewStatus ?? _mapStatusString(state.status, membership?.timeline, expiredAt: membership?.expiredAt);
+          membershipStatus = _previewStatus ?? _mapStatusString(state.status, membership?.timeline, expiredAt: membership?.validUntil);
         }
 
         return Container(
@@ -907,8 +907,22 @@ class _RenewalDueMembershipView extends StatelessWidget {
 
     final now = DateTime.now();
     final expiry = membership?.expiredAt ?? now.add(const Duration(days: 28));
-    final validUntil = membership?.validUntil ?? now.add(const Duration(days: 28));
-    final daysRemaining = expiry.difference(now).inDays;
+    // final validUntil = membership?.validUntil ?? now.add(const Duration(days: 28));
+    // final daysRemaining = validUntil.difference(now).inDays;
+
+    final validUntil = membership?.validUntil ??
+        now.add(const Duration(days: 28));
+
+    final today = DateTime(now.year, now.month, now.day);
+    final validUntilDate = DateTime(
+      validUntil.year,
+      validUntil.month,
+      validUntil.day,
+    );
+
+    final daysRemaining = validUntilDate.difference(today).inDays;
+
+
     final totalFee = membership?.totalFee ?? 0;
     final feeText = _ApprovedMembershipView._formatAmount(totalFee);
     final memId = membership?.membershipId ?? '';
