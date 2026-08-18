@@ -108,6 +108,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             Icons.phone_outlined,
             const Color(0xFF2C5EBD),
             () => _launchUrl('tel:+919888936836'),
+            ''
           ),
           SizedBox(width: 12.w),
           _buildContactCard(
@@ -115,6 +116,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             Icons.chat_bubble_outline,
             const Color(0xFF10B981),
             () => _launchUrl('https://wa.me/919888936836?text=Hello%20Stay%20India%20Support!'),
+            'assets/images/whatsapp.png'
           ),
           SizedBox(width: 12.w),
           _buildContactCard(
@@ -122,15 +124,16 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             Icons.mail_outline,
             const Color(0xFFF97316),
             () => _launchUrl(
-              'mailto:support@stayindia.org?subject=Contact%40stayindia.in',
+              'mailto:contact@stayindia.in?subject=Support%20Request',
             ),
+            ''
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContactCard(String title, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildContactCard(String title, IconData icon, Color color, VoidCallback onTap, String imageUrl) {
     return Expanded(
       child: Material(
         color: Colors.transparent,
@@ -146,7 +149,15 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             ),
             child: Column(
               children: [
-                Icon(icon, color: color, size: 24.sp),
+                if (imageUrl.isNotEmpty)...[
+                  Image.asset(
+                    imageUrl,
+                    width: 24.w,
+                    height: 24.h,
+                  ),
+                ]else...[
+                  Icon(icon, color: color, size: 24.sp),
+                ],
                 SizedBox(height: 8.h),
                 Text(
                   title,
