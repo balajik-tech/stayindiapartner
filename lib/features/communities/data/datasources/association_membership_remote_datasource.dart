@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/utils/logger.dart';
 
 abstract class AssociationMembershipRemoteDataSource {
   Future<List<Map<String, dynamic>>> getMyApplications(String portalId);
@@ -131,6 +132,7 @@ class AssociationMembershipRemoteDataSourceImpl
 
   @override
   Future<Map<String, dynamic>> createRenewalOrder(String membershipId) async {
+    AppLogger.debug('API: Creating renewal order for $membershipId');
     final response = await dio.post(
       ApiConstants.associationCreateRenewalOrder(membershipId),
       data: {},
@@ -138,11 +140,15 @@ class AssociationMembershipRemoteDataSourceImpl
 
     if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
       final resData = response.data;
+      // Handle "data": { "order": { ... } } structure
       if (resData is Map && resData['data'] is Map && resData['data']['order'] is Map) {
-        return Map<String, dynamic>.from(resData['data']['order'] as Map);
+        final order = Map<String, dynamic>.from(resData['data']['order'] as Map);
+        AppLogger.success('API: Renewal order created: ${order['orderId']}');
+        return order;
       }
     }
-    throw Exception(response.data?['message'] ?? 'Failed to create renewal order');
+    final error = response.data is Map ? response.data['message'] : 'Failed to create renewal order';
+    throw Exception(error);
   }
 
   @override
