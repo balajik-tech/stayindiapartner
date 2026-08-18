@@ -6,6 +6,7 @@ class AssociationMembershipEntity extends Equatable {
   final String? applicationReference;
   final DateTime? submittedAt;
   final DateTime? approvedAt;
+  final DateTime? expiredAt;
   final double? totalFee;
   final String? membershipId;
   final Map<String, dynamic>? timeline;
@@ -17,6 +18,7 @@ class AssociationMembershipEntity extends Equatable {
     this.applicationReference,
     this.submittedAt,
     this.approvedAt,
+    this.expiredAt,
     this.totalFee,
     this.membershipId,
     this.timeline,

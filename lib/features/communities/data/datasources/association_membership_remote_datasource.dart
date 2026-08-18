@@ -10,6 +10,7 @@ abstract class AssociationMembershipRemoteDataSource {
   });
   Future<Map<String, dynamic>> getPaymentDetails(String membershipId);
   Future<Map<String, dynamic>> createPaymentOrder(String membershipId);
+  Future<Map<String, dynamic>> createRenewalOrder(String membershipId);
   Future<Map<String, dynamic>> verifyPayment({
     required String orderId,
     required String paymentId,
@@ -126,6 +127,22 @@ class AssociationMembershipRemoteDataSourceImpl
       }
     }
     throw Exception(response.data?['message'] ?? 'Failed to create payment order');
+  }
+
+  @override
+  Future<Map<String, dynamic>> createRenewalOrder(String membershipId) async {
+    final response = await dio.post(
+      ApiConstants.associationCreateRenewalOrder(membershipId),
+      data: {},
+    );
+
+    if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+      final resData = response.data;
+      if (resData is Map && resData['data'] is Map && resData['data']['order'] is Map) {
+        return Map<String, dynamic>.from(resData['data']['order'] as Map);
+      }
+    }
+    throw Exception(response.data?['message'] ?? 'Failed to create renewal order');
   }
 
   @override

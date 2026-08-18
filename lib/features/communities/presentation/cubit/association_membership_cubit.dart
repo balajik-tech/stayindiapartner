@@ -44,6 +44,7 @@ class AssociationMembershipCubit extends Cubit<AssociationMembershipState> {
   final SubmitMembershipApplicationUseCase submitApplication;
   final GetMembershipPaymentDetailsUseCase getPaymentDetails;
   final CreateMembershipPaymentOrderUseCase createPaymentOrder;
+  final CreateMembershipRenewalOrderUseCase createRenewalOrder;
   final VerifyMembershipPaymentUseCase verifyPaymentUseCase;
 
   AssociationMembershipCubit({
@@ -52,6 +53,7 @@ class AssociationMembershipCubit extends Cubit<AssociationMembershipState> {
     required this.submitApplication,
     required this.getPaymentDetails,
     required this.createPaymentOrder,
+    required this.createRenewalOrder,
     required this.verifyPaymentUseCase,
   }) : super(AssociationMembershipInitial());
 
@@ -133,6 +135,17 @@ class AssociationMembershipCubit extends Cubit<AssociationMembershipState> {
       return await createPaymentOrder(membershipId);
     } catch (e) {
       AppLogger.error('Failed to create payment order: $e');
+      emit(AssociationMembershipError(e.toString()));
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> generateRenewalOrder(String membershipId) async {
+    try {
+      AppLogger.info('Creating renewal order for membership: $membershipId');
+      return await createRenewalOrder(membershipId);
+    } catch (e) {
+      AppLogger.error('Failed to create renewal order: $e');
       emit(AssociationMembershipError(e.toString()));
       return null;
     }

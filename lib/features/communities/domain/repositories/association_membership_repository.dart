@@ -9,6 +9,7 @@ abstract class AssociationMembershipRepository {
   });
   Future<MembershipPaymentDetailsEntity> getPaymentDetails(String membershipId);
   Future<Map<String, dynamic>> createPaymentOrder(String membershipId);
+  Future<Map<String, dynamic>> createRenewalOrder(String membershipId);
   Future<bool> verifyPayment({
     required String orderId,
     required String paymentId,

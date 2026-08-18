@@ -44,6 +44,11 @@ class AssociationMembershipRepositoryImpl implements AssociationMembershipReposi
   }
 
   @override
+  Future<Map<String, dynamic>> createRenewalOrder(String membershipId) {
+    return remoteDataSource.createRenewalOrder(membershipId);
+  }
+
+  @override
   Future<bool> verifyPayment({
     required String orderId,
     required String paymentId,

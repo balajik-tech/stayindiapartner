@@ -51,6 +51,7 @@ void registerAssociateHomeDataFeature(GetIt sl) {
   sl.registerLazySingleton(() => SubmitMembershipApplicationUseCase(sl()));
   sl.registerLazySingleton(() => GetMembershipPaymentDetailsUseCase(sl()));
   sl.registerLazySingleton(() => CreateMembershipPaymentOrderUseCase(sl()));
+  sl.registerLazySingleton(() => CreateMembershipRenewalOrderUseCase(sl()));
   sl.registerLazySingleton(() => VerifyMembershipPaymentUseCase(sl()));
 
   // Cubit — factory, so every navigation to the page gets a fresh instance
@@ -78,6 +79,7 @@ void registerAssociateHomeDataFeature(GetIt sl) {
       submitApplication: sl(),
       getPaymentDetails: sl(),
       createPaymentOrder: sl(),
+      createRenewalOrder: sl(),
       verifyPaymentUseCase: sl(),
     ),
   );

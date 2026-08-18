@@ -53,6 +53,15 @@ class CreateMembershipPaymentOrderUseCase {
   }
 }
 
+class CreateMembershipRenewalOrderUseCase {
+  final AssociationMembershipRepository repository;
+  CreateMembershipRenewalOrderUseCase(this.repository);
+
+  Future<Map<String, dynamic>> call(String membershipId) {
+    return repository.createRenewalOrder(membershipId);
+  }
+}
+
 class VerifyMembershipPaymentUseCase {
   final AssociationMembershipRepository repository;
   VerifyMembershipPaymentUseCase(this.repository);

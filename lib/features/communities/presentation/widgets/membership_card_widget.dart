@@ -94,7 +94,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         if (state is AssociationMembershipLoaded) {
           membership = state.membership;
           eligibleProperties = state.eligibleProperties;
-          membershipStatus = _previewStatus ?? _mapStatusString(state.status, membership?.timeline);
+          membershipStatus = _previewStatus ?? _mapStatusString(state.status, membership?.timeline, expiredAt: membership?.expiredAt);
         }
 
         return Container(
@@ -126,7 +126,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               SizedBox(height: 20.h),
               _buildFooter(accent, membershipStatus, membership),
               SizedBox(height: 8.h),
-              // _buildPreviewToggles(membershipStatus),
+              _buildPreviewToggles(membershipStatus),
             ],
           ),
         );
@@ -134,8 +134,21 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     );
   }
 
-  MembershipStatus _mapStatusString(String statusStr, Map<String, dynamic>? timeline) {
+  MembershipStatus _mapStatusString(String statusStr, Map<String, dynamic>? timeline, {DateTime? expiredAt}) {
     statusStr = statusStr.toUpperCase().trim();
+
+    // Check expiry logic first if we have the date
+    if (expiredAt != null) {
+      final now = DateTime.now();
+      final difference = expiredAt.difference(now).inDays;
+
+      if (difference < 0) {
+        return MembershipStatus.expired;
+      } else if (difference <= 28) {
+        return MembershipStatus.renewalDue;
+      }
+    }
+
     if (statusStr == 'EXPIRED' || statusStr == 'LAPSED') {
       return MembershipStatus.expired;
     } else if (statusStr == 'RENEWAL_DUE') {
@@ -419,9 +432,17 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
           membership: membership,
         );
       case MembershipStatus.renewalDue:
-        return _RenewalDueMembershipView(theme: widget.theme);
+        return _RenewalDueMembershipView(
+          theme: widget.theme,
+          membership: membership,
+          onRenew: () => _showRenewMembershipSheet(membership, paymentDetails),
+        );
       case MembershipStatus.expired:
-        return _ExpiredMembershipView(theme: widget.theme);
+        return _ExpiredMembershipView(
+          theme: widget.theme,
+          membership: membership,
+          onRenew: () => _showRenewMembershipSheet(membership, paymentDetails),
+        );
     }
   }
 
@@ -591,6 +612,26 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
           membership: membership,
           paymentDetails: paymentDetails,
           portalId: _getPortalId(),
+        ),
+      ),
+    );
+  }
+
+  void _showRenewMembershipSheet(AssociationMembershipEntity? membership, MembershipPaymentDetailsEntity? paymentDetails) {
+    if (membership == null) return;
+    final cubit = context.read<AssociationMembershipCubit>();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BlocProvider.value(
+        value: cubit,
+        child: _PayMembershipSheet(
+          theme: widget.theme,
+          membership: membership,
+          paymentDetails: paymentDetails,
+          portalId: _getPortalId(),
+          isRenewal: true,
         ),
       ),
     );
@@ -850,13 +891,27 @@ class _ActiveMembershipView extends StatelessWidget {
 
 class _RenewalDueMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+  final AssociationMembershipEntity? membership;
+  final VoidCallback onRenew;
 
-  const _RenewalDueMembershipView({required this.theme});
+  const _RenewalDueMembershipView({
+    required this.theme,
+    this.membership,
+    required this.onRenew,
+  });
 
   @override
   Widget build(BuildContext context) {
     final primary = theme.primaryColor.toColor();
     final accent = theme.accentColor.toColor();
+
+    final now = DateTime.now();
+    final expiry = membership?.expiredAt ?? now.add(const Duration(days: 28));
+    final daysRemaining = expiry.difference(now).inDays;
+    final totalFee = membership?.totalFee ?? 0;
+    final feeText = _ApprovedMembershipView._formatAmount(totalFee);
+    final memId = membership?.membershipId ?? '';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -865,7 +920,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
             Expanded(
               child: _SummaryItem(
                 label: 'MEMBER SINCE',
-                value: '13 Sept 2025',
+                value: _formatDate(membership?.approvedAt) ?? '13 Sept 2025',
                 subValue: 'Chennai',
                 theme: theme,
               ),
@@ -874,8 +929,10 @@ class _RenewalDueMembershipView extends StatelessWidget {
             Expanded(
               child: _SummaryItem(
                 label: 'PROPERTIES',
-                value: '3 registered',
-                subValue: 'Sri Balaji Men\'s Hostel +2',
+                value: '${membership?.properties.length ?? 0} registered',
+                subValue: membership?.properties.isNotEmpty == true
+                    ? membership!.properties.first.name
+                    : 'N/A',
                 theme: theme,
               ),
             ),
@@ -883,8 +940,8 @@ class _RenewalDueMembershipView extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         _MembershipIdBox(
-          id: 'TNIT-MEM-2025-8842',
-          validUntil: '11 Sept 2026',
+          id: memId,
+          validUntil: _formatExpiryDate(expiry),
           theme: theme,
         ),
         SizedBox(height: 16.h),
@@ -902,7 +959,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Renewal due in 28 days',
+                      'Renewal due in $daysRemaining days',
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 15.sp,
@@ -921,7 +978,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: onRenew,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accent,
                   foregroundColor: primary,
@@ -934,7 +991,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Renew · ₹2,000',
+                  'Renew · $feeText',
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
                     fontSize: 13.sp,
@@ -945,39 +1002,49 @@ class _RenewalDueMembershipView extends StatelessWidget {
           ),
         ),
         SizedBox(height: 16.h),
-        // Row(
-        //   children: [
-        //     Expanded(
-        //       child: _OutlineButton(
-        //         label: 'View ID card',
-        //         icon: Icons.visibility_outlined,
-        //         onPressed: () {},
-        //       ),
-        //     ),
-        //     SizedBox(width: 12.w),
-        //     Expanded(
-        //       child: _OutlineButton(
-        //         label: 'Download',
-        //         icon: Icons.download_outlined,
-        //         onPressed: () {},
-        //       ),
-        //     ),
-        //   ],
-        // ),
       ],
     );
+  }
+
+  static String? _formatDate(DateTime? dt) {
+    if (dt == null) return null;
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
+  }
+
+  static String _formatExpiryDate(DateTime dt) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
   }
 }
 
 class _ExpiredMembershipView extends StatelessWidget {
   final CommunityThemeEntity theme;
+  final AssociationMembershipEntity? membership;
+  final VoidCallback onRenew;
 
-  const _ExpiredMembershipView({required this.theme});
+  const _ExpiredMembershipView({
+    required this.theme,
+    this.membership,
+    required this.onRenew,
+  });
 
   @override
   Widget build(BuildContext context) {
     final primary = theme.primaryColor.toColor();
     final accent = theme.accentColor.toColor();
+
+    final totalFee = membership?.totalFee ?? 2000;
+    final feeText = _ApprovedMembershipView._formatAmount(totalFee);
+    final memId = membership?.membershipId ?? '';
+    final expiry = membership?.expiredAt;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -986,7 +1053,7 @@ class _ExpiredMembershipView extends StatelessWidget {
             Expanded(
               child: _SummaryItem(
                 label: 'MEMBER SINCE',
-                value: '15 Jun 2025',
+                value: _RenewalDueMembershipView._formatDate(membership?.approvedAt) ?? '15 Jun 2025',
                 subValue: 'Chennai',
                 theme: theme,
               ),
@@ -995,8 +1062,10 @@ class _ExpiredMembershipView extends StatelessWidget {
             Expanded(
               child: _SummaryItem(
                 label: 'PROPERTIES',
-                value: '3 registered',
-                subValue: 'Sri Balaji Men\'s Hostel +2',
+                value: '${membership?.properties.length ?? 0} registered',
+                subValue: membership?.properties.isNotEmpty == true
+                    ? membership!.properties.first.name
+                    : 'N/A',
                 theme: theme,
               ),
             ),
@@ -1004,8 +1073,10 @@ class _ExpiredMembershipView extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         _MembershipIdBox(
-          id: 'TNIT-MEM-2024-5501',
-          validUntil: 'Expired 04 Jul 2026',
+          id: memId,
+          validUntil: expiry != null
+              ? 'Expired ${_RenewalDueMembershipView._formatExpiryDate(expiry)}'
+              : 'Expired 04 Jul 2026',
           isExpired: true,
           theme: theme,
         ),
@@ -1043,7 +1114,7 @@ class _ExpiredMembershipView extends StatelessWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: onRenew,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accent,
                   foregroundColor: primary,
@@ -1056,7 +1127,7 @@ class _ExpiredMembershipView extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Renew · ₹2,000',
+                  'Renew · $feeText',
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
                     fontSize: 13.sp,
@@ -1067,25 +1138,6 @@ class _ExpiredMembershipView extends StatelessWidget {
           ),
         ),
         SizedBox(height: 16.h),
-        // Row(
-        //   children: [
-        //     Expanded(
-        //       child: _OutlineButton(
-        //         label: 'View ID card',
-        //         icon: Icons.visibility_outlined,
-        //         onPressed: () {},
-        //       ),
-        //     ),
-        //     SizedBox(width: 12.w),
-        //     Expanded(
-        //       child: _OutlineButton(
-        //         label: 'Download',
-        //         icon: Icons.download_outlined,
-        //         onPressed: () {},
-        //       ),
-        //     ),
-        //   ],
-        // ),
       ],
     );
   }
@@ -1927,12 +1979,14 @@ class _PayMembershipSheet extends StatefulWidget {
   final AssociationMembershipEntity? membership;
   final MembershipPaymentDetailsEntity? paymentDetails;
   final String portalId;
+  final bool isRenewal;
 
   const _PayMembershipSheet({
     required this.theme,
     this.membership,
     this.paymentDetails,
     required this.portalId,
+    this.isRenewal = false,
   });
 
   @override
@@ -2013,7 +2067,7 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
-                      'Pay membership',
+                      widget.isRenewal ? 'Renew membership' : 'Pay membership',
                       style: GoogleFonts.inter(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
@@ -2084,7 +2138,14 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
                 child: ElevatedButton.icon(
                   onPressed: () async {
                   final cubit = context.read<AssociationMembershipCubit>();
-                  final order = await cubit.generatePaymentOrder(widget.membership!.id);
+                  final Map<String, dynamic>? order;
+                  
+                  if (widget.isRenewal) {
+                    order = await cubit.generateRenewalOrder(widget.membership!.id);
+                  } else {
+                    order = await cubit.generatePaymentOrder(widget.membership!.id);
+                  }
+
                   if (order != null) {
                     _navigateToRazorpay(
                       context,
@@ -2098,7 +2159,7 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
                 },
                   icon: Icon(Icons.credit_card, color: primary, size: 18.sp),
                   label: Text(
-                    'Pay $feeText',
+                    '${widget.isRenewal ? 'Renew' : 'Pay'} $feeText',
                     style: GoogleFonts.inter(
                       color: primary,
                       fontWeight: FontWeight.w700,

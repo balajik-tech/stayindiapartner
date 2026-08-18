@@ -101,6 +101,7 @@ class ApiConstants {
   static const String associationMyApplications = '/association-memberships/applications/mine';
   static String associationPaymentDetails(String membershipId) => '/association-memberships/applications/$membershipId/payment-details';
   static String associationCreatePaymentOrder(String membershipId) => '/association-memberships/applications/$membershipId/payment-order';
+  static String associationCreateRenewalOrder(String membershipId) => '/association-memberships/memberships/$membershipId/renewal-order';
   static const String associationVerifyPayment = '/association-memberships/payments/verify';
   static const String sos = '/sos';
   static const String socialPosts = '/posts';
