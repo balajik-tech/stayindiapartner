@@ -126,7 +126,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               SizedBox(height: 20.h),
               _buildFooter(accent, membershipStatus, membership),
               SizedBox(height: 8.h),
-              _buildPreviewToggles(membershipStatus),
+              // _buildPreviewToggles(membershipStatus),
             ],
           ),
         );
