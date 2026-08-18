@@ -6,6 +6,7 @@ import '../../../../injection_container.dart';
 import '../../../profile/presentation/cubit/hostel_cubit.dart';
 import '../../domain/entities/bank_account_entity.dart';
 import '../cubit/add_bank_account_cubit.dart';
+import 'package:diacritic/diacritic.dart';
 
 class AddBankAccountPage extends StatelessWidget {
   final String propertyId;
@@ -21,7 +22,10 @@ class AddBankAccountPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<AddBankAccountCubit>(),
-      child: _AddBankAccountView(propertyId: propertyId, propertyName: propertyName),
+      child: _AddBankAccountView(
+        propertyId: propertyId,
+        propertyName: propertyName,
+      ),
     );
   }
 }
@@ -30,7 +34,10 @@ class _AddBankAccountView extends StatefulWidget {
   final String propertyId;
   final String propertyName;
 
-  const _AddBankAccountView({required this.propertyId, required this.propertyName});
+  const _AddBankAccountView({
+    required this.propertyId,
+    required this.propertyName,
+  });
 
   @override
   State<_AddBankAccountView> createState() => _AddBankAccountViewState();
@@ -52,7 +59,6 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
     _ifscController.addListener(_onIfscChanged);
     _panController.addListener(_onPanChanged);
 
-
     //Dialog testing
 
     // WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -64,7 +70,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
 
   bool get _numbersMatch =>
       _confirmAccountNumberController.text.isNotEmpty &&
-          _accountNumberController.text == _confirmAccountNumberController.text;
+      _accountNumberController.text == _confirmAccountNumberController.text;
 
   bool get _isFormValid {
     return _accountNumberController.text.trim().isNotEmpty &&
@@ -72,9 +78,8 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
         _numbersMatch &&
         _ifscController.text.trim().length == 11 &&
         _panController.text.trim().length == 10;
-       // && _holderNameController.text.trim().isNotEmpty;
+    // && _holderNameController.text.trim().isNotEmpty;
   }
-
 
   @override
   void dispose() {
@@ -191,23 +196,25 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
         child: BlocConsumer<AddBankAccountCubit, AddBankAccountState>(
           listener: (context, state) {
             if (state.submitError != null && !_confirmDialogShown) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.submitError!)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.submitError!)));
             }
             if (state.verifyError != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.verifyError!)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.verifyError!)));
             }
             if (state.panVerifyError != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.panVerifyError!)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.panVerifyError!)));
             }
             if (state.verifySuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Bank account verified successfully.')),
+                const SnackBar(
+                  content: Text('Bank account verified successfully.'),
+                ),
               );
             }
             if (state.panVerifySuccess && state.panVerificationResult != null) {
@@ -239,7 +246,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                     Navigator.of(context).pop();
                   }
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Bank account added successfully.')),
+                    const SnackBar(
+                      content: Text('Bank account added successfully.'),
+                    ),
                   );
                   Navigator.of(context).pop(true);
                 }
@@ -248,7 +257,11 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
           },
           builder: (context, state) {
             final bool namesMatch = _panAndBankHolderNamesMatch(state);
-            final bool canProceedToVerification = !state.isVerifying && _isFormValid && state.panVerifySuccess && namesMatch;
+            final bool canProceedToVerification =
+                !state.isVerifying &&
+                _isFormValid &&
+                state.panVerifySuccess &&
+                namesMatch;
             final String nameMismatchError = _panAndBankHolderNameError(state);
 
             return Stack(
@@ -261,17 +274,31 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       child: Row(
                         children: [
                           IconButton(
-                            onPressed: (state.isSubmitting || state.isVerifying) ? null : () => Navigator.of(context).maybePop(),
-                            icon: const Icon(Icons.close,color: Colors.black),
+                            onPressed: (state.isSubmitting || state.isVerifying)
+                                ? null
+                                : () => Navigator.of(context).maybePop(),
+                            icon: const Icon(Icons.close, color: Colors.black),
                           ),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: const [
-                                Text('Add Bank Account',
-                                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,color: Colors.black)),
-                                Text('Step 1 of 2 · Account details',
-                                    style: TextStyle(fontSize: 13,  color: Color(0xFF5b5b5b),fontWeight: FontWeight.w700)),
+                                Text(
+                                  'Add Bank Account',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  'Step 1 of 2 · Account details',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF5b5b5b),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -279,7 +306,10 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       ),
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: LinearProgressIndicator(
                         value: 0,
                         minHeight: 1,
@@ -297,9 +327,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             keyboardType: TextInputType.number,
                             decoration: _inputDecoration(),
                             onChanged: (_) => setState(() {}),
-                              style:  GoogleFonts.inter(
-                                color: Colors.black,
-                              ),
+                            style: GoogleFonts.inter(color: Colors.black),
                           ),
                           const SizedBox(height: 16),
                           _FieldLabel('Confirm Account Number'),
@@ -308,25 +336,33 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             keyboardType: TextInputType.number,
                             decoration: _inputDecoration(),
                             onChanged: (_) => setState(() {}),
-                            style:  GoogleFonts.inter(
-                              color: Colors.black,
-                            ),
+                            style: GoogleFonts.inter(color: Colors.black),
                           ),
-                          if (_confirmAccountNumberController.text.isNotEmpty) ...[
+                          if (_confirmAccountNumberController
+                              .text
+                              .isNotEmpty) ...[
                             const SizedBox(height: 6),
                             Row(
                               children: [
                                 Icon(
-                                  _numbersMatch ? Icons.check_circle : Icons.error_outline,
+                                  _numbersMatch
+                                      ? Icons.check_circle
+                                      : Icons.error_outline,
                                   size: 16,
-                                  color: _numbersMatch ? const Color(0xFF1E8E42) : Colors.redAccent,
+                                  color: _numbersMatch
+                                      ? const Color(0xFF1E8E42)
+                                      : Colors.redAccent,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  _numbersMatch ? 'Numbers match' : 'Numbers do not match',
+                                  _numbersMatch
+                                      ? 'Numbers match'
+                                      : 'Numbers do not match',
                                   style: TextStyle(
                                     fontSize: 12.5,
-                                    color: _numbersMatch ? const Color(0xFF1E8E42) : Colors.redAccent,
+                                    color: _numbersMatch
+                                        ? const Color(0xFF1E8E42)
+                                        : Colors.redAccent,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -339,11 +375,11 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             controller: _ifscController,
                             textCapitalization: TextCapitalization.characters,
                             maxLength: 11,
-                            decoration: _inputDecoration().copyWith(counterText: ''),
-                            onChanged: (_) => setState(() {}),
-                            style:  GoogleFonts.inter(
-                              color: Colors.black,
+                            decoration: _inputDecoration().copyWith(
+                              counterText: '',
                             ),
+                            onChanged: (_) => setState(() {}),
+                            style: GoogleFonts.inter(color: Colors.black),
                           ),
                           if (state.isLookupLoading) ...[
                             const SizedBox(height: 8),
@@ -352,36 +388,54 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                 const SizedBox(
                                   width: 14,
                                   height: 14,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Looking up IFSC branch details…',
-                                  style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF6B7280)),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.5,
+                                    color: const Color(0xFF6B7280),
+                                  ),
                                 ),
                               ],
                             ),
                           ],
-                          if (state.lookupError != null && _ifscController.text.trim().length == 11) ...[
+                          if (state.lookupError != null &&
+                              _ifscController.text.trim().length == 11) ...[
                             const SizedBox(height: 8),
                             Text(
                               state.lookupError!,
-                              style:  GoogleFonts.inter(fontSize: 12.5, color: Colors.redAccent),
+                              style: GoogleFonts.inter(
+                                fontSize: 12.5,
+                                color: Colors.redAccent,
+                              ),
                             ),
                           ],
-                          if (state.ifscLookupDetails != null && state.ifscLookupDetails!.displayLabel.trim().isNotEmpty) ...[
+                          if (state.ifscLookupDetails != null &&
+                              state.ifscLookupDetails!.displayLabel
+                                  .trim()
+                                  .isNotEmpty) ...[
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF5F7FF),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: const Color(0xFFD9E1FF)),
+                                border: Border.all(
+                                  color: const Color(0xFFD9E1FF),
+                                ),
                               ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF2E5AF5)),
+                                  const Icon(
+                                    Icons.location_on_outlined,
+                                    size: 16,
+                                    color: Color(0xFF2E5AF5),
+                                  ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
@@ -404,7 +458,8 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                               Expanded(
                                 child: TextField(
                                   controller: _panController,
-                                  textCapitalization: TextCapitalization.characters,
+                                  textCapitalization:
+                                      TextCapitalization.characters,
                                   maxLength: 10,
                                   decoration: _inputDecoration().copyWith(
                                     counterText: '',
@@ -415,17 +470,18 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                     ),
                                   ),
                                   onChanged: (_) => setState(() {}),
-                                  style: GoogleFonts.inter(
-                                    color: Colors.black,
-                                  ),
+                                  style: GoogleFonts.inter(color: Colors.black),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               SizedBox(
                                 height: 52,
                                 child: ElevatedButton(
-                                  onPressed: (!state.isVerifyingPan && _isPanValid)
-                                      ? () => (state.panVerifySuccess)? null: _verifyPan(context)
+                                  onPressed:
+                                      (!state.isVerifyingPan && _isPanValid)
+                                      ? () => (state.panVerifySuccess)
+                                            ? null
+                                            : _verifyPan(context)
                                       : null,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: state.panVerifySuccess
@@ -455,17 +511,17 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                           ),
                                         )
                                       : state.panVerifySuccess
-                                          ? const Icon(Icons.check, size: 20)
-                                          : Text(
-                                              'Verify',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
-                                                color: _isPanValid
-                                                    ? Colors.black
-                                                    : Colors.grey.shade500,
-                                              ),
-                                            ),
+                                      ? const Icon(Icons.check, size: 20)
+                                      : Text(
+                                          'Verify',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            color: _isPanValid
+                                                ? Colors.black
+                                                : Colors.grey.shade500,
+                                          ),
+                                        ),
                                 ),
                               ),
                             ],
@@ -475,35 +531,48 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             _panFieldHintText(state),
                             style: GoogleFonts.inter(
                               fontSize: 12.5,
-                              color: state.panVerifySuccess && state.panVerificationResult != null
+                              color:
+                                  state.panVerifySuccess &&
+                                      state.panVerificationResult != null
                                   ? const Color(0xFF1E8E42)
-                                  : _panController.text.trim().isNotEmpty && !_isPanValid
-                                      ? Colors.redAccent
-                                      : state.panVerifyError != null
-                                          ? Colors.redAccent
-                                          : const Color(0xFF6B7280),
-                              fontWeight: state.panVerifySuccess && state.panVerificationResult != null
+                                  : _panController.text.trim().isNotEmpty &&
+                                        !_isPanValid
+                                  ? Colors.redAccent
+                                  : state.panVerifyError != null
+                                  ? Colors.redAccent
+                                  : const Color(0xFF6B7280),
+                              fontWeight:
+                                  state.panVerifySuccess &&
+                                      state.panVerificationResult != null
                                   ? FontWeight.w600
                                   : FontWeight.w500,
                             ),
                           ),
-                          if (state.panVerifySuccess && state.panVerificationResult != null) ...[
+                          if (state.panVerifySuccess &&
+                              state.panVerificationResult != null) ...[
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFE6F4EA),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: const Color(0xFF1E8E42)),
+                                border: Border.all(
+                                  color: const Color(0xFF1E8E42),
+                                ),
                               ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.check_circle, size: 16, color: Color(0xFF1E8E42)),
+                                  const Icon(
+                                    Icons.check_circle,
+                                    size: 16,
+                                    color: Color(0xFF1E8E42),
+                                  ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'PAN Verified: ${state.panVerificationResult!.fullname}',
@@ -548,16 +617,24 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                               Expanded(
                                 child: _AccountTypeChip(
                                   label: 'Savings',
-                                  selected: _accountType == BankAccountType.savings,
-                                  onTap: () => setState(() => _accountType = BankAccountType.savings),
+                                  selected:
+                                      _accountType == BankAccountType.savings,
+                                  onTap: () => setState(
+                                    () =>
+                                        _accountType = BankAccountType.savings,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _AccountTypeChip(
                                   label: 'Current',
-                                  selected: _accountType == BankAccountType.current,
-                                  onTap: () => setState(() => _accountType = BankAccountType.current),
+                                  selected:
+                                      _accountType == BankAccountType.current,
+                                  onTap: () => setState(
+                                    () =>
+                                        _accountType = BankAccountType.current,
+                                  ),
                                 ),
                               ),
                             ],
@@ -605,7 +682,10 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       child: ElevatedButton(
-                        onPressed: (!state.isVerifying && _isFormValid  && state.panVerifySuccess)
+                        onPressed:
+                            (!state.isVerifying &&
+                                _isFormValid &&
+                                state.panVerifySuccess)
                             ? () => _verify(context)
                             : null,
                         style: ElevatedButton.styleFrom(
@@ -614,7 +694,12 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           foregroundColor: Colors.black,
                           elevation: 0,
                           side: BorderSide(
-                            color: (!state.isVerifying && _isFormValid  && state.panVerifySuccess) ? Colors.grey.shade300 : Colors.grey.shade200,
+                            color:
+                                (!state.isVerifying &&
+                                    _isFormValid &&
+                                    state.panVerifySuccess)
+                                ? Colors.grey.shade300
+                                : Colors.grey.shade200,
                             width: 1.5,
                           ),
                           shape: RoundedRectangleBorder(
@@ -635,7 +720,12 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 18,
-                                  color: (!state.isVerifying && _isFormValid  && state.panVerifySuccess) ? Colors.black : Colors.grey.shade500,
+                                  color:
+                                      (!state.isVerifying &&
+                                          _isFormValid &&
+                                          state.panVerifySuccess)
+                                      ? Colors.black
+                                      : Colors.grey.shade500,
                                 ),
                               ),
                       ),
@@ -646,9 +736,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                   Positioned.fill(
                     child: Container(
                       color: Colors.black.withOpacity(0.05),
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      child: const Center(child: CircularProgressIndicator()),
                     ),
                   ),
               ],
@@ -679,10 +767,14 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
     );
   }
 
-  void _showConfirmBankAccountDialog(BuildContext context, AddBankAccountState state) {
+  void _showConfirmBankAccountDialog(
+    BuildContext context,
+    AddBankAccountState state,
+  ) {
     final result = state.verificationResult!;
-    final accountTypeLabel =
-    _accountType == BankAccountType.savings ? 'savings' : 'current';
+    final accountTypeLabel = _accountType == BankAccountType.savings
+        ? 'savings'
+        : 'current';
 
     _showConfirmBankAccountDialogRaw(
       context,
@@ -717,14 +809,14 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   // }
 
   Future<void> _showConfirmBankAccountDialogRaw(
-      BuildContext context, {
-        required String holderName,
-        required String accountNumber,
-        required String bankName,
-        required String branchName,
-        required String accountTypeLabel,
-        required VoidCallback onConfirm,
-      }) {
+    BuildContext context, {
+    required String holderName,
+    required String accountNumber,
+    required String bankName,
+    required String branchName,
+    required String accountTypeLabel,
+    required VoidCallback onConfirm,
+  }) {
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -761,11 +853,17 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                 ),
                               ),
                               InkWell(
-                                onTap: state.isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                                onTap: state.isSubmitting
+                                    ? null
+                                    : () => Navigator.of(dialogContext).pop(),
                                 borderRadius: BorderRadius.circular(20),
                                 child: const Padding(
                                   padding: EdgeInsets.all(4),
-                                  child: Icon(Icons.close, color: Colors.black87, size: 22),
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Colors.black87,
+                                    size: 22,
+                                  ),
                                 ),
                               ),
                             ],
@@ -791,7 +889,11 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                               children: [
                                 const Padding(
                                   padding: EdgeInsets.only(top: 1),
-                                  child: Icon(Icons.check_circle, size: 18, color: Color(0xFF1E8E42)),
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    size: 18,
+                                    color: Color(0xFF1E8E42),
+                                  ),
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
@@ -813,7 +915,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             padding: const EdgeInsets.symmetric(horizontal: 14),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE5E7EB)),
+                              border: Border.all(
+                                color: const Color(0xFFE5E7EB),
+                              ),
                             ),
                             child: Column(
                               children: [
@@ -826,10 +930,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                   value: accountNumber,
                                   monospace: true,
                                 ),
-                                _DetailRow(
-                                  label: 'Bank Name',
-                                  value: bankName,
-                                ),
+                                _DetailRow(label: 'Bank Name', value: bankName),
                                 _DetailRow(
                                   label: 'Branch',
                                   value: branchName,
@@ -842,12 +943,16 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.info_outline, size: 16, color: Color(0xFF6B7280)),
+                              const Icon(
+                                Icons.info_outline,
+                                size: 16,
+                                color: Color(0xFF6B7280),
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'Rentals will be sent to this account',
-                                  style:  GoogleFonts.inter(
+                                  style: GoogleFonts.inter(
                                     fontSize: 13,
                                     color: Color(0xFF6B7280),
                                   ),
@@ -890,7 +995,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           if (state.submitError != null) ...[
                             const SizedBox(height: 8),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                              ),
                               child: Text(
                                 state.submitError!,
                                 style: GoogleFonts.inter(
@@ -905,8 +1012,10 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           const SizedBox(height: 4),
                           Center(
                             child: TextButton(
-                              onPressed: state.isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
-                              child:  Text(
+                              onPressed: state.isSubmitting
+                                  ? null
+                                  : () => Navigator.of(dialogContext).pop(),
+                              child: Text(
                                 'Cancel',
                                 style: GoogleFonts.inter(
                                   fontSize: 15,
@@ -944,51 +1053,113 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   }
 }
 
+// bool areNamesEquivalent(String? firstName, String? secondName) {
+//   final normalizedFirst = _normalizeName(firstName);
+//   final normalizedSecond = _normalizeName(secondName);
+//
+//   if (normalizedFirst.isEmpty || normalizedSecond.isEmpty) {
+//     return false;
+//   }
+//
+//   if (normalizedFirst == normalizedSecond) {
+//     return true;
+//   }
+//
+//   final firstWords = normalizedFirst.split(' ')..sort();
+//   final secondWords = normalizedSecond.split(' ')..sort();
+//
+//   if (firstWords.length != secondWords.length) {
+//     return false;
+//   }
+//
+//   for (var i = 0; i < firstWords.length; i++) {
+//     if (firstWords[i] != secondWords[i]) {
+//       return false;
+//     }
+//   }
+//
+//   return true;
+// }
+
+// String _normalizeName(String? value) {
+//   return (value ?? '')
+//       .toLowerCase()
+//       .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+//       .replaceAll(RegExp(r'\s+'), ' ')
+//       .trim();
+// }
+
 bool areNamesEquivalent(String? firstName, String? secondName) {
-  final normalizedFirst = _normalizeName(firstName);
-  final normalizedSecond = _normalizeName(secondName);
+  final a = _normalizeName(firstName);
+  final b = _normalizeName(secondName);
 
-  if (normalizedFirst.isEmpty || normalizedSecond.isEmpty) {
-    return false;
+  if (a.isEmpty || b.isEmpty) return false;
+  if (a == b) return true;
+
+  final aWords = a.split(' ');
+  final bWords = b.split(' ');
+
+  // Cheap reject: token regrouping preserves total letter count.
+  if (aWords.join().length != bWords.join().length) return false;
+
+  // Guard against factorial blowup; fall back to strict sorted compare.
+  if (aWords.length > 6 || bWords.length > 6) {
+    final x = aWords.toList()..sort();
+    final y = bWords.toList()..sort();
+    return x.join(' ') == y.join(' ');
   }
 
-  if (normalizedFirst == normalizedSecond) {
-    return true;
-  }
-
-  final firstWords = normalizedFirst.split(' ')..sort();
-  final secondWords = normalizedSecond.split(' ')..sort();
-
-  if (firstWords.length != secondWords.length) {
-    return false;
-  }
-
-  for (var i = 0; i < firstWords.length; i++) {
-    if (firstWords[i] != secondWords[i]) {
-      return false;
-    }
-  }
-
-  return true;
+  final bForms = _permutedJoins(bWords);
+  return _permutedJoins(aWords).any(bForms.contains);
 }
 
 String _normalizeName(String? value) {
-  return (value ?? '')
+  if (value == null) return '';
+  final normalized = removeDiacritics(value)
       .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+      .replaceAll(RegExp(r'[^a-z0-9\s]'), '')
       .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
+  return normalized;
+
+}
+
+Set<String> _permutedJoins(List<String> words) {
+  final results = <String>{};
+  void permute(List<String> current, List<String> remaining) {
+    if (remaining.isEmpty) {
+      results.add(current.join());
+      return;
+    }
+    for (var i = 0; i < remaining.length; i++) {
+      permute(
+        [...current, remaining[i]],
+        [...remaining.sublist(0, i), ...remaining.sublist(i + 1)],
+      );
+    }
+  }
+
+  permute([], words);
+  return results;
 }
 
 class _FieldLabel extends StatelessWidget {
   final String text;
+
   const _FieldLabel(this.text);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(text, style:  GoogleFonts.inter(fontSize: 13.5, fontWeight: FontWeight.w600,color: Color(0xFF545454))),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF545454),
+        ),
+      ),
     );
   }
 }
@@ -1016,15 +1187,15 @@ class _DetailRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                  flex: 1,
-                  child:
-              Text(
-                label,
-                style:  GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Color(0xFF6B7280),
+                flex: 1,
+                child: Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: Color(0xFF6B7280),
+                  ),
                 ),
-              )),
+              ),
               Expanded(
                 flex: 1,
                 child: Container(
@@ -1054,7 +1225,11 @@ class _AccountTypeChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _AccountTypeChip({required this.label, required this.selected, required this.onTap});
+  const _AccountTypeChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1066,15 +1241,18 @@ class _AccountTypeChip extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: selected ? const Color(0xFF9ab2d4) : const Color(0xFFD1D5DB), width: selected ? 1.5 : 1),
-          color:  Colors.white,
+          border: Border.all(
+            color: selected ? const Color(0xFF9ab2d4) : const Color(0xFFD1D5DB),
+            width: selected ? 1.5 : 1,
+          ),
+          color: Colors.white,
         ),
         child: Text(
           label,
           style: GoogleFonts.inter(
-              color: selected ? const Color(0xFF4c6891) : Color(0xFF505050),
-              fontWeight: FontWeight.w700,
-              fontSize: 16
+            color: selected ? const Color(0xFF4c6891) : Color(0xFF505050),
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
           ),
         ),
       ),
