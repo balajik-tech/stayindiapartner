@@ -21,6 +21,8 @@ import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_
 
 import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
 
+import 'add_bulk_tenant_page.dart';
+
 class TenantsPage extends StatefulWidget {
   const TenantsPage({super.key});
 
@@ -143,14 +145,46 @@ class _TenantsPageState extends State<TenantsPage> {
           ),
         ),
       ),
-      floatingActionButton: _buildFAB(context) != null
-          ? Padding(
-              padding: EdgeInsets.only(
-                bottom: 10.h + MediaQuery.of(context).padding.bottom,
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(
+          bottom: 10.h + MediaQuery.of(context).padding.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            FloatingActionButton.extended(
+              heroTag: 'bulkTenantFab',
+              onPressed: () {
+                // Add bulk tenant action
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddBulkTenantPage(),
+                  ),
+                );
+              },
+              backgroundColor: const Color(0xFF16539B),
+              icon: const Icon(
+                Icons.group_add_rounded,
+                color: Colors.white,
               ),
-              child: _buildFAB(context),
-            )
-          : null,
+              label: const Text(
+                'Add Bulk Tenant',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            if (_buildFAB(context) != null) ...[
+              SizedBox(height: 12.h),
+              _buildFAB(context)!,
+            ],
+          ],
+        ),
+      ),
     );
   }
 
