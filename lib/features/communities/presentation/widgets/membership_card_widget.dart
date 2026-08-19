@@ -126,7 +126,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               SizedBox(height: 20.h),
               _buildFooter(accent, membershipStatus, membership),
               SizedBox(height: 8.h),
-              // _buildPreviewToggles(membershipStatus),
+              _buildPreviewToggles(membershipStatus),
             ],
           ),
         );
@@ -2169,9 +2169,6 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
                     }
 
                     if (order != null && mounted) {
-                      // Pop the current sheet before navigating to Razorpay
-                      Navigator.of(context).pop();
-
                       _navigateToRazorpay(
                         context,
                         amount: (order['amount'] as num).toDouble() / 100,
@@ -2267,11 +2264,11 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
     // Razorpay expects amount in paise
     final int totalAmountToPay = (amount * 100).round();
     final cubit = context.read<AssociationMembershipCubit>();
+    final navigator = Navigator.of(context);
 
     debugPrint("========== Razorpay Request ==========${ApiConstants.razorpayKey}");
 
-    Navigator.push(
-      context,
+    navigator.push(
       MaterialPageRoute(
         builder: (_) => RazorpayPaymentScreen(
           apiKey: ApiConstants.razorpayKey,
@@ -2288,8 +2285,6 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
             debugPrint('Signature  : ${result.signature}');
             debugPrint('======================================');
 
-            Navigator.pop(context); // Pop RazorpayPaymentScreen
-
             // Call verify-payment API
             cubit.verifyPayment(
               portalId: portalId,
@@ -2297,15 +2292,29 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
               paymentId: result.paymentId ?? '',
               signature: result.signature ?? '',
             );
+
+            // Pop RazorpayPaymentScreen
+            navigator.pop();
+
+            // Pop the bottom sheet (which was behind the Razorpay screen)
+            if (navigator.canPop()) {
+              navigator.pop(true);
+            }
           },
           onFailure: (message) {
             debugPrint('========== Razorpay Failure ==========');
             debugPrint('Error: $message');
             debugPrint('=====================================');
 
-            Navigator.pop(context); // Pop RazorpayPaymentScreen
+            // Pop RazorpayPaymentScreen
+            navigator.pop();
+
+            // Pop the bottom sheet
+            if (navigator.canPop()) {
+              navigator.pop(true);
+            }
             
-            ScaffoldMessenger.of(context).showSnackBar(
+            ScaffoldMessenger.of(navigator.context).showSnackBar(
               SnackBar(
                 content: Text('Payment failed: $message'),
                 backgroundColor: Colors.red,
