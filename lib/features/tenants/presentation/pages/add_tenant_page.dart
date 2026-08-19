@@ -20,6 +20,9 @@ import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_s
 import 'package:stayindia_owner/injection_container.dart' as di;
 import 'package:stayindia_owner/features/profile/domain/usecases/room_usecases.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:stayindia_owner/features/finance/presentation/cubit/payment_report_cubit.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 
 enum StayType {
@@ -246,6 +249,64 @@ class _AddTenantPageState extends State<AddTenantPage> {
     setState(() {
       _selectedBed = bed;
     });
+  }
+
+  void _showCollectPaymentDialog({
+    required BuildContext context,
+    required String phone,
+    required String firstName,
+    required String lastName,
+    required String sharingType,
+    String? email,
+    String? userPhotoPath,
+    String? aadharPhotoPath,
+    String? aadharCardbackPath,
+    required double securityDeposit,
+    required double rent,
+    required String checkInDate,
+    required String checkOutDate,
+    required double maintainance,
+    required String roomType,
+    required String aadhaarNumber,
+    required String dob,
+    required String gender,
+    required String address,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return BlocProvider.value(
+          value: context.read<PaymentReportCubit>(),
+          child: _CollectPaymentBottomSheet(
+            phone: phone,
+            firstName: firstName,
+            lastName: lastName,
+            sharingType: sharingType,
+            email: email,
+            userPhotoPath: userPhotoPath,
+            aadharPhotoPath: aadharPhotoPath,
+            aadharCardbackPath: aadharCardbackPath,
+            securityDeposit: securityDeposit,
+            rent: rent,
+            checkInDate: checkInDate,
+            checkOutDate: checkOutDate,
+            maintainance: maintainance,
+            roomType: roomType,
+            aadhaarNumber: aadhaarNumber,
+            dob: dob,
+            gender: gender,
+            address: address,
+            selectedHostel: _selectedHostel!,
+            selectedRoom: _selectedRoom!,
+            selectedBed: _selectedBed!,
+            stayType: _stayType,
+            addTenantCubit: _addTenantCubit,
+          ),
+        );
+      },
+    );
   }
 
   String formatSharingType(String type) {
@@ -606,11 +667,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
     _addTenantCubit.bulkUpload(file);
   }
 
-  void _submit() {
-    if (_csvFile != null) {
-      _submitBulkTenantUpload();
-      return;
-    }
+  void _submit(BuildContext context) {
+    // if (_csvFile != null) {
+    //   _submitBulkTenantUpload();
+    //   return;
+    // }
 
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
@@ -796,23 +857,56 @@ class _AddTenantPageState extends State<AddTenantPage> {
     double? rent;
     String checkInDate = "";
     String checkOutDate = "";
-    double? maintainance= 0;
+    double? maintainance = 0;
 
-    if(_stayType == StayType.MONTHLY){
+    if (_stayType == StayType.MONTHLY) {
       securityDeposit = double.tryParse(_depositController.text.trim());
       rent = double.tryParse(_rentController.text.trim());
-      checkInDate = checkInDate;
+      checkInDate = _checkInDate != null
+          ? DateFormat('yyyy-MM-dd').format(_checkInDate!)
+          : "";
       checkOutDate = "";
       maintainance = double.tryParse(_maintenanceController.text.trim());
-    }else if(_stayType == StayType.CUSTOM){
+    } else if (_stayType == StayType.CUSTOM) {
       securityDeposit = double.tryParse(_customDepositController.text.trim());
       rent = double.tryParse(_dayRentController.text.trim());
-      checkInDate = checkInDate;
-      checkOutDate = checkOutDate;
+      checkInDate = _checkInDate != null
+          ? DateFormat('yyyy-MM-dd').format(_checkInDate!)
+          : "";
+      checkOutDate = _checkOutDate != null
+          ? DateFormat('yyyy-MM-dd').format(_checkOutDate!)
+          : "";
       maintainance = 0;
     }
 
-    String? roomType =  _isAC == true ?"AC" :"NON-AC";
+    String? roomType = _isAC == true ? "AC" : "NON-AC";
+
+    debugPrint("is NEW::::::::::${_isNew}");
+
+    if (_isNew) {
+      _showCollectPaymentDialog(
+        context: context,
+        phone: phone,
+        firstName: firstName,
+        lastName: lastName,
+        sharingType: _selectedRoom!.sharingType,
+        email: _emailController.text.trim(),
+        userPhotoPath: _userPhoto?.path,
+        aadharPhotoPath: _aadharPhoto?.path,
+        aadharCardbackPath: _aadharPhotoBack?.path,
+        securityDeposit: securityDeposit ?? 0,
+        rent: rent ?? 0,
+        checkInDate: checkInDate,
+        checkOutDate: checkOutDate,
+        maintainance: maintainance ?? 0,
+        roomType: roomType,
+        aadhaarNumber: extractedAadhaar ?? '',
+        dob: extractedAadhaarDOB ?? '',
+        gender: extractedAadhaarGender.toLowerCase() ?? '',
+        address: extractedAadhaarAddress ?? '',
+      );
+      return;
+    }
 
     _addTenantCubit.submit(
       hostel: _selectedHostel!,
@@ -836,7 +930,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       bookingType: _stayType.name.toString(),
       maintenance:maintainance.toString(),
       roomType:roomType,
-      endDate: (checkInDate.isNotEmpty)
+      endDate: (checkOutDate.isNotEmpty)
           ? DateTime.parse(checkOutDate)
           : DateTime.now(),
       aadhaarNumber: extractedAadhaar ?? '',
@@ -848,8 +942,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _addTenantCubit,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _addTenantCubit),
+        BlocProvider(create: (context) => di.sl<PaymentReportCubit>()),
+      ],
       child: BlocListener<AddTenantCubit, AddTenantState>(
         listener: (context, state) {
           if (state is AddTenantSuccess) {
@@ -859,7 +956,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            Navigator.pop(context, true);
+            if (!_isNew) {
+              Navigator.pop(context, true);
+            }
           } else if (state is AddTenantError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -1107,7 +1206,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                           _buildVerificationSection(context),
 
                           SizedBox(height: 40.h),
-                          _buildSubmitButton(state),
+                          _buildSubmitButton(context, state),
                         ],
                       ),
                     );
@@ -1121,12 +1220,12 @@ class _AddTenantPageState extends State<AddTenantPage> {
     );
   }
 
-  Widget _buildSubmitButton(AddTenantState state) {
+  Widget _buildSubmitButton(BuildContext context, AddTenantState state) {
     bool isSubmitting = state is AddTenantSubmitting;
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: isSubmitting ? null : _submit,
+        onPressed: isSubmitting ? null : () => _submit(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryBlue,
           foregroundColor: Colors.white,
@@ -1288,10 +1387,16 @@ class _AddTenantPageState extends State<AddTenantPage> {
         SizedBox(height: 8.h),
         GestureDetector(
           onTap: () async {
+            final now = DateTime.now();
+
             final DateTime? picked = await showDatePicker(
               context: context,
-              initialDate: _checkInDate ?? DateTime.now(),
-              firstDate: DateTime(2000),
+              initialDate: _isNew
+                  ? DateTime(now.year, now.month, now.day)
+                  : (_checkInDate ?? DateTime.now()),
+              firstDate: _isNew
+                  ? DateTime(now.year, now.month, now.day)
+                  : DateTime(2000),
               lastDate: DateTime(2100),
             );
             if (picked != null) {
@@ -2249,6 +2354,536 @@ class _AddTenantPageState extends State<AddTenantPage> {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CollectPaymentBottomSheet extends StatefulWidget {
+  final String phone;
+  final String firstName;
+  final String lastName;
+  final String sharingType;
+  final String? email;
+  final String? userPhotoPath;
+  final String? aadharPhotoPath;
+  final String? aadharCardbackPath;
+  final double securityDeposit;
+  final double rent;
+  final String checkInDate;
+  final String checkOutDate;
+  final double maintainance;
+  final String roomType;
+  final String aadhaarNumber;
+  final String dob;
+  final String gender;
+  final String address;
+
+  final Hostel selectedHostel;
+  final RoomDetail selectedRoom;
+  final String selectedBed;
+  final StayType stayType;
+  final AddTenantCubit addTenantCubit;
+
+  const _CollectPaymentBottomSheet({
+    required this.phone,
+    required this.firstName,
+    required this.lastName,
+    required this.sharingType,
+    this.email,
+    this.userPhotoPath,
+    this.aadharPhotoPath,
+    this.aadharCardbackPath,
+    required this.securityDeposit,
+    required this.rent,
+    required this.checkInDate,
+    required this.checkOutDate,
+    required this.maintainance,
+    required this.roomType,
+    required this.aadhaarNumber,
+    required this.dob,
+    required this.gender,
+    required this.address,
+    required this.selectedHostel,
+    required this.selectedRoom,
+    required this.selectedBed,
+    required this.stayType,
+    required this.addTenantCubit,
+  });
+
+  @override
+  State<_CollectPaymentBottomSheet> createState() =>
+      _CollectPaymentBottomSheetState();
+}
+
+class _CollectPaymentBottomSheetState
+    extends State<_CollectPaymentBottomSheet> {
+  late TextEditingController _collectingNowController;
+  String _paymentMethod = 'Cash'; // 'Cash', 'UPI', 'Link'
+  String _collectionType = 'Full amount'; // 'Full amount', 'Deposit only', 'Nothing now'
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    double total = widget.rent + widget.securityDeposit + widget.maintainance;
+    _collectingNowController =
+        TextEditingController(text: total.toStringAsFixed(0));
+  }
+
+  @override
+  void dispose() {
+    _collectingNowController.dispose();
+    super.dispose();
+  }
+
+  void _onCollectionTypeChanged(String type) {
+    setState(() {
+      _collectionType = type;
+      if (type == 'Full amount') {
+        double total = widget.rent + widget.securityDeposit + widget.maintainance;
+        _collectingNowController.text = total.toStringAsFixed(0);
+      } else if (type == 'Deposit only') {
+        _collectingNowController.text = widget.securityDeposit.toStringAsFixed(0);
+      } else {
+        _collectingNowController.text = '0';
+      }
+    });
+  }
+
+  Future<void> _handleProceed() async {
+    setState(() => _isSubmitting = true);
+
+    try {
+      // 1. Submit Add Tenant
+      final response = await widget.addTenantCubit.submit(
+        hostel: widget.selectedHostel,
+        room: widget.selectedRoom,
+        bed: widget.selectedBed,
+        phone: widget.phone,
+        firstName: widget.firstName,
+        lastName: widget.lastName,
+        sharingType: widget.sharingType,
+        email: widget.email,
+        userPhotoPath: widget.userPhotoPath,
+        aadharPhotoPath: widget.aadharPhotoPath,
+        aadharCardbackPath: widget.aadharCardbackPath,
+        deposit: widget.securityDeposit,
+        rent: widget.rent,
+        startDate: (widget.checkInDate.isNotEmpty)
+            ? DateTime.parse(widget.checkInDate)
+            : DateTime.now(),
+        bookingType: widget.stayType.name.toString(),
+        maintenance: widget.maintainance.toString(),
+        roomType: widget.roomType,
+        endDate: (widget.checkOutDate.isNotEmpty)
+            ? DateTime.parse(widget.checkOutDate)
+            : DateTime.now(),
+        aadhaarNumber: widget.aadhaarNumber,
+        dob: widget.dob,
+        gender: widget.gender,
+        address: widget.address,
+      );
+
+      if (response != null && mounted) {
+        // Extract IDs from response
+        final data = response['data'] ?? response;
+        final String tenantId = (data['tenant']?['_id'] ?? data['tenantId'] ?? data['id'] ?? '').toString();
+        final String bookingId = (data['bookingId'] ?? data['_id'] ?? '').toString();
+        final String hostelId = (data['hostel']?['_id'] ?? widget.selectedHostel.id).toString();
+
+        double collectingNow = double.tryParse(_collectingNowController.text) ?? 0;
+
+        if (collectingNow > 0) {
+          // 2. Submit Payment
+          // Logic for splitting the collecting amount (Rent first, then deposit, etc. or just as categorized)
+          // For simplicity, if they pay "Deposit only", we attribute to deposit. 
+          // If "Full amount", we split it based on the components.
+          
+          double rentPaid = 0;
+          double depositPaid = 0;
+          double maintenancePaid = 0;
+          
+          if (_collectionType == 'Deposit only') {
+             depositPaid = collectingNow;
+          } else if (_collectionType == 'Full amount') {
+             rentPaid = widget.rent;
+             depositPaid = widget.securityDeposit;
+             maintenancePaid = widget.maintainance;
+          } else {
+             // Custom amount or custom split - for now assume Rent -> Deposit -> Maintenance
+             double remaining = collectingNow;
+             rentPaid = remaining >= widget.rent ? widget.rent : remaining;
+             remaining -= rentPaid;
+             depositPaid = remaining >= widget.securityDeposit ? widget.securityDeposit : remaining;
+             remaining -= depositPaid;
+             maintenancePaid = remaining >= widget.maintainance ? widget.maintainance : remaining;
+          }
+
+          await context.read<PaymentReportCubit>().submitPayment(
+                tenantId: tenantId,
+                hostelId: hostelId,
+                bookingId: bookingId,
+                amount: collectingNow,
+                rent: rentPaid,
+                deposit: depositPaid,
+                utilities: 0,
+                others: maintenancePaid,
+                category: 'Rent',
+                mode: _paymentMethod,
+                date: DateTime.now().toIso8601String(),
+                sendWhatsapp: true,
+              );
+        }
+        
+        if (mounted) {
+          Navigator.pop(context); // Close dialog
+          Navigator.pop(context, true); // Close AddTenantPage
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.redAccent),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double totalDue = widget.rent + widget.securityDeposit + widget.maintainance;
+    final authState = context.read<AuthCubit>().state;
+    String collectorName = "You";
+    if (authState is AuthAuthenticated) {
+      collectorName = "${authState.owner.name} (you)";
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+      ),
+      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Collect Payment',
+                  style: GoogleFonts.inter(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1E3A8A),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    'Not collected',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20.h),
+            Container(
+              padding: EdgeInsets.all(20.r),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[200]!),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Column(
+                children: [
+                  _buildDueItem('Rent', widget.rent),
+                  SizedBox(height: 12.h),
+                  _buildDueItem('Security deposit', widget.securityDeposit),
+                  SizedBox(height: 12.h),
+                  _buildDueItem('Maintainance', widget.maintainance),
+                  SizedBox(height: 12.h),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Row(
+                      children: [
+                        Text(
+                          '+ Add discount or waiver',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: const Color(0xFF2563EB),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    child: Divider(color: Colors.grey[200]),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total due',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        '₹${NumberFormat('#,##,###').format(totalDue)}',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1E3A8A),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              'Collecting now',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: 8.h),
+            TextField(
+              controller: _collectingNowController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFFF1F5F9),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Row(
+              children: [
+                _buildToggleBtn('Full amount'),
+                SizedBox(width: 8.w),
+                _buildToggleBtn('Deposit only'),
+                SizedBox(width: 8.w),
+                _buildToggleBtn('Nothing now'),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              'Balance carried forward: ₹${(totalDue - (double.tryParse(_collectingNowController.text) ?? 0)).toStringAsFixed(0)}',
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              'Payment method',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                _buildMethodBtn('Cash'),
+                SizedBox(width: 8.w),
+                _buildMethodBtn('UPI / QR', value: 'UPI'),
+                SizedBox(width: 8.w),
+                _buildMethodBtn('Payment link', value: 'Link'),
+              ],
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              'Received by',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Text(
+                collectorName,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            SizedBox(height: 32.h),
+            SizedBox(
+              width: double.infinity,
+              height: 56.h,
+              child: ElevatedButton(
+                onPressed: _isSubmitting ? null : _handleProceed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  elevation: 0,
+                ),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        _paymentMethod == 'Cash'
+                            ? 'Mark cash as received'
+                            : _paymentMethod == 'UPI'
+                                ? 'Mark UPI as received'
+                                : 'Send payment link',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDueItem(String label, double amount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (label == 'Rent')
+              Text(
+                '${DateFormat('dd MMM').format(DateTime.now())} - ${DateFormat('dd MMM').format(DateTime.now().add(const Duration(days: 30)))}, pro-rated',
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: Colors.grey[400],
+                ),
+              ),
+          ],
+        ),
+        Text(
+          '₹${NumberFormat('#,##,###').format(amount)}',
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToggleBtn(String label) {
+    bool isSelected = _collectionType == label;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onCollectionTypeChanged(label),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+            border: Border.all(
+              color: isSelected ? const Color(0xFF2563EB) : Colors.grey[300]!,
+            ),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? const Color(0xFF2563EB) : Colors.grey[600],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMethodBtn(String label, {String? value}) {
+    String actualValue = value ?? label;
+    bool isSelected = _paymentMethod == actualValue;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _paymentMethod = actualValue),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+            border: Border.all(
+              color: isSelected ? const Color(0xFF2563EB) : Colors.grey[300]!,
+            ),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? const Color(0xFF2563EB) : Colors.grey[600],
+              ),
+            ),
+          ),
         ),
       ),
     );

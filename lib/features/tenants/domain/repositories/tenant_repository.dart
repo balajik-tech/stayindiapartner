@@ -12,7 +12,7 @@ abstract class TenantRepository {
 
   Future<TenantDetailEntity> getTenantDetail(String tenantId, String hostelId);
 
-  Future<void> addManualTenant({
+  Future<Map<String, dynamic>> addManualTenant({
     required String phone,
     required String hostelId,
     required String roomId,

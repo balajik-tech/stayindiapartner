@@ -17,7 +17,7 @@ abstract class TenantRemoteDataSource {
 
   Future<TenantDetailModel> getTenantDetail(String tenantId, String hostelId);
 
-  Future<void> addManualTenant({
+  Future<Map<String, dynamic>> addManualTenant({
     required String phone,
     required String hostelId,
     required String roomId,
@@ -107,7 +107,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
   }
 
   @override
-  Future<void> addManualTenant({
+  Future<Map<String, dynamic>> addManualTenant({
     required String phone,
     required String hostelId,
     required String roomId,
@@ -212,7 +212,9 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
       ApiConstants.tenantsManual,
       data: formData,
     );
-    if (response.statusCode != 200 && response.statusCode != 201) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.data as Map<String, dynamic>;
+    } else {
       final msg = response.data?['message'] ?? 'Failed to add tenant';
       throw Exception(msg);
     }

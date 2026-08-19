@@ -30,7 +30,7 @@ class TenantRepositoryImpl implements TenantRepository {
   ) => remote.getTenantDetail(tenantId, hostelId);
 
   @override
-  Future<void> addManualTenant({
+  Future<Map<String, dynamic>> addManualTenant({
     required String phone,
     required String hostelId,
     required String roomId,

@@ -103,7 +103,7 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     );
   }
 
-  Future<void> submit({
+  Future<Map<String, dynamic>?> submit({
     required Hostel hostel,
     required RoomDetail room,
     required String bed,
@@ -129,7 +129,7 @@ class AddTenantCubit extends Cubit<AddTenantState> {
   }) async {
     emit(AddTenantSubmitting());
     try {
-      await _addTenant(
+      final response = await _addTenant(
         phone: phone,
         hostelId: hostel.id,
         roomId: room.id,
@@ -155,9 +155,11 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         address: address,
 
     );
-      emit(AddTenantSuccess());
+      emit(AddTenantSuccess(data: response));
+      return response;
     } catch (e) {
       emit(AddTenantError(ErrorHelper.toFriendlyMessage(e)));
+      return null;
     }
   }
 

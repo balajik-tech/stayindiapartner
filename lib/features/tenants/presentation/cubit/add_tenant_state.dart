@@ -105,9 +105,10 @@ class AddTenantSubmitting extends AddTenantState {}
 
 class AddTenantSuccess extends AddTenantState {
   final String? message;
-  const AddTenantSuccess({this.message});
+  final Map<String, dynamic>? data;
+  const AddTenantSuccess({this.message, this.data});
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, data];
 }
 
 class AddTenantError extends AddTenantState {

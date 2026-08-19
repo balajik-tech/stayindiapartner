@@ -48,7 +48,7 @@ class AddTenantUseCase {
   final TenantRepository repository;
   AddTenantUseCase(this.repository);
 
-  Future<void> call({
+  Future<Map<String, dynamic>> call({
     required String phone,
     required String hostelId,
     required String roomId,
