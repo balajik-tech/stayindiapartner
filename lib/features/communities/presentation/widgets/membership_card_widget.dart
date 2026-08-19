@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../injection_container.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_state.dart';
@@ -126,7 +127,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               SizedBox(height: 20.h),
               _buildFooter(accent, membershipStatus, membership),
               SizedBox(height: 8.h),
-              // _buildPreviewToggles(membershipStatus),
+              _buildPreviewToggles(membershipStatus),
             ],
           ),
         );
@@ -187,16 +188,17 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     Color? textColor = Colors.white;
     Color? smallCircleColor = accent;
 
-    final profileState = context.read<ProfileCubit>().state;
+    final profileState = context.watch<ProfileCubit>().state;
+    final authState = context.watch<AuthCubit>().state;
     String userFirstName = '';
     String userFullName = '';
+
     if (profileState is ProfileLoaded) {
-      if (profileState.profile.firstName.trim().isNotEmpty) {
-        userFirstName = profileState.profile.firstName.trim();
-      }
-      if (profileState.profile.fullName.trim().isNotEmpty) {
-        userFullName = profileState.profile.fullName.trim();
-      }
+      userFirstName = profileState.profile.firstName.trim();
+      userFullName = profileState.profile.fullName.trim();
+    } else if (authState is AuthAuthenticated) {
+      userFullName = authState.owner.name.trim();
+      userFirstName = userFullName.split(' ').first;
     }
 
     switch (status) {
@@ -1582,7 +1584,8 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
     final primary = widget.theme.primaryColor.toColor();
     final accent = widget.theme.accentColor.toColor();
     final selectedCount = _selected.where((s) => s).length;
-    final profileState = context.read<ProfileCubit>().state;
+    final profileState = context.watch<ProfileCubit>().state;
+    final authState = context.watch<AuthCubit>().state;
 
     String userName = '';
     String userPhone = '';
@@ -1590,18 +1593,27 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
 
     if (profileState is ProfileLoaded) {
       final p = profileState.profile;
-      if (p.fullName.trim().isNotEmpty) {
-        userName = p.fullName.trim();
-      }
-      if (p.phone.trim().isNotEmpty) {
-        userPhone = p.phone.trim().startsWith('+')
-            ? p.phone.trim()
-            : '+91 ${p.phone.trim()}';
-      }
+      userName = p.fullName.trim();
+      userPhone = p.phone.trim().startsWith('+') ? p.phone.trim() : '+91 ${p.phone.trim()}';
+      
       String ini = '';
       if (p.firstName.trim().isNotEmpty) ini += p.firstName.trim()[0].toUpperCase();
       if (p.lastName.trim().isNotEmpty) ini += p.lastName.trim()[0].toUpperCase();
-      if (ini.isNotEmpty) userInitials = ini;
+      userInitials = ini;
+    } else if (authState is AuthAuthenticated) {
+      userName = authState.owner.name.trim();
+      userPhone = authState.owner.phone.trim().startsWith('+') 
+          ? authState.owner.phone.trim() 
+          : '+91 ${authState.owner.phone.trim()}';
+      
+      final parts = userName.split(' ');
+      if (parts.isNotEmpty) {
+        String ini = parts.first[0].toUpperCase();
+        if (parts.length > 1) {
+          ini += parts.last[0].toUpperCase();
+        }
+        userInitials = ini;
+      }
     }
 
     return BlocListener<AssociationMembershipCubit, AssociationMembershipState>(
@@ -2023,12 +2035,14 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
   Widget build(BuildContext context) {
     final primary = widget.theme.primaryColor.toColor();
     final accent = widget.theme.accentColor.toColor();
-    final profileState = context.read<ProfileCubit>().state;
+    final profileState = context.watch<ProfileCubit>().state;
+    final authState = context.watch<AuthCubit>().state;
 
     String memberName = '';
-    if (profileState is ProfileLoaded &&
-        profileState.profile.fullName.trim().isNotEmpty) {
+    if (profileState is ProfileLoaded) {
       memberName = profileState.profile.fullName.trim();
+    } else if (authState is AuthAuthenticated) {
+      memberName = authState.owner.name.trim();
     }
 
     return BlocBuilder<AssociationMembershipCubit, AssociationMembershipState>(
@@ -2155,8 +2169,17 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
                   onPressed: () async {
                     final cubit = context.read<AssociationMembershipCubit>();
                     final profileState = context.read<ProfileCubit>().state;
-                    final String email = profileState is ProfileLoaded ? profileState.profile.email : '';
-                    final String mobile = profileState is ProfileLoaded ? profileState.profile.phone : '';
+                    final authState = context.read<AuthCubit>().state;
+                    String email = '';
+                    String mobile = '';
+
+                    if (profileState is ProfileLoaded) {
+                      email = profileState.profile.email;
+                      mobile = profileState.profile.phone;
+                    } else if (authState is AuthAuthenticated) {
+                      email = authState.owner.email ?? '';
+                      mobile = authState.owner.phone;
+                    }
                     final portalId = widget.portalId;
                     final membershipId = widget.membership!.id;
                     final bool isRenewal = widget.isRenewal;
