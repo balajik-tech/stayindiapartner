@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
@@ -463,6 +464,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         iconBgColor: const Color(0xFFFEF2F2),
                         iconColor: const Color(0xFFDC2626),
                         onTap: () => _handleDeleteAccount(context),
+                      ),
+                      _ProfileCard(
+                        icon: Icons.logout_rounded,
+                        title: 'deactivate_account'.tr(),
+                        titleColor: AppColors.error,
+                        imageUrl: 'assets/images/delete.png',
+                        iconBgColor: const Color(0xFFFEF2F2),
+                        iconColor: const Color(0xFFDC2626),
+                        onTap: () => _handleDeactivateAccount(context),
                       ),
                     ]),
 
@@ -1330,6 +1340,275 @@ class _ProfilePageState extends State<ProfilePage> {
     if (confirm == true && context.mounted) {
       context.read<AuthCubit>().deleteAccount();
     }
+  }
+
+  void _handleDeactivateAccount(BuildContext context) async {
+    final action = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: 12.w,
+          vertical: 12.h,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28.r),
+        ),
+        titlePadding: EdgeInsets.fromLTRB(
+          24.w,
+          20.h,
+          24.w,
+          8.h,
+        ),
+        contentPadding: EdgeInsets.fromLTRB(
+          24.w,
+          8.h,
+          24.w,
+          4.h,
+        ),
+        actionsPadding: EdgeInsets.fromLTRB(
+          16.w,
+          0,
+          16.w,
+          16.h,
+        ),
+        title: Column(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: const Color(0xFFEAB308),
+              size: 44.sp,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Account Options',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w700,
+                fontSize: 18.sp,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Manage your StayIndia account and properties.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: const Color(0xFF0f0f0f),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 16.h),
+
+            _DeactivateOptionTile(
+              title: 'DEACTIVATE PROPERTIES ONLY',
+              subtitle:
+              'Remove all your property listings from the platform. Your account and user profile will remain active.',
+              icon: Icons.business_rounded,
+              color: const Color(0xFF102d44),
+              bgColor: const Color(0xFFe7edf9),
+              onTap: () => Navigator.pop(context, 'PROPERTIES'),
+            ),
+
+            SizedBox(height: 16.h),
+
+            _DeactivateOptionTile(
+              title: 'DEACTIVATE ACCOUNT PERMANENTLY',
+              subtitle:
+              'Your account, user profile, and all property listings will be permanently deactivated. This action is irreversible.',
+              icon: Icons.person_remove_rounded,
+              color: const Color(0xFF4a1d19),
+              bgColor: const Color(0xFFfceadf),
+              onTap: () => Navigator.pop(context, 'ACCOUNT'),
+            ),
+            SizedBox(height: 8.h),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                fontSize: 16.sp,
+                color: const Color(0xFF4d4762),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (action != null && context.mounted) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: 24.w,
+            vertical: 24.h,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24.r),
+          ),
+          titlePadding: EdgeInsets.fromLTRB(
+            24.w,
+            20.h,
+            24.w,
+            8.h,
+          ),
+          contentPadding: EdgeInsets.fromLTRB(
+            24.w,
+            8.h,
+            24.w,
+            4.h,
+          ),
+          actionsPadding: EdgeInsets.fromLTRB(
+            16.w,
+            0,
+            16.w,
+            8.h,
+          ),
+          title: Text(
+            'confirm_deactivation'.tr(),
+            style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppColors.error,
+            ),
+          ),
+          content: Text(
+            'confirm_deactivation_message'.tr(
+              namedArgs: {
+                'action': action,
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('cancel'.tr()),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.error,
+              ),
+              child: Text(
+                'confirm'.tr(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm == true && context.mounted) {
+        try {
+          await context.read<ProfileCubit>().deactivateAccount(action);
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Deactivation successful.'),
+                backgroundColor: Colors.green,
+              ),
+            );
+
+            context.read<AuthCubit>().logout();
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed: $e'),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+class _DeactivateOptionTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final Color bgColor;
+  final VoidCallback onTap;
+
+  const _DeactivateOptionTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.bgColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.all(12.r),
+        decoration: BoxDecoration(
+          color: bgColor,
+          border: Border.all(color: color.withOpacity(0.1)),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24.sp),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.blackColor,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

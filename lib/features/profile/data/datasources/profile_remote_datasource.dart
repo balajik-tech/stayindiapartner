@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/features/profile/data/models/profile_model.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/dl_kyc_entity.dart';
@@ -17,6 +18,7 @@ abstract class ProfileRemoteDataSource {
   });
   Future<ProfileModel> uploadAvatar(File image);
   Future<void> deleteAccount();
+  Future<void> deactivateAccount(String action);
   Future<String> generateReferralId();
   Future<String> getRateUsUrl();
 }
@@ -104,6 +106,19 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     final response = await dio.delete(ApiConstants.userDeleteAccount);
     if (response.statusCode != 200) {
       throw Exception('Failed to delete account');
+    }
+  }
+
+  @override
+  Future<void> deactivateAccount(String action) async {
+    final response = await dio.patch(
+      ApiConstants.userDeactivateAccount,
+      data: {'action': action},
+    );
+
+    if (response.statusCode != 200) {
+      final message = response.data?['message'] ?? 'Failed to deactivate';
+      throw Exception(message);
     }
   }
 

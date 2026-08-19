@@ -46,6 +46,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<void> deleteAccount() => remoteDataSource.deleteAccount();
 
   @override
+  Future<void> deactivateAccount(String action) => remoteDataSource.deactivateAccount(action);
+
+  @override
   Future<String> generateReferralId() => remoteDataSource.generateReferralId();
 
   @override

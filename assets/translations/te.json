@@ -468,7 +468,6 @@
   "email_address": "ఈమెయిల్ చిరునామా",
   "current_address": "శాశ్వత చిరునామా",
   "delete_my_account": "నా ఖాతాను తొలగించు",
-  "delete_account": "ఖాతాను తొలగించు",
   "delete_account_confirm": "ఈ చర్య శాశ్వతమైనది మరియు మీ డేటా అంతా ఎప్పటికీ పోతుంది. ధృవీకరించాలా?",
   "delete_permanently": "శాశ్వతంగా తొలగించు",
   "update_field": "{field}అప్‌డేట్ చేయండి",
@@ -990,5 +989,8 @@
     "dont_close_screen_note": "చెల్లింపు పూర్తయ్యే వరకు దయచేసి ఈ స్క్రీన్‌ను మూసివేయవద్దు లేదా యాప్‌లను మార్చవద్దు.",
     "launch_error": "లాంచ్ లోపం: {}"
   },
-  "delete_account": "ఖాతాను తొలగించండి"
+  "delete_account": "ఖాతాను తొలగించండి",
+
+  "confirm_deactivation": "నిష్క్రియం చేయడాన్ని నిర్ధారించండి",
+  "confirm_deactivation_message": "మీ {action}ని నిష్క్రియం చేయాలనుకుంటున్నారా? ఇది వెంటనే అమల్లోకి వస్తుంది."
 }

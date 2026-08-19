@@ -463,7 +463,6 @@
   "email_address": "ईमेल पता",
   "current_address": "स्थायी पता",
   "delete_my_account": "मेरा खाता हटाएं",
-  "delete_account": "खाता हटाएं",
   "delete_account_confirm": "यह कार्रवाई स्थायी है और आपका सारा डेटा हमेशा के लिए खो जाएगा। पुष्टि करें?",
   "delete_permanently": "स्थायी रूप से हटाएं",
   "update_field": "{field} अपडेट करें",
@@ -990,5 +989,8 @@
     "dont_close_screen_note": "कृपया भुगतान पूरा होने तक इस स्क्रीन को बंद न करें या ऐप न बदलें।",
     "launch_error": "लॉन्च त्रुटि: {}"
   },
-  "delete_account": "खाता हटाएं"
+  "delete_account": "खाता हटाएं",
+
+  "confirm_deactivation": "निष्क्रिय करने की पुष्टि करें",
+  "confirm_deactivation_message": "क्या आप वाकई अपने {action} को निष्क्रिय करना चाहते हैं? यह तुरंत प्रभावी होगा।"
 }

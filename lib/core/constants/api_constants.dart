@@ -174,6 +174,7 @@ class ApiConstants {
   static const String userProfile = '/users/profile';
   static const String userCompleteProfile = '/users/complete-profile';
   static const String userDeleteAccount = '/users/delete-account';
+  static const String userDeactivateAccount = '/account-settings/deactivate';
   static const String userProfileImage = '/users/profile';
   static const String userAcceptPolicy = '/users/accept-policy';
 

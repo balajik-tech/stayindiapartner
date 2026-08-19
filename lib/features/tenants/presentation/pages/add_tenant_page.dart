@@ -54,6 +54,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
   DateTime? _checkInDate;
   late AddTenantCubit _addTenantCubit;
   bool _isAC = true;
+  bool _isNew = true;
 
   File? _csvFile;
 
@@ -914,9 +915,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildBulkUploadSection(),
-                          SizedBox(height: 8.h),
-                          _buildOrText(),
+                          // _buildBulkUploadSection(),
+                          // SizedBox(height: 8.h),
+                          // _buildOrText(),
+                          _buildTenantToggle(),
                           SizedBox(height: 32.h),
                           _buildSectionTitle('property_selection'.tr()),
                           SizedBox(height: 16.h),
@@ -1410,6 +1412,125 @@ class _AddTenantPageState extends State<AddTenantPage> {
   //     ),
   //   );
   // }
+
+  Widget _buildTenantToggle() {
+    return Container(
+      height: 48.h,
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (!_isNew) {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    _isNew = true;
+                  });
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _isNew ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: _isNew
+                      ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.fiber_new_rounded,
+                        size: 16.sp,
+                        color: _isNew
+                            ? const Color(0xFF16539B)
+                            : const Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'new'.tr(),
+                        style: TextStyle(
+                          color: _isNew
+                              ? const Color(0xFF16539B)
+                              : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (_isNew) {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    _isNew = false;
+                  });
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: !_isNew ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: !_isNew
+                      ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.home_work_rounded,
+                        size: 16.sp,
+                        color: !_isNew
+                            ? const Color(0xFF16539B)
+                            : const Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'existing'.tr(),
+                        style: TextStyle(
+                          color: !_isNew
+                              ? const Color(0xFF16539B)
+                              : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildAcToggle() {
     return Container(

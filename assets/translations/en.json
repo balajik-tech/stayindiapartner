@@ -196,7 +196,7 @@
   "update_success": "Updated successfully",
   "delete_success": "Deleted successfully",
   "add_success": "Added successfully",
-  "add_new_tenant": "Add New Tenant",
+  "add_new_tenant": "Add Tenant",
   "property_selection": "Property Selection",
   "select_hostel": "Select Hostel",
   "tenant_details": "Tenant Details",
@@ -470,7 +470,7 @@
   "email_address": "Email Address",
   "current_address": "Permanent Address",
   "delete_my_account": "Delete My Account",
-  "delete_account": "Delete Account",
+  "deactivate_account": "Deactivate Account",
   "delete_account_confirm": "This action is permanent and all your data will be lost forever. Confirm?",
   "delete_permanently": "Delete Permanently",
   "update_field": "Update {field}",
@@ -997,5 +997,9 @@
     "dont_close_screen_note": "Please do not close this screen or switch apps until the payment is complete.",
     "launch_error": "Launch Error: {}"
   },
-  "delete_account": "Delete Account"
+  "delete_account": "Delete Account",
+
+  "confirm_deactivation": "Confirm Deactivation",
+  "confirm_deactivation_message": "Are you sure you want to deactivate your {action}? This will take effect immediately."
+
 }

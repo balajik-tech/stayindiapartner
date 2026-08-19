@@ -50,6 +50,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   final UpdateProfileUseCase _updateProfile;
   final UploadAvatarUseCase _uploadAvatar;
   final DeleteOwnerAccountUseCase _deleteAccount;
+  final DeactivateAccountUseCase _deactivateAccount;
   final GenerateReferralUseCase _generateReferral;
   final GetRateUsUrlUseCase _getRateUsUrl;
 
@@ -58,12 +59,14 @@ class ProfileCubit extends Cubit<ProfileState> {
     required UpdateProfileUseCase updateProfileUseCase,
     required UploadAvatarUseCase uploadAvatarUseCase,
     required DeleteOwnerAccountUseCase deleteOwnerAccountUseCase,
+    required DeactivateAccountUseCase deactivateAccountUseCase,
     required GenerateReferralUseCase generateReferralUseCase,
     required GetRateUsUrlUseCase getRateUsUrlUseCase,
   }) : _getProfile = getProfileUseCase,
        _updateProfile = updateProfileUseCase,
        _uploadAvatar = uploadAvatarUseCase,
        _deleteAccount = deleteOwnerAccountUseCase,
+       _deactivateAccount = deactivateAccountUseCase,
        _generateReferral = generateReferralUseCase,
        _getRateUsUrl = getRateUsUrlUseCase,
        super(ProfileInitial());
@@ -145,6 +148,19 @@ class ProfileCubit extends Cubit<ProfileState> {
     } catch (e) {
       AppLogger.error('deleteAccount failed', e);
       emit(ProfileError(ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> deactivateAccount(String action) async {
+    emit(ProfileUpdating());
+    try {
+      await _deactivateAccount(action);
+      // If deactivation is successful, we might want to logout or refresh
+      // User requested "navigate to route first" - likely means logout/splash
+    } catch (e) {
+      AppLogger.error('deactivateAccount failed', e);
+      emit(ProfileError(ErrorHelper.toFriendlyMessage(e)));
+      rethrow;
     }
   }
 }

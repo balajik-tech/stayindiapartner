@@ -49,6 +49,13 @@ class DeleteOwnerAccountUseCase {
   Future<void> call() => repository.deleteAccount();
 }
 
+class DeactivateAccountUseCase {
+  final ProfileRepository repository;
+  DeactivateAccountUseCase(this.repository);
+
+  Future<void> call(String action) => repository.deactivateAccount(action);
+}
+
 class GenerateReferralUseCase {
   final ProfileRepository repository;
   GenerateReferralUseCase(this.repository);
