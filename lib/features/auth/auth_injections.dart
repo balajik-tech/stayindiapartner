@@ -12,6 +12,7 @@ import 'domain/usecases/request_otp_usecase.dart';
 import 'domain/usecases/verify_otp_usecase.dart';
 import 'domain/usecases/has_active_session_usecase.dart';
 import 'domain/usecases/delete_account_usecase.dart';
+import 'domain/usecases/restore_account_usecase.dart';
 import 'presentation/cubit/auth_cubit.dart';
 
 void registerAuthFeature(GetIt sl) {
@@ -24,6 +25,7 @@ void registerAuthFeature(GetIt sl) {
       logoutUseCase: sl(),
       hasActiveSessionUseCase: sl(),
       deleteAccountUseCase: sl(),
+      restoreAccountUseCase: sl(),
       repository: sl(),
       notificationService: sl(),
       cacheService: sl(),
@@ -37,6 +39,7 @@ void registerAuthFeature(GetIt sl) {
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton(() => HasActiveSessionUseCase(sl()));
   sl.registerLazySingleton(() => DeleteAccountUseCase(sl()));
+  sl.registerLazySingleton(() => RestoreAccountUseCase(sl()));
 
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remote: sl(), tokenStorage: sl()),

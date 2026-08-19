@@ -20,6 +20,8 @@ abstract class AuthRepository {
 
   Future<void> deleteAccount();
 
+  Future<void> restoreAccount(String action);
+
   Future<bool> hasActiveSession();
   Future<void> updateDeviceToken({
     required String pushToken,

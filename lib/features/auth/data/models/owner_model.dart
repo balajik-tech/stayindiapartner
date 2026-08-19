@@ -15,6 +15,7 @@ class OwnerModel extends OwnerEntity {
     super.verificationBadge,
     super.staffPropertyId,
     super.permissions,
+    super.deactivatedOn,
   });
 
   factory OwnerModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +41,9 @@ class OwnerModel extends OwnerEntity {
     final permissionsRaw = json['permissions'] as List? ?? [];
     final permissionsList = permissionsRaw.map((e) => e.toString()).toList();
 
+    final deactivatedOnStr = json['deactivatedOn']?.toString();
+    final deactivatedOn = deactivatedOnStr != null ? DateTime.tryParse(deactivatedOnStr) : null;
+
     return OwnerModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
       name: name,
@@ -56,6 +60,7 @@ class OwnerModel extends OwnerEntity {
       verificationBadge: json['verificationBadge']?.toString(),
       staffPropertyId: json['propertyId']?.toString(),
       permissions: permissionsList,
+      deactivatedOn: deactivatedOn,
     );
   }
 
@@ -73,6 +78,7 @@ class OwnerModel extends OwnerEntity {
     if (verificationBadge != null) 'verificationBadge': verificationBadge,
     if (staffPropertyId != null) 'propertyId': staffPropertyId,
     'permissions': permissions,
+    if (deactivatedOn != null) 'deactivatedOn': deactivatedOn?.toIso8601String(),
   };
 
   factory OwnerModel.fromEntity(OwnerEntity entity) => OwnerModel(
@@ -89,5 +95,6 @@ class OwnerModel extends OwnerEntity {
     verificationBadge: entity.verificationBadge,
     staffPropertyId: entity.staffPropertyId,
     permissions: entity.permissions,
+    deactivatedOn: entity.deactivatedOn,
   );
 }

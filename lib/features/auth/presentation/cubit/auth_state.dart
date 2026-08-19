@@ -76,3 +76,31 @@ class AuthGoogleNeedsPhone extends AuthState {
   @override
   List<Object?> get props => [email, firstName, lastName, avatar];
 }
+
+class AuthAccountDeletedWithin30Days extends AuthState {
+  final String name;
+  final String deletionDate;
+  final String restoreUntilDate;
+  final String phone;
+
+  const AuthAccountDeletedWithin30Days({
+    required this.name,
+    required this.deletionDate,
+    required this.restoreUntilDate,
+    required this.phone,
+  });
+
+  @override
+  List<Object?> get props => [name, deletionDate, restoreUntilDate, phone];
+}
+
+class AuthAccountDeletedPast30Days extends AuthState {
+  final String phone;
+
+  const AuthAccountDeletedPast30Days({required this.phone});
+
+  @override
+  List<Object?> get props => [phone];
+}
+
+class AuthAccountRestored extends AuthState {}

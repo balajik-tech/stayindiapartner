@@ -10,6 +10,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 import '../cubit/auth_cubit.dart';
 import '../widgets/auth_widgets.dart';
+import '../widgets/account_recovery_widgets.dart';
 import 'LoginOnBoardingScreen.dart';
 
 class OtpPage extends StatefulWidget {
@@ -47,6 +48,11 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   bool _useSmsOtp = false;
   bool _hasAutoSubmitted = false;
   String? _appSignature; // debug helper — see initState
+
+  // --- Account Recovery ---
+  bool _showConfirmStartFresh = false;
+  bool _isRestoring = false;
+
   final SmartAuth _smartAuth = SmartAuth.instance;
   late String? _currentDevOtp;
   late AnimationController _entranceController;
@@ -212,12 +218,43 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     _listenForSmsOtp();
   }
 
+  void _onRestoreAccount() {
+    setState(() => _isRestoring = true);
+    context.read<AuthCubit>().restoreAccount(action: "OLD_ACCOUNT");
+  }
+
+  void _onStartFresh() {
+    setState(() => _showConfirmStartFresh = true);
+  }
+
+  void _onConfirmStartFresh() {
+    setState(() {
+      _showConfirmStartFresh = false;
+      _isRestoring = false;
+    });
+    context.read<AuthCubit>().startFresh(widget.phone);
+  }
+
+  void _onGoBackFromStartFresh() {
+    setState(() => _showConfirmStartFresh = false);
+  }
+
+  void _onCancelRecovery() {
+    setState(() {
+      _isRestoring = false;
+      _showConfirmStartFresh = false;
+    });
+    context.read<AuthCubit>().logout();
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthCubit, AuthState>(
       listenWhen: (_, current) =>
           current is AuthOtpSent ||
           current is AuthError ||
+          current is AuthAccountRestored ||
           current is AuthAuthenticated,
       listener: (context, state) {
         if (state is AuthAuthenticated) {
@@ -236,14 +273,20 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           );
         } else if (state is AuthError) {
           _hasAutoSubmitted = false;
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(state.message, style: GoogleFonts.outfit()),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+          if (!_isRestoring) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(state.message, style: GoogleFonts.outfit()),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+          }
+        } else if (state is AuthAccountRestored) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Account restored successfully!')),
+          );
         }
       },
       child: BlocBuilder<AuthCubit, AuthState>(
@@ -290,187 +333,8 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24.r),
                         child: SingleChildScrollView(
-                          padding: EdgeInsets.fromLTRB(24.w, 14.h, 24.w, 24.h),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // ---- close button ----
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: GestureDetector(
-                                  onTap: () => Navigator.of(context).pop(),
-                                  behavior: HitTestBehavior.opaque,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(4.r),
-                                    child: Icon(
-                                      Icons.close_rounded,
-                                      size: 22.sp,
-                                      color: AppColors.primaryBlue,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // ---- logo ----
-                              Center(child: const AuthNewLogoBadge()),
-                              // ---- heading ----
-                              Text(
-                                'Your Hostel control center',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 24.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.inputBoxColor,
-                                  letterSpacing: -0.4,
-                                ),
-                              ),
-                              SizedBox(height: 6.h),
-                              Text(
-                                'Manage Your Hostels effortlessly',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryBlue,
-                                ),
-                              ),
-
-                              // ---- illustration ----
-                              SizedBox(height: 18.h),
-
-                              Container(
-                                alignment: Alignment.center,
-                                child: Image.asset(
-                                  'assets/images/login_lap.png',
-                                  width: 180.w,
-                                  height: 125.h,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.home_work_rounded,
-                                      color: Colors.white,
-                                      size: 40.sp,
-                                    );
-                                  },
-                                ),
-                              ),
-                              SizedBox(height: 22.h),
-
-                              // ---- mobile number label ----
-                              _OtpInputGrid(
-                                controllers: _controllers,
-                                focusNodes: _focusNodes,
-                                onOtpPasted: _fillOtpFields,
-                              ),
-
-                              SizedBox(height: 4.h),
-                              // ---- phone field ----
-                              _ResendRow(
-                                countdown: _countdown,
-                                onResend: () => _onResend(context),
-                              ),
-
-                              // ---- password field (staff login only) ----
-                              SizedBox(height: 8.h),
-
-                              // ---- submit button ----
-                              Material(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(8.r),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  onTap: isLoading
-                                      ? null
-                                      : () => _onVerify(context),
-                                  child: Container(
-                                    height: 52.h,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          AppColors.kAuthOrange,
-                                          AppColors.kAuthOrangeDark,
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8.r),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.kAuthOrange
-                                              .withValues(alpha: 0.35),
-                                          blurRadius: 14,
-                                          offset: const Offset(0, 6),
-                                        ),
-                                      ],
-                                    ),
-                                    child: isLoading
-                                        ? SizedBox(
-                                            width: 22.w,
-                                            height: 22.w,
-                                            child:
-                                                const CircularProgressIndicator(
-                                                  strokeWidth: 2.4,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation(
-                                                        Colors.white,
-                                                      ),
-                                                ),
-                                          )
-                                        : Text(
-                                            isLoading
-                                                ? 'VERIFYING...'
-                                                : 'VERIFY & CONTINUE',
-                                            style: GoogleFonts.outfit(
-                                              fontSize: 15.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                              letterSpacing: 0.4,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                              ),
-
-                              SizedBox(height: 18.h),
-
-                              // ---- terms footer ----
-                              Center(
-                                child: Text.rich(
-                                  TextSpan(
-                                    text: 'By continuing, you agree to our ',
-                                    children: [
-                                      TextSpan(
-                                        text: 'Terms',
-                                        style: TextStyle(
-                                          color: AppColors.kAuthOrange,
-                                          fontWeight: FontWeight.bold,
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                      ),
-                                      const TextSpan(text: ' & '),
-                                      TextSpan(
-                                        text: 'Privacy Policy',
-                                        style: TextStyle(
-                                          color: AppColors.kAuthOrange,
-                                          fontWeight: FontWeight.bold,
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 12.sp,
-                                    color: AppColors.primaryBlue.withValues(
-                                      alpha: 0.7,
-                                    ),
-                                    height: 1.4,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 24.h),
+                          child: _buildContent(context, state, isLoading),
                         ),
                       ),
                     ),
@@ -482,6 +346,214 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, AuthState state, bool isLoading) {
+    if (_isRestoring && state is AuthError) {
+      return RestoreFailedView(
+        onRetry: _onRestoreAccount,
+        onCancel: _onCancelRecovery,
+      );
+    }
+
+    if (state is AuthAccountDeletedWithin30Days) {
+      if (_showConfirmStartFresh) {
+        return ConfirmStartFreshView(
+          deletionDate: state.deletionDate,
+          onGoBack: _onGoBackFromStartFresh,
+          onConfirm: _onConfirmStartFresh,
+        );
+      }
+      return RestoreAccountWithin30DaysView(
+        name: state.name,
+        deletionDate: state.deletionDate,
+        restoreUntilDate: state.restoreUntilDate,
+        onRestore: _onRestoreAccount,
+        onStartFresh: _onStartFresh,
+      );
+    }
+
+    if (state is AuthAccountDeletedPast30Days) {
+      return Past30DaysRegisterView(
+        onRegister: _onConfirmStartFresh,
+      );
+    }
+
+    if (state is AuthAccountRestored) {
+      return AccountRestoredView(
+        onContinue: () {
+          setState(() => _isRestoring = false);
+          context.read<AuthCubit>().refreshProfile();
+        },
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // ---- close button ----
+        Align(
+          alignment: Alignment.centerRight,
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: EdgeInsets.all(4.r),
+              child: Icon(
+                Icons.close_rounded,
+                size: 22.sp,
+                color: AppColors.primaryBlue,
+              ),
+            ),
+          ),
+        ),
+        // ---- logo ----
+        Center(child: const AuthNewLogoBadge()),
+        // ---- heading ----
+        Text(
+          'Your Hostel control center',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.outfit(
+            fontSize: 24.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.inputBoxColor,
+            letterSpacing: -0.4,
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          'Manage Your Hostels effortlessly',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.outfit(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryBlue,
+          ),
+        ),
+
+        // ---- illustration ----
+        SizedBox(height: 18.h),
+
+        Container(
+          alignment: Alignment.center,
+          child: Image.asset(
+            'assets/images/login_lap.png',
+            width: 180.w,
+            height: 125.h,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.home_work_rounded,
+                color: Colors.white,
+                size: 40.sp,
+              );
+            },
+          ),
+        ),
+        SizedBox(height: 22.h),
+
+        // ---- mobile number label ----
+        _OtpInputGrid(
+          controllers: _controllers,
+          focusNodes: _focusNodes,
+          onOtpPasted: _fillOtpFields,
+        ),
+
+        SizedBox(height: 4.h),
+        // ---- phone field ----
+        _ResendRow(
+          countdown: _countdown,
+          onResend: () => _onResend(context),
+        ),
+
+        // ---- password field (staff login only) ----
+        SizedBox(height: 8.h),
+
+        // ---- submit button ----
+        Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8.r),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8.r),
+            onTap: isLoading ? null : () => _onVerify(context),
+            child: Container(
+              height: 52.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.kAuthOrange, AppColors.kAuthOrangeDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(8.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.kAuthOrange.withValues(alpha: 0.35),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: isLoading
+                  ? SizedBox(
+                      width: 22.w,
+                      height: 22.w,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE',
+                      style: GoogleFonts.outfit(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+            ),
+          ),
+        ),
+
+        SizedBox(height: 18.h),
+
+        // ---- terms footer ----
+        Center(
+          child: Text.rich(
+            TextSpan(
+              text: 'By continuing, you agree to our ',
+              children: [
+                TextSpan(
+                  text: 'Terms',
+                  style: TextStyle(
+                    color: AppColors.kAuthOrange,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+                const TextSpan(text: ' & '),
+                TextSpan(
+                  text: 'Privacy Policy',
+                  style: TextStyle(
+                    color: AppColors.kAuthOrange,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(
+              fontSize: 12.sp,
+              color: AppColors.primaryBlue.withValues(alpha: 0.7),
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

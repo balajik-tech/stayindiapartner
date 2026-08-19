@@ -14,6 +14,7 @@ class OwnerEntity extends Equatable {
   final String? verificationBadge;
   final String? staffPropertyId;
   final List<String> permissions;
+  final DateTime? deactivatedOn;
 
   const OwnerEntity({
     required this.id,
@@ -29,6 +30,7 @@ class OwnerEntity extends Equatable {
     this.verificationBadge,
     this.staffPropertyId,
     this.permissions = const [],
+    this.deactivatedOn,
   });
 
   bool get isNewOwner => !isProfileComplete;
@@ -65,6 +67,7 @@ class OwnerEntity extends Equatable {
     String? verificationBadge,
     String? staffPropertyId,
     List<String>? permissions,
+    DateTime? deactivatedOn,
   }) {
     return OwnerEntity(
       id: id ?? this.id,
@@ -80,6 +83,7 @@ class OwnerEntity extends Equatable {
       verificationBadge: verificationBadge ?? this.verificationBadge,
       staffPropertyId: staffPropertyId ?? this.staffPropertyId,
       permissions: permissions ?? this.permissions,
+      deactivatedOn: deactivatedOn ?? this.deactivatedOn,
     );
   }
 
@@ -98,5 +102,6 @@ class OwnerEntity extends Equatable {
     verificationBadge,
     staffPropertyId,
     permissions,
+    deactivatedOn,
   ];
 }

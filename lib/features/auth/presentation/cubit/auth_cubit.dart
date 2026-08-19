@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/utils/image_utils.dart';
 
@@ -12,6 +13,7 @@ import 'package:stayindia_owner/features/auth/domain/usecases/logout_usecase.dar
 import 'package:stayindia_owner/features/auth/domain/usecases/request_otp_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/delete_account_usecase.dart';
+import 'package:stayindia_owner/features/auth/domain/usecases/restore_account_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/has_active_session_usecase.dart';
 import 'package:stayindia_owner/core/utils/error_helper.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
@@ -30,6 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
   final LogoutUseCase _logout;
   final HasActiveSessionUseCase _hasActiveSession;
   final DeleteAccountUseCase _deleteAccount;
+  final RestoreAccountUseCase _restoreAccount;
 
   final AuthRepository _repository;
   final NotificationService _notificationService;
@@ -43,6 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
     required LogoutUseCase logoutUseCase,
     required HasActiveSessionUseCase hasActiveSessionUseCase,
     required DeleteAccountUseCase deleteAccountUseCase,
+    required RestoreAccountUseCase restoreAccountUseCase,
     required AuthRepository repository,
     required NotificationService notificationService,
     required CacheService cacheService,
@@ -53,6 +57,7 @@ class AuthCubit extends Cubit<AuthState> {
        _logout = logoutUseCase,
        _hasActiveSession = hasActiveSessionUseCase,
        _deleteAccount = deleteAccountUseCase,
+       _restoreAccount = restoreAccountUseCase,
        _repository = repository,
        _notificationService = notificationService,
        _cacheService = cacheService,
@@ -169,6 +174,29 @@ class AuthCubit extends Cubit<AuthState> {
       AppLogger.info(
         'AuthCubit: OTP verified for ${result.owner.id}. isNewUser: ${result.isNewUser}, isProfileComplete: ${result.owner.isProfileComplete}',
       );
+
+      if (result.owner.deactivatedOn != null) {
+        final deactivatedDate = result.owner.deactivatedOn!;
+        final now = DateTime.now();
+        final difference = now.difference(deactivatedDate).inDays;
+
+        if (difference <= 30) {
+          final restoreUntil = deactivatedDate.add(const Duration(days: 30));
+          final formatter = DateFormat('d MMMM yyyy');
+          emit(
+            AuthAccountDeletedWithin30Days(
+              name: result.owner.name,
+              deletionDate: formatter.format(deactivatedDate),
+              restoreUntilDate: formatter.format(restoreUntil),
+              phone: phone,
+            ),
+          );
+        } else {
+          emit(AuthAccountDeletedPast30Days(phone: phone));
+        }
+        return;
+      }
+
       emit(AuthAuthenticated(owner: result.owner, isNewUser: result.isNewUser));
       _syncDeviceToken();
       AppLogger.info(
@@ -312,6 +340,31 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthUnauthenticated());
     SessionResetCoordinator.postResetCleanup();
     AppLogger.info('Owner account deleted.');
+  }
+
+  Future<void> restoreAccount({required String action, String? phone}) async {
+    emit(AuthLoading());
+    try {
+      await _restoreAccount(action);
+      if (action == "OLD_ACCOUNT") {
+        emit(AuthAccountRestored());
+      } else {
+        // For NEW_ACCOUNT, we proceed to registration by sending OTP
+        if (phone != null) {
+          final devOtp = await _requestOtp(phone);
+          emit(AuthOtpSent(phone: phone, devOtp: devOtp));
+        } else {
+          emit(AuthUnauthenticated());
+        }
+      }
+    } catch (e) {
+      AppLogger.error('restoreAccount failed: $e');
+      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+    }
+  }
+
+  Future<void> startFresh(String phone) async {
+    await restoreAccount(action: "NEW_ACCOUNT", phone: phone);
   }
 
   /// Clear DigiLocker details
