@@ -1460,7 +1460,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        'new'.tr(),
+                        'New'.tr(),
                         style: TextStyle(
                           color: _isNew
                               ? const Color(0xFF16539B)
@@ -1512,7 +1512,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        'existing'.tr(),
+                        'Existing'.tr(),
                         style: TextStyle(
                           color: !_isNew
                               ? const Color(0xFF16539B)
