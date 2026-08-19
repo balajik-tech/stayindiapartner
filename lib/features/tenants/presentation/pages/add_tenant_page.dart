@@ -2442,12 +2442,12 @@ class _CollectPaymentBottomSheetState
     setState(() {
       _collectionType = type;
       if (type == 'Full amount') {
-        double total = widget.rent + widget.securityDeposit + widget.maintainance;
-        _collectingNowController.text = total.toStringAsFixed(0);
+        // double total = widget.rent + widget.securityDeposit + widget.maintainance;
+        // _collectingNowController.text = total.toStringAsFixed(0);
       } else if (type == 'Deposit only') {
-        _collectingNowController.text = widget.securityDeposit.toStringAsFixed(0);
+        // _collectingNowController.text = widget.securityDeposit.toStringAsFixed(0);
       } else {
-        _collectingNowController.text = '0';
+        // _collectingNowController.text = '0';
       }
     });
   }
@@ -2728,8 +2728,8 @@ class _CollectPaymentBottomSheetState
                 _buildMethodBtn('Cash'),
                 SizedBox(width: 8.w),
                 _buildMethodBtn('UPI / QR', value: 'UPI'),
-                SizedBox(width: 8.w),
-                _buildMethodBtn('Payment link', value: 'Link'),
+                // SizedBox(width: 8.w),
+                // _buildMethodBtn('Payment link', value: 'Link'),
               ],
             ),
             SizedBox(height: 24.h),
