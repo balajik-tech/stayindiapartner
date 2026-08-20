@@ -127,7 +127,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               SizedBox(height: 20.h),
               _buildFooter(accent, membershipStatus, membership),
               SizedBox(height: 8.h),
-              _buildPreviewToggles(membershipStatus),
+              // _buildPreviewToggles(membershipStatus),
             ],
           ),
         );
@@ -859,6 +859,7 @@ class _ActiveMembershipView extends StatelessWidget {
     final memId = membership?.membershipId ?? '';
     final expiry = membership?.expiredAt;
     final validUntil = membership?.validUntil;
+    final phone = membership?.phone;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -884,6 +885,7 @@ class _ActiveMembershipView extends StatelessWidget {
               ? 'Valid until ${_RenewalDueMembershipView._formatExpiryDate(validUntil)}'
               : '',
           theme: theme,
+          phone: phone,
         ),
         SizedBox(height: 16.h),
       ],
@@ -928,6 +930,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
     final totalFee = membership?.totalFee ?? 0;
     final feeText = _ApprovedMembershipView._formatAmount(totalFee);
     final memId = membership?.membershipId ?? '';
+    final phone = membership?.phone ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -960,6 +963,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
           id: memId,
           validUntil: 'Valid until ${_formatExpiryDate(validUntil)}',
           theme: theme,
+          phone: phone,
         ),
         SizedBox(height: 16.h),
         Container(
@@ -1061,6 +1065,7 @@ class _ExpiredMembershipView extends StatelessWidget {
     final feeText = _ApprovedMembershipView._formatAmount(totalFee);
     final memId = membership?.membershipId ?? '';
     final expiry = membership?.expiredAt;
+    final phone = membership?.phone ?? "";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1096,6 +1101,7 @@ class _ExpiredMembershipView extends StatelessWidget {
               : '',
           isExpired: true,
           theme: theme,
+          phone: phone
         ),
         SizedBox(height: 16.h),
         Container(
@@ -1308,10 +1314,12 @@ class _MembershipIdBox extends StatelessWidget {
   final String id;
   final String validUntil;
   final bool isExpired;
+  final String? phone;
   final CommunityThemeEntity theme;
 
   const _MembershipIdBox({
     required this.id,
+    required this.phone,
     required this.validUntil,
     this.isExpired = false,
     required this.theme,
@@ -1373,21 +1381,55 @@ class _MembershipIdBox extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+          InkWell(
+            onTap: () async {
+              await shareMembershipIdViaWhatsApp(
+                membershipId: id,
+                whatsappNumber: phone?? '917093284311',
+              );
+            },
+            borderRadius: BorderRadius.circular(50.r),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Image.asset(
+                'assets/images/whatsapp_iconn.png',
+                width: 24.w,
+                height: 24.h,
+                fit: BoxFit.contain,
+              ),
             ),
-            child: Image.asset(
-              'assets/images/whatsapp_iconn.png',
-              width: 24.w,
-              height: 24.h,
-              fit: BoxFit.contain,
-            ),
-          ),
+          )
         ],
       ),
     );
+  }
+
+  Future<void> shareMembershipIdViaWhatsApp({
+    required String membershipId,
+    required String whatsappNumber,
+  }) async {
+    final message =
+        'Hello, my Membership ID is $membershipId. '
+        'Please share my membership certificate and receipt.';
+
+    final encodedMessage = Uri.encodeComponent(message);
+
+    final whatsappUrl = Uri.parse(
+      'https://wa.me/$whatsappNumber?text=$encodedMessage',
+    );
+
+    if (await canLaunchUrl(whatsappUrl)) {
+      await launchUrl(
+        whatsappUrl,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      throw Exception('Could not open WhatsApp');
+    }
   }
 }
 

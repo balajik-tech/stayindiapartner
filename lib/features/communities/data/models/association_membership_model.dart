@@ -11,6 +11,7 @@ class AssociationMembershipModel extends AssociationMembershipEntity {
     super.validUntil,
     super.totalFee,
     super.membershipId,
+    super.phone,
     super.timeline,
     required super.properties,
   });
@@ -38,6 +39,7 @@ class AssociationMembershipModel extends AssociationMembershipEntity {
           (json['status'] == 'ACTIVE' && json['id'] != null
               ? json['id'].toString()
               : null),
+      phone: json['phone']?.toString() ?? null,
       timeline: json['timeline'] is Map ? Map<String, dynamic>.from(json['timeline'] as Map) : null,
       properties: (json['properties'] as List? ?? [])
           .map((e) => MembershipPropertyModel.fromJson(e as Map<String, dynamic>))
