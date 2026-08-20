@@ -127,7 +127,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
               SizedBox(height: 20.h),
               _buildFooter(accent, membershipStatus, membership),
               SizedBox(height: 8.h),
-              // _buildPreviewToggles(membershipStatus),
+              _buildPreviewToggles(membershipStatus),
             ],
           ),
         );
@@ -859,7 +859,7 @@ class _ActiveMembershipView extends StatelessWidget {
     final memId = membership?.membershipId ?? '';
     final expiry = membership?.expiredAt;
     final validUntil = membership?.validUntil;
-    final phone = membership?.phone;
+    final whatsappLink = membership?.whatsappLink;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -885,7 +885,7 @@ class _ActiveMembershipView extends StatelessWidget {
               ? 'Valid until ${_RenewalDueMembershipView._formatExpiryDate(validUntil)}'
               : '',
           theme: theme,
-          phone: phone,
+          whatsappLink: whatsappLink,
         ),
         SizedBox(height: 16.h),
       ],
@@ -930,7 +930,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
     final totalFee = membership?.totalFee ?? 0;
     final feeText = _ApprovedMembershipView._formatAmount(totalFee);
     final memId = membership?.membershipId ?? '';
-    final phone = membership?.phone ?? '';
+    final whatsappLink = membership?.whatsappLink ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -963,7 +963,7 @@ class _RenewalDueMembershipView extends StatelessWidget {
           id: memId,
           validUntil: 'Valid until ${_formatExpiryDate(validUntil)}',
           theme: theme,
-          phone: phone,
+          whatsappLink: whatsappLink,
         ),
         SizedBox(height: 16.h),
         Container(
@@ -1065,7 +1065,7 @@ class _ExpiredMembershipView extends StatelessWidget {
     final feeText = _ApprovedMembershipView._formatAmount(totalFee);
     final memId = membership?.membershipId ?? '';
     final expiry = membership?.expiredAt;
-    final phone = membership?.phone ?? "";
+    final whatsappLink = membership?.whatsappLink ?? "";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1101,7 +1101,7 @@ class _ExpiredMembershipView extends StatelessWidget {
               : '',
           isExpired: true,
           theme: theme,
-          phone: phone
+            whatsappLink: whatsappLink
         ),
         SizedBox(height: 16.h),
         Container(
@@ -1314,12 +1314,12 @@ class _MembershipIdBox extends StatelessWidget {
   final String id;
   final String validUntil;
   final bool isExpired;
-  final String? phone;
+  final String? whatsappLink;
   final CommunityThemeEntity theme;
 
   const _MembershipIdBox({
     required this.id,
-    required this.phone,
+    required this.whatsappLink,
     required this.validUntil,
     this.isExpired = false,
     required this.theme,
@@ -1384,8 +1384,8 @@ class _MembershipIdBox extends StatelessWidget {
           InkWell(
             onTap: () async {
               await shareMembershipIdViaWhatsApp(
-                membershipId: id,
-                whatsappNumber: phone?? '917093284311',
+                // membershipId: id,
+                whatsappLink: whatsappLink!,
               );
             },
             borderRadius: BorderRadius.circular(50.r),
@@ -1409,17 +1409,17 @@ class _MembershipIdBox extends StatelessWidget {
   }
 
   Future<void> shareMembershipIdViaWhatsApp({
-    required String membershipId,
-    required String whatsappNumber,
+    // required String membershipId,
+    required String whatsappLink,
   }) async {
     final message =
-        'Hello, my Membership ID is $membershipId. '
+        'Hello, my Membership ID is . '
         'Please share my membership certificate and receipt.';
 
     final encodedMessage = Uri.encodeComponent(message);
 
     final whatsappUrl = Uri.parse(
-      'https://wa.me/$whatsappNumber?text=$encodedMessage',
+      whatsappLink,
     );
 
     if (await canLaunchUrl(whatsappUrl)) {
