@@ -80,7 +80,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> deleteAccount() => _remote.deleteAccount();
 
   @override
-  Future<void> restoreAccount(String action) => _remote.restoreAccount(action);
+  Future<Map<String, dynamic>> restoreAccount(String action) => _remote.restoreAccount(action);
 
   @override
   Future<bool> hasActiveSession() => _tokenStorage.hasToken();

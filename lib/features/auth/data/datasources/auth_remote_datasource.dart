@@ -38,7 +38,7 @@ abstract class AuthRemoteDataSource {
   Future<void> logout();
 
   Future<void> deleteAccount();
-  Future<void> restoreAccount(String action);
+  Future<Map<String, dynamic>> restoreAccount(String action);
   Future<void> updateDeviceToken({
     required String pushToken,
     required String platform,
@@ -302,14 +302,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> restoreAccount(String action) async {
+  Future<Map<String, dynamic>> restoreAccount(String action) async {
     AppLogger.info('Restoring owner account with action: $action');
     final response = await _dio.patch(
       ApiConstants.userRestoreAccount,
       data: {'action': action},
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return;
+      return response.data as Map<String, dynamic>;
     }
     throw ServerException(
       message: 'Account recovery failed. Please try again.',

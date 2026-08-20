@@ -5,7 +5,7 @@ class RestoreAccountUseCase {
 
   RestoreAccountUseCase(this.repository);
 
-  Future<void> call(String action) {
+  Future<Map<String, dynamic>> call(String action) {
     return repository.restoreAccount(action);
   }
 }

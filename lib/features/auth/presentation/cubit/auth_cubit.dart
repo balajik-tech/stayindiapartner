@@ -345,12 +345,19 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> restoreAccount({required String action, String? phone}) async {
     emit(AuthLoading());
     try {
-      await _restoreAccount(action);
+      final response = await _restoreAccount(action);
       if (action == "OLD_ACCOUNT") {
         emit(AuthAccountRestored());
       } else {
-        // For NEW_ACCOUNT, we proceed to registration by sending OTP
-        if (phone != null) {
+        // For NEW_ACCOUNT, check if accountCreated is true
+        final data = response['data'] ?? response;
+        final bool accountCreated = data['accountCreated'] == true;
+
+        if (accountCreated && phone != null) {
+          final devOtp = await _requestOtp(phone);
+          emit(AuthOtpSent(phone: phone, devOtp: devOtp));
+        } else if (phone != null) {
+          // Fallback if already exists or other case
           final devOtp = await _requestOtp(phone);
           emit(AuthOtpSent(phone: phone, devOtp: devOtp));
         } else {
