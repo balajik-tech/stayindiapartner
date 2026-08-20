@@ -6,6 +6,7 @@ class PaymentReportItem extends Equatable {
   final String tenantName;
   final String? roomNo;
   final String? bedNo;
+  final String hostelId;
   final String hostelName;
   final double totalPaid;
   final DateTime paymentDate;
@@ -19,6 +20,7 @@ class PaymentReportItem extends Equatable {
     required this.tenantName,
     this.roomNo,
     this.bedNo,
+    required this.hostelId,
     required this.hostelName,
     required this.totalPaid,
     required this.paymentDate,
@@ -34,6 +36,7 @@ class PaymentReportItem extends Equatable {
         tenantName,
         roomNo,
         bedNo,
+        hostelId,
         hostelName,
         totalPaid,
         paymentDate,

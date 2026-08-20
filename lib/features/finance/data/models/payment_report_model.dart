@@ -8,6 +8,7 @@ class PaymentReportModel extends PaymentReportItem {
     required super.tenantName,
     super.roomNo,
     super.bedNo,
+    required super.hostelId,
     required super.hostelName,
     required super.totalPaid,
     required super.paymentDate,
@@ -23,6 +24,7 @@ class PaymentReportModel extends PaymentReportItem {
       tenantName: json['tenantName'] ?? '',
       roomNo: json['roomNo'],
       bedNo: json['bedNo'],
+      hostelId: json['hostelId'] ?? '',
       hostelName: json['hostelName'] ?? '',
       totalPaid: (json['totalPaid'] ?? 0).toDouble(),
       paymentDate: json['paymentDate'] != null
@@ -78,6 +80,7 @@ class PaymentReportModel extends PaymentReportItem {
           '${tenant['firstName'] ?? ''} ${tenant['lastName'] ?? ''}'.trim(),
       roomNo: room['roomTypename'],
       bedNo: booking['bedNumber']?.toString(),
+      hostelId: hostel['_id'] ?? hostel['id'] ?? '',
       hostelName: hostel['name'] ?? '',
       totalPaid: totalPaid,
       paymentDate: paymentDate,

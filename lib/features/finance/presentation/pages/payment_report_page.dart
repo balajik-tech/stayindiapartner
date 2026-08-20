@@ -6,6 +6,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import '../cubit/payment_report_cubit.dart';
 import '../cubit/payment_report_state.dart';
 import '../../domain/entities/payment_report_entity.dart';
@@ -43,6 +44,8 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFF0F7FF),
         elevation: 0,
+        centerTitle: true,
+        title: _buildHostelSelector(),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_rounded, color: AppColors.darkText),
           onPressed: () => Navigator.pop(context),
@@ -83,9 +86,39 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                               ),
                             ),
                             SizedBox(height: 16.h),
-                            ...state.items.map(
-                              (item) => _PaymentItemTile(item: item),
-                            ),
+                            ...state.items
+                                    .where(
+                                      (item) =>
+                                          _selectedHostelId == null ||
+                                          item.hostelId == _selectedHostelId,
+                                    )
+                                    .isEmpty
+                                ? [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 30.h,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          'No payments found',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.grayColor3,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]
+                                : state.items
+                                      .where(
+                                        (item) =>
+                                            _selectedHostelId == null ||
+                                            item.hostelId == _selectedHostelId,
+                                      )
+                                      .map(
+                                        (item) => _PaymentItemTile(item: item),
+                                      ),
                           ]),
                         ),
                       ),
@@ -130,6 +163,7 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(height: 8.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -266,6 +300,119 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
     );
   }
 
+  Widget _buildHostelSelector() {
+    return BlocBuilder<HostelCubit, HostelState>(
+      builder: (context, state) {
+        if (state is! HostelLoaded || state.hostels.isEmpty)
+          return const SizedBox();
+
+        final selectedHostel = state.hostels.cast<Hostel>().firstWhere(
+          (h) => h.id == _selectedHostelId,
+          orElse: () => state.hostels[state.selectedHostelIndex],
+        );
+
+        return GestureDetector(
+          onTap: () => _showHostelSheet(context, state),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  selectedHostel.name.toLowerCase(),
+                  style: GoogleFonts.inter(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkText,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppColors.darkText,
+                size: 22.sp,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showHostelSheet(BuildContext context, HostelLoaded state) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (sheetContext) {
+        return Container(
+          padding: EdgeInsets.symmetric(vertical: 20.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Select Property',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+
+              SizedBox(height: 16.h),
+
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: state.hostels.length,
+                  itemBuilder: (context, index) {
+                    final hostel = state.hostels[index];
+                    final isSelected = hostel.id == _selectedHostelId;
+
+                    return ListTile(
+                      title: Text(
+                        hostel.name,
+                        style: GoogleFonts.inter(
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primaryBlue
+                              : AppColors.darkText,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Icon(Icons.check, color: AppColors.primaryBlue)
+                          : null,
+                      onTap: () {
+                        // Update parent screen
+                        setState(() {
+                          _selectedHostelId = hostel.id;
+                        });
+
+                        // Close bottom sheet
+                        Navigator.of(sheetContext).pop();
+
+                        // Fetch report
+                        context.read<PaymentReportCubit>().fetchReport(
+                          hostelId: hostel.id,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildMethodRow({
     required IconData icon,
     required String imageUrl,
@@ -382,10 +529,6 @@ class _PaymentItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isStayIndia = item.paymentMethod?.toLowerCase() == 'razorpay';
-    final methodIcon = isStayIndia
-        ? Icons.hexagon_rounded
-        : Icons.touch_app_rounded;
-    final methodColor = isStayIndia ? const Color(0xFF2C599D) : Colors.grey;
 
     return Padding(
       padding: EdgeInsets.only(bottom: 20.h),
@@ -465,7 +608,7 @@ class _PaymentItemTile extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  '${DateFormat('dd MMM').format(item.paymentDate)} · ${isStayIndia ? 'StayIndia' : 'Direct'} · ${item.paymentMethod?.toLowerCase() == 'razorpay'?"Settled":item.paymentMethod.toString().trim()}',
+                  '${DateFormat('dd MMM').format(item.paymentDate)} · ${isStayIndia ? 'StayIndia' : 'Direct'} · ${item.paymentMethod?.toLowerCase() == 'razorpay' ? "Settled" : item.paymentMethod.toString().trim()}',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
@@ -488,7 +631,9 @@ class _PaymentItemTile extends StatelessWidget {
               ),
               Text(
                 isStayIndia
-                    ? item.bankName != null ? ' · ${item.bankName}' : ''
+                    ? item.bankName != null
+                          ? ' · ${item.bankName}'
+                          : ''
                     : 'By you',
                 style: GoogleFonts.inter(
                   fontSize: 11.sp,
