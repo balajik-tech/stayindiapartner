@@ -236,6 +236,12 @@ class GetSocialFeedUseCase {
       repository.getSocialFeed(limit: limit, skip: skip);
 }
 
+class GetOfficialFeedUseCase {
+  final CommunityRepository repository;
+  GetOfficialFeedUseCase(this.repository);
+  Future<List<SocialPostEntity>> call() => repository.getOfficialFeed();
+}
+
 class CreateSocialPostUseCase {
   final CommunityRepository repository;
   CreateSocialPostUseCase(this.repository);

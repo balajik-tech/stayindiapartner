@@ -134,12 +134,14 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     _loadReadPostIds();
     _loadUnreadMessageCounts();
     context.read<OwnerCommunityCubit>().loadCommunities();
-    context.read<SocialFeedCubit>().loadFeed();
+    context.read<SocialFeedCubit>().loadFeed(isOfficial: _activeFeedType == 'OFFICIAL');
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
-        context.read<SocialFeedCubit>().loadMoreFeed();
+        if (_activeFeedType != 'OFFICIAL') {
+          context.read<SocialFeedCubit>().loadMoreFeed();
+        }
       }
     });
 
@@ -198,6 +200,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 setState(() {
                   _activeFeedType = 'OFFICIAL';
                 });
+                context.read<SocialFeedCubit>().loadFeed(isOfficial: true);
               },
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -250,6 +253,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                 setState(() {
                   _activeFeedType = 'GLOBAL';
                 });
+                context.read<SocialFeedCubit>().loadFeed(isOfficial: false);
               },
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -305,7 +309,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         child: RefreshIndicator(
           onRefresh: () async {
             context.read<OwnerCommunityCubit>().loadCommunities();
-            await context.read<SocialFeedCubit>().loadFeed(isRefresh: true);
+            await context.read<SocialFeedCubit>().loadFeed(
+                  isRefresh: true,
+                  isOfficial: _activeFeedType == 'OFFICIAL',
+                );
           },
           color: AppColors.primaryBlue,
           child: BlocBuilder<SocialFeedCubit, SocialFeedState>(

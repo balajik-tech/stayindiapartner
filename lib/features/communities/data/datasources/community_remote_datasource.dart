@@ -84,6 +84,7 @@ abstract class CommunityRemoteDataSource {
   });
 
   Future<List<SocialPostModel>> getSocialFeed({int limit = 20, int skip = 0});
+  Future<List<SocialPostModel>> getOfficialFeed();
   Future<SocialPostModel> createSocialPost({
     String? communityId,
     required String content,
@@ -649,6 +650,19 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
           .toList();
     }
     throw Exception('Failed to fetch social feed');
+  }
+
+  @override
+  Future<List<SocialPostModel>> getOfficialFeed() async {
+    AppLogger.info('Fetching official association feed');
+    final response = await _dio.get(ApiConstants.associationFeed);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data['data']?['feed'] ?? [];
+      return data
+          .map((p) => SocialPostModel.fromOfficialFeedJson(p as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Failed to fetch official feed');
   }
 
   @override

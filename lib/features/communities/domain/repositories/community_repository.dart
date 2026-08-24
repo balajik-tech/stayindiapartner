@@ -85,6 +85,7 @@ abstract class CommunityRepository {
   });
 
   Future<List<SocialPostEntity>> getSocialFeed({int limit = 20, int skip = 0});
+  Future<List<SocialPostEntity>> getOfficialFeed();
   Future<SocialPostEntity> createSocialPost({
     String? communityId,
     required String content,

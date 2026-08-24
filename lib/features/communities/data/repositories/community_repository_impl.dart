@@ -195,6 +195,9 @@ class CommunityRepositoryImpl implements CommunityRepository {
   }) => remote.getSocialFeed(limit: limit, skip: skip);
 
   @override
+  Future<List<SocialPostEntity>> getOfficialFeed() => remote.getOfficialFeed();
+
+  @override
   Future<SocialPostEntity> createSocialPost({
     String? communityId,
     required String content,

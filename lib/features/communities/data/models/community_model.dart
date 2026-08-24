@@ -238,4 +238,23 @@ class SocialPostModel extends SocialPostEntity {
           : null,
     );
   }
+
+  factory SocialPostModel.fromOfficialFeedJson(Map<String, dynamic> json) {
+    return SocialPostModel(
+      id: json['_id']?.toString() ?? '',
+      userId: json['authorId']?.toString() ?? '',
+      userName: json['authorName']?.toString() ?? 'Unknown',
+      userRole: json['authorRole']?.toString(),
+      content: json['content']?.toString() ?? '',
+      type: 'OFFICIAL',
+      likesCount: 0,
+      commentsCount: 0,
+      isLiked: false,
+      createdAt: json['publishedAt'] != null
+          ? DateTime.parse(json['publishedAt'].toString())
+          : DateTime.now(),
+      visibility: 'OFFICIAL',
+      imageUrl: json['imageUrl']?.toString(),
+    );
+  }
 }

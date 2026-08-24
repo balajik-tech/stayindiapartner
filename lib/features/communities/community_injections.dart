@@ -51,6 +51,7 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerFactory(
     () => SocialFeedCubit(
       getSocialFeedUseCase: sl(),
+      getOfficialFeedUseCase: sl(),
       createSocialPostUseCase: sl(),
       togglePostLikeUseCase: sl(),
       addPostCommentUseCase: sl(),
@@ -83,6 +84,7 @@ void registerCommunityFeature(GetIt sl) {
   sl.registerLazySingleton(() => JoinAssociationUseCase(sl()));
   sl.registerLazySingleton(() => CreateAssociationUseCase(sl()));
   sl.registerLazySingleton(() => GetSocialFeedUseCase(sl()));
+  sl.registerLazySingleton(() => GetOfficialFeedUseCase(sl()));
   sl.registerLazySingleton(() => CreateSocialPostUseCase(sl()));
   sl.registerLazySingleton(() => TogglePostLikeUseCase(sl()));
   sl.registerLazySingleton(() => GetPostCommentsUseCase(sl()));
