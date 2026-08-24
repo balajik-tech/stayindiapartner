@@ -1,3 +1,4 @@
+import '../../../../core/constants/api_constants.dart';
 import '../entities/payment_report_entity.dart';
 
 abstract class PaymentRepository {
@@ -5,6 +6,8 @@ abstract class PaymentRepository {
     String? hostelId,
     String? startDate,
     String? endDate,
+    int page = 1,
+    int limit = ApiConstants.paginationLimit,
   });
 
   Future<void> recordPayment({

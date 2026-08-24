@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/error/app_exceptions.dart';
+import '../../domain/entities/payment_report_entity.dart';
 import '../../domain/entities/revenue_summary.dart';
 import '../../domain/usecases/get_payment_report_usecase.dart';
 import '../../domain/usecases/record_payment_usecase.dart';
@@ -45,6 +47,8 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
         hostelId: hostelId,
         startDate: startDate,
         endDate: endDate,
+        page: 1,
+        limit: ApiConstants.paginationLimit,
       );
       final tenants = await _getTenants(hostelId: hostelId, limit: 100);
 
@@ -52,9 +56,58 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
         items: reportData.payments,
         summary: reportData.summary,
         tenants: tenants,
+        page: 1,
+        hasMore: reportData.payments.length < reportData.totalCount,
       ));
     } catch (e) {
       emit(PaymentReportError(message: GlobalErrorMapper.map(e).message));
+    }
+  }
+
+  Future<void> fetchMoreReport({
+    String? hostelId,
+    String? startDate,
+    String? endDate,
+  }) async {
+    final currentState = state;
+    if (currentState is! PaymentReportLoaded ||
+        currentState.isLoadingMore ||
+        !currentState.hasMore) return;
+
+    final int nextPage = currentState.page + 1;
+    emit(currentState.copyWith(isLoadingMore: true));
+
+    try {
+      final reportData = await _getPaymentReport(
+        hostelId: hostelId,
+        startDate: startDate,
+        endDate: endDate,
+        page: nextPage,
+        limit: ApiConstants.paginationLimit,
+      );
+
+      if (reportData.payments.isEmpty) {
+        emit(currentState.copyWith(
+          hasMore: false,
+          isLoadingMore: false,
+        ));
+        return;
+      }
+
+      final List<PaymentReportItem> updatedItems = [
+        ...currentState.items,
+        ...reportData.payments
+      ];
+
+      emit(currentState.copyWith(
+        items: updatedItems,
+        page: nextPage,
+        hasMore: reportData.payments.length >= ApiConstants.paginationLimit &&
+            updatedItems.length < reportData.totalCount,
+        isLoadingMore: false,
+      ));
+    } catch (e) {
+      emit(currentState.copyWith(isLoadingMore: false));
     }
   }
 

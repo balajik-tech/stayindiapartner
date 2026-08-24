@@ -22,11 +22,37 @@ class PaymentReportPage extends StatefulWidget {
 class _PaymentReportPageState extends State<PaymentReportPage> {
   String? _selectedHostelId;
   DateTime _selectedDate = DateTime.now();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _fetchData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    
+    if (_scrollController.position.extentAfter < 300) {
+      final state = context.read<PaymentReportCubit>().state;
+      if (state is PaymentReportLoaded && !state.isLoadingMore && state.hasMore) {
+        final startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+        final endDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
+
+        context.read<PaymentReportCubit>().fetchMoreReport(
+              hostelId: _selectedHostelId,
+              startDate: DateFormat('yyyy-MM-dd').format(startDate),
+              endDate: DateFormat('yyyy-MM-dd').format(endDate),
+            );
+      }
+    }
   }
 
   void _fetchData() {
@@ -66,7 +92,23 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
           ),
         ],
       ),
-      body: BlocBuilder<PaymentReportCubit, PaymentReportState>(
+      body: BlocConsumer<PaymentReportCubit, PaymentReportState>(
+        listener: (context, state) {
+          if (state is PaymentReportLoaded && state.hasMore && !state.isLoadingMore) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients &&
+                  _scrollController.position.maxScrollExtent <= 0) {
+                final startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+                final endDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
+                context.read<PaymentReportCubit>().fetchMoreReport(
+                      hostelId: _selectedHostelId,
+                      startDate: DateFormat('yyyy-MM-dd').format(startDate),
+                      endDate: DateFormat('yyyy-MM-dd').format(endDate),
+                    );
+              }
+            });
+          }
+        },
         builder: (context, state) {
           if (state is PaymentReportLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -80,6 +122,8 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
               child: Stack(
                 children: [
                   CustomScrollView(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
                       SliverToBoxAdapter(child: _buildSummary(state)),
                       SliverPadding(
@@ -96,12 +140,12 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                             ),
                             SizedBox(height: 16.h),
                             ...state.items
-                                    .where(
-                                      (item) =>
-                                          _selectedHostelId == null ||
-                                          item.hostelId == _selectedHostelId,
-                                    )
-                                    .isEmpty
+                                .where(
+                                  (item) =>
+                                      _selectedHostelId == null ||
+                                      item.hostelId == _selectedHostelId,
+                                )
+                                .isEmpty
                                 ? [
                                     Padding(
                                       padding: EdgeInsets.symmetric(
@@ -120,14 +164,21 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                                     ),
                                   ]
                                 : state.items
-                                      .where(
-                                        (item) =>
-                                            _selectedHostelId == null ||
-                                            item.hostelId == _selectedHostelId,
-                                      )
-                                      .map(
-                                        (item) => _PaymentItemTile(item: item),
-                                      ),
+                                    .where(
+                                      (item) =>
+                                          _selectedHostelId == null ||
+                                          item.hostelId == _selectedHostelId,
+                                    )
+                                    .map(
+                                      (item) => _PaymentItemTile(item: item),
+                                    ),
+                            if (state.isLoadingMore)
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20.h),
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
                           ]),
                         ),
                       ),
@@ -535,9 +586,7 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                         Navigator.of(sheetContext).pop();
 
                         // Fetch report
-                        context.read<PaymentReportCubit>().fetchReport(
-                          hostelId: hostel.id,
-                        );
+                        _fetchData();
                       },
                     );
                   },

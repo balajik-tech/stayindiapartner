@@ -1,3 +1,4 @@
+import '../../../../core/constants/api_constants.dart';
 import '../../domain/entities/payment_report_entity.dart';
 import '../../domain/repositories/payment_repository.dart';
 import '../datasources/payment_remote_datasource.dart';
@@ -12,11 +13,15 @@ class PaymentRepositoryImpl implements PaymentRepository {
     String? hostelId,
     String? startDate,
     String? endDate,
+    int page = 1,
+    int limit = ApiConstants.paginationLimit,
   }) {
     return remoteDataSource.getPaymentReport(
       hostelId: hostelId,
       startDate: startDate,
       endDate: endDate,
+      page: page,
+      limit: limit,
     );
   }
 

@@ -8,6 +8,8 @@ abstract class PaymentRemoteDataSource {
     String? hostelId,
     String? startDate,
     String? endDate,
+    int page = 1,
+    int limit = ApiConstants.paginationLimit,
   });
 
   Future<void> recordPayment({
@@ -73,11 +75,13 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
     String? hostelId,
     String? startDate,
     String? endDate,
+    int page = 1,
+    int limit = ApiConstants.paginationLimit,
   }) async {
     try {
       final queryParams = <String, dynamic>{
-        'page': 1,
-        'limit': 100, // Increased limit to get more items
+        'page': page,
+        'limit': limit,
       };
       if (hostelId != null) queryParams['hostelId'] = hostelId;
       if (startDate != null) queryParams['startDate'] = startDate;
@@ -90,13 +94,19 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
       final List results = response.data['data']['payments'] ?? [];
       final payments = results.map((e) => PaymentReportModel.fromTenantRentalJson(e)).toList();
       
+      // Try to find the total count from various common field names
+      final totalCount = response.data['data']['total'] ?? 
+                         response.data['data']['totalCount'] ?? 
+                         response.data['data']['count'] ?? 
+                         0;
+      
       final tenantCount = payments.map((e) => e.tenantName).toSet().length;
       final summary = PaymentReportModel.summaryFromJson(
         response.data['data']['summary'] ?? {},
         tenantCount,
       );
 
-      return PaymentReportData(payments: payments, summary: summary);
+      return PaymentReportData(payments: payments, summary: summary, totalCount: totalCount);
     } catch (e) {
       rethrow;
     }

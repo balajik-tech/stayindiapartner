@@ -50,12 +50,14 @@ class PaymentReportItem extends Equatable {
 class PaymentReportData extends Equatable {
   final List<PaymentReportItem> payments;
   final RevenueSummary summary;
+  final int totalCount;
 
   const PaymentReportData({
     required this.payments,
     required this.summary,
+    this.totalCount = 0,
   });
 
   @override
-  List<Object?> get props => [payments, summary];
+  List<Object?> get props => [payments, summary, totalCount];
 }

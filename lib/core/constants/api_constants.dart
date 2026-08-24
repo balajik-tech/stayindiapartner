@@ -4,6 +4,7 @@ import '../services/app_config_service.dart';
 
 class ApiConstants {
 
+
   static const String _api_Version = '/api/v1';
 
   static const String productionUrl = 'https://aws-api.stayindia.in';
@@ -13,6 +14,10 @@ class ApiConstants {
   static const String _prodUrl = '$stagingUrl$_api_Version';
 
 
+
+  static const int paginationLimit = 100;
+
+  
   static String get baseUrl {
     const url = String.fromEnvironment('API_BASE_URL', defaultValue: _prodUrl);
     if (Platform.isAndroid && url.contains('localhost')) {

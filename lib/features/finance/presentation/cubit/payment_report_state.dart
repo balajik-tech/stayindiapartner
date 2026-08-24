@@ -17,15 +17,46 @@ class PaymentReportLoaded extends PaymentReportState {
   final List<PaymentReportItem> items;
   final RevenueSummary? summary;
   final List<TenantEntity> tenants;
+  final int page;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const PaymentReportLoaded({
     required this.items,
     this.summary,
     this.tenants = const [],
+    this.page = 1,
+    this.hasMore = true,
+    this.isLoadingMore = false,
   });
 
+  PaymentReportLoaded copyWith({
+    List<PaymentReportItem>? items,
+    RevenueSummary? summary,
+    List<TenantEntity>? tenants,
+    int? page,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) {
+    return PaymentReportLoaded(
+      items: items ?? this.items,
+      summary: summary ?? this.summary,
+      tenants: tenants ?? this.tenants,
+      page: page ?? this.page,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+
   @override
-  List<Object?> get props => [items, summary, tenants];
+  List<Object?> get props => [
+        items,
+        summary,
+        tenants,
+        page,
+        hasMore,
+        isLoadingMore,
+      ];
 }
 
 class PaymentReportError extends PaymentReportState {
