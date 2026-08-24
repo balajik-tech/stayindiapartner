@@ -19,12 +19,14 @@ class SocialFeedLoaded extends SocialFeedState {
   final bool isCreatingPost;
   final bool isFetchingMore;
   final bool hasReachedMax;
+  final bool isOfficial;
 
   const SocialFeedLoaded({
     required this.posts,
     this.isCreatingPost = false,
     this.isFetchingMore = false,
     this.hasReachedMax = false,
+    this.isOfficial = false,
   });
 
   SocialFeedLoaded copyWith({
@@ -32,12 +34,14 @@ class SocialFeedLoaded extends SocialFeedState {
     bool? isCreatingPost,
     bool? isFetchingMore,
     bool? hasReachedMax,
+    bool? isOfficial,
   }) {
     return SocialFeedLoaded(
       posts: posts ?? this.posts,
       isCreatingPost: isCreatingPost ?? this.isCreatingPost,
       isFetchingMore: isFetchingMore ?? this.isFetchingMore,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isOfficial: isOfficial ?? this.isOfficial,
     );
   }
 
@@ -47,6 +51,7 @@ class SocialFeedLoaded extends SocialFeedState {
     isCreatingPost,
     isFetchingMore,
     hasReachedMax,
+    isOfficial,
   ];
 }
 
@@ -87,9 +92,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
        super(SocialFeedInitial());
 
   Future<void> loadFeed({bool isRefresh = false, bool isOfficial = false}) async {
-    final s = state;
-    if (s is SocialFeedLoaded && isRefresh) {
-    } else {
+    if (!isRefresh) {
       emit(SocialFeedLoading());
     }
 
@@ -98,14 +101,11 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
           ? await _getOfficialFeed()
           : await _getSocialFeed(limit: 20, skip: 0);
           
-      if (state is SocialFeedLoaded && isRefresh) {
-        emit((state as SocialFeedLoaded).copyWith(posts: posts));
-      } else {
-        emit(SocialFeedLoaded(
-          posts: posts, 
-          hasReachedMax: isOfficial ? true : posts.length < 20,
-        ));
-      }
+      emit(SocialFeedLoaded(
+        posts: posts, 
+        isOfficial: isOfficial,
+        hasReachedMax: isOfficial ? true : posts.length < 20,
+      ));
     } catch (e) {
       emit(SocialFeedError(message: ErrorHelper.toFriendlyMessage(e)));
     }

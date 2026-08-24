@@ -992,29 +992,100 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       ];
     }
 
-    final isOfficial = _activeFeedType == 'OFFICIAL';
+    final isOfficialTab = _activeFeedType == 'OFFICIAL';
 
-    if (isOfficial) {
-      final posts = state is SocialFeedLoaded ? state.posts : <SocialPostEntity>[];
-      final officialPosts = posts
-          .where((p) => p.visibility?.toUpperCase() != 'GLOBAL')
-          .toList();
+    if (state is SocialFeedLoaded) {
+      // Ensure we are showing posts for the active tab
+      if (state.isOfficial != isOfficialTab) {
+        return [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 40.h),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
+        ];
+      }
 
-      if (officialPosts.isNotEmpty) {
+      if (isOfficialTab) {
+        if (state.posts.isNotEmpty) {
+          return [
+            SliverPadding(
+              padding: EdgeInsets.zero,
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final post = state.posts[index];
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) _markPostAsRead(post.id);
+                  });
+                  return _PostCard(post: post);
+                }, childCount: state.posts.length),
+              ),
+            ),
+            SliverToBoxAdapter(child: SizedBox(height: 100.h)),
+          ];
+        }
+
+        return [
+          SliverToBoxAdapter(child: _buildOfficialLockedState()),
+          SliverToBoxAdapter(child: _buildSuggestedNearYou()),
+          SliverToBoxAdapter(child: SizedBox(height: 100.h)),
+        ];
+      } else {
+        // GLOBAL Feed
+        if (state.posts.isEmpty) {
+          return [
+            SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 60.h, horizontal: 32.w),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.feed_outlined,
+                        size: 64.sp,
+                        color: Colors.grey.shade300,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'No forum posts',
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.darkText,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Forum posts appear here',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: AppColors.greyText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ];
+        }
+
         return [
           SliverPadding(
             padding: EdgeInsets.zero,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                final post = officialPosts[index];
+                final post = state.posts[index];
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) _markPostAsRead(post.id);
                 });
                 return _PostCard(post: post);
-              }, childCount: officialPosts.length),
+              }, childCount: state.posts.length),
             ),
           ),
-          if (state is SocialFeedLoaded && state.isFetchingMore)
+          if (state.isFetchingMore)
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 20.h),
@@ -1024,79 +1095,6 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           SliverToBoxAdapter(child: SizedBox(height: 100.h)),
         ];
       }
-
-      return [
-        SliverToBoxAdapter(child: _buildOfficialLockedState()),
-        SliverToBoxAdapter(child: _buildSuggestedNearYou()),
-        SliverToBoxAdapter(child: SizedBox(height: 100.h)),
-      ];
-    }
-
-    if (state is SocialFeedLoaded) {
-      final filteredPosts = state.posts.where((post) {
-        return post.visibility?.toUpperCase() == 'GLOBAL';
-      }).toList();
-
-      if (filteredPosts.isEmpty) {
-        return [
-          SliverToBoxAdapter(
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 60.h, horizontal: 32.w),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.feed_outlined,
-                      size: 64.sp,
-                      color: Colors.grey.shade300,
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'No forum posts',
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.darkText,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      'Forum posts appear here',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        color: AppColors.greyText,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ];
-      }
-      return [
-        SliverPadding(
-          padding: EdgeInsets.zero,
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final post = filteredPosts[index];
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) _markPostAsRead(post.id);
-              });
-              return _PostCard(post: post);
-            }, childCount: filteredPosts.length),
-          ),
-        ),
-        if (state.isFetchingMore)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-          ),
-        SliverToBoxAdapter(child: SizedBox(height: 100.h)),
-      ];
     }
     if (state is SocialFeedError) {
       return [
@@ -1388,10 +1386,20 @@ class _PostCardState extends State<_PostCard> {
 
     String displayRole;
     if (isOfficialPost) {
-      displayRole =
-      (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
+      final role = (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
           ? widget.post.userRole!
           : 'president_admin_role'.tr();
+      
+      final city = widget.post.userCity;
+      final state = widget.post.userState;
+      
+      if (city != null && city.isNotEmpty && state != null && state.isNotEmpty) {
+        displayRole = '$role · $city, $state';
+      } else if (city != null && city.isNotEmpty) {
+        displayRole = '$role · $city';
+      } else {
+        displayRole = role;
+      }
     } else {
       final city = widget.post.userCity;
       final state = widget.post.userState;

@@ -240,11 +240,17 @@ class SocialPostModel extends SocialPostEntity {
   }
 
   factory SocialPostModel.fromOfficialFeedJson(Map<String, dynamic> json) {
+    final userData = json['userId'] is Map ? json['userId'] as Map<String, dynamic> : null;
+    final portalData = json['portalId'] is Map ? json['portalId'] as Map<String, dynamic> : null;
+
     return SocialPostModel(
       id: json['_id']?.toString() ?? '',
-      userId: json['authorId']?.toString() ?? '',
-      userName: json['authorName']?.toString() ?? 'Unknown',
+      userId: json['authorId']?.toString() ?? userData?['_id']?.toString() ?? '',
+      userName: json['authorName']?.toString() ?? userData?['name']?.toString() ?? portalData?['name']?.toString() ?? 'Unknown',
+      userAvatar: userData?['profilePic']?.toString() ?? portalData?['logo']?.toString(),
       userRole: json['authorRole']?.toString(),
+      userCity: portalData?['address'] is Map ? portalData!['address']['city']?.toString() : null,
+      userState: portalData?['address'] is Map ? portalData!['address']['state']?.toString() : null,
       content: json['content']?.toString() ?? '',
       type: 'OFFICIAL',
       likesCount: 0,
