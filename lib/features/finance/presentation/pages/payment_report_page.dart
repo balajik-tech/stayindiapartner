@@ -21,6 +21,7 @@ class PaymentReportPage extends StatefulWidget {
 
 class _PaymentReportPageState extends State<PaymentReportPage> {
   String? _selectedHostelId;
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -34,7 +35,15 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
       _selectedHostelId ??=
           hostelState.hostels[hostelState.selectedHostelIndex].id;
     }
-    context.read<PaymentReportCubit>().fetchReport(hostelId: _selectedHostelId);
+
+    final startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+    final endDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
+
+    context.read<PaymentReportCubit>().fetchReport(
+      hostelId: _selectedHostelId,
+      startDate: DateFormat('yyyy-MM-dd').format(startDate),
+      endDate: DateFormat('yyyy-MM-dd').format(endDate),
+    );
   }
 
   @override
@@ -164,23 +173,26 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(height: 8.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Collected in ${summary?.period ?? DateFormat('MMMM').format(DateTime.now())}',
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.darkText,
+                  GestureDetector(
+                    onTap: () => _showMonthSheet(context),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Collected in ${DateFormat('MMMM').format(_selectedDate)}',
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.darkText,
+                          ),
                         ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: AppColors.darkText,
-                        size: 20.sp,
-                      ),
-                    ],
+                        Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: AppColors.darkText,
+                          size: 20.sp,
+                        ),
+                      ],
+                    ),
                   ),
 
                   Text(
@@ -338,6 +350,128 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
           ),
         );
       },
+    );
+  }
+
+  void _showMonthSheet(BuildContext context) {
+    final hostelState = context.read<HostelCubit>().state;
+    DateTime startDate = DateTime(DateTime.now().year - 1, DateTime.now().month, 1); // Default 1 year back
+
+
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      final hostel = hostelState.hostels.cast<Hostel>().firstWhere(
+        (h) => h.id == _selectedHostelId,
+        orElse: () => hostelState.hostels[hostelState.selectedHostelIndex],
+      );
+      if (hostel.createdAt != null) {
+        startDate = DateTime(hostel.createdAt!.year, hostel.createdAt!.month, 1);
+      }
+    }
+
+    List<DateTime> months = [];
+    DateTime current = DateTime.now();
+    DateTime temp = DateTime(current.year, current.month, 1);
+
+    while (temp.isAfter(startDate) ||
+        (temp.year == startDate.year && temp.month == startDate.month)) {
+      months.add(temp);
+      temp = DateTime(temp.year, temp.month - 1, 1);
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (sheetContext) => Container(
+        padding: EdgeInsets.symmetric(vertical: 20.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Select Month',
+                    style: GoogleFonts.inter(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.darkText,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close, size: 24.sp),
+                    onPressed: () => Navigator.pop(sheetContext),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 16.h),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 0.5.sh),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: months.length,
+                itemBuilder: (context, index) {
+                  final month = months[index];
+                  final isSelected = month.year == _selectedDate.year &&
+                      month.month == _selectedDate.month;
+                  return ListTile(
+                    title: Text(
+                      DateFormat('MMMM yyyy').format(month),
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: AppColors.darkText,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(Icons.check_circle, color: const Color(0xFF388E3C), size: 24.sp)
+                        : Icon(Icons.radio_button_off, color: Colors.grey.shade400, size: 24.sp),
+                    onTap: () {
+                      setState(() {
+                        _selectedDate = month;
+                      });
+                      _fetchData();
+                      Navigator.pop(sheetContext);
+                    },
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(sheetContext),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6200EE),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Done',
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

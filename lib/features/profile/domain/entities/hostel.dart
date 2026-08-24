@@ -23,6 +23,7 @@ class Hostel {
   final String? foodLicense;
   final String? hostelLicense;
   final String? tradeLicense;
+  final DateTime? createdAt;
 
   Hostel({
     required this.id,
@@ -48,5 +49,6 @@ class Hostel {
     this.foodLicense,
     this.hostelLicense,
     this.tradeLicense,
+    this.createdAt,
   });
 }

@@ -34,10 +34,18 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
         _recordUpiPayment = recordUpiPayment,
         super(PaymentReportInitial());
 
-  Future<void> fetchReport({String? hostelId}) async {
+  Future<void> fetchReport({
+    String? hostelId,
+    String? startDate,
+    String? endDate,
+  }) async {
     emit(PaymentReportLoading());
     try {
-      final reportData = await _getPaymentReport(hostelId: hostelId);
+      final reportData = await _getPaymentReport(
+        hostelId: hostelId,
+        startDate: startDate,
+        endDate: endDate,
+      );
       final tenants = await _getTenants(hostelId: hostelId, limit: 100);
 
       emit(PaymentReportLoaded(

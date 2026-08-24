@@ -25,6 +25,7 @@ class HostelModel extends Hostel {
     super.foodLicense,
     super.hostelLicense,
     super.tradeLicense,
+    super.createdAt,
   });
 
   factory HostelModel.fromJson(Map<String, dynamic> json) {
@@ -63,6 +64,9 @@ class HostelModel extends Hostel {
       foodLicense: json['foodLicense'] as String?,
       hostelLicense: json['hostelLicense'] as String?,
       tradeLicense: json['tradeLicense'] as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
     );
   }
 
@@ -92,6 +96,7 @@ class HostelModel extends Hostel {
       if (foodLicense != null) 'foodLicense': foodLicense,
       if (hostelLicense != null) 'hostelLicense': hostelLicense,
       if (tradeLicense != null) 'tradeLicense': tradeLicense,
+      if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
     };
   }
 }
