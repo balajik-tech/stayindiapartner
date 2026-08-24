@@ -1399,8 +1399,12 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   : DateTime(2000),
               lastDate: DateTime(2100),
             );
+
             if (picked != null) {
-              setState(() => _checkInDate = picked);
+              setState(() {
+                _checkInDate = picked;
+                _checkOutDate = null; // Reset checkout date
+              });
             }
           },
           child: Container(
@@ -1449,8 +1453,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
           onTap: () async {
             final DateTime? picked = await showDatePicker(
               context: context,
-              initialDate: _checkOutDate ?? DateTime.now(),
-              firstDate: DateTime(2000),
+              initialDate: _checkOutDate ??
+                  (_checkInDate ?? DateTime.now()),
+              firstDate: _checkInDate ?? DateTime.now(),
               lastDate: DateTime(2100),
             );
             if (picked != null) {
