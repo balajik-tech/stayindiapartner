@@ -436,8 +436,8 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
                       setState(() {
                         _selectedDate = month;
                       });
-                      _fetchData();
-                      Navigator.pop(sheetContext);
+                      // _fetchData();
+                      // Navigator.pop(sheetContext);
                     },
                   );
                 },
@@ -449,7 +449,10 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(sheetContext),
+                  onPressed: () => {
+                    _fetchData(),
+                    Navigator.pop(sheetContext)
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6200EE),
                     padding: EdgeInsets.symmetric(vertical: 16.h),
