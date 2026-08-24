@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -30,6 +29,7 @@ import 'package:stayindia_owner/injection_container.dart';
 
 import '../widgets/dotted_circle_painter.dart';
 import 'community_home_page.dart';
+import 'association_search_page.dart';
 
 class OwnersCommunityPage extends StatefulWidget {
   const OwnersCommunityPage({super.key});
@@ -68,7 +68,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         final Map<String, dynamic> decoded = jsonDecode(jsonStr);
         setState(() {
           _unreadMessageCounts = decoded.map(
-            (key, value) => MapEntry(key, value as int),
+                (key, value) => MapEntry(key, value as int),
           );
         });
       }
@@ -442,7 +442,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         child: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,
-          onChanged: (value) => setState(() {}),
+          readOnly: true,
+          showCursor: false,
+          onTap: _openAssociationSearch,
           decoration: InputDecoration(
             hintText: 'Search associations',
             hintStyle: GoogleFonts.inter(
@@ -459,6 +461,19 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     );
   }
 
+  /// Opens the full-screen "search associations" page (see screenshots).
+  /// Tapping the inline search bar above hands off to it instead of typing
+  /// inline, since matching/recents/empty-state all live there now.
+  void _openAssociationSearch() {
+    _searchFocusNode.unfocus();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AssociationSearchPage(),
+      ),
+    );
+  }
+
   Widget _buildExploreSection() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -469,17 +484,17 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               : <CommunityDetailsEntity>[];
           final associations = state is OwnerCommunityLoaded
               ? state.associations.where((a) {
-                  final query = _searchController.text.toLowerCase();
-                  return a.name.toLowerCase().contains(query);
-                }).toList()
+            final query = _searchController.text.toLowerCase();
+            return a.name.toLowerCase().contains(query);
+          }).toList()
               : <AssociationPortalEntity>[];
 
           return SizedBox(
             height: 90.h,
             child:ScrollConfiguration(
-              behavior: const ScrollBehavior().copyWith(
-                overscroll: false,
-              ),child:  Center(
+                behavior: const ScrollBehavior().copyWith(
+                  overscroll: false,
+                ),child:  Center(
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -554,16 +569,16 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                               ),
                               child: ClipOval(
                                 child: (a.logo.isNotEmpty &&
-                                        ApiConstants.getImageUrl(a.logo) != null)
+                                    ApiConstants.getImageUrl(a.logo) != null)
                                     ? CachedNetworkImage(
-                                        imageUrl: ApiConstants.getImageUrl(a.logo)!,
-                                        fit: BoxFit.cover,
-                                      )
+                                  imageUrl: ApiConstants.getImageUrl(a.logo)!,
+                                  fit: BoxFit.cover,
+                                )
                                     : Icon(
-                                        Icons.business_rounded,
-                                        color: Colors.grey.shade400,
-                                        size: 28.sp,
-                                      ),
+                                  Icons.business_rounded,
+                                  color: Colors.grey.shade400,
+                                  size: 28.sp,
+                                ),
                               ),
                             ),
                             SizedBox(height: 8.h),
@@ -664,18 +679,18 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   return CircleAvatar(
                     radius: 22.r,
                     backgroundImage:
-                        (owner?.avatar != null && owner!.avatar!.isNotEmpty)
+                    (owner?.avatar != null && owner!.avatar!.isNotEmpty)
                         ? CachedNetworkImageProvider(
-                            ApiConstants.getImageUrl(owner.avatar)!,
-                          )
+                      ApiConstants.getImageUrl(owner.avatar)!,
+                    )
                         : null,
                     backgroundColor: Colors.grey.shade100,
                     child: (owner?.avatar == null || owner!.avatar!.isEmpty)
                         ? Icon(
-                            Icons.person,
-                            color: Colors.grey.shade400,
-                            size: 28.sp,
-                          )
+                      Icons.person,
+                      color: Colors.grey.shade400,
+                      size: 28.sp,
+                    )
                         : null,
                   );
                 },
@@ -863,10 +878,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     onPressed: _selectedImagePath != null
                         ? null
                         : () {
-                            setState(() {
-                              _isPoll = true;
-                            });
-                          },
+                      setState(() {
+                        _isPoll = true;
+                      });
+                    },
                     icon: Icon(
                       Icons.poll_outlined,
                       color: _selectedImagePath != null
@@ -894,28 +909,28 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                           state is SocialFeedLoaded && state.isCreatingPost;
                       final canPost =
                           _postController.text.trim().isNotEmpty &&
-                          (!_isPoll || validPollOptions.length >= 2);
+                              (!_isPoll || validPollOptions.length >= 2);
 
                       return ElevatedButton(
                         onPressed: (!canPost || isCreating)
                             ? null
                             : () {
-                                context.read<SocialFeedCubit>().createPost(
-                                  content: _postController.text.trim(),
-                                  imagePath: _selectedImagePath,
-                                  type: _isPoll ? 'POLL' : 'POST',
-                                  pollOptions: _isPoll
-                                      ? validPollOptions
-                                      : null,
-                                );
-                                _postController.clear();
-                                _selectedImagePath = null;
-                                _isPoll = false;
-                                for (var c in _pollOptionControllers) {
-                                  c.clear();
-                                }
-                                setState(() {});
-                              },
+                          context.read<SocialFeedCubit>().createPost(
+                            content: _postController.text.trim(),
+                            imagePath: _selectedImagePath,
+                            type: _isPoll ? 'POLL' : 'POST',
+                            pollOptions: _isPoll
+                                ? validPollOptions
+                                : null,
+                          );
+                          _postController.clear();
+                          _selectedImagePath = null;
+                          _isPoll = false;
+                          for (var c in _pollOptionControllers) {
+                            c.clear();
+                          }
+                          setState(() {});
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryBlue,
                           disabledBackgroundColor: AppColors.primaryBlue
@@ -931,21 +946,21 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         ),
                         child: isCreating
                             ? SizedBox(
-                                width: 16.w,
-                                height: 16.w,
-                                child: const CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
+                          width: 16.w,
+                          height: 16.w,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
                             : Text(
-                                'post_btn'.tr(),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14.sp,
-                                ),
-                              ),
+                          'post_btn'.tr(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14.sp,
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -1125,7 +1140,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           ),
           SizedBox(height: 4.h),
           SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
+            width: MediaQuery.of(context).size.width * 0.8,
             child: Text(
               'Circulars, licence updates and meeting notices from your association.',
               textAlign: TextAlign.center,
@@ -1138,19 +1153,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           ),
           SizedBox(height: 24.h),
           ElevatedButton(
-            onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) => const ExploreCommunitiesPage(),
-              //   ),
-              // );
-              _searchFocusNode.requestFocus();
-
-              Future.delayed(const Duration(milliseconds: 100), () {
-                SystemChannels.textInput.invokeMethod('TextInput.show');
-              });
-            },
+            onPressed: _openAssociationSearch,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1650A2),
               foregroundColor: Colors.white,
@@ -1379,7 +1382,7 @@ class _PostCardState extends State<_PostCard> {
     String displayRole;
     if (isOfficialPost) {
       displayRole =
-          (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
+      (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
           ? widget.post.userRole!
           : 'president_admin_role'.tr();
     } else {
@@ -1759,7 +1762,7 @@ class _PostCardState extends State<_PostCard> {
                   borderRadius: BorderRadius.circular(16.r),
                   child: CachedNetworkImage(
                     imageUrl:
-                        ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
+                    ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
                     width: double.infinity,
                     height: 180.h,
                     fit: BoxFit.cover,
