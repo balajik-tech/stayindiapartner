@@ -79,7 +79,7 @@ class TenantRepositoryImpl implements TenantRepository {
   );
 
   @override
-  Future<Map<String, dynamic>> bulkUploadTenants(File file) {
-    return remote.bulkUploadTenants(file);
+  Future<Map<String, dynamic>> bulkUploadTenants(File file, String hostelId) {
+    return remote.bulkUploadTenants(file, hostelId);
   }
 }

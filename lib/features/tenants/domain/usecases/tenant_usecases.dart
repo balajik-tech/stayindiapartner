@@ -103,7 +103,7 @@ class BulkUploadTenantsUseCase {
   final TenantRepository repository;
   BulkUploadTenantsUseCase(this.repository);
 
-  Future<Map<String, dynamic>> call(File file) {
-    return repository.bulkUploadTenants(file);
+  Future<Map<String, dynamic>> call(File file, String hostelId) {
+    return repository.bulkUploadTenants(file, hostelId);
   }
 }

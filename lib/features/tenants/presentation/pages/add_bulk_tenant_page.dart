@@ -11,6 +11,12 @@ import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_s
 import 'package:stayindia_owner/injection_container.dart' as di;
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:open_filex/open_filex.dart';
+
 class AddBulkTenantPage extends StatefulWidget {
   const AddBulkTenantPage({super.key});
 
@@ -68,21 +74,74 @@ class _AddBulkTenantPageState extends State<AddBulkTenantPage> {
   }
 
   Future<void> _downloadSampleCSV() async {
-    final String csvUrl = ApiConstants.sampleCSVURL;
+    final hostelState = context.read<HostelCubit>().state;
+    String? hostelId;
+    if (hostelState is HostelLoaded) {
+      hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+    }
 
-    final Uri uri = Uri.parse(csvUrl);
+    if (hostelId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a property first'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final String csvUrl = ApiConstants.baseUrl + ApiConstants.tenantImportTemplate(hostelId);
 
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(
-          uri,
-          mode: LaunchMode.externalApplication,
-        );
+      final dio = di.sl<Dio>();
+      // Use ApplicationDocumentsDirectory for better compatibility and visibility for OpenFilex
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/tenant_import_template_$hostelId.csv';
+
+
+      debugPrint('Downloading CSV from: $csvUrl to: $filePath');
+
+      final response = await dio.download(
+        csvUrl,
+        filePath,
+      );
+
+      if (response.statusCode == 200) {
+        final file = File(filePath);
+        final exists = await file.exists();
+
+        if (exists && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Template downloaded successfully'),
+              backgroundColor: Colors.green,
+              action: SnackBarAction(
+                label: 'Open',
+                textColor: Colors.white,
+                onPressed: () async {
+                  try {
+                    await OpenFilex.open(filePath);
+                  } catch (e) {
+                    debugPrint('Error opening file: $e');
+                  }
+                },
+              ),
+            ),
+          );
+        }
       } else {
-        debugPrint('❌ Could not launch CSV URL: $csvUrl');
+        debugPrint('❌ Failed to download CSV: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('❌ Error opening CSV: $e');
+      debugPrint('❌ Error downloading CSV: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error downloading template'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
 
@@ -111,7 +170,23 @@ class _AddBulkTenantPageState extends State<AddBulkTenantPage> {
       return;
     }
 
-    _addTenantCubit.bulkUpload(file);
+    final hostelState = context.read<HostelCubit>().state;
+    String? hostelId;
+    if (hostelState is HostelLoaded) {
+      hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
+    }
+
+    if (hostelId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a property first'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    _addTenantCubit.bulkUpload(file, hostelId);
   }
 
   Widget _buildSectionTitle(String title) {

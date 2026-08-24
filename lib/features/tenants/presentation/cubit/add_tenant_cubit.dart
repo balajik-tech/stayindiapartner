@@ -163,10 +163,10 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     }
   }
 
-  Future<void> bulkUpload(File file) async {
+  Future<void> bulkUpload(File file, String hostelId) async {
     emit(const AddTenantLoading(message: "Processing bulk upload..."));
     try {
-      final response = await _bulkUpload(file);
+      final response = await _bulkUpload(file, hostelId);
       final success = response['success'] == true || response['status'] == 'success';
       final message = response['message'] ?? 'Bulk upload processed';
       

@@ -42,7 +42,7 @@ abstract class TenantRemoteDataSource {
     String? address,
   });
 
-  Future<Map<String, dynamic>> bulkUploadTenants(File file);
+  Future<Map<String, dynamic>> bulkUploadTenants(File file, String hostelId);
 }
 
 class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
@@ -221,7 +221,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> bulkUploadTenants(File file) async {
+  Future<Map<String, dynamic>> bulkUploadTenants(File file, String hostelId) async {
     final fileName = file.path.split('/').last;
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(
@@ -231,7 +231,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     });
 
     final response = await _dio.post(
-      ApiConstants.bulkTenants,
+      ApiConstants.bulkTenants(hostelId),
       data: formData,
     );
 

@@ -37,5 +37,5 @@ abstract class TenantRepository {
     String? address,
   });
 
-  Future<Map<String, dynamic>> bulkUploadTenants(File file);
+  Future<Map<String, dynamic>> bulkUploadTenants(File file, String hostelId);
 }
