@@ -57,7 +57,7 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
         summary: reportData.summary,
         tenants: tenants,
         page: 1,
-        hasMore: reportData.payments.length < reportData.totalCount,
+        hasMore: reportData.payments.length >= ApiConstants.paginationLimit,
       ));
     } catch (e) {
       emit(PaymentReportError(message: GlobalErrorMapper.map(e).message));
@@ -102,8 +102,7 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
       emit(currentState.copyWith(
         items: updatedItems,
         page: nextPage,
-        hasMore: reportData.payments.length >= ApiConstants.paginationLimit &&
-            updatedItems.length < reportData.totalCount,
+        hasMore: reportData.payments.length >= ApiConstants.paginationLimit,
         isLoadingMore: false,
       ));
     } catch (e) {

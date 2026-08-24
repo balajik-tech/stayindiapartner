@@ -96,15 +96,20 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
         listener: (context, state) {
           if (state is PaymentReportLoaded && state.hasMore && !state.isLoadingMore) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_scrollController.hasClients &&
-                  _scrollController.position.maxScrollExtent <= 0) {
-                final startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
-                final endDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
-                context.read<PaymentReportCubit>().fetchMoreReport(
-                      hostelId: _selectedHostelId,
-                      startDate: DateFormat('yyyy-MM-dd').format(startDate),
-                      endDate: DateFormat('yyyy-MM-dd').format(endDate),
-                    );
+              if (_scrollController.hasClients) {
+                final maxScroll = _scrollController.position.maxScrollExtent;
+                final currentScroll = _scrollController.position.pixels;
+                
+                // Trigger if content is not scrollable OR if we are near the bottom
+                if (maxScroll <= 0 || (maxScroll - currentScroll) < 300) {
+                  final startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+                  final endDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
+                  context.read<PaymentReportCubit>().fetchMoreReport(
+                        hostelId: _selectedHostelId,
+                        startDate: DateFormat('yyyy-MM-dd').format(startDate),
+                        endDate: DateFormat('yyyy-MM-dd').format(endDate),
+                      );
+                }
               }
             });
           }
