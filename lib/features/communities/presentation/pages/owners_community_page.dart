@@ -1151,26 +1151,26 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               ),
             ),
           ),
-          SizedBox(height: 24.h),
-          ElevatedButton(
-            onPressed: _openAssociationSearch,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1650A2),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.r),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Browse associations',
-              style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
+          // SizedBox(height: 24.h),
+          // ElevatedButton(
+          //   onPressed: _openAssociationSearch,
+          //   style: ElevatedButton.styleFrom(
+          //     backgroundColor: const Color(0xFF1650A2),
+          //     foregroundColor: Colors.white,
+          //     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(30.r),
+          //     ),
+          //     elevation: 0,
+          //   ),
+          //   child: Text(
+          //     'Browse associations',
+          //     style: GoogleFonts.inter(
+          //       fontSize: 16.sp,
+          //       fontWeight: FontWeight.w600,
+          //     ),
+          //   ),
+          // ),
           SizedBox(height: 12.h),
           Text(
             'The forum stays open to everyone.',
