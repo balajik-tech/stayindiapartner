@@ -378,7 +378,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                                       ? ""
                                       : '+91 ${_phoneController.text}',
                                   icon: Icons.phone_rounded,
-                                  isLocked: false,
+                                  isLocked: true,
                                   onTap: () => _showEditSheet(
                                     'phone_number'.tr(),
                                     _phoneController,
