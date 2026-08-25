@@ -16,6 +16,9 @@ class AuthTextField extends StatefulWidget {
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
   final void Function(String)? onSubmitted;
+  // Optional override for the field's outline color (defaults to the
+  // existing grey/blue behaviour when not provided) and label accent.
+  final Color? borderColor;
 
   const AuthTextField({
     super.key,
@@ -29,6 +32,7 @@ class AuthTextField extends StatefulWidget {
     this.focusNode,
     this.textInputAction,
     this.onSubmitted,
+    this.borderColor,
   });
 
   @override
@@ -64,6 +68,9 @@ class _AuthTextFieldState extends State<AuthTextField> {
 
   @override
   Widget build(BuildContext context) {
+    // Falls back to the original primaryBlue accent when no borderColor is passed.
+    final Color accentColor = widget.borderColor ?? AppColors.primaryBlue;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -73,7 +80,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: _isFocused
-                ? AppColors.primaryBlue
+                ? accentColor
                 : AppColors.darkText.withValues(alpha: 0.8),
           ),
         ),
@@ -85,7 +92,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
             boxShadow: [
               if (_isFocused)
                 BoxShadow(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  color: accentColor.withValues(alpha: 0.1),
                   blurRadius: 10,
                   spreadRadius: 0,
                   offset: const Offset(0, 4),
@@ -122,16 +129,20 @@ class _AuthTextFieldState extends State<AuthTextField> {
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
-                borderSide: BorderSide(color: Colors.grey.shade200),
+                borderSide: widget.borderColor != null
+                    ? BorderSide(color: widget.borderColor!)
+                    : BorderSide(color: Colors.grey.shade200),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
-                borderSide: BorderSide(color: Colors.grey.shade200),
+                borderSide: widget.borderColor != null
+                    ? BorderSide(color: widget.borderColor!)
+                    : BorderSide(color: Colors.grey.shade200),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
-                borderSide: const BorderSide(
-                  color: AppColors.primaryBlue,
+                borderSide: BorderSide(
+                  color: accentColor,
                   width: 1.8,
                 ),
               ),
@@ -148,6 +159,9 @@ class AuthPrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
+  // Optional solid background override. When null, the original
+  // AppColors.primaryGradient is used exactly as before.
+  final Color? backgroundColor;
 
   const AuthPrimaryButton({
     super.key,
@@ -155,6 +169,7 @@ class AuthPrimaryButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.isLoading = false,
+    this.backgroundColor,
   });
 
   @override
@@ -166,11 +181,12 @@ class AuthPrimaryButton extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
+          color: backgroundColor,
+          gradient: backgroundColor == null ? AppColors.primaryGradient : null,
           borderRadius: BorderRadius.circular(18.r),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryBlue.withValues(alpha: 0.25),
+              color: (backgroundColor ?? AppColors.primaryBlue).withValues(alpha: 0.25),
               blurRadius: 15,
               spreadRadius: 1,
               offset: const Offset(0, 8),
@@ -190,22 +206,22 @@ class AuthPrimaryButton extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             child: isLoading
                 ? SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      strokeWidth: 2.5,
-                    ),
-                  )
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                color: Colors.white.withValues(alpha: 0.9),
+                strokeWidth: 2.5,
+              ),
+            )
                 : Text(
-                    label,
-                    style: GoogleFonts.outfit(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+              label,
+              style: GoogleFonts.outfit(
+                fontSize: 17.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
           ),
         ),
       ),
@@ -222,23 +238,23 @@ class AuthLogoBadge extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         Container(
-          width: double.infinity,
-          child: Container(
-            alignment: Alignment.center,
-            child: Image.asset(
-              'assets/images/login_logo.jpg',
-              width: double.infinity,
-              height: 0.35.sh,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  Icons.home_work_rounded,
-                  color: Colors.white,
-                  size: 40.sp,
-                );
-              },
-            ),
-          )
+            width: double.infinity,
+            child: Container(
+              alignment: Alignment.center,
+              child: Image.asset(
+                'assets/images/login_logo.jpg',
+                width: double.infinity,
+                height: 0.35.sh,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.home_work_rounded,
+                    color: Colors.white,
+                    size: 40.sp,
+                  );
+                },
+              ),
+            )
         ),
       ],
     );

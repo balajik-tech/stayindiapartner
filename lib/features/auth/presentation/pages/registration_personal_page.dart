@@ -25,6 +25,7 @@ class RegistrationPersonalPage extends StatefulWidget {
       _RegistrationPersonalPageState();
 }
 
+
 class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     with SingleTickerProviderStateMixin {
   final _fullNameController = TextEditingController();
@@ -40,6 +41,10 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
 
   late final AnimationController _animController;
   late final Animation<double> _fadeAnimation;
+
+  // Design accent color from latest screenshot (Continue button + field borders).
+  // If AppColors already exposes an orange/accent color, swap this out for that instead.
+  static const Color _accentOrange = Color(0xFFE8763C);
 
   @override
   void initState() {
@@ -119,11 +124,11 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     final address = "$street, $district, $stateStr - $pincode";
 
     if (fullName.isEmpty
-        // email.isEmpty ||
-        // stateStr.isEmpty ||
-        // district.isEmpty ||
-        // pincode.isEmpty ||
-        // street.isEmpty
+    // email.isEmpty ||
+    // stateStr.isEmpty ||
+    // district.isEmpty ||
+    // pincode.isEmpty ||
+    // street.isEmpty
     ) {
       HapticFeedback.vibrate();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -201,9 +206,10 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
                         //   totalSteps: 3,
                         //   stepLabels: ['Personal', 'Property', 'Setup'],
                         // ),
-                        SizedBox(height: 32.h),
-                        _buildHeader(),
-                        SizedBox(height: 32.h),
+                        SizedBox(height: 24.h),
+                        // _buildHeader(),
+                        // Title now lives in the AppBar per latest design (see _buildAppBar).
+                        // SizedBox(height: 32.h),
                         _buildImagePicker(),
                         SizedBox(height: 40.h),
                         _buildFormSection(),
@@ -227,7 +233,19 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     return AppBar(
       backgroundColor: const Color(0xFFF8FAFC),
       elevation: 0,
-      centerTitle: false,
+      centerTitle: true,
+      title: Transform.translate(
+        offset: Offset(5.w, 0),
+        child: Text(
+          'Lets get to know you',
+          style: GoogleFonts.outfit(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkText,
+            letterSpacing: -0.3,
+          ),
+        ),
+      ),
       leading: BouncingWrapper(
         onTap: () {
           if (Navigator.canPop(context)) {
@@ -236,25 +254,31 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
             context.read<AuthCubit>().logout();
           }
         },
-        child: Container(
-          margin: EdgeInsets.all(10.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.black,
-            size: 16,
-          ),
+        child: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.black,
+          size: 18,
         ),
+        // Previous circular white-card back button (kept for reference):
+        // child: Container(
+        //   margin: EdgeInsets.all(10.w),
+        //   decoration: BoxDecoration(
+        //     color: Colors.white,
+        //     shape: BoxShape.circle,
+        //     boxShadow: [
+        //       BoxShadow(
+        //         color: Colors.black.withValues(alpha: 0.05),
+        //         blurRadius: 8,
+        //         offset: const Offset(0, 2),
+        //       ),
+        //     ],
+        //   ),
+        //   child: const Icon(
+        //     Icons.arrow_back_ios_new_rounded,
+        //     color: Colors.black,
+        //     size: 16,
+        //   ),
+        // ),
       ),
     );
   }
@@ -295,68 +319,70 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
               children: [
                 Container(
                   padding: EdgeInsets.all(4.w),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.primaryBlue.withValues(alpha: 0.2),
-                        AppColors.primaryBlue.withValues(alpha: 0.05),
-                      ],
-                    ),
-                  ),
+                  // decoration: BoxDecoration(
+                  //   shape: BoxShape.circle,
+                  //   gradient: LinearGradient(
+                  //     colors: [
+                  //       AppColors.primaryBlue.withValues(alpha: 0.2),
+                  //       AppColors.primaryBlue.withValues(alpha: 0.05),
+                  //     ],
+                  //   ),
+                  // ),
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
+                      border: Border.all(color: AppColors.primaryBlue, width: 2),
+                      // boxShadow: [
+                      //   BoxShadow(
+                      //     color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                      //     blurRadius: 20,
+                      //     offset: const Offset(0, 10),
+                      //   ),
+                      // ],
                     ),
                     child: CircleAvatar(
                       radius: 54.r,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Color(0xFFECEBFF),
                       backgroundImage: _selectedImage != null
                           ? ResizeImage(
-                              FileImage(_selectedImage!),
-                              width: 220,
-                              height: 220,
-                            )
+                        FileImage(_selectedImage!),
+                        width: 220,
+                        height: 220,
+                      )
                           : null,
                       child: _selectedImage == null
-                          ? Icon(
-                              Icons.person_rounded,
-                              size: 54.sp,
-                              color: Colors.grey.shade200,
-                            )
+                          ? Image.asset(
+                        'assets/images/profileuser.png',
+                        width: 54.sp,
+                        height: 54.sp,
+                        fit: BoxFit.contain,
+                      )
                           : null,
                     ),
                   ),
                 ),
                 Positioned(
-                  bottom: 4,
-                  right: 4,
+                  bottom: 8,
+                  right: 8,
                   child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryBlue,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.camera_alt_rounded,
-                      size: 18.sp,
-                      color: Colors.white,
+                    // padding: EdgeInsets.all(8.w),
+                    // decoration: BoxDecoration(
+                    //   color: AppColors.primaryBlue,
+                    //   shape: BoxShape.circle,
+                    //   border: Border.all(color: Colors.white, width: 3),
+                    //   boxShadow: [
+                    //     BoxShadow(
+                    //       color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                    //       blurRadius: 8,
+                    //       offset: const Offset(0, 4),
+                    //     ),
+                    //   ],
+                    // ),
+                    child: Image.asset(
+                      'assets/images/cameraicon.png',
+                      width: 24.sp,
+                      height: 24.sp,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
@@ -368,7 +394,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
             _selectedImage == null ? 'Add your profile photo' : 'Change photo',
             style: GoogleFonts.outfit(
               fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: AppColors.primaryBlue,
             ),
           ),
@@ -381,16 +407,19 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     return Column(
       children: [
         AuthTextField(
-          label: 'Full Name',
+          label: 'Full name',
           controller: _fullNameController,
           hintText: 'e.g. Rahul Sharma',
+          // Latest design uses an orange outline on the fields.
+          borderColor: _accentOrange,
         ),
         SizedBox(height: 24.h),
         AuthTextField(
-          label: 'Email Address (Optional)',
+          label: 'Email ID (optional)',
           controller: _emailController,
           hintText: 'name@example.com',
           keyboardType: TextInputType.emailAddress,
+          borderColor: _accentOrange,
         ),
         SizedBox(height: 24.h),
         // Row(
@@ -596,6 +625,8 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
             label: 'Continue',
             isLoading: state is AuthLoading,
             onPressed: () => _onContinue(context),
+            // Latest design uses a solid orange CTA instead of the primary blue.
+            backgroundColor: _accentOrange,
           );
         },
       ),
