@@ -99,6 +99,7 @@ class ApiConstants {
   static const String associationsPortal = '/association-portal/associations';
   static const String associationFeed = '/association-portal/user-feed';
   static const String associationPortalDetails = '/association-portal/details';
+  static const String associationTheme = '/association-portal/theme';
   static const String associationWorkingBody = '/association-portal/working-body';
   static const String associationTeamLeads = '/association-portal/teamleads';
   static const String associationExecutiveMembers = '/association-portal/executive-members';

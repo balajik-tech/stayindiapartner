@@ -96,14 +96,14 @@ class _CommunityHomeView extends StatelessWidget {
                     count: loaded.executiveMembers.length,
                     isExpanded: loaded.expandedSections.contains(AccordionSection.executiveMembers),
                     onToggle: () => cubit.toggleSection(AccordionSection.executiveMembers),
-                    footer: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: Text(
-                        'Tap a member to open their zone & core members.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                      ),
-                    ),
+                    // footer: Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 14),
+                    //   child: Text(
+                    //     'Tap a member to open their zone & core members.',
+                    //     textAlign: TextAlign.center,
+                    //     style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                    //   ),
+                    // ),
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),

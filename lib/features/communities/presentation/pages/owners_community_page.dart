@@ -52,7 +52,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     TextEditingController(),
   ];
 
-  String _activeFeedType = 'OFFICIAL';
+  // String _activeFeedType = 'OFFICIAL';
+  String _activeFeedType = 'GLOBAL';
 
   Set<String> _readPostIds = {};
   Map<String, int> _unreadMessageCounts = {};

@@ -49,7 +49,7 @@ class HeroHeaderWidget extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [primary, primaryLight],
+          colors: [primary, primary],
         ),
       ),
       child: Column(

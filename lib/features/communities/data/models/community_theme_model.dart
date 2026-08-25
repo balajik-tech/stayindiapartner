@@ -15,20 +15,27 @@ class AssociateCommunityThemeModel extends CommunityThemeEntity {
     required super.badgeText,
   });
 
-  /// Matches the shape you'll get back from the theme API later.
+  /// Matches the shape of the theme API response and merges with defaults.
   factory AssociateCommunityThemeModel.fromJson(Map<String, dynamic> json) {
+    // Extract dynamic colors from nested 'theme' object if it exists (API style)
+    // or from top level (Legacy/Static style)
+    final themeData = json['theme'] is Map ? json['theme'] as Map<String, dynamic> : json;
+
+    final primaryColor = themeData['primaryColor']?.toString() ?? '#16305A';
+    final accentColor = themeData['accentColor']?.toString() ?? '#6FA641';
+
     return AssociateCommunityThemeModel(
-      primaryColor: json['primaryColor'] as String,
-      primaryColorLight: json['primaryColorLight'] as String,
-      accentColor: json['accentColor'] as String,
-      backgroundColor: json['backgroundColor'] as String,
-      cardColor: json['cardColor'] as String,
-      textOnPrimary: json['textOnPrimary'] as String,
-      textPrimary: json['textPrimary'] as String,
-      textSecondary: json['textSecondary'] as String,
-      badgeBackground: json['badgeBackground'] as String,
-      badgeBorder: json['badgeBorder'] as String,
-      badgeText: json['badgeText'] as String,
+      primaryColor: primaryColor,
+      primaryColorLight: themeData['primaryColorLight']?.toString() ?? '#1E4976',
+      accentColor: accentColor,
+      backgroundColor: themeData['backgroundColor']?.toString() ?? '#EEF1F6',
+      cardColor: themeData['cardColor']?.toString() ?? '#FFFFFF',
+      textOnPrimary: themeData['textOnPrimary']?.toString() ?? '#FFFFFF',
+      textPrimary: themeData['textPrimary']?.toString() ?? '#1A1A1A',
+      textSecondary: themeData['textSecondary']?.toString() ?? '#6B7280',
+      badgeBackground: primaryColor ?? themeData['badgeBackground']?.toString() ?? '#E7F0DD',
+      badgeBorder:primaryColor ?? themeData['badgeBorder']?.toString() ?? '#9CCB6B',
+      badgeText: accentColor ?? themeData['badgeText']?.toString() ?? '#3E7A34',
     );
   }
 

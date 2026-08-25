@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 // Add font_awesome_flutter to pubspec.yaml for an accurate WhatsApp glyph:
 //   flutter pub add font_awesome_flutter
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
@@ -158,7 +159,7 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
                 borderColor: const Color(0xFFE5E1D8),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: launch stayindia.in web form
+                  _openRegistrationForm();
                 },
               ),
               SizedBox(height: 22.h),
@@ -179,6 +180,20 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _openRegistrationForm() async {
+    final uri = Uri.parse(
+      'https://associations.stayindia.in/register',
+    );
+    try {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (e) {
+      debugPrint('Could not open registration URL: $e');
+    }
   }
 }
 

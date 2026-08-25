@@ -183,18 +183,37 @@ class AssociateStaticDataSource implements AssociateDataSource {
 
   @override
   Future<AssociateCommunityThemeModel> getCommunityTheme(String associationId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.associationTheme,
+        queryParameters: {'portalId': associationId},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = response.data;
+        if (raw is Map<String, dynamic> && raw['data'] != null) {
+          final data = raw['data'] as Map<String, dynamic>;
+          final themeData = data['theme'] as Map<String, dynamic>?;
+          if (themeData != null) {
+            return AssociateCommunityThemeModel.fromJson(themeData);
+          }
+        }
+      }
+    } catch (e) {
+      // Fallback to defaults on error
+    }
+
     return const AssociateCommunityThemeModel(
-      primaryColor: '#16305A', // top card & membership card & card title & count in card color change
-      primaryColorLight: '#1E4976', // gradient background color for top card
-      accentColor: '#6FA641', // tamil nadu text color
-      backgroundColor: '#EEF1F6', // background color
-      cardColor: '#FFFFFF',  // accordion card color
+      primaryColor: '#16305A',
+      primaryColorLight: '#1E4976',
+      accentColor: '#6FA641',
+      backgroundColor: '#EEF1F6',
+      cardColor: '#FFFFFF',
       textOnPrimary: '#FFFFFF',
-      textPrimary: '#1A1A1A', // card each user name color
-      textSecondary: '#6B7280', // subtext inside card under sub header & each user (State Vice President
-      badgeBackground: '#E7F0DD',//badge background color
-      badgeBorder: '#9CCB6B', //badge border
-      badgeText: '#3E7A34', //badge background color
+      textPrimary: '#1A1A1A',
+      textSecondary: '#6B7280',
+      badgeBackground: '#E7F0DD',
+      badgeBorder: '#9CCB6B',
+      badgeText: '#3E7A34',
     );
   }
 
