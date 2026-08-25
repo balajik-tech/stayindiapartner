@@ -6,8 +6,11 @@ import 'package:easy_localization/easy_localization.dart';
 //   flutter pub add font_awesome_flutter
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:dio/dio.dart';
+import '../../../../injection_container.dart' as di;
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/constants/api_constants.dart';
 
 // ---------------------------------------------------------------------------
 // 1. Trigger widget — same GestureDetector you had, now opens the sheet
@@ -142,8 +145,7 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
                 badgeColor: _accentOrangeBg,
                 badgeTextColor: _accentOrange,
                 onTap: () {
-                  Navigator.pop(context);
-                  // TODO: launch WhatsApp flow
+                  _triggerCreateFlow(context, 'WHATSAPP');
                 },
               ),
               SizedBox(height: 12.h),
@@ -158,8 +160,7 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
                 highlighted: false,
                 borderColor: const Color(0xFFE5E1D8),
                 onTap: () {
-                  Navigator.pop(context);
-                  _openRegistrationForm();
+                  _triggerCreateFlow(context, 'WEB_FORM');
                 },
               ),
               SizedBox(height: 22.h),
@@ -182,17 +183,38 @@ class RegisterAssociationBottomSheet extends StatelessWidget {
     );
   }
 
-  Future<void> _openRegistrationForm() async {
-    final uri = Uri.parse(
-      'https://associations.stayindia.in/register',
+  Future<void> _triggerCreateFlow(BuildContext context, String method) async {
+    // Show a basic loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
+
     try {
-      await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
+      final dio = di.sl<Dio>();
+      final response = await dio.post(
+        ApiConstants.associationCreateFlow,
+        data: {'method': method},
       );
+
+      if (context.mounted) Navigator.pop(context); // Dismiss loading
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final urlString = response.data['data']['url'] ?? response.data['data']['formUrl'];
+        if (urlString != null) {
+          final uri = Uri.parse(urlString);
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          if (context.mounted) Navigator.pop(context); // Close bottom sheet
+        }
+      }
     } catch (e) {
-      debugPrint('Could not open registration URL: $e');
+      if (context.mounted) {
+        Navigator.pop(context); // Dismiss loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
     }
   }
 }
