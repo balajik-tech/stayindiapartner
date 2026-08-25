@@ -273,7 +273,7 @@ class _AddBulkTenantPageState extends State<AddBulkTenantPage> {
                 ),
               ] else ...[
                 Text(
-                  'Upload a CSV or Excel file containing tenant details for bulk registration.',
+                  'Upload a CSV file containing tenant details for bulk registration.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13.sp,
@@ -315,7 +315,7 @@ class _AddBulkTenantPageState extends State<AddBulkTenantPage> {
               color: AppColors.primaryBlue,
             ),
             label: Text(
-              'Download sample file',
+              'Download Generated CSV File',
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
@@ -370,6 +370,10 @@ class _AddBulkTenantPageState extends State<AddBulkTenantPage> {
                 backgroundColor: Colors.green,
               ),
             );
+            setState(() {
+              _csvFile = null;
+            });
+            _addTenantCubit.reset();
           } else if (state is AddTenantError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

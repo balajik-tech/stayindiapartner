@@ -179,4 +179,8 @@ class AddTenantCubit extends Cubit<AddTenantState> {
       emit(AddTenantError(ErrorHelper.toFriendlyMessage(e)));
     }
   }
+
+  void reset() {
+    emit(AddTenantInitial());
+  }
 }
