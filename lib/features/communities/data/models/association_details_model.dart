@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import '../../domain/entities/association_details_entity.dart';
 
 class AssociationDetailsModel extends AssociationDetailsEntity {
@@ -16,25 +18,21 @@ class AssociationDetailsModel extends AssociationDetailsEntity {
   factory AssociationDetailsModel.fromJson(Map<String, dynamic> json) {
     String addressStr = '';
     final rawAddress = json['address'];
-    if (rawAddress is String) {
-      addressStr = rawAddress;
-    } else if (rawAddress is Map<String, dynamic>) {
-      final line1 = rawAddress['line1']?.toString() ?? '';
-      final line2 = rawAddress['line2']?.toString() ?? '';
-      final city = rawAddress['city']?.toString() ?? '';
-      final state = rawAddress['state']?.toString() ?? '';
-      final pincode = rawAddress['pincode']?.toString() ?? '';
 
+    if (rawAddress is String) {
+      addressStr = rawAddress.trim();
+    } else if (rawAddress is Map) {
       final parts = [
-        if (line1.isNotEmpty) line1,
-        if (line2.isNotEmpty) line2,
-        if (city.isNotEmpty) city,
-        if (state.isNotEmpty) state,
-        if (pincode.isNotEmpty) pincode,
-      ];
+        rawAddress['line1']?.toString().trim(),
+        // rawAddress['line2']?.toString().trim(),
+        rawAddress['city']?.toString().trim(),
+        rawAddress['state']?.toString().trim(),
+        rawAddress['pincode']?.toString().trim(),
+      ].whereType<String>().where((e) => e.isNotEmpty).toSet().toList();
+
       addressStr = parts.join(', ');
-    } else if (rawAddress != null) {
-      addressStr = rawAddress.toString();
+    } else {
+      addressStr = rawAddress?.toString().trim() ?? '';
     }
 
     return AssociationDetailsModel(
