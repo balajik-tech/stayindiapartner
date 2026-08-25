@@ -111,23 +111,34 @@ class _AddBulkTenantPageState extends State<AddBulkTenantPage> {
         final exists = await file.exists();
 
         if (exists && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Template downloaded successfully'),
-              backgroundColor: Colors.green,
-              action: SnackBarAction(
-                label: 'Open',
-                textColor: Colors.white,
-                onPressed: () async {
-                  try {
-                    await OpenFilex.open(filePath);
-                  } catch (e) {
-                    debugPrint('Error opening file: $e');
-                  }
-                },
+          final messenger = ScaffoldMessenger.of(context);
+
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: const Text('Template downloaded successfully'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 5),
+                action: SnackBarAction(
+                  label: 'Open',
+                  textColor: Colors.white,
+                  onPressed: () async {
+                    try {
+                      await OpenFilex.open(filePath);
+                    } catch (e) {
+                      debugPrint('Error opening file: $e');
+                    }
+                  },
+                ),
               ),
-            ),
-          );
+            );
+
+          Future.delayed(const Duration(seconds: 5), () {
+            if (mounted) {
+              messenger.removeCurrentSnackBar();
+            }
+          });
         }
       } else {
         debugPrint('❌ Failed to download CSV: ${response.statusCode}');
