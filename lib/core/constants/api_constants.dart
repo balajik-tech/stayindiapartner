@@ -17,6 +17,7 @@ class ApiConstants {
 
   static const int paginationLimit = 100;
 
+  static const String TERMS_AND_CONDITIONS = "https://www.stayindia.in/privacy.html";
   
   static String get baseUrl {
     const url = String.fromEnvironment('API_BASE_URL', defaultValue: _prodUrl);

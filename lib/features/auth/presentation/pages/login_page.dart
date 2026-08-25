@@ -1,15 +1,18 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_phone_number_hint/google_phone_number_hint.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../cubit/auth_cubit.dart';
 import '../widgets/auth_widgets.dart';
 import 'LoginOnBoardingScreen.dart';
@@ -47,6 +50,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   // --- SIM detection ---
   bool _isFetchingSimHint = false;
+
+  bool _isTermsAccepted = false;
 
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
@@ -622,26 +627,49 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 borderRadius: BorderRadius.circular(8.r),
                                 onTap: isLoading
                                     ? null
-                                    : () => _isStaffLogin
-                                    ? _onStaffLogin(context)
-                                    : _onSendOtp(context),
+                                    : () {
+                                  if (!_isTermsAccepted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Please accept Terms and Privacy Policy',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  _isStaffLogin
+                                      ? _onStaffLogin(context)
+                                      : _onSendOtp(context);
+                                },
                                 child: Container(
                                   height: 52.h,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [AppColors.inputBoxColor, AppColors.inputBoxColor],
+                                      colors: _isTermsAccepted
+                                          ? [
+                                        AppColors.inputBoxColor,
+                                        AppColors.inputBoxColor,
+                                      ]
+                                          : [
+                                        Colors.grey.shade400,
+                                        Colors.grey.shade400,
+                                      ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
                                     borderRadius: BorderRadius.circular(8.r),
-                                    boxShadow: [
+                                    boxShadow: _isTermsAccepted
+                                        ? [
                                       BoxShadow(
                                         color: AppColors.kAuthOrange.withValues(alpha: 0.35),
                                         blurRadius: 14,
                                         offset: const Offset(0, 6),
                                       ),
-                                    ],
+                                    ]
+                                        : [],
                                   ),
                                   child: isLoading
                                       ? SizedBox(
@@ -664,42 +692,69 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ),
                               ),
                             ),
-
                             SizedBox(height: 18.h),
 
                             // ---- terms footer ----
-                            Center(
-                              child: Text.rich(
-                                TextSpan(
-                                  text: 'By continuing, you agree to our ',
-                                  children: [
-                                    TextSpan(
-                                      text: 'Terms',
-                                      style: TextStyle(
-                                        color: AppColors.kAuthOrange,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  child: Checkbox(
+                                    value: _isTermsAccepted,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isTermsAccepted = value ?? false;
+                                      });
+                                    },
+                                    activeColor: AppColors.kAuthOrange,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(top: 8.h),
+                                    child: Text.rich(
+                                      TextSpan(
+                                        text: 'By continuing, you agree to our ',
+                                        children: [
+                                          TextSpan(
+                                            text: 'Terms',
+                                            style: TextStyle(
+                                              color: AppColors.kAuthOrange,
+                                              fontWeight: FontWeight.bold,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                _openUrl(ApiConstants.TERMS_AND_CONDITIONS);
+                                              },
+                                          ),
+                                          const TextSpan(text: ' & '),
+                                          TextSpan(
+                                            text: 'Privacy Policy',
+                                            style: TextStyle(
+                                              color: AppColors.kAuthOrange,
+                                              fontWeight: FontWeight.bold,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                _openUrl(ApiConstants.TERMS_AND_CONDITIONS);
+                                              },
+                                          ),
+                                        ],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12.sp,
+                                        color: AppColors.primaryBlue.withValues(alpha: 0.7),
+                                        height: 1.4,
                                       ),
                                     ),
-                                    const TextSpan(text: ' & '),
-                                    TextSpan(
-                                      text: 'Privacy Policy',
-                                      style: TextStyle(
-                                        color: AppColors.kAuthOrange,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12.sp,
-                                  color: AppColors.primaryBlue.withValues(alpha: 0.7),
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
+                              ],
+                            )
                           ],
                         ),
                       ),
@@ -712,6 +767,17 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         );
       },
     );
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+    }
   }
 }
 
