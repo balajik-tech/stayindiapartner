@@ -1190,7 +1190,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
     return Column(
       children: [
-        _LiveTimeDateWidget(),
+        // _LiveTimeDateWidget(),
         SizedBox(height: 20.h),
         Row(
           children: [
