@@ -60,8 +60,8 @@ class DigiLockerCubit extends Cubit<DigiLockerState> {
           : null;
       // Build data map for API call
       final data = <String, dynamic>{
-        if (derivedLastName != null) 'firstName': derivedLastName,
-        if (derivedFirstName != null) 'lastName': derivedFirstName,
+        if (fullName != null) 'firstName': fullName,
+        'lastName': "",
         // if (phone != null) 'phone': phone,
         if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
         if (result.aadharAddress != null) 'address': result.aadharAddress,

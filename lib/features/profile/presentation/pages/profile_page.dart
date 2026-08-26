@@ -38,6 +38,7 @@ import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_condi
 import 'government_licenses_page.dart';
 import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/main.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -46,7 +47,7 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage>  with RouteAware{
   @override
   void initState() {
     super.initState();
@@ -54,6 +55,28 @@ class _ProfilePageState extends State<ProfilePage> {
     if (profileCubit.state is ProfileInitial) {
       profileCubit.loadProfile();
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final route = ModalRoute.of(context);
+
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when coming back to this screen
+    context.read<ProfileCubit>().loadProfile();
   }
 
   @override

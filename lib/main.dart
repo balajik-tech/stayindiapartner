@@ -32,6 +32,8 @@ void main() {
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 
 class StayIndiaOwnerApp extends StatelessWidget {
   const StayIndiaOwnerApp({super.key});
@@ -122,6 +124,7 @@ class StayIndiaOwnerApp extends StatelessWidget {
                       ],
                       child: MaterialApp(
                         navigatorKey: navigatorKey,
+                        navigatorObservers: [routeObserver],
                         title: 'Stay India Owner',
                         debugShowCheckedModeBanner: false,
                         theme: AppTheme.lightTheme,
