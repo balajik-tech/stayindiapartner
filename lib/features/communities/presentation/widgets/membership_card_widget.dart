@@ -585,6 +585,25 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
   }
 
   void _showRequestToJoinSheet(BuildContext context) {
+
+    final profileState = context.read<ProfileCubit>().state;
+
+    if (profileState is ProfileLoaded) {
+      final isKYCVerified =
+          profileState.profile.dlKyc?.isAadharVerified ?? false;
+
+      debugPrint('isKYCVerified: $isKYCVerified');
+
+      if (!isKYCVerified) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please complete your KYC verification'),
+          ),
+        );
+        return;
+      }
+    }
+
     final cubit = context.read<AssociationMembershipCubit>();
     showModalBottomSheet(
       context: context,

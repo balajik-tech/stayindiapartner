@@ -76,7 +76,7 @@ class _AddBulkTenantPageState extends State<AddBulkTenantPage> {
   Future<void> _downloadSampleCSV() async {
     final hostelState = context.read<HostelCubit>().state;
     String? hostelId;
-    if (hostelState is HostelLoaded) {
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
       hostelId = hostelState.hostels[hostelState.selectedHostelIndex].id;
     }
 
