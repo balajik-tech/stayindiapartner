@@ -23,11 +23,11 @@ class AssociationDetailsModel extends AssociationDetailsEntity {
       addressStr = rawAddress.trim();
     } else if (rawAddress is Map) {
       final parts = [
-        rawAddress['line1']?.toString().trim(),
+        // rawAddress['line1']?.toString().trim(),
         // rawAddress['line2']?.toString().trim(),
-        rawAddress['city']?.toString().trim(),
+        // rawAddress['city']?.toString().trim(),
         rawAddress['state']?.toString().trim(),
-        rawAddress['pincode']?.toString().trim(),
+        // rawAddress['pincode']?.toString().trim(),
       ].whereType<String>().where((e) => e.isNotEmpty).toSet().toList();
 
       addressStr = parts.join(', ');

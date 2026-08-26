@@ -2116,11 +2116,18 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
     final profileState = context.watch<ProfileCubit>().state;
     final authState = context.watch<AuthCubit>().state;
 
-    String memberName = '';
+    String? memberName = '';
     if (profileState is ProfileLoaded) {
-      memberName = profileState.profile.fullName.trim();
-    } else if (authState is AuthAuthenticated) {
-      memberName = authState.owner.name.trim();
+      memberName = profileState.profile.dlKyc?.name?.trim();
+      if (memberName == null || memberName.isEmpty) {
+        memberName = profileState.profile.fullName.trim();
+      }
+    }
+
+    if (memberName == null || memberName.isEmpty) {
+      if (authState is AuthAuthenticated) {
+        memberName = authState.owner.name.trim();
+      }
     }
 
     return BlocBuilder<AssociationMembershipCubit, AssociationMembershipState>(
@@ -2206,7 +2213,7 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
                 ),
                 child: Column(
                   children: [
-                    _buildRow('Member', memberName),
+                    _buildRow('Member', memberName!),
                     const Divider(height: 32, color: Color(0xFFE2E8F0)),
                     _buildRow('Application', appRef),
                     const Divider(height: 32, color: Color(0xFFE2E8F0)),

@@ -102,7 +102,7 @@ class StayIndiaOwnerApp extends StatelessWidget {
                           create: (context) => di.sl<PaymentCubit>(),
                         ),
                         BlocProvider(
-                          create: (context) => di.sl<ProfileCubit>(),
+                          create: (context) => di.sl<ProfileCubit>()..loadProfile(),
                         ),
                         BlocProvider(
                           create: (context) => di.sl<SettingsCubit>(),

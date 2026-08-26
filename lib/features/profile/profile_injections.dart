@@ -43,7 +43,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/subscription
 import 'package:stayindia_owner/features/auth/presentation/cubit/document_cubit.dart';
 
 void registerProfileFeature(GetIt sl) {
-  sl.registerFactory(
+  sl.registerLazySingleton(
     () => ProfileCubit(
       getProfileUseCase: sl(),
       updateProfileUseCase: sl(),

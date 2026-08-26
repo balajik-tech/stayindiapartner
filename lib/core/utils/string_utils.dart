@@ -8,6 +8,10 @@ class StringUtils {
     return text[0].toUpperCase() + text.substring(1);
   }
 
+  static String captialLetter(String text) {
+    return text.toUpperCase();
+  }
+
 
   static String formatRoomNumber(String rNum, [dynamic floor]) {
     String formatted = rNum

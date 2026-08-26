@@ -27,7 +27,7 @@ class HeroHeaderWidget extends StatelessWidget {
     final primaryLight = theme.primaryColorLight.toColor();
     final accent = theme.accentColor.toColor();
 
-    final name = details?.name ?? '';
+    final name = details?.name.toUpperCase() ?? '';
     final nameWords = name.split(' ');
     final firstNamePart = nameWords.length > 2 
         ? nameWords.take(nameWords.length - 2).join(' ') 
@@ -35,7 +35,7 @@ class HeroHeaderWidget extends StatelessWidget {
     final lastTwoWords = nameWords.length > 2 
         ? nameWords.skip(nameWords.length - 2).join(' ') 
         : nameWords.skip(1).join(' ');
-    final location = details?.address;
+    final location = details?.address.toUpperCase();
     final phoneNumber = details?.phone;
 
     final description = details?.about.description.trim().isNotEmpty == true
@@ -44,7 +44,7 @@ class HeroHeaderWidget extends StatelessWidget {
 
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -69,13 +69,13 @@ class HeroHeaderWidget extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 2),
           Row(
             children: [
               SizedBox(
-                width: MediaQuery.of(context).size.width * 0.5,
+                width: MediaQuery.of(context).size.width * 0.4,
                 child: Text(
-                  location ?? '',
+                   location ?? '',
                   softWrap: true,
                   style: GoogleFonts.inter(
                     color: accent,
@@ -85,53 +85,65 @@ class HeroHeaderWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 4),
               Expanded(child: Container(height: 1, color: Colors.white24)),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                     Text(
-                      firstNamePart,
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                        height: 1.15,
-                      ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    firstNamePart,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w600,
+                      height: 1.15,
                     ),
-                    Text(
-                      lastTwoWords,
-                      style: GoogleFonts.inter(
-                        color: accent,
-                        fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                        height: 1.15,
-                      ),
+                  ),
+                  Text(
+                    lastTwoWords,
+                    style: GoogleFonts.inter(
+                      color: accent,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w600,
+                      height: 1.15,
                     ),
-                    Text(
-                      (details?.about.description != null && details!.about.description.isNotEmpty)
-                          ? details!.about.description
-                          : '',
-                      style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.4),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    (details?.about.description != null &&
+                        details!.about.description.isNotEmpty)
+                        ? details!.about.description
+                        : '',
+                    style: GoogleFonts.inter(
+                      color: Colors.white70,
+                      fontSize: 15,
+                      height: 1.4,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              _LogoBadge(accent: accent, logoUrl: details?.logo),
-            ],
-          ),
-          const SizedBox(height: 16),
+            ),
+            const SizedBox(width: 12),
+            Transform.translate(
+              offset: const Offset(0, -10),
+              child: _LogoBadge(
+                accent: accent,
+                logoUrl: details?.logo,
+              ),
+            ),
+          ],
+        ),
+          const SizedBox(height: 8),
 
           if (detailsError != null && detailsError!.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
@@ -158,7 +170,7 @@ class HeroHeaderWidget extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -179,11 +191,11 @@ class HeroHeaderWidget extends StatelessWidget {
               //   label: 'Donations',
               //   onPressed: () => _showSheet(context, 'Donations'),
               // ),
-              if (details?.rulesRegulations != null)
-                _PillButton(
-                  label: 'Rules & Regulation',
-                  onPressed: () => _showSheet(context, 'Rules'),
-                ),
+              // if (details?.rulesRegulations != null)
+              //   _PillButton(
+              //     label: 'Rules & Regulation',
+              //     onPressed: () => _showSheet(context, 'Rules'),
+              //   ),
             ],
           ),
         ],

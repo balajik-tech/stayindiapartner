@@ -4,8 +4,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_it/get_it.dart';
 import 'package:stayindia_owner/core/utils/image_utils.dart';
-
+import 'package:stayindia_owner/core/services/app_config_service.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/complete_profile_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/get_current_owner_usecase.dart';
@@ -200,8 +202,13 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthAuthenticated(owner: result.owner, isNewUser: result.isNewUser));
       _syncDeviceToken();
-      // Ensure app config is fresh after authentication
+      // Ensure app config and profile are fresh after authentication
       AppConfigService.instance.load(force: true);
+      try {
+        if (GetIt.instance.isRegistered<ProfileCubit>()) {
+          GetIt.instance<ProfileCubit>().loadProfile();
+        }
+      } catch (_) {}
       AppLogger.info(
         'OTP verified. Owner: ${result.owner.id}, isNewUser: ${result.isNewUser}',
       );
@@ -250,6 +257,11 @@ class AuthCubit extends Cubit<AuthState> {
           emit(AuthAuthenticated(owner: owner, isNewUser: false));
           _syncDeviceToken();
           AppConfigService.instance.load(force: true);
+          try {
+            if (GetIt.instance.isRegistered<ProfileCubit>()) {
+              GetIt.instance<ProfileCubit>().loadProfile();
+            }
+          } catch (_) {}
           AppLogger.success(
             'Google Login: Existing owner authenticated: ${owner.id}',
           );
@@ -412,6 +424,11 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthAuthenticated(owner: owner, isNewUser: false));
       _syncDeviceToken();
       AppConfigService.instance.load(force: true);
+      try {
+        if (GetIt.instance.isRegistered<ProfileCubit>()) {
+          GetIt.instance<ProfileCubit>().loadProfile();
+        }
+      } catch (_) {}
       AppLogger.info('Staff logged in successfully. Owner/Staff: ${owner.id}');
     } catch (e) {
       AppLogger.error('staffLogin failed', e);
