@@ -27,6 +27,7 @@ import 'package:stayindia_owner/features/communities/presentation/pages/owners_l
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/association_portal_entity.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../widgets/dotted_circle_painter.dart';
 import 'community_home_page.dart';
@@ -70,7 +71,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
         final Map<String, dynamic> decoded = jsonDecode(jsonStr);
         setState(() {
           _unreadMessageCounts = decoded.map(
-                (key, value) => MapEntry(key, value as int),
+            (key, value) => MapEntry(key, value as int),
           );
         });
       }
@@ -136,7 +137,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     _loadReadPostIds();
     _loadUnreadMessageCounts();
     context.read<OwnerCommunityCubit>().loadCommunities();
-    context.read<SocialFeedCubit>().loadFeed(isOfficial: _activeFeedType == 'OFFICIAL');
+    context.read<SocialFeedCubit>().loadFeed(
+      isOfficial: _activeFeedType == 'OFFICIAL',
+    );
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
@@ -215,8 +218,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (!isOfficial)
-                      Icon(Icons.lock_outline_rounded,
-                          size: 14.sp, color: Colors.grey.shade600),
+                      Icon(
+                        Icons.lock_outline_rounded,
+                        size: 14.sp,
+                        color: Colors.grey.shade600,
+                      ),
                     if (!isOfficial) SizedBox(width: 4.w),
                     Text(
                       'Official feed',
@@ -229,9 +235,14 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     if (unreadOfficial > 0) ...[
                       SizedBox(width: 6.w),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
                         decoration: BoxDecoration(
-                          color: isOfficial ? Colors.white : const Color(0xFF2563EB),
+                          color: isOfficial
+                              ? Colors.white
+                              : const Color(0xFF2563EB),
                           borderRadius: BorderRadius.circular(10.r),
                         ),
                         child: Text(
@@ -272,15 +283,22 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
-                        color: !isOfficial ? Colors.white : Colors.grey.shade600,
+                        color: !isOfficial
+                            ? Colors.white
+                            : Colors.grey.shade600,
                       ),
                     ),
                     if (unreadForum > 0) ...[
                       SizedBox(width: 6.w),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
                         decoration: BoxDecoration(
-                          color: !isOfficial ? Colors.white : const Color(0xFFEA580C),
+                          color: !isOfficial
+                              ? Colors.white
+                              : const Color(0xFFEA580C),
                           borderRadius: BorderRadius.circular(10.r),
                         ),
                         child: Text(
@@ -312,9 +330,9 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
           onRefresh: () async {
             context.read<OwnerCommunityCubit>().loadCommunities();
             await context.read<SocialFeedCubit>().loadFeed(
-                  isRefresh: true,
-                  isOfficial: _activeFeedType == 'OFFICIAL',
-                );
+              isRefresh: true,
+              isOfficial: _activeFeedType == 'OFFICIAL',
+            );
           },
           color: AppColors.primaryBlue,
           child: BlocBuilder<SocialFeedCubit, SocialFeedState>(
@@ -409,9 +427,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const OwnersListPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const OwnersListPage()),
               );
             },
             child: Container(
@@ -460,8 +476,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               color: AppColors.greyText,
               fontSize: 15.sp,
             ),
-            prefixIcon: Icon(Icons.search_rounded,
-                color:  AppColors.greyText, size: 22.sp),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: AppColors.greyText,
+              size: 22.sp,
+            ),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(vertical: 14.h),
           ),
@@ -477,9 +496,7 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     _searchFocusNode.unfocus();
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const AssociationSearchPage(),
-      ),
+      MaterialPageRoute(builder: (_) => const AssociationSearchPage()),
     );
   }
 
@@ -493,125 +510,129 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               : <CommunityDetailsEntity>[];
           final associations = state is OwnerCommunityLoaded
               ? state.associations.where((a) {
-            final query = _searchController.text.toLowerCase();
-            return a.name.toLowerCase().contains(query);
-          }).toList()
+                  final query = _searchController.text.toLowerCase();
+                  return a.name.toLowerCase().contains(query);
+                }).toList()
               : <AssociationPortalEntity>[];
 
           return SizedBox(
             height: 90.h,
-            child:ScrollConfiguration(
-                behavior: const ScrollBehavior().copyWith(
-                  overscroll: false,
-                ),child:  Center(
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      showRegisterAssociationBottomSheet(context);
-                    },
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 56.w,
-                          height: 56.w,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                          ),
-                          child: CustomPaint(
-                            painter: DashedLineCirclePainter(
-                              color: AppColors.greyText,
-                              strokeWidth: 1.5,
-                              dashLength: 6,
-                              gapLength: 8,
+            child: ScrollConfiguration(
+              behavior: const ScrollBehavior().copyWith(overscroll: false),
+              child: Center(
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        showRegisterAssociationBottomSheet(context);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 56.w,
+                            height: 56.w,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
                             ),
-                            child: Center(
-                              child: Icon(
-                                Icons.add,
-                                color: const Color(0xFFF48126),
-                                size: 28.sp,
+                            child: CustomPaint(
+                              painter: DashedLineCirclePainter(
+                                color: AppColors.greyText,
+                                strokeWidth: 1.5,
+                                dashLength: 6,
+                                gapLength: 8,
                               ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'Create new',
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.greyText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 20.w),
-                  ...associations.map((a) {
-                    return Padding(
-                      padding: EdgeInsets.only(right: 20.w),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  AssociateHomePage(associationId: a.id),
-                            ),
-                          );
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 56.w,
-                              height: 56.w,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.grey.shade100,
-                                border: Border.all(
-                                  color: AppColors.greyText,
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: ClipOval(
-                                child: (a.logo.isNotEmpty &&
-                                    ApiConstants.getImageUrl(a.logo) != null)
-                                    ? CachedNetworkImage(
-                                  imageUrl: ApiConstants.getImageUrl(a.logo)!,
-                                  fit: BoxFit.cover,
-                                )
-                                    : Icon(
-                                  Icons.business_rounded,
-                                  color: Colors.grey.shade400,
+                              child: Center(
+                                child: Icon(
+                                  Icons.add,
+                                  color: const Color(0xFFF48126),
                                   size: 28.sp,
                                 ),
                               ),
                             ),
-                            SizedBox(height: 8.h),
-                            SizedBox(
-                              width: 70.w,
-                              child: Text(
-                                a.name,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color:  AppColors.grayColor3,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                              ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            'Create new',
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.greyText,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    );
-                  }),
-                ],
-              ),)
+                    ),
+                    SizedBox(width: 20.w),
+                    ...associations.map((a) {
+                      return Padding(
+                        padding: EdgeInsets.only(right: 20.w),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    AssociateHomePage(associationId: a.id),
+                              ),
+                            );
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 56.w,
+                                height: 56.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey.shade100,
+                                  border: Border.all(
+                                    color: AppColors.greyText,
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: ClipOval(
+                                  child:
+                                      (a.logo.isNotEmpty &&
+                                          ApiConstants.getImageUrl(a.logo) !=
+                                              null)
+                                      ? CachedNetworkImage(
+                                          imageUrl: ApiConstants.getImageUrl(
+                                            a.logo,
+                                          )!,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Icon(
+                                          Icons.business_rounded,
+                                          color: Colors.grey.shade400,
+                                          size: 28.sp,
+                                        ),
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              SizedBox(
+                                width: 70.w,
+                                child: Text(
+                                  a.name,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.grayColor3,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
             ),
           );
         },
@@ -688,18 +709,18 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   return CircleAvatar(
                     radius: 22.r,
                     backgroundImage:
-                    (owner?.avatar != null && owner!.avatar!.isNotEmpty)
+                        (owner?.avatar != null && owner!.avatar!.isNotEmpty)
                         ? CachedNetworkImageProvider(
-                      ApiConstants.getImageUrl(owner.avatar)!,
-                    )
+                            ApiConstants.getImageUrl(owner.avatar)!,
+                          )
                         : null,
                     backgroundColor: Colors.grey.shade100,
                     child: (owner?.avatar == null || owner!.avatar!.isEmpty)
                         ? Icon(
-                      Icons.person,
-                      color: Colors.grey.shade400,
-                      size: 28.sp,
-                    )
+                            Icons.person,
+                            color: Colors.grey.shade400,
+                            size: 28.sp,
+                          )
                         : null,
                   );
                 },
@@ -887,10 +908,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                     onPressed: _selectedImagePath != null
                         ? null
                         : () {
-                      setState(() {
-                        _isPoll = true;
-                      });
-                    },
+                            setState(() {
+                              _isPoll = true;
+                            });
+                          },
                     icon: Icon(
                       Icons.poll_outlined,
                       color: _selectedImagePath != null
@@ -918,28 +939,28 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                           state is SocialFeedLoaded && state.isCreatingPost;
                       final canPost =
                           _postController.text.trim().isNotEmpty &&
-                              (!_isPoll || validPollOptions.length >= 2);
+                          (!_isPoll || validPollOptions.length >= 2);
 
                       return ElevatedButton(
                         onPressed: (!canPost || isCreating)
                             ? null
                             : () {
-                          context.read<SocialFeedCubit>().createPost(
-                            content: _postController.text.trim(),
-                            imagePath: _selectedImagePath,
-                            type: _isPoll ? 'POLL' : 'POST',
-                            pollOptions: _isPoll
-                                ? validPollOptions
-                                : null,
-                          );
-                          _postController.clear();
-                          _selectedImagePath = null;
-                          _isPoll = false;
-                          for (var c in _pollOptionControllers) {
-                            c.clear();
-                          }
-                          setState(() {});
-                        },
+                                context.read<SocialFeedCubit>().createPost(
+                                  content: _postController.text.trim(),
+                                  imagePath: _selectedImagePath,
+                                  type: _isPoll ? 'POLL' : 'POST',
+                                  pollOptions: _isPoll
+                                      ? validPollOptions
+                                      : null,
+                                );
+                                _postController.clear();
+                                _selectedImagePath = null;
+                                _isPoll = false;
+                                for (var c in _pollOptionControllers) {
+                                  c.clear();
+                                }
+                                setState(() {});
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryBlue,
                           disabledBackgroundColor: AppColors.primaryBlue
@@ -955,21 +976,21 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                         ),
                         child: isCreating
                             ? SizedBox(
-                          width: 16.w,
-                          height: 16.w,
-                          child: const CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
+                                width: 16.w,
+                                height: 16.w,
+                                child: const CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
                             : Text(
-                          'post_btn'.tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14.sp,
-                          ),
-                        ),
+                                'post_btn'.tr(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
                       );
                     },
                   ),
@@ -1040,7 +1061,10 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
             SliverToBoxAdapter(
               child: Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 60.h, horizontal: 32.w),
+                  padding: EdgeInsets.symmetric(
+                    vertical: 60.h,
+                    horizontal: 32.w,
+                  ),
                   child: Column(
                     children: [
                       Icon(
@@ -1388,14 +1412,18 @@ class _PostCardState extends State<_PostCard> {
 
     String displayRole;
     if (isOfficialPost) {
-      final role = (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
+      final role =
+          (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
           ? widget.post.userRole!
           : 'president_admin_role'.tr();
-      
+
       final city = widget.post.userCity;
       final state = widget.post.userState;
-      
-      if (city != null && city.isNotEmpty && state != null && state.isNotEmpty) {
+
+      if (city != null &&
+          city.isNotEmpty &&
+          state != null &&
+          state.isNotEmpty) {
         //displayRole = ''$role; · $city, $state';
       } else if (city != null && city.isNotEmpty) {
         //displayRole =  '$role · $city';
@@ -1427,10 +1455,7 @@ class _PostCardState extends State<_PostCard> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(
-              color: Colors.grey.shade300,
-              width: 1,
-            ),
+            border: Border.all(color: Colors.grey.shade300, width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -1447,24 +1472,26 @@ class _PostCardState extends State<_PostCard> {
                   CircleAvatar(
                     radius: 18.r,
                     backgroundColor: Colors.grey.shade100,
-                    backgroundImage: (widget.post.userAvatar != null &&
-                        widget.post.userAvatar!.isNotEmpty)
+                    backgroundImage:
+                        (widget.post.userAvatar != null &&
+                            widget.post.userAvatar!.isNotEmpty)
                         ? CachedNetworkImageProvider(
-                      ApiConstants.getImageUrl(widget.post.userAvatar!)!,
-                    )
+                            ApiConstants.getImageUrl(widget.post.userAvatar!)!,
+                          )
                         : null,
-                    child: (widget.post.userAvatar == null ||
-                        widget.post.userAvatar!.isEmpty)
+                    child:
+                        (widget.post.userAvatar == null ||
+                            widget.post.userAvatar!.isEmpty)
                         ? Text(
-                      widget.post.userName.isNotEmpty
-                          ? widget.post.userName[0].toUpperCase()
-                          : 'U',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.sp,
-                      ),
-                    )
+                            widget.post.userName.isNotEmpty
+                                ? widget.post.userName[0].toUpperCase()
+                                : 'U',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.sp,
+                            ),
+                          )
                         : null,
                   ),
                   SizedBox(width: 12.w),
@@ -1485,16 +1512,23 @@ class _PostCardState extends State<_PostCard> {
                               ),
                             ),
                             const Spacer(),
-                            if (widget.post.userRole?.toLowerCase() == 'member' || isOfficialPost)
+                            if (widget.post.userRole?.toLowerCase() ==
+                                    'member' ||
+                                isOfficialPost)
                               Container(
                                 padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w, vertical: 4.h),
+                                  horizontal: 10.w,
+                                  vertical: 4.h,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFEFF6FF),
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
                                 child: Text(
-                                  StringUtils.capitalize(widget.post.userRole!.toLowerCase()) ?? "",
+                                  StringUtils.capitalize(
+                                        widget.post.userRole!.toLowerCase(),
+                                      ) ??
+                                      "",
                                   style: GoogleFonts.inter(
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w700,
@@ -1518,13 +1552,23 @@ class _PostCardState extends State<_PostCard> {
                 ],
               ),
               SizedBox(height: 12.h),
-              Text(
-                widget.post.content,
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: AppColors.grayColor3,
-                  height: 1.5,
-                  fontWeight: FontWeight.w500,
+              // Text(
+              //   widget.post.content,
+              //   style: GoogleFonts.inter(
+              //     fontSize: 12.sp,
+              //     color: AppColors.grayColor3,
+              //     height: 1.5,
+              //     fontWeight: FontWeight.w500,
+              //   ),
+              // ),
+              MarkdownBody(
+                data: widget.post.content,
+                styleSheet: MarkdownStyleSheet(
+                  p: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    height: 1.5,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               if (widget.post.imageUrl != null &&
@@ -1534,7 +1578,7 @@ class _PostCardState extends State<_PostCard> {
                   borderRadius: BorderRadius.circular(12.r),
                   child: CachedNetworkImage(
                     imageUrl:
-                    ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
+                        ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
@@ -1547,8 +1591,8 @@ class _PostCardState extends State<_PostCard> {
                   if (opt is Map) {
                     final text = opt['text']?.toString() ?? '';
                     final count =
-                    ((opt['votesCount'] ?? opt['votes'] ?? 0) as num)
-                        .toInt();
+                        ((opt['votesCount'] ?? opt['votes'] ?? 0) as num)
+                            .toInt();
                     final pct = totalVotes > 0 ? (count / totalVotes) : 0.0;
                     final isMyVote = widget.post.userVote == i;
 
@@ -1556,11 +1600,11 @@ class _PostCardState extends State<_PostCard> {
                       onTap: widget.post.userVote != null
                           ? null
                           : () {
-                        context.read<SocialFeedCubit>().votePoll(
-                          widget.post.id,
-                          i,
-                        );
-                      },
+                              context.read<SocialFeedCubit>().votePoll(
+                                widget.post.id,
+                                i,
+                              );
+                            },
                       child: Container(
                         margin: EdgeInsets.only(bottom: 8.h),
                         height: 40.h,
@@ -1584,8 +1628,9 @@ class _PostCardState extends State<_PostCard> {
                                   width: constraints.maxWidth * pct,
                                   decoration: BoxDecoration(
                                     color: isMyVote
-                                        ? const Color(0xFF1650A2)
-                                        .withValues(alpha: 0.1)
+                                        ? const Color(
+                                            0xFF1650A2,
+                                          ).withValues(alpha: 0.1)
                                         : Colors.grey.shade100,
                                     borderRadius: BorderRadius.circular(10.r),
                                   ),
@@ -1779,7 +1824,7 @@ class _PostCardState extends State<_PostCard> {
                   borderRadius: BorderRadius.circular(16.r),
                   child: CachedNetworkImage(
                     imageUrl:
-                    ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
+                        ApiConstants.getImageUrl(widget.post.imageUrl!) ?? '',
                     width: double.infinity,
                     height: 180.h,
                     fit: BoxFit.cover,

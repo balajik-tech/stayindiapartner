@@ -70,6 +70,7 @@ dependencies:
   flutter_tts: ^4.2.3
   diacritic: ^0.1.6
   open_filex: ^4.7.0
+  flutter_markdown: ^0.7.7+1
 
 dev_dependencies:
   flutter_test:
