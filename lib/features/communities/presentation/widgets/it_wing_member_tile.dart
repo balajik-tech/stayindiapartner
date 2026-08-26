@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/it_wing_member_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
@@ -50,17 +51,37 @@ class ItWingMemberTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: badgeBg,
-                  border: Border.all(color: badgeBorder.withValues(alpha: 0.6)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${member.phone}',
-                  style: GoogleFonts.inter(fontSize: 11.5, color: badgeText,),
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  InkWell(
+                    onTap: () => _makePhoneCall(member.phone ?? ''),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.phone_rounded,
+                          size: 20,
+                          color: accent,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  InkWell(
+                    onTap: () => _openWhatsApp(member.phone ?? ''),
+                    child: Image.asset(
+                      'assets/images/whatsapp.png',
+                      width: 18,
+                      height: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
               ),
             ],
           ),
@@ -68,5 +89,31 @@ class ItWingMemberTile extends StatelessWidget {
         if (showDivider) Divider(height: 1, indent: 18, endIndent: 18, color: Colors.grey.shade200),
       ],
     );
+  }
+
+  Future<void> _makePhoneCall(String phone) async {
+    final Uri uri = Uri(
+      scheme: 'tel',
+      path: phone,
+    );
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Future<void> _openWhatsApp(String phone) async {
+    final cleanNumber = phone.replaceAll(RegExp(r'[^0-9]'), '');
+
+    final Uri uri = Uri.parse(
+      'https://wa.me/$cleanNumber',
+    );
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+    }
   }
 }

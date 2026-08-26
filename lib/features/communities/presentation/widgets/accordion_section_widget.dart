@@ -16,6 +16,7 @@ class AccordionSectionWidget extends StatelessWidget {
   final VoidCallback onToggle;
   final List<Widget> children;
   final Widget? footer;
+  final Icon? groupIcon;
 
   const AccordionSectionWidget({
     super.key,
@@ -26,6 +27,7 @@ class AccordionSectionWidget extends StatelessWidget {
     required this.isExpanded,
     required this.onToggle,
     required this.children,
+    required this.groupIcon,
     this.footer,
   });
 
@@ -59,30 +61,32 @@ class AccordionSectionWidget extends StatelessWidget {
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 18,
+                    radius: 24,
                     backgroundColor: accent.withValues(alpha: 0.15),
-                    child: Icon(Icons.home_outlined, color: accent, size: 18),
+                    child: groupIcon,
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           title,
-                          style:  GoogleFonts.inter(
+                          style: GoogleFonts.inter(
                             color: primary,
                             fontSize: 19,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            subtitle,
-                            overflow: TextOverflow.ellipsis,
-                            style:  GoogleFonts.inter(color: textSecondary, fontSize: 13),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: GoogleFonts.inter(
+                            color: textSecondary,
+                            fontSize: 13,
                           ),
                         ),
                       ],

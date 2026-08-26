@@ -17,12 +17,15 @@ import 'executive_member_detail_page.dart';
 
 class AssociateHomePage extends StatelessWidget {
   final String associationId;
+
   const AssociateHomePage({super.key, required this.associationId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<AssociateHomeDataCubit>()..loadCommunityData(associationId),
+      create: (_) =>
+      sl<AssociateHomeDataCubit>()
+        ..loadCommunityData(associationId),
       child: _CommunityHomeView(portalId: associationId),
     );
   }
@@ -30,14 +33,17 @@ class AssociateHomePage extends StatelessWidget {
 
 class _CommunityHomeView extends StatelessWidget {
   final String portalId;
+
   const _CommunityHomeView({required this.portalId});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AssociateHomeDataCubit, AssociateHomeDataState>(
       builder: (context, state) {
-        if (state is AssociateHomeDataLoading || state is AssociateHomeDataInitial) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        if (state is AssociateHomeDataLoading ||
+            state is AssociateHomeDataInitial) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         if (state is AssociateHomeDataError) {
           return Scaffold(
@@ -70,103 +76,133 @@ class _CommunityHomeView extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   // Executive Committee
-                  AccordionSectionWidget(
-                    theme: theme,
-                    title: 'Executive Committee',
-                    subtitle: 'State office bearers',
-                    count: loaded.executiveCommittee.length,
-                    isExpanded: loaded.expandedSections.contains(AccordionSection.executiveCommittee),
-                    onToggle: () => cubit.toggleSection(AccordionSection.executiveCommittee),
-                    children: [
-                      for (var i = 0; i < loaded.executiveCommittee.length; i++)
-                        CommitteeMemberTile(
-                          member: loaded.executiveCommittee[i],
-                          theme: theme,
-                          showDivider: i != loaded.executiveCommittee.length - 1,
-                        ),
-                    ],
-                  ),
+
+                  if(loaded.executiveCommittee.isNotEmpty)...[
+                    AccordionSectionWidget(
+                      theme: theme,
+                      title: 'Executive Committee',
+                      subtitle: 'Governing and Working Body',
+                      groupIcon: Icon(Icons.groups_outlined, color: theme
+                          .primaryColor.toColor(), size: 24),
+                      count: loaded.executiveCommittee.length,
+                      isExpanded: loaded.expandedSections.contains(
+                          AccordionSection.executiveCommittee),
+                      onToggle: () =>
+                          cubit.toggleSection(
+                          AccordionSection.executiveCommittee),
+                      children: [
+                        for (var i = 0; i < loaded.executiveCommittee
+                            .length; i++)
+                          CommitteeMemberTile(
+                            member: loaded.executiveCommittee[i],
+                            theme: theme,
+                            showDivider: i !=
+                                loaded.executiveCommittee.length - 1,
+                          ),
+                      ],
+                    ),
+                  ],
 
 
                   // Executive Members
-                  AccordionSectionWidget(
-                    theme: theme,
-                    title: 'Executive Members',
-                    subtitle: 'Photo, name & zone',
-                    count: loaded.executiveMembers.length,
-                    isExpanded: loaded.expandedSections.contains(AccordionSection.executiveMembers),
-                    onToggle: () => cubit.toggleSection(AccordionSection.executiveMembers),
-                    // footer: Padding(
-                    //   padding: const EdgeInsets.symmetric(vertical: 14),
-                    //   child: Text(
-                    //     'Tap a member to open their zone & core members.',
-                    //     textAlign: TextAlign.center,
-                    //     style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                    //   ),
-                    // ),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
-                        child: Text(
-                          'Tap a member to open their zone & core members.',
-                          style: GoogleFonts.inter(fontSize: 12.5, color: Colors.grey),
+
+                  if(loaded.executiveMembers.isNotEmpty)...[
+                    AccordionSectionWidget(
+                      theme: theme,
+                      title: 'Executive Members',
+                      subtitle: 'Members of Executive Committee',
+                      groupIcon: Icon(Icons.person_outlined, color: theme
+                          .primaryColor.toColor(), size: 24),
+                      count: loaded.executiveMembers.length,
+                      isExpanded: loaded.expandedSections.contains(
+                          AccordionSection.executiveMembers),
+                      onToggle: () =>
+                          cubit.toggleSection(
+                          AccordionSection.executiveMembers),
+                      // footer: Padding(
+                      //   padding: const EdgeInsets.symmetric(vertical: 14),
+                      //   child: Text(
+                      //     'Tap a member to open their zone & core members.',
+                      //     textAlign: TextAlign.center,
+                      //     style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                      //   ),
+                      // ),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
+                          child: Text(
+                            'Tap a member to open their zone & core members.',
+                            style: GoogleFonts.inter(
+                                fontSize: 12.5, color: Colors.grey),
+                          ),
                         ),
-                      ),
-                      for (var i = 0; i < loaded.executiveMembers.length; i++)
-                        ExecutiveMemberTile(
-                          member: loaded.executiveMembers[i],
-                          theme: theme,
-                          showDivider: i != loaded.executiveMembers.length - 1,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ExecutiveMemberDetailPage(
-                                  member: loaded.executiveMembers[i],
-                                  theme: theme,
+                        for (var i = 0; i < loaded.executiveMembers.length; i++)
+                          ExecutiveMemberTile(
+                            member: loaded.executiveMembers[i],
+                            theme: theme,
+                            showDivider: i !=
+                                loaded.executiveMembers.length - 1,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      ExecutiveMemberDetailPage(
+                                        member: loaded.executiveMembers[i],
+                                        theme: theme,
+                                      ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                    ],
-                  ),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
+                  ],
+
 
                   // IT Wing
-                  AccordionSectionWidget(
-                    theme: theme,
-                    title: 'IT Wing',
-                    subtitle: 'Technology & digital team',
-                    count: loaded.itWingMembers.length,
-                    isExpanded: loaded.expandedSections.contains(AccordionSection.itWing),
-                    onToggle: () => cubit.toggleSection(AccordionSection.itWing),
-                    children: [
-                      for (var i = 0; i < loaded.itWingMembers.length; i++)
-                        ItWingMemberTile(
-                          member: loaded.itWingMembers[i],
-                          theme: theme,
-                          showDivider: i != loaded.itWingMembers.length - 1,
-                        ),
-                    ],
-                  ),
+                  if(loaded.itWingMembers.isNotEmpty)...[
 
-                  // IT Wing
-                  AccordionSectionWidget(
-                    theme: theme,
-                    title: 'Port Members',
-                    subtitle: '',
-                    count: loaded.portMembers.length,
-                    isExpanded: loaded.expandedSections.contains(AccordionSection.portMembers),
-                    onToggle: () => cubit.toggleSection(AccordionSection.portMembers),
-                    children: [
-                      for (var i = 0; i < loaded.portMembers.length; i++)
-                        PortMemberTile(
-                          member: loaded.portMembers[i],
-                          theme: theme,
-                          showDivider: i != loaded.portMembers.length - 1,
-                        ),
-                    ],
-                  ),
+                    AccordionSectionWidget(
+                      theme: theme,
+                      title: 'IT Wing',
+                      subtitle: 'Technology & digital team',
+                      count: loaded.itWingMembers.length,
+                      groupIcon: Icon(Icons.computer_outlined, color: theme
+                          .primaryColor.toColor(), size: 24),
+                      isExpanded: loaded.expandedSections.contains(
+                          AccordionSection.itWing),
+                      onToggle: () =>
+                          cubit.toggleSection(AccordionSection.itWing),
+                      children: [
+                        for (var i = 0; i < loaded.itWingMembers.length; i++)
+                          ItWingMemberTile(
+                            member: loaded.itWingMembers[i],
+                            theme: theme,
+                            showDivider: i != loaded.itWingMembers.length - 1,
+                          ),
+                      ],
+                    ),
+                  ],
+
+
+                  // // IT Wing
+                  // AccordionSectionWidget(
+                  //   theme: theme,
+                  //   title: 'Port Members',
+                  //   subtitle: '',
+                  //   count: loaded.portMembers.length,
+                  //   isExpanded: loaded.expandedSections.contains(AccordionSection.portMembers),
+                  //   onToggle: () => cubit.toggleSection(AccordionSection.portMembers),
+                  //   children: [
+                  //     for (var i = 0; i < loaded.portMembers.length; i++)
+                  //       PortMemberTile(
+                  //         member: loaded.portMembers[i],
+                  //         theme: theme,
+                  //         showDivider: i != loaded.portMembers.length - 1,
+                  //       ),
+                  //   ],
+                  // ),
 
 
                   const SizedBox(height: 16),
@@ -175,7 +211,8 @@ class _CommunityHomeView extends StatelessWidget {
                     child: Text(
                       '——  Office Bearers & Members Directory  ——',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                      style: GoogleFonts.inter(
+                          fontSize: 12, color: Colors.grey),
                     ),
                   ),
                   const SizedBox(height: 24),
