@@ -712,7 +712,7 @@ class _AppliedMembershipView extends StatelessWidget {
     ];
     List<String> propertyLocations = const [
     ];
-    int count = 2;
+    int count = 0;
 
     if (membership != null) {
       appRef = membership!.applicationReference ?? appRef;
@@ -1990,14 +1990,20 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
                           propertyIds,
                         );
                       }
-                    : null,
+                    : () {
+                  final List<String> propertyIds = [];
+                  context.read<AssociationMembershipCubit>().submit(
+                    widget.portalId ?? '',
+                    propertyIds,
+                  );
+                },
                 icon: Icon(
                   Icons.check,
                   color: primary,
                   size: 14.sp,
                 ),
                 label: Text(
-                  selectedCount > 0
+                  selectedCount >= 0
                       ? 'Submit application · $selectedCount ${selectedCount == 1 ? 'property' : 'properties'}'
                       : 'Submit application',
                   style: GoogleFonts.inter(
