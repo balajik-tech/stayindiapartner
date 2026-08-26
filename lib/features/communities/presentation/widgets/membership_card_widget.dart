@@ -746,12 +746,14 @@ class _AppliedMembershipView extends StatelessWidget {
           theme: theme,
         ),
         SizedBox(height: 16.h),
-        _PropertySummaryBox(
-          count: count,
-          properties: propertyNames,
-          locations: propertyLocations,
-          theme: theme,
-        ),
+        if(count != 0)...[
+          _PropertySummaryBox(
+            count: count,
+            properties: propertyNames,
+            locations: propertyLocations,
+            theme: theme,
+          )
+        ],
         SizedBox(height: 20.h),
         Container(
           padding: EdgeInsets.only(left: 12.w),
