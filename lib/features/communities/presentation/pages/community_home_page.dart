@@ -5,6 +5,8 @@ import '../../../../injection_container.dart';
 
 import '../cubit/associate_home_cubit.dart';
 import '../cubit/associate_home_state.dart';
+import '../cubit/association_membership_cubit.dart';
+// import '../cubit/association_membership_state.dart';
 import '../widgets/hero_header_widget.dart';
 import '../widgets/membership_card_widget.dart';
 import '../widgets/accordion_section_widget.dart';
@@ -75,115 +77,113 @@ class _CommunityHomeView extends StatelessWidget {
                   MembershipCardWidget(theme: theme, portalId: portalId),
                   const SizedBox(height: 8),
 
-                  // Executive Committee
+                  BlocBuilder<AssociationMembershipCubit, AssociationMembershipState>(
+                    builder: (context, membershipState) {
+                      final timeline = (membershipState is AssociationMembershipLoaded)
+                          ? membershipState.membership?.timeline
+                          : null;
 
-                  if(loaded.executiveCommittee.isNotEmpty)...[
-                    AccordionSectionWidget(
-                      theme: theme,
-                      title: 'Executive Committee',
-                      subtitle: 'Governing and Working Body',
-                      groupIcon: Icon(Icons.groups_outlined, color: theme
-                          .primaryColor.toColor(), size: 24),
-                      count: loaded.executiveCommittee.length,
-                      isExpanded: loaded.expandedSections.contains(
-                          AccordionSection.executiveCommittee),
-                      onToggle: () =>
-                          cubit.toggleSection(
-                          AccordionSection.executiveCommittee),
-                      children: [
-                        for (var i = 0; i < loaded.executiveCommittee
-                            .length; i++)
-                          CommitteeMemberTile(
-                            member: loaded.executiveCommittee[i],
-                            theme: theme,
-                            showDivider: i !=
-                                loaded.executiveCommittee.length - 1,
-                          ),
-                      ],
-                    ),
-                  ],
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Executive Committee
+                          if (loaded.executiveCommittee.isNotEmpty) ...[
+                            AccordionSectionWidget(
+                              theme: theme,
+                              title: 'Executive Committee',
+                              subtitle: 'Governing and Working Body',
+                              groupIcon: Icon(Icons.groups_outlined,
+                                  color: theme.primaryColor.toColor(), size: 24),
+                              count: loaded.executiveCommittee.length,
+                              isExpanded: loaded.expandedSections.contains(
+                                  AccordionSection.executiveCommittee),
+                              onToggle: () => cubit.toggleSection(
+                                  AccordionSection.executiveCommittee),
+                              timeline: timeline,
+                              children: [
+                                for (var i = 0; i < loaded.executiveCommittee.length; i++)
+                                  CommitteeMemberTile(
+                                    member: loaded.executiveCommittee[i],
+                                    theme: theme,
+                                    showDivider: i != loaded.executiveCommittee.length - 1,
+                                      timeline:timeline
+                                  ),
+                              ],
+                            ),
+                          ],
 
-
-                  // Executive Members
-
-                  if(loaded.executiveMembers.isNotEmpty)...[
-                    AccordionSectionWidget(
-                      theme: theme,
-                      title: 'Executive Members',
-                      subtitle: 'Members of Executive Committee',
-                      groupIcon: Icon(Icons.person_outlined, color: theme
-                          .primaryColor.toColor(), size: 24),
-                      count: loaded.executiveMembers.length,
-                      isExpanded: loaded.expandedSections.contains(
-                          AccordionSection.executiveMembers),
-                      onToggle: () =>
-                          cubit.toggleSection(
-                          AccordionSection.executiveMembers),
-                      // footer: Padding(
-                      //   padding: const EdgeInsets.symmetric(vertical: 14),
-                      //   child: Text(
-                      //     'Tap a member to open their zone & core members.',
-                      //     textAlign: TextAlign.center,
-                      //     style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                      //   ),
-                      // ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
-                          child: Text(
-                            'Tap a member to open their zone & core members.',
-                            style: GoogleFonts.inter(
-                                fontSize: 12.5, color: Colors.grey),
-                          ),
-                        ),
-                        for (var i = 0; i < loaded.executiveMembers.length; i++)
-                          ExecutiveMemberTile(
-                            member: loaded.executiveMembers[i],
-                            theme: theme,
-                            showDivider: i !=
-                                loaded.executiveMembers.length - 1,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      ExecutiveMemberDetailPage(
-                                        member: loaded.executiveMembers[i],
-                                        theme: theme,
-                                      ),
+                          // Executive Members
+                          if (loaded.executiveMembers.isNotEmpty) ...[
+                            AccordionSectionWidget(
+                              theme: theme,
+                              title: 'Executive Members',
+                              subtitle: 'Members of Executive Committee',
+                              groupIcon: Icon(Icons.person_outlined,
+                                  color: theme.primaryColor.toColor(), size: 24),
+                              count: loaded.executiveMembers.length,
+                              isExpanded: loaded.expandedSections.contains(
+                                  AccordionSection.executiveMembers),
+                              onToggle: () => cubit.toggleSection(
+                                  AccordionSection.executiveMembers),
+                              timeline: timeline,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
+                                  child: Text(
+                                    'Tap a member to open their zone & core members.',
+                                    style: GoogleFonts.inter(
+                                        fontSize: 12.5, color: Colors.grey),
+                                  ),
                                 ),
-                              );
-                            },
-                          ),
-                      ],
-                    ),
-                  ],
+                                for (var i = 0; i < loaded.executiveMembers.length; i++)
+                                  ExecutiveMemberTile(
+                                    member: loaded.executiveMembers[i],
+                                    theme: theme,
+                                    showDivider: i != loaded.executiveMembers.length - 1,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ExecutiveMemberDetailPage(
+                                            member: loaded.executiveMembers[i],
+                                            theme: theme,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ],
 
-
-                  // IT Wing
-                  if(loaded.itWingMembers.isNotEmpty)...[
-
-                    AccordionSectionWidget(
-                      theme: theme,
-                      title: 'IT Wing',
-                      subtitle: 'Technology & digital team',
-                      count: loaded.itWingMembers.length,
-                      groupIcon: Icon(Icons.computer_outlined, color: theme
-                          .primaryColor.toColor(), size: 24),
-                      isExpanded: loaded.expandedSections.contains(
-                          AccordionSection.itWing),
-                      onToggle: () =>
-                          cubit.toggleSection(AccordionSection.itWing),
-                      children: [
-                        for (var i = 0; i < loaded.itWingMembers.length; i++)
-                          ItWingMemberTile(
-                            member: loaded.itWingMembers[i],
-                            theme: theme,
-                            showDivider: i != loaded.itWingMembers.length - 1,
-                          ),
-                      ],
-                    ),
-                  ],
+                          // IT Wing
+                          if (loaded.itWingMembers.isNotEmpty) ...[
+                            AccordionSectionWidget(
+                              theme: theme,
+                              title: 'IT Wing',
+                              subtitle: 'Technology & digital team',
+                              count: loaded.itWingMembers.length,
+                              groupIcon: Icon(Icons.computer_outlined,
+                                  color: theme.primaryColor.toColor(), size: 24),
+                              isExpanded: loaded.expandedSections.contains(
+                                  AccordionSection.itWing),
+                              onToggle: () =>
+                                  cubit.toggleSection(AccordionSection.itWing),
+                              timeline: timeline,
+                              children: [
+                                for (var i = 0; i < loaded.itWingMembers.length; i++)
+                                  ItWingMemberTile(
+                                    member: loaded.itWingMembers[i],
+                                    theme: theme,
+                                    showDivider: i != loaded.itWingMembers.length - 1,
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
 
 
                   // // IT Wing

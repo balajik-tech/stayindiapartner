@@ -10,12 +10,14 @@ class ItWingMemberTile extends StatelessWidget {
   final ItWingMemberEntity member;
   final CommunityThemeEntity theme;
   final bool showDivider;
+  final Map<String, dynamic>? timeline;
 
   const ItWingMemberTile({
     super.key,
     required this.member,
     required this.theme,
     this.showDivider = true,
+    this.timeline,
   });
 
   @override
@@ -26,6 +28,17 @@ class ItWingMemberTile extends StatelessWidget {
     final badgeText = theme.badgeText.toColor();
     final accent = theme.accentColor.toColor();
     final textPrimary = theme.textPrimary.toColor();
+
+    bool? statusText =false;
+    if (timeline != null) {
+      if (timeline!['idIssued'] == true) {
+        statusText = true;
+      } else if (timeline!['paid'] == true) {
+        statusText = true;
+      } else if (timeline!['approved'] == true) {
+        statusText = true;
+      }
+    }
 
     return Column(
       children: [
@@ -51,38 +64,40 @@ class ItWingMemberTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: () => _makePhoneCall(member.phone ?? ''),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.phone_rounded,
-                          size: 20,
-                          color: accent,
+              if(statusText == true)...[
+                Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () => _makePhoneCall(member.phone ?? ''),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.phone_rounded,
+                                    size: 20,
+                                    color: accent,
+                                  ),
+                                  const SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(width: 16),
+
+                            InkWell(
+                              onTap: () => _openWhatsApp(member.phone ?? ''),
+                              child: Image.asset(
+                                'assets/images/whatsapp.png',
+                                width: 18,
+                                height: 18,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
                         ),
-                        const SizedBox(width: 4),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(width: 16),
-
-                  InkWell(
-                    onTap: () => _openWhatsApp(member.phone ?? ''),
-                    child: Image.asset(
-                      'assets/images/whatsapp.png',
-                      width: 18,
-                      height: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-              ),
+              ]
             ],
           ),
         ),

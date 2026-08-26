@@ -17,6 +17,7 @@ class AccordionSectionWidget extends StatelessWidget {
   final List<Widget> children;
   final Widget? footer;
   final Icon? groupIcon;
+  final Map<String, dynamic>? timeline;
 
   const AccordionSectionWidget({
     super.key,
@@ -29,6 +30,7 @@ class AccordionSectionWidget extends StatelessWidget {
     required this.children,
     required this.groupIcon,
     this.footer,
+    this.timeline,
   });
 
   @override
@@ -37,6 +39,19 @@ class AccordionSectionWidget extends StatelessWidget {
     final primary = theme.primaryColor.toColor();
     final textSecondary = theme.textSecondary.toColor();
     final cardColor = theme.cardColor.toColor();
+
+    String? statusText;
+    if (timeline != null) {
+      if (timeline!['idIssued'] == true) {
+        statusText = 'ID ISSUED';
+      } else if (timeline!['paid'] == true) {
+        statusText = 'PAID';
+      } else if (timeline!['approved'] == true) {
+        statusText = 'APPROVED';
+      } else if (timeline!['applied'] == true) {
+        statusText = 'APPLIED';
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),

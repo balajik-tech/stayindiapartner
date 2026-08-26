@@ -11,6 +11,7 @@ class ExecutiveMemberTile extends StatelessWidget {
   final CommunityThemeEntity theme;
   final bool showDivider;
   final VoidCallback? onTap;
+  final Map<String, dynamic>? timeline;
 
   const ExecutiveMemberTile({
     super.key,
@@ -18,7 +19,10 @@ class ExecutiveMemberTile extends StatelessWidget {
     required this.theme,
     this.showDivider = true,
     this.onTap,
+    this.timeline,
   });
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +33,20 @@ class ExecutiveMemberTile extends StatelessWidget {
     final accent = theme.accentColor.toColor();
     final textPrimary = theme.textPrimary.toColor();
     final primary = theme.primaryColor.toColor();
+
+
+    String? statusText;
+    if (timeline != null) {
+      if (timeline!['idIssued'] == true) {
+        statusText = 'ID ISSUED';
+      } else if (timeline!['paid'] == true) {
+        statusText = 'PAID';
+      } else if (timeline!['approved'] == true) {
+        statusText = 'APPROVED';
+      } else if (timeline!['applied'] == true) {
+        statusText = 'APPLIED';
+      }
+    }
 
     return Column(
       children: [
@@ -77,7 +95,8 @@ class ExecutiveMemberTile extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(width: 8),
-                          Row(
+                           if(statusText == true)...[
+                              Row(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -109,6 +128,7 @@ class ExecutiveMemberTile extends StatelessWidget {
                               const SizedBox(width: 8),
                             ],
                           ),
+                           ]
                         ],
                       ),
                     ],
