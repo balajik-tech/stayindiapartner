@@ -12,6 +12,7 @@ import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
+import '../../../navigation/presentation/pages/main_navigation_page.dart';
 import '../cubit/association_membership_cubit.dart';
 import '../../domain/entities/association_membership_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
@@ -588,20 +589,28 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
 
     final profileState = context.read<ProfileCubit>().state;
 
+    bool? isKYCVerified;
     if (profileState is ProfileLoaded) {
-      final isKYCVerified =
-          profileState.profile.dlKyc?.isAadharVerified ?? false;
-
+      isKYCVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
       debugPrint('isKYCVerified: $isKYCVerified');
+    }
 
-      if (!isKYCVerified) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please complete your KYC verification'),
-          ),
-        );
-        return;
-      }
+    if ( isKYCVerified == null || !isKYCVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please complete your KYC verification'),
+        ),
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MainNavigationPage(initialIndex: 4),
+        ),
+            (route) => false,
+      );
+
+      return;
     }
 
     final cubit = context.read<AssociationMembershipCubit>();

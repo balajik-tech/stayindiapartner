@@ -12,7 +12,9 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../firebase_options.dart';
 import '../../injection_container.dart' as di;
+import '../services/token_storage.dart';
 import '../services/cache_service.dart';
+import '../../features/profile/presentation/cubit/profile_cubit.dart';
 import '../services/notification_service.dart';
 import '../services/app_config_service.dart';
 import '../theme/app_colors.dart';
@@ -161,6 +163,17 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       await di.sl<CacheService>().checkAndFlushOnUpdate();
       await di.sl<NotificationService>().init();
       await di.sl<NotificationService>().requestPermissions();
+
+      // Fetch user profile if logged in to warm up caches/state
+      try {
+        final token = await di.sl<TokenStorage>().getToken();
+        if (token != null && token.isNotEmpty) {
+          AppLogger.info('Warm-booting user profile...');
+          await di.sl<ProfileCubit>().loadProfile();
+        }
+      } catch (e) {
+        AppLogger.warning('Silent profile fetch failed during bootstrap: $e');
+      }
 
       AppLogger.info('Stay India Owner App Initialized via Bootstrapper');
 
