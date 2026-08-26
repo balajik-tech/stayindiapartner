@@ -2414,13 +2414,15 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
             if (navigator.canPop()) {
               navigator.pop(true);
             }
-            
-            ScaffoldMessenger.of(navigator.context).showSnackBar(
-              SnackBar(
-                content: Text('Payment failed: $message'),
-                backgroundColor: Colors.red,
-              ),
-            );
+
+            if (message.trim().isNotEmpty || message != 'undefined') {
+              ScaffoldMessenger.of(navigator.context).showSnackBar(
+                SnackBar(
+                  content: Text('Payment failed: $message'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
         ),
       ),

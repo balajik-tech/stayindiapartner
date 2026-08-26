@@ -17,6 +17,7 @@ import 'package:stayindia_owner/features/auth/domain/usecases/restore_account_us
 import 'package:stayindia_owner/features/auth/domain/usecases/has_active_session_usecase.dart';
 import 'package:stayindia_owner/core/utils/error_helper.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
+import 'package:stayindia_owner/core/services/app_config_service.dart';
 import 'package:stayindia_owner/core/services/cache_service.dart';
 import 'package:stayindia_owner/features/auth/domain/repositories/auth_repository.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
@@ -199,6 +200,8 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthAuthenticated(owner: result.owner, isNewUser: result.isNewUser));
       _syncDeviceToken();
+      // Ensure app config is fresh after authentication
+      AppConfigService.instance.load(force: true);
       AppLogger.info(
         'OTP verified. Owner: ${result.owner.id}, isNewUser: ${result.isNewUser}',
       );
@@ -246,6 +249,7 @@ class AuthCubit extends Cubit<AuthState> {
         } else {
           emit(AuthAuthenticated(owner: owner, isNewUser: false));
           _syncDeviceToken();
+          AppConfigService.instance.load(force: true);
           AppLogger.success(
             'Google Login: Existing owner authenticated: ${owner.id}',
           );
@@ -407,6 +411,7 @@ class AuthCubit extends Cubit<AuthState> {
       final owner = await _repository.staffLogin(phone, password);
       emit(AuthAuthenticated(owner: owner, isNewUser: false));
       _syncDeviceToken();
+      AppConfigService.instance.load(force: true);
       AppLogger.info('Staff logged in successfully. Owner/Staff: ${owner.id}');
     } catch (e) {
       AppLogger.error('staffLogin failed', e);
