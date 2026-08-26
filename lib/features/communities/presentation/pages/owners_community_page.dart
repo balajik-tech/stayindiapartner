@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/owner_community_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/cubit/social_feed_cubit.dart';
@@ -1395,11 +1396,11 @@ class _PostCardState extends State<_PostCard> {
       final state = widget.post.userState;
       
       if (city != null && city.isNotEmpty && state != null && state.isNotEmpty) {
-        displayRole = '$role · $city, $state';
+        //displayRole = ''$role; · $city, $state';
       } else if (city != null && city.isNotEmpty) {
-        displayRole = '$role · $city';
+        //displayRole =  '$role · $city';
       } else {
-        displayRole = role;
+        //displayRole = role;
       }
     } else {
       final city = widget.post.userCity;
@@ -1475,7 +1476,7 @@ class _PostCardState extends State<_PostCard> {
                           children: [
                             Text(
                               widget.post.userName.isNotEmpty
-                                  ? widget.post.userName
+                                  ? StringUtils.capitalize(widget.post.userName)
                                   : 'Unknown User',
                               style: GoogleFonts.inter(
                                 fontSize: 16.sp,
@@ -1493,7 +1494,7 @@ class _PostCardState extends State<_PostCard> {
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
                                 child: Text(
-                                  'Member',
+                                  StringUtils.capitalize(widget.post.userRole!.toLowerCase()) ?? "",
                                   style: GoogleFonts.inter(
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w700,
@@ -1504,7 +1505,7 @@ class _PostCardState extends State<_PostCard> {
                           ],
                         ),
                         Text(
-                          '$displayRole · ${_formatTimeAgo(widget.post.createdAt)}',
+                          '${_formatTimeAgo(widget.post.createdAt)}',
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             color: AppColors.greyText,

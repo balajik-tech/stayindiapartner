@@ -47,7 +47,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
   @override
   void initState() {
     super.initState();
@@ -71,19 +70,20 @@ class _ProfilePageState extends State<ProfilePage> {
           final profile = state is ProfileLoaded
               ? state.profile
               : (state is ProfileUpdateSuccess ? state.profile : null);
-          final name =
-          (profile?.dlKyc?.name?.trim().isNotEmpty == true)
+          final name = (profile?.dlKyc?.name?.trim().isNotEmpty == true)
               ? profile!.dlKyc!.name!.trim()
               : (((profile?.firstName?.trim().isNotEmpty == true) ||
-              (profile?.lastName?.trim().isNotEmpty == true))
-              ? '${profile?.lastName ?? ''} ${profile?.firstName ?? ''} '.trim()
-              : (owner?.name ?? ''));
+                        (profile?.lastName?.trim().isNotEmpty == true))
+                    ? '${profile?.lastName ?? ''} ${profile?.firstName ?? ''} '
+                          .trim()
+                    : (owner?.name ?? ''));
 
-          final phone = (profile?.phone != null && profile!.phone.trim().isNotEmpty)
+          final phone =
+              (profile?.phone != null && profile!.phone.trim().isNotEmpty)
               ? '+91 ${profile.phone}'
               : ((owner?.phone != null && owner!.phone.trim().isNotEmpty)
-                  ? '+91 ${owner.phone}'
-                  : '');
+                    ? '+91 ${owner.phone}'
+                    : '');
 
           return CustomScrollView(
             physics: const BouncingScrollPhysics(),
@@ -94,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   name,
                   phone,
                   profile?.avatar,
-                  profile?.dlKyc?.isAadharVerified
+                  profile?.dlKyc?.isAadharVerified,
                 ),
               ),
               // commented Govt. Licenses & Verification
@@ -292,7 +292,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     //     ),
                     //   ]),
                     // ],
-
                     _buildGridSection('3. ${'support_legal'.tr()}', [
                       _ProfileCard(
                         icon: Icons.language_rounded,
@@ -347,16 +346,18 @@ class _ProfilePageState extends State<ProfilePage> {
                           iconBgColor: const Color(0xFFFCE7F3),
                           iconColor: const Color(0xFFDB2777),
                           onTap: () async {
-                            final referralId = await context.read<ProfileCubit>().generateReferral();
+                            final referralId = await context
+                                .read<ProfileCubit>()
+                                .generateReferral();
                             if (context.mounted) {
                               ShareAppBottomSheet.show(
                                 context,
-                                shareLink: referralId != null 
+                                shareLink: referralId != null
                                     ? '${ApiConstants.partnerAppLink}?ref=$referralId'
-                                    : ApiConstants.partnerAppLink
+                                    : ApiConstants.partnerAppLink,
                               );
                             }
-                          }
+                          },
                         ),
                         _ProfileCard(
                           icon: Icons.star_rate_rounded,
@@ -364,11 +365,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           iconBgColor: const Color(0xFFFEF9C3),
                           iconColor: const Color(0xFFCA8A04),
                           onTap: () async {
-                            final url = await context.read<ProfileCubit>().getRateUsUrl();
+                            final url = await context
+                                .read<ProfileCubit>()
+                                .getRateUsUrl();
                             if (url != null && url.isNotEmpty) {
                               final uri = Uri.parse(url);
                               if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                await launchUrl(
+                                  uri,
+                                  mode: LaunchMode.externalApplication,
+                                );
                               }
                             }
                           },
@@ -437,13 +443,15 @@ class _ProfilePageState extends State<ProfilePage> {
                           iconBgColor: const Color(0xFFF5F3FF),
                           iconColor: const Color(0xFF7C3AED),
                           onTap: () async {
-                            final referralId = await context.read<ProfileCubit>().generateReferral();
+                            final referralId = await context
+                                .read<ProfileCubit>()
+                                .generateReferral();
                             if (context.mounted) {
                               ShareAppBottomSheet.show(
                                 context,
-                                shareLink: referralId != null 
+                                shareLink: referralId != null
                                     ? '${ApiConstants.partnerAppLink}?ref=$referralId'
-                                    : ApiConstants.partnerAppLink
+                                    : ApiConstants.partnerAppLink,
                               );
                             }
                           },
@@ -566,12 +574,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           width: 1.5,
                         ),
                       ),
-                      child: Text(
-                        '🏛️',
-                        style: TextStyle(
-                          fontSize: 24.sp,
-                        ),
-                      ),
+                      child: Text('🏛️', style: TextStyle(fontSize: 24.sp)),
                     ),
                     SizedBox(width: 16.w),
                     Expanded(
@@ -650,9 +653,8 @@ class _ProfilePageState extends State<ProfilePage> {
     String name,
     String phone,
     String? avatar,
-      bool? isAaadharVerified
+    bool? isAaadharVerified,
   ) {
-
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -675,7 +677,10 @@ class _ProfilePageState extends State<ProfilePage> {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFF98125), width: 1.5),
+                  border: Border.all(
+                    color: const Color(0xFFF98125),
+                    width: 1.5,
+                  ),
                 ),
                 child: CustomAvatar(
                   imageUrl: ApiConstants.getImageUrl(avatar),
@@ -723,9 +728,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 14.w,
+                              vertical: 8.h,
+                            ),
                             decoration: BoxDecoration(
-                              border: Border.all(color: const Color(0xFF2C599D), width: 1.2),
+                              border: Border.all(
+                                color: const Color(0xFF2C599D),
+                                width: 1.2,
+                              ),
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Text(
@@ -743,27 +754,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               ),
-              SizedBox(width: 6.h),
+              SizedBox(width: 6.w),
             ],
           ),
         ),
 
+        // Verified
         if (isAaadharVerified == true)
           Positioned(
-            top: 70.h,   // Relative to Stack top
-            right: 35.w, // Relative to Stack right
+            top: 70.h,
+            right: 35.w,
             child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 10.w,
-                vertical: 5.h,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
               decoration: BoxDecoration(
                 color: const Color(0xFFE8F5E9),
                 borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(
-                  color: const Color(0xFF4CAF50),
-                  width: 1,
-                ),
+                border: Border.all(color: const Color(0xFF4CAF50), width: 1),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -775,7 +781,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   SizedBox(width: 4.w),
                   Text(
-                    "Verified",
+                    'Verified',
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w700,
@@ -786,15 +792,49 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-        ],
+
+        // Verify KYC
+        if (isAaadharVerified == false)
+          Positioned(
+            top: 70.h,
+            right: 35.w,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3E0),
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: const Color(0xFFFF9800), width: 1),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.access_time_rounded,
+                    color: const Color(0xFFE65100),
+                    size: 18.sp,
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    'eKYC Pending',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFFE65100),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 
   Widget _buildQuickActionsFullWidth(
-      BuildContext context,
-      String role,
-      dynamic owner,
-      ) {
+    BuildContext context,
+    String role,
+    dynamic owner,
+  ) {
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
       child: Column(
@@ -821,8 +861,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildQuickActions(BuildContext context, String role, dynamic owner) {
     final bool hasInsights = owner?.hasPermission('reports') ?? true;
-    final bool hasStock = false;// owner?.hasPermission('stock') ?? true;  // hidden stock for condition changed
-    final bool hasStaff = false;// owner?.hasPermission('staff') ?? true;  // hidden staff for condition changed
+    final bool hasStock =
+        false; // owner?.hasPermission('stock') ?? true;  // hidden stock for condition changed
+    final bool hasStaff =
+        false; // owner?.hasPermission('staff') ?? true;  // hidden staff for condition changed
 
     if (!hasInsights && !hasStock && !hasStaff) {
       return const SizedBox.shrink();
@@ -1317,7 +1359,10 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         title: Text(
           'delete_account'.tr(),
-          style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.error),
+          style: const TextStyle(
+            fontWeight: FontWeight.w900,
+            color: AppColors.error,
+          ),
         ),
         content: Text('delete_account_confirm'.tr()),
         actions: [
@@ -1348,31 +1393,13 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        insetPadding: EdgeInsets.symmetric(
-          horizontal: 12.w,
-          vertical: 12.h,
-        ),
+        insetPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28.r),
         ),
-        titlePadding: EdgeInsets.fromLTRB(
-          24.w,
-          20.h,
-          24.w,
-          8.h,
-        ),
-        contentPadding: EdgeInsets.fromLTRB(
-          24.w,
-          8.h,
-          24.w,
-          4.h,
-        ),
-        actionsPadding: EdgeInsets.fromLTRB(
-          16.w,
-          0,
-          16.w,
-          16.h,
-        ),
+        titlePadding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 8.h),
+        contentPadding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 4.h),
+        actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
         title: Column(
           children: [
             Icon(
@@ -1408,7 +1435,7 @@ class _ProfilePageState extends State<ProfilePage> {
             _DeactivateOptionTile(
               title: 'DEACTIVATE PROPERTIES ONLY',
               subtitle:
-              'Remove all your property listings from the platform. Your account and user profile will remain active.',
+                  'Remove all your property listings from the platform. Your account and user profile will remain active.',
               icon: Icons.business_rounded,
               color: const Color(0xFF102d44),
               bgColor: const Color(0xFFe7edf9),
@@ -1420,7 +1447,7 @@ class _ProfilePageState extends State<ProfilePage> {
             _DeactivateOptionTile(
               title: 'DEACTIVATE ACCOUNT PERMANENTLY',
               subtitle:
-              'Your account, user profile, and all property listings will be permanently deactivated. This action is irreversible.',
+                  'Your account, user profile, and all property listings will be permanently deactivated. This action is irreversible.',
               icon: Icons.person_remove_rounded,
               color: const Color(0xFF4a1d19),
               bgColor: const Color(0xFFfceadf),
@@ -1449,31 +1476,13 @@ class _ProfilePageState extends State<ProfilePage> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: 24.w,
-            vertical: 24.h,
-          ),
+          insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24.r),
           ),
-          titlePadding: EdgeInsets.fromLTRB(
-            24.w,
-            20.h,
-            24.w,
-            8.h,
-          ),
-          contentPadding: EdgeInsets.fromLTRB(
-            24.w,
-            8.h,
-            24.w,
-            4.h,
-          ),
-          actionsPadding: EdgeInsets.fromLTRB(
-            16.w,
-            0,
-            16.w,
-            8.h,
-          ),
+          titlePadding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 8.h),
+          contentPadding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 4.h),
+          actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
           title: Text(
             'confirm_deactivation'.tr(),
             style: const TextStyle(
@@ -1482,11 +1491,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           content: Text(
-            'confirm_deactivation_message'.tr(
-              namedArgs: {
-                'action': action,
-              },
-            ),
+            'confirm_deactivation_message'.tr(namedArgs: {'action': action}),
           ),
           actions: [
             TextButton(
@@ -1495,14 +1500,10 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.error,
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppColors.error),
               child: Text(
                 'confirm'.tr(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -1638,17 +1639,11 @@ class _ProfileCard extends StatelessWidget {
     return BouncingWrapper(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 10.w,
-          vertical: 10.h,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: const Color(0xFFE2E8F0),
-            width: 1,
-          ),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.02),
@@ -1668,10 +1663,10 @@ class _ProfileCard extends StatelessWidget {
               child: hasImage
                   ? _buildImage(imageUrl!)
                   : Icon(
-                icon,
-                color: iconColor ?? AppColors.primaryBlue,
-                size: 18.sp,
-              ),
+                      icon,
+                      color: iconColor ?? AppColors.primaryBlue,
+                      size: 18.sp,
+                    ),
             ),
             SizedBox(width: 8.w),
             Expanded(
@@ -1706,11 +1701,14 @@ class _ProfileCard extends StatelessWidget {
         width: imageSize,
         height: imageSize,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, size: imageSize),
+        errorBuilder: (context, error, stackTrace) =>
+            Icon(Icons.broken_image, size: imageSize),
       );
     } else {
       // Check if it's a standard asset path
-      final String assetPath = url.startsWith('assets/') ? url : 'assets/images/$url';
+      final String assetPath = url.startsWith('assets/')
+          ? url
+          : 'assets/images/$url';
       return Image.asset(
         assetPath,
         width: imageSize,
@@ -1731,12 +1729,11 @@ class _QuickActionCard extends StatelessWidget {
   final VoidCallback onTap;
   final String? image;
 
-
   const _QuickActionCard({
     required this.icon,
     required this.label,
     required this.onTap,
-    this.image="",
+    this.image = "",
   });
 
   @override
@@ -1762,9 +1759,9 @@ class _QuickActionCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if(image!.isNotEmpty)...[
+            if (image!.isNotEmpty) ...[
               Image.asset(image!, width: 24.sp),
-            ]else...[
+            ] else ...[
               Icon(icon, color: AppColors.accentOrange, size: 24.sp),
             ],
             SizedBox(height: 6.h),
@@ -1807,16 +1804,11 @@ class _FullWidthActionCard extends StatelessWidget {
       scaleFactor: 0.97,
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.symmetric(
-          vertical: 16.h,
-          horizontal: 16.w,
-        ),
+        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: AppColors.border.withValues(alpha: 0.5),
-          ),
+          border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -1834,11 +1826,7 @@ class _FullWidthActionCard extends StatelessWidget {
                 color: const Color(0xFFF0FDF4),
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(
-                icon,
-                color: const Color(0xFF16A34A),
-                size: 24.sp,
-              ),
+              child: Icon(icon, color: const Color(0xFF16A34A), size: 24.sp),
             ),
 
             SizedBox(width: 14.w),
