@@ -203,7 +203,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     // Build the data map for API call
     final data = <String, dynamic>{
       'firstName': _firstNameController.text.trim(),
-      'lastName': _lastNameController.text.trim(),
+      'lastName': "",
       'email': _emailController.text.trim(),
       'address': _addressController.text.trim(),
       if (currentProfile?.dob != null) 'dob': currentProfile!.dob,

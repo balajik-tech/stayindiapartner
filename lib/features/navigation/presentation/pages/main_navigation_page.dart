@@ -33,6 +33,7 @@ import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubi
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../widgets/global_action_sheet.dart';
 import 'package:stayindia_owner/features/profile/presentation/pages/floor_management_page.dart';
 import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
@@ -454,6 +455,33 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     return BouncingWrapper(
       onTap: () {
         HapticFeedback.heavyImpact();
+
+        // First Complete the KYC
+        final profileState = context.read<ProfileCubit>().state;
+        bool? isKYCVerified;
+        if (profileState is ProfileLoaded) {
+        isKYCVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+        debugPrint('isKYCVerified: $isKYCVerified');
+        }
+        if ( isKYCVerified == null || !isKYCVerified) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please complete your KYC verification'),
+            ),
+          );
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const MainNavigationPage(initialIndex: 4),
+            ),
+                (route) => false,
+          );
+
+          return;
+        }
+        // End Complete the KYC
+
         final authState = context.read<AuthCubit>().state;
         if (authState is! AuthAuthenticated &&
             authState is! AuthProfileCompleted) {

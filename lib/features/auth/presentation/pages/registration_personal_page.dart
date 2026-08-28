@@ -155,8 +155,8 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
 
     authCubit.completeProfile(
       ProfileParams(
-        firstName: parsedFirstName,
-        lastName: parsedLastName,
+        firstName: fullName.toString().trim(),
+        lastName: "",
         email: email,
         phone: phone,
         address: address,
