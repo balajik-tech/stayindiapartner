@@ -739,7 +739,9 @@ class _PaymentItemTile extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    item.tenantName.substring(0, 1).toUpperCase(),
+                    item.tenantName.isNotEmpty
+                        ? item.tenantName.substring(0, 1).toUpperCase()
+                        : '?',
                     style: GoogleFonts.inter(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
