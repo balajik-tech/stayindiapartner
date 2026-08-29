@@ -11,7 +11,7 @@ class ApiConstants {
 
   static const String stagingUrl = 'https://api.stayindia.in';
 
-  static const String _prodUrl = '$productionUrl$_api_Version';
+  static const String _prodUrl = '$stagingUrl$_api_Version';
 
 
 
