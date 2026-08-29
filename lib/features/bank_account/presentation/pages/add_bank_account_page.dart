@@ -1108,9 +1108,18 @@ bool areNamesEquivalent(String? firstName, String? secondName) {
     final y = bWords.toList()..sort();
     return x.join(' ') == y.join(' ');
   }
-
+  // Existing permutation logic
   final bForms = _permutedJoins(bWords);
-  return _permutedJoins(aWords).any(bForms.contains);
+  // return _permutedJoins(aWords).any(bForms.contains);
+
+  final permutationMatch = _permutedJoins(aWords).any(bForms.contains);
+  if (permutationMatch) {
+    return true;
+  }
+
+  // Final fallback: fuzzy matching
+  return _isFuzzyNameMatch(a, b);
+
 }
 
 String _normalizeName(String? value) {
@@ -1141,6 +1150,61 @@ Set<String> _permutedJoins(List<String> words) {
 
   permute([], words);
   return results;
+}
+
+// Final fuzzy matching logic.
+bool _isFuzzyNameMatch(String a, String b) {
+  final normalizedA = a.replaceAll(' ', '');
+  final normalizedB = b.replaceAll(' ', '');
+
+  final distance = _levenshteinDistance(
+    normalizedA,
+    normalizedB,
+  );
+
+  final maxLength = normalizedA.length > normalizedB.length
+      ? normalizedA.length
+      : normalizedB.length;
+
+  if (maxLength == 0) return true;
+
+  final similarity = 1 - (distance / maxLength);
+
+  // 90% threshold
+  return similarity >= 0.90;
+}
+
+int _levenshteinDistance(String a, String b) {
+  if (a == b) return 0;
+  if (a.isEmpty) return b.length;
+  if (b.isEmpty) return a.length;
+
+  final previous = List<int>.generate(
+    b.length + 1,
+        (i) => i,
+  );
+
+  for (var i = 1; i <= a.length; i++) {
+    final current = List<int>.filled(b.length + 1, 0);
+    current[0] = i;
+
+    for (var j = 1; j <= b.length; j++) {
+      final insertCost = current[j - 1] + 1;
+      final deleteCost = previous[j] + 1;
+      final replaceCost =
+          previous[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1);
+
+      current[j] = [
+        insertCost,
+        deleteCost,
+        replaceCost,
+      ].reduce((x, y) => x < y ? x : y);
+    }
+
+    previous.setAll(0, current);
+  }
+
+  return previous[b.length];
 }
 
 class _FieldLabel extends StatelessWidget {
