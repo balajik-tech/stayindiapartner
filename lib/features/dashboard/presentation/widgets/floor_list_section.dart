@@ -248,7 +248,65 @@ class FloorListSection extends StatelessWidget {
           );
         }
 
+        // Calculate if there are any matching rooms across all floors when searching
+        bool hasAnyMatch = false;
+        if (query.isEmpty) {
+          hasAnyMatch = true;
+        } else {
+          for (final floor in displayFloors) {
+            final hasMatchInFloor = floor.rooms.any((room) {
+              final roomNum = room.roomNumber.toLowerCase();
+              final hasMatchingTenant = room.beds.any(
+                (bed) =>
+                    (bed.tenantName?.toLowerCase().contains(query) ?? false),
+              );
+              return roomNum.contains(query) || hasMatchingTenant;
+            });
+            if (hasMatchInFloor) {
+              hasAnyMatch = true;
+              break;
+            }
+          }
+        }
 
+        if (!hasAnyMatch && query.isNotEmpty) {
+          return SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 60.h),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.search_off_rounded,
+                      size: 80.sp,
+                      color: AppColors.textSecondary.withValues(alpha: 0.2),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'No results found',
+                      style: GoogleFonts.inter(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.darkText,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'No room or tenant matched "$query"',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        color: AppColors.greyText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
 
         return SliverPadding(
           padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
