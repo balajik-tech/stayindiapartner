@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_phone_number_hint/google_phone_number_hint.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
@@ -754,7 +755,29 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   ),
                                 ),
                               ],
-                            )
+                            ),
+
+
+                            const SizedBox(height: 12),
+
+                            FutureBuilder<PackageInfo>(
+                              future: PackageInfo.fromPlatform(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                final info = snapshot.data!;
+
+                                return Text(
+                                  '${ApiConstants.environment} • v${info.version} (${info.buildNumber})',
+                                  style: const TextStyle(
+                                    fontSize: 8,
+                                    color: Colors.grey,
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -767,6 +790,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         );
       },
     );
+  }
+
+  Future<String> getAppVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    return 'v${info.version} (${info.buildNumber})';
   }
 
   Future<void> _openUrl(String url) async {

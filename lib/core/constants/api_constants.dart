@@ -13,6 +13,7 @@ class ApiConstants {
 
   static const String _prodUrl = '$stagingUrl$_api_Version';
 
+  static final String environment = _prodUrl.startsWith(productionUrl) ? 'PROD' : 'STAGING';
 
 
   static const int paginationLimit = 100;
