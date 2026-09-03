@@ -152,7 +152,8 @@ class ActiveSubscriptionModel extends ActiveSubscription {
     super.updatedAt,
     super.supportCall,
     super.supportWhatsappText,
-    super.supportWhatsappUrl
+    super.supportWhatsappUrl,
+    super.isLinkRequired
 
   });
 
@@ -190,6 +191,7 @@ class ActiveSubscriptionModel extends ActiveSubscription {
       supportCall: json['supportCall'] as String?,
       supportWhatsappText: json['supportWhatsappText'] as String?,
       supportWhatsappUrl: json['supportWhatsappUrl'] as String?,
+      isLinkRequired: json['isLinkRequired'] as bool?,
     );
   }
 }

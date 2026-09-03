@@ -109,6 +109,7 @@ class ActiveSubscription {
   final String? supportCall;
   final String? supportWhatsappText;
   final String? supportWhatsappUrl;
+  final bool? isLinkRequired;
 
 
   ActiveSubscription({
@@ -144,6 +145,7 @@ class ActiveSubscription {
     this.supportCall,
     this.supportWhatsappText,
     this.supportWhatsappUrl,
+    this.isLinkRequired
   });
 }
 

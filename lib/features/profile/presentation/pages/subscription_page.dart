@@ -162,6 +162,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final whatsappText = subscription.supportWhatsappText;
     final whatsappUrl = subscription.supportWhatsappUrl;
 
+    final isLinkRequired = subscription.isLinkRequired;
+
 
     String badgeText = 'Active';
     Color badgeBg = const Color(0xFFDCFCE7);
@@ -244,6 +246,63 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               ),
             ),
             SizedBox(height: 16.h),
+            if(isLinkRequired==true &&  badgeText == 'Active')...[
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        _callPhoneNumber(phoneNumber!);
+                      },
+                      icon: Icon(Icons.call_outlined, size: 18.sp, color: AppColors.primaryBlue),
+                      label: Text(
+                        'Call',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.primaryBlue),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primaryBlue,
+                        side: BorderSide(color: AppColors.primaryBlue),
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
+                      },
+                      icon: SizedBox(
+                        width: 18.w,
+                        height: 18.h,
+                        child: Image.asset(
+                            'assets/images/whatsapp_black.png',
+                            fit: BoxFit.contain,
+                            color: AppColors.white
+                        ),
+                      ),
+                      label: Text(
+                        'WhatsApp',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.white),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.freeGreen,
+                        backgroundColor: AppColors.freeGreen,
+                        side: BorderSide(color: AppColors.freeGreen),
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.h),
+            ],
             Divider(height: 1, color: Colors.grey.shade100),
             SizedBox(height: 8.h),
             if (isPaused) ...[
@@ -349,7 +408,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   ),
                 ],
               ),
-            ] else if (isExpiring) ...[
+            ]
+            else if (isExpiring) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -448,7 +508,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   ),
                 ],
               ),
-            ] else ...[
+            ]
+            else ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
