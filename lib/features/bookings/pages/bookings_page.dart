@@ -403,33 +403,40 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll>
   }
 
   Tab _buildTabItem(String label, int count, int index) {
-    bool isSelected = _tabController.index == index;
     return Tab(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(label),
-          if (count > 0) ...[
-            SizedBox(width: 6.w),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : AppColors.primaryBlue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-              child: Text(
-                '$count',
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w900,
-                  color: isSelected ? Colors.white : AppColors.primaryBlue,
+      child: AnimatedBuilder(
+        animation: _tabController.animation!,
+        builder: (context, child) {
+          final double value = _tabController.animation!.value;
+          bool isSelected = value.round() == index;
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(label),
+              if (count > 0) ...[
+                SizedBox(width: 6.w),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white.withValues(alpha: 0.2)
+                        : AppColors.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w900,
+                      color: isSelected ? Colors.white : AppColors.primaryBlue,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ],
+              ],
+            ],
+          );
+        },
       ),
     );
   }
