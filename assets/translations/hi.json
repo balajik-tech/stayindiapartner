@@ -993,5 +993,6 @@
   "delete_account": "खाता हटाएं",
 
   "confirm_deactivation": "निष्क्रिय करने की पुष्टि करें",
-  "confirm_deactivation_message": "क्या आप वाकई अपने {action} को निष्क्रिय करना चाहते हैं? यह तुरंत प्रभावी होगा।"
+  "confirm_deactivation_message": "क्या आप वाकई अपने {action} को निष्क्रिय करना चाहते हैं? यह तुरंत प्रभावी होगा।",
+  "no_floors_found": "कोई मंजिल नहीं मिली"
 }

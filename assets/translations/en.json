@@ -447,7 +447,7 @@
   "daily_rent_hint": "Daily Rent",
   "security_deposit_hint": "Security Deposit",
   "maintenance_hint": "Maintenance Fee",
-  "prices_auto_apply": "Prices will be automatically applied to all {count}rooms.",
+  "prices_auto_apply": "Prices will be automatically applied to all {count} rooms.",
   "apply_to_all_rooms": "Apply to All Rooms",
   "apply_to_all_rooms_sub": "Set pricing for all rooms at once. This will override existing values.",
   "btn_cancel": "Cancel",
@@ -1001,6 +1001,6 @@
   "delete_account": "Delete Account",
 
   "confirm_deactivation": "Confirm Deactivation",
-  "confirm_deactivation_message": "Are you sure you want to deactivate your {action}? This will take effect immediately."
-
+  "confirm_deactivation_message": "Are you sure you want to deactivate your {action}? This will take effect immediately.",
+  "no_floors_found": "No floors found"
 }

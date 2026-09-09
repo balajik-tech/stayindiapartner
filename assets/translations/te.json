@@ -993,5 +993,6 @@
   "delete_account": "ఖాతాను తొలగించండి",
 
   "confirm_deactivation": "నిష్క్రియం చేయడాన్ని నిర్ధారించండి",
-  "confirm_deactivation_message": "మీ {action}ని నిష్క్రియం చేయాలనుకుంటున్నారా? ఇది వెంటనే అమల్లోకి వస్తుంది."
+  "confirm_deactivation_message": "మీ {action}ని నిష్క్రియం చేయాలనుకుంటున్నారా? ఇది వెంటనే అమల్లోకి వస్తుంది.",
+  "no_floors_found": "అంతస్తులు ఏవీ కనుగొనబడలేదు"
 }
