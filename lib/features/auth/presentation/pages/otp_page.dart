@@ -429,7 +429,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           style: GoogleFonts.outfit(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.primaryBlue,
+            color: AppColors.kAuthOrangeDark,
           ),
         ),
 
@@ -483,14 +483,14 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.kAuthOrange, AppColors.kAuthOrangeDark],
+                  colors: [AppColors.inputBoxColor, AppColors.inputBoxColor],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(8.r),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.kAuthOrange.withValues(alpha: 0.35),
+                    color: AppColors.inputBoxColor.withValues(alpha: 0.35),
                     blurRadius: 14,
                     offset: const Offset(0, 6),
                   ),
@@ -529,7 +529,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                 TextSpan(
                   text: 'Terms',
                   style: TextStyle(
-                    color: AppColors.kAuthOrange,
+                    color: AppColors.inputBoxColor,
                     fontWeight: FontWeight.bold,
                     decoration: TextDecoration.underline,
                   ),
@@ -538,7 +538,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                 TextSpan(
                   text: 'Privacy Policy',
                   style: TextStyle(
-                    color: AppColors.kAuthOrange,
+                    color: AppColors.inputBoxColor,
                     fontWeight: FontWeight.bold,
                     decoration: TextDecoration.underline,
                   ),
@@ -548,7 +548,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 12.sp,
-              color: AppColors.primaryBlue.withValues(alpha: 0.7),
+              color: AppColors.orangeColor,
               height: 1.4,
             ),
           ),

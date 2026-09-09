@@ -21,7 +21,7 @@ class AppColors {
 
   static const Color kAuthOrange = Color(0xFFF7941D);
   static const Color kAuthOrangeDark = Color(0xFFE8760C);
-  static const Color inputBoxColor = Color(0xFFF48126);
+  static const Color inputBoxColor = Color(0xff17539B);
 
   static const Color orangeColor = Color(0xFFF48126);
 

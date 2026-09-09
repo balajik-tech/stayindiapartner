@@ -102,7 +102,7 @@ class LoginOnBoardingScreen extends StatelessWidget {
                         height: 1.2,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0,
-                        color: Color(0xffF58220),
+                        color: const Color(0xff17539B),
                       ),
                     ),
                   ),
@@ -145,7 +145,7 @@ class LoginOnBoardingScreen extends StatelessWidget {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xffF58220),
+                                backgroundColor: const Color(0xff17539B),
                                 elevation: 8,
                                 shadowColor:
                                     const Color(0xffB8C4FF).withOpacity(.5),

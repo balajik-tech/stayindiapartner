@@ -391,7 +391,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
 
-                                color: AppColors.primaryBlue,
+                                color: const Color(0xffF58220),
                               ),
                             ),
 
@@ -665,7 +665,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                     boxShadow: _isTermsAccepted
                                         ? [
                                       BoxShadow(
-                                        color: AppColors.kAuthOrange.withValues(alpha: 0.35),
+                                        color: AppColors.inputBoxColor.withValues(alpha: 0.35),
                                         blurRadius: 14,
                                         offset: const Offset(0, 6),
                                       ),
@@ -707,7 +707,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                         _isTermsAccepted = value ?? false;
                                       });
                                     },
-                                    activeColor: AppColors.kAuthOrange,
+                                    activeColor: AppColors.inputBoxColor,
                                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   ),
                                 ),
@@ -721,7 +721,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           TextSpan(
                                             text: 'Terms',
                                             style: TextStyle(
-                                              color: AppColors.kAuthOrange,
+                                              color: AppColors.inputBoxColor,
                                               fontWeight: FontWeight.bold,
                                               decoration: TextDecoration.underline,
                                             ),
@@ -734,7 +734,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           TextSpan(
                                             text: 'Privacy Policy',
                                             style: TextStyle(
-                                              color: AppColors.kAuthOrange,
+                                              color: AppColors.inputBoxColor,
                                               fontWeight: FontWeight.bold,
                                               decoration: TextDecoration.underline,
                                             ),
@@ -748,7 +748,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.outfit(
                                         fontSize: 12.sp,
-                                        color: AppColors.primaryBlue.withValues(alpha: 0.7),
+                                        color: AppColors.orangeColor,
                                         height: 1.4,
                                       ),
                                     ),
