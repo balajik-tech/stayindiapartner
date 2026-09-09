@@ -109,19 +109,19 @@ class LoginOnBoardingScreen extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 40),
-                    child: Text(
-                      "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w400,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
+                  // const Padding(
+                  //   padding: EdgeInsets.symmetric(horizontal: 40),
+                  //   child: Text(
+                  //     "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+                  //     textAlign: TextAlign.center,
+                  //     style: TextStyle(
+                  //       fontSize: 14,
+                  //       color: Colors.black87,
+                  //       fontWeight: FontWeight.w400,
+                  //       height: 1.5,
+                  //     ),
+                  //   ),
+                  // ),
 
                   const Spacer(),
 
