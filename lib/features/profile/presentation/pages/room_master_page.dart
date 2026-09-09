@@ -44,6 +44,8 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
   late Map<String, Map<int, Map<String, TextEditingController>>> _controllers;
   late Map<String, Map<int, Map<String, FocusNode>>> _focusNodes;
   bool _initializedFromState = false;
+  final ScrollController _horizontalScrollController = ScrollController();
+  bool _showRightArrow = true;
 
   @override
   void initState() {
@@ -51,6 +53,28 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
     _activeSharingTypes = [1, 2, 3, 4];
     _controllers = {'AC': {}, 'NON_AC': {}};
     _focusNodes = {'AC': {}, 'NON_AC': {}};
+
+    _horizontalScrollController.addListener(() {
+      if (_horizontalScrollController.hasClients) {
+        final maxScroll = _horizontalScrollController.position.maxScrollExtent;
+        final currentScroll = _horizontalScrollController.position.pixels;
+        final show = maxScroll > 0 && currentScroll < maxScroll - 5;
+        if (show != _showRightArrow) {
+          setState(() {
+            _showRightArrow = show;
+          });
+        }
+      }
+    });
+
+    // Also check initial state after first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_horizontalScrollController.hasClients) {
+        setState(() {
+          _showRightArrow = _horizontalScrollController.position.maxScrollExtent > 0;
+        });
+      }
+    });
 
     for (final type in ['AC', 'NON_AC']) {
       for (int s = 1; s <= 10; s++) {
@@ -89,6 +113,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         fieldMap.forEach((field, node) => node.dispose());
       });
     });
+    _horizontalScrollController.dispose();
     super.dispose();
   }
 
@@ -393,7 +418,49 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _buildLeftStaticPanel(),
-                                  Expanded(child: _buildRightScrollablePanel()),
+                                  Expanded(
+                                    child: Stack(
+                                      alignment: Alignment.centerRight,
+                                      children: [
+                                        _buildRightScrollablePanel(),
+                                        if (_showRightArrow)
+                                          Positioned(
+                                            right: 4.w,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                _horizontalScrollController.animateTo(
+                                                  _horizontalScrollController.position.maxScrollExtent,
+                                                  duration: const Duration(milliseconds: 500),
+                                                  curve: Curves.easeOut,
+                                                );
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.all(4.r),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.9),
+                                                  shape: BoxShape.circle,
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withValues(
+                                                              alpha: 0.15),
+                                                      blurRadius: 6,
+                                                      offset: const Offset(0, 2),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Icon(
+                                                  Icons.chevron_right_rounded,
+                                                  color: const Color(0xFF16539B),
+                                                  size: 24.sp,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -519,7 +586,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
 
   Widget _buildLeftStaticPanel() {
     return Container(
-      width: _isEditing ? 116.w : 100.w,
+      width: _isEditing ? 80.w : 60.w,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -547,7 +614,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
 
   Widget _buildStaticHeaderCell() {
     return Container(
-      height: 44.h,
+      height: 40.h,
       color: const Color(0xFFEFF6FF),
       alignment: Alignment.center,
       child: Text(
@@ -573,23 +640,25 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           : null,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        height: 52.h,
+        height: 44.h,
         decoration: BoxDecoration(
           color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
           border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         ),
         padding: EdgeInsets.symmetric(horizontal: _isEditing ? 8.w : 12.w),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SizedBox(width: _isEditing ? 4.w : 0),
             Expanded(
               child: Text(
-                '$sharing Sharing',
+                '$sharing',
                 style: TextStyle(
                   color: const Color(0xFF0F172A),
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w800,
                 ),
+                textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -600,12 +669,12 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 behavior: HitTestBehavior.opaque,
                 child: Container(
                   width: 24.w,
-                  height: 40.h,
+                  height: 36.h,
                   alignment: Alignment.centerRight,
                   child: Icon(
                     Icons.delete_outline_rounded,
                     color: const Color(0xFFEF4444),
-                    size: 20.sp,
+                    size: 18.sp,
                   ),
                 ),
               ),
@@ -684,14 +753,16 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
     return InkWell(
       onTap: _showAddSharingDialog,
       child: Container(
-        height: 48.h,
+        height: 40.h,
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         ),
         padding: EdgeInsets.symmetric(horizontal: _isEditing ? 8.w : 12.w),
-        alignment: Alignment.centerLeft,
+        alignment: Alignment.center,
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.add_circle_outline_rounded,
@@ -699,14 +770,6 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
               size: 16.sp,
             ),
             SizedBox(width: 4.w),
-            Text(
-              'Add',
-              style: TextStyle(
-                color: const Color(0xFF16539B),
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
           ],
         ),
       ),
@@ -715,10 +778,11 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
 
   Widget _buildRightScrollablePanel() {
     return SingleChildScrollView(
+      controller: _horizontalScrollController,
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: SizedBox(
-        width: 400.w,
+        width: 320.w,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -735,14 +799,14 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
 
   Widget _buildScrollableHeader() {
     return Container(
-      height: 44.h,
+      height: 40.h,
       color: const Color(0xFFEFF6FF),
       child: Row(
         children: [
-          _buildHeaderCell('Monthly Rent', 100.w),
-          _buildHeaderCell('Deposit', 100.w),
-          _buildHeaderCell('Maintenance', 100.w),
-          _buildHeaderCell('Daily Rent', 100.w),
+          _buildHeaderCell('Monthly Rent', 80.w),
+          _buildHeaderCell('Deposit', 80.w),
+          _buildHeaderCell('Maintenance', 80.w),
+          _buildHeaderCell('Daily Rent', 80.w),
         ],
       ),
     );
@@ -751,7 +815,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
   Widget _buildScrollableRow(int sharing) {
     final isAlternate = sharing % 2 == 0;
     return Container(
-      height: 52.h,
+      height: 44.h,
       decoration: BoxDecoration(
         color: isAlternate ? const Color(0xFFF8FAFC) : Colors.white,
         border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
@@ -771,7 +835,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
     return InkWell(
       onTap: _showAddSharingDialog,
       child: Container(
-        height: 48.h,
+        height: 40.h,
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
@@ -799,7 +863,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           style: TextStyle(
             color: const Color(0xFF16539B),
             fontWeight: FontWeight.w900,
-            fontSize: 11.sp,
+            fontSize: 10.sp,
             letterSpacing: 0.5,
           ),
         ),
@@ -814,8 +878,8 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
     if (!_isEditing) {
       final val = controller.text.trim();
       return Container(
-        width: 100.w,
-        height: 52.h,
+        width: 80.w,
+        height: 44.h,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           border: Border(
@@ -826,7 +890,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         child: Text(
           val.isNotEmpty ? '₹ $val' : '-',
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w700,
             color: val.isNotEmpty
                 ? const Color(0xFF0F172A)
@@ -837,9 +901,9 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
     }
 
     return Container(
-      width: 100.w,
-      height: 52.h,
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+      width: 80.w,
+      height: 44.h,
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
       child: TextField(
         controller: controller,
         focusNode: focusNode,
@@ -870,7 +934,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           }
         },
         style: TextStyle(
-          fontSize: 13.sp,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w700,
           color: const Color(0xFF0F172A),
         ),
@@ -878,23 +942,23 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
           prefixText: '₹ ',
           prefixStyle: TextStyle(
             color: const Color(0xFF94A3B8),
-            fontSize: 12.sp,
+            fontSize: 10.sp,
             fontWeight: FontWeight.w600,
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+          contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0),
           filled: true,
           fillColor: Colors.white,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.r),
+            borderRadius: BorderRadius.circular(6.r),
             borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.r),
+            borderRadius: BorderRadius.circular(6.r),
             borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.r),
-            borderSide: const BorderSide(color: Color(0xFF16539B), width: 1.5),
+            borderRadius: BorderRadius.circular(6.r),
+            borderSide: const BorderSide(color: Color(0xFF16539B), width: 1.2),
           ),
         ),
       ),
