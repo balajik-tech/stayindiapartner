@@ -483,6 +483,7 @@
   "tenants": "Tenants",
   "total_properties": "Total Properties",
   "total_beds": "Total Beds",
+  "total_rooms": "Total Rooms",
   "payment_dues": "Payment Dues",
   "occupied": "Occupied",
   "vacant_beds": "Free Beds",

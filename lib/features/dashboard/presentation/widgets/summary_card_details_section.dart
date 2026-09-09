@@ -135,6 +135,7 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
               if (displayName.isEmpty) displayName = 'Empty Bed';
               break;
             case 'total':
+            case 'total_rooms':
               matches = true;
               subtitle = bed.status.toUpperCase();
               if (displayName.isEmpty) displayName = 'Empty Bed';
@@ -192,6 +193,8 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
         return 'Available Beds';
       case 'total':
         return 'All Beds';
+      case 'total_rooms':
+        return 'All Rooms';
       case 'in':
         return 'Tenants Currently In';
       case 'out':

@@ -162,6 +162,12 @@ class SummaryCardsSection extends StatelessWidget {
         final status = data?.occupancyStatus;
         final ops = data?.dailyOperations;
 
+        final int totalRoomsCount = occupancy?.floors.fold<int>(
+              0,
+              (sum, floor) => sum + floor.rooms.length,
+            ) ??
+            0;
+
         return SizedBox(
           height: 64.h,
           child: ListView(
@@ -179,6 +185,15 @@ class SummaryCardsSection extends StatelessWidget {
               //   state.selectedMetric,
               //   isBordered: true,
               // ),
+              _buildCard(
+                context,
+                'total_rooms',
+                isLoading ? '...' : totalRoomsCount.toString(),
+                'total_rooms'.tr(),
+                const Color(0xFFF97316),
+                Icons.door_front_door_rounded,
+                state.selectedMetric,
+              ),
               _buildCard(
                 context,
                 'total',
