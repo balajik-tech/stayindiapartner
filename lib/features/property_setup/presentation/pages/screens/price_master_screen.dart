@@ -8,6 +8,8 @@ import 'package:stayindia_owner/features/property_setup/presentation/cubit/prope
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 
+import '../../../../profile/presentation/pages/room_master_page.dart';
+
 class PriceMasterScreen extends StatefulWidget {
   const PriceMasterScreen({super.key});
 
@@ -742,6 +744,10 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      MaxValueTextInputFormatter(50000),
+                    ],
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w800,
@@ -798,6 +804,10 @@ class _DialogTextField extends StatelessWidget {
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
         ),
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          MaxValueTextInputFormatter(50000),
+        ],
         style: TextStyle(
           fontSize: 16.sp,
           fontWeight: FontWeight.w800,

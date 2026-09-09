@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,6 +12,8 @@ import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
+
+import '../../../property_setup/presentation/pages/screens/room_category_screen.dart';
 
 class RoomPricingPage extends StatefulWidget {
   final Hostel hostel;
@@ -810,6 +813,10 @@ class _PriceInputState extends State<_PriceInput> {
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(vertical: 12),
                     ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      MaxValueTextInputFormatter(50000),
+                    ],
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w800,
