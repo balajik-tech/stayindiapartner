@@ -23,6 +23,7 @@ import '../../../finance/presentation/pages/payment_report_page.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
 import '../../../razorpay/presentation/screens/payment_failed_screen.dart';
 import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
+import '../cubit/hostel_state.dart';
 import '../widgets/share_app_bottom_sheet.dart';
 import 'account_settings_page.dart';
 import 'help_support_page.dart';
@@ -85,6 +86,8 @@ class _ProfilePageState extends State<ProfilePage>  with RouteAware{
     final owner = authState is AuthAuthenticated ? authState.owner : null;
     final role = owner?.role.toLowerCase() ?? 'owner';
     final bool isStaff = role != 'owner' && role != 'manager';
+    final hostelState = context.watch<HostelCubit>().state;
+    final bool hasHostels = hostelState is HostelLoaded && hostelState.hostels.isNotEmpty;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -218,18 +221,21 @@ class _ProfilePageState extends State<ProfilePage>  with RouteAware{
 
                     if (!isStaff) ...[
                       _buildGridSection('2. ${'hostel_configuration'.tr()}', [
-                        _ProfileCard(
-                          icon: Icons.business_rounded,
-                          title: 'hostel_profile'.tr(),
-                          iconBgColor: const Color(0xFFFFF1F2),
-                          iconColor: const Color(0xFFE11D48),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HostelProfilePage(),
+
+                        if(hasHostels)...[
+                          _ProfileCard(
+                            icon: Icons.business_rounded,
+                            title: 'hostel_profile'.tr(),
+                            iconBgColor: const Color(0xFFFFF1F2),
+                            iconColor: const Color(0xFFE11D48),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HostelProfilePage(),
+                              ),
                             ),
-                          ),
-                        ),
+                          )
+                        ],
                         _ProfileCard(
                           icon: Icons.wifi_rounded,
                           title: 'amenities'.tr(),
