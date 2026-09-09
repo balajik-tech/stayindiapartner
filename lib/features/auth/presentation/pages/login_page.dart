@@ -479,11 +479,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           ),
                                         ),
                                         SizedBox(width: 2.w),
-                                        Icon(
-                                          Icons.unfold_more_rounded,
-                                          size: 16.sp,
-                                          color: AppColors.primaryBlue,
-                                        ),
+                                        // Icon(
+                                        //   Icons.unfold_more_rounded,
+                                        //   size: 16.sp,
+                                        //   color: AppColors.primaryBlue,
+                                        // ),
                                       ],
                                     ),
                                   ),
