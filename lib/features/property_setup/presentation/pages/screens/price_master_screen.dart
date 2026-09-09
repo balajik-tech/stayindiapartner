@@ -578,6 +578,46 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                 final dailyRent =
                     double.tryParse(dailyRentController.text) ?? 0.0;
 
+                if (rent <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a valid rent amount'.tr()),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                if (deposit <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a valid deposit amount'.tr()),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                if (maintenance <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a valid maintenance amount'.tr()),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                if (dailyRent <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a valid daily rent amount'.tr()),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
                 if (rent > 0) {
                   context.read<PropertySetupCubit>().applyPricingToAllRooms(
                     'rent',
@@ -620,7 +660,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
               ),
               child: Text(
                 'btn_apply_all'.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                 ),
