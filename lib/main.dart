@@ -127,25 +127,38 @@ class StayIndiaOwnerApp extends StatelessWidget {
                         navigatorObservers: [routeObserver],
                         title: 'Stay India Owner',
                         debugShowCheckedModeBanner: false,
+
                         theme: AppTheme.lightTheme,
                         darkTheme: AppTheme.darkTheme,
                         themeMode: themeMode,
+
                         localizationsDelegates: context.localizationDelegates,
                         supportedLocales: context.supportedLocales,
                         locale: context.locale,
+
                         builder: (context, child) {
                           Intl.defaultLocale = context.locale.toString();
-                          return SafeArea(
-                            top: false,
-                            bottom: true,
-                            child: child!,
+
+                          // Prevent device font-size/accessibility scaling
+                          final mediaQuery = MediaQuery.of(context);
+
+                          return MediaQuery(
+                            data: mediaQuery.copyWith(
+                              textScaler: const TextScaler.linear(1.0),
+                            ),
+                            child: SafeArea(
+                              top: false,
+                              bottom: true,
+                              child: child!,
+                            ),
                           );
                         },
+
                         home: const AuthGate(
                           dashboard: MainNavigationPage(),
                           registration: RegistrationPersonalPage(),
                         ),
-                      ),
+                      )
                     );
                   },
                 ),
