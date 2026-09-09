@@ -38,7 +38,7 @@ class OtpPage extends StatefulWidget {
 class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   final List<TextEditingController> _controllers = List.generate(
     6,
-    (_) => TextEditingController(),
+        (_) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
@@ -148,7 +148,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       } else {
         debugPrint(
           'SMS was received and consent granted, but no code could '
-          'be extracted from the message text — check the SMS content.',
+              'be extracted from the message text — check the SMS content.',
         );
       }
     } else if (result.isCanceled) {
@@ -250,101 +250,109 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
-      listenWhen: (_, current) =>
-          current is AuthOtpSent ||
-          current is AuthError ||
-          current is AuthAccountRestored ||
-          current is AuthAuthenticated,
-      listener: (context, state) {
-        if (state is AuthAuthenticated) {
-          Navigator.popUntil(context, (route) => route.isFirst);
-        } else if (state is AuthOtpSent && state.isResend) {
-          _startCountdown();
-          setState(() => _currentDevOtp = state.devOtp);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'OTP resent successfully.',
-                style: GoogleFonts.outfit(),
+    final isTimerRunning = _countdown > 0;
+    return PopScope(
+      canPop: !isTimerRunning,
+      child: BlocListener<AuthCubit, AuthState>(
+        listenWhen: (_, current) =>
+        current is AuthOtpSent ||
+            current is AuthError ||
+            current is AuthAccountRestored ||
+            current is AuthAuthenticated,
+        listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          } else if (state is AuthOtpSent && state.isResend) {
+            _startCountdown();
+            setState(() => _currentDevOtp = state.devOtp);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'OTP resent successfully.',
+                  style: GoogleFonts.outfit(),
+                ),
+                behavior: SnackBarBehavior.floating,
               ),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        } else if (state is AuthError) {
-          _hasAutoSubmitted = false;
-          if (!_isRestoring) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(state.message, style: GoogleFonts.outfit()),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-          }
-        } else if (state is AuthAccountRestored) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Account restored successfully!')),
-          );
-        }
-      },
-      child: BlocBuilder<AuthCubit, AuthState>(
-        builder: (context, state) {
-          final isLoading = state is AuthLoading;
-          return Scaffold(
-            backgroundColor: AppColors.white,
-            body: Stack(
-              children: [
-                LoginOnBoardingScreen(),
-                // Transparent overlay
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.black.withOpacity(
-                      0.75,
-                    ), // Change opacity as needed
+            );
+          } else if (state is AuthError) {
+            _hasAutoSubmitted = false;
+            if (!_isRestoring) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(state.message, style: GoogleFonts.outfit()),
+                    behavior: SnackBarBehavior.floating,
                   ),
-                ),
-
-                Center(
-                  child: Dialog(
-                    insetPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 20,
-                    ),
-                    backgroundColor: Colors.transparent,
+                );
+            }
+          } else if (state is AuthAccountRestored) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Account restored successfully!')),
+            );
+          }
+        },
+        child: BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, state) {
+            final isLoading = state is AuthLoading;
+            return Scaffold(
+              backgroundColor: AppColors.white,
+              body: Stack(
+                children: [
+                  LoginOnBoardingScreen(),
+                  // Transparent overlay
+                  Positioned.fill(
                     child: Container(
-                      width: double.infinity,
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * .85,
-                        maxWidth: 420.w,
+                      color: Colors.black.withOpacity(
+                        0.75,
+                      ), // Change opacity as needed
+                    ),
+                  ),
+
+                  Center(
+                    child: Dialog(
+                      insetPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            blurRadius: 40,
-                            offset: const Offset(0, 20),
+                      backgroundColor: Colors.transparent,
+                      child: Container(
+                        width: double.infinity,
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * .85,
+                          maxWidth: 420.w,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 40,
+                              offset: const Offset(0, 20),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24.r),
+                          child: SingleChildScrollView(
+                            padding: EdgeInsets.fromLTRB(
+                              24.w,
+                              16.h,
+                              24.w,
+                              24.h,
+                            ),
+                            child: _buildContent(context, state, isLoading),
                           ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24.r),
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 24.h),
-                          child: _buildContent(context, state, isLoading),
                         ),
                       ),
                     ),
                   ),
-                ),
-
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -375,9 +383,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     }
 
     if (state is AuthAccountDeletedPast30Days) {
-      return Past30DaysRegisterView(
-        onRegister: _onConfirmStartFresh,
-      );
+      return Past30DaysRegisterView(onRegister: _onConfirmStartFresh);
     }
 
     if (state is AuthAccountRestored) {
@@ -389,6 +395,8 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       );
     }
 
+    final isTimerRunning = _countdown > 0;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -397,14 +405,16 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
         Align(
           alignment: Alignment.centerRight,
           child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: isTimerRunning ? null : () => Navigator.of(context).pop(),
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: EdgeInsets.all(4.r),
               child: Icon(
                 Icons.close_rounded,
                 size: 22.sp,
-                color: AppColors.primaryBlue,
+                color: isTimerRunning
+                    ? AppColors.primaryBlue.withValues(alpha: 0.3)
+                    : AppColors.primaryBlue,
               ),
             ),
           ),
@@ -463,10 +473,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
 
         SizedBox(height: 4.h),
         // ---- phone field ----
-        _ResendRow(
-          countdown: _countdown,
-          onResend: () => _onResend(context),
-        ),
+        _ResendRow(countdown: _countdown, onResend: () => _onResend(context)),
 
         // ---- password field (staff login only) ----
         SizedBox(height: 8.h),
@@ -498,22 +505,22 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
               ),
               child: isLoading
                   ? SizedBox(
-                      width: 22.w,
-                      height: 22.w,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2.4,
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
-                      ),
-                    )
+                width: 22.w,
+                height: 22.w,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                ),
+              )
                   : Text(
-                      isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE',
-                      style: GoogleFonts.outfit(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
+                isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE',
+                style: GoogleFonts.outfit(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 0.4,
+                ),
+              ),
             ),
           ),
         ),
@@ -666,8 +673,10 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                   textAlignVertical: TextAlignVertical.center,
                   keyboardType: TextInputType.number,
                   autofillHints: const [AutofillHints.oneTimeCode],
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(1),],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(1),
+                  ],
                   showCursor: false,
                   style: GoogleFonts.outfit(
                     fontSize: 23.sp,
