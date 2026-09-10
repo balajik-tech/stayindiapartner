@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -172,6 +173,22 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       await di.sl<NotificationService>().init();
       await di.sl<NotificationService>().requestPermissions();
 
+      // Fetch user profile if logged in to warm up caches/state
+      try {
+        final token = await di.sl<TokenStorage>().getToken();
+        if (token != null && token.isNotEmpty) {
+          AppLogger.info('Warm-booting user profile...');
+          
+          // Using di directly to avoid circular dependency
+          if (di.sl.isRegistered<ProfileCubit>()) {
+             // Explicitly awaiting to ensure state is ready before dashboard
+            await di.sl<ProfileCubit>().loadProfile();
+          }
+        }
+      } catch (e) {
+        AppLogger.warning('Silent profile fetch failed during bootstrap: $e');
+      }
+
       // Trigger session restoration immediately
       await di.sl<AuthCubit>().restoreSession();
 
@@ -303,8 +320,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                           BlocProvider(create: (context) => di.sl<StaffCubit>()),
                           BlocProvider(create: (context) => di.sl<PaymentCubit>()),
                           BlocProvider(
-                            create: (context) =>
-                                di.sl<ProfileCubit>()..loadProfile(),
+                            create: (context) => di.sl<ProfileCubit>(),
                           ),
                           BlocProvider(create: (context) => di.sl<SettingsCubit>()),
                           BlocProvider(create: (context) => di.sl<CommunityCubit>()),

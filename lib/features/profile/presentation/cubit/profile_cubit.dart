@@ -71,7 +71,10 @@ class ProfileCubit extends Cubit<ProfileState> {
        _getRateUsUrl = getRateUsUrlUseCase,
        super(ProfileInitial());
 
-  Future<void> loadProfile() async {
+  Future<void> loadProfile({bool force = false}) async {
+    if (!force && (state is ProfileLoaded || state is ProfileLoading)) {
+      return;
+    }
     emit(ProfileLoading());
     try {
       final profile = await _getProfile();
