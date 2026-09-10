@@ -103,8 +103,7 @@ class ErrorSanitizer {
 
     if (isTechnical ||
         message.contains('[') ||
-        message.contains('{') ||
-        message.contains(':')) {
+        message.contains('{')) {
       if (lowerMessage.contains('not found') && !lowerMessage.contains('404')) {
         return 'Requested item not found.';
       }

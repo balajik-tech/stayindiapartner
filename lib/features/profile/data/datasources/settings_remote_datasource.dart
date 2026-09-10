@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import '../models/hostel_settings_model.dart';
 
 abstract class SettingsRemoteDataSource {
@@ -32,9 +33,14 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
             : raw as Map<String, dynamic>;
         return HostelSettingsModel.fromJson(data);
       }
-      throw Exception('Failed to load settings');
+      throw ServerException(
+        message: 'Failed to load settings',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      throw GlobalErrorMapper.map(e);
     } catch (e) {
-      throw Exception('Error loading settings: $e');
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -46,10 +52,15 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
         data: data,
       );
       if (response.statusCode != 200) {
-        throw Exception('Failed to update profile');
+        throw ServerException(
+          message: 'Failed to update profile',
+          statusCode: response.statusCode,
+        );
       }
+    } on DioException catch (e) {
+      throw GlobalErrorMapper.map(e);
     } catch (e) {
-      throw Exception('Error updating profile: $e');
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -64,10 +75,15 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
         data: {'amenities': enabledAmenities},
       );
       if (response.statusCode != 200) {
-        throw Exception('Failed to update amenities');
+        throw ServerException(
+          message: 'Failed to update amenities',
+          statusCode: response.statusCode,
+        );
       }
+    } on DioException catch (e) {
+      throw GlobalErrorMapper.map(e);
     } catch (e) {
-      throw Exception('Error updating amenities: $e');
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -82,10 +98,16 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
         data: data,
       );
       if (response.statusCode != 200) {
-        throw Exception('Failed to update house rules');
+        final message =
+            (response.data is Map && response.data['message'] != null)
+                ? response.data['message'].toString()
+                : 'Failed to update house rules';
+        throw ServerException(message: message, statusCode: response.statusCode);
       }
+    } on DioException catch (e) {
+      throw GlobalErrorMapper.map(e);
     } catch (e) {
-      throw Exception('Error updating house rules: $e');
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -100,10 +122,15 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
         data: data,
       );
       if (response.statusCode != 200) {
-        throw Exception('Failed to update notification settings');
+        throw ServerException(
+          message: 'Failed to update notification settings',
+          statusCode: response.statusCode,
+        );
       }
+    } on DioException catch (e) {
+      throw GlobalErrorMapper.map(e);
     } catch (e) {
-      throw Exception('Error updating notification settings: $e');
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -118,10 +145,15 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
         data: data,
       );
       if (response.statusCode != 200) {
-        throw Exception('Failed to update room configuration');
+        throw ServerException(
+          message: 'Failed to update room configuration',
+          statusCode: response.statusCode,
+        );
       }
+    } on DioException catch (e) {
+      throw GlobalErrorMapper.map(e);
     } catch (e) {
-      throw Exception('Error updating room configuration: $e');
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -145,10 +177,15 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to upload images');
+        throw ServerException(
+          message: 'Failed to upload images',
+          statusCode: response.statusCode,
+        );
       }
+    } on DioException catch (e) {
+      throw GlobalErrorMapper.map(e);
     } catch (e) {
-      throw Exception('Error uploading images: $e');
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -168,9 +205,14 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
         final data = response.data['data'] as Map<String, dynamic>;
         return data['imageUrl'] as String;
       }
-      throw Exception('Failed to upload image');
+      throw ServerException(
+        message: 'Failed to upload image',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      throw GlobalErrorMapper.map(e);
     } catch (e) {
-      throw Exception('Error uploading image: $e');
+      throw ServerException(message: e.toString());
     }
   }
 }

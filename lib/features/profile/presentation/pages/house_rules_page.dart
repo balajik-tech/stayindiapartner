@@ -10,6 +10,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cubit.dart';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class HouseRulesPage extends StatefulWidget {
@@ -203,6 +204,8 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
             _entryTimeController,
             hint: 'e.g. 10:00 PM',
             icon: Icons.access_time_rounded,
+            readOnly: true,
+            onTap: _selectTime,
           ),
           SizedBox(height: 20.h),
           _buildLabel(
@@ -280,6 +283,47 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         return 'rd';
       default:
         return 'th';
+    }
+  }
+
+  Future<void> _selectTime() async {
+    TimeOfDay initialTime = TimeOfDay.now();
+
+    if (_entryTimeController.text.isNotEmpty) {
+      try {
+        final format = DateFormat('hh:mm a');
+        final dateTime = format.parse(_entryTimeController.text);
+        initialTime = TimeOfDay.fromDateTime(dateTime);
+      } catch (e) {
+        // Fallback to now
+      }
+    }
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primaryBlue,
+              onPrimary: Colors.white,
+              onSurface: AppColors.darkText,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final now = DateTime.now();
+      final dt =
+          DateTime(now.year, now.month, now.day, picked.hour, picked.minute);
+      final format = DateFormat('hh:mm a');
+      setState(() {
+        _entryTimeController.text = format.format(dt);
+      });
     }
   }
 
@@ -373,6 +417,8 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
     required String hint,
     int maxLines = 1,
     required IconData icon,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -383,6 +429,8 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
       child: TextField(
         controller: controller,
         maxLines: maxLines,
+        readOnly: readOnly,
+        onTap: onTap,
         style: TextStyle(
           fontSize: 15.sp,
           fontWeight: FontWeight.bold,
