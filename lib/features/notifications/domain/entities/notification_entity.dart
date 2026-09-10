@@ -38,3 +38,16 @@ class NotificationEntity extends Equatable {
     );
   }
 }
+
+class NotificationData extends Equatable {
+  final List<NotificationEntity> notifications;
+  final int unreadCount;
+
+  const NotificationData({
+    required this.notifications,
+    required this.unreadCount,
+  });
+
+  @override
+  List<Object?> get props => [notifications, unreadCount];
+}

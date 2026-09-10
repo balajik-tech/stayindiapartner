@@ -5,7 +5,7 @@ import 'domain/repositories/notification_repository.dart';
 import 'presentation/cubit/notification_cubit.dart';
 
 void registerNotificationFeature(GetIt sl) {
-  sl.registerFactory(() => NotificationCubit(repository: sl()));
+  sl.registerLazySingleton(() => NotificationCubit(repository: sl()));
 
   sl.registerLazySingleton<NotificationRepository>(
     () => NotificationRepositoryImpl(remoteDataSource: sl()),

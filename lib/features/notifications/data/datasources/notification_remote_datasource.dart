@@ -3,7 +3,7 @@ import '../../../../core/constants/api_constants.dart';
 import '../../domain/entities/notification_entity.dart';
 
 abstract class NotificationRemoteDataSource {
-  Future<List<NotificationEntity>> getNotifications();
+  Future<NotificationData> getNotifications();
   Future<void> markAllAsRead();
   Future<void> sendBulkMessage({
     required List<String> tenantIds,
@@ -18,7 +18,7 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   NotificationRemoteDataSourceImpl(this._dio);
 
   @override
-  Future<List<NotificationEntity>> getNotifications() async {
+  Future<NotificationData> getNotifications() async {
     final response = await _dio.get(
       ApiConstants.notifications,
       queryParameters: {'appType': 'OWNER_APP'},
@@ -28,7 +28,15 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
       final List results = (responseData is Map)
           ? (responseData['items'] ?? responseData['results'] ?? [])
           : [];
-      return results.map((json) => NotificationEntity.fromJson(json)).toList();
+      final int unreadCount = (responseData is Map)
+          ? (responseData['unreadCount'] ?? 0)
+          : 0;
+      
+      final notifications = results.map((json) => NotificationEntity.fromJson(json)).toList();
+      return NotificationData(
+        notifications: notifications,
+        unreadCount: unreadCount,
+      );
     }
     throw Exception('Failed to fetch notifications');
   }

@@ -8,6 +8,7 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:stayindia_owner/features/notifications/presentation/cubit/notification_cubit.dart';
 
 class UnifiedHeader extends StatelessWidget {
   const UnifiedHeader({super.key});
@@ -227,18 +228,25 @@ class UnifiedHeader extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Positioned(
-                          top: 8.h,
-                          right: 8.w,
-                          child: Container(
-                            width: 8.w,
-                            height: 8.w,
-                            decoration: BoxDecoration(
-                              color: AppColors.orangeColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.orangeColor, width: 1.5),
-                            ),
-                          ),
+                        BlocBuilder<NotificationCubit, NotificationState>(
+                          builder: (context, state) {
+                            final bool hasUnread = state is NotificationLoaded && state.unreadCount > 0;
+                            if (!hasUnread) return const SizedBox.shrink();
+                            
+                            return Positioned(
+                              top: 8.h,
+                              right: 8.w,
+                              child: Container(
+                                width: 8.w,
+                                height: 8.w,
+                                decoration: BoxDecoration(
+                                  color: AppColors.orangeColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: AppColors.orangeColor, width: 1.5),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

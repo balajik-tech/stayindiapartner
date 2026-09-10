@@ -16,9 +16,10 @@ class NotificationLoading extends NotificationState {}
 
 class NotificationLoaded extends NotificationState {
   final List<NotificationEntity> notifications;
-  const NotificationLoaded(this.notifications);
+  final int unreadCount;
+  const NotificationLoaded(this.notifications, {this.unreadCount = 0});
   @override
-  List<Object?> get props => [notifications];
+  List<Object?> get props => [notifications, unreadCount];
 }
 
 class NotificationError extends NotificationState {
@@ -36,8 +37,8 @@ class NotificationCubit extends Cubit<NotificationState> {
   Future<void> fetchNotifications() async {
     emit(NotificationLoading());
     try {
-      final notifications = await repository.getNotifications();
-      emit(NotificationLoaded(notifications));
+      final data = await repository.getNotifications();
+      emit(NotificationLoaded(data.notifications, unreadCount: data.unreadCount));
     } catch (e) {
       emit(NotificationError(GlobalErrorMapper.map(e).message));
     }

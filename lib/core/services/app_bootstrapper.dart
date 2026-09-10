@@ -46,6 +46,7 @@ import '../../features/communities/presentation/cubit/community_cubit.dart';
 import '../../features/communities/presentation/cubit/owner_community_cubit.dart';
 import '../../features/communities/presentation/cubit/association_cubit.dart';
 import '../../features/communities/presentation/cubit/association_membership_cubit.dart';
+import '../../features/notifications/presentation/cubit/notification_cubit.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -255,6 +256,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                         state is AuthProfileCompleted) {
                       context.read<GuestSessionCubit>().setGuest(false);
                       context.read<HostelCubit>().getHostels(forceRefresh: true);
+                      context.read<NotificationCubit>().fetchNotifications();
                     }
                     if (state is AuthUnauthenticated) {
                       navigatorKey.currentState?.popUntil(
@@ -311,6 +313,10 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                           ),
                           BlocProvider(
                             create: (context) => di.sl<AssociationCubit>(),
+                          ),
+                          BlocProvider(
+                            create: (context) =>
+                                di.sl<NotificationCubit>()..fetchNotifications(),
                           ),
                           BlocProvider(
                             create: (context) =>
