@@ -98,7 +98,7 @@ class AccordionSectionWidget extends StatelessWidget {
                         Text(
                           subtitle,
                           overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                          maxLines: 2,
                           style: GoogleFonts.inter(
                             color: textSecondary,
                             fontSize: 13,

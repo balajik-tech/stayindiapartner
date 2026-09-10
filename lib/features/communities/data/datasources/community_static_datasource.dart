@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import '../models/committee_member_model.dart';
+import '../models/community_wing_model.dart';
 import '../models/executive_member_model.dart';
 import '../models/it_wing_member_model.dart';
 import '../models/port_member_model.dart';
@@ -17,6 +18,7 @@ abstract class AssociateDataSource {
   Future<List<AssociateExecutiveMemberModel>> getExecutiveMembers(String associationId);
   Future<List<AssociateItWingMemberModel>> getItWingMembers(String associationId);
   Future<List<AssociatePortMemberModel>> getPortMembers(String associationId);
+  Future<List<CommunityWingModel>> getCommunityWings(String associationId);
   Future<List<ExecutiveStructureLeaderModel>> getExecutiveStructure(String execId);
   Future<AssociateCommunityThemeModel> getCommunityTheme(String associationId);
   Future<AssociationDetailsModel> getAssociationDetails(String id);
@@ -154,6 +156,29 @@ class AssociateStaticDataSource implements AssociateDataSource {
       }
     }
     throw Exception('Failed to fetch port members');
+  }
+
+  @override
+  Future<List<CommunityWingModel>> getCommunityWings(String associationId) async {
+    final response = await _dio.get(
+      ApiConstants.communityWings,
+      queryParameters: {'associationId': associationId, 'status': 'ACTIVE'},
+    );
+    if (response.statusCode == 200 && response.data != null) {
+      final raw = response.data;
+      List<dynamic>? list;
+      if (raw is Map<String, dynamic>) {
+        list = raw['data'] as List<dynamic>?;
+      } else if (raw is List<dynamic>) {
+        list = raw;
+      }
+      if (list != null) {
+        return list
+            .map((json) => CommunityWingModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+    }
+    throw Exception('Failed to fetch community wings');
   }
 
   @override

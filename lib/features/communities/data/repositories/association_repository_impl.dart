@@ -1,4 +1,5 @@
 import '../../domain/entities/associate_member_entity.dart';
+import '../../domain/entities/community_wing_entity.dart';
 import '../../domain/entities/executive_member_entity.dart';
 import '../../domain/entities/it_wing_member_entity.dart';
 import '../../domain/entities/port_member_entity.dart';
@@ -28,6 +29,10 @@ class AssociateRepositoryImpl implements AssociateRepository {
   @override
   Future<List<PortMemberEntity>> getPortMembers(String associationId) =>
       dataSource.getPortMembers(associationId);
+
+  @override
+  Future<List<CommunityWingEntity>> getCommunityWings(String associationId) =>
+      dataSource.getCommunityWings(associationId);
 
   @override
   Future<List<ExecutiveStructureLeaderEntity>> getExecutiveStructure(String execId) =>

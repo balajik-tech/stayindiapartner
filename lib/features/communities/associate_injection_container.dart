@@ -11,6 +11,7 @@ import 'domain/usecases/get_executive_committee_usecase.dart';
 import 'domain/usecases/get_executive_members_usecase.dart';
 import 'domain/usecases/get_it_wing_members_usecase.dart';
 import 'domain/usecases/get_port_members_usecase.dart';
+import 'domain/usecases/get_community_wings_usecase.dart';
 import 'domain/usecases/get_executive_structure_usecase.dart';
 import 'domain/usecases/get_community_theme_usecase.dart';
 import 'domain/usecases/get_association_details_usecase.dart';
@@ -41,6 +42,7 @@ void registerAssociateHomeDataFeature(GetIt sl) {
   sl.registerLazySingleton(() => GetExecutiveMembersUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetItWingMembersUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetPortMembersUseCase(sl<AssociateRepository>()));
+  sl.registerLazySingleton(() => GetCommunityWingsUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetExecutiveStructureUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetCommunityThemeUseCase(sl<AssociateRepository>()));
   sl.registerLazySingleton(() => GetAssociationDetailsUseCase(sl<AssociateRepository>()));
@@ -61,6 +63,7 @@ void registerAssociateHomeDataFeature(GetIt sl) {
       getExecutiveMembers: sl<GetExecutiveMembersUseCase>(),
       getItWingMembers: sl<GetItWingMembersUseCase>(),
       getPortMembers: sl<GetPortMembersUseCase>(),
+      getCommunityWings: sl<GetCommunityWingsUseCase>(),
       getCommunityTheme: sl<GetCommunityThemeUseCase>(),
       getAssociationDetails: sl<GetAssociationDetailsUseCase>(),
     ),

@@ -13,6 +13,7 @@ import '../widgets/accordion_section_widget.dart';
 import '../widgets/committee_member_tile.dart';
 import '../widgets/executive_member_tile.dart';
 import '../widgets/it_wing_member_tile.dart';
+import '../widgets/community_wing_member_tile.dart';
 import '../widgets/port_member_tile.dart';
 import '../widgets/hex_color.dart';
 import 'executive_member_detail_page.dart';
@@ -179,6 +180,33 @@ class _CommunityHomeView extends StatelessWidget {
                                   ),
                               ],
                             ),
+                          ],
+
+                          // Community Wings
+                          if (loaded.communityWings.isNotEmpty) ...[
+                            for (final wing in loaded.communityWings)
+                              AccordionSectionWidget(
+                                theme: theme,
+                                title: wing.name,
+                                subtitle: '',//wing.description,
+                                count: wing.members.length,
+                                groupIcon: Icon(Icons.celebration,
+                                    color: theme.primaryColor.toColor(), size: 24),
+                                isExpanded: loaded.expandedSections.contains(
+                                    AccordionSection.communityWings),
+                                onToggle: () => cubit.toggleSection(
+                                    AccordionSection.communityWings),
+                                timeline: timeline,
+                                children: [
+                                  for (var i = 0; i < wing.members.length; i++)
+                                    CommunityWingMemberTile(
+                                      member: wing.members[i],
+                                      theme: theme,
+                                      showDivider: i != wing.members.length - 1,
+                                      timeline: timeline,
+                                    ),
+                                ],
+                              ),
                           ],
                         ],
                       );

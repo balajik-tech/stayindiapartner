@@ -5,6 +5,7 @@ import '../../domain/usecases/get_executive_committee_usecase.dart';
 import '../../domain/usecases/get_executive_members_usecase.dart';
 import '../../domain/usecases/get_it_wing_members_usecase.dart';
 import '../../domain/usecases/get_port_members_usecase.dart';
+import '../../domain/usecases/get_community_wings_usecase.dart';
 import '../../domain/usecases/get_community_theme_usecase.dart';
 import '../../domain/usecases/get_association_details_usecase.dart';
 import 'associate_home_state.dart';
@@ -14,6 +15,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
   final GetExecutiveMembersUseCase getExecutiveMembers;
   final GetItWingMembersUseCase getItWingMembers;
   final GetPortMembersUseCase getPortMembers;
+  final GetCommunityWingsUseCase getCommunityWings;
   final GetCommunityThemeUseCase getCommunityTheme;
   final GetAssociationDetailsUseCase getAssociationDetails;
 
@@ -22,6 +24,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
     required this.getExecutiveMembers,
     required this.getItWingMembers,
     required this.getPortMembers,
+    required this.getCommunityWings,
     required this.getCommunityTheme,
     required this.getAssociationDetails,
   }) : super(const AssociateHomeDataInitial());
@@ -35,6 +38,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
         getExecutiveMembers(associationId),
         getItWingMembers(associationId),
         getPortMembers(associationId),
+        getCommunityWings(associationId),
       ]);
 
       AssociationDetailsEntity? details;
@@ -53,6 +57,7 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
           executiveMembers: (results[2] as List).cast(),
           itWingMembers: (results[3] as List).cast(),
           portMembers: (results[4] as List).cast(),
+          communityWings: (results[5] as List).cast(),
           details: details,
           detailsError: detailsError,
         ),

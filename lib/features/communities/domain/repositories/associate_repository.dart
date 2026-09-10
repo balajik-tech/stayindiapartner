@@ -7,11 +7,14 @@ import '../entities/community_theme_entity.dart';
 import '../entities/association_details_entity.dart';
 import '../entities/association_portal_entity.dart';
 
+import '../entities/community_wing_entity.dart';
+
 abstract class AssociateRepository {
   Future<List<CommitteeMemberEntity>> getExecutiveCommittee(String associationId);
   Future<List<ExecutiveMemberEntity>> getExecutiveMembers(String associationId);
   Future<List<ItWingMemberEntity>> getItWingMembers(String associationId);
   Future<List<PortMemberEntity>> getPortMembers(String associationId);
+  Future<List<CommunityWingEntity>> getCommunityWings(String associationId);
   Future<List<ExecutiveStructureLeaderEntity>> getExecutiveStructure(String execId);
   Future<CommunityThemeEntity> getCommunityTheme(String associationId);
   Future<AssociationDetailsEntity> getAssociationDetails(String id);
