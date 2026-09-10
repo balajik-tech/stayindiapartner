@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/features/auth/presentation/pages/auth_gate.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/registration_personal_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/login_page.dart';
@@ -88,10 +87,7 @@ class _SplashScreenState extends State<SplashScreen>
       // nextScreen = const LoginPage();
       nextScreen = const LoginOnBoardingScreen();
     } else {
-      nextScreen = AuthGate(
-        dashboard: const MainNavigationPage(),
-        registration: const RegistrationPersonalPage(),
-      );
+      nextScreen = const LoginOnBoardingScreen();
     }
 
     Navigator.of(context).pushReplacement(

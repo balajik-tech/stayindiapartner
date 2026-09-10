@@ -9,6 +9,8 @@ import 'package:stayindia_owner/main.dart';
 import 'package:stayindia_owner/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 
+import 'app_bootstrapper.dart';
+
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;

@@ -3,7 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AnimatedFutureOfLivingText extends StatefulWidget {
-  const AnimatedFutureOfLivingText({super.key});
+  final bool animate;
+  const AnimatedFutureOfLivingText({super.key, this.animate = true});
 
   @override
   State<AnimatedFutureOfLivingText> createState() => _AnimatedFutureOfLivingTextState();
@@ -21,11 +22,15 @@ class _AnimatedFutureOfLivingTextState extends State<AnimatedFutureOfLivingText>
       duration: const Duration(milliseconds: 1400),
     );
     
-    Future.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        _controller.forward();
-      }
-    });
+    if (widget.animate) {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          _controller.forward();
+        }
+      });
+    } else {
+      _controller.value = 1.0;
+    }
   }
 
   @override
@@ -74,7 +79,7 @@ class _AnimatedFutureOfLivingTextState extends State<AnimatedFutureOfLivingText>
             child: Text(
               word['text'] as String,
               style: GoogleFonts.outfit(
-                fontSize: 20.sp,
+                fontSize: 20, // Use fixed pixels as ScreenUtil isn't ready during bootstrap
                 fontWeight: FontWeight.w900,
                 color: word['color'] as Color,
                 letterSpacing: -0.2,

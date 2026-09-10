@@ -16,6 +16,7 @@ import 'package:stayindia_owner/features/stock_management/presentation/pages/sto
 import 'package:stayindia_owner/features/stock_management/presentation/cubit/stock_cubit.dart';
 import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import '../../../../core/services/app_bootstrapper.dart';
 import '../../../bank_account/presentation/pages/bank_accounts_page.dart';
 import '../../../digilocker/presentation/pages/DigiLockerStorage.dart';
 import '../../../finance/presentation/cubit/payment_report_cubit.dart';
