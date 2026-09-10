@@ -190,7 +190,7 @@ class SummaryCardsSection extends StatelessWidget {
                 'total_rooms',
                 isLoading ? '...' : totalRoomsCount.toString(),
                 'total_rooms'.tr(),
-                const Color(0xFFF97316),
+                const Color(0xFF007FFF),
                 Icons.door_front_door_rounded,
                 state.selectedMetric,
               ),
