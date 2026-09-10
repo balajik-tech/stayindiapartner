@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-class ShareAppBottomSheet extends StatelessWidget {
+class ShareAppBottomSheet extends StatefulWidget {
   const ShareAppBottomSheet({
     super.key,
     this.appName = 'Stay India Partner',
@@ -27,15 +27,16 @@ class ShareAppBottomSheet extends StatelessWidget {
   final String shareMessage;
   final String appIconAsset;
 
-  /// Opens the "Share app" bottom sheet. This is the only method
-  /// callers outside this file need to use.
   static Future<void> show(
       BuildContext context, {
         String appName = 'Stay India Partner',
         String appTagline = 'Manage Simply · Grow Rapidly',
         String shareLink = 'https://stayindia.in/partner',
         String shareMessage =
-        "Hi! I’ve been using Stay India Partner for my PG, and it's a game-changer. Get 100% verified tenants with lifetime free leads—no broker commissions! Easily manage beds, rent, and tenants all in one place.Download the app and grow your business rapidly:",
+        "Hi! I’ve been using Stay India Partner for my PG, and it's a game-changer. "
+            "Get 100% verified tenants with lifetime free leads—no broker commissions! "
+            "Easily manage beds, rent, and tenants all in one place. "
+            "Download the app and grow your business rapidly:",
         String appIconAsset = 'assets/images/app_icon.png',
       }) {
     return showModalBottomSheet<void>(
@@ -52,7 +53,42 @@ class ShareAppBottomSheet extends StatelessWidget {
     );
   }
 
-  String get _fullMessage => '$shareMessage $shareLink';
+  @override
+  State<ShareAppBottomSheet> createState() =>
+      _ShareAppBottomSheetState();
+}
+
+class _ShareAppBottomSheetState
+    extends State<ShareAppBottomSheet> {
+
+  bool _isActionInProgress = false;
+
+  String get _fullMessage =>
+      '${widget.shareMessage} ${widget.shareLink}';
+
+  /// Only one action can run at a time.
+  Future<void> _runAction(
+      Future<void> Function() action,
+      ) async {
+    if (_isActionInProgress) {
+      return;
+    }
+
+    // Lock immediately.
+    _isActionInProgress = true;
+
+    try {
+      await action();
+    } catch (e) {
+      debugPrint('Share action error: $e');
+    } finally {
+      _isActionInProgress = false;
+
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +96,16 @@ class ShareAppBottomSheet extends StatelessWidget {
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(32),
+          ),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          20,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +135,7 @@ class ShareAppBottomSheet extends StatelessWidget {
         width: 40,
         height: 4,
         decoration: BoxDecoration(
-          color: Color(0xFFcecece),
+          color: const Color(0xFFCECECE),
           borderRadius: BorderRadius.circular(2),
         ),
       ),
@@ -105,11 +148,20 @@ class ShareAppBottomSheet extends StatelessWidget {
       children: [
         Text(
           'refer_friend'.tr(),
-          style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w800,color: Colors.black),
+          style: GoogleFonts.inter(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: Colors.black,
+          ),
         ),
         IconButton(
-          icon: const Icon(Icons.close,color: Colors.grey),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(
+            Icons.close,
+            color: Colors.grey,
+          ),
+          onPressed: _isActionInProgress
+              ? null
+              : () => Navigator.of(context).pop(),
         ),
       ],
     );
@@ -119,16 +171,18 @@ class ShareAppBottomSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFfcfcfb),
+        color: const Color(0xFFFCFCFB),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           ClipRRect(
+            borderRadius: BorderRadius.circular(8),
             child: Image.asset(
               'assets/images/logo.jpg',
               width: 48,
               height: 48,
+              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 12),
@@ -137,17 +191,20 @@ class ShareAppBottomSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  appName,
+                  widget.appName,
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: Colors.black
+                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  appTagline,
-                  style: GoogleFonts.inter(fontSize: 13, color: Color(0xFF575654)),
+                  widget.appTagline,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: const Color(0xFF575654),
+                  ),
                 ),
               ],
             ),
@@ -159,17 +216,25 @@ class ShareAppBottomSheet extends StatelessWidget {
 
   Widget _buildMessageCard(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 0,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFFfcfcfb),
+        color: const Color(0xFFFCFCFB),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            shareMessage,
-            style:  GoogleFonts.inter(fontSize: 15, height: 1.4,color: Colors.black,fontWeight: FontWeight.w500),
+            widget.shareMessage,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              height: 1.4,
+              color: Colors.black,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 24),
           const Divider(
@@ -179,7 +244,6 @@ class ShareAppBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Image.asset(
                 'assets/images/link.png',
@@ -188,22 +252,18 @@ class ShareAppBottomSheet extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                flex: 8, // More space for the link
+                flex: 8,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        shareLink,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: AppColors.primaryBlue,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    Text(
+                      widget.shareLink,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: AppColors.primaryBlue,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
@@ -217,11 +277,14 @@ class ShareAppBottomSheet extends StatelessWidget {
                   ],
                 ),
               ),
-
               Expanded(
                 flex: 2,
                 child: TextButton(
-                  onPressed: () => _copyLink(context),
+                  onPressed: _isActionInProgress
+                      ? null
+                      : () => _runAction(
+                        () => _copyLink(context),
+                  ),
                   child: Text(
                     'Copy',
                     style: GoogleFonts.inter(
@@ -232,7 +295,7 @@ class ShareAppBottomSheet extends StatelessWidget {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -244,35 +307,54 @@ class ShareAppBottomSheet extends StatelessWidget {
       children: [
         _ShareActionButton(
           icon: Icons.chat_bubble,
-          image:'assets/images/whatsapp_icon.png',
+          image: 'assets/images/whatsapp_icon.png',
           iconColor: const Color(0xFF25D366),
           backgroundColor: const Color(0xFFD9F2DE),
           label: 'WhatsApp',
-          onTap: () => _shareViaWhatsApp(context),
+          onTap: _isActionInProgress
+              ? () {}
+              : () => _runAction(
+                () => _shareViaWhatsApp(context),
+          ),
         ),
+
         _ShareActionButton(
           icon: Icons.sms,
-          image:'assets/images/comment.png',
+          image: 'assets/images/comment.png',
           iconColor: const Color(0xFF1565C0),
           backgroundColor: const Color(0xFFD6E7FA),
           label: 'SMS',
-          onTap: () => _shareViaSms(context),
+          onTap: _isActionInProgress
+              ? () {}
+              : () => _runAction(
+                () => _shareViaSms(context),
+          ),
         ),
+
         _ShareActionButton(
           icon: Icons.copy_all_outlined,
-          image:'assets/images/copy.png',
+          image: 'assets/images/copy.png',
           iconColor: Colors.black87,
           backgroundColor: Colors.white,
           label: 'Copy link',
-          onTap: () => _copyLink(context),
+          onTap: _isActionInProgress
+              ? () {}
+              : () => _runAction(
+                () => _copyLink(context),
+          ),
         ),
+
         _ShareActionButton(
           icon: Icons.more_horiz,
-          image:'',
+          image: '',
           iconColor: Colors.black87,
-          backgroundColor:Colors.white,
+          backgroundColor: Colors.white,
           label: 'More',
-          onTap: () => _shareViaSystemSheet(context),
+          onTap: _isActionInProgress
+              ? () {}
+              : () => _runAction(
+                () => _shareViaSystemSheet(context),
+          ),
         ),
       ],
     );
@@ -281,15 +363,29 @@ class ShareAppBottomSheet extends StatelessWidget {
   Widget _buildOrDivider() {
     return Row(
       children: [
-        Expanded(child: Divider(color: Colors.grey.shade300)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            'or share in person',
-            style: GoogleFonts.inter(color: Color(0xFF898782), fontSize: 13,fontWeight: FontWeight.w500),
+        Expanded(
+          child: Divider(
+            color: Colors.grey.shade300,
           ),
         ),
-        Expanded(child: Divider(color: Colors.grey.shade300)),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+          ),
+          child: Text(
+            'or share in person',
+            style: GoogleFonts.inter(
+              color: const Color(0xFF898782),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Divider(
+            color: Colors.grey.shade300,
+          ),
+        ),
       ],
     );
   }
@@ -297,20 +393,21 @@ class ShareAppBottomSheet extends StatelessWidget {
   Widget _buildQrSection(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => _showEnlargedQr(context),
+      onTap: _isActionInProgress
+          ? null
+          : () => _showEnlargedQr(context),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFfcfcfb),
+          color: const Color(0xFFFCFCFB),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           children: [
             QrImageView(
-              data: shareLink,
+              data: widget.shareLink,
               version: QrVersions.auto,
               size: 64,
-              // backgroundColor: Colors.white,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -319,12 +416,20 @@ class ShareAppBottomSheet extends StatelessWidget {
                 children: [
                   Text(
                     'Scan to download',
-                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600,color: Colors.black),
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     'Tap to enlarge for scanning',
-                    style: GoogleFonts.inter(fontSize: 13, color: Color(0xFF52514f),fontWeight: FontWeight.w500),
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF52514F),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -335,35 +440,47 @@ class ShareAppBottomSheet extends StatelessWidget {
     );
   }
 
-  // ---- Actions ----
-
   Future<void> _copyLink(BuildContext context) async {
-    await Clipboard.setData(ClipboardData(text: shareLink));
+    await Clipboard.setData(
+      ClipboardData(
+        text: widget.shareLink,
+      ),
+    );
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Link copied to clipboard')),
+        const SnackBar(
+          content: Text('Link copied to clipboard'),
+        ),
       );
     }
   }
 
-  Future<void> _shareViaWhatsApp(BuildContext context) async {
+  Future<void> _shareViaWhatsApp(
+      BuildContext context,
+      ) async {
     final uri = Uri.parse(
       'whatsapp://send?text=${Uri.encodeComponent(_fullMessage)}',
     );
+
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else if (context.mounted) {
-      // Fallback: WhatsApp not installed, use system share sheet instead.
       await _shareViaSystemSheet(context);
     }
   }
 
-  Future<void> _shareViaSms(BuildContext context) async {
+  Future<void> _shareViaSms(
+      BuildContext context,
+      ) async {
     final uri = Uri(
       scheme: 'sms',
       path: '',
-      queryParameters: {'body': _fullMessage},
+      queryParameters: {
+        'body': _fullMessage,
+      },
     );
+
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else if (context.mounted) {
@@ -371,8 +488,13 @@ class ShareAppBottomSheet extends StatelessWidget {
     }
   }
 
-  Future<void> _shareViaSystemSheet(BuildContext context) async {
-    await Share.share(_fullMessage, subject: appName);
+  Future<void> _shareViaSystemSheet(
+      BuildContext context,
+      ) async {
+    await Share.share(
+      _fullMessage,
+      subject: widget.appName,
+    );
   }
 
   void _showEnlargedQr(BuildContext context) {
@@ -389,18 +511,23 @@ class ShareAppBottomSheet extends StatelessWidget {
             children: [
               const Text(
                 'Scan to download',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 20),
               QrImageView(
-                data: shareLink,
+                data: widget.shareLink,
                 version: QrVersions.auto,
                 size: 240,
                 backgroundColor: Colors.white,
               ),
               const SizedBox(height: 20),
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
                 child: const Text('Close'),
               ),
             ],

@@ -49,7 +49,7 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>  with RouteAware{
+class _ProfilePageState extends State<ProfilePage> with RouteAware {
   @override
   void initState() {
     super.initState();
@@ -88,7 +88,8 @@ class _ProfilePageState extends State<ProfilePage>  with RouteAware{
     final role = owner?.role.toLowerCase() ?? 'owner';
     final bool isStaff = role != 'owner' && role != 'manager';
     final hostelState = context.watch<HostelCubit>().state;
-    final bool hasHostels = hostelState is HostelLoaded && hostelState.hostels.isNotEmpty;
+    final bool hasHostels =
+        hostelState is HostelLoaded && hostelState.hostels.isNotEmpty;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -222,8 +223,7 @@ class _ProfilePageState extends State<ProfilePage>  with RouteAware{
 
                     if (!isStaff) ...[
                       _buildGridSection('2. ${'hostel_configuration'.tr()}', [
-
-                        if(hasHostels)...[
+                        if (hasHostels) ...[
                           _ProfileCard(
                             icon: Icons.business_rounded,
                             title: 'hostel_profile'.tr(),
@@ -235,7 +235,7 @@ class _ProfilePageState extends State<ProfilePage>  with RouteAware{
                                 builder: (context) => const HostelProfilePage(),
                               ),
                             ),
-                          )
+                          ),
                         ],
                         _ProfileCard(
                           icon: Icons.wifi_rounded,
@@ -375,19 +375,20 @@ class _ProfilePageState extends State<ProfilePage>  with RouteAware{
                           title: 'refer_friend'.tr(),
                           iconBgColor: const Color(0xFFFCE7F3),
                           iconColor: const Color(0xFFDB2777),
-                          onTap: () async {
+                          onTap: () => _showBottomSheetOnce(context, () async {
                             final referralId = await context
                                 .read<ProfileCubit>()
                                 .generateReferral();
-                            if (context.mounted) {
-                              ShareAppBottomSheet.show(
-                                context,
-                                shareLink: referralId != null
-                                    ? '${ApiConstants.partnerAppLink}?ref=$referralId'
-                                    : ApiConstants.partnerAppLink,
-                              );
-                            }
-                          },
+
+                            if (!context.mounted) return;
+
+                            await ShareAppBottomSheet.show(
+                              context,
+                              shareLink: referralId != null
+                                  ? '${ApiConstants.partnerAppLink}?ref=$referralId'
+                                  : ApiConstants.partnerAppLink,
+                            );
+                          }),
                         ),
                         _ProfileCard(
                           icon: Icons.star_rate_rounded,
@@ -472,19 +473,20 @@ class _ProfilePageState extends State<ProfilePage>  with RouteAware{
                           title: 'share_app'.tr(),
                           iconBgColor: const Color(0xFFF5F3FF),
                           iconColor: const Color(0xFF7C3AED),
-                          onTap: () async {
+                          onTap: () => _showBottomSheetOnce(context, () async {
                             final referralId = await context
                                 .read<ProfileCubit>()
                                 .generateReferral();
-                            if (context.mounted) {
-                              ShareAppBottomSheet.show(
-                                context,
-                                shareLink: referralId != null
-                                    ? '${ApiConstants.partnerAppLink}?ref=$referralId'
-                                    : ApiConstants.partnerAppLink,
-                              );
-                            }
-                          },
+
+                            if (!context.mounted) return;
+
+                            await ShareAppBottomSheet.show(
+                              context,
+                              shareLink: referralId != null
+                                  ? '${ApiConstants.partnerAppLink}?ref=$referralId'
+                                  : ApiConstants.partnerAppLink,
+                            );
+                          }),
                         ),
                       _ProfileCard(
                         icon: Icons.logout_rounded,
@@ -1567,6 +1569,26 @@ class _ProfilePageState extends State<ProfilePage>  with RouteAware{
       }
     }
   }
+
+  bool _isBottomSheetInProgress = false;
+
+  Future<void> _showBottomSheetOnce(
+      BuildContext context,
+      Future<void> Function() action,
+      ) async {
+    if (_isBottomSheetInProgress) return;
+
+    _isBottomSheetInProgress = true;
+
+    try {
+      await action();
+    } catch (e, stackTrace) {
+      debugPrint('Bottom sheet error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      _isBottomSheetInProgress = false;
+    }
+  }
 }
 
 class _DeactivateOptionTile extends StatelessWidget {
@@ -1643,7 +1665,7 @@ class _DeactivateOptionTile extends StatelessWidget {
   }
 }
 
-class _ProfileCard extends StatelessWidget {
+class _ProfileCard extends StatefulWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
@@ -1663,11 +1685,40 @@ class _ProfileCard extends StatelessWidget {
   });
 
   @override
+  State<_ProfileCard> createState() => _ProfileCardState();
+}
+
+class _ProfileCardState extends State<_ProfileCard> {
+  // Guards against rapid double/multi taps firing onTap (and hence
+  // Navigator.push) more than once before the first tap is handled.
+  bool _isHandlingTap = false;
+
+  void _handleTap() {
+    // Ignore all additional clicks
+    if (_isHandlingTap) return;
+
+    _isHandlingTap = true;
+
+    widget.onTap.call();
+
+    // Reset after the action starts
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) {
+        setState(() {
+          _isHandlingTap = false;
+        });
+      } else {
+        _isHandlingTap = false;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bool hasImage = imageUrl?.trim().isNotEmpty ?? false;
+    final bool hasImage = widget.imageUrl?.trim().isNotEmpty ?? false;
 
     return BouncingWrapper(
-      onTap: onTap,
+      onTap: _handleTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
         decoration: BoxDecoration(
@@ -1687,25 +1738,25 @@ class _ProfileCard extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
-                color: iconBgColor ?? AppColors.backgroundSecondary,
+                color: widget.iconBgColor ?? AppColors.backgroundSecondary,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: hasImage
-                  ? _buildImage(imageUrl!)
+                  ? _buildImage(widget.imageUrl!)
                   : Icon(
-                      icon,
-                      color: iconColor ?? AppColors.primaryBlue,
+                      widget.icon,
+                      color: widget.iconColor ?? AppColors.primaryBlue,
                       size: 18.sp,
                     ),
             ),
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
-                title,
+                widget.title,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
-                  color: titleColor ?? AppColors.textPrimary,
+                  color: widget.titleColor ?? AppColors.textPrimary,
                   height: 1.2,
                 ),
                 maxLines: 2,
