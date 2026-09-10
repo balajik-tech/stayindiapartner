@@ -2068,6 +2068,12 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
+                  cacheHeight: 400, // Optimized to prevent OutOfMemory crashes on Android
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Icon(Icons.broken_image, color: Colors.red),
+                    );
+                  },
                 ),
               ),
               Positioned(
