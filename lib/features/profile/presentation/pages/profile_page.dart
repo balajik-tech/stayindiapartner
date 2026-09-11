@@ -40,6 +40,7 @@ import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_condi
 import 'government_licenses_page.dart';
 import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/request_service/presentation/pages/request_service_page.dart';
 import 'package:stayindia_owner/main.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -380,13 +381,12 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                               : 'raise_service_request'.tr(),
                           iconBgColor: const Color(0xFFEFF6FF),
                           iconColor: const Color(0xFF2563EB),
-                          onTap: () {},
-                          // onTap: () => Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const MaintenancePage(),
-                          //   ),
-                          // ),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RequestServicePage(),
+                            ),
+                          ),
                         ),
                         _ProfileCard(
                           icon: Icons.assignment_rounded,
@@ -395,13 +395,12 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                               : 'my_requests'.tr(),
                           iconBgColor: const Color(0xFFECFDF5),
                           iconColor: const Color(0xFF059669),
-                          onTap: () {},
-                          // onTap: () => Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const MaintenancePage(),
-                          //   ),
-                          // ),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RequestServicePage(),
+                            ),
+                          ),
                         ),
                       ],
                     ),

@@ -26,6 +26,7 @@ import 'package:stayindia_owner/features/property_setup/property_setup_injection
 import 'package:stayindia_owner/features/offers/offers_injections.dart';
 import 'package:stayindia_owner/features/movement_history/movement_injections.dart';
 import 'package:stayindia_owner/features/razorpay/razorpay_injections.dart';
+import 'package:stayindia_owner/features/request_service/request_service_injections.dart';
 import 'package:stayindia_owner/core/theme/theme_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/guest_session_cubit.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
@@ -61,6 +62,7 @@ Future<void> init() async {
   registerOffersFeature(sl);
   registerMovementFeature(sl);
   registerRazorpayFeature(sl);
+  registerRequestServiceFeature(sl);
 
   // Register DigiLocker dependencies
   DigiLockerDI.init(sl);
