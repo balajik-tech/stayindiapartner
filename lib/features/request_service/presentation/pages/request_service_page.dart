@@ -15,12 +15,16 @@ class ServiceOption {
   final String title;
   final String subtitle;
   final IconData icon;
+  final Color bgColor;
+  final Color iconColor;
 
   const ServiceOption({
     required this.id,
     required this.title,
     required this.subtitle,
     required this.icon,
+    required this.bgColor,
+    required this.iconColor,
   });
 }
 
@@ -45,50 +49,42 @@ class _RequestServicePageState extends State<RequestServicePage> {
     ServiceOption(
       id: 'cook',
       title: 'Cook',
-      subtitle: 'Chef, meal preparation, kitchen assistant',
-      icon: Icons.restaurant_rounded,
+      subtitle: 'Full meal prep for residents',
+      icon: Icons.soup_kitchen_outlined,
+      bgColor: Color(0xFFFFF3E0),
+      iconColor: Color(0xFFEA580C),
+    ),
+    ServiceOption(
+      id: 'assistant_cook',
+      title: 'Assistant cook',
+      subtitle: 'Prep, chopping, cleanup',
+      icon: Icons.flatware_rounded,
+      bgColor: Color(0xFFFCE4EC),
+      iconColor: Color(0xFFEC4899),
     ),
     ServiceOption(
       id: 'electrician',
       title: 'Electrician',
-      subtitle: 'Switchboards, wiring, fans, light repairs',
+      subtitle: 'Wiring, fittings, repairs',
       icon: Icons.bolt_rounded,
+      bgColor: Color(0xFFFEF9C3),
+      iconColor: Color(0xFFD97706),
+    ),
+    ServiceOption(
+      id: 'carpenter',
+      title: 'Carpenter',
+      subtitle: 'Beds, doors, furniture',
+      icon: Icons.handyman_rounded,
+      bgColor: Color(0xFFE0F2FE),
+      iconColor: Color(0xFF0284C7),
     ),
     ServiceOption(
       id: 'plumber',
       title: 'Plumber',
-      subtitle: 'Tap leakage, pipe repair, drainage, bathroom',
-      icon: Icons.plumbing_rounded,
-    ),
-    ServiceOption(
-      id: 'cleaning',
-      title: 'Cleaning & Housekeeping',
-      subtitle: 'Deep cleaning, room sweeping, waste disposal',
-      icon: Icons.cleaning_services_rounded,
-    ),
-    ServiceOption(
-      id: 'wifi',
-      title: 'Internet & Wi-Fi',
-      subtitle: 'Router reset, cable check, network issues',
-      icon: Icons.wifi_rounded,
-    ),
-    ServiceOption(
-      id: 'carpenter',
-      title: 'Carpentry & Furniture',
-      subtitle: 'Door lock, bed repair, wardrobe fixing',
-      icon: Icons.handyman_rounded,
-    ),
-    ServiceOption(
-      id: 'painting',
-      title: 'Painting & Touchup',
-      subtitle: 'Wall painting, dampness touchup, plaster',
-      icon: Icons.format_paint_rounded,
-    ),
-    ServiceOption(
-      id: 'other',
-      title: 'Other Maintenance',
-      subtitle: 'General maintenance and repair tasks',
-      icon: Icons.miscellaneous_services_rounded,
+      subtitle: 'Leaks, taps, drainage',
+      icon: Icons.water_drop_outlined,
+      bgColor: Color(0xFFE0F7FA),
+      iconColor: Color(0xFF0891B2),
     ),
   ];
 
@@ -229,120 +225,140 @@ class _RequestServicePageState extends State<RequestServicePage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
-      backgroundColor: Colors.white,
       builder: (context) {
         return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          padding: EdgeInsets.only(
+            left: 20.w,
+            right: 20.w,
+            top: 10.h,
+            bottom: MediaQuery.of(context).padding.bottom + 20.h,
           ),
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Top drag indicator
+              Center(
+                child: Container(
+                  width: 36.w,
+                  height: 4.h,
+                  margin: EdgeInsets.only(bottom: 16.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+              ),
+              // Header Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Select a Service',
+                    'Select a service',
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF0F172A),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: EdgeInsets.all(6.r),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF1F5F9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 18.r,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const Divider(),
-              SizedBox(height: 8.h),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: _services.length,
-                  separatorBuilder: (_, _) => SizedBox(height: 10.h),
-                  itemBuilder: (context, index) {
-                    final service = _services[index];
-                    final isSelected = _selectedService?.id == service.id;
-                    return BouncingWrapper(
-                      onTap: () {
-                        setState(() {
-                          _selectedService = service;
-                        });
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(14.r),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFEFF6FF)
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(14.r),
-                          border: Border.all(
+              SizedBox(height: 16.h),
+              // Options List
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _services.length,
+                separatorBuilder: (_, _) => SizedBox(height: 14.h),
+                itemBuilder: (context, index) {
+                  final service = _services[index];
+                  final isSelected = _selectedService?.id == service.id;
+                  return BouncingWrapper(
+                    onTap: () {
+                      setState(() {
+                        _selectedService = service;
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                      padding: EdgeInsets.symmetric(vertical: 4.h),
+                      child: Row(
+                        children: [
+                          // Custom color icon background
+                          Container(
+                            width: 44.r,
+                            height: 44.r,
+                            decoration: BoxDecoration(
+                              color: service.bgColor,
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Icon(
+                              service.icon,
+                              color: service.iconColor,
+                              size: 22.r,
+                            ),
+                          ),
+                          SizedBox(width: 14.w),
+                          // Title & Subtitle
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  service.title,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  service.subtitle,
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    color: const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          // Radio selection indicator
+                          Icon(
+                            isSelected
+                                ? Icons.radio_button_checked_rounded
+                                : Icons.radio_button_unchecked_rounded,
                             color: isSelected
                                 ? const Color(0xFF2563EB)
-                                : const Color(0xFFE2E8F0),
-                            width: isSelected ? 1.5 : 1.0,
+                                : const Color(0xFFCBD5E1),
+                            size: 24.r,
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(10.r),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? const Color(0xFFDBEAFE)
-                                    : const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                              child: Icon(
-                                service.icon,
-                                color: isSelected
-                                    ? const Color(0xFF2563EB)
-                                    : const Color(0xFF64748B),
-                                size: 22.r,
-                              ),
-                            ),
-                            SizedBox(width: 14.w),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    service.title,
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF1E293B),
-                                    ),
-                                  ),
-                                  SizedBox(height: 2.h),
-                                  Text(
-                                    service.subtitle,
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: const Color(0xFF64748B),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (isSelected)
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                color: Color(0xFF2563EB),
-                              ),
-                          ],
-                        ),
+                        ],
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
