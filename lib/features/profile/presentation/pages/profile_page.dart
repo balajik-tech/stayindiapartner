@@ -368,8 +368,46 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       ],
                     ]),
 
+                    _buildGridSection(
+                      '4. ${'services'.tr() == 'services' ? 'Stay India Services' : 'services'.tr()}',
+                      [
+                        _ProfileCard(
+                          icon: Icons.build_rounded,
+                          title:
+                              'raise_service_request'.tr() ==
+                                  'raise_service_request'
+                              ? 'Raise a StayIndia request'
+                              : 'raise_service_request'.tr(),
+                          iconBgColor: const Color(0xFFEFF6FF),
+                          iconColor: const Color(0xFF2563EB),
+                          onTap: () {},
+                          // onTap: () => Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => const MaintenancePage(),
+                          //   ),
+                          // ),
+                        ),
+                        _ProfileCard(
+                          icon: Icons.assignment_rounded,
+                          title: 'my_requests'.tr() == 'my_requests'
+                              ? 'My requests'
+                              : 'my_requests'.tr(),
+                          iconBgColor: const Color(0xFFECFDF5),
+                          iconColor: const Color(0xFF059669),
+                          onTap: () {},
+                          // onTap: () => Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => const MaintenancePage(),
+                          //   ),
+                          // ),
+                        ),
+                      ],
+                    ),
+
                     if (!isStaff) ...[
-                      _buildGridSection('4. ${'tools_reports'.tr()}', [
+                      _buildGridSection('5. ${'tools_reports'.tr()}', [
                         _ProfileCard(
                           icon: Icons.card_giftcard_rounded,
                           title: 'refer_friend'.tr(),
@@ -466,7 +504,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       ]),
                     ],
 
-                    _buildGridSection('5. ${'application'.tr()}', [
+                    _buildGridSection('6. ${'application'.tr()}', [
                       if (!isStaff)
                         _ProfileCard(
                           icon: Icons.share_rounded,
@@ -1573,9 +1611,9 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
   bool _isBottomSheetInProgress = false;
 
   Future<void> _showBottomSheetOnce(
-      BuildContext context,
-      Future<void> Function() action,
-      ) async {
+    BuildContext context,
+    Future<void> Function() action,
+  ) async {
     if (_isBottomSheetInProgress) return;
 
     _isBottomSheetInProgress = true;
