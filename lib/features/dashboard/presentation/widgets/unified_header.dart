@@ -8,7 +8,6 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/notifications/presentation/pages/notifications_page.dart';
-import 'package:stayindia_owner/features/notifications/presentation/cubit/notification_cubit.dart';
 
 class UnifiedHeader extends StatelessWidget {
   const UnifiedHeader({super.key});
@@ -114,24 +113,24 @@ class UnifiedHeader extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Container(
-                            width: 32.w,
-                            height: 32.w,
-                            decoration: BoxDecoration(
-                              color:  AppColors.orangeColor,
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                            child: Center(
-                              child: Image.asset(
-                                'assets/images/hostel.png',
-                                width: 20,
-                                height: 20,
-                                fit: BoxFit.contain,
-                                colorBlendMode: BlendMode.srcIn,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10.w),
+                          // Container(
+                          //   width: 32.w,
+                          //   height: 32.w,
+                          //   decoration: BoxDecoration(
+                          //     color:  AppColors.orangeColor,
+                          //     borderRadius: BorderRadius.circular(10.r),
+                          //   ),
+                          //   child: Center(
+                          //     child: Image.asset(
+                          //       'assets/images/hostel.png',
+                          //       width: 20,
+                          //       height: 20,
+                          //       fit: BoxFit.contain,
+                          //       colorBlendMode: BlendMode.srcIn,
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(width: 10.w),
                           Expanded(
                             child: Text(
                               selectedHostelName,
@@ -183,8 +182,29 @@ class UnifiedHeader extends StatelessWidget {
               //   ),
               // ),
 
+              Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFf4f5f9),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: const Color(0xFFE8ECF5), // Border color
+                    width: 1.0,
+                  ),
+                ),
+                child:Center(
+                  child: Image.asset(
+                    'assets/images/whatsapp.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                    // color: Color(0xFF0a3462),
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
+                ),
+              ),
               SizedBox(width: 12.w),
-
               Semantics(
                 label: StringUtils.translate('notifications', context: context),
                 button: true,
@@ -228,25 +248,18 @@ class UnifiedHeader extends StatelessWidget {
                             ),
                           ),
                         ),
-                        BlocBuilder<NotificationCubit, NotificationState>(
-                          builder: (context, state) {
-                            final bool hasUnread = state is NotificationLoaded && state.unreadCount > 0;
-                            if (!hasUnread) return const SizedBox.shrink();
-                            
-                            return Positioned(
-                              top: 8.h,
-                              right: 8.w,
-                              child: Container(
-                                width: 8.w,
-                                height: 8.w,
-                                decoration: BoxDecoration(
-                                  color: AppColors.orangeColor,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.orangeColor, width: 1.5),
-                                ),
-                              ),
-                            );
-                          },
+                        Positioned(
+                          top: 8.h,
+                          right: 8.w,
+                          child: Container(
+                            width: 8.w,
+                            height: 8.w,
+                            decoration: BoxDecoration(
+                              color: AppColors.orangeColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.orangeColor, width: 1.5),
+                            ),
+                          ),
                         ),
                       ],
                     ),
