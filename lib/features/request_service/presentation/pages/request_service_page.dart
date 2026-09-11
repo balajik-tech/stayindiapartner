@@ -6,8 +6,8 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
-import 'package:stayindia_owner/features/maintenance/presentation/pages/maintenance_page.dart';
 import 'package:stayindia_owner/features/request_service/presentation/cubit/request_service_cubit.dart';
+import 'package:stayindia_owner/features/request_service/presentation/pages/my_requests_page.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
 class ServiceOption {
@@ -457,7 +457,7 @@ class _RequestServicePageState extends State<RequestServicePage> {
             );
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const MaintenancePage()),
+              MaterialPageRoute(builder: (_) => const MyRequestsPage()),
             );
           } else if (state is RequestServiceError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -499,7 +499,7 @@ class _RequestServicePageState extends State<RequestServicePage> {
                 tooltip: 'My requests',
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const MaintenancePage()),
+                  MaterialPageRoute(builder: (_) => const MyRequestsPage()),
                 ),
               ),
             ],

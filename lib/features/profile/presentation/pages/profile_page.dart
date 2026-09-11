@@ -41,6 +41,7 @@ import 'government_licenses_page.dart';
 import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/request_service/presentation/pages/request_service_page.dart';
+import 'package:stayindia_owner/features/request_service/presentation/pages/my_requests_page.dart';
 import 'package:stayindia_owner/main.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -398,7 +399,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RequestServicePage(),
+                              builder: (context) => const MyRequestsPage(),
                             ),
                           ),
                         ),
