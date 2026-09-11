@@ -8,6 +8,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/request_service/presentation/cubit/request_service_cubit.dart';
 import 'package:stayindia_owner/features/request_service/presentation/pages/my_requests_page.dart';
+import 'package:stayindia_owner/features/request_service/presentation/pages/request_sent_page.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
 class ServiceOption {
@@ -449,15 +450,19 @@ class _RequestServicePageState extends State<RequestServicePage> {
       child: BlocListener<RequestServiceCubit, RequestServiceState>(
         listener: (context, state) {
           if (state is RequestServiceSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Service request sent successfully!'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            final String reqId = 'SR-${state.request.id.substring(0, state.request.id.length > 4 ? 4 : state.request.id.length).toUpperCase()}';
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const MyRequestsPage()),
+              MaterialPageRoute(
+                builder: (_) => RequestSentPage(
+                  requestId: reqId.isEmpty || reqId == 'SR-' ? 'SR-2419' : reqId,
+                  serviceType: _selectedService?.title ?? 'Cook',
+                  hostelName: activeHostel.name,
+                  date: DateFormat('E d MMM').format(_selectedDate),
+                  slot: _selectedSlot,
+                  slotTime: _selectedSlot == 'Morning' ? '7 am – 12 pm' : '4 pm – 9 pm',
+                ),
+              ),
             );
           } else if (state is RequestServiceError) {
             ScaffoldMessenger.of(context).showSnackBar(
