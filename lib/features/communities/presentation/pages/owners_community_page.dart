@@ -22,6 +22,7 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/owners_list_page.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
@@ -54,8 +55,8 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     TextEditingController(),
   ];
 
-  // String _activeFeedType = 'OFFICIAL';
-  String _activeFeedType = 'GLOBAL';
+  String _activeFeedType = 'OFFICIAL';
+  // String _activeFeedType = 'GLOBAL';
 
   Set<String> _readPostIds = {};
   Map<String, int> _unreadMessageCounts = {};
@@ -260,62 +261,64 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
               ),
             ),
           ),
-          Expanded(
-            child: BouncingWrapper(
-              onTap: () {
-                setState(() {
-                  _activeFeedType = 'GLOBAL';
-                });
-                context.read<SocialFeedCubit>().loadFeed(isOfficial: false);
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 14.h),
-                decoration: BoxDecoration(
-                  color: !isOfficial ? activeColor : inactiveColor,
-                  borderRadius: BorderRadius.circular(28.r),
-                ),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'PG owners forum',
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                        color: !isOfficial
-                            ? Colors.white
-                            : Colors.grey.shade600,
-                      ),
-                    ),
-                    if (unreadForum > 0) ...[
-                      SizedBox(width: 6.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: !isOfficial
-                              ? Colors.white
-                              : const Color(0xFFEA580C),
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: Text(
-                          '$unreadForum',
-                          style: TextStyle(
-                            color: !isOfficial ? activeColor : Colors.white,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
+          //  Commented PG OWNERS FORUM
+          // Expanded(
+          //   child: BouncingWrapper(
+          //     onTap: () {
+          //       setState(() {
+          //         _activeFeedType = 'GLOBAL';
+          //       });
+          //       context.read<SocialFeedCubit>().loadFeed(isOfficial: false);
+          //     },
+          //     child: Container(
+          //       padding: EdgeInsets.symmetric(vertical: 14.h),
+          //       decoration: BoxDecoration(
+          //         color: !isOfficial ? activeColor : inactiveColor,
+          //         borderRadius: BorderRadius.circular(28.r),
+          //       ),
+          //       alignment: Alignment.center,
+          //       child: Row(
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         children: [
+          //           Text(
+          //             'PG owners forum',
+          //             style: GoogleFonts.inter(
+          //               fontSize: 14.sp,
+          //               fontWeight: FontWeight.w700,
+          //               color: !isOfficial
+          //                   ? Colors.white
+          //                   : Colors.grey.shade600,
+          //             ),
+          //           ),
+          //           if (unreadForum > 0) ...[
+          //             SizedBox(width: 6.w),
+          //             Container(
+          //               padding: EdgeInsets.symmetric(
+          //                 horizontal: 6.w,
+          //                 vertical: 2.h,
+          //               ),
+          //               decoration: BoxDecoration(
+          //                 color: !isOfficial
+          //                     ? Colors.white
+          //                     : const Color(0xFFEA580C),
+          //                 borderRadius: BorderRadius.circular(10.r),
+          //               ),
+          //               child: Text(
+          //                 '$unreadForum',
+          //                 style: TextStyle(
+          //                   color: !isOfficial ? activeColor : Colors.white,
+          //                   fontSize: 10.sp,
+          //                   fontWeight: FontWeight.bold,
+          //                 ),
+          //               ),
+          //             ),
+          //           ],
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          //  END Commented PG OWNERS FORUM
         ],
       ),
     );
@@ -369,9 +372,11 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                       unreadForum: unreadForum,
                     ),
                   ),
-                  if (_activeFeedType == 'GLOBAL')
+                  if (_activeFeedType == 'GLOBAL')...[
                     SliverToBoxAdapter(child: _buildCreatePostBox()),
-                  ..._buildFeedSlivers(state),
+                  ] else...[
+                    ..._buildFeedSlivers(state),
+                  ]
                 ],
               );
             },
@@ -1018,17 +1023,19 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
     final isOfficialTab = _activeFeedType == 'OFFICIAL';
 
     if (state is SocialFeedLoaded) {
-      // Ensure we are showing posts for the active tab
-      if (state.isOfficial != isOfficialTab) {
-        return [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 40.h),
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-          ),
-        ];
-      }
+      // Ensure we are showing posts for the active tab. 
+      // If there's a mismatch, we still show the loader as we are likely waiting for the correct load to finish.
+
+      // if (state.isOfficial != isOfficialTab) {
+      //   return [
+      //     SliverToBoxAdapter(
+      //       child: Padding(
+      //         padding: EdgeInsets.symmetric(vertical: 40.h),
+      //         child: const Center(child: CircularProgressIndicator()),
+      //       ),
+      //     ),
+      //   ];
+      // }
 
       if (isOfficialTab) {
         if (state.posts.isNotEmpty) {
@@ -1133,6 +1140,13 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
                   Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
                   SizedBox(height: 16.h),
                   Text('something_wrong'.tr()),
+                  SizedBox(height: 16.h),
+                  ElevatedButton(
+                    onPressed: () => context.read<SocialFeedCubit>().loadFeed(
+                      isOfficial: _activeFeedType == 'OFFICIAL',
+                    ),
+                    child: Text('Retry'),
+                  ),
                 ],
               ),
             ),
@@ -1661,38 +1675,48 @@ class _PostCardState extends State<_PostCard> {
               SizedBox(height: 16.h),
               Row(
                 children: [
+                  //  NO COMMENT FEATURE: REMOVED
+                  // BouncingWrapper(
+                  //   onTap: () {
+                  //     showModalBottomSheet(
+                  //       context: context,
+                  //       isScrollControlled: true,
+                  //       backgroundColor: Colors.transparent,
+                  //       builder: (context) => CommentsSheet(post: widget.post),
+                  //     );
+                  //   },
+                  //   child: Row(
+                  //     children: [
+                  //       Icon(
+                  //         Icons.chat_bubble_outline_rounded,
+                  //         color: AppColors.grayColor3,
+                  //         size: 18.sp,
+                  //       ),
+                  //       SizedBox(width: 6.w),
+                  //       Text(
+                  //         '${widget.post.commentsCount} replies',
+                  //         style: GoogleFonts.inter(
+                  //           fontSize: 13.sp,
+                  //           fontWeight: FontWeight.w500,
+                  //           color: AppColors.grayColor3,
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // SizedBox(width: 24.w),
+                  //  NO COMMENT FEATURE: REMOVED END
                   BouncingWrapper(
                     onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => CommentsSheet(post: widget.post),
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          color: AppColors.grayColor3,
-                          size: 18.sp,
-                        ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          '${widget.post.commentsCount} replies',
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.grayColor3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 24.w),
-                  BouncingWrapper(
-                    onTap: () {
-                      // Share logic placeholder
+                      final content = widget.post.content;
+                      final userName = widget.post.userName;
+                      final appLink = ApiConstants.partnerAppLink;
+
+                      final shareMessage =
+                          'Post by $userName on Stay India Official Feed:\n\n'
+                          '$content\n\n';
+
+                      Share.share(shareMessage);
                     },
                     child: Row(
                       children: [

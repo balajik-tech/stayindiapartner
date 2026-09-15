@@ -97,15 +97,17 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
     }
 
     try {
-      final posts = isOfficial 
+      final posts = isOfficial
           ? await _getOfficialFeed()
           : await _getSocialFeed(limit: 20, skip: 0);
-          
-      emit(SocialFeedLoaded(
-        posts: posts, 
-        isOfficial: isOfficial,
-        hasReachedMax: isOfficial ? true : posts.length < 20,
-      ));
+
+      emit(
+        SocialFeedLoaded(
+          posts: posts,
+          isOfficial: isOfficial,
+          hasReachedMax: isOfficial ? true : posts.length < 20,
+        ),
+      );
     } catch (e) {
       emit(SocialFeedError(message: ErrorHelper.toFriendlyMessage(e)));
     }
@@ -114,6 +116,8 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   Future<void> loadMoreFeed() async {
     final s = state;
     if (s is SocialFeedLoaded && !s.isFetchingMore && !s.hasReachedMax) {
+      if (s.isOfficial) return; // Official feed doesn't support pagination yet
+
       emit(s.copyWith(isFetchingMore: true));
       try {
         final nextPosts = await _getSocialFeed(limit: 20, skip: s.posts.length);
@@ -138,6 +142,8 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
     Map<String, dynamic>? location,
   }) async {
     final s = state;
+    final bool wasOfficial = s is SocialFeedLoaded && s.isOfficial;
+
     if (s is SocialFeedLoaded) {
       emit(s.copyWith(isCreatingPost: true));
       try {
@@ -162,7 +168,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
           pollOptions: pollOptions,
           location: location,
         );
-        await loadFeed(isRefresh: true);
+        await loadFeed(isRefresh: true, isOfficial: wasOfficial);
       } catch (e) {
         emit(SocialFeedError(message: ErrorHelper.toFriendlyMessage(e)));
       }
@@ -172,6 +178,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   Future<void> toggleLike(String postId) async {
     final s = state;
     if (s is SocialFeedLoaded) {
+      final bool wasOfficial = s.isOfficial;
       final updatedPosts = s.posts.map((p) {
         if (p.id == postId) {
           final isLiked = !p.isLiked;
@@ -185,7 +192,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       try {
         await _togglePostLike(postId);
       } catch (e) {
-        await loadFeed(isRefresh: true);
+        await loadFeed(isRefresh: true, isOfficial: wasOfficial);
       }
     }
   }
@@ -193,6 +200,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   Future<void> addComment(String postId, String text) async {
     final s = state;
     if (s is SocialFeedLoaded) {
+      final bool wasOfficial = s.isOfficial;
       final updatedPosts = s.posts.map((p) {
         if (p.id == postId) {
           return p.copyWith(commentsCount: p.commentsCount + 1);
@@ -204,7 +212,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       try {
         await _addPostComment(postId, text);
       } catch (e) {
-        await loadFeed(isRefresh: true);
+        await loadFeed(isRefresh: true, isOfficial: wasOfficial);
       }
     }
   }
@@ -212,6 +220,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   Future<void> votePoll(String postId, int optionIndex) async {
     final s = state;
     if (s is SocialFeedLoaded) {
+      final bool wasOfficial = s.isOfficial;
       final targetPost = s.posts.where((p) => p.id == postId).firstOrNull;
       if (targetPost != null && targetPost.userVote != null) {
         return;
@@ -220,9 +229,8 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       final updatedPosts = s.posts.map((p) {
         if (p.id == postId && p.poll != null) {
           final opts = List<dynamic>.from(p.poll!['options'] ?? []);
-          final newOpts = opts
-              .map((opt) => Map<String, dynamic>.from(opt))
-              .toList();
+          final newOpts =
+              opts.map((opt) => Map<String, dynamic>.from(opt)).toList();
 
           if (optionIndex >= 0 && optionIndex < newOpts.length) {
             final newCount =
@@ -246,14 +254,29 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
 
       try {
         await _votePoll(postId, optionIndex);
-        final posts = await _getSocialFeed(limit: 20, skip: 0);
-        if (state is SocialFeedLoaded) {
-          emit((state as SocialFeedLoaded).copyWith(posts: posts));
+        // Refresh feed but keep track of which feed we are on
+        if (wasOfficial) {
+          final posts = await _getOfficialFeed();
+          if (state is SocialFeedLoaded) {
+            emit((state as SocialFeedLoaded).copyWith(posts: posts));
+          }
+        } else {
+          final posts = await _getSocialFeed(limit: 20, skip: 0);
+          if (state is SocialFeedLoaded) {
+            emit((state as SocialFeedLoaded).copyWith(posts: posts));
+          }
         }
       } catch (e) {
-        final posts = await _getSocialFeed(limit: 20, skip: 0);
-        if (state is SocialFeedLoaded) {
-          emit((state as SocialFeedLoaded).copyWith(posts: posts));
+        if (wasOfficial) {
+          final posts = await _getOfficialFeed();
+          if (state is SocialFeedLoaded) {
+            emit((state as SocialFeedLoaded).copyWith(posts: posts));
+          }
+        } else {
+          final posts = await _getSocialFeed(limit: 20, skip: 0);
+          if (state is SocialFeedLoaded) {
+            emit((state as SocialFeedLoaded).copyWith(posts: posts));
+          }
         }
       }
     }
@@ -262,11 +285,19 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   Future<void> deletePost(String postId) async {
     final s = state;
     if (s is SocialFeedLoaded) {
+      final bool wasOfficial = s.isOfficial;
       try {
         await _deleteSocialPost(postId);
-        final posts = await _getSocialFeed(limit: 20, skip: 0);
-        if (state is SocialFeedLoaded) {
-          emit((state as SocialFeedLoaded).copyWith(posts: posts));
+        if (wasOfficial) {
+          final posts = await _getOfficialFeed();
+          if (state is SocialFeedLoaded) {
+            emit((state as SocialFeedLoaded).copyWith(posts: posts));
+          }
+        } else {
+          final posts = await _getSocialFeed(limit: 20, skip: 0);
+          if (state is SocialFeedLoaded) {
+            emit((state as SocialFeedLoaded).copyWith(posts: posts));
+          }
         }
       } catch (e) {
         emit(SocialFeedError(message: ErrorHelper.toFriendlyMessage(e)));
@@ -284,6 +315,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   }) async {
     final s = state;
     if (s is SocialFeedLoaded) {
+      final bool wasOfficial = s.isOfficial;
       try {
         await _updateSocialPost(
           postId: postId,
@@ -293,9 +325,16 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
           pollOptions: pollOptions,
           removePoll: removePoll,
         );
-        final posts = await _getSocialFeed(limit: 20, skip: 0);
-        if (state is SocialFeedLoaded) {
-          emit((state as SocialFeedLoaded).copyWith(posts: posts));
+        if (wasOfficial) {
+          final posts = await _getOfficialFeed();
+          if (state is SocialFeedLoaded) {
+            emit((state as SocialFeedLoaded).copyWith(posts: posts));
+          }
+        } else {
+          final posts = await _getSocialFeed(limit: 20, skip: 0);
+          if (state is SocialFeedLoaded) {
+            emit((state as SocialFeedLoaded).copyWith(posts: posts));
+          }
         }
       } catch (e) {
         emit(SocialFeedError(message: ErrorHelper.toFriendlyMessage(e)));
