@@ -91,7 +91,7 @@ class MembershipPropertyModel extends MembershipPropertyEntity {
     if (typeStr == 'men' || typeStr == 'boys' || typeStr == 'male') {
       return "MEN'S HOSTEL";
     } else if (typeStr == 'women' || typeStr == 'girls' || typeStr == 'female') {
-      return "WORKING WOMEN'S HOSTEL";
+      return "WOMEN'S HOSTEL";
     } else if (typeStr == 'co-living' || typeStr == 'coliving') {
       return "CO-LIVING PG";
     } else if (typeStr == 'students' || typeStr == 'student') {
@@ -100,7 +100,7 @@ class MembershipPropertyModel extends MembershipPropertyEntity {
     if (propertyTag != null && propertyTag.trim().isNotEmpty) {
       final tagStr = propertyTag.trim().toUpperCase();
       if (tagStr == 'BOYS' || tagStr == 'MEN') return "MEN'S HOSTEL";
-      if (tagStr == 'GIRLS' || tagStr == 'WOMEN') return "WORKING WOMEN'S HOSTEL";
+      if (tagStr == 'GIRLS' || tagStr == 'WOMEN') return "WOMEN'S HOSTEL";
       if (tagStr == 'PG') return "PG HOSTEL";
       return tagStr;
     }
