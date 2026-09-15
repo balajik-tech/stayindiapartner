@@ -11,6 +11,7 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cubit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'hostel_documents_page.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
@@ -59,6 +60,7 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
       final hostelId = _hostelId(context);
       if (hostelId.isNotEmpty) {
         context.read<SettingsCubit>().loadSettings(hostelId);
+        context.read<DashboardCubit>().fetchDashboardData(hostelId);
       }
     });
   }
@@ -940,64 +942,76 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
           ),
         ],
       ),
-      child:Row(
-        children: [
-          /// Delete Property Button
-          Expanded(
-            child: SizedBox(
-              height: 56.h,
-              child: OutlinedButton(
-                onPressed: isSaving ? null : _showDeleteConfirmation,
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.red),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.r),
+      child: BlocBuilder<DashboardCubit, DashboardState>(
+        builder: (context, dashboardState) {
+          final occupancy = (dashboardState is DashboardLoaded)
+              ? dashboardState.data.occupancy
+              : dashboardState.bulkData?.occupancy;
+
+          final hasOccupancy = (occupancy?.occupiedBeds ?? 0) > 0;
+
+          return Row(
+            children: [
+              /// Delete Property Button
+              if (!hasOccupancy) ...[
+                Expanded(
+                  child: SizedBox(
+                    height: 56.h,
+                    child: OutlinedButton(
+                      onPressed: isSaving ? null : _showDeleteConfirmation,
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.r),
+                        ),
+                      ),
+                      child: Text(
+                        "Delete Property",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                child: Text(
-                  "Delete Property",
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w800,
+                SizedBox(width: 12.w),
+              ],
+
+              /// Save Property Button
+              Expanded(
+                child: SizedBox(
+                  height: 56.h,
+                  child: ElevatedButton(
+                    onPressed: isSaving ? null : _handleSave,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isSaving
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            StringUtils.translate(
+                              'save_property_profile',
+                              context: context,
+                            ),
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ),
-            ),
-          ),
-
-          SizedBox(width: 12.w),
-
-          /// Save Property Button
-          Expanded(
-            child: SizedBox(
-              height: 56.h,
-              child: ElevatedButton(
-                onPressed: isSaving ? null : _handleSave,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                  elevation: 0,
-                ),
-                child: isSaving
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                  StringUtils.translate(
-                    'save_property_profile',
-                    context: context,
-                  ),
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ])
+            ],
+          );
+        },
+      ),
     );
   }
 
