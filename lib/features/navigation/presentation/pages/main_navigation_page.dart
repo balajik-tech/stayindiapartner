@@ -435,19 +435,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   Widget? _buildFABIfAllowed(BuildContext context) {
-    final authState = context.read<AuthCubit>().state;
-    if (authState is! AuthAuthenticated && authState is! AuthProfileCompleted) {
-      return null;
+    final hostelState = context.read<HostelCubit>().state;
+    if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty) {
+      return _buildPremiumFAB(context);
     }
-    final owner = authState is AuthAuthenticated
-        ? authState.owner
-        : (authState as AuthProfileCompleted).owner;
-
-    final role = owner.role.toLowerCase();
-    if (role != 'owner' && role != 'manager') {
-      return null;
-    }
-    return _buildPremiumFAB(context);
+    return null;
   }
 
   Widget _buildPremiumFAB(BuildContext context) {
