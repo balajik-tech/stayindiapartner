@@ -512,7 +512,51 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
 
   Future<void> _handleSave(BuildContext context) async {
     final hostelId = _hostelId(context);
-    if (hostelId.isEmpty) return;
+    if (hostelId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No properties has been created yet. Please create a property first.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_rulesController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(StringUtils.translate('please_enter_hostel_rules', context: context) != 'please_enter_hostel_rules' 
+              ? StringUtils.translate('please_enter_hostel_rules', context: context) 
+              : 'Please enter the hostel rules'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_entryTimeController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(StringUtils.translate('please_select_entry_time', context: context) != 'please_select_entry_time'
+              ? StringUtils.translate('please_select_entry_time', context: context)
+              : 'Please select entry gate closing time'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_visitorPolicyController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(StringUtils.translate('please_enter_visitor_policy', context: context) != 'please_enter_visitor_policy'
+              ? StringUtils.translate('please_enter_visitor_policy', context: context)
+              : 'Please enter visitor policy'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isSaving = true);
 
