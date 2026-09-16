@@ -609,35 +609,35 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
             ),
           ),
         ),
-        SizedBox(height: 32.h),
-        Text(
-          'Follow Stay India',
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: const Color(0xFF94A3B8),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _SocialIcon(icon: Icons.facebook, color: const Color(0xFF1877F2)),
-            SizedBox(width: 20.w),
-            _SocialIcon(icon: Icons.camera_alt, color: const Color(0xFFE4405F)),
-            SizedBox(width: 20.w),
-            _SocialIcon(icon: Icons.play_arrow_rounded, color: const Color(0xFFFF0000)),
-          ],
-        ),
-        SizedBox(height: 24.h),
-        Text(
-          'Version 2.4.1',
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: const Color(0xFFCBD5E1),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        // SizedBox(height: 32.h),
+        // Text(
+        //   'Follow Stay India',
+        //   style: TextStyle(
+        //     fontSize: 12.sp,
+        //     color: const Color(0xFF94A3B8),
+        //     fontWeight: FontWeight.w600,
+        //   ),
+        // ),
+        // SizedBox(height: 16.h),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: [
+        //     _SocialIcon(icon: Icons.facebook, color: const Color(0xFF1877F2)),
+        //     SizedBox(width: 20.w),
+        //     _SocialIcon(icon: Icons.camera_alt, color: const Color(0xFFE4405F)),
+        //     SizedBox(width: 20.w),
+        //     _SocialIcon(icon: Icons.play_arrow_rounded, color: const Color(0xFFFF0000)),
+        //   ],
+        // ),
+        // SizedBox(height: 24.h),
+        // Text(
+        //   'Version 2.4.1',
+        //   style: TextStyle(
+        //     fontSize: 12.sp,
+        //     color: const Color(0xFFCBD5E1),
+        //     fontWeight: FontWeight.w500,
+        //   ),
+        // ),
         SizedBox(height: 48.h),
       ],
     );
