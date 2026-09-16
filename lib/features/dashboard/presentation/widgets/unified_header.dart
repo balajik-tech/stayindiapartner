@@ -7,6 +7,7 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:stayindia_owner/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:stayindia_owner/features/notifications/presentation/pages/notifications_page.dart';
 
 class UnifiedHeader extends StatelessWidget {
@@ -223,45 +224,56 @@ class UnifiedHeader extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          width: 44.w,
-                          height: 44.w,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFf4f5f9),
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(
-                              color: const Color(0xFFE8ECF5), // Border color
-                              width: 1.0,
+                    child: BlocBuilder<NotificationCubit, NotificationState>(
+                      builder: (context, notificationState) {
+                        final int unreadCount = notificationState is NotificationLoaded
+                            ? notificationState.unreadCount
+                            : 0;
+
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 44.w,
+                              height: 44.w,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFf4f5f9),
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: const Color(0xFFE8ECF5), // Border color
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  'assets/images/bell.png',
+                                  width: 20,
+                                  height: 20,
+                                  fit: BoxFit.contain,
+                                  // color: Color(0xFF0a3462),
+                                  colorBlendMode: BlendMode.srcIn,
+                                ),
+                              ),
                             ),
-                          ),
-                          child:Center(
-                            child: Image.asset(
-                              'assets/images/bell.png',
-                              width: 20,
-                              height: 20,
-                              fit: BoxFit.contain,
-                              // color: Color(0xFF0a3462),
-                              colorBlendMode: BlendMode.srcIn,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 8.h,
-                          right: 8.w,
-                          child: Container(
-                            width: 8.w,
-                            height: 8.w,
-                            decoration: BoxDecoration(
-                              color: AppColors.orangeColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.orangeColor, width: 1.5),
-                            ),
-                          ),
-                        ),
-                      ],
+                            if (unreadCount > 0)
+                              Positioned(
+                                top: 8.h,
+                                right: 8.w,
+                                child: Container(
+                                  width: 8.w,
+                                  height: 8.w,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.orangeColor,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: AppColors.orangeColor,
+                                        width: 1.5),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),

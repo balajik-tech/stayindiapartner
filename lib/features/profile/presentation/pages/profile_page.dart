@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -17,6 +18,8 @@ import '../../../../core/services/app_bootstrapper.dart';
 import '../../../bank_account/presentation/pages/bank_accounts_page.dart';
 import '../../../finance/presentation/cubit/payment_report_cubit.dart';
 import '../../../finance/presentation/pages/payment_report_page.dart';
+import '../../../notifications/presentation/cubit/notification_cubit.dart';
+import '../../../notifications/presentation/pages/notifications_page.dart';
 import '../cubit/hostel_state.dart';
 import '../widgets/dashed_divider.dart';
 import '../widgets/share_app_bottom_sheet.dart';
@@ -382,7 +385,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                 child: Column(
                   children: [
                     Text(
-                      '1,000',
+                      '0',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -402,34 +405,54 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                 ),
               ),
               SizedBox(width: 12.w),
-              Stack(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8.r),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
+              BouncingWrapper(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsPage(),
                     ),
-                    child: Icon(
-                      Icons.notifications_none_rounded,
-                      color: const Color(0xFF16294D),
-                      size: 20.sp,
-                    ),
-                  ),
-                  Positioned(
-                    right: 6,
-                    top: 6,
-                    child: Container(
-                      width: 8.w,
-                      height: 8.w,
-                      decoration: BoxDecoration(
-                        color: AppColors.orangeColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  );
+                },
+                child: BlocBuilder<NotificationCubit, NotificationState>(
+                  builder: (context, notificationState) {
+                    final int unreadCount = notificationState is NotificationLoaded
+                        ? notificationState.unreadCount
+                        : 0;
+
+                    return Stack(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(8.r),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.notifications_none_rounded,
+                            color: const Color(0xFF16294D),
+                            size: 20.sp,
+                          ),
+                        ),
+                        if (unreadCount > 0)
+                          Positioned(
+                            right: 6,
+                            top: 6,
+                            child: Container(
+                              width: 8.w,
+                              height: 8.w,
+                              decoration: BoxDecoration(
+                                color: AppColors.orangeColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              )
             ],
           ),
         ],
