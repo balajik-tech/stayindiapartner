@@ -23,7 +23,7 @@ class HostelConfigurationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFf5f8fc),
       appBar: _buildAppBar(context),
       body: BlocBuilder<HostelCubit, HostelState>(
         builder: (context, state) {
@@ -119,16 +119,9 @@ class HostelConfigurationPage extends StatelessWidget {
 
   Widget _buildAddPropertyButton(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 32.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
+      padding: EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF5F8FC),
       ),
       child: BouncingWrapper(
         onTap: () => Navigator.push(
@@ -137,28 +130,39 @@ class HostelConfigurationPage extends StatelessWidget {
             builder: (context) => const PropertySetupStepperPage(),
           ),
         ),
-        child: Container(
-          height: 52.h,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+        child: CustomPaint(
+          painter: DashedBorderPainter(
+            color: const Color(0xFFa5bddb),
+            strokeWidth: 2,
+            dashWidth: 6,
+            dashSpace: 4,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.add, size: 20.sp, color: AppColors.primaryBlue),
-              SizedBox(width: 8.w),
-              Text(
-                'Add a property',
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700,
+          child: Container(
+            height: 52.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F8FC),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.add,
+                  size: 20.sp,
                   color: AppColors.primaryBlue,
                 ),
-              ),
-            ],
+                SizedBox(width: 8.w),
+                Text(
+                  'Add a property',
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
