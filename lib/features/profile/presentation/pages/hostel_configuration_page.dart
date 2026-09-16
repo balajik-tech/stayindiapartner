@@ -223,19 +223,20 @@ class _HostelConfigCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String status = "All set";
+    // String status = "All set";
     Color statusBg = const Color(0xFFdbeadd);
     Color statusText = const Color(0xFF3b7843);
 
-    if (index == 1) {
-      status = "1 pending";
-      statusBg = const Color(0xFFf8efdc);
-      statusText = const Color(0xFF7e521d);
-    } else if (index == 2) {
-      status = "2 pending";
-      statusBg = const Color(0xFFfbefe5);
-      statusText = const Color(0xFF9c4821);
-    }
+    // if (index == 1) {
+    //   status = "1 pending";
+    //   statusBg = const Color(0xFFf8efdc);
+    //   statusText = const Color(0xFF7e521d);
+    // } else if (index == 2) {
+    //   status = "2 pending";
+    //   statusBg = const Color(0xFFfbefe5);
+    //   statusText = const Color(0xFF9c4821);
+    // }
+    String status = "";
 
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
@@ -318,7 +319,8 @@ class _HostelConfigCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
+                  if(status.isNotEmpty)
+                    Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                     decoration: BoxDecoration(
                       color: statusBg,
@@ -341,8 +343,10 @@ class _HostelConfigCard extends StatelessWidget {
           _ConfigSubItem(
             icon: Icons.wifi_rounded,
             title: 'Amenities',
-            status: index == 2 ? null : (index == 1 ? "7 listed" : "9 listed"),
-            actionLabel: index == 2 ? "Add" : null,
+            status: null,
+            actionLabel:null,
+            // status: index == 2 ? null : (index == 1 ? "7 listed" : "9 listed"),
+            // actionLabel: index == 2 ? "Add" : null,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);
               Navigator.push(
@@ -355,8 +359,10 @@ class _HostelConfigCard extends StatelessWidget {
           _ConfigSubItem(
             icon: Icons.list_alt_rounded,
             title: 'House rules',
-            status: index == 0 ? "6 rules" : (index == 1 ? "5 rules" : null),
-            actionLabel: index == 2 ? "Add" : null,
+            status: null,
+            actionLabel:null,
+            // status: index == 0 ? "6 rules" : (index == 1 ? "5 rules" : null),
+            // actionLabel: index == 2 ? "Add" : null,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);
               Navigator.push(
@@ -369,8 +375,10 @@ class _HostelConfigCard extends StatelessWidget {
           _ConfigSubItem(
             icon: Icons.restaurant_rounded,
             title: 'Food menu',
-            status: index == 0 ? "This week" : (index == 2 ? "This week" : null),
-            actionLabel: index == 1 ? "Add menu" : null,
+            status: null,
+            actionLabel:null,
+            // status: index == 0 ? "This week" : (index == 2 ? "This week" : null),
+            // actionLabel: index == 1 ? "Add menu" : null,
             isLast: true,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);
