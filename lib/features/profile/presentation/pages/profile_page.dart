@@ -140,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             title: 'Management plans',
                             subtitle: 'Gold, Silver, Basic across $hostelCount properties',
                             iconBgColor: const Color(0xFFEEEDFE),
-                            iconColor: const Color(0xFF7C3AED),
+                            iconColor: const Color(0xFF3C3489),
                             // badge: const _StatusBadge(
                             //   text: '1 renews in 11 days',
                             //   color: Color(0xFF92400E),
@@ -154,11 +154,11 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             ),
                           ),
                           _MenuTile(
-                            icon: Icons.insights_rounded,
+                            icon: Icons.bar_chart_outlined,
                             title: 'Financial insights',
                             subtitle: 'Revenue, occupancy and dues',
                             iconBgColor: const Color(0xFFE6F1FB),
-                            iconColor: const Color(0xFF2563EB),
+                            iconColor: const Color(0xFF185FA5),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -174,7 +174,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             title: 'Collection & history',
                             subtitle: 'Rent collected and outstanding',
                             iconBgColor: const Color(0xFFFAEEDA),
-                            iconColor: const Color(0xFFEA580C),
+                            iconColor: const Color(0xFF854F0B),
                             // badge: const _StatusBadge(
                             //   text: '4 pending',
                             //   color: Color(0xFFB91C1C),
@@ -195,7 +195,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             title: 'bank_accounts'.tr(),
                             subtitle: 'View and manage your bank accounts',
                             iconBgColor: const Color(0xFFE1F5EE),
-                            iconColor: const Color(0xFF059669),
+                            iconColor: const Color(0xFF0F6E56),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -233,7 +233,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       title: 'Services',
                       children: [
                         _MenuTile(
-                          icon: Icons.build_rounded,
+                          icon: Icons.build_outlined,
                           title: 'Raise a service request',
                           subtitle: 'Cook, plumber, electrician and more',
                           iconBgColor: const Color(0xFF1B54A4),
@@ -246,11 +246,11 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           ),
                         ),
                         _MenuTile(
-                          icon: Icons.assignment_rounded,
+                          icon: Icons.assessment,
                           title: 'My requests',
                           subtitle: 'Plumber arriving today 4-6 pm',
                           iconBgColor: const Color(0xFFE6F1FB),
-                          iconColor: const Color(0xFF16A34A),
+                          iconColor: const Color(0xFF185FA5),
                           badge: const _StatusBadge(
                             text: '2 active',
                             color: Color(0xFF166534),
@@ -289,7 +289,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           title: 'Help & support',
                           subtitle: 'Chat or call the Stay India team',
                           iconBgColor: const Color(0xFFFAEEDA),
-                          iconColor: const Color(0xFFD97706),
+                          iconColor: const Color(0xFF854F0B),
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -302,15 +302,15 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           title: 'Change language',
                           subtitle: 'English',
                           iconBgColor: const Color(0xFFE1F5EE),
-                          iconColor: const Color(0xFF16A34A),
+                          iconColor: const Color(0xFF0F6E56),
                           onTap: () => _showLanguagePicker(context),
                         ),
                         _MenuTile(
-                          icon: Icons.verified_user_outlined,
+                          icon: Icons.security,
                           title: 'Privacy policy',
                           subtitle: 'How we handle your data',
                           iconBgColor: const Color(0xFFEEEDFE),
-                          iconColor: const Color(0xFF7C3AED),
+                          iconColor: const Color(0xFF3C3489),
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -323,7 +323,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           icon: Icons.info_outline_rounded,
                           title: 'About Stay India',
                           iconBgColor: const Color(0xFFE6F1FB),
-                          iconColor: const Color(0xFF2563EB),
+                          iconColor: const Color(0xFF185FA5),
                           onTap: () => {
                             _openUrl(ApiConstants.ABOUT_US)
                           },
@@ -1375,7 +1375,7 @@ class _HostelConfigCard extends StatelessWidget {
                 color: const Color(0xFFE6F1FB),
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(Icons.business_rounded, color: const Color(0xFF2563EB), size: 20.sp),
+              child: Icon(Icons.business_rounded, color: const Color(0xFF185FA5), size: 20.sp),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -1468,7 +1468,7 @@ class _ReferralCard extends StatelessWidget {
                 color: const Color(0xFFE3F7E8),
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(Icons.card_giftcard_rounded, color: const Color(0xFF16A34A), size: 20.sp),
+              child: Icon(Icons.card_giftcard_outlined, color: const Color(0xFF1B7A3D), size: 20.sp),
             ),
             SizedBox(width: 16.w),
             Expanded(
