@@ -26,6 +26,7 @@ import 'hostel_profile_page.dart';
 import 'amenities_page.dart';
 import 'house_rules_page.dart';
 import 'food_menu_page.dart';
+import 'hostel_configuration_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_conditions_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/request_service/presentation/pages/request_service_page.dart';
@@ -89,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Color(0xFFF4F8FC),
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           final profile = state is ProfileLoaded
@@ -139,11 +140,11 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             subtitle: 'Gold, Silver, Basic across $hostelCount properties',
                             iconBgColor: const Color(0xFFF5F3FF),
                             iconColor: const Color(0xFF7C3AED),
-                            badge: const _StatusBadge(
-                              text: '1 renews in 11 days',
-                              color: Color(0xFF92400E),
-                              bgColor: Color(0xFFFEF3C7),
-                            ),
+                            // badge: const _StatusBadge(
+                            //   text: '1 renews in 11 days',
+                            //   color: Color(0xFF92400E),
+                            //   bgColor: Color(0xFFFEF3C7),
+                            // ),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -173,11 +174,11 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             subtitle: 'Rent collected and outstanding',
                             iconBgColor: const Color(0xFFFFF7ED),
                             iconColor: const Color(0xFFEA580C),
-                            badge: const _StatusBadge(
-                              text: '4 pending',
-                              color: Color(0xFFB91C1C),
-                              bgColor: Color(0xFFFEE2E2),
-                            ),
+                            // badge: const _StatusBadge(
+                            //   text: '4 pending',
+                            //   color: Color(0xFFB91C1C),
+                            //   bgColor: Color(0xFFFEE2E2),
+                            // ),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -191,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           _MenuTile(
                             icon: Icons.account_balance_rounded,
                             title: 'bank_accounts'.tr(),
-                            subtitle: 'HDFC ••4471 • payouts active',
+                            subtitle: 'View and manage your bank accounts',
                             iconBgColor: const Color(0xFFECFDF5),
                             iconColor: const Color(0xFF059669),
                             onTap: () => Navigator.push(
@@ -218,7 +219,12 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                         propertiesCount: hostelCount,
                         bedsCount: totalBeds,
                         pendingItems: '3 items pending',
-                        onTap: () => _showHostelConfigOptions(context),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HostelConfigurationPage(),
+                          ),
+                        ),
                       ),
                     ],
 
@@ -348,69 +354,10 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
   }
 
 
-  void _showHostelConfigOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.business_rounded),
-              title: Text('hostel_profile'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HostelProfilePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.wifi_rounded),
-              title: Text('amenities'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AmenitiesPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.rule_rounded),
-              title: Text('house_rules'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HouseRulesPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.restaurant_rounded),
-              title: Text('food_menu'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FoodMenuPage()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildAccountHeader(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 54.h, 20.w, 10.h),
+      padding: EdgeInsets.fromLTRB(20.w, 48.h, 20.w, 10.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -418,7 +365,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
             'Account',
             style: GoogleFonts.inter(
               fontSize: 24.sp,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1E293B),
             ),
           ),
@@ -429,24 +376,24 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  // border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
-                child: Row(
+                child: Column(
                   children: [
                     Text(
                       '1,000',
                       style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF2C599D),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1B54A4),
                       ),
                     ),
                     SizedBox(width: 4.w),
                     Text(
                       'Rewards',
                       style: TextStyle(
-                        fontSize: 10.sp,
-                        color: const Color(0xFF64748B),
+                        fontSize: 10,
+                        color: const Color(0xFF7A8699),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -460,23 +407,22 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                     padding: EdgeInsets.all(8.r),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.notifications_none_rounded,
-                      color: const Color(0xFF64748B),
+                      color: const Color(0xFF16294D),
                       size: 20.sp,
                     ),
                   ),
                   Positioned(
-                    right: 4,
-                    top: 4,
+                    right: 6,
+                    top: 6,
                     child: Container(
                       width: 8.w,
                       height: 8.w,
-                      decoration: const BoxDecoration(
-                        color: Colors.orange,
+                      decoration: BoxDecoration(
+                        color: AppColors.orangeColor,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -501,11 +447,11 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
       margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C599D),
+        color: const Color(0xFF1B54A4),
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2C599D).withValues(alpha: 0.2),
+            color: const Color(0xFF1B54A4).withValues(alpha: 0.2),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -528,8 +474,8 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                 Text(
                   name,
                   style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
                     color: Colors.white,
                   ),
                   maxLines: 1,
@@ -539,7 +485,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                   phone,
                   style: TextStyle(
                     fontSize: 13.sp,
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: Color(0xFFB5D4F4).withValues(alpha: 0.8),
                   ),
                 ),
                 SizedBox(height: 8.h),
@@ -555,15 +501,15 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                     children: [
                       Icon(
                         Icons.verified,
-                        color: isAaadharVerified == true ? Colors.greenAccent : Colors.red,
+                        color: isAaadharVerified == true ? Color(0xFF059669) : Colors.red,
                         size: 14.sp,
                       ),
                       SizedBox(width: 4.w),
                       Text(
                         isAaadharVerified == true ? 'eKYC verified' : 'eKYC Pending',
                         style: TextStyle(
-                          fontSize: 10.sp,
-                          color:  isAaadharVerified == true ? Colors.white: Colors.red,
+                          fontSize: 11.sp,
+                          color:  isAaadharVerified == true ? Color(0xFF059669): Colors.red,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -584,18 +530,18 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(16.r),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.edit_outlined, size: 14.sp, color: const Color(0xFF2C599D)),
+                  Icon(Icons.edit_outlined, size: 13, color: const Color(0xFF1B54A4)),
                   SizedBox(width: 4.w),
                   Text(
                     'Edit',
                     style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF2C599D),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF1B54A4),
                     ),
                   ),
                 ],
@@ -642,20 +588,20 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
           child: OutlinedButton(
             onPressed: () => _handleDeactivateAccount(context),
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFB91C1C),
+              foregroundColor: const Color(0xFFA32D2D),
               side: const BorderSide(color: Color(0xFFFECACA)),
               minimumSize: Size(double.infinity, 52.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              backgroundColor: const Color(0xFFFEF2F2),
+              backgroundColor:  Colors.white,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'Delete account',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+                  style: TextStyle(color:Color(0xFFA32D2D),fontSize: 16.sp, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(width: 8.w),
                 const Icon(Icons.delete_outline_rounded, size: 20),
@@ -1208,9 +1154,9 @@ class _MenuSection extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF334155),
+              color: const Color(0xFF16294D),
             ),
           ),
         ),
@@ -1293,9 +1239,9 @@ class _MenuTile extends StatelessWidget {
                         child: Text(
                           title,
                           style: TextStyle(
-                            fontSize: 15.sp,
+                            fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: isDestructive ? Colors.red : const Color(0xFF1E293B),
+                            color: isDestructive ? Colors.red : const Color(0xFF16294D),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -1312,8 +1258,8 @@ class _MenuTile extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: TextStyle(
-                        fontSize: 12.sp,
-                        color: const Color(0xFF64748B),
+                        fontSize: 12,
+                        color: const Color(0xFF7A8699),
                         fontWeight: FontWeight.w400,
                       ),
                       maxLines: 1,
@@ -1328,11 +1274,11 @@ class _MenuTile extends StatelessWidget {
                 padding: EdgeInsets.all(4.r),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: const Color(0xFFC6D9EE)),
                 ),
                 child: Icon(
                   Icons.chevron_right_rounded,
-                  color: const Color(0xFF64748B),
+                  color: const Color(0xFF1B54A4),
                   size: 16.sp,
                 ),
               ),
@@ -1395,9 +1341,9 @@ class _HostelConfigCard extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
-          color: const Color(0xFFFDFCF6),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: const Color(0xFFFEF3C7)),
+          border: Border.all(color: const Color(0xFFF0D5A8)),
         ),
         child: Row(
           children: [
@@ -1417,9 +1363,9 @@ class _HostelConfigCard extends StatelessWidget {
                   Text(
                     '$propertiesCount properties - $bedsCount beds',
                     style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1E293B),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF16294D),
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -1432,17 +1378,17 @@ class _HostelConfigCard extends StatelessWidget {
                   ),
                   SizedBox(height: 8.h),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 3.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEF3C7),
-                      borderRadius: BorderRadius.circular(6.r),
+                      color: const Color(0xFFFAEEDA),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Text(
                       pendingItems,
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFFD97706),
+                        color: const Color(0xFF854F0B),
                       ),
                     ),
                   ),
@@ -1453,11 +1399,12 @@ class _HostelConfigCard extends StatelessWidget {
               padding: EdgeInsets.all(4.r),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: const Color(0xFFC6D9EE)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF64748B),
+                color: const Color(0xFF1B54A4),
+                size: 16.sp,
               ),
             ),
           ],
@@ -1508,26 +1455,27 @@ class _ReferralCard extends StatelessWidget {
                   Text(
                     'Refer a friend',
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1E293B),
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 12.h),
                   Text(
                     'Earn ₹500 when they complete 30 days',
                     style: TextStyle(
-                      fontSize: 13.sp,
-                      color: const Color(0xFF64748B),
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400
                     ),
                   ),
                   SizedBox(height: 8.h),
                   Text(
                     '2 joined  •  ₹1,000 earned',
                     style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF94A3B8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF1B7A3D),
                     ),
                   ),
                 ],
@@ -1537,11 +1485,12 @@ class _ReferralCard extends StatelessWidget {
               padding: EdgeInsets.all(4.r),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: const Color(0xFFC6D9EE)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF64748B),
+                color: const Color(0xFF1B54A4),
+                size: 16.sp,
               ),
             ),
           ],
