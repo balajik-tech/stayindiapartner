@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
@@ -602,34 +603,44 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
             ),
           ),
         ),
-        SizedBox(height: 32.h),
-        Text(
-          'follow_stay_india'.tr(),
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: const Color(0xFF94A3B8),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _SocialIcon(icon: Icons.facebook, color: const Color(0xFF1877F2)),
-            SizedBox(width: 20.w),
-            _SocialIcon(icon: Icons.camera_alt, color: const Color(0xFFE4405F)),
-            SizedBox(width: 20.w),
-            _SocialIcon(icon: Icons.play_arrow_rounded, color: const Color(0xFFFF0000)),
-          ],
-        ),
+        // SizedBox(height: 32.h),
+        // Text(
+        //   'follow_stay_india'.tr(),
+        //   style: TextStyle(
+        //     fontSize: 12.sp,
+        //     color: const Color(0xFF94A3B8),
+        //     fontWeight: FontWeight.w600,
+        //   ),
+        // ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: [
+        //     _SocialIcon(icon: Icons.facebook, color: const Color(0xFF1877F2)),
+        //     SizedBox(width: 20.w),
+        //     _SocialIcon(icon: Icons.camera_alt, color: const Color(0xFFE4405F)),
+        //     SizedBox(width: 20.w),
+        //     _SocialIcon(icon: Icons.play_arrow_rounded, color: const Color(0xFFFF0000)),
+        //   ],
+        // ),
         SizedBox(height: 24.h),
-        Text(
-          'version'.tr(namedArgs: {'version': '2.4.1'}),
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: const Color(0xFFCBD5E1),
-            fontWeight: FontWeight.w500,
-          ),
+        FutureBuilder<PackageInfo>(
+          future: PackageInfo.fromPlatform(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const SizedBox.shrink();
+            }
+
+            final info = snapshot.data!;
+
+            return Text(
+              '${ApiConstants.environment} • v${info.version} (${info.buildNumber})',
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: const Color(0xFF9AA5B4),
+                fontWeight: FontWeight.w500,
+              ),
+            );
+          },
         ),
         SizedBox(height: 80.h),
       ],
