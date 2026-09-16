@@ -18,6 +18,7 @@ import '../../../bank_account/presentation/pages/bank_accounts_page.dart';
 import '../../../finance/presentation/cubit/payment_report_cubit.dart';
 import '../../../finance/presentation/pages/payment_report_page.dart';
 import '../cubit/hostel_state.dart';
+import '../widgets/dashed_divider.dart';
 import '../widgets/share_app_bottom_sheet.dart';
 import 'account_settings_page.dart';
 import 'help_support_page.dart';
@@ -1178,12 +1179,32 @@ class _MenuSection extends StatelessWidget {
               for (int i = 0; i < children.length; i++) ...[
                 children[i],
                 if (i < children.length - 1)
-                  Divider(height: 1, color: const Color(0xFFF1F5F9), indent: 60.w),
+                  Container(padding:EdgeInsets.symmetric(horizontal: 16),child: _buildDashedDivider())
+
               ],
             ],
           ),
         ),
       ],
+    );
+  }
+  Widget _buildDashedDivider() {
+    return const Padding(
+      padding: EdgeInsets.only(
+        top: 0,
+        bottom: 0,
+      ),
+      child: SizedBox(
+        height: 1,
+        width: double.infinity,
+        child: CustomPaint(
+          painter: DashedDividerPainter(
+            color: Color(0xFFdfe5ee),
+            dashWidth: 5,
+            dashSpace: 4,
+          ),
+        ),
+      ),
     );
   }
 }

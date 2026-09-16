@@ -4,9 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/widgets/bed_card.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/pages/property_setup_stepper_page.dart';
+import '../../../communities/presentation/widgets/dotted_circle_painter.dart';
+import '../widgets/dash_dotter_line.dart';
+import '../widgets/dashed_divider.dart';
 import 'hostel_profile_page.dart';
 import 'amenities_page.dart';
 import 'house_rules_page.dart';
@@ -220,17 +224,17 @@ class _HostelConfigCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String status = "All set";
-    Color statusBg = const Color(0xFFE6F4EA);
-    Color statusText = const Color(0xFF1E8E3E);
+    Color statusBg = const Color(0xFFdbeadd);
+    Color statusText = const Color(0xFF3b7843);
 
     if (index == 1) {
       status = "1 pending";
-      statusBg = const Color(0xFFFEF7E0);
-      statusText = const Color(0xFFB45309);
+      statusBg = const Color(0xFFf8efdc);
+      statusText = const Color(0xFF7e521d);
     } else if (index == 2) {
       status = "2 pending";
-      statusBg = const Color(0xFFFEF2F2);
-      statusText = const Color(0xFFB91C1C);
+      statusBg = const Color(0xFFfbefe5);
+      statusText = const Color(0xFF9c4821);
     }
 
     return Container(
@@ -290,17 +294,16 @@ class _HostelConfigCard extends StatelessWidget {
                           hostel.name,
                           style: TextStyle(
                             fontSize: 16.sp,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: const Color(0xFF1E293B),
                           ),
                         ),
-                        SizedBox(height: 2.h),
                         Text(
                           '${hostel.area ?? hostel.city ?? ""} • ${hostel.totalBeds ?? 0} beds',
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: const Color(0xFF64748B),
-                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF8891a1),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         if (index == 2)
@@ -334,7 +337,7 @@ class _HostelConfigCard extends StatelessWidget {
               ),
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          _buildDashedDivider(),
           _ConfigSubItem(
             icon: Icons.wifi_rounded,
             title: 'Amenities',
@@ -348,6 +351,7 @@ class _HostelConfigCard extends StatelessWidget {
               );
             },
           ),
+          _buildDashedDivider(),
           _ConfigSubItem(
             icon: Icons.list_alt_rounded,
             title: 'House rules',
@@ -361,6 +365,7 @@ class _HostelConfigCard extends StatelessWidget {
               );
             },
           ),
+          _buildDashedDivider(),
           _ConfigSubItem(
             icon: Icons.restaurant_rounded,
             title: 'Food menu',
@@ -376,6 +381,25 @@ class _HostelConfigCard extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+  Widget _buildDashedDivider() {
+    return const Padding(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+      ),
+      child: SizedBox(
+        height: 1,
+        width: double.infinity,
+        child: CustomPaint(
+          painter: DashedDividerPainter(
+            color: Color(0xFFdfe5ee),
+            dashWidth: 5,
+            dashSpace: 4,
+          ),
+        ),
       ),
     );
   }
@@ -405,22 +429,22 @@ class _ConfigSubItem extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: actionLabel != null ? const Color(0xFFFFFBEB) : null,
+          color: actionLabel != null ? const Color(0xFFfffbf4) : null,
           borderRadius: isLast
               ? BorderRadius.vertical(bottom: Radius.circular(24.r))
               : null,
         ),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFF64748B), size: 20.sp),
+            Icon(icon, color: const Color(0xFF5e6b83), size: 20.sp),
             SizedBox(width: 16.w),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1E293B),
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1a294b),
                 ),
               ),
             ),
@@ -430,27 +454,27 @@ class _ConfigSubItem extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF16A34A),
+                  color: const Color(0xFF3b7843),
                 ),
               ),
             if (actionLabel != null)
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF78350F),
+                  color: const Color(0xFF7e521d),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
                   actionLabel!,
                   style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
                 ),
               ),
             SizedBox(width: 8.w),
-            const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1)),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFF2d539f)),
           ],
         ),
       ),
