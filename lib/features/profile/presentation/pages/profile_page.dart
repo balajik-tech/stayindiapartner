@@ -140,6 +140,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                         children: [
                           _MenuTile(
                             icon: Icons.workspace_premium_rounded,
+                            imagePath: 'assets/images/profile_management.png',
                             title: 'Management plans',
                             subtitle: 'Gold, Silver, Basic across $hostelCount properties',
                             iconBgColor: const Color(0xFFEEEDFE),
@@ -158,6 +159,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           ),
                           _MenuTile(
                             icon: Icons.bar_chart_outlined,
+                            imagePath: 'assets/images/profile_financial.png',
                             title: 'Financial insights',
                             subtitle: 'Revenue, occupancy and dues',
                             iconBgColor: const Color(0xFFE6F1FB),
@@ -175,6 +177,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           _MenuTile(
                             icon: Icons.history_rounded,
                             title: 'Collection & history',
+                            imagePath: 'assets/images/profile_collection.png',
                             subtitle: 'Rent collected and outstanding',
                             iconBgColor: const Color(0xFFFAEEDA),
                             iconColor: const Color(0xFF854F0B),
@@ -196,6 +199,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           _MenuTile(
                             icon: Icons.account_balance_rounded,
                             title: 'bank_accounts'.tr(),
+                            imagePath: 'assets/images/profile_bankaccount.png',
                             subtitle: 'View and manage your bank accounts',
                             iconBgColor: const Color(0xFFE1F5EE),
                             iconColor: const Color(0xFF0F6E56),
@@ -222,7 +226,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       _HostelConfigCard(
                         propertiesCount: hostelCount,
                         bedsCount: totalBeds,
-                        pendingItems: '3 items pending',
+                        pendingItems: '',
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -232,42 +236,42 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       ),
                     ],
 
-                    _MenuSection(
-                      title: 'Services',
-                      children: [
-                        _MenuTile(
-                          icon: Icons.build_outlined,
-                          title: 'Raise a service request',
-                          subtitle: 'Cook, plumber, electrician and more',
-                          iconBgColor: const Color(0xFF1B54A4),
-                          iconColor: Colors.white,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RequestServicePage(),
-                            ),
-                          ),
-                        ),
-                        _MenuTile(
-                          icon: Icons.assessment,
-                          title: 'My requests',
-                          subtitle: 'Plumber arriving today 4-6 pm',
-                          iconBgColor: const Color(0xFFE6F1FB),
-                          iconColor: const Color(0xFF185FA5),
-                          badge: const _StatusBadge(
-                            text: '2 active',
-                            color: Color(0xFF166534),
-                            bgColor: Color(0xFFDCFCE7),
-                          ),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MyRequestsPage(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // _MenuSection(
+                    //   title: 'Services',
+                    //   children: [
+                    //     _MenuTile(
+                    //       icon: Icons.build_outlined,
+                    //       title: 'Raise a service request',
+                    //       subtitle: 'Cook, plumber, electrician and more',
+                    //       iconBgColor: const Color(0xFF1B54A4),
+                    //       iconColor: Colors.white,
+                    //       onTap: () => Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (context) => const RequestServicePage(),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     _MenuTile(
+                    //       icon: Icons.assessment,
+                    //       title: 'My requests',
+                    //       subtitle: 'Plumber arriving today 4-6 pm',
+                    //       iconBgColor: const Color(0xFFE6F1FB),
+                    //       iconColor: const Color(0xFF185FA5),
+                    //       badge: const _StatusBadge(
+                    //         text: '2 active',
+                    //         color: Color(0xFF166534),
+                    //         bgColor: Color(0xFFDCFCE7),
+                    //       ),
+                    //       onTap: () => Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (context) => const MyRequestsPage(),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
 
                     _ReferralCard(
                       onTap: () => _showBottomSheetOnce(context, () async {
@@ -1243,6 +1247,7 @@ class _MenuTile extends StatelessWidget {
   final Widget? badge;
   final bool showChevron;
   final bool isDestructive;
+  final String? imagePath;
 
   const _MenuTile({
     required this.icon,
@@ -1252,6 +1257,7 @@ class _MenuTile extends StatelessWidget {
     required this.iconBgColor,
     required this.iconColor,
     this.badge,
+    this.imagePath="",
     this.showChevron = true,
     this.isDestructive = false,
   });
@@ -1271,7 +1277,9 @@ class _MenuTile extends StatelessWidget {
                 color: iconBgColor,
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(icon, color: iconColor, size: 20.sp),
+              child:imagePath.toString().isNotEmpty ?
+                Image.asset(imagePath.toString(),width: 18,height: 18):
+                Icon(icon, color: iconColor, size: 20.sp),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -1422,7 +1430,8 @@ class _HostelConfigCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 8.h),
-                  Container(
+                  if(pendingItems.isNotEmpty)
+                    Container(
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 3.h),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFAEEDA),
@@ -1491,7 +1500,7 @@ class _ReferralCard extends StatelessWidget {
                 color: const Color(0xFFE3F7E8),
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(Icons.card_giftcard_outlined, color: const Color(0xFF1B7A3D), size: 20.sp),
+              child: Image.asset('assets/images/profile_gift.png', width: 18,height: 18),
             ),
             SizedBox(width: 16.w),
             Expanded(
