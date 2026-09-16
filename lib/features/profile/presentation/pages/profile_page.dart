@@ -255,6 +255,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                     //     _MenuTile(
                     //       icon: Icons.assessment,
                     //       title: 'My requests',
+                    //       imagePath: 'assets/images/profile_request.png',
                     //       subtitle: 'Plumber arriving today 4-6 pm',
                     //       iconBgColor: const Color(0xFFE6F1FB),
                     //       iconColor: const Color(0xFF185FA5),
@@ -316,6 +317,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           icon: Icons.security,
                           title: 'Privacy policy',
                           subtitle: 'How we handle your data',
+                          imagePath: 'assets/images/profile_privacy.png',
                           iconBgColor: const Color(0xFFEEEDFE),
                           iconColor: const Color(0xFF3C3489),
                           onTap: () => Navigator.push(
@@ -1401,12 +1403,12 @@ class _HostelConfigCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(10.r),
+              padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
                 color: const Color(0xFFE6F1FB),
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(Icons.business_rounded, color: const Color(0xFF185FA5), size: 20.sp),
+              child: Image.asset('assets/images/profile_hostel.png', width: 22,height: 22),
             ),
             SizedBox(width: 16.w),
             Expanded(
