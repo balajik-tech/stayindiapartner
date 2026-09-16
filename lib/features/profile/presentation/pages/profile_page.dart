@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
@@ -12,18 +11,12 @@ import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/finance/presentation/pages/financial_dashboard_page.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubit.dart';
-import 'package:stayindia_owner/features/stock_management/presentation/pages/stock_dashboard_page.dart';
-import 'package:stayindia_owner/features/stock_management/presentation/cubit/stock_cubit.dart';
-import 'package:stayindia_owner/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/app_bootstrapper.dart';
 import '../../../bank_account/presentation/pages/bank_accounts_page.dart';
-import '../../../digilocker/presentation/pages/DigiLockerStorage.dart';
 import '../../../finance/presentation/cubit/payment_report_cubit.dart';
 import '../../../finance/presentation/pages/payment_report_page.dart';
-import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
-import '../../../razorpay/presentation/screens/payment_failed_screen.dart';
-import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
 import '../cubit/hostel_state.dart';
 import '../widgets/share_app_bottom_sheet.dart';
 import 'account_settings_page.dart';
@@ -33,16 +26,10 @@ import 'hostel_profile_page.dart';
 import 'amenities_page.dart';
 import 'house_rules_page.dart';
 import 'food_menu_page.dart';
-import 'refer_friend_page.dart';
-import 'announcements_page.dart';
-import 'reports_dashboard_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_conditions_page.dart';
-import 'government_licenses_page.dart';
-import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/request_service/presentation/pages/request_service_page.dart';
 import 'package:stayindia_owner/features/request_service/presentation/pages/my_requests_page.dart';
-import 'package:stayindia_owner/main.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -72,6 +59,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     }
   }
 
+  @override
   void dispose() {
     routeObserver.unsubscribe(this);
     super.dispose();
@@ -90,8 +78,15 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     final role = owner?.role.toLowerCase() ?? 'owner';
     final bool isStaff = role != 'owner' && role != 'manager';
     final hostelState = context.watch<HostelCubit>().state;
-    final bool hasHostels =
-        hostelState is HostelLoaded && hostelState.hostels.isNotEmpty;
+
+    int totalBeds = 0;
+    int hostelCount = 0;
+    if (hostelState is HostelLoaded) {
+      hostelCount = hostelState.hostels.length;
+      for (var h in hostelState.hostels) {
+        totalBeds += h.totalBeds ?? 0;
+      }
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -119,7 +114,10 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
             physics: const BouncingScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(
-                child: _buildProfileHeader(
+                child: _buildAccountHeader(context),
+              ),
+              SliverToBoxAdapter(
+                child: _buildProfileCard(
                   context,
                   name,
                   phone,
@@ -127,259 +125,110 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                   profile?.dlKyc?.isAadharVerified,
                 ),
               ),
-              // commented Govt. Licenses & Verification
-              // SliverToBoxAdapter(
-              //   child: _buildGovernmentLicensesCard(context),
-              // ),
-              SliverToBoxAdapter(
-                child: _buildQuickActionsFullWidth(context, role, owner),
-              ),
-              SliverToBoxAdapter(
-                child: _buildQuickActions(context, role, owner),
-              ),
               SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+                padding: EdgeInsets.only(bottom: 24.h),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     if (!isStaff) ...[
-                      _buildGridSection('1. ${'personal_management'.tr()}', [
-                        // _ProfileCard(
-                        //   icon: Icons.person_rounded,
-                        //   title: 'account_settings'.tr(),
-                        //   iconBgColor: const Color(0xFFE0F2FE),
-                        //   iconColor: const Color(0xFF0284C7),
-                        //   onTap: () => Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) => const AccountSettingsPage(),
-                        //     ),
-                        //   ),
-                        // ),
-                        _ProfileCard(
-                          icon: Icons.person_rounded,
-                          title: 'bank_accounts'.tr(),
-                          iconBgColor: const Color(0xFFE0F2FE),
-                          iconColor: const Color(0xFF0284C7),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const BankAccountsPage(),
+                      _MenuSection(
+                        title: 'Business',
+                        children: [
+                          _MenuTile(
+                            icon: Icons.workspace_premium_rounded,
+                            title: 'Management plans',
+                            subtitle: 'Gold, Silver, Basic across $hostelCount properties',
+                            iconBgColor: const Color(0xFFF5F3FF),
+                            iconColor: const Color(0xFF7C3AED),
+                            badge: const _StatusBadge(
+                              text: '1 renews in 11 days',
+                              color: Color(0xFF92400E),
+                              bgColor: Color(0xFFFEF3C7),
                             ),
-                          ),
-                        ),
-                        // _ProfileCard(
-                        //   icon: Icons.credit_card_rounded,
-                        //   title: 'subscription'.tr(),
-                        //   iconBgColor: const Color(0xFFF0FDF4),
-                        //   iconColor: const Color(0xFF16A34A),
-                        //   onTap: () => Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) => const SubscriptionPage(),
-                        //     ),
-                        //   ),
-                        // ),
-                        // _ProfileCard(
-                        //   icon: Icons.stars_rounded,
-                        //   title: 'membership_id'.tr() == 'membership_id'
-                        //       ? 'Membership ID'
-                        //       : 'membership_id'.tr(),
-                        //   iconBgColor: const Color(0xFFFEF9C3),
-                        //   iconColor: const Color(0xFFCA8A04),
-                        //   onTap: () =>
-                        //       _showMembershipCard(context, name, phone),
-                        // ),
-                        // _ProfileCard(
-                        //   icon: Icons.card_membership_rounded,
-                        //   title: 'digital_certificate'.tr(),
-                        //   iconBgColor: const Color(0xFFF5F3FF),
-                        //   iconColor: const Color(0xFF7C3AED),
-                        //   onTap: () => Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) => BlocProvider(
-                        //         create: (context) =>
-                        //             sl<HostelCubit>()..getHostels(),
-                        //         child: const DigitalCertificatePage(),
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                      ]),
-                    ] else ...[
-                      _buildGridSection('1. ${'personal_management'.tr()}', [
-                        _ProfileCard(
-                          icon: Icons.person_rounded,
-                          title: 'account_settings'.tr(),
-                          iconBgColor: const Color(0xFFE0F2FE),
-                          iconColor: const Color(0xFF0284C7),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AccountSettingsPage(),
-                            ),
-                          ),
-                        ),
-                      ]),
-                    ],
-
-                    if (!isStaff) ...[
-                      _buildGridSection('2. ${'hostel_configuration'.tr()}', [
-                        if (hasHostels) ...[
-                          _ProfileCard(
-                            icon: Icons.business_rounded,
-                            title: 'hostel_profile'.tr(),
-                            iconBgColor: const Color(0xFFFFF1F2),
-                            iconColor: const Color(0xFFE11D48),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const HostelProfilePage(),
+                                builder: (context) => const SubscriptionPage(),
+                              ),
+                            ),
+                          ),
+                          _MenuTile(
+                            icon: Icons.insights_rounded,
+                            title: 'Financial insights',
+                            subtitle: 'Revenue, occupancy and dues',
+                            iconBgColor: const Color(0xFFEFF6FF),
+                            iconColor: const Color(0xFF2563EB),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BlocProvider(
+                                  create: (context) => sl<FinanceCubit>(),
+                                  child: const FinancialDashboardPage(),
+                                ),
+                              ),
+                            ),
+                          ),
+                          _MenuTile(
+                            icon: Icons.history_rounded,
+                            title: 'Collection & history',
+                            subtitle: 'Rent collected and outstanding',
+                            iconBgColor: const Color(0xFFFFF7ED),
+                            iconColor: const Color(0xFFEA580C),
+                            badge: const _StatusBadge(
+                              text: '4 pending',
+                              color: Color(0xFFB91C1C),
+                              bgColor: Color(0xFFFEE2E2),
+                            ),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BlocProvider(
+                                  create: (context) => sl<PaymentReportCubit>(),
+                                  child: const PaymentReportPage(),
+                                ),
+                              ),
+                            ),
+                          ),
+                          _MenuTile(
+                            icon: Icons.account_balance_rounded,
+                            title: 'bank_accounts'.tr(),
+                            subtitle: 'HDFC ••4471 • payouts active',
+                            iconBgColor: const Color(0xFFECFDF5),
+                            iconColor: const Color(0xFF059669),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const BankAccountsPage(),
                               ),
                             ),
                           ),
                         ],
-                        _ProfileCard(
-                          icon: Icons.wifi_rounded,
-                          title: 'amenities'.tr(),
-                          iconBgColor: const Color(0xFFECFDF5),
-                          iconColor: const Color(0xFF059669),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AmenitiesPage(),
-                            ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 12.h),
+                        child: Text(
+                          'Hostel configuration',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF334155),
                           ),
                         ),
-                        _ProfileCard(
-                          icon: Icons.rule_rounded,
-                          title: 'house_rules'.tr(),
-                          iconBgColor: const Color(0xFFFFF7ED),
-                          iconColor: const Color(0xFFEA580C),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HouseRulesPage(),
-                            ),
-                          ),
-                        ),
-                        _ProfileCard(
-                          icon: Icons.restaurant_rounded,
-                          title: 'food_menu'.tr(),
-                          iconBgColor: const Color(0xFFFEF2F2),
-                          iconColor: const Color(0xFFDC2626),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const FoodMenuPage(),
-                            ),
-                          ),
-                        ),
-                      ]),
+                      ),
+                      _HostelConfigCard(
+                        propertiesCount: hostelCount,
+                        bedsCount: totalBeds,
+                        pendingItems: '3 items pending',
+                        onTap: () => _showHostelConfigOptions(context),
+                      ),
                     ],
 
-                    // if (!isStaff) ...[
-                    //   _buildGridSection('3. ${'business_management'.tr()}', [
-                    //     _ProfileCard(
-                    //       icon: Icons.insights_rounded,
-                    //       title: 'financial_insights'.tr(),
-                    //       iconBgColor: const Color(0xFFEFF6FF),
-                    //       iconColor: const Color(0xFF2563EB),
-                    //       onTap: () => Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (context) => BlocProvider(
-                    //             create: (context) => sl<FinanceCubit>(),
-                    //             child: const FinancialDashboardPage(),
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //     _ProfileCard(
-                    //       icon: Icons.inventory_2_rounded,
-                    //       title: 'stock_management'.tr(),
-                    //       iconBgColor: const Color(0xFFFAF5FF),
-                    //       iconColor: const Color(0xFF9333EA),
-                    //       onTap: () => Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (context) => BlocProvider(
-                    //             create: (context) => sl<StockCubit>(),
-                    //             child: const StockDashboardPage(),
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //     _ProfileCard(
-                    //       icon: Icons.people_alt_rounded,
-                    //       title: 'staff_management'.tr(),
-                    //       iconBgColor: const Color(0xFFF0FDFA),
-                    //       iconColor: const Color(0xFF0D9488),
-                    //       onTap: () => Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (context) => const StaffManagementPage(),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ]),
-                    // ],
-                    _buildGridSection('3. ${'support_legal'.tr()}', [
-                      _ProfileCard(
-                        icon: Icons.language_rounded,
-                        title: 'change_language'.tr(),
-                        iconBgColor: const Color(0xFFF1F5F9),
-                        iconColor: const Color(0xFF475569),
-                        onTap: () => _showLanguagePicker(context),
-                      ),
-                      _ProfileCard(
-                        icon: Icons.verified_user_rounded,
-                        title: 'privacy_policy'.tr(),
-                        iconBgColor: const Color(0xFFECFEFF),
-                        iconColor: const Color(0xFF0891B2),
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const TermsAndConditionsPage(readOnly: true),
-                          ),
-                        ),
-                      ),
-                      if (!isStaff) ...[
-                        _ProfileCard(
-                          icon: Icons.help_center_rounded,
-                          title: 'help_support'.tr(),
-                          iconBgColor: const Color(0xFFFFFBEB),
-                          iconColor: const Color(0xFFD97706),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HelpSupportPage(),
-                            ),
-                          ),
-                        ),
-                        //hide feedback
-
-                        // _ProfileCard(
-                        //   icon: Icons.chat_bubble_rounded,
-                        //   title: 'feedback'.tr(),
-                        //   iconBgColor: const Color(0xFFFFF1F2),
-                        //   iconColor: const Color(0xFFE11D48),
-                        //   onTap: () {},
-                        // ),
-                      ],
-                    ]),
-
-                    _buildGridSection(
-                      '4. ${'services'.tr() == 'services' ? 'Stay India Services' : 'services'.tr()}',
-                      [
-                        _ProfileCard(
+                    _MenuSection(
+                      title: 'Services',
+                      children: [
+                        _MenuTile(
                           icon: Icons.build_rounded,
-                          title:
-                              'raise_service_request'.tr() ==
-                                  'raise_service_request'
-                              ? 'Raise a StayIndia request'
-                              : 'raise_service_request'.tr(),
+                          title: 'Raise a service request',
+                          subtitle: 'Cook, plumber, electrician and more',
                           iconBgColor: const Color(0xFFEFF6FF),
                           iconColor: const Color(0xFF2563EB),
                           onTap: () => Navigator.push(
@@ -389,13 +238,17 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             ),
                           ),
                         ),
-                        _ProfileCard(
+                        _MenuTile(
                           icon: Icons.assignment_rounded,
-                          title: 'my_requests'.tr() == 'my_requests'
-                              ? 'My requests'
-                              : 'my_requests'.tr(),
-                          iconBgColor: const Color(0xFFECFDF5),
-                          iconColor: const Color(0xFF059669),
+                          title: 'My requests',
+                          subtitle: 'Plumber arriving today 4-6 pm',
+                          iconBgColor: const Color(0xFFF0FDF4),
+                          iconColor: const Color(0xFF16A34A),
+                          badge: const _StatusBadge(
+                            text: '2 active',
+                            color: Color(0xFF166534),
+                            bgColor: Color(0xFFDCFCE7),
+                          ),
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -406,155 +259,73 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       ],
                     ),
 
-                    if (!isStaff) ...[
-                      _buildGridSection('5. ${'tools_reports'.tr()}', [
-                        _ProfileCard(
-                          icon: Icons.card_giftcard_rounded,
-                          title: 'refer_friend'.tr(),
-                          iconBgColor: const Color(0xFFFCE7F3),
-                          iconColor: const Color(0xFFDB2777),
-                          onTap: () => _showBottomSheetOnce(context, () async {
-                            final referralId = await context
-                                .read<ProfileCubit>()
-                                .generateReferral();
+                    _ReferralCard(
+                      onTap: () => _showBottomSheetOnce(context, () async {
+                        final referralId = await context
+                            .read<ProfileCubit>()
+                            .generateReferral();
+                        if (!context.mounted) return;
+                        await ShareAppBottomSheet.show(
+                          context,
+                          shareLink: referralId != null
+                              ? '${ApiConstants.partnerAppLink}?ref=$referralId'
+                              : ApiConstants.partnerAppLink,
+                        );
+                      }),
+                    ),
 
-                            if (!context.mounted) return;
-
-                            await ShareAppBottomSheet.show(
-                              context,
-                              shareLink: referralId != null
-                                  ? '${ApiConstants.partnerAppLink}?ref=$referralId'
-                                  : ApiConstants.partnerAppLink,
-                            );
-                          }),
+                    _MenuSection(
+                      title: 'Support & legal',
+                      children: [
+                        _MenuTile(
+                          icon: Icons.help_outline_rounded,
+                          title: 'Help & support',
+                          subtitle: 'Chat or call the Stay India team',
+                          iconBgColor: const Color(0xFFFFFBEB),
+                          iconColor: const Color(0xFFD97706),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HelpSupportPage(),
+                            ),
+                          ),
                         ),
-                        _ProfileCard(
-                          icon: Icons.star_rate_rounded,
-                          title: 'rate_us'.tr(),
-                          iconBgColor: const Color(0xFFFEF9C3),
-                          iconColor: const Color(0xFFCA8A04),
-                          onTap: () async {
-                            final url = await context
-                                .read<ProfileCubit>()
-                                .getRateUsUrl();
-                            if (url != null && url.isNotEmpty) {
-                              final uri = Uri.parse(url);
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(
-                                  uri,
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              }
-                            }
-                          },
-                        ),
-                        _ProfileCard(
-                          icon: Icons.system_update_rounded,
-                          title: 'update_app'.tr(),
+                        _MenuTile(
+                          icon: Icons.language_rounded,
+                          title: 'Change language',
+                          subtitle: 'English',
                           iconBgColor: const Color(0xFFF0FDF4),
                           iconColor: const Color(0xFF16A34A),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('App is up to date! (v1.0.4)'),
-                              ),
-                            );
-                          },
+                          onTap: () => _showLanguagePicker(context),
                         ),
-
-                        // _ProfileCard(
-                        //   icon: Icons.campaign_rounded,
-                        //   title: 'send_announcements'.tr(),
-                        //   iconBgColor: const Color(0xFFEFF6FF),
-                        //   iconColor: const Color(0xFF2563EB),
-                        //   onTap: () => Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) =>
-                        //           const SendAnnouncementsPage(),
-                        //     ),
-                        //   ),
-                        // ),
-                        // _ProfileCard(
-                        //   icon: Icons.analytics_rounded,
-                        //   title: 'my_reports'.tr(),
-                        //   iconBgColor: const Color(0xFFECFDF5),
-                        //   iconColor: const Color(0xFF059669),
-                        //   onTap: () => Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) =>
-                        //           const ReportsDashboardPage(),
-                        //     ),
-                        //   ),
-                        // ),
-                        // _ProfileCard(
-                        //   icon: Icons.local_offer_rounded,
-                        //   title: 'hostel_offers'.tr(),
-                        //   iconBgColor: const Color(0xFFFFF7ED),
-                        //   iconColor: const Color(0xFFEA580C),
-                        //   onTap: () => Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) =>
-                        //           const OffersManagementPage(),
-                        //     ),
-                        //   ),
-                        // ),
-                      ]),
-                    ],
-
-                    _buildGridSection('6. ${'application'.tr()}', [
-                      if (!isStaff)
-                        _ProfileCard(
-                          icon: Icons.share_rounded,
-                          title: 'share_app'.tr(),
+                        _MenuTile(
+                          icon: Icons.verified_user_outlined,
+                          title: 'Privacy policy',
+                          subtitle: 'How we handle your data',
                           iconBgColor: const Color(0xFFF5F3FF),
                           iconColor: const Color(0xFF7C3AED),
-                          onTap: () => _showBottomSheetOnce(context, () async {
-                            final referralId = await context
-                                .read<ProfileCubit>()
-                                .generateReferral();
-
-                            if (!context.mounted) return;
-
-                            await ShareAppBottomSheet.show(
-                              context,
-                              shareLink: referralId != null
-                                  ? '${ApiConstants.partnerAppLink}?ref=$referralId'
-                                  : ApiConstants.partnerAppLink,
-                            );
-                          }),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const TermsAndConditionsPage(readOnly: true),
+                            ),
+                          ),
                         ),
-                      _ProfileCard(
-                        icon: Icons.logout_rounded,
-                        title: 'logout'.tr(),
-                        titleColor: AppColors.error,
-                        iconBgColor: const Color(0xFFFEF2F2),
-                        iconColor: const Color(0xFFDC2626),
-                        onTap: () => _handleLogout(context),
-                      ),
-                      // _ProfileCard(
-                      //   icon: Icons.logout_rounded,
-                      //   title: 'delete_account'.tr(),
-                      //   titleColor: AppColors.error,
-                      //   imageUrl: 'assets/images/delete.png',
-                      //   iconBgColor: const Color(0xFFFEF2F2),
-                      //   iconColor: const Color(0xFFDC2626),
-                      //   onTap: () => _handleDeleteAccount(context),
-                      // ),
-                      _ProfileCard(
-                        icon: Icons.logout_rounded,
-                        title: 'deactivate_account'.tr(),
-                        titleColor: AppColors.error,
-                        imageUrl: 'assets/images/delete.png',
-                        iconBgColor: const Color(0xFFFEF2F2),
-                        iconColor: const Color(0xFFDC2626),
-                        onTap: () => _handleDeactivateAccount(context),
-                      ),
-                    ]),
+                        _MenuTile(
+                          icon: Icons.info_outline_rounded,
+                          title: 'About Stay India',
+                          iconBgColor: const Color(0xFFEFF6FF),
+                          iconColor: const Color(0xFF2563EB),
+                          onTap: () => {
+                            _openUrl(ApiConstants.ABOUT_US)
+                          },
+                        ),
+                      ],
+                    ),
 
-                    SizedBox(height: 140.h),
+                    SizedBox(height: 32.h),
+                    _buildFooter(context),
                   ]),
                 ),
               ),
@@ -565,651 +336,369 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     );
   }
 
-  Widget _buildGovernmentLicensesCard(BuildContext context) {
-    return BouncingWrapper(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BlocProvider(
-            create: (context) => sl<HostelCubit>()..getHostels(),
-            child: const GovernmentLicensesPage(),
-          ),
-        ),
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+    }
+  }
+
+
+  void _showHostelConfigOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
-      child: Container(
-        margin: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF1E3A8A), // Premium Dark Blue
-              Color(0xFF3B82F6), // Royal Blue
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF1E3A8A).withValues(alpha: 0.35),
-              blurRadius: 16,
-              spreadRadius: 1,
-              offset: const Offset(0, 8),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.business_rounded),
+              title: Text('hostel_profile'.tr()),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HostelProfilePage()),
+                );
+              },
             ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+            ListTile(
+              leading: const Icon(Icons.wifi_rounded),
+              title: Text('amenities'.tr()),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AmenitiesPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.rule_rounded),
+              title: Text('house_rules'.tr()),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HouseRulesPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.restaurant_rounded),
+              title: Text('food_menu'.tr()),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FoodMenuPage()),
+                );
+              },
             ),
           ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20.r),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -20.w,
-                top: -20.h,
-                child: Container(
-                  width: 100.w,
-                  height: 100.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.08),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: -30.w,
-                bottom: -30.h,
-                child: Container(
-                  width: 120.w,
-                  height: 120.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.05),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(12.r),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Text('🏛️', style: TextStyle(fontSize: 24.sp)),
-                    ),
-                    SizedBox(width: 16.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Govt. Licenses & Verifications',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                    letterSpacing: -0.3,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              SizedBox(width: 6.w),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 6.w,
-                                  vertical: 2.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF97316),
-                                  borderRadius: BorderRadius.circular(6.r),
-                                ),
-                                child: Text(
-                                  'OFFICIAL',
-                                  style: TextStyle(
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            'FSSAI, Trade License, Police Verification & more',
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Colors.white.withValues(alpha: 0.9),
-                      size: 14.sp,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(
+  Widget _buildAccountHeader(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 54.h, 20.w, 10.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Account',
+            style: GoogleFonts.inter(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      '1,000',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2C599D),
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      'Rewards',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Stack(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Icon(
+                      Icons.notifications_none_rounded,
+                      color: const Color(0xFF64748B),
+                      size: 20.sp,
+                    ),
+                  ),
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: Container(
+                      width: 8.w,
+                      height: 8.w,
+                      decoration: const BoxDecoration(
+                        color: Colors.orange,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileCard(
     BuildContext context,
     String name,
     String phone,
     String? avatar,
     bool? isAaadharVerified,
   ) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          margin: EdgeInsets.fromLTRB(20.w, 54.h, 20.w, 12.h),
-          padding: EdgeInsets.all(16.r),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2C599D),
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2C599D).withValues(alpha: 0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
-          child: Row(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFF98125),
-                    width: 1.5,
+        ],
+      ),
+      child: Row(
+        children: [
+          CustomAvatar(
+            imageUrl: ApiConstants.getImageUrl(avatar),
+            name: name,
+            size: 56.0,
+            isCircle: true,
+            fontSize: 20.sp,
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  phone,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
-                child: CustomAvatar(
-                  imageUrl: ApiConstants.getImageUrl(avatar),
-                  name: name,
-                  size: 52.0,
-                  isCircle: true,
-                  fontSize: 18.sp,
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1A1A1A),
-                        letterSpacing: -0.4,
+                SizedBox(height: 8.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.verified,
+                        color: isAaadharVerified == true ? Colors.greenAccent : Colors.red,
+                        size: 14.sp,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (phone.isNotEmpty) ...[
-                      SizedBox(height: 2.h),
+                      SizedBox(width: 4.w),
                       Text(
-                        phone,
+                        isAaadharVerified == true ? 'eKYC verified' : 'eKYC Pending',
                         style: TextStyle(
-                          fontSize: 13.sp,
-                          color: const Color(0xFF6B7280),
-                          fontWeight: FontWeight.w500,
+                          fontSize: 10.sp,
+                          color:  isAaadharVerified == true ? Colors.white: Colors.red,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
-                    SizedBox(height: 8.h),
-                    Row(
-                      children: [
-                        BouncingWrapper(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AccountSettingsPage(),
-                            ),
-                          ),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 14.w,
-                              vertical: 8.h,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: const Color(0xFF2C599D),
-                                width: 1.2,
-                              ),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Text(
-                              'edit_profile'.tr(),
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF2C599D),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 6.w),
-            ],
-          ),
-        ),
-
-        // Verified
-        if (isAaadharVerified == true)
-          Positioned(
-            top: 70.h,
-            right: 35.w,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F5E9),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: const Color(0xFF4CAF50), width: 1),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.verified,
-                    color: const Color(0xFF2E7D32),
-                    size: 16.sp,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    'Verified',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF2E7D32),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-        // Verify KYC
-        if (isAaadharVerified == false)
-          Positioned(
-            top: 70.h,
-            right: 35.w,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF3E0),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: const Color(0xFFFF9800), width: 1),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    color: const Color(0xFFE65100),
-                    size: 18.sp,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    'eKYC Pending',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFFE65100),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildQuickActionsFullWidth(
-    BuildContext context,
-    String role,
-    dynamic owner,
-  ) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _FullWidthActionCard(
-            icon: Icons.credit_card_rounded,
-            label: 'subscription'.tr(),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SubscriptionPage(),
-                ),
-              );
-            },
-          ),
-          // Add another card vertically
-          SizedBox(height: 12.h),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActions(BuildContext context, String role, dynamic owner) {
-    final bool hasInsights = owner?.hasPermission('reports') ?? true;
-    final bool hasStock =
-        false; // owner?.hasPermission('stock') ?? true;  // hidden stock for condition changed
-    final bool hasStaff =
-        false; // owner?.hasPermission('staff') ?? true;  // hidden staff for condition changed
-
-    if (!hasInsights && !hasStock && !hasStaff) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      height: 120.h,
-      padding: EdgeInsets.only(top: 24.h),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        children: [
-          if (hasInsights)
-            _QuickActionCard(
-              icon: Icons.insights_rounded,
-              image: 'assets/images/bargraph.png',
-              label: 'insights_quick'.tr(),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => sl<FinanceCubit>(),
-                    child: const FinancialDashboardPage(),
                   ),
                 ),
-              ),
+              ],
             ),
-          SizedBox(width: 12.w),
-          _QuickActionCard(
-            icon: Icons.insights_rounded,
-            image: 'assets/images/collection_rupee.png',
-            label: 'collection'.tr(),
+          ),
+          BouncingWrapper(
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => BlocProvider(
-                  create: (context) => sl<PaymentReportCubit>(),
-                  child: const PaymentReportPage(),
-                ),
+                builder: (context) => const AccountSettingsPage(),
+              ),
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.edit_outlined, size: 14.sp, color: const Color(0xFF2C599D)),
+                  SizedBox(width: 4.w),
+                  Text(
+                    'Edit',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF2C599D),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          if (hasInsights && (hasStock || hasStaff)) SizedBox(width: 12.w),
-          if (hasStock)
-            _QuickActionCard(
-              icon: Icons.inventory_2_rounded,
-              label: 'stock_quick'.tr(),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => sl<StockCubit>(),
-                    child: const StockDashboardPage(),
-                  ),
-                ),
-              ),
-            ),
-          if (hasStock && hasStaff) SizedBox(width: 12.w),
-          if (hasStaff)
-            _QuickActionCard(
-              icon: Icons.people_alt_rounded,
-              label: 'staff_quick'.tr(),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const StaffManagementPage(),
-                ),
-              ),
-            ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionLabel(String label) {
-    return Padding(
-      padding: EdgeInsets.only(left: 8.w, bottom: 12.h),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 13.sp,
-          fontWeight: FontWeight.w800,
-          color: AppColors.textSecondary.withValues(alpha: 0.85),
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGridSection(String label, List<Widget> children) {
+  Widget _buildFooter(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionLabel(label),
-        SizedBox(height: 8.h),
-        GridView.count(
-          crossAxisCount: 2,
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 10.w,
-          mainAxisSpacing: 10.h,
-          childAspectRatio: 2.3,
-          children: children,
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: ElevatedButton(
+            onPressed: () => _handleLogout(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2C599D),
+              foregroundColor: Colors.white,
+              minimumSize: Size(double.infinity, 52.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              elevation: 0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Log out',
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(width: 8.w),
+                const Icon(Icons.logout_rounded, size: 20),
+              ],
+            ),
+          ),
         ),
-        SizedBox(height: 28.h),
+        SizedBox(height: 12.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: OutlinedButton(
+            onPressed: () => _handleDeactivateAccount(context),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFB91C1C),
+              side: const BorderSide(color: Color(0xFFFECACA)),
+              minimumSize: Size(double.infinity, 52.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              backgroundColor: const Color(0xFFFEF2F2),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Delete account',
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(width: 8.w),
+                const Icon(Icons.delete_outline_rounded, size: 20),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 32.h),
+        Text(
+          'Follow Stay India',
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: const Color(0xFF94A3B8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: 16.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _SocialIcon(icon: Icons.facebook, color: const Color(0xFF1877F2)),
+            SizedBox(width: 20.w),
+            _SocialIcon(icon: Icons.camera_alt, color: const Color(0xFFE4405F)),
+            SizedBox(width: 20.w),
+            _SocialIcon(icon: Icons.play_arrow_rounded, color: const Color(0xFFFF0000)),
+          ],
+        ),
+        SizedBox(height: 24.h),
+        Text(
+          'Version 2.4.1',
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: const Color(0xFFCBD5E1),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: 48.h),
       ],
     );
   }
 
-  void _showMembershipCard(BuildContext context, String name, String phone) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.r),
-        ),
-        backgroundColor: Colors.transparent,
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFFBF953F),
-                Color(0xFFFCF6BA),
-                Color(0xFFB38728),
-                Color(0xFFFBF5B7),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24.r),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
-                blurRadius: 20,
-                spreadRadius: 2,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 20.h),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(24.r),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.stars_rounded,
-                      color: const Color(0xFFFFD700),
-                      size: 48.sp,
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      'GOLDEN PG STATUS',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFFFFD700),
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(24.r),
-                child: Column(
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF1E293B),
-                        letterSpacing: -0.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 12.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 10.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: const Color(0xFFB38728),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'MEMBERSHIP ID',
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF475569),
-                              letterSpacing: 1,
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            'SI-OWNER-${phone.replaceAll("+91 ", "").replaceAll(" ", "")}',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w900,
-                              color: const Color(0xFF1E293B),
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.verified_rounded,
-                          color: const Color(0xFFB38728),
-                          size: 16.sp,
-                        ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          'Verified Stay India Premium Partner',
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF475569),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 24.h),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: const Color(0xFFFFD700),
-                        elevation: 0,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 32.w,
-                          vertical: 12.h,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
-                      ),
-                      child: const Text(
-                        'Awesome',
-                        style: TextStyle(fontWeight: FontWeight.w900),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+
+
 
   void _showLanguagePicker(BuildContext context) {
     showModalBottomSheet(
@@ -1655,7 +1144,7 @@ class _DeactivateOptionTile extends StatelessWidget {
         padding: EdgeInsets.all(12.r),
         decoration: BoxDecoration(
           color: bgColor,
-          border: Border.all(color: color.withOpacity(0.1)),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
@@ -1664,7 +1153,7 @@ class _DeactivateOptionTile extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(10.r),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 24.sp),
@@ -1703,234 +1192,299 @@ class _DeactivateOptionTile extends StatelessWidget {
   }
 }
 
-class _ProfileCard extends StatefulWidget {
-  final IconData icon;
+class _MenuSection extends StatelessWidget {
   final String title;
-  final VoidCallback onTap;
-  final Color? titleColor;
-  final Color? iconBgColor;
-  final Color? iconColor;
-  final String? imageUrl;
+  final List<Widget> children;
 
-  const _ProfileCard({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.titleColor,
-    this.iconBgColor,
-    this.iconColor,
-    this.imageUrl,
-  });
-
-  @override
-  State<_ProfileCard> createState() => _ProfileCardState();
-}
-
-class _ProfileCardState extends State<_ProfileCard> {
-  // Guards against rapid double/multi taps firing onTap (and hence
-  // Navigator.push) more than once before the first tap is handled.
-  bool _isHandlingTap = false;
-
-  void _handleTap() {
-    // Ignore all additional clicks
-    if (_isHandlingTap) return;
-
-    _isHandlingTap = true;
-
-    widget.onTap.call();
-
-    // Reset after the action starts
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (mounted) {
-        setState(() {
-          _isHandlingTap = false;
-        });
-      } else {
-        _isHandlingTap = false;
-      }
-    });
-  }
+  const _MenuSection({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
-    final bool hasImage = widget.imageUrl?.trim().isNotEmpty ?? false;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 10.h),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF334155),
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 20.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              for (int i = 0; i < children.length; i++) ...[
+                children[i],
+                if (i < children.length - 1)
+                  Divider(height: 1, color: const Color(0xFFF1F5F9), indent: 60.w),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
 
+class _MenuTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+  final Color iconBgColor;
+  final Color iconColor;
+  final Widget? badge;
+  final bool showChevron;
+  final bool isDestructive;
+
+  const _MenuTile({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    required this.onTap,
+    required this.iconBgColor,
+    required this.iconColor,
+    this.badge,
+    this.showChevron = true,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(icon, color: iconColor, size: 20.sp),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                            color: isDestructive ? Colors.red : const Color(0xFF1E293B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (badge != null) ...[
+                        SizedBox(width: 8.w),
+                        badge!,
+                      ],
+                    ],
+                  ),
+                  if (subtitle != null) ...[
+                    SizedBox(height: 2.h),
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w400,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (showChevron)
+              Container(
+                padding: EdgeInsets.all(4.r),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  color: const Color(0xFF64748B),
+                  size: 16.sp,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String text;
+  final Color color;
+  final Color bgColor;
+
+  const _StatusBadge({
+    required this.text,
+    required this.color,
+    required this.bgColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 9.sp,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _HostelConfigCard extends StatelessWidget {
+  final int propertiesCount;
+  final int bedsCount;
+  final String pendingItems;
+  final VoidCallback onTap;
+
+  const _HostelConfigCard({
+    required this.propertiesCount,
+    required this.bedsCount,
+    required this.pendingItems,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return BouncingWrapper(
-      onTap: _handleTap,
+      onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFDFCF6),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: const Color(0xFFFEF3C7)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.r),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(Icons.business_rounded, color: const Color(0xFF2563EB), size: 24.sp),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$propertiesCount properties - $bedsCount beds',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Amenities, house rules, food menu',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF3C7),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Text(
+                      pendingItems,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFD97706),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(4.r),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReferralCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ReferralCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return BouncingWrapper(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(8.r),
-              decoration: BoxDecoration(
-                color: widget.iconBgColor ?? AppColors.backgroundSecondary,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: hasImage
-                  ? _buildImage(widget.imageUrl!)
-                  : Icon(
-                      widget.icon,
-                      color: widget.iconColor ?? AppColors.primaryBlue,
-                      size: 18.sp,
-                    ),
-            ),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: Text(
-                widget.title,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
-                  color: widget.titleColor ?? AppColors.textPrimary,
-                  height: 1.2,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.border,
-              size: 16.sp,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImage(String url) {
-    final double imageSize = 18.r;
-    if (url.startsWith('http') || url.startsWith('https')) {
-      return Image.network(
-        url,
-        width: imageSize,
-        height: imageSize,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) =>
-            Icon(Icons.broken_image, size: imageSize),
-      );
-    } else {
-      // Check if it's a standard asset path
-      final String assetPath = url.startsWith('assets/')
-          ? url
-          : 'assets/images/$url';
-      return Image.asset(
-        assetPath,
-        width: imageSize,
-        height: imageSize,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          // If the direct asset path fails, try to fallback to the original URL or show an error icon
-          return Icon(Icons.image_not_supported, size: imageSize);
-        },
-      );
-    }
-  }
-}
-
-class _QuickActionCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final String? image;
-
-  const _QuickActionCard({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.image = "",
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return BouncingWrapper(
-      onTap: onTap,
-      scaleFactor: 0.96,
-      child: Container(
-        width: 168.w,
-        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (image!.isNotEmpty) ...[
-              Image.asset(image!, width: 24.sp),
-            ] else ...[
-              Icon(icon, color: AppColors.accentOrange, size: 24.sp),
-            ],
-            SizedBox(height: 6.h),
-            Flexible(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FullWidthActionCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _FullWidthActionCard({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return BouncingWrapper(
-      onTap: onTap,
-      scaleFactor: 0.97,
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -1939,32 +1493,56 @@ class _FullWidthActionCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 48.w,
-              height: 48.w,
+              padding: EdgeInsets.all(12.r),
               decoration: BoxDecoration(
                 color: const Color(0xFFF0FDF4),
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(icon, color: const Color(0xFF16A34A), size: 24.sp),
+              child: Icon(Icons.card_giftcard_rounded, color: const Color(0xFF16A34A), size: 24.sp),
             ),
-
-            SizedBox(width: 14.w),
-
+            SizedBox(width: 16.w),
             Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Refer a friend',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Earn ₹500 when they complete 30 days',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    '2 joined  •  ₹1,000 earned',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16.sp,
-              color: AppColors.textSecondary.withValues(alpha: 0.6),
+            Container(
+              padding: EdgeInsets.all(4.r),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF64748B),
+              ),
             ),
           ],
         ),
@@ -1972,3 +1550,30 @@ class _FullWidthActionCard extends StatelessWidget {
     );
   }
 }
+
+class _SocialIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+
+  const _SocialIcon({required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(10.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(icon, color: color, size: 22.sp),
+    );
+  }
+}
+
