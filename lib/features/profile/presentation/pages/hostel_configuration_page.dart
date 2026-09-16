@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/bed_card.dart';
@@ -84,7 +85,7 @@ class HostelConfigurationPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Hostel configuration',
+            'hostel_configuration'.tr(),
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
@@ -93,7 +94,7 @@ class HostelConfigurationPage extends StatelessWidget {
           ),
           if (hostelCount > 0)
             Text(
-              '$hostelCount properties • $totalBeds beds',
+              '${'properties_count'.tr(namedArgs: {'count': hostelCount.toString()})} • ${'beds_count'.tr(namedArgs: {'count': totalBeds.toString()})}',
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 color: const Color(0xFF64748B),
@@ -154,7 +155,7 @@ class HostelConfigurationPage extends StatelessWidget {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  'Add a property',
+                  'add_property'.tr(),
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
@@ -186,12 +187,12 @@ class HostelConfigurationPage extends StatelessWidget {
             ),
             SizedBox(height: 24.h),
             Text(
-              'No properties found',
+              'no_properties_found'.tr(),
               style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
             ),
             SizedBox(height: 12.h),
             Text(
-              'Start by adding your first property to configure amenities, rules and menu.',
+              'no_properties_desc'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B), height: 1.5),
             ),
@@ -204,7 +205,7 @@ class HostelConfigurationPage extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text('Add property'),
+              label: Text('add_property'.tr()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
                 foregroundColor: Colors.white,
@@ -227,20 +228,21 @@ class _HostelConfigCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // String status = "All set";
-    Color statusBg = const Color(0xFFdbeadd);
-    Color statusText = const Color(0xFF3b7843);
+    String status = "all_set".tr();
+    Color statusBg = const Color(0xFFE6F4EA);
+    Color statusText = const Color(0xFF1E8E3E);
 
     // if (index == 1) {
-    //   status = "1 pending";
-    //   statusBg = const Color(0xFFf8efdc);
-    //   statusText = const Color(0xFF7e521d);
+    //   status = 'pending_count'.tr(namedArgs: {'count': '1'});
+    //   statusBg = const Color(0xFFFEF7E0);
+    //   statusText = const Color(0xFFB45309);
     // } else if (index == 2) {
-    //   status = "2 pending";
-    //   statusBg = const Color(0xFFfbefe5);
-    //   statusText = const Color(0xFF9c4821);
+    //   status = 'pending_count'.tr(namedArgs: {'count': '2'});
+    //   statusBg = const Color(0xFFFEF2F2);
+    //   statusText = const Color(0xFFB91C1C);
     // }
-    String status = "";
+
+    status = '';
 
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
@@ -304,7 +306,7 @@ class _HostelConfigCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${hostel.area ?? hostel.city ?? ""} • ${hostel.totalBeds ?? 0} beds',
+                          '${hostel.area ?? hostel.city ?? ""} • ${'beds_count'.tr(namedArgs: {'count': (hostel.totalBeds ?? 0).toString()})}',
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: const Color(0xFF8891a1),
@@ -346,11 +348,11 @@ class _HostelConfigCard extends StatelessWidget {
           _buildDashedDivider(),
           _ConfigSubItem(
             icon: Icons.wifi_rounded,
-            title: 'Amenities',
+            title: 'amenities'.tr(),
+            // status: index == 2 ? null : (index == 1 ? 'listed_count'.tr(namedArgs: {'count': '7'}) : 'listed_count'.tr(namedArgs: {'count': '9'})),
+            // actionLabel: index == 2 ? 'add'.tr() : null,
             status: null,
-            actionLabel:null,
-            // status: index == 2 ? null : (index == 1 ? "7 listed" : "9 listed"),
-            // actionLabel: index == 2 ? "Add" : null,
+            actionLabel:  null,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);
               Navigator.push(
@@ -362,11 +364,11 @@ class _HostelConfigCard extends StatelessWidget {
           _buildDashedDivider(),
           _ConfigSubItem(
             icon: Icons.list_alt_rounded,
-            title: 'House rules',
+            title: 'house_rules'.tr(),
+            // status: index == 0 ? 'rules_count'.tr(namedArgs: {'count': '6'}) : (index == 1 ? 'rules_count'.tr(namedArgs: {'count': '5'}) : null),
+            // actionLabel: index == 2 ? 'add'.tr() : null,
             status: null,
-            actionLabel:null,
-            // status: index == 0 ? "6 rules" : (index == 1 ? "5 rules" : null),
-            // actionLabel: index == 2 ? "Add" : null,
+            actionLabel:  null,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);
               Navigator.push(
@@ -378,11 +380,11 @@ class _HostelConfigCard extends StatelessWidget {
           _buildDashedDivider(),
           _ConfigSubItem(
             icon: Icons.restaurant_rounded,
-            title: 'Food menu',
+            title: 'food_menu'.tr(),
+            // status: index == 0 ? 'this_week'.tr() : (index == 2 ? 'this_week'.tr() : null),
+            // actionLabel: index == 1 ? 'add_menu'.tr() : null,
             status: null,
-            actionLabel:null,
-            // status: index == 0 ? "This week" : (index == 2 ? "This week" : null),
-            // actionLabel: index == 1 ? "Add menu" : null,
+            actionLabel:  null,
             isLast: true,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);

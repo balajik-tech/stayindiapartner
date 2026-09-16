@@ -136,13 +136,13 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                   delegate: SliverChildListDelegate([
                     if (!isStaff) ...[
                       _MenuSection(
-                        title: 'Business',
+                        title: 'business'.tr(),
                         children: [
                           _MenuTile(
                             icon: Icons.workspace_premium_rounded,
                             imagePath: 'assets/images/profile_management.png',
-                            title: 'Management plans',
-                            subtitle: 'Gold, Silver, Basic across $hostelCount properties',
+                            title: 'management_plans'.tr(),
+                            subtitle: 'management_plans_subtitle'.tr(namedArgs: {'count': hostelCount.toString()}),
                             iconBgColor: const Color(0xFFEEEDFE),
                             iconColor: const Color(0xFF3C3489),
                             // badge: const _StatusBadge(
@@ -160,8 +160,8 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           _MenuTile(
                             icon: Icons.bar_chart_outlined,
                             imagePath: 'assets/images/profile_financial.png',
-                            title: 'Financial insights',
-                            subtitle: 'Revenue, occupancy and dues',
+                            title: 'financial_insights'.tr(),
+                            subtitle: 'financial_insights_desc'.tr(),
                             iconBgColor: const Color(0xFFE6F1FB),
                             iconColor: const Color(0xFF185FA5),
                             onTap: () => Navigator.push(
@@ -176,13 +176,13 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           ),
                           _MenuTile(
                             icon: Icons.history_rounded,
-                            title: 'Collection & history',
+                            title: 'collection'.tr(),
                             imagePath: 'assets/images/profile_collection.png',
-                            subtitle: 'Rent collected and outstanding',
+                            subtitle: 'collection_desc'.tr(),
                             iconBgColor: const Color(0xFFFAEEDA),
                             iconColor: const Color(0xFF854F0B),
-                            // badge: const _StatusBadge(
-                            //   text: '4 pending',
+                            // badge: _StatusBadge(
+                            //   text: 'pending_count'.tr(namedArgs: {'count': '4'}),
                             //   color: Color(0xFFB91C1C),
                             //   bgColor: Color(0xFFFEE2E2),
                             // ),
@@ -200,7 +200,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             icon: Icons.account_balance_rounded,
                             title: 'bank_accounts'.tr(),
                             imagePath: 'assets/images/profile_bankaccount.png',
-                            subtitle: 'View and manage your bank accounts',
+                            subtitle: 'bank_accounts_desc'.tr(),
                             iconBgColor: const Color(0xFFE1F5EE),
                             iconColor: const Color(0xFF0F6E56),
                             onTap: () => Navigator.push(
@@ -215,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       Padding(
                         padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 12.h),
                         child: Text(
-                          'Hostel configuration',
+                          'hostel_configuration'.tr(),
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
@@ -236,44 +236,6 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       ),
                     ],
 
-                    // _MenuSection(
-                    //   title: 'Services',
-                    //   children: [
-                    //     _MenuTile(
-                    //       icon: Icons.build_outlined,
-                    //       title: 'Raise a service request',
-                    //       subtitle: 'Cook, plumber, electrician and more',
-                    //       iconBgColor: const Color(0xFF1B54A4),
-                    //       iconColor: Colors.white,
-                    //       onTap: () => Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (context) => const RequestServicePage(),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //     _MenuTile(
-                    //       icon: Icons.assessment,
-                    //       title: 'My requests',
-                    //       imagePath: 'assets/images/profile_request.png',
-                    //       subtitle: 'Plumber arriving today 4-6 pm',
-                    //       iconBgColor: const Color(0xFFE6F1FB),
-                    //       iconColor: const Color(0xFF185FA5),
-                    //       badge: const _StatusBadge(
-                    //         text: '2 active',
-                    //         color: Color(0xFF166534),
-                    //         bgColor: Color(0xFFDCFCE7),
-                    //       ),
-                    //       onTap: () => Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (context) => const MyRequestsPage(),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-
                     _ReferralCard(
                       onTap: () => _showBottomSheetOnce(context, () async {
                         final referralId = await context
@@ -290,12 +252,12 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                     ),
 
                     _MenuSection(
-                      title: 'Support & legal',
+                      title: 'support_legal'.tr(),
                       children: [
                         _MenuTile(
                           icon: Icons.help_outline_rounded,
-                          title: 'Help & support',
-                          subtitle: 'Chat or call the Stay India team',
+                          title: 'help_support'.tr(),
+                          subtitle: 'help_support_desc'.tr(),
                           iconBgColor: const Color(0xFFFAEEDA),
                           iconColor: const Color(0xFF854F0B),
                           onTap: () => Navigator.push(
@@ -307,16 +269,16 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                         ),
                         _MenuTile(
                           icon: Icons.language_rounded,
-                          title: 'Change language',
-                          subtitle: 'English',
+                          title: 'change_language'.tr(),
+                          subtitle: 'language_name'.tr(),
                           iconBgColor: const Color(0xFFE1F5EE),
                           iconColor: const Color(0xFF0F6E56),
                           onTap: () => _showLanguagePicker(context),
                         ),
                         _MenuTile(
                           icon: Icons.security,
-                          title: 'Privacy policy',
-                          subtitle: 'How we handle your data',
+                          title: 'privacy_policy'.tr(),
+                          subtitle: 'privacy_policy_desc'.tr(),
                           imagePath: 'assets/images/profile_privacy.png',
                           iconBgColor: const Color(0xFFEEEDFE),
                           iconColor: const Color(0xFF3C3489),
@@ -330,7 +292,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                         ),
                         _MenuTile(
                           icon: Icons.info_outline_rounded,
-                          title: 'About Stay India',
+                          title: 'about_stay_india'.tr(),
                           iconBgColor: const Color(0xFFE6F1FB),
                           iconColor: const Color(0xFF185FA5),
                           onTap: () => {
@@ -372,7 +334,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Account',
+            'account'.tr(),
             style: GoogleFonts.inter(
               fontSize: 24.sp,
               fontWeight: FontWeight.w500,
@@ -400,7 +362,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      'Rewards',
+                      'rewards'.tr(),
                       style: TextStyle(
                         fontSize: 10,
                         color: const Color(0xFF7A8699),
@@ -537,7 +499,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        isAaadharVerified == true ? 'eKYC verified' : 'eKYC Pending',
+                        isAaadharVerified == true ? 'ekyc_verified'.tr() : 'ekyc_pending'.tr(),
                         style: TextStyle(
                           fontSize: 11.sp,
                           color:  isAaadharVerified == true ? Color(0xFF059669): Colors.red,
@@ -568,7 +530,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                   Icon(Icons.edit_outlined, size: 13, color: const Color(0xFF1B54A4)),
                   SizedBox(width: 4.w),
                   Text(
-                    'Edit',
+                    'edit'.tr(),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -604,7 +566,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Log out',
+                  'logout'.tr(),
                   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(width: 8.w),
@@ -631,7 +593,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Delete account',
+                  'delete_account'.tr(),
                   style: TextStyle(color:Color(0xFFA32D2D),fontSize: 16.sp, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(width: 8.w),
@@ -640,35 +602,35 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
             ),
           ),
         ),
-        // SizedBox(height: 32.h),
-        // Text(
-        //   'Follow Stay India',
-        //   style: TextStyle(
-        //     fontSize: 12.sp,
-        //     color: const Color(0xFF94A3B8),
-        //     fontWeight: FontWeight.w600,
-        //   ),
-        // ),
-        // SizedBox(height: 16.h),
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.center,
-        //   children: [
-        //     _SocialIcon(icon: Icons.facebook, color: const Color(0xFF1877F2)),
-        //     SizedBox(width: 20.w),
-        //     _SocialIcon(icon: Icons.camera_alt, color: const Color(0xFFE4405F)),
-        //     SizedBox(width: 20.w),
-        //     _SocialIcon(icon: Icons.play_arrow_rounded, color: const Color(0xFFFF0000)),
-        //   ],
-        // ),
-        // SizedBox(height: 24.h),
-        // Text(
-        //   'Version 2.4.1',
-        //   style: TextStyle(
-        //     fontSize: 12.sp,
-        //     color: const Color(0xFFCBD5E1),
-        //     fontWeight: FontWeight.w500,
-        //   ),
-        // ),
+        SizedBox(height: 32.h),
+        Text(
+          'follow_stay_india'.tr(),
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: const Color(0xFF94A3B8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: 16.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _SocialIcon(icon: Icons.facebook, color: const Color(0xFF1877F2)),
+            SizedBox(width: 20.w),
+            _SocialIcon(icon: Icons.camera_alt, color: const Color(0xFFE4405F)),
+            SizedBox(width: 20.w),
+            _SocialIcon(icon: Icons.play_arrow_rounded, color: const Color(0xFFFF0000)),
+          ],
+        ),
+        SizedBox(height: 24.h),
+        Text(
+          'version'.tr(namedArgs: {'version': '2.4.1'}),
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: const Color(0xFFCBD5E1),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         SizedBox(height: 80.h),
       ],
     );
@@ -1510,7 +1472,7 @@ class _ReferralCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Refer a friend',
+                    'refer_friend'.tr(),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -1519,7 +1481,7 @@ class _ReferralCard extends StatelessWidget {
                   ),
                   SizedBox(height: 12.h),
                   Text(
-                    'Earn ₹500 when they complete 30 days',
+                    'refer_friend_desc'.tr(),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.black,
@@ -1528,7 +1490,7 @@ class _ReferralCard extends StatelessWidget {
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    '2 joined  •  ₹1,000 earned',
+                    'refer_friend_stats'.tr(namedArgs: {'joined': '2', 'earned': '₹1,000'}),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
