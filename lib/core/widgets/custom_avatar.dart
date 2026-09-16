@@ -29,7 +29,15 @@ class CustomAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    // final String initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final String initial = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((e) => e.isNotEmpty)
+        .map((e) => e[0].toUpperCase())
+        .take(2)
+        .join();
+
     final double effectiveSize = size.w;
     final double effectiveBorderRadius = borderRadius ?? 8.r;
     final Color effectiveBgColor =

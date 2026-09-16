@@ -466,6 +466,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
             size: 56.0,
             isCircle: true,
             fontSize: 20.sp,
+            backgroundColor:Color(0xFFe8f1fa)
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -476,7 +477,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                   name,
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
                   maxLines: 1,
