@@ -620,7 +620,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
             onPressed: () => _handleDeactivateAccount(context),
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFFA32D2D),
-              side: const BorderSide(color: Color(0xFFFECACA)),
+              side: const BorderSide(color: Color(0xFFE24B4A)),
               minimumSize: Size(double.infinity, 52.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
@@ -635,7 +635,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                   style: TextStyle(color:Color(0xFFA32D2D),fontSize: 16.sp, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(width: 8.w),
-                const Icon(Icons.delete_outline_rounded, size: 20),
+                Image.asset('assets/images/profile_delete.png', width: 16,height: 16),
               ],
             ),
           ),
