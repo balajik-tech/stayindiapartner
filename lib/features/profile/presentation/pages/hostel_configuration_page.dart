@@ -8,6 +8,7 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/bed_card.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
+import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/pages/property_setup_stepper_page.dart';
 import '../../../communities/presentation/widgets/dotted_circle_painter.dart';
 import '../widgets/dash_dotter_line.dart';
@@ -20,6 +21,34 @@ import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 
 class HostelConfigurationPage extends StatelessWidget {
   const HostelConfigurationPage({super.key});
+
+  void _handleAddProperty(BuildContext context) {
+    final profileState = context.read<ProfileCubit>().state;
+    bool isVerified = false;
+
+    if (profileState is ProfileLoaded) {
+      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+    } else if (profileState is ProfileUpdateSuccess) {
+      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+    }
+
+    if (isVerified) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PropertySetupStepperPage(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please complete your KYC verification'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,12 +135,7 @@ class HostelConfigurationPage extends StatelessWidget {
       actions: [
         IconButton(
           icon: Icon(Icons.add, color: AppColors.primaryBlue, size: 28.sp),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const PropertySetupStepperPage(),
-            ),
-          ),
+          onPressed: () => _handleAddProperty(context),
         ),
         SizedBox(width: 8.w),
       ],
@@ -125,12 +149,7 @@ class HostelConfigurationPage extends StatelessWidget {
         color: Color(0xFFF5F8FC),
       ),
       child: BouncingWrapper(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PropertySetupStepperPage(),
-          ),
-        ),
+        onTap: () => _handleAddProperty(context),
         child: CustomPaint(
           painter: DashedBorderPainter(
             color: const Color(0xFFa5bddb),
@@ -198,12 +217,7 @@ class HostelConfigurationPage extends StatelessWidget {
             ),
             SizedBox(height: 32.h),
             ElevatedButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PropertySetupStepperPage(),
-                ),
-              ),
+              onPressed: () => _handleAddProperty(context),
               icon: const Icon(Icons.add, color: Colors.white),
               label: Text('add_property'.tr()),
               style: ElevatedButton.styleFrom(
@@ -225,6 +239,34 @@ class _HostelConfigCard extends StatelessWidget {
   final int index;
 
   const _HostelConfigCard({required this.hostel, required this.index});
+
+  void _handleAddProperty(BuildContext context) {
+    final profileState = context.read<ProfileCubit>().state;
+    bool isVerified = false;
+
+    if (profileState is ProfileLoaded) {
+      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+    } else if (profileState is ProfileUpdateSuccess) {
+      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+    }
+
+    if (isVerified) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PropertySetupStepperPage(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('ekyc_pending'.tr()),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -435,6 +477,34 @@ class _ConfigSubItem extends StatelessWidget {
     this.isLast = false,
     required this.onTap,
   });
+
+  void _handleAddProperty(BuildContext context) {
+    final profileState = context.read<ProfileCubit>().state;
+    bool isVerified = false;
+
+    if (profileState is ProfileLoaded) {
+      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+    } else if (profileState is ProfileUpdateSuccess) {
+      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+    }
+
+    if (isVerified) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PropertySetupStepperPage(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('ekyc_pending'.tr()),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
