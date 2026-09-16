@@ -307,15 +307,15 @@ class _HostelConfigCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        if (index == 2)
-                           Text(
-                            'Draft',
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              color: const Color(0xFF94A3B8),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                        // if (index == 2)
+                        //    Text(
+                        //     'Draft',
+                        //     style: TextStyle(
+                        //       fontSize: 11.sp,
+                        //       color: const Color(0xFF94A3B8),
+                        //       fontWeight: FontWeight.w600,
+                        //     ),
+                        //   ),
                       ],
                     ),
                   ),
