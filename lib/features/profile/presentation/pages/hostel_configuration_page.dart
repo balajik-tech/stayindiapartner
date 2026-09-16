@@ -274,20 +274,20 @@ class _HostelConfigCard extends StatelessWidget {
                     padding: EdgeInsets.all(12.r),
                     decoration: BoxDecoration(
                       color: index % 3 == 0
-                          ? const Color(0xFFEFF6FF)
+                          ? const Color(0xFFe8f1fa)
                           : (index % 3 == 1
-                              ? const Color(0xFFF0FDF4)
-                              : const Color(0xFFFFF7ED)),
-                      borderRadius: BorderRadius.circular(16.r),
+                              ? const Color(0xFFe5f5f0)
+                              : const Color(0xFFf8efdc)),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Icon(
-                      Icons.business_rounded,
+                      Icons.apartment_outlined,
                       color: index % 3 == 0
-                          ? const Color(0xFF2563EB)
+                          ? const Color(0xFF2f5ea0)
                           : (index % 3 == 1
-                              ? const Color(0xFF16A34A)
-                              : const Color(0xFFEA580C)),
-                      size: 24.sp,
+                              ? const Color(0xFF336d57)
+                              : const Color(0xFF7e521d)),
+                      size: 20,
                     ),
                   ),
                   SizedBox(width: 16.w),
