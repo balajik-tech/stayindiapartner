@@ -16,7 +16,7 @@ class Hostel {
   final int? totalBeds;
   final List<dynamic>? amenities;
   final List<String>? houseRules;
-  final bool? hasFoodMenu;
+  final List<dynamic>? foodMenu;
   final int? amenitiesCount;
   final int? rulesCount;
   final int? pendingItemsCount;
@@ -49,7 +49,7 @@ class Hostel {
     this.totalBeds,
     this.amenities,
     this.houseRules,
-    this.hasFoodMenu,
+    this.foodMenu,
     this.amenitiesCount,
     this.rulesCount,
     this.pendingItemsCount,

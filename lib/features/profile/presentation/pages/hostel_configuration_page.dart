@@ -270,13 +270,20 @@ class _HostelConfigCard extends StatelessWidget {
     int pendingCount = 0;
     if ((hostel.amenitiesCount ?? 0) == 0) pendingCount++;
     if ((hostel.rulesCount ?? 0) == 0) pendingCount++;
-    if (!(hostel.hasFoodMenu ?? false)) pendingCount++;
+    if ((hostel.foodMenu ?? []).isEmpty) pendingCount++;
 
     if (pendingCount > 0) {
       status = 'pending_count'.tr(namedArgs: {'count': pendingCount.toString()});
       statusBg = pendingCount == 1 ? const Color(0xFFFEF7E0) : const Color(0xFFFEF2F2);
       statusText = pendingCount == 1 ? const Color(0xFFB45309) : const Color(0xFFB91C1C);
     }
+
+    final Color iconBg = pendingCount == 0
+        ? const Color(0xFFe8f1fa)
+        : (pendingCount == 1 ? const Color(0xFFe5f5f0) : const Color(0xFFf8efdc));
+    final Color iconColor = pendingCount == 0
+        ? const Color(0xFF2f5ea0)
+        : (pendingCount == 1 ? const Color(0xFF336d57) : const Color(0xFF7e521d));
 
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
@@ -309,20 +316,12 @@ class _HostelConfigCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(12.r),
                     decoration: BoxDecoration(
-                      color: index % 3 == 0
-                          ? const Color(0xFFe8f1fa)
-                          : (index % 3 == 1
-                              ? const Color(0xFFe5f5f0)
-                              : const Color(0xFFf8efdc)),
+                      color: iconBg,
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Icon(
                       Icons.apartment_outlined,
-                      color: index % 3 == 0
-                          ? const Color(0xFF2f5ea0)
-                          : (index % 3 == 1
-                              ? const Color(0xFF336d57)
-                              : const Color(0xFF7e521d)),
+                      color: iconColor,
                       size: 20,
                     ),
                   ),
@@ -415,8 +414,8 @@ class _HostelConfigCard extends StatelessWidget {
           _ConfigSubItem(
             icon: Icons.restaurant_rounded,
             title: 'food_menu'.tr(),
-            status: (hostel.hasFoodMenu ?? false) ? 'this_week'.tr() : null,
-            actionLabel: !(hostel.hasFoodMenu ?? false) ? 'add_menu'.tr() : null,
+            status: (hostel.foodMenu ?? []).isNotEmpty ? 'this_week'.tr() : null,
+            actionLabel: (hostel.foodMenu ?? []).isEmpty ? 'add_menu'.tr() : null,
             isLast: true,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);

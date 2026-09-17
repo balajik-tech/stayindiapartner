@@ -19,7 +19,7 @@ class HostelModel extends Hostel {
     super.totalBeds,
     super.amenities,
     super.houseRules,
-    super.hasFoodMenu,
+    super.foodMenu,
     super.amenitiesCount,
     super.rulesCount,
     super.pendingItemsCount,
@@ -63,7 +63,7 @@ class HostelModel extends Hostel {
       totalBeds: json['totalBeds'] ?? json['total'] ?? 0,
       amenities: json['amenities'] as List?,
       houseRules: (json['houseRules'] as List?)?.map((e) => e.toString()).toList(),
-      hasFoodMenu: json['hasFoodMenu'] ?? false,
+      foodMenu: json['foodMenu'] as List?,
       amenitiesCount: json['amenitiesCount'] ?? (json['amenities'] as List?)?.length ?? 0,
       rulesCount: json['rulesCount'] ?? (json['houseRules'] as List?)?.length ?? 0,
       pendingItemsCount: json['pendingItemsCount'] ?? _calculatePending(json),
@@ -97,7 +97,7 @@ class HostelModel extends Hostel {
       'hostel_type': hostelType,
       'amenities': amenities,
       'houseRules': houseRules,
-      'hasFoodMenu': hasFoodMenu ?? false,
+      'foodMenu': foodMenu,
 
       if (propertyTag != null) 'propertyTag': propertyTag,
 
@@ -114,31 +114,9 @@ class HostelModel extends Hostel {
       if (foodLicense != null) 'foodLicense': foodLicense,
       if (hostelLicense != null) 'hostelLicense': hostelLicense,
       if (tradeLicense != null) 'tradeLicense': tradeLicense,
-      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
     };
   }
-
-  static int calculatePending(Map<String, dynamic> json) {
-    int count = 0;
-
-    final amenities = json['amenities'] as List<dynamic>? ?? [];
-    if (amenities.isEmpty) {
-      count++;
-    }
-
-    final houseRules = json['houseRules'] as Map<String, dynamic>? ?? {};
-    if (houseRules.isEmpty) {
-      count++;
-    }
-
-    final hasMenu = json['hasFoodMenu'] as bool? ?? false;
-    if (!hasMenu) {
-      count++;
-    }
-
-    return count;
-  }
-
 
   static int _calculatePending(Map<String, dynamic> json) {
     int count = 0;
@@ -148,8 +126,8 @@ class HostelModel extends Hostel {
     final rules = json['houseRules'] as List?;
     if (rules == null || rules.isEmpty) count++;
 
-    final hasMenu = json['hasFoodMenu'] as bool? ?? false;
-    if (!hasMenu) count++;
+    final foodMenu = json['foodMenu'] as List?;
+    if (foodMenu == null || foodMenu.isEmpty) count++;
 
     return count;
   }

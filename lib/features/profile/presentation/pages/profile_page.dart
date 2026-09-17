@@ -94,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
         totalBeds += h.totalBeds ?? 0;
         if ((h.amenitiesCount ?? 0) == 0) totalPending++;
         if ((h.rulesCount ?? 0) == 0) totalPending++;
-        if (!(h.hasFoodMenu ?? false)) totalPending++;
+        if ((h.foodMenu ?? []).isEmpty) totalPending++;
       }
     }
 
