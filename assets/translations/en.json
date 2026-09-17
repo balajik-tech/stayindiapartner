@@ -1039,5 +1039,6 @@
   "add_menu": "Add menu",
   "management_plans_subtitle": "Gold, Silver, Basic across {count} properties",
   "my_requests_subtitle": "Plumber arriving today 4-6 pm",
-  "refer_friend_stats": "{joined} joined  •  {earned} earned"
+  "refer_friend_stats": "{joined} joined  •  {earned} earned",
+  "hostel_config_desc": "Amenities, house rules, food menu"
 }

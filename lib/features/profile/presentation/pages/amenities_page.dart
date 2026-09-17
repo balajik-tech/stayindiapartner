@@ -63,6 +63,7 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
                 .toList();
           });
         } else if (state is SettingsSaveSuccess) {
+          context.read<HostelCubit>().getHostels(forceRefresh: true);
           Navigator.pop(context);
           ScaffoldMessenger.of(
             context,

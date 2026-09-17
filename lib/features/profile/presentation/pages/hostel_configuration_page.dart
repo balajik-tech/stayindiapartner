@@ -131,14 +131,7 @@ class HostelConfigurationPage extends StatelessWidget {
               ),
             ),
         ],
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.add, color: AppColors.primaryBlue, size: 28.sp),
-          onPressed: () => _handleAddProperty(context),
-        ),
-        SizedBox(width: 8.w),
-      ],
+      )
     );
   }
 
@@ -274,17 +267,16 @@ class _HostelConfigCard extends StatelessWidget {
     Color statusBg = const Color(0xFFE6F4EA);
     Color statusText = const Color(0xFF1E8E3E);
 
-    // if (index == 1) {
-    //   status = 'pending_count'.tr(namedArgs: {'count': '1'});
-    //   statusBg = const Color(0xFFFEF7E0);
-    //   statusText = const Color(0xFFB45309);
-    // } else if (index == 2) {
-    //   status = 'pending_count'.tr(namedArgs: {'count': '2'});
-    //   statusBg = const Color(0xFFFEF2F2);
-    //   statusText = const Color(0xFFB91C1C);
-    // }
+    int pendingCount = 0;
+    if ((hostel.amenitiesCount ?? 0) == 0) pendingCount++;
+    if ((hostel.rulesCount ?? 0) == 0) pendingCount++;
+    if (!(hostel.hasFoodMenu ?? false)) pendingCount++;
 
-    status = '';
+    if (pendingCount > 0) {
+      status = 'pending_count'.tr(namedArgs: {'count': pendingCount.toString()});
+      statusBg = pendingCount == 1 ? const Color(0xFFFEF7E0) : const Color(0xFFFEF2F2);
+      statusText = pendingCount == 1 ? const Color(0xFFB45309) : const Color(0xFFB91C1C);
+    }
 
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
@@ -391,10 +383,10 @@ class _HostelConfigCard extends StatelessWidget {
           _ConfigSubItem(
             icon: Icons.wifi_rounded,
             title: 'amenities'.tr(),
-            // status: index == 2 ? null : (index == 1 ? 'listed_count'.tr(namedArgs: {'count': '7'}) : 'listed_count'.tr(namedArgs: {'count': '9'})),
-            // actionLabel: index == 2 ? 'add'.tr() : null,
-            status: null,
-            actionLabel:  null,
+            status: (hostel.amenitiesCount ?? 0) > 0
+                ? 'listed_count'.tr(namedArgs: {'count': (hostel.amenitiesCount ?? 0).toString()})
+                : null,
+            actionLabel: (hostel.amenitiesCount ?? 0) == 0 ? 'add'.tr() : null,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);
               Navigator.push(
@@ -407,10 +399,10 @@ class _HostelConfigCard extends StatelessWidget {
           _ConfigSubItem(
             icon: Icons.list_alt_rounded,
             title: 'house_rules'.tr(),
-            // status: index == 0 ? 'rules_count'.tr(namedArgs: {'count': '6'}) : (index == 1 ? 'rules_count'.tr(namedArgs: {'count': '5'}) : null),
-            // actionLabel: index == 2 ? 'add'.tr() : null,
-            status: null,
-            actionLabel:  null,
+            status: (hostel.rulesCount ?? 0) > 0
+                ? 'rules_count'.tr(namedArgs: {'count': (hostel.rulesCount ?? 0).toString()})
+                : null,
+            actionLabel: (hostel.rulesCount ?? 0) == 0 ? 'add'.tr() : null,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);
               Navigator.push(
@@ -423,10 +415,8 @@ class _HostelConfigCard extends StatelessWidget {
           _ConfigSubItem(
             icon: Icons.restaurant_rounded,
             title: 'food_menu'.tr(),
-            // status: index == 0 ? 'this_week'.tr() : (index == 2 ? 'this_week'.tr() : null),
-            // actionLabel: index == 1 ? 'add_menu'.tr() : null,
-            status: null,
-            actionLabel:  null,
+            status: (hostel.hasFoodMenu ?? false) ? 'this_week'.tr() : null,
+            actionLabel: !(hostel.hasFoodMenu ?? false) ? 'add_menu'.tr() : null,
             isLast: true,
             onTap: () {
               context.read<HostelCubit>().selectHostel(index);

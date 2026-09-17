@@ -254,7 +254,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     final currentLocale = context.locale;
-    AppLogger.info('Rebuilding MainNavigationPage with locale: $currentLocale');
+    // AppLogger.info('Rebuilding MainNavigationPage with locale: $currentLocale');
 
     return MultiBlocProvider(
       providers: [

@@ -620,6 +620,7 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                   _applyMenuToLocal(state.menu);
                 }
               } else if (state is FoodMenuSaved) {
+                context.read<HostelCubit>().getHostels(forceRefresh: true);
               } else if (state is FoodMenuError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

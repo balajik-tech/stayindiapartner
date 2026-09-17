@@ -1031,5 +1031,6 @@
   "add_menu": "मेनू जोड़ें",
   "management_plans_subtitle": "{count} संपत्तियों में गोल्ड, सिल्वर, बेसिक",
   "my_requests_subtitle": "प्लंबर आज शाम 4-6 बजे पहुंच रहा है",
-  "refer_friend_stats": "{joined} शामिल हुए • {earned} कमाए"
+  "refer_friend_stats": "{joined} शामिल हुए • {earned} कमाए",
+  "hostel_config_desc": "सुविधाएं, घर के नियम, भोजन मेनू"
 }

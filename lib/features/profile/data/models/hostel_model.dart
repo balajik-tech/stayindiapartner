@@ -17,6 +17,12 @@ class HostelModel extends Hostel {
     super.lng,
     super.occupiedBeds,
     super.totalBeds,
+    super.amenities,
+    super.houseRules,
+    super.hasFoodMenu,
+    super.amenitiesCount,
+    super.rulesCount,
+    super.pendingItemsCount,
     super.images,
     super.coverImage,
     super.contactNumber,
@@ -55,6 +61,12 @@ class HostelModel extends Hostel {
           : null,
       occupiedBeds: json['occupiedBeds'] ?? json['occupied'] ?? 0,
       totalBeds: json['totalBeds'] ?? json['total'] ?? 0,
+      amenities: json['amenities'] as List?,
+      houseRules: (json['houseRules'] as List?)?.map((e) => e.toString()).toList(),
+      hasFoodMenu: json['hasFoodMenu'] ?? false,
+      amenitiesCount: json['amenitiesCount'] ?? (json['amenities'] as List?)?.length ?? 0,
+      rulesCount: json['rulesCount'] ?? (json['houseRules'] as List?)?.length ?? 0,
+      pendingItemsCount: json['pendingItemsCount'] ?? _calculatePending(json),
       images: (json['images'] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList(),
@@ -83,12 +95,18 @@ class HostelModel extends Hostel {
       'pincode': pincode ?? '',
       'floors': floors,
       'hostel_type': hostelType,
+      'amenities': amenities,
+      'houseRules': houseRules,
+      'hasFoodMenu': hasFoodMenu ?? false,
+
       if (propertyTag != null) 'propertyTag': propertyTag,
+
       if (lat != null && lng != null)
         'location': {
           'type': 'Point',
           'coordinates': [lng, lat],
         },
+
       if (contactNumber != null) 'contactNumber': contactNumber,
       if (description != null) 'description': description,
       if (images != null) 'images': images,
@@ -96,7 +114,43 @@ class HostelModel extends Hostel {
       if (foodLicense != null) 'foodLicense': foodLicense,
       if (hostelLicense != null) 'hostelLicense': hostelLicense,
       if (tradeLicense != null) 'tradeLicense': tradeLicense,
-      if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
     };
+  }
+
+  static int calculatePending(Map<String, dynamic> json) {
+    int count = 0;
+
+    final amenities = json['amenities'] as List<dynamic>? ?? [];
+    if (amenities.isEmpty) {
+      count++;
+    }
+
+    final houseRules = json['houseRules'] as Map<String, dynamic>? ?? {};
+    if (houseRules.isEmpty) {
+      count++;
+    }
+
+    final hasMenu = json['hasFoodMenu'] as bool? ?? false;
+    if (!hasMenu) {
+      count++;
+    }
+
+    return count;
+  }
+
+
+  static int _calculatePending(Map<String, dynamic> json) {
+    int count = 0;
+    final amenities = json['amenities'] as List?;
+    if (amenities == null || amenities.isEmpty) count++;
+
+    final rules = json['houseRules'] as List?;
+    if (rules == null || rules.isEmpty) count++;
+
+    final hasMenu = json['hasFoodMenu'] as bool? ?? false;
+    if (!hasMenu) count++;
+
+    return count;
   }
 }

@@ -14,6 +14,12 @@ class Hostel {
   final double? lng;
   final int? occupiedBeds;
   final int? totalBeds;
+  final List<dynamic>? amenities;
+  final List<String>? houseRules;
+  final bool? hasFoodMenu;
+  final int? amenitiesCount;
+  final int? rulesCount;
+  final int? pendingItemsCount;
 
   final List<String>? images;
   final String? coverImage;
@@ -41,6 +47,12 @@ class Hostel {
     this.lng,
     this.occupiedBeds,
     this.totalBeds,
+    this.amenities,
+    this.houseRules,
+    this.hasFoodMenu,
+    this.amenitiesCount,
+    this.rulesCount,
+    this.pendingItemsCount,
     this.images,
     this.coverImage,
     this.contactNumber,

@@ -85,12 +85,16 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     final bool isStaff = role != 'owner' && role != 'manager';
     final hostelState = context.watch<HostelCubit>().state;
 
-    int totalBeds = 0;
+    int totalPending = 0;
     int hostelCount = 0;
+    int totalBeds = 0;
     if (hostelState is HostelLoaded) {
       hostelCount = hostelState.hostels.length;
       for (var h in hostelState.hostels) {
         totalBeds += h.totalBeds ?? 0;
+        if ((h.amenitiesCount ?? 0) == 0) totalPending++;
+        if ((h.rulesCount ?? 0) == 0) totalPending++;
+        if (!(h.hasFoodMenu ?? false)) totalPending++;
       }
     }
 
@@ -227,7 +231,8 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                       _HostelConfigCard(
                         propertiesCount: hostelCount,
                         bedsCount: totalBeds,
-                        pendingItems: '',
+                        pendingCount: totalPending,
+                        pendingItems: totalPending > 0 ? 'pending_count'.tr(namedArgs: {'count': totalPending.toString()}) : 'all_set'.tr(),
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -1352,17 +1357,27 @@ class _HostelConfigCard extends StatelessWidget {
   final int propertiesCount;
   final int bedsCount;
   final String pendingItems;
+  final int pendingCount;
   final VoidCallback onTap;
 
   const _HostelConfigCard({
     required this.propertiesCount,
     required this.bedsCount,
     required this.pendingItems,
+    required this.pendingCount,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    Color statusBg = const Color(0xFFE6F4EA);
+    Color statusText = const Color(0xFF1E8E3E);
+
+    if (pendingCount > 0) {
+      statusBg = pendingCount == 1 ? const Color(0xFFFEF7E0) : const Color(0xFFFEF2F2);
+      statusText = pendingCount == 1 ? const Color(0xFFB45309) : const Color(0xFFB91C1C);
+    }
+
     return BouncingWrapper(
       onTap: onTap,
       child: Container(
@@ -1371,7 +1386,7 @@ class _HostelConfigCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: const Color(0xFFF0D5A8)),
+          border: Border.all(color: pendingCount > 0 ? statusBg : const Color(0xFFF0D5A8)),
         ),
         child: Row(
           children: [
@@ -1389,7 +1404,7 @@ class _HostelConfigCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$propertiesCount properties - $bedsCount beds',
+                    '${'properties_count'.tr(namedArgs: {'count': propertiesCount.toString()})} - ${'beds_count'.tr(namedArgs: {'count': bedsCount.toString()})}',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -1398,7 +1413,7 @@ class _HostelConfigCard extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'Amenities, house rules, food menu',
+                    'hostel_config_desc'.tr(),
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: const Color(0xFF64748B),
@@ -1409,7 +1424,7 @@ class _HostelConfigCard extends StatelessWidget {
                     Container(
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 3.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFAEEDA),
+                      color: statusBg,
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Text(
@@ -1417,7 +1432,7 @@ class _HostelConfigCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF854F0B),
+                        color: statusText,
                       ),
                     ),
                   ),

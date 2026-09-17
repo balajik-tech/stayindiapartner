@@ -101,6 +101,7 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
         if (state is SettingsLoaded) {
           _populateFields(state);
         } else if (state is SettingsSaveSuccess) {
+          context.read<HostelCubit>().getHostels(forceRefresh: true);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),

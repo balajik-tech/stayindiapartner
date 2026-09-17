@@ -1031,5 +1031,6 @@
   "add_menu": "ಮೆನುವನ್ನು ಸೇರಿಸಿ",
   "management_plans_subtitle": "{count} ಆಸ್ತಿಗಳಲ್ಲಿ ಗೋಲ್ಡ್, ಸಿಲ್ವರ್, ಬೇಸಿಕ್",
   "my_requests_subtitle": "ಪ್ಲಂಬರ್ ಇಂದು ಸಂಜೆ 4-6 ಗಂಟೆಗೆ ಬರುತ್ತಿದ್ದಾರೆ",
-  "refer_friend_stats": "{joined} ಸೇರಿದ್ದಾರೆ • {earned} ಗಳಿಸಿದ್ದಾರೆ"
+  "refer_friend_stats": "{joined} ಸೇರಿದ್ದಾರೆ • {earned} ಗಳಿಸಿದ್ದಾರೆ",
+  "hostel_config_desc": "ಸೌಲಭ್ಯಗಳು, ಮನೆಯ ನಿಯಮಗಳು, ಆಹಾರ ಮೆನು"
 }
