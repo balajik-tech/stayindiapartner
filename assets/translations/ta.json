@@ -1032,5 +1032,6 @@
   "management_plans_subtitle": "{count} சொத்துக்களில் தங்கம், வெள்ளி, அடிப்படை",
   "my_requests_subtitle": "பிளம்பர் இன்று மாலை 4-6 மணிக்கு வருகிறார்",
   "refer_friend_stats": "{joined} பேர் சேர்ந்துள்ளனர் • {earned} சம்பாதிக்கப்பட்டது",
-  "hostel_config_desc": "வசதிகள், வீட்டு விதிகள், உணவு மெனு"
+  "hostel_config_desc": "வசதிகள், வீட்டு விதிகள், உணவு மெனு",
+  "set_up_bank_account": "வங்கிக் கணக்கை அமைக்கவும்"
 }

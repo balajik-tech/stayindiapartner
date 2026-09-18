@@ -66,9 +66,14 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
   @override
   Future<HostelModel> createHostel(HostelModel hostel) async {
     try {
+      final Map<String, dynamic> data = hostel.toJson();
+      data.remove('amenities');
+      data.remove('houseRules');
+      data.remove('foodMenu');
+
       final response = await dio.post(
         ApiConstants.hostels,
-        data: hostel.toJson(),
+        data: data,
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {

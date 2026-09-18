@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
+import 'package:stayindia_owner/features/bank_account/presentation/pages/bank_accounts_page.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/bed_card.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
@@ -65,6 +66,9 @@ class HostelConfigurationPage extends StatelessWidget {
             if (hostels.isEmpty) {
               return _buildEmptyState(context);
             }
+            final bool anyMissingBank = hostels.any(
+                  (h) => h.hasBankAccount == false,
+            );
             return Column(
               children: [
                 Expanded(
@@ -80,7 +84,7 @@ class HostelConfigurationPage extends StatelessWidget {
                     },
                   ),
                 ),
-                _buildAddPropertyButton(context),
+                if (!anyMissingBank) _buildBankButton(context),
               ],
             );
           }
@@ -182,6 +186,52 @@ class HostelConfigurationPage extends StatelessWidget {
     );
   }
 
+  Widget _buildBankButton(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF5F8FC),
+      ),
+      child: BouncingWrapper(
+        onTap: () => {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const BankAccountsPage(),
+            ),
+          )
+        },
+        child:  Container(
+          height: 52.h,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.primaryBlue,
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.add,
+                size: 20.sp,
+                color: AppColors.primaryBlue,
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                'set_up_bank_account'.tr(),
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
@@ -267,11 +317,7 @@ class _HostelConfigCard extends StatelessWidget {
     Color statusBg = const Color(0xFFE6F4EA);
     Color statusText = const Color(0xFF1E8E3E);
 
-    int pendingCount = 0;
-    if ((hostel.amenitiesCount ?? 0) == 0) pendingCount++;
-    if ((hostel.rulesCount ?? 0) == 0) pendingCount++;
-    if ((hostel.foodMenu ?? []).isEmpty) pendingCount++;
-
+    final pendingCount = hostel.pendingItemsCount ?? 0;
     if (pendingCount > 0) {
       status = 'pending_count'.tr(namedArgs: {'count': pendingCount.toString()});
       statusBg = pendingCount == 1 ? const Color(0xFFFEF7E0) : const Color(0xFFFEF2F2);

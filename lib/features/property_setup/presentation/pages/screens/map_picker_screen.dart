@@ -23,9 +23,15 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedLocation =
-        widget.initialLocation ?? const LatLng(12.9716, 77.5946);
-    _getAddress(_selectedLocation);
+    if (widget.initialLocation != null) {
+      _selectedLocation = widget.initialLocation!;
+      _getAddress(_selectedLocation);
+    } else {
+      _selectedLocation = const LatLng(12.9726, 77.5948);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _getCurrentLocation();
+      });
+    }
   }
 
   Future<void> _getAddress(LatLng location) async {

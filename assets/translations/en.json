@@ -1040,5 +1040,6 @@
   "management_plans_subtitle": "Gold, Silver, Basic across {count} properties",
   "my_requests_subtitle": "Plumber arriving today 4-6 pm",
   "refer_friend_stats": "{joined} joined  •  {earned} earned",
-  "hostel_config_desc": "Amenities, house rules, food menu"
+  "hostel_config_desc": "Amenities, house rules, food menu",
+  "set_up_bank_account": "Set up Bank Account"
 }

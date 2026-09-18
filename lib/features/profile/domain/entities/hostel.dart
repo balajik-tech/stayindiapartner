@@ -20,6 +20,8 @@ class Hostel {
   final int? amenitiesCount;
   final int? rulesCount;
   final int? pendingItemsCount;
+  final bool? hasActiveBankAccount;
+  final bool? hasBankAccount;
 
   final List<String>? images;
   final String? coverImage;
@@ -53,6 +55,8 @@ class Hostel {
     this.amenitiesCount,
     this.rulesCount,
     this.pendingItemsCount,
+    this.hasActiveBankAccount,
+    this.hasBankAccount,
     this.images,
     this.coverImage,
     this.contactNumber,

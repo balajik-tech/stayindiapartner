@@ -4,8 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
+import 'package:stayindia_owner/features/profile/presentation/pages/hostel_configuration_page.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 
 import '../../../../tenants/presentation/widgets/AppLanguageStrings.dart';
 
@@ -298,12 +301,18 @@ class _SetupSuccessScreenState extends State<SetupSuccessScreen> {
                               final prefs = await SharedPreferences.getInstance();
                               await prefs.setBool('privacy_policy_accepted', true);
 
-                              if (context.mounted) {
-                                Navigator.pop(dialogContext);
-                                context.read<HostelCubit>().getHostels(forceRefresh: true);
-                                context.read<PropertySetupCubit>().resetState();
-                                Navigator.pop(context);
-                              }
+                                if (context.mounted) {
+                                  Navigator.pop(dialogContext);
+                                  context.read<HostelCubit>().getHostels(forceRefresh: true);
+                                  context.read<PropertySetupCubit>().resetState();
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const HostelConfigurationPage(),
+                                    ),
+                                  );
+                                }
                             }
                                 : null,
                             style: ElevatedButton.styleFrom(
@@ -339,87 +348,122 @@ class _SetupSuccessScreenState extends State<SetupSuccessScreen> {
   }
 
 
+  void _handleContinueSetup() async {
+    HapticFeedback.mediumImpact();
+    final prefs = await SharedPreferences.getInstance();
+    final accepted = prefs.getBool('privacy_policy_accepted') ?? false;
+
+    if (!accepted) {
+      if (mounted) {
+        _showPrivacyPolicyDialog(context);
+      }
+    } else {
+      if (mounted) {
+        context.read<HostelCubit>().getHostels(forceRefresh: true);
+        context.read<PropertySetupCubit>().resetState();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HostelConfigurationPage(),
+          ),
+        );
+      }
+    }
+  }
+
+  void _handleSkip() {
+    HapticFeedback.lightImpact();
+    context.read<HostelCubit>().getHostels(forceRefresh: true);
+    context.read<PropertySetupCubit>().resetState();
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 32.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 160.w,
-                    height: 160.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFDCFCE7),
-                      shape: BoxShape.circle,
-                    ),
+    final setupState = context.watch<PropertySetupCubit>().state;
+    final buildingName = setupState.buildingName;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: 32.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 100.w,
+                        height: 100.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE6F4EA),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.check,
+                          color: const Color(0xFF34A853),
+                          size: 60.sp,
+                        ),
+                      ),
+                      SizedBox(height: 32.h),
+                      Text(
+                        'property_added'.tr() == 'property_added'
+                            ? 'Property added'
+                            : 'property_added'.tr(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1E293B),
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'property_added_desc'.tr(namedArgs: {'name': buildingName}) ==
+                                'property_added_desc'
+                            ? 'Next, add amenities, house rules and the food menu so tenants can find $buildingName.'
+                            : 'property_added_desc'
+                                .tr(namedArgs: {'name': buildingName}),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          color: const Color(0xFF64748B),
+                          height: 1.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 48.h),
+                      _PremiumActionButton(
+                        onPressed: _handleContinueSetup,
+                        text: 'continue_setup'.tr() == 'continue_setup'
+                            ? 'Continue setup'
+                            : 'continue_setup'.tr(),
+                      ),
+                      SizedBox(height: 16.h),
+                      TextButton(
+                        onPressed: _handleSkip,
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF64748B),
+                        ),
+                        child: Text(
+                          'skip_for_now'.tr() == 'skip_for_now'
+                              ? 'Skip for now'
+                              : 'skip_for_now'.tr(),
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  Container(
-                    width: 120.w,
-                    height: 120.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFBBF7D0),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: const Color(0xFF16A34A),
-                    size: 100.sp,
-                  ),
-                ],
-              ),
-              SizedBox(height: 48.h),
-              Text(
-                'property_setup_complete'.tr(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 26.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF0F172A),
-                  letterSpacing: -0.5,
                 ),
               ),
-              SizedBox(height: 16.h),
-              Text(
-                'property_setup_complete_sub'.tr(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  color: const Color(0xFF64748B),
-                  height: 1.6,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 64.h),
-              _PremiumActionButton(
-                onPressed: () async {
-                  HapticFeedback.mediumImpact();
-                  final prefs = await SharedPreferences.getInstance();
-                  final accepted = prefs.getBool('privacy_policy_accepted') ?? false;
-                  if (!accepted) {
-                    if (context.mounted) {
-                      _showPrivacyPolicyDialog(context);
-                    }
-                  } else {
-                    if (context.mounted) {
-                      context.read<HostelCubit>().getHostels(forceRefresh: true);
-                      context.read<PropertySetupCubit>().resetState();
-                      Navigator.pop(context);
-                    }
-                  }
-                },
-                text: 'go_to_dashboard'.tr(),
-              ),
-              SizedBox(height: 24.h),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

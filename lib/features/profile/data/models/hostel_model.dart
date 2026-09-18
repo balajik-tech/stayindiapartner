@@ -23,6 +23,8 @@ class HostelModel extends Hostel {
     super.amenitiesCount,
     super.rulesCount,
     super.pendingItemsCount,
+    super.hasActiveBankAccount,
+    super.hasBankAccount,
     super.images,
     super.coverImage,
     super.contactNumber,
@@ -66,6 +68,8 @@ class HostelModel extends Hostel {
       foodMenu: json['foodMenu'] as List?,
       amenitiesCount: json['amenitiesCount'] ?? (json['amenities'] as List?)?.length ?? 0,
       rulesCount: json['rulesCount'] ?? (json['houseRules'] as List?)?.length ?? 0,
+      hasActiveBankAccount: json['hasActiveBankAccount'] ?? false,
+      hasBankAccount: json['hasBankAccount'] ?? false,
       pendingItemsCount: json['pendingItemsCount'] ?? _calculatePending(json),
       images: (json['images'] as List<dynamic>?)
           ?.map((e) => e.toString())
@@ -95,9 +99,11 @@ class HostelModel extends Hostel {
       'pincode': pincode ?? '',
       'floors': floors,
       'hostel_type': hostelType,
-      'amenities': amenities,
-      'houseRules': houseRules,
-      'foodMenu': foodMenu,
+      if (amenities != null) 'amenities': amenities,
+      if (houseRules != null) 'houseRules': houseRules,
+      if (foodMenu != null) 'foodMenu': foodMenu,
+      'hasActiveBankAccount': hasActiveBankAccount ?? false,
+      'hasBankAccount': hasBankAccount ?? false,
 
       if (propertyTag != null) 'propertyTag': propertyTag,
 

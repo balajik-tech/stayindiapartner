@@ -92,9 +92,8 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
       hostelCount = hostelState.hostels.length;
       for (var h in hostelState.hostels) {
         totalBeds += h.totalBeds ?? 0;
-        if ((h.amenitiesCount ?? 0) == 0) totalPending++;
-        if ((h.rulesCount ?? 0) == 0) totalPending++;
-        if ((h.foodMenu ?? []).isEmpty) totalPending++;
+        totalPending += h.pendingItemsCount ?? 0;
+        if (!(h.hasBankAccount ?? false)) totalPending++;
       }
     }
 

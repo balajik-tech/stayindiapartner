@@ -1032,5 +1032,6 @@
   "management_plans_subtitle": "{count} ప్రాపర్టీలలో గోల్డ్, సిల్వర్, బేసిక్",
   "my_requests_subtitle": "ప్లంబర్ ఈ రోజు సాయంత్రం 4-6 గంటలకు వస్తున్నారు",
   "refer_friend_stats": "{joined} చేరారు • {earned} సంపాదించారు",
-  "hostel_config_desc": "సౌకర్యాలు, ఇంటి నియమాలు, భోజన మెను"
+  "hostel_config_desc": "సౌకర్యాలు, ఇంటి నియమాలు, భోజన మెను",
+  "set_up_bank_account": "బ్యాంక్ ఖాతాను సెటప్ చేయండి"
 }
