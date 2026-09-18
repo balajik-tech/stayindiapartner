@@ -39,7 +39,7 @@ class HostelRemoteDataSourceImpl implements HostelRemoteDataSource {
   HostelRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<List<HostelModel>> getHostels({int page = 1, int limit = 10}) async {
+  Future<List<HostelModel>> getHostels({int page = 1, int limit = 20}) async {
     try {
       final response = await dio.get(
         ApiConstants.hostels,
