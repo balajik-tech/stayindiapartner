@@ -146,7 +146,13 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             icon: Icons.workspace_premium_rounded,
                             imagePath: 'assets/images/profile_management.png',
                             title: 'management_plans'.tr(),
-                            subtitle: 'management_plans_subtitle'.tr(namedArgs: {'count': hostelCount.toString()}),
+                            subtitle: hostelCount == 1
+                                ? 'management_plan_subtitle_single'.tr(
+                              namedArgs: {'count': hostelCount.toString()},
+                            )
+                                : 'management_plans_subtitle'.tr(
+                              namedArgs: {'count': hostelCount.toString()},
+                            ),
                             iconBgColor: const Color(0xFFEEEDFE),
                             iconColor: const Color(0xFF3C3489),
                             // badge: const _StatusBadge(
@@ -1514,14 +1520,14 @@ class _ReferralCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 8.h),
-                  Text(
-                    'refer_friend_stats'.tr(namedArgs: {'joined': '2', 'earned': '₹1,000'}),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF1B7A3D),
-                    ),
-                  ),
+                  // Text(
+                  //   'refer_friend_stats'.tr(namedArgs: {'joined': '2', 'earned': '₹1,000'}),
+                  //   style: TextStyle(
+                  //     fontSize: 12,
+                  //     fontWeight: FontWeight.w400,
+                  //     color: const Color(0xFF1B7A3D),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
