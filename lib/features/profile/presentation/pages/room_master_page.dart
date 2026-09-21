@@ -394,81 +394,110 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                     SizedBox(height: 12.h),
                     _buildToggleRow(),
                     SizedBox(height: 16.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(
+                    color: const Color(0xFFE2E8F0),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Fixed left panel
+                    _buildLeftStaticPanel(),
+
+                    // Scrollable right panel
                     Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16.r),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
+                      child: Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          ScrollbarTheme(
+                            data: ScrollbarThemeData(
+                              thumbColor: WidgetStateProperty.all(
+                                const Color(0xFF64748B),
                               ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16.r),
-                            child: SingleChildScrollView(
-                              physics: const BouncingScrollPhysics(),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLeftStaticPanel(),
-                                  Expanded(
-                                    child: Stack(
-                                      alignment: Alignment.centerRight,
-                                      children: [
-                                        _buildRightScrollablePanel(),
-                                        if (_showRightArrow)
-                                          Positioned(
-                                            right: 4.w,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                _horizontalScrollController.animateTo(
-                                                  _horizontalScrollController.position.maxScrollExtent,
-                                                  duration: const Duration(milliseconds: 500),
-                                                  curve: Curves.easeOut,
-                                                );
-                                              },
-                                              child: Container(
-                                                padding: EdgeInsets.all(4.r),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white
-                                                      .withValues(alpha: 0.9),
-                                                  shape: BoxShape.circle,
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.black
-                                                          .withValues(
-                                                              alpha: 0.15),
-                                                      blurRadius: 6,
-                                                      offset: const Offset(0, 2),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: Icon(
-                                                  Icons.chevron_right_rounded,
-                                                  color: const Color(0xFF16539B),
-                                                  size: 24.sp,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                              trackColor: WidgetStateProperty.all(
+                                const Color(0xFFE2E8F0),
+                              ),
+                              trackBorderColor: WidgetStateProperty.all(
+                                Colors.transparent,
+                              ),
+                              thickness: WidgetStateProperty.all(10),
+                              radius: const Radius.circular(12),
+                            ),
+                            child: Scrollbar(
+                              controller: _horizontalScrollController,
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              interactive: true,
+                              scrollbarOrientation: ScrollbarOrientation.bottom,
+                              child: SingleChildScrollView(
+                                controller: _horizontalScrollController,
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                padding: EdgeInsets.only(bottom: 10.h),
+                                child: _buildRightScrollablePanel(),
                               ),
                             ),
                           ),
-                        ),
+
+                          // Right arrow
+                          if (_showRightArrow)
+                            Positioned(
+                              right: 4.w,
+                              child: GestureDetector(
+                                onTap: () {
+                                  if (_horizontalScrollController.hasClients) {
+                                    _horizontalScrollController.animateTo(
+                                      _horizontalScrollController.position.maxScrollExtent,
+                                      duration: const Duration(milliseconds: 500),
+                                      curve: Curves.easeOut,
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(4.r),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.15),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: const Color(0xFF16539B),
+                                    size: 24.sp,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
+                  ],
+                ),
+              ),
+            ),
                     SizedBox(height: 12.h),
+                    Expanded(
+                      child: Container(),
+                    ),
                     _buildBottomBar(currentLoadedRooms),
                   ],
                 ),
@@ -777,22 +806,20 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
   }
 
   Widget _buildRightScrollablePanel() {
-    return SingleChildScrollView(
-      controller: _horizontalScrollController,
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: SizedBox(
-        width: 320.w,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildScrollableHeader(),
-            ..._activeSharingTypes.map(
-              (sharing) => _buildScrollableRow(sharing),
-            ),
-            if (_isEditing) _buildScrollableAddRowPlaceholder(),
-          ],
-        ),
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width * 0.85,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildScrollableHeader(),
+
+          ..._activeSharingTypes.map(
+                (sharing) => _buildScrollableRow(sharing),
+          ),
+
+          if (_isEditing)
+            _buildScrollableAddRowPlaceholder(),
+        ],
       ),
     );
   }
