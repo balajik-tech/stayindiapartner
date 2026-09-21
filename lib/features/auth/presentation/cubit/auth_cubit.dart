@@ -328,6 +328,7 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
+    emit(AuthLoggingOut());
     try {
       await _logout();
       await clearDigiLockerDetails();

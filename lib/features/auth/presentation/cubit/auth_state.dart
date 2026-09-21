@@ -42,6 +42,8 @@ class AuthProfileCompleted extends AuthAuthenticated {
 
 class AuthUnauthenticated extends AuthState {}
 
+class AuthLoggingOut extends AuthState {}
+
 class AuthSessionRestoreError extends AuthState {
   final String message;
 

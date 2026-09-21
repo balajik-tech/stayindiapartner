@@ -82,9 +82,12 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
 
   void _refreshData() {
     if (mounted) {
-      context.read<ProfileCubit>().loadProfile(force: true);
-      context.read<HostelCubit>().getHostels(forceRefresh: true);
-      context.read<NotificationCubit>().fetchNotifications();
+      final authState = context.read<AuthCubit>().state;
+      if (authState is AuthAuthenticated || authState is AuthProfileCompleted) {
+        context.read<ProfileCubit>().loadProfile(force: true);
+        context.read<HostelCubit>().getHostels(forceRefresh: true);
+        context.read<NotificationCubit>().fetchNotifications();
+      }
     }
   }
 

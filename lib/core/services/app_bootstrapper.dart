@@ -288,6 +288,14 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                           curr is AuthOtpSent) {
                         return false;
                       }
+                      
+                      // Always rebuild when moving between authenticated and unauthenticated states
+                      // or when logging out to ensure UI transitions properly.
+                      if (curr is AuthLoggingOut || prev is AuthLoggingOut || 
+                          curr is AuthUnauthenticated || prev is AuthUnauthenticated) {
+                        return true;
+                      }
+
                       final prevKey = prev is AuthAuthenticated
                           ? prev.owner.id
                           : 'unauthenticated';
@@ -388,8 +396,8 @@ class _AppBootstrapperState extends State<AppBootstrapper>
 
     final activeState = _lastActiveState ?? state;
 
-    if (activeState is AuthInitial || activeState is AuthSessionRestoring) {
-      return _buildRawSplash(animate: false);
+    if (activeState is AuthInitial || activeState is AuthSessionRestoring || activeState is AuthLoggingOut) {
+      return _buildRawSplash(animate: false, wrapInMaterialApp: false);
     }
 
     if (activeState is AuthGoogleNeedsPhone) {
@@ -422,72 +430,34 @@ class _AppBootstrapperState extends State<AppBootstrapper>
     return const LoginOnBoardingScreen();
   }
 
-  Widget _buildRawSplash({required bool animate}) {
+  Widget _buildRawSplash({required bool animate, bool wrapInMaterialApp = true}) {
     // Before system is initialized, we don't have ScreenUtil or Theme
     // So we use hardcoded values matching the splash design
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/images/logo.jpg',
-                height: 160, // Fixed pixel height
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.apartment_rounded, size: 100, color: Color(0xFF16539B)),
-              ),
-              const SizedBox(height: 24),
-              AnimatedFutureOfLivingText(animate: animate),
-              if (!_systemInitialized && !_hasError) ...[
-                const SizedBox(height: 32),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 60),
-                  child: Column(
-                    children: [
-                      // LinearProgressIndicator(
-                      //   backgroundColor: Color(0xFFF3F4F6),
-                      //   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF16539B)),
-                      // ),
-                      // SizedBox(height: 12),
-                      // Text(
-                      //   'Preparing system...',
-                      //   style: TextStyle(
-                      //     fontSize: 12,
-                      //     color: Colors.grey,
-                      //     fontWeight: FontWeight.w500,
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                ),
-              ],
-              if (_hasError) ...[
-                const SizedBox(height: 24),
-                const Text(
-                  'Initialization Failed',
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    _errorDetails,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () => _startStagedInitialization(),
-                  child: const Text('Retry'),
-                ),
-              ],
-              const SizedBox(height: 32),
-            ],
-          ),
+    final splashContent = Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/logo.jpg',
+              height: 160, // Fixed pixel height
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.apartment_rounded, size: 100, color: Color(0xFF16539B)),
+            ),
+            const SizedBox(height: 24),
+            AnimatedFutureOfLivingText(animate: animate),
+            const SizedBox(height: 32),
+          ],
         ),
       ),
+    );
+
+    if (!wrapInMaterialApp) return splashContent;
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: splashContent,
     );
   }
 }

@@ -395,6 +395,19 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             }
 
             if (hostelState is HostelError) {
+              final authState = context.watch<AuthCubit>().state;
+              if (authState is! AuthAuthenticated &&
+                  authState is! AuthProfileCompleted &&
+                  authState is! AuthLoggingOut) {
+                return const Scaffold(
+                  backgroundColor: Colors.white,
+                  body: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                );
+              }
               return Scaffold(
                 body: Center(
                   child: Padding(
