@@ -796,18 +796,24 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Widget buildProfileHeader(dynamic profile) {
+    final authState = context.watch<AuthCubit>().state;
+    final owner = authState is AuthAuthenticated
+        ? authState.owner
+        : (authState is AuthProfileCompleted ? authState.owner : null);
+
+    final bool isVerified = _currentProfile?.dlKyc?.isAadharVerified == true;
 
     final String name = (_currentProfile?.dlKyc?.name?.trim().isNotEmpty == true)
         ? _currentProfile!.dlKyc!.name!.trim()
-        : ('${_currentProfile?.lastName ?? ''} ${_currentProfile?.firstName ?? ''}'
-        .trim()
-        .isNotEmpty
-        ? '${_currentProfile?.lastName ?? ''} ${_currentProfile?.firstName ?? ''}'
-        .trim()
-        : '');
+        : (('${_firstNameController.text} ${_lastNameController.text}'.trim().isNotEmpty)
+            ? '${_firstNameController.text} ${_lastNameController.text}'.trim()
+            : (owner?.name ?? ''));
 
-    final bool isVerified =
-        _currentProfile?.dlKyc?.isAadharVerified == true;
+    final String displayPhone = (_currentProfile?.phone.trim().isNotEmpty == true)
+        ? _currentProfile!.phone.trim()
+        : (_phoneController.text.trim().isNotEmpty
+            ? _phoneController.text.trim()
+            : (owner?.phone ?? ''));
 
     return Container(
       width: double.infinity,
@@ -844,7 +850,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         onTap: _pickAndUploadImage,
                         child: CustomAvatar(
                           imageUrl: ApiConstants.getImageUrl(profile?.avatar),
-
                           name: name,
                           size: 70,
                           isCircle: true,
@@ -874,37 +879,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                           ),
                         ),
                       ),
-
-                    // Positioned(
-                    //   right: -2,
-                    //   bottom: -2,
-                    //   child: GestureDetector(
-                    //     onTap: _pickAndUploadImage,
-                    //     child: Container(
-                    //       padding: EdgeInsets.all(6.r),
-                    //       decoration: BoxDecoration(
-                    //         color: AppColors.primaryBlue,
-                    //         shape: BoxShape.circle,
-                    //         border: Border.all(
-                    //           color: Colors.white,
-                    //           width: 2,
-                    //         ),
-                    //         boxShadow: [
-                    //           BoxShadow(
-                    //             color: Colors.black.withOpacity(0.15),
-                    //             blurRadius: 6,
-                    //             offset: const Offset(0, 2),
-                    //           ),
-                    //         ],
-                    //       ),
-                    //       child: Icon(
-                    //         Icons.camera_alt_rounded,
-                    //         color: Colors.white,
-                    //         size: 16.sp,
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
                   ],
                 ),
 
@@ -929,9 +903,9 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
                       SizedBox(height: 4.h),
 
-                      if (_phoneController.text.trim().isNotEmpty)
+                      if (displayPhone.isNotEmpty)
                         Text(
-                          '+91 ${_phoneController.text}',
+                          '+91 ${displayPhone.replaceAll('+91', '').trim()}',
                           style: GoogleFonts.inter(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w400,
@@ -945,13 +919,13 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             ),
           ),
 
-          // Divider(height: 1, color: Colors.grey.shade100),
-
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 0.h, 16.w, 16.h),
             child: isVerified
-                ? Container(margin: EdgeInsets.symmetric(horizontal: 8.w),
-                child: buildVerifiedEkycCard())
+                ? Container(
+                    margin: EdgeInsets.symmetric(horizontal: 8.w),
+                    child: buildVerifiedEkycCard(),
+                  )
                 : _buildEkycCard(),
           ),
         ],

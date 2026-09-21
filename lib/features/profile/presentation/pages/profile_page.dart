@@ -21,6 +21,8 @@ import '../../../finance/presentation/cubit/payment_report_cubit.dart';
 import '../../../finance/presentation/pages/payment_report_page.dart';
 import '../../../notifications/presentation/cubit/notification_cubit.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
+import '../../domain/entities/hostel.dart';
+import '../../domain/entities/profile_entity.dart';
 import '../cubit/hostel_state.dart';
 import '../widgets/dashed_divider.dart';
 import '../widgets/share_app_bottom_sheet.dart';
@@ -45,13 +47,15 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> with RouteAware {
+  ProfileEntity? _cachedProfile;
+  List<Hostel>? _cachedHostels;
+
   @override
   void initState() {
     super.initState();
-    final profileCubit = context.read<ProfileCubit>();
-    if (profileCubit.state is ProfileInitial) {
-      profileCubit.loadProfile();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshData();
+    });
   }
 
   @override
@@ -59,7 +63,6 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     super.didChangeDependencies();
 
     final route = ModalRoute.of(context);
-
     if (route is PageRoute) {
       routeObserver.subscribe(this, route);
     }
@@ -74,7 +77,15 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
   @override
   void didPopNext() {
     // Called when coming back to this screen
-    context.read<ProfileCubit>().loadProfile();
+    _refreshData();
+  }
+
+  void _refreshData() {
+    if (mounted) {
+      context.read<ProfileCubit>().loadProfile(force: true);
+      context.read<HostelCubit>().getHostels(forceRefresh: true);
+      context.read<NotificationCubit>().fetchNotifications();
+    }
   }
 
   @override
@@ -83,14 +94,20 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     final owner = authState is AuthAuthenticated ? authState.owner : null;
     final role = owner?.role.toLowerCase() ?? 'owner';
     final bool isStaff = role != 'owner' && role != 'manager';
+    
     final hostelState = context.watch<HostelCubit>().state;
+    if (hostelState is HostelLoaded) {
+      _cachedHostels = hostelState.hostels;
+    }
 
     int totalPending = 0;
     int hostelCount = 0;
     int totalBeds = 0;
-    if (hostelState is HostelLoaded) {
-      hostelCount = hostelState.hostels.length;
-      for (var h in hostelState.hostels) {
+    
+    final hostels = _cachedHostels;
+    if (hostels != null) {
+      hostelCount = hostels.length;
+      for (var h in hostels) {
         totalBeds += h.totalBeds ?? 0;
         totalPending += h.pendingItemsCount ?? 0;
         if (!(h.hasBankAccount ?? false)) totalPending++;
@@ -98,12 +115,16 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     }
 
     return Scaffold(
-      backgroundColor: Color(0xFFF4F8FC),
+      backgroundColor: const Color(0xFFF4F8FC),
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
-          final profile = state is ProfileLoaded
-              ? state.profile
-              : (state is ProfileUpdateSuccess ? state.profile : null);
+          if (state is ProfileLoaded) {
+            _cachedProfile = state.profile;
+          } else if (state is ProfileUpdateSuccess) {
+            _cachedProfile = state.profile;
+          }
+          
+          final profile = _cachedProfile;
           final name = (profile?.dlKyc?.name?.trim().isNotEmpty == true)
               ? profile!.dlKyc!.name!.trim()
               : (((profile?.firstName?.trim().isNotEmpty == true) ||
