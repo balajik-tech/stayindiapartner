@@ -647,7 +647,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
       color: const Color(0xFFEFF6FF),
       alignment: Alignment.center,
       child: Text(
-        'Sharing',
+        '',
         style: TextStyle(
           color: const Color(0xFF16539B),
           fontWeight: FontWeight.w900,
