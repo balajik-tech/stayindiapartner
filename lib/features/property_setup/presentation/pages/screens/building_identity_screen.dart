@@ -253,63 +253,55 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                             .updateDetailedAddress(val),
                       ),
                       SizedBox(height: 24.h),
-                      Row(
+                      Column(
                         children: [
-                          Expanded(
-                            child: _buildTextField(
-                              context,
-                              label: 'area'.tr(),
-                              hint: 'area_hint'.tr(),
-                              icon: Icons.grid_view_rounded,
-                              controller: _areaController,
-                              onChanged: (val) => context
-                                  .read<PropertySetupCubit>()
-                                  .updateArea(val),
-                            ),
+                          _buildTextField(
+                            context,
+                            label: 'area'.tr(),
+                            hint: 'area_hint'.tr(),
+                            icon: Icons.grid_view_rounded,
+                            controller: _areaController,
+                            onChanged: (val) => context
+                                .read<PropertySetupCubit>()
+                                .updateArea(val),
                           ),
-                          SizedBox(width: 16.w),
-                          Expanded(
-                            child: _buildTextField(
-                              context,
-                              label: 'city'.tr(),
-                              hint: 'city_hint'.tr(),
-                              icon: Icons.location_city_rounded,
-                              controller: _cityController,
-                              onChanged: (val) => context
-                                  .read<PropertySetupCubit>()
-                                  .updateCity(val),
-                            ),
+                          SizedBox(height: 24.h),
+                          _buildTextField(
+                            context,
+                            label: 'city'.tr(),
+                            hint: 'city_hint'.tr(),
+                            icon: Icons.location_city_rounded,
+                            controller: _cityController,
+                            onChanged: (val) => context
+                                .read<PropertySetupCubit>()
+                                .updateCity(val),
                           ),
                         ],
                       ),
                       SizedBox(height: 24.h),
-                      Row(
+                      Column(
                         children: [
-                          Expanded(
-                            child: _buildTextField(
-                              context,
-                              label: 'state_label'.tr(),
-                              hint: 'state_hint'.tr(),
-                              icon: Icons.public_rounded,
-                              controller: _stateController,
-                              onChanged: (val) => context
-                                  .read<PropertySetupCubit>()
-                                  .updateState(val),
-                            ),
+                          _buildTextField(
+                            context,
+                            label: 'state_label'.tr(),
+                            hint: 'state_hint'.tr(),
+                            icon: Icons.public_rounded,
+                            controller: _stateController,
+                            onChanged: (val) => context
+                                .read<PropertySetupCubit>()
+                                .updateState(val),
                           ),
-                          SizedBox(width: 16.w),
-                          Expanded(
-                            child: _buildTextField(
-                              context,
-                              label: 'pin_code'.tr(),
-                              hint: 'pin_code_hint'.tr(),
-                              icon: Icons.pin_drop_rounded,
-                              controller: _pincodeController,
-                              onChanged: (val) => context
-                                  .read<PropertySetupCubit>()
-                                  .updatePincode(val),
-                              keyboardType: TextInputType.number,
-                            ),
+                          SizedBox(height: 24.h),
+                          _buildTextField(
+                            context,
+                            label: 'pin_code'.tr(),
+                            hint: 'pin_code_hint'.tr(),
+                            icon: Icons.pin_drop_rounded,
+                            controller: _pincodeController,
+                            onChanged: (val) => context
+                                .read<PropertySetupCubit>()
+                                .updatePincode(val),
+                            keyboardType: TextInputType.number,
                           ),
                         ],
                       ),
