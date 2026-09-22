@@ -66,10 +66,9 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     _startCountdown();
 
     // Start listening for an incoming SMS containing the OTP, via the
-    // Android SMS User Consent API. Unlike the SMS Retriever API this
-    // does NOT require any "<#>" prefix or app-signature hash in the
-    // message — it just needs a short code in the SMS body, and shows
-    // the user a native "Allow" dialog once the SMS arrives.
+    // Android SMS Retriever API. This requires the app signature hash
+    // (hashcode) to be present at the end of the SMS message.
+    // When the SMS arrives, it will be automatically detected and read.
     _listenForSmsOtp();
 
     _entranceController = AnimationController(
@@ -97,7 +96,8 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   void dispose() {
     _timer?.cancel();
     _entranceController.dispose();
-    _smartAuth.removeUserConsentApiListener(); // stop the SMS listener
+    _smartAuth.removeSmsRetrieverApiListener(); // stop the Retriever listener
+    _smartAuth.removeUserConsentApiListener(); // stop the User Consent listener
     for (final c in _controllers) {
       c.dispose();
     }
@@ -122,39 +122,57 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   String get _otp => _controllers.map((c) => c.text).join();
 
   // Starts (or restarts) listening for the incoming OTP SMS via the
-  // Android SMS User Consent API. This call suspends until either an
-  // SMS arrives and the user taps "Allow" on the system dialog, the
-  // user dismisses it, or it times out (~5 minutes) — so we don't
-  // await it inline, just let it resolve in the background.
+  // Android SMS Retriever API. This call suspends until either an
+  // SMS arrives with the correct hashcode, it times out (~5 minutes),
+  // or it is cancelled.
   Future<void> _listenForSmsOtp() async {
-    // Also fetch the app signature — not required for the User Consent
-    // API, but handy to log in case you want to fall back to the
-    // Retriever API (getSmsWithRetrieverApi) later.
     final signatureResult = await _smartAuth.getAppSignature();
-    final signature = signatureResult.hasData
+
+    final signature =
+    signatureResult.hasData
         ? signatureResult.requireData
         : null;
-    debugPrint('App signature: $signature');
-    if (mounted) setState(() => _appSignature = signature);
 
+    debugPrint('====================================');
+    debugPrint('STAY INDIA SMS RETRIEVER');
+    debugPrint('Package: com.stayindia.stayindiauser');
+    debugPrint('App Signature: $signature');
+    debugPrint('====================================');
+
+    if (mounted) {
+      setState(() {
+        _appSignature = signature;
+      });
+    }
+
+    final result = await _smartAuth.getSmsWithRetrieverApi();
+
+    if (!mounted) return;
+
+    if (result.hasData) {
+      final detectedCode = result.requireData.code;
+
+      debugPrint('Detected OTP: $detectedCode');
+
+      if (detectedCode != null) {
+        _fillOtpFields(detectedCode);
+      }
+    } else {
+      debugPrint('SMS Retriever failed: $result');
+
+      _listenForSmsUserConsent();
+    }
+  }
+
+  Future<void> _listenForSmsUserConsent() async {
     final result = await _smartAuth.getSmsWithUserConsentApi();
     if (!mounted) return;
 
     if (result.hasData) {
       final detectedCode = result.requireData.code;
-      debugPrint('SMS received, extracted code: $detectedCode');
       if (detectedCode != null) {
         _fillOtpFields(detectedCode);
-      } else {
-        debugPrint(
-          'SMS was received and consent granted, but no code could '
-              'be extracted from the message text — check the SMS content.',
-        );
       }
-    } else if (result.isCanceled) {
-      debugPrint('User dismissed the SMS consent dialog.');
-    } else {
-      debugPrint('SMS User Consent API failed: $result');
     }
   }
 
@@ -180,7 +198,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     // Auto-submit once, right after the fields are filled.
     if (!_hasAutoSubmitted) {
       _hasAutoSubmitted = true;
-      // _onVerify(context);
+      _onVerify(context);
     }
   }
 
@@ -560,6 +578,46 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             ),
           ),
         ),
+
+
+
+
+        if (_appSignature != null) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: SelectableText(
+                  'App Hash: $_appSignature',
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.copy,
+                  size: 18,
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  Clipboard.setData(
+                    ClipboardData(text: _appSignature!),
+                  );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('App hash copied'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
