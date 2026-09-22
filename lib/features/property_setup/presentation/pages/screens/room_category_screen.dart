@@ -226,22 +226,10 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
       final bool isAC = typeKey == 'AC';
       sharingMap.forEach((sharing, fieldMap) {
         if (!_activeSharingTypes.contains(sharing)) return;
-
-        final rent = fieldMap['rent']!.text.trim().isEmpty
-            ? '0.0'
-            : fieldMap['rent']!.text.trim();
-
-        final deposit = fieldMap['deposit']!.text.trim().isEmpty
-            ? '0.0'
-            : fieldMap['deposit']!.text.trim();
-
-        final maint = fieldMap['maintenance']!.text.trim().isEmpty
-            ? '0.0'
-            : fieldMap['maintenance']!.text.trim();
-
-        final daily = fieldMap['daily']!.text.trim().isEmpty
-            ? '0.0'
-            : fieldMap['daily']!.text.trim();
+        final rent = fieldMap['rent']!.text.trim();
+        final deposit = fieldMap['deposit']!.text.trim();
+        final maint = fieldMap['maintenance']!.text.trim();
+        final daily = fieldMap['daily']!.text.trim();
 
         if (rent.isNotEmpty) {
           categoriesToSave.add({
@@ -251,7 +239,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
             'roomSize': '',
             'roomCount': 0,
             'monthlyRent': rent,
-            'dailyRent': daily.isNotEmpty ? daily :'0',
+            'dailyRent': daily,
             'securityDeposit': deposit.isNotEmpty ? deposit : '0',
             'maintenance': maint.isNotEmpty ? maint : '0',
             'securityDepositCustomized': true,
@@ -520,7 +508,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
 
   Widget _buildLeftStaticPanel() {
     return Container(
-      width: 70.w,
+      width: 125.w,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -579,16 +567,18 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         ),
         padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '$sharing',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: const Color(0xFF1E293B),
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
+            Expanded(
+              child: Text(
+                '$sharing Sharing',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: const Color(0xFF1E293B),
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             GestureDetector(
@@ -687,11 +677,24 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
           border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
         ),
         padding: EdgeInsets.symmetric(horizontal: 12.w),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.add_circle_outline_rounded,
-          color: const Color(0xFF16539B),
-          size: 22.sp,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            Icon(
+              Icons.add_circle_outline_rounded,
+              color: const Color(0xFF16539B),
+              size: 16.sp,
+            ),
+            SizedBox(width: 6.w),
+            Text(
+              'Add',
+              style: TextStyle(
+                color: const Color(0xFF16539B),
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
     );
