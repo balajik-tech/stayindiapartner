@@ -16,6 +16,7 @@ class SummaryCard extends StatelessWidget {
   final IconData icon;
   final bool isSelected;
   final bool isBordered;
+  final bool noDropDown;
 
   const SummaryCard({
     super.key,
@@ -26,6 +27,7 @@ class SummaryCard extends StatelessWidget {
     this.onTap,
     this.isSelected = false,
     this.isBordered = false,
+    this.noDropDown = false
   });
 
   @override
@@ -106,11 +108,14 @@ class SummaryCard extends StatelessWidget {
                   ),
                   if (onTap != null) ...[
                     SizedBox(width: 2.w),
-                    Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: contentColor.withValues(alpha: 0.7),
-                      size: 14.sp,
-                    ),
+                    if(!noDropDown)...[
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: contentColor.withValues(alpha: 0.7),
+                        size: 14.sp,
+                      )
+                    ]
+                   ,
                   ],
                 ],
               ),
@@ -193,6 +198,8 @@ class SummaryCardsSection extends StatelessWidget {
                 const Color(0xFF007FFF),
                 Icons.door_front_door_rounded,
                 state.selectedMetric,
+                noDropDown: true,
+                stopAction: true
               ),
               _buildCard(
                 context,
@@ -202,6 +209,8 @@ class SummaryCardsSection extends StatelessWidget {
                 const Color(0xFF2C599D),
                 Icons.bed_rounded,
                 state.selectedMetric,
+                noDropDown: true,
+                stopAction: true
               ),
               if (role != 'warden')
                 _buildCard(
@@ -223,6 +232,8 @@ class SummaryCardsSection extends StatelessWidget {
                 const Color(0xFFFF8600),
                 Icons.person_pin_rounded,
                 state.selectedMetric,
+                noDropDown: true,
+                stopAction: true
               ),
               _buildCard(
                 context,
@@ -232,6 +243,8 @@ class SummaryCardsSection extends StatelessWidget {
                 const Color(0xFF87CEEB),
                 Icons.add_box_rounded,
                 state.selectedMetric,
+                noDropDown: true,
+                stopAction: true
               ),
               _buildCard(
                 context,
@@ -455,6 +468,8 @@ class SummaryCardsSection extends StatelessWidget {
     IconData icon,
     String? selectedMetric, {
     bool isBordered = false,
+    bool noDropDown = false,
+    bool stopAction = false
   }) {
     return SummaryCard(
       count: count,
@@ -463,7 +478,12 @@ class SummaryCardsSection extends StatelessWidget {
       icon: icon,
       isBordered: isBordered,
       isSelected: selectedMetric == id,
-      onTap: () => context.read<DashboardCubit>().toggleMetric(id),
+      noDropDown: noDropDown,
+      onTap: () => {
+        if(!stopAction){
+          context.read<DashboardCubit>().toggleMetric(id)
+        }
+      },
     );
   }
 }
