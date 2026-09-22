@@ -508,7 +508,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
 
   Widget _buildLeftStaticPanel() {
     return Container(
-      width: 125.w,
+      width: 70.w,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -567,18 +567,16 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         ),
         padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: Text(
-                '$sharing Sharing',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: const Color(0xFF1E293B),
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
-                ),
+            Text(
+              '$sharing',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: const Color(0xFF1E293B),
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
               ),
             ),
             GestureDetector(
@@ -677,24 +675,11 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
           border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
         ),
         padding: EdgeInsets.symmetric(horizontal: 12.w),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            Icon(
-              Icons.add_circle_outline_rounded,
-              color: const Color(0xFF16539B),
-              size: 16.sp,
-            ),
-            SizedBox(width: 6.w),
-            Text(
-              'Add',
-              style: TextStyle(
-                color: const Color(0xFF16539B),
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.add_circle_outline_rounded,
+          color: const Color(0xFF16539B),
+          size: 22.sp,
         ),
       ),
     );
