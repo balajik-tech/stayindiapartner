@@ -31,7 +31,7 @@ class RoomCategoryScreen extends StatefulWidget {
 }
 
 class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
-  String _selectedType = 'AC';
+  String _selectedType = 'NON_AC';
   late List<int> _activeSharingTypes;
 
   late Map<String, Map<int, Map<String, TextEditingController>>> _controllers;
@@ -398,8 +398,10 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
     );
   }
 
+
   Widget _buildToggleRow() {
     final isAC = _selectedType == 'AC';
+
     return Center(
       child: Container(
         width: 320.w,
@@ -407,14 +409,21 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(
+            color: const Color(0xFFE2E8F0),
+          ),
         ),
         child: Stack(
           children: [
             AnimatedAlign(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
-              alignment: isAC ? Alignment.centerLeft : Alignment.centerRight,
+
+              // NON_AC = Left, AC = Right
+              alignment: isAC
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+
               child: FractionallySizedBox(
                 widthFactor: 0.5,
                 child: Container(
@@ -424,7 +433,9 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                     borderRadius: BorderRadius.circular(10.r),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF16539B).withValues(alpha: 0.3),
+                        color: const Color(0xFF16539B).withValues(
+                          alpha: 0.3,
+                        ),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -433,33 +444,15 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                 ),
               ),
             ),
+
             Row(
               children: [
+                // LEFT - NON-AC
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      setState(() {
-                        _selectedType = 'AC';
-                      });
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: Center(
-                      child: Text(
-                        'AC Room Pricing',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w800,
-                          color: isAC ? Colors.white : const Color(0xFF64748B),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
+
                       setState(() {
                         _selectedType = 'NON_AC';
                       });
@@ -471,7 +464,35 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w800,
-                          color: !isAC ? Colors.white : const Color(0xFF64748B),
+                          color: !isAC
+                              ? Colors.white
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // RIGHT - AC
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+
+                      setState(() {
+                        _selectedType = 'AC';
+                      });
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(
+                      child: Text(
+                        'AC Room Pricing',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w800,
+                          color: isAC
+                              ? Colors.white
+                              : const Color(0xFF64748B),
                         ),
                       ),
                     ),
