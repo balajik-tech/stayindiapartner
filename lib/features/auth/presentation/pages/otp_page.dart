@@ -585,15 +585,14 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
         if (_appSignature != null) ...[
           const SizedBox(height: 8),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: SelectableText(
-                  'App Hash: $_appSignature',
-                  style: GoogleFonts.outfit(
-                    fontSize: 11,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
+              SelectableText(
+                'App Hash: $_appSignature',
+                style: GoogleFonts.outfit(
+                  fontSize: 11,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               IconButton(
