@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../../../../../core/theme/app_colors.dart';
+
 class MapPickerScreen extends StatefulWidget {
   final LatLng? initialLocation;
   const MapPickerScreen({super.key, this.initialLocation});
@@ -108,8 +110,8 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     point: _selectedLocation,
                     radius: 150,
                     useRadiusInMeter: true,
-                    color: const Color(0xFFFF7A00).withValues(alpha: 0.15),
-                    borderColor: const Color(0xFFFF7A00).withValues(alpha: 0.5),
+                    color: AppColors.buttonColors.withValues(alpha: 0.15),
+                    borderColor: AppColors.buttonColors.withValues(alpha: 0.5),
                     borderStrokeWidth: 2,
                   ),
                 ],
@@ -122,7 +124,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     height: 80.h,
                     child: const Icon(
                       Icons.location_on_rounded,
-                      color: Color(0xFFFF7A00),
+                      color: AppColors.buttonColors,
                       size: 45,
                     ),
                   ),
@@ -189,7 +191,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                         Navigator.pop(context, _selectedLocation);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF7A00),
+                        backgroundColor: AppColors.buttonColors,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.r),

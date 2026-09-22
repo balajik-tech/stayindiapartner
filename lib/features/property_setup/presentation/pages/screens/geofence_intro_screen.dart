@@ -354,11 +354,11 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
             height: 54.h,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.accentOrange,
+              color: AppColors.buttonColors,
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.accentOrange.withValues(alpha: 0.25),
+                  color: AppColors.buttonColors.withValues(alpha: 0.25),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
