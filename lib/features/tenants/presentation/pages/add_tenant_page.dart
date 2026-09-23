@@ -2434,21 +2434,21 @@ class _CollectPaymentBottomSheetState
                   SizedBox(height: 12.h),
                   _buildDueItem('Maintainance', widget.maintainance),
                   SizedBox(height: 12.h),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Row(
-                      children: [
-                        Text(
-                          '+ Add discount or waiver',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: const Color(0xFF2563EB),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // GestureDetector(
+                  //   onTap: () {},
+                  //   child: Row(
+                  //     children: [
+                  //       Text(
+                  //         '+ Add discount or waiver',
+                  //         style: TextStyle(
+                  //           fontSize: 14.sp,
+                  //           color: const Color(0xFF2563EB),
+                  //           fontWeight: FontWeight.w600,
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 16.h),
                     child: Divider(color: Colors.grey[200]),
