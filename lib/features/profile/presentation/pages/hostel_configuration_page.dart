@@ -25,30 +25,38 @@ class HostelConfigurationPage extends StatelessWidget {
 
   void _handleAddProperty(BuildContext context) {
     final profileState = context.read<ProfileCubit>().state;
-    bool isVerified = false;
 
-    if (profileState is ProfileLoaded) {
-      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
-    } else if (profileState is ProfileUpdateSuccess) {
-      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PropertySetupStepperPage(),
+      ),
+    );
 
-    if (isVerified) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const PropertySetupStepperPage(),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please complete your KYC verification'),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+    // bool isVerified = false;
+    //
+    // if (profileState is ProfileLoaded) {
+    //   isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+    // } else if (profileState is ProfileUpdateSuccess) {
+    //   isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+    // }
+    //
+    // if (isVerified) {
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (context) => const PropertySetupStepperPage(),
+    //     ),
+    //   );
+    // } else {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('Please complete your KYC verification'),
+    //       backgroundColor: Colors.redAccent,
+    //       behavior: SnackBarBehavior.floating,
+    //     ),
+    //   );
+    // }
   }
 
   @override

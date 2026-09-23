@@ -461,30 +461,30 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       onTap: () {
         HapticFeedback.heavyImpact();
 
-        // First Complete the KYC
-        final profileState = context.read<ProfileCubit>().state;
-        bool? isKYCVerified;
-        if (profileState is ProfileLoaded) {
-        isKYCVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
-        debugPrint('isKYCVerified: $isKYCVerified');
-        }
-        if ( isKYCVerified == null || !isKYCVerified) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please complete your KYC verification'),
-            ),
-          );
-
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const MainNavigationPage(initialIndex: 4),
-            ),
-                (route) => false,
-          );
-
-          return;
-        }
+        // // First Complete the KYC
+        // final profileState = context.read<ProfileCubit>().state;
+        // bool? isKYCVerified;
+        // if (profileState is ProfileLoaded) {
+        // isKYCVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
+        // debugPrint('isKYCVerified: $isKYCVerified');
+        // }
+        // if ( isKYCVerified == null || !isKYCVerified) {
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     const SnackBar(
+        //       content: Text('Please complete your KYC verification'),
+        //     ),
+        //   );
+        //
+        //   Navigator.pushAndRemoveUntil(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (_) => const MainNavigationPage(initialIndex: 4),
+        //     ),
+        //         (route) => false,
+        //   );
+        //
+        //   return;
+        // }
         // End Complete the KYC
 
         final authState = context.read<AuthCubit>().state;
