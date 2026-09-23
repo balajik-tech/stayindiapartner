@@ -121,7 +121,24 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     final pincode = _pincodeController.text.trim();
     final street = _streetController.text.trim();
 
-    final address = "$street, $district, $stateStr - $pincode";
+    // final address = "$street, $district, $stateStr - $pincode";
+
+    final addressParts = [
+      street,
+      district,
+      stateStr,
+    ].where((value) => value.toString().trim().isNotEmpty).map(
+          (value) => value.toString().trim(),
+    );
+
+    final address = addressParts.join(', ');
+
+    final finalAddress = [
+      address,
+      pincode,
+    ].where((value) => value.toString().trim().isNotEmpty).map(
+          (value) => value.toString().trim(),
+    ).join(' - ');
 
     if (fullName.isEmpty
     // email.isEmpty ||
@@ -159,7 +176,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
         lastName: "",
         email: email,
         phone: phone,
-        address: address,
+        address: finalAddress,
         avatarPath: _selectedImage?.path,
       ),
     );

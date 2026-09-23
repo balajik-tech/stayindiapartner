@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +15,6 @@ import 'package:stayindia_owner/core/widgets/shimmer_loading.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/profile_entity.dart';
-import 'package:stayindia_owner/features/profile/domain/entities/dl_kyc_entity.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/auth/domain/repositories/auth_repository.dart';
@@ -50,6 +48,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   @override
   void initState() {
     super.initState();
+    final profileState = context.read<ProfileCubit>().state;
+    if (profileState is ProfileLoaded) {
+      _populateControllers(profileState);
+    }
     context.read<ProfileCubit>().loadProfile();
   }
 
@@ -70,43 +72,21 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       _lastNameController.text = state.profile.lastName;
       _phoneController.text = state.profile.phone;
       _emailController.text = state.profile.email;
-      // loadAddress();
-      if(state.profile.dlKyc?.isAadharVerified == true){
-        _addressController.text = state.profile.address;
-      }else{
+
+      final isVerified = state.profile.dlKyc?.isAadharVerified == true;
+      if (isVerified) {
+        final addr = state.profile.address.trim().isNotEmpty
+            ? state.profile.address
+            : (state.profile.dlKyc?.aadharAddress ?? '');
+        _addressController.text = addr;
+      } else {
+        if (state.profile.address.trim().isNotEmpty) {
+          _addressController.text = state.profile.address;
+        }
         loadAddress2();
       }
-
     }
   }
-
-  // Future<void> loadAddress() async {
-  //   final address = await getAddress();
-  //   if (address != null) {
-  //     _addressController.text = address;
-  //   }
-  //   final result = await getDigiLockerDetails();
-  //   if (result?.name != null && result!.name!.trim().isNotEmpty) {
-  //     final fullName = result.name!.trim();
-  //
-  //     final nameParts = fullName.split(RegExp(r'\s+'));
-  //
-  //     _lastNameController.text = nameParts.first;
-  //
-  //     if (nameParts.length > 1) {
-  //       _firstNameController.text = nameParts.sublist(1).join(' ');
-  //     } else {
-  //       _firstNameController.text = '';
-  //     }
-  //   }
-  // }
-  //
-  // /// Get address from saved DigiLocker details
-  // static Future<String?> getAddress() async {
-  //   final result = await getDigiLockerDetails();
-  //   return result?.aadharAddress;
-  // }
-
 
   /// Get DigiLocker details
   static Future<KycResult?> getDigiLockerDetails() async {
@@ -130,27 +110,21 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
       debugPrint("edit profile address:::${result.aadharAddress}");
 
-      if (result.aadharAddress != null) {
-        setState(() {
-          _addressController.text = result.aadharAddress!;
-        });
-      }
-
-      if (result.name != null && result.name!.trim().isNotEmpty) {
-        final fullName = result.name!.trim();
-        final nameParts = fullName.split(RegExp(r'\s+'));
-
-        setState(() {
-          _lastNameController.text = nameParts.first;
-        });
-
-        if (nameParts.length > 1) {
+      if (mounted) {
+        if (result.aadharAddress != null && result.aadharAddress!.trim().isNotEmpty) {
           setState(() {
-            _firstNameController.text = nameParts.sublist(1).join(' ');
+            _addressController.text = result.aadharAddress!;
           });
-        } else {
+        }
+
+        if (result.name != null && result.name!.trim().isNotEmpty) {
+          final fullName = result.name!.trim();
+          final nameParts = fullName.split(RegExp(r'\s+'));
+
           setState(() {
-            _firstNameController.text = '';
+            _firstNameController.text = nameParts.first;
+            _lastNameController.text =
+                nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
           });
         }
       }
@@ -203,7 +177,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     // Build the data map for API call
     final data = <String, dynamic>{
       'firstName': _firstNameController.text.trim(),
-      'lastName': "",
+      'lastName': _lastNameController.text.trim(),
+      // 'phone': _phoneController.text.trim(),
       'email': _emailController.text.trim(),
       'address': _addressController.text.trim(),
       if (currentProfile?.dob != null) 'dob': currentProfile!.dob,
@@ -217,7 +192,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     // Add KYC data if available
     if (kycResult != null) {
       data['dlKyc'] = {
-        'is_aadhar_verified': _addressController.text.trim().isNotEmpty,
+        'is_aadhar_verified': true,
         'gender': kycResult.gender,
         'masked_aadhaar': kycResult.maskedAadhaar ??
             KycResult.maskAadhaar(kycResult.aadharNumber),
@@ -257,11 +232,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       final authRepository = sl<AuthRepository>();
       await authRepository.updateProfile(data);
 
-      // Refresh profile and show success message
-      context.read<ProfileCubit>().loadProfile();
-      context.read<AuthCubit>().refreshProfile();
-
       if (mounted) {
+        // Refresh profile and show success message
+        context.read<ProfileCubit>().loadProfile();
+        context.read<AuthCubit>().refreshProfile();
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('update_success'.tr()),
@@ -314,12 +289,20 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         appBar: _buildAppBar(context),
         body: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, state) {
-            if (state is ProfileLoading && _firstNameController.text.isEmpty) {
+            if (state is ProfileLoading &&
+                _firstNameController.text.isEmpty &&
+                _phoneController.text.isEmpty &&
+                _emailController.text.isEmpty) {
               return const DetailsSkeleton();
             }
 
             if (state is ProfileLoaded) {
               _currentProfile = state.profile;
+              if (_firstNameController.text.isEmpty &&
+                  _phoneController.text.isEmpty &&
+                  _emailController.text.isEmpty) {
+                _populateControllers(state);
+              }
             }
 
             final profile = _currentProfile;
@@ -333,15 +316,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                       Expanded(
                         child: ListView(
                           physics: const BouncingScrollPhysics(),
-                          // padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 120.h),
+                          padding: EdgeInsets.only(bottom: 100.h),
                           children: [
-                            // _buildAnimatedHeader(profile),
                             buildProfileHeader(profile),
 
                             SizedBox(height: 24.h),
 
                             Container(
-                              margin: EdgeInsets.symmetric(horizontal: 16.0),
+                              margin: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -349,105 +331,91 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                                     'personal_info'.tr().toUpperCase(),
                                   ),
                                 ],
-                              ) ,
+                              ),
                             ),
 
-
                             _buildEditableBlock(_buildPersonalInfoRows()),
-                            if (_currentProfile?.dlKyc?.isAadharVerified ==
-                                true)
+                            if (_currentProfile?.dlKyc?.isAadharVerified == true)
                               _buildLockedHint(
                                 "Locked fields come from Aadhaar. To change these, re-verify with a new document.",
                               ),
                             SizedBox(height: 24.h),
 
-                            if (_currentProfile?.dlKyc?.isAadharVerified == true)...[
-                              Container(
-                                margin: EdgeInsets.symmetric(horizontal: 16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildSectionLabel('CONTACT DETAILS'),
-                                  ],
-                                ) ,
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildSectionLabel('CONTACT DETAILS'),
+                                ],
                               ),
-                              _buildEditableBlock([
-                                _EditableRow(
-                                  label: 'phone_number'.tr(),
-                                  value: _phoneController.text.trim().isEmpty
-                                      ? ""
-                                      : '+91 ${_phoneController.text}',
-                                  icon: Icons.phone_rounded,
-                                  isLocked: true,
-                                  onTap: () => _showEditSheet(
-                                    'phone_number'.tr(),
-                                    _phoneController,
-                                    inputType: TextInputType.phone,
-                                  ),
+                            ),
+                            _buildEditableBlock([
+                              _EditableRow(
+                                label: 'phone_number'.tr(),
+                                value: _phoneController.text.trim().isEmpty
+                                    ? ""
+                                    : (_phoneController.text.startsWith('+91')
+                                        ? _phoneController.text.trim()
+                                        : '+91 ${_phoneController.text.trim()}'),
+                                icon: Icons.phone_rounded,
+                                isLocked: true,
+                              ),
+                              _EditableRow(
+                                label: 'email_address'.tr(),
+                                value: _emailController.text,
+                                icon: Icons.email_rounded,
+                                isLocked: false,
+                                onTap: () => _showEditSheet(
+                                  'email_address'.tr(),
+                                  _emailController,
+                                  inputType: TextInputType.emailAddress,
                                 ),
-                                _EditableRow(
-                                  label: 'email_address'.tr(),
-                                  value: _emailController.text,
-                                  icon: Icons.email_rounded,
-                                  isLocked: false,
-                                  onTap: () => _showEditSheet(
-                                    'email_address'.tr(),
-                                    _emailController,
-                                    inputType: TextInputType.emailAddress,
-                                  ),
-                                ),
-                              ]),
-                            ],
+                              ),
+                            ]),
                             SizedBox(height: 24.h),
 
                             Container(
-                              margin: EdgeInsets.symmetric(horizontal: 0.0),
+                              margin: const EdgeInsets.symmetric(horizontal: 0.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    margin: EdgeInsets.symmetric(horizontal: 16.0),
+                                    margin: const EdgeInsets.symmetric(horizontal: 16.0),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         _buildSectionLabel('address'.tr().toUpperCase()),
-
                                       ],
-                                    ) ,
+                                    ),
                                   ),
 
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: _currentProfile?.dlKyc?.isAadharVerified ==
-                                        true ? 0:16),
-                                    child:  _buildAddressSection(),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: _currentProfile?.dlKyc?.isAadharVerified == true ? 0 : 16,
+                                    ),
+                                    child: _buildAddressSection(),
                                   ),
 
-
-                                  if (_currentProfile?.dlKyc?.isAadharVerified ==
-                                      true)
+                                  if (_currentProfile?.dlKyc?.isAadharVerified == true)
                                     _buildLockedHint(
                                       "Address is locked. To change it, re-verify with an updated Aadhaar.",
                                     ),
                                 ],
-                              ) ,
+                              ),
                             ),
                             SizedBox(height: 48.h),
-                            // _buildDeleteAccountButton(context), //commented delete account button
                           ],
                         ),
                       ),
                     ],
                   ),
-                  if (_currentProfile?.dlKyc?.isAadharVerified ==
-                      true)...[
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: _buildStickyCTA(state is ProfileUpdating),
-                    )
-                  ]
-                  ,
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: _buildStickyCTA(state is ProfileUpdating),
+                  ),
                 ],
               ),
             );
@@ -466,13 +434,12 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         width: double.infinity,
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: const Color.fromRGBO(245, 216, 215,1),
+          color: const Color.fromRGBO(245, 216, 215, 1),
           borderRadius: BorderRadius.circular(16.r),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             /// Status Chip
             Container(
               padding: EdgeInsets.symmetric(
@@ -488,7 +455,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 children: [
                   Icon(
                     Icons.access_time_rounded,
-                    color:  const Color(0xFF9C3A32),
+                    color: const Color(0xFF9C3A32),
                     size: 18.sp,
                   ),
                   SizedBox(width: 4.w),
@@ -498,8 +465,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFF8F3B35),
-                        letterSpacing: 0
-                    ),
+                        letterSpacing: 0),
                   ),
                 ],
               ),
@@ -525,8 +491,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               width: double.infinity,
               height: 54.h,
               child: ElevatedButton.icon(
-                onPressed
-                    : () async {
+                onPressed: () async {
                   final config = AppConfigService.instance.data;
                   final credentials = DigiLockerCredentials(
                     companyName: config.digilockerCompanyName,
@@ -540,7 +505,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                     documents: 'aadhaar',
                     onResult: (result) async {
                       if (result != null) {
-                        print(result);
+                        debugPrint(result.toString());
 
                         // Save KYC result to API using DigiLockerCubit with profile data
                         final digilockerCubit = sl<DigiLockerCubit>();
@@ -553,9 +518,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                           address: _addressController.text.trim(),
                         );
 
-                        // Refresh profile after saving
-                        context.read<ProfileCubit>().loadProfile();
-                        context.read<AuthCubit>().refreshProfile();
+                        if (mounted) {
+                          // Refresh profile after saving
+                          context.read<ProfileCubit>().loadProfile();
+                          context.read<AuthCubit>().refreshProfile();
+                        }
                       }
                     },
                   );
@@ -569,9 +536,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   ),
                 ),
                 icon: Icon(
-                  isVerified
-                      ? Icons.check_circle_outline
-                      : Icons.security,
+                  isVerified ? Icons.check_circle_outline : Icons.security,
                   color: Colors.white,
                   size: 22.sp,
                 ),
@@ -665,18 +630,16 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
             SizedBox(height: 8.h),
             Container(
-              padding: EdgeInsets.only(left: 4),
+              padding: const EdgeInsets.only(left: 4),
               child: Text(
-                "Verified on ${DateFormatter.formatISO(dlKyc?.dateTime) ?? '-'} . Aadhaar ${dlKyc?.maskedAadhaar ?? '-'}",
+                "Verified on ${DateFormatter.formatISO(dlKyc?.dateTime)} . Aadhaar ${dlKyc?.maskedAadhaar ?? '-'}",
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
-                  color: Color(0xFF989692),
+                  color: const Color(0xFF989692),
                   fontWeight: FontWeight.w700,
                 ),
-              )
-            )
-
-            ,
+              ),
+            ),
           ],
         );
       },
@@ -705,93 +668,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           letterSpacing: -0.5,
         ),
       ),
-    );
-  }
-
-  Widget _buildAnimatedHeader(dynamic profile) {
-    final name = '${_firstNameController.text} ${_lastNameController.text}';
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeOutQuart,
-      builder: (context, value, child) {
-        return Transform.scale(
-          scale: 0.9 + (0.1 * value),
-          child: Opacity(
-            opacity: value,
-            child: Column(
-              children: [
-                SizedBox(height: 20.h),
-                Stack(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(4.r),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: CustomAvatar(
-                        imageUrl: ApiConstants.getImageUrl(profile?.avatar),
-                        name: name,
-                        size: 100.0,
-                        isCircle: true,
-                        fontSize: 38.sp,
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 4,
-                      right: 4,
-                      child: GestureDetector(
-                        onTap: _pickAndUploadImage,
-                        child: Container(
-                          padding: EdgeInsets.all(8.r),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryBlue,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: Icon(
-                            Icons.camera_alt_rounded,
-                            color: Colors.white,
-                            size: 18.sp,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.darkText,
-                  ),
-                ),
-                if (_phoneController.text.trim().isNotEmpty) ...[
-                  SizedBox(height: 4.h),
-                  Text(
-                    '+91 ${_phoneController.text}',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.greyText,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -936,9 +812,13 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   List<Widget> _buildPersonalInfoRows() {
     final bool isVerified =
         _currentProfile?.dlKyc?.isAadharVerified == true;
-    final String fullName = _currentProfile?.dlKyc?.name??'${_firstNameController.text} ${_lastNameController.text}'.trim();
-    final String? dob = _currentProfile?.dlKyc?.dob ;
-    final String? gender = _currentProfile?.dlKyc?.gender;
+    final String fullName = (isVerified && _currentProfile?.dlKyc?.name?.trim().isNotEmpty == true)
+        ? _currentProfile!.dlKyc!.name!.trim()
+        : ('${_firstNameController.text} ${_lastNameController.text}'.trim().isNotEmpty
+            ? '${_firstNameController.text} ${_lastNameController.text}'.trim()
+            : '${_currentProfile?.firstName ?? ''} ${_currentProfile?.lastName ?? ''}'.trim());
+    final String? dob = _currentProfile?.dlKyc?.dob ?? _currentProfile?.dob;
+    final String? gender = _currentProfile?.dlKyc?.gender ?? _currentProfile?.gender;
 
     if (isVerified) {
       return [
@@ -969,10 +849,22 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         label: "Full name",
         value: fullName,
         icon: Icons.person_rounded,
-        onTap: () => _showEditSheet(
-          'first_name'.tr(),
-          _firstNameController,
-        ),
+        onTap: () {
+          final tempController = TextEditingController(text: fullName);
+          _showEditSheet(
+            'full_name'.tr(),
+            tempController,
+            onSave: () {
+              final text = tempController.text.trim();
+              final parts = text.split(RegExp(r'\s+'));
+              setState(() {
+                _firstNameController.text = parts.isNotEmpty ? parts.first : '';
+                _lastNameController.text =
+                    parts.length > 1 ? parts.sublist(1).join(' ') : '';
+              });
+            },
+          );
+        },
       ),
       _EditableRow(
         label: "Date of birth",
@@ -998,11 +890,17 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     final bool isVerified =
         _currentProfile?.dlKyc?.isAadharVerified == true;
 
-    if (isVerified) {
+    final String addressText = _addressController.text.trim().isNotEmpty
+        ? _addressController.text.trim()
+        : (_currentProfile?.address.trim().isNotEmpty == true
+            ? _currentProfile!.address.trim()
+            : (_currentProfile?.dlKyc?.aadharAddress?.trim() ?? ''));
+
+    if (isVerified || addressText.isNotEmpty) {
       return _buildEditableBlock([
         _EditableRow(
           label: 'current_address'.tr(),
-          value: _addressController.text,
+          value: addressText,
           icon: Icons.location_on_rounded,
           isLocked: true,
         ),
@@ -1050,7 +948,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         style: GoogleFonts.inter(
           fontSize: 12.sp,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF989692),
+          color: const Color(0xFF989692),
           height: 1.4,
         ),
       ),
@@ -1062,10 +960,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       padding: EdgeInsets.only(left: 8.w, bottom: 12.h),
       child: Text(
         label,
-        style:  GoogleFonts.inter(
+        style: GoogleFonts.inter(
           fontSize: 14.sp,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF898782),
+          color: const Color(0xFF898782),
           letterSpacing: 1.2,
         ),
       ),
@@ -1074,12 +972,12 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
   Widget _buildEditableBlock(List<Widget> children) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
-          color: Colors.grey.shade300, // Change shade as needed
+          color: Colors.grey.shade300,
           width: 1.0,
         ),
         boxShadow: [
@@ -1136,87 +1034,34 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             ),
             child: isUpdating
                 ? SizedBox(
-              height: 24.h,
-              width: 24.h,
-              child: const CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
-              ),
-            )
+                    height: 24.h,
+                    width: 24.h,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
+                    ),
+                  )
                 : Text(
-              'save_changes'.tr(),
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
+                    'save_changes'.tr(),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),
     );
-  }
-
-  Widget _buildDeleteAccountButton(BuildContext context) {
-    return Center(
-      child: TextButton(
-        onPressed: _confirmDelete,
-        child: Text(
-          'delete_my_account'.tr(),
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFFF04438).withValues(alpha: 0.7),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _confirmDelete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.r),
-        ),
-        title: Text(
-          'delete_account'.tr(),
-          style: const TextStyle(fontWeight: FontWeight.w900),
-        ),
-        content: Text('delete_account_confirm'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(
-              'delete_permanently'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true && mounted) {
-      context.read<ProfileCubit>().deleteAccount().then((_) {
-        if (mounted) {
-          context.read<AuthCubit>().logout();
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
-      });
-    }
   }
 
   void _showEditSheet(
-      String title,
-      TextEditingController controller, {
-        TextInputType inputType = TextInputType.text,
-        bool isLongText = false,
-      }) {
+    String title,
+    TextEditingController controller, {
+    TextInputType inputType = TextInputType.text,
+    bool isLongText = false,
+    VoidCallback? onSave,
+  }) {
     HapticFeedback.selectionClick();
     showModalBottomSheet(
       context: context,
@@ -1278,7 +1123,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             SizedBox(height: 24.h),
             ElevatedButton(
               onPressed: () {
-                setState(() {});
+                if (onSave != null) {
+                  onSave();
+                } else {
+                  setState(() {});
+                }
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
@@ -1368,16 +1217,16 @@ class _EditableRowState extends State<_EditableRow>
             children: [
               widget.imageAsset != null
                   ? Image.asset(
-                widget.imageAsset!,
-                width: 24,
-                height: 24,
-                color: Colors.grey.shade400,
-              ) :
-              Icon(
-                widget.icon,
-                color: Colors.grey.shade400,
-                size: 20.sp,
-              ),
+                      widget.imageAsset!,
+                      width: 24,
+                      height: 24,
+                      color: Colors.grey.shade400,
+                    )
+                  : Icon(
+                      widget.icon,
+                      color: Colors.grey.shade400,
+                      size: 20.sp,
+                    ),
               SizedBox(width: 14.w),
               Expanded(
                 child: Column(
@@ -1410,25 +1259,24 @@ class _EditableRowState extends State<_EditableRow>
               if (widget.showTrailingIcon)
                 widget.isLocked
                     ? Icon(
-                  Icons.lock_outline_rounded,
-                  color: Color(0xFF989692),
-                  size: 16.sp,
-                )
+                        Icons.lock_outline_rounded,
+                        color: const Color(0xFF989692),
+                        size: 16.sp,
+                      )
                     : Container(
-                  padding: EdgeInsets.all(4.r),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                      color:
-                      Color(0xFF989692).withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.edit_outlined,
-                    color: Color(0xFF989692),
-                    size: 14.sp,
-                  ),
-                ),
+                        padding: EdgeInsets.all(4.r),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(
+                            color: const Color(0xFF989692).withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.edit_outlined,
+                          color: const Color(0xFF989692),
+                          size: 14.sp,
+                        ),
+                      ),
             ],
           ),
         ),
