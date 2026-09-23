@@ -11,7 +11,7 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import '../models/owner_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<String?> requestOtp(String phone);
+  Future<String?> requestOtp(String phone, {String? hashId, int? fileType});
 
   Future<({OwnerModel owner, bool isNewUser})> verifyOtp(
     String phone,
@@ -87,13 +87,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<String?> requestOtp(String phone) async {
+  Future<String?> requestOtp(String phone, {String? hashId, int? fileType}) async {
     final sanitized = _sanitizePhone(phone);
-    AppLogger.info('Requesting OTP for: $sanitized');
+    AppLogger.info('Requesting OTP for: $sanitized with hashid: $hashId, filetype: ${fileType ?? 2}');
 
     final response = await _dio.post(
       ApiConstants.requestOtp,
-      data: {'phone': sanitized, 'role': 'OWNER'},
+      data: {
+        'phone': sanitized,
+        'role': 'OWNER',
+        if (hashId != null && hashId.isNotEmpty) 'hashid': hashId,
+        if (fileType != null) 'filetype': 2
+      },
     );
 
     if (response.statusCode == 200) {

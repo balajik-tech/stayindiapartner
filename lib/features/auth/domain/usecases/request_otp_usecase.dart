@@ -5,5 +5,6 @@ class RequestOtpUseCase {
 
   const RequestOtpUseCase(this.repository);
 
-  Future<String?> call(String phone) => repository.requestOtp(phone);
+  Future<String?> call(String phone, {String? hashId, int? fileType}) =>
+      repository.requestOtp(phone, hashId: hashId, fileType: fileType);
 }

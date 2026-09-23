@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_phone_number_hint/google_phone_number_hint.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:smart_auth/smart_auth.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
@@ -54,6 +56,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   bool _isTermsAccepted = false;
 
+  final SmartAuth _smartAuth = SmartAuth.instance;
+  String? _appSignature;
+
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -72,6 +77,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       _isStaffLogin = widget.isStaffLogin ?? false;
     });
     _onPhoneFieldTap();
+    _listenForSmsOtp();
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -95,6 +101,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _smartAuth.removeSmsRetrieverApiListener();
+    _smartAuth.removeUserConsentApiListener();
     _phoneController.dispose();
     _phoneFocusNode.dispose();
     _passwordController.dispose();
@@ -115,7 +123,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       _showSnackBar(context, 'Please enter a valid 10-digit mobile number.');
       return;
     }
-    context.read<AuthCubit>().sendOtp(phone);
+    context.read<AuthCubit>().sendOtp(
+      phone,
+      hashId: _appSignature,
+      fileType: 2,
+    );
   }
 
   void _onStaffLogin(BuildContext context) {
@@ -240,6 +252,65 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         );
       },
     );
+  }
+
+
+  Future<void> _listenForSmsOtp() async {
+    final signatureResult = await _smartAuth.getAppSignature();
+
+    final signature =
+    signatureResult.hasData
+        ? signatureResult.requireData
+        : null;
+
+    debugPrint('====================================');
+    debugPrint('STAY INDIA SMS RETRIEVER');
+    debugPrint('Package: com.stayindia.stayindiauser');
+    debugPrint('App Signature: $signature');
+    debugPrint('====================================');
+
+    if (mounted) {
+      setState(() {
+        _appSignature = signature;
+      });
+      // if (_appSignature != null && _appSignature!.isNotEmpty) {
+      //   _sendSmsApi();
+      // }
+    }
+
+    final result = await _smartAuth.getSmsWithRetrieverApi();
+
+    if (!mounted) return;
+
+    if (result.hasData) {
+      final detectedCode = result.requireData.code;
+
+      debugPrint('Detected OTP: $detectedCode');
+
+      if (detectedCode != null) {
+        _fillOtpFields(detectedCode);
+      }
+    } else {
+      debugPrint('SMS Retriever failed: $result');
+
+      _listenForSmsUserConsent();
+    }
+  }
+
+  Future<void> _listenForSmsUserConsent() async {
+    final result = await _smartAuth.getSmsWithUserConsentApi();
+    if (!mounted) return;
+
+    if (result.hasData) {
+      final detectedCode = result.requireData.code;
+      if (detectedCode != null) {
+
+      }
+    }
+  }
+
+  void _fillOtpFields(String detectedCode) {
+    // Dummy handler on login page
   }
 
   @override

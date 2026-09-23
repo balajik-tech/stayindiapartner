@@ -133,10 +133,10 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> sendOtp(String phone) async {
+  Future<void> sendOtp(String phone, {String? hashId, int? fileType}) async {
     emit(AuthLoading());
     try {
-      final devOtp = await _requestOtp(phone);
+      final devOtp = await _requestOtp(phone, hashId: hashId, fileType: fileType);
       emit(AuthOtpSent(phone: phone, devOtp: devOtp));
       AppLogger.info('OTP sent to $phone');
     } catch (e) {
@@ -145,10 +145,10 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> resendOtp(String phone) async {
+  Future<void> resendOtp(String phone, {String? hashId, int? fileType}) async {
     emit(AuthLoading());
     try {
-      final devOtp = await _requestOtp(phone);
+      final devOtp = await _requestOtp(phone, hashId: hashId, fileType: fileType);
       emit(AuthOtpSent(phone: phone, devOtp: devOtp, isResend: true));
     } catch (e) {
       AppLogger.error('resendOtp failed', e);

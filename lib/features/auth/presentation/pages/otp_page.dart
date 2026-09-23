@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smart_auth/smart_auth.dart';
+import 'package:dio/dio.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
@@ -121,10 +122,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
 
   String get _otp => _controllers.map((c) => c.text).join();
 
-  // Starts (or restarts) listening for the incoming OTP SMS via the
-  // Android SMS Retriever API. This call suspends until either an
-  // SMS arrives with the correct hashcode, it times out (~5 minutes),
-  // or it is cancelled.
+
   Future<void> _listenForSmsOtp() async {
     final signatureResult = await _smartAuth.getAppSignature();
 
@@ -231,7 +229,11 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     }
     _hasAutoSubmitted = false;
     _focusNodes.first.requestFocus();
-    context.read<AuthCubit>().resendOtp(widget.phone);
+    context.read<AuthCubit>().resendOtp(
+      widget.phone,
+      hashId: _appSignature,
+      fileType: 2,
+    );
     // Re-arm the listener for the newly sent SMS.
     _listenForSmsOtp();
   }
@@ -283,6 +285,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           } else if (state is AuthOtpSent && state.isResend) {
             _startCountdown();
             setState(() => _currentDevOtp = state.devOtp);
+            // _sendSmsApi();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(

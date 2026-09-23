@@ -15,7 +15,8 @@ class AuthRepositoryImpl implements AuthRepository {
        _tokenStorage = tokenStorage;
 
   @override
-  Future<String?> requestOtp(String phone) => _remote.requestOtp(phone);
+  Future<String?> requestOtp(String phone, {String? hashId, int? fileType}) =>
+      _remote.requestOtp(phone, hashId: hashId, fileType: fileType);
 
   @override
   Future<({OwnerEntity owner, bool isNewUser})> verifyOtp(

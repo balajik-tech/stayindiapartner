@@ -1,7 +1,7 @@
 import '../entities/owner_entity.dart';
 
 abstract class AuthRepository {
-  Future<String?> requestOtp(String phone);
+  Future<String?> requestOtp(String phone, {String? hashId, int? fileType});
   Future<({OwnerEntity owner, bool isNewUser})> verifyOtp(
     String phone,
     String otp, {
