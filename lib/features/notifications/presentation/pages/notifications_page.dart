@@ -14,8 +14,8 @@ class NotificationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<NotificationCubit>()..fetchNotifications(),
+    return BlocProvider.value(
+      value: sl<NotificationCubit>()..fetchNotifications(showLoading: false),
       child: const NotificationsView(),
     );
   }
@@ -105,12 +105,12 @@ class _NotificationsViewState extends State<NotificationsView> {
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20.w, 40.h, 20.w, 32.h),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            const Color(0xFF2C599D),
-            const Color(0xFF1E3A8A),
+            Color(0xFF2C599D),
+            Color(0xFF1E3A8A),
           ],
         ),
         borderRadius: BorderRadius.vertical(
@@ -175,33 +175,34 @@ class _NotificationsViewState extends State<NotificationsView> {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              context.read<NotificationCubit>().markAllAsRead();
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.done_all_rounded, color: Colors.white, size: 16.sp),
-                  SizedBox(width: 6.w),
-                  Text(
-                    'Mark all read',
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12.sp,
+          if (unreadCount > 0)
+            GestureDetector(
+              onTap: () {
+                context.read<NotificationCubit>().markAllAsRead();
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.done_all_rounded, color: Colors.white, size: 16.sp),
+                    SizedBox(width: 6.w),
+                    Text(
+                      'Mark all read',
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12.sp,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -295,7 +296,7 @@ class _NotificationsViewState extends State<NotificationsView> {
       }
 
       return RefreshIndicator(
-        onRefresh: () => context.read<NotificationCubit>().fetchNotifications(),
+        onRefresh: () => context.read<NotificationCubit>().fetchNotifications(showLoading: false),
         child: ListView.separated(
           padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
           itemCount: notifications.length,

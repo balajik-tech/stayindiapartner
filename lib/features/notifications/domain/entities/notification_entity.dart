@@ -19,6 +19,26 @@ class NotificationEntity extends Equatable {
     this.metadata,
   });
 
+  NotificationEntity copyWith({
+    String? id,
+    String? title,
+    String? message,
+    String? type,
+    bool? isRead,
+    DateTime? createdAt,
+    Map<String, dynamic>? metadata,
+  }) {
+    return NotificationEntity(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      message: message ?? this.message,
+      type: type ?? this.type,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+      metadata: metadata ?? this.metadata,
+    );
+  }
+
   @override
   List<Object?> get props => [id, title, message, type, isRead, createdAt, metadata];
 

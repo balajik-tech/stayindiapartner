@@ -34,21 +34,35 @@ class NotificationCubit extends Cubit<NotificationState> {
 
   NotificationCubit({required this.repository}) : super(NotificationInitial());
 
-  Future<void> fetchNotifications() async {
-    emit(NotificationLoading());
+  Future<void> fetchNotifications({bool showLoading = true}) async {
+    if (showLoading && state is! NotificationLoaded) {
+      emit(NotificationLoading());
+    }
     try {
       final data = await repository.getNotifications();
       emit(NotificationLoaded(data.notifications, unreadCount: data.unreadCount));
     } catch (e) {
-      emit(NotificationError(GlobalErrorMapper.map(e).message));
+      if (state is! NotificationLoaded) {
+        emit(NotificationError(GlobalErrorMapper.map(e).message));
+      }
     }
   }
 
   Future<void> markAllAsRead() async {
+    if (state is NotificationLoaded) {
+      final current = state as NotificationLoaded;
+      final updatedList = current.notifications
+          .map((n) => n.copyWith(isRead: true))
+          .toList();
+      emit(NotificationLoaded(updatedList, unreadCount: 0));
+    }
+
     try {
       await repository.markAllAsRead();
-      fetchNotifications();
+      final data = await repository.getNotifications();
+      emit(NotificationLoaded(data.notifications, unreadCount: data.unreadCount));
     } catch (e) {
+      fetchNotifications(showLoading: false);
     }
   }
 }
