@@ -735,8 +735,9 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                     ),
 
                     // Edit icon - top right
-                    Positioned(
-                      top: 2,
+                    if(!isVerified)
+                      Positioned(
+                      bottom: 4,
                       right: 2,
                       child: GestureDetector(
                         onTap: _pickAndUploadImage,
