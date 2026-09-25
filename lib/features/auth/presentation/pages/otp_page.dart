@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pinput/pinput.dart';
 import 'package:smart_auth/smart_auth.dart';
 import 'package:dio/dio.dart';
 
@@ -37,11 +39,17 @@ class OtpPage extends StatefulWidget {
 }
 
 class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
+  // Android OTP controllers & nodes (kept as is)
   final List<TextEditingController> _controllers = List.generate(
     6,
-        (_) => TextEditingController(),
+    (_) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+
+  // iOS Pinput controller & node
+  final TextEditingController _iosPinController = TextEditingController();
+  final FocusNode _iosFocusNode = FocusNode();
+  bool _hasError = false;
 
   int _countdown = 30;
   Timer? _timer;
@@ -70,7 +78,10 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     // Android SMS Retriever API. This requires the app signature hash
     // (hashcode) to be present at the end of the SMS message.
     // When the SMS arrives, it will be automatically detected and read.
-    _listenForSmsOtp();
+    // NOTE: Android only. iOS uses native QuickType OTP autofill with Pinput.
+    if (Platform.isAndroid) {
+      _listenForSmsOtp();
+    }
 
     _entranceController = AnimationController(
       vsync: this,
@@ -97,14 +108,19 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   void dispose() {
     _timer?.cancel();
     _entranceController.dispose();
-    _smartAuth.removeSmsRetrieverApiListener(); // stop the Retriever listener
-    _smartAuth.removeUserConsentApiListener(); // stop the User Consent listener
+    if (Platform.isAndroid) {
+      _smartAuth.removeSmsRetrieverApiListener(); // stop the Retriever listener
+      _smartAuth
+          .removeUserConsentApiListener(); // stop the User Consent listener
+    }
     for (final c in _controllers) {
       c.dispose();
     }
     for (final n in _focusNodes) {
       n.dispose();
     }
+    _iosPinController.dispose();
+    _iosFocusNode.dispose();
     super.dispose();
   }
 
@@ -120,14 +136,14 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     });
   }
 
-  String get _otp => _controllers.map((c) => c.text).join();
-
+  String get _otp => Platform.isIOS
+      ? _iosPinController.text.trim()
+      : _controllers.map((c) => c.text).join();
 
   Future<void> _listenForSmsOtp() async {
     final signatureResult = await _smartAuth.getAppSignature();
 
-    final signature =
-    signatureResult.hasData
+    final signature = signatureResult.hasData
         ? signatureResult.requireData
         : null;
 
@@ -184,14 +200,22 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     final otp = digits.substring(digits.length - 6);
 
     setState(() {
-      for (int i = 0; i < 6; i++) {
-        _controllers[i].text = otp[i];
+      if (Platform.isIOS) {
+        _iosPinController.text = otp;
+      } else {
+        for (int i = 0; i < 6; i++) {
+          _controllers[i].text = otp[i];
+        }
       }
       _useSmsOtp = true;
     });
 
     FocusScope.of(context).unfocus();
-    _focusNodes.last.unfocus();
+    if (Platform.isIOS) {
+      _iosFocusNode.unfocus();
+    } else {
+      _focusNodes.last.unfocus();
+    }
 
     // Auto-submit once, right after the fields are filled.
     if (!_hasAutoSubmitted) {
@@ -201,7 +225,10 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   }
 
   void _onVerify(BuildContext context) {
+    if (context.read<AuthCubit>().state is AuthLoading) return;
+    setState(() => _hasError = false);
     if (_otp.length < 6) {
+      setState(() => _hasError = true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -224,18 +251,25 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   }
 
   void _onResend(BuildContext context) {
-    for (final c in _controllers) {
-      c.clear();
-    }
     _hasAutoSubmitted = false;
-    _focusNodes.first.requestFocus();
-    context.read<AuthCubit>().resendOtp(
-      widget.phone,
-      hashId: _appSignature,
-      fileType: 2,
-    );
-    // Re-arm the listener for the newly sent SMS.
-    _listenForSmsOtp();
+    setState(() => _hasError = false);
+    if (Platform.isIOS) {
+      _iosPinController.clear();
+      _iosFocusNode.requestFocus();
+      context.read<AuthCubit>().resendOtp(widget.phone, fileType: 2);
+    } else {
+      for (final c in _controllers) {
+        c.clear();
+      }
+      _focusNodes.first.requestFocus();
+      context.read<AuthCubit>().resendOtp(
+        widget.phone,
+        hashId: _appSignature,
+        fileType: 2,
+      );
+      // Re-arm the listener for the newly sent SMS.
+      _listenForSmsOtp();
+    }
   }
 
   void _onRestoreAccount() {
@@ -275,7 +309,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       canPop: !isTimerRunning,
       child: BlocListener<AuthCubit, AuthState>(
         listenWhen: (_, current) =>
-        current is AuthOtpSent ||
+            current is AuthOtpSent ||
             current is AuthError ||
             current is AuthAccountRestored ||
             current is AuthAuthenticated,
@@ -297,6 +331,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             );
           } else if (state is AuthError) {
             _hasAutoSubmitted = false;
+            setState(() => _hasError = true);
             if (!_isRestoring) {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
@@ -485,12 +520,14 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
         ),
         SizedBox(height: 22.h),
 
-        // ---- mobile number label ----
-        _OtpInputGrid(
-          controllers: _controllers,
-          focusNodes: _focusNodes,
-          onOtpPasted: _fillOtpFields,
-        ),
+        // ---- OTP input ----
+        Platform.isIOS
+            ? _buildIosPinput(context, isLoading)
+            : _OtpInputGrid(
+                controllers: _controllers,
+                focusNodes: _focusNodes,
+                onOtpPasted: _fillOtpFields,
+              ),
 
         SizedBox(height: 4.h),
         // ---- phone field ----
@@ -526,22 +563,22 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
               ),
               child: isLoading
                   ? SizedBox(
-                width: 22.w,
-                height: 22.w,
-                child: const CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                ),
-              )
+                      width: 22.w,
+                      height: 22.w,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                      ),
+                    )
                   : Text(
-                isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE',
-                style: GoogleFonts.outfit(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 0.4,
-                ),
-              ),
+                      isLoading ? 'VERIFYING...' : 'VERIFY & CONTINUE',
+                      style: GoogleFonts.outfit(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -582,10 +619,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           ),
         ),
 
-
-
-
-        if (_appSignature != null) ...[
+        if (Platform.isAndroid && _appSignature != null) ...[
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -599,15 +633,9 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                 ),
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.copy,
-                  size: 18,
-                  color: Colors.black,
-                ),
+                icon: const Icon(Icons.copy, size: 18, color: Colors.black),
                 onPressed: () {
-                  Clipboard.setData(
-                    ClipboardData(text: _appSignature!),
-                  );
+                  Clipboard.setData(ClipboardData(text: _appSignature!));
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -621,6 +649,129 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildIosPinput(BuildContext context, bool isLoading) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const int otpLength = 6;
+        final double maxWidth = constraints.maxWidth;
+        final double spacing = 8.w;
+        final double boxWidth =
+            ((maxWidth - (spacing * (otpLength - 1))) / otpLength).clamp(
+              40.w,
+              52.w,
+            );
+        final double boxHeight = boxWidth / 0.85;
+
+        final defaultPinTheme = PinTheme(
+          width: boxWidth,
+          height: boxHeight,
+          textStyle: GoogleFonts.outfit(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkText,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: Colors.grey.shade200, width: 1.5),
+          ),
+        );
+
+        final focusedPinTheme = defaultPinTheme.copyWith(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: AppColors.inputBoxColor, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.inputBoxColor.withValues(alpha: 0.12),
+                blurRadius: 12,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        );
+
+        final submittedPinTheme = defaultPinTheme.copyWith(
+          textStyle: GoogleFonts.outfit(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.inputBoxColor,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: AppColors.inputBoxColor, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.inputBoxColor.withValues(alpha: 0.2),
+                blurRadius: 8,
+                spreadRadius: 0,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+        );
+
+        final errorPinTheme = defaultPinTheme.copyWith(
+          textStyle: GoogleFonts.outfit(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.sosRed,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: AppColors.sosRed, width: 1.5),
+          ),
+        );
+
+        return AutofillGroup(
+          child: Pinput(
+            length: otpLength,
+            controller: _iosPinController,
+            focusNode: _iosFocusNode,
+            autofocus: true,
+            enabled: !isLoading,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            autofillHints: const [AutofillHints.oneTimeCode],
+            hapticFeedbackType: HapticFeedbackType.lightImpact,
+            closeKeyboardWhenCompleted: true,
+            defaultPinTheme: defaultPinTheme,
+            focusedPinTheme: focusedPinTheme,
+            submittedPinTheme: submittedPinTheme,
+            errorPinTheme: errorPinTheme,
+            forceErrorState: _hasError,
+            separatorBuilder: (index) => SizedBox(width: spacing),
+            cursor: Container(
+              width: 2.w,
+              height: 22.h,
+              color: AppColors.inputBoxColor,
+            ),
+            onChanged: (pin) {
+              if (_hasError) {
+                setState(() => _hasError = false);
+              } else {
+                setState(() {});
+              }
+              if (pin.length == 6 && !_hasAutoSubmitted && !isLoading) {
+                _hasAutoSubmitted = true;
+                _onVerify(context);
+              }
+            },
+            onCompleted: (pin) {
+              if (!_hasAutoSubmitted && !isLoading) {
+                _hasAutoSubmitted = true;
+                _onVerify(context);
+              }
+            },
+          ),
+        );
+      },
     );
   }
 }
