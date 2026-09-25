@@ -135,6 +135,22 @@ class _DashboardPageState extends State<DashboardPage>
     }
   }
 
+  bool _isRefreshingHostels = false;
+
+  Future<void> _refreshHostels() async {
+    if (_isRefreshingHostels) return;
+
+    _isRefreshingHostels = true;
+
+    try {
+      await context.read<HostelCubit>().getHostels(
+        forceRefresh: true,
+      );
+    } finally {
+      _isRefreshingHostels = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final owner = context.select((AuthCubit cubit) {
@@ -219,7 +235,10 @@ class _DashboardPageState extends State<DashboardPage>
               ),
             ],
             child: RefreshIndicator(
-              onRefresh: () async => _refreshData(),
+              onRefresh: () async => {
+                _refreshData(),
+                _refreshHostels()
+              },
               color: AppColors.primaryBlue,
               displacement: 40,
               child: BlocBuilder<DashboardCubit, DashboardState>(
