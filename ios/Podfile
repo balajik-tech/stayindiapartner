@@ -43,4 +43,34 @@ post_install do |installer|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
     end
   end
+
+  # Fix for Xcode 15+: DT_TOOLCHAIN_DIR cannot be used to evaluate LIBRARY_SEARCH_PATHS
+  installer.aggregate_targets.each do |target|
+    target.xcconfigs.each do |variant, xcconfig|
+      xcconfig_path = target.xcconfig_path(variant)
+      if File.exist?(xcconfig_path)
+        File.write(xcconfig_path, File.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
+      end
+    end
+  end
+
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      xcconfig_path = config.base_configuration_reference&.real_path
+      if xcconfig_path && File.exist?(xcconfig_path)
+        File.write(xcconfig_path, File.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
+      end
+    end
+  end
+
+  Dir.glob(File.join(installer.sandbox.root, '**', '*.{xcconfig,sh}')).each do |file|
+    file_contents = File.read(file)
+    if file_contents.include?('DT_TOOLCHAIN_DIR')
+      file_contents = file_contents.gsub('DT_TOOLCHAIN_DIR', 'TOOLCHAIN_DIR')
+    end
+    if file.end_with?('-xcframeworks.sh') && file_contents.include?('rsync --delete')
+      file_contents = file_contents.gsub('rsync --delete', 'rsync')
+    end
+    File.write(file, file_contents)
+  end
 end

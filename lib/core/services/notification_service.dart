@@ -1,11 +1,11 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import '../utils/logger.dart';
 import 'dart:convert';
-import 'package:stayindia_owner/main.dart';
 import 'package:stayindia_owner/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 
@@ -31,7 +31,6 @@ class NotificationService {
           requestAlertPermission: true,
           requestBadgePermission: true,
           requestSoundPermission: true,
-          requestCriticalPermission: true,
         );
 
     const InitializationSettings initializationSettings =
@@ -39,6 +38,13 @@ class NotificationService {
           android: initializationSettingsAndroid,
           iOS: initializationSettingsIOS,
         );
+
+    // Allow iOS to show banners/play sounds even when the app is in the foreground
+    await _fcm.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     await _notificationsPlugin.initialize(
       settings: initializationSettings,
@@ -192,9 +198,39 @@ class NotificationService {
 
   Future<String?> getToken() async {
     try {
-      return await _fcm.getToken();
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        // Firebase on iOS requires APNs token before generating an FCM token.
+        String? apnsToken = await _fcm.getAPNSToken();
+        if (apnsToken == null) {
+          // Wait briefly for Apple's APNs server handshake
+          for (int i = 0; i < 3; i++) {
+            await Future.delayed(const Duration(seconds: 1));
+            apnsToken = await _fcm.getAPNSToken();
+            if (apnsToken != null) break;
+          }
+        }
+
+        if (apnsToken == null) {
+          AppLogger.warning(
+            'APNS token not available on iOS yet. Skipping immediate FCM token retrieval.',
+          );
+          return null;
+        }
+      }
+
+      final token = await _fcm.getToken();
+      if (token != null) {
+        AppLogger.info('========================================');
+        AppLogger.info('>>> FCM REGISTRATION TOKEN: $token');
+        AppLogger.info('========================================');
+      }
+      return token;
     } catch (e) {
-      AppLogger.error('Failed to get FCM token: $e');
+      if (e.toString().contains('apns-token-not-set')) {
+        AppLogger.warning('APNS token not ready yet: $e');
+      } else {
+        AppLogger.error('Failed to get FCM token: $e');
+      }
       return null;
     }
   }
@@ -204,7 +240,6 @@ class NotificationService {
       alert: true,
       badge: true,
       sound: true,
-      criticalAlert: true,
     );
     AppLogger.info('User granted permission: ${settings.authorizationStatus}');
 
@@ -243,7 +278,7 @@ class NotificationService {
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
-      interruptionLevel: InterruptionLevel.critical,
+      interruptionLevel: InterruptionLevel.active,
     );
 
     const NotificationDetails platformDetails = NotificationDetails(

@@ -54,7 +54,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'stay-india-partner.firebasestorage.app',
     androidClientId: '730093151187-b9i8hboeqmd6i8tk5ribcqn1teq4anig.apps.googleusercontent.com',
     iosClientId: '730093151187-dh312ecscfthjepn87g0e14jjs15f4ua.apps.googleusercontent.com',
-    iosBundleId: 'com.example.stayindiaOwner',
+    iosBundleId: 'com.stayindia.stayindiaowner',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
