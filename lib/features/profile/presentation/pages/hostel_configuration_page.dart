@@ -92,7 +92,7 @@ class HostelConfigurationPage extends StatelessWidget {
                     },
                   ),
                 ),
-                if (!anyMissingBank) _buildBankButton(context),
+                if (anyMissingBank) _buildBankButton(context),
               ],
             );
           }
