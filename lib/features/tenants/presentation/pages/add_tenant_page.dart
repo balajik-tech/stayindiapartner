@@ -56,7 +56,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
   DateTime? _checkInDate;
   late AddTenantCubit _addTenantCubit;
-  bool _isAC = true;
+  bool _isAC = false;
   bool _isNew = true;
 
   File? _csvFile;
@@ -2227,6 +2227,8 @@ class _CollectPaymentBottomSheet extends StatefulWidget {
 class _CollectPaymentBottomSheetState
     extends State<_CollectPaymentBottomSheet> {
   late TextEditingController _collectingNowController;
+  final TextEditingController _discountController = TextEditingController();
+  double _discountAmount = 0.0;
   String _paymentMethod = 'Cash'; // 'Cash', 'UPI', 'Link'
   String _collectionType = 'Full amount'; // 'Full amount', 'Deposit only', 'Nothing now'
   bool _isSubmitting = false;
@@ -2242,21 +2244,150 @@ class _CollectPaymentBottomSheetState
   @override
   void dispose() {
     _collectingNowController.dispose();
+    _discountController.dispose();
     super.dispose();
   }
 
   void _onCollectionTypeChanged(String type) {
+    double totalDue =
+        (widget.rent + widget.securityDeposit + widget.maintainance - _discountAmount)
+            .clamp(0, double.infinity);
     setState(() {
       _collectionType = type;
       if (type == 'Full amount') {
-        // double total = widget.rent + widget.securityDeposit + widget.maintainance;
-        // _collectingNowController.text = total.toStringAsFixed(0);
+        _collectingNowController.text = totalDue.toStringAsFixed(0);
       } else if (type == 'Deposit only') {
-        // _collectingNowController.text = widget.securityDeposit.toStringAsFixed(0);
+        _collectingNowController.text =
+            widget.securityDeposit.toStringAsFixed(0);
       } else {
-        // _collectingNowController.text = '0';
+        _collectingNowController.text = '0';
       }
     });
+  }
+
+  void _showDiscountDialog() {
+    _discountController.text =
+        _discountAmount > 0 ? _discountAmount.toStringAsFixed(0) : '';
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          title: Text(
+            'Add Discount or Waiver',
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1E3A8A),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Enter discount or waiver amount',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: Colors.grey[600],
+                ),
+              ),
+              SizedBox(height: 12.h),
+              TextField(
+                controller: _discountController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                autofocus: true,
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  prefixText: '₹ ',
+                  prefixStyle: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF1F5F9),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 14.h,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            if (_discountAmount > 0)
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _discountAmount = 0.0;
+                    double totalDue =
+                        (widget.rent + widget.securityDeposit + widget.maintainance)
+                            .clamp(0, double.infinity);
+                    if (_collectionType == 'Full amount') {
+                      _collectingNowController.text =
+                          totalDue.toStringAsFixed(0);
+                    }
+                  });
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text(
+                  'Remove',
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                double discount =
+                    double.tryParse(_discountController.text.trim()) ?? 0.0;
+                double maxTotal =
+                    widget.rent + widget.securityDeposit + widget.maintainance;
+                if (discount > maxTotal) {
+                  discount = maxTotal;
+                }
+                setState(() {
+                  _discountAmount = discount;
+                  double totalDue =
+                      (maxTotal - _discountAmount).clamp(0, double.infinity);
+                  if (_collectionType == 'Full amount') {
+                    _collectingNowController.text =
+                        totalDue.toStringAsFixed(0);
+                  }
+                });
+                Navigator.pop(dialogContext);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+              ),
+              child: const Text(
+                'Apply',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _handleProceed() async {
@@ -2362,7 +2493,8 @@ class _CollectPaymentBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    double totalDue = widget.rent + widget.securityDeposit + widget.maintainance;
+    double originalTotal = widget.rent + widget.securityDeposit + widget.maintainance;
+    double totalDue = (originalTotal - _discountAmount).clamp(0, double.infinity);
     final authState = context.read<AuthCubit>().state;
     String collectorName = "You";
     if (authState is AuthAuthenticated) {
@@ -2434,21 +2566,58 @@ class _CollectPaymentBottomSheetState
                   SizedBox(height: 12.h),
                   _buildDueItem('Maintainance', widget.maintainance),
                   SizedBox(height: 12.h),
-                  // GestureDetector(
-                  //   onTap: () {},
-                  //   child: Row(
-                  //     children: [
-                  //       Text(
-                  //         '+ Add discount or waiver',
-                  //         style: TextStyle(
-                  //           fontSize: 14.sp,
-                  //           color: const Color(0xFF2563EB),
-                  //           fontWeight: FontWeight.w600,
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
+                  if (_discountAmount > 0) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Discount / Waiver',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.green[700],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            GestureDetector(
+                              onTap: _showDiscountDialog,
+                              child: Icon(
+                                Icons.edit_outlined,
+                                size: 16.sp,
+                                color: const Color(0xFF2563EB),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '- ₹${NumberFormat('#,##,###').format(_discountAmount)}',
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    GestureDetector(
+                      onTap: _showDiscountDialog,
+                      child: Row(
+                        children: [
+                          Text(
+                            '+ Add discount or waiver',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: const Color(0xFF2563EB),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 16.h),
                     child: Divider(color: Colors.grey[200]),
