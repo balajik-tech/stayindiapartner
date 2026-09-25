@@ -734,6 +734,31 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                       ),
                     ),
 
+                    // Edit icon - top right
+                    Positioned(
+                      top: 2,
+                      right: 2,
+                      child: GestureDetector(
+                        onTap: _pickAndUploadImage,
+                        child: Container(
+                          padding: EdgeInsets.all(5.r),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryBlue,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.edit_rounded,
+                            color: Colors.white,
+                            size: 10.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+
                     if (isVerified)
                       Positioned(
                         bottom: 4,
