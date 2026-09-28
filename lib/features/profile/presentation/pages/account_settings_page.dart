@@ -1089,90 +1089,124 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     VoidCallback? onSave,
   }) {
     HapticFeedback.selectionClick();
+    String? errorMessage;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(
-          20.w,
-          20.h,
-          20.w,
-          MediaQuery.of(context).viewInsets.bottom +
-              MediaQuery.of(context).padding.bottom +
-              24.h,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return Container(
+            padding: EdgeInsets.fromLTRB(
+              20.w,
+              20.h,
+              20.w,
+              MediaQuery.of(sheetContext).viewInsets.bottom +
+                  MediaQuery.of(sheetContext).padding.bottom +
+                  24.h,
             ),
-            SizedBox(height: 24.h),
-            Text(
-              'update_field'.tr(namedArgs: {'field': title}),
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w900,
-                color: AppColors.darkText,
-              ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
             ),
-            SizedBox(height: 16.h),
-            TextField(
-              controller: controller,
-              keyboardType: inputType,
-              maxLines: isLongText ? 4 : 1,
-              autofocus: true,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFF8F9FA),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.r),
-                  borderSide: BorderSide.none,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
                 ),
-                contentPadding: EdgeInsets.all(16.w),
-              ),
+                SizedBox(height: 24.h),
+                Text(
+                  'update_field'.tr(namedArgs: {'field': title}),
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                TextField(
+                  controller: controller,
+                  keyboardType: inputType,
+                  maxLines: isLongText ? 4 : 1,
+                  autofocus: true,
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+                  onChanged: (_) {
+                    if (errorMessage != null) {
+                      setSheetState(() {
+                        errorMessage = null;
+                      });
+                    }
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color(0xFFF8F9FA),
+                    errorText: errorMessage,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.r),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: EdgeInsets.all(16.w),
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                ElevatedButton(
+                  onPressed: () {
+                    final text = controller.text.trim();
+                    if (text.isEmpty) {
+                      setSheetState(() {
+                        errorMessage = 'Field cannot be empty';
+                      });
+                      return;
+                    }
+
+                    if (inputType == TextInputType.emailAddress) {
+                      final emailRegex = RegExp(
+                        r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$",
+                      );
+                      if (!emailRegex.hasMatch(text)) {
+                        setSheetState(() {
+                          errorMessage = 'Please enter a valid email address';
+                        });
+                        return;
+                      }
+                    }
+
+                    if (onSave != null) {
+                      onSave();
+                    } else {
+                      setState(() {});
+                    }
+                    Navigator.pop(sheetContext);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    minimumSize: Size(double.infinity, 56.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                    ),
+                  ),
+                  child: Text(
+                    'confirm'.tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 24.h),
-            ElevatedButton(
-              onPressed: () {
-                if (onSave != null) {
-                  onSave();
-                } else {
-                  setState(() {});
-                }
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
-                minimumSize: Size(double.infinity, 56.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28.r),
-                ),
-              ),
-              child: Text(
-                'confirm'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
