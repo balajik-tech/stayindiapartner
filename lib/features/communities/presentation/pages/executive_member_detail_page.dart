@@ -233,7 +233,7 @@ class _ExecutiveMemberDetailView extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
-                                      '${member.phone}',
+                                      member.phone,
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
                                         color: badgeText,
@@ -293,7 +293,7 @@ class _ExecutiveMemberDetailView extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(18),
                           child: Text(
-                            (state as ExecutiveDetailError).message,
+                            (state).message,
                             style: const TextStyle(color: Colors.red),
                             textAlign: TextAlign.center,
                           ),
@@ -347,7 +347,7 @@ class _ExecutiveMemberDetailView extends StatelessWidget {
                                               borderRadius: BorderRadius.circular(4),
                                             ),
                                             child: Text(
-                                              '${core.phone}',
+                                              core.phone,
                                               style: GoogleFonts.inter(
                                                 fontSize: 10,
                                                 color: badgeText,

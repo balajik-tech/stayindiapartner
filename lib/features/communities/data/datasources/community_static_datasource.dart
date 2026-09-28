@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import '../models/committee_member_model.dart';
 import '../models/community_wing_model.dart';
 import '../models/executive_member_model.dart';
@@ -29,181 +30,220 @@ class AssociateStaticDataSource implements AssociateDataSource {
   final Dio _dio;
   const AssociateStaticDataSource(this._dio);
 
-  @override
-  Future<List<AssociationPortalModel>> getAssociations() async {
-    final response = await _dio.get(ApiConstants.associationsPortal);
-    if (response.statusCode == 200 && response.data != null) {
-      final raw = response.data;
-      
-      // Attempt to find the list of associations in various possible structures
-      List<dynamic>? list;
-      
-      if (raw is Map<String, dynamic>) {
-        if (raw['data'] is Map<String, dynamic>) {
-          final data = raw['data'] as Map<String, dynamic>;
-          list = (data['associations'] ?? data['results'] ?? data['items']) as List<dynamic>?;
-        } else if (raw['data'] is List<dynamic>) {
-          list = raw['data'] as List<dynamic>;
-        } else if (raw['associations'] is List<dynamic>) {
-          list = raw['associations'] as List<dynamic>;
-        }
-      } else if (raw is List<dynamic>) {
-        list = raw;
-      }
-
-      if (list != null) {
-        return list.map((json) => AssociationPortalModel.fromJson(json as Map<String, dynamic>)).toList();
+  String _extractErrorMessage(DioException e, String fallback) {
+    if (e.response?.data != null && e.response?.data is Map) {
+      final map = e.response!.data as Map;
+      final msg = map['message'] ?? map['error'];
+      if (msg != null && msg.toString().isNotEmpty) {
+        return msg.toString();
       }
     }
-    throw Exception('Failed to fetch associations: Invalid data structure or empty response');
+    return fallback;
+  }
+
+  @override
+  Future<List<AssociationPortalModel>> getAssociations() async {
+    try {
+      final response = await _dio.get(ApiConstants.associationsPortal);
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = response.data;
+        
+        // Attempt to find the list of associations in various possible structures
+        List<dynamic>? list;
+        
+        if (raw is Map<String, dynamic>) {
+          if (raw['data'] is Map<String, dynamic>) {
+            final data = raw['data'] as Map<String, dynamic>;
+            list = (data['associations'] ?? data['results'] ?? data['items']) as List<dynamic>?;
+          } else if (raw['data'] is List<dynamic>) {
+            list = raw['data'] as List<dynamic>;
+          } else if (raw['associations'] is List<dynamic>) {
+            list = raw['associations'] as List<dynamic>;
+          }
+        } else if (raw is List<dynamic>) {
+          list = raw;
+        }
+
+        if (list != null) {
+          return list.map((json) => AssociationPortalModel.fromJson(json as Map<String, dynamic>)).toList();
+        }
+      }
+      throw AuthException(message: 'Failed to fetch associations: Invalid data structure or empty response');
+    } on DioException catch (e) {
+      throw AuthException(message: _extractErrorMessage(e, 'Failed to fetch associations'));
+    }
   }
 
   @override
   Future<List<AssociateCommitteeMemberModel>> getExecutiveCommittee(String associationId) async {
-    final response = await _dio.get('${ApiConstants.associationWorkingBody}/$associationId');
-    if (response.statusCode == 200 && response.data != null) {
-      final raw = response.data;
-      List<dynamic>? list;
+    try {
+      final response = await _dio.get('${ApiConstants.associationWorkingBody}/$associationId');
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = response.data;
+        List<dynamic>? list;
 
-      if (raw is Map<String, dynamic>) {
-        if (raw['data'] is Map<String, dynamic>) {
-          final data = raw['data'] as Map<String, dynamic>;
-          list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
-        } else if (raw['data'] is List<dynamic>) {
-          list = raw['data'] as List<dynamic>;
-        } else if (raw['roles'] is List<dynamic>) {
-          list = raw['roles'] as List<dynamic>;
+        if (raw is Map<String, dynamic>) {
+          if (raw['data'] is Map<String, dynamic>) {
+            final data = raw['data'] as Map<String, dynamic>;
+            list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
+          } else if (raw['data'] is List<dynamic>) {
+            list = raw['data'] as List<dynamic>;
+          } else if (raw['roles'] is List<dynamic>) {
+            list = raw['roles'] as List<dynamic>;
+          }
+        }
+
+        if (list != null) {
+          return list.map((json) => AssociateCommitteeMemberModel.fromJson(json as Map<String, dynamic>)).toList();
         }
       }
-
-      if (list != null) {
-        return list.map((json) => AssociateCommitteeMemberModel.fromJson(json as Map<String, dynamic>)).toList();
-      }
+      throw AuthException(message: 'Failed to fetch executive committee');
+    } on DioException catch (e) {
+      throw AuthException(message: _extractErrorMessage(e, 'Failed to fetch executive committee'));
     }
-    throw Exception('Failed to fetch executive committee');
   }
 
   @override
   Future<List<AssociateExecutiveMemberModel>> getExecutiveMembers(String associationId) async {
-    final response = await _dio.get('${ApiConstants.associationExecutiveMembers}/$associationId');
-    if (response.statusCode == 200 && response.data != null) {
-      final raw = response.data;
-      List<dynamic>? list;
+    try {
+      final response = await _dio.get('${ApiConstants.associationExecutiveMembers}/$associationId');
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = response.data;
+        List<dynamic>? list;
 
-      if (raw is Map<String, dynamic>) {
-        if (raw['data'] is Map<String, dynamic>) {
-          final data = raw['data'] as Map<String, dynamic>;
-          list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
-        } else if (raw['data'] is List<dynamic>) {
-          list = raw['data'] as List<dynamic>;
-        } else if (raw['roles'] is List<dynamic>) {
-          list = raw['roles'] as List<dynamic>;
+        if (raw is Map<String, dynamic>) {
+          if (raw['data'] is Map<String, dynamic>) {
+            final data = raw['data'] as Map<String, dynamic>;
+            list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
+          } else if (raw['data'] is List<dynamic>) {
+            list = raw['data'] as List<dynamic>;
+          } else if (raw['roles'] is List<dynamic>) {
+            list = raw['roles'] as List<dynamic>;
+          }
+        }
+
+        if (list != null) {
+          return list.map((json) => AssociateExecutiveMemberModel.fromJson(json as Map<String, dynamic>)).toList();
         }
       }
-
-      if (list != null) {
-        return list.map((json) => AssociateExecutiveMemberModel.fromJson(json as Map<String, dynamic>)).toList();
-      }
+      throw AuthException(message: 'Failed to fetch executive members');
+    } on DioException catch (e) {
+      throw AuthException(message: _extractErrorMessage(e, 'Failed to fetch executive members'));
     }
-    throw Exception('Failed to fetch executive members');
   }
 
   @override
   Future<List<AssociateItWingMemberModel>> getItWingMembers(String associationId) async {
-    final response = await _dio.get('${ApiConstants.associationTeamLeads}/$associationId');
-    if (response.statusCode == 200 && response.data != null) {
-      final raw = response.data;
-      List<dynamic>? list;
+    try {
+      final response = await _dio.get('${ApiConstants.associationTeamLeads}/$associationId');
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = response.data;
+        List<dynamic>? list;
 
-      if (raw is Map<String, dynamic>) {
-        if (raw['data'] is Map<String, dynamic>) {
-          final data = raw['data'] as Map<String, dynamic>;
-          list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
-        } else if (raw['data'] is List<dynamic>) {
-          list = raw['data'] as List<dynamic>;
-        } else if (raw['roles'] is List<dynamic>) {
-          list = raw['roles'] as List<dynamic>;
+        if (raw is Map<String, dynamic>) {
+          if (raw['data'] is Map<String, dynamic>) {
+            final data = raw['data'] as Map<String, dynamic>;
+            list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
+          } else if (raw['data'] is List<dynamic>) {
+            list = raw['data'] as List<dynamic>;
+          } else if (raw['roles'] is List<dynamic>) {
+            list = raw['roles'] as List<dynamic>;
+          }
+        }
+
+        if (list != null) {
+          return list.map((json) => AssociateItWingMemberModel.fromJson(json as Map<String, dynamic>)).toList();
         }
       }
-
-      if (list != null) {
-        return list.map((json) => AssociateItWingMemberModel.fromJson(json as Map<String, dynamic>)).toList();
-      }
+      throw AuthException(message: 'Failed to fetch IT wing members');
+    } on DioException catch (e) {
+      throw AuthException(message: _extractErrorMessage(e, 'Failed to fetch IT wing members'));
     }
-    throw Exception('Failed to fetch IT wing members');
   }
 
   @override
   Future<List<AssociatePortMemberModel>> getPortMembers(String associationId) async {
-    final response = await _dio.get('${ApiConstants.associationPortMembers}/$associationId');
-    if (response.statusCode == 200 && response.data != null) {
-      final raw = response.data;
-      List<dynamic>? list;
+    try {
+      final response = await _dio.get('${ApiConstants.associationPortMembers}/$associationId');
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = response.data;
+        List<dynamic>? list;
 
-      if (raw is Map<String, dynamic>) {
-        if (raw['data'] is Map<String, dynamic>) {
-          final data = raw['data'] as Map<String, dynamic>;
-          list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
-        } else if (raw['data'] is List<dynamic>) {
-          list = raw['data'] as List<dynamic>;
-        } else if (raw['roles'] is List<dynamic>) {
-          list = raw['roles'] as List<dynamic>;
+        if (raw is Map<String, dynamic>) {
+          if (raw['data'] is Map<String, dynamic>) {
+            final data = raw['data'] as Map<String, dynamic>;
+            list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
+          } else if (raw['data'] is List<dynamic>) {
+            list = raw['data'] as List<dynamic>;
+          } else if (raw['roles'] is List<dynamic>) {
+            list = raw['roles'] as List<dynamic>;
+          }
+        }
+
+        if (list != null) {
+          return list.map((json) => AssociatePortMemberModel.fromJson(json as Map<String, dynamic>)).toList();
         }
       }
-
-      if (list != null) {
-        return list.map((json) => AssociatePortMemberModel.fromJson(json as Map<String, dynamic>)).toList();
-      }
+      throw AuthException(message: 'Failed to fetch port members');
+    } on DioException catch (e) {
+      throw AuthException(message: _extractErrorMessage(e, 'Failed to fetch port members'));
     }
-    throw Exception('Failed to fetch port members');
   }
 
   @override
   Future<List<CommunityWingModel>> getCommunityWings(String associationId) async {
-    final response = await _dio.get(
-      ApiConstants.communityWings,
-      queryParameters: {'associationId': associationId, 'status': 'ACTIVE'},
-    );
-    if (response.statusCode == 200 && response.data != null) {
-      final raw = response.data;
-      List<dynamic>? list;
-      if (raw is Map<String, dynamic>) {
-        list = raw['data'] as List<dynamic>?;
-      } else if (raw is List<dynamic>) {
-        list = raw;
+    try {
+      final response = await _dio.get(
+        ApiConstants.communityWings,
+        queryParameters: {'associationId': associationId, 'status': 'ACTIVE'},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = response.data;
+        List<dynamic>? list;
+        if (raw is Map<String, dynamic>) {
+          list = raw['data'] as List<dynamic>?;
+        } else if (raw is List<dynamic>) {
+          list = raw;
+        }
+        if (list != null) {
+          return list
+              .map((json) => CommunityWingModel.fromJson(json as Map<String, dynamic>))
+              .toList();
+        }
       }
-      if (list != null) {
-        return list
-            .map((json) => CommunityWingModel.fromJson(json as Map<String, dynamic>))
-            .toList();
-      }
+      throw AuthException(message: 'Failed to fetch community wings');
+    } on DioException catch (e) {
+      throw AuthException(message: _extractErrorMessage(e, 'Failed to fetch community wings'));
     }
-    throw Exception('Failed to fetch community wings');
   }
 
   @override
   Future<List<ExecutiveStructureLeaderModel>> getExecutiveStructure(String execId) async {
-    final response = await _dio.get('${ApiConstants.associationExecutiveStructure}/$execId');
-    if (response.statusCode == 200 && response.data != null) {
-      final raw = response.data;
-      List<dynamic>? list;
+    try {
+      final response = await _dio.get('${ApiConstants.associationExecutiveStructure}/$execId');
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = response.data;
+        List<dynamic>? list;
 
-      if (raw is Map<String, dynamic>) {
-        if (raw['data'] is Map<String, dynamic>) {
-          final data = raw['data'] as Map<String, dynamic>;
-          list = (data['leaders'] ?? data['results'] ?? data['items']) as List<dynamic>?;
-        } else if (raw['data'] is List<dynamic>) {
-          list = raw['data'] as List<dynamic>;
-        } else if (raw['leaders'] is List<dynamic>) {
-          list = raw['leaders'] as List<dynamic>;
+        if (raw is Map<String, dynamic>) {
+          if (raw['data'] is Map<String, dynamic>) {
+            final data = raw['data'] as Map<String, dynamic>;
+            list = (data['leaders'] ?? data['results'] ?? data['items']) as List<dynamic>?;
+          } else if (raw['data'] is List<dynamic>) {
+            list = raw['data'] as List<dynamic>;
+          } else if (raw['leaders'] is List<dynamic>) {
+            list = raw['leaders'] as List<dynamic>;
+          }
+        }
+
+        if (list != null) {
+          return list.map((json) => ExecutiveStructureLeaderModel.fromJson(json as Map<String, dynamic>)).toList();
         }
       }
-
-      if (list != null) {
-        return list.map((json) => ExecutiveStructureLeaderModel.fromJson(json as Map<String, dynamic>)).toList();
-      }
+      throw AuthException(message: 'Failed to fetch executive structure');
+    } on DioException catch (e) {
+      throw AuthException(message: _extractErrorMessage(e, 'Failed to fetch executive structure'));
     }
-    throw Exception('Failed to fetch executive structure');
   }
 
   @override
@@ -244,12 +284,16 @@ class AssociateStaticDataSource implements AssociateDataSource {
 
   @override
   Future<AssociationDetailsModel> getAssociationDetails(String id) async {
-    final response = await _dio.get('${ApiConstants.associationPortalDetails}/$id');
-    if (response.statusCode == 200) {
-      final raw = response.data;
-      final data = raw['data'] as Map<String, dynamic>;
-      return AssociationDetailsModel.fromJson(data);
+    try {
+      final response = await _dio.get('${ApiConstants.associationPortalDetails}/$id');
+      if (response.statusCode == 200) {
+        final raw = response.data;
+        final data = raw['data'] as Map<String, dynamic>;
+        return AssociationDetailsModel.fromJson(data);
+      }
+      throw AuthException(message: 'Failed to load association details');
+    } on DioException catch (e) {
+      throw AuthException(message: _extractErrorMessage(e, 'Failed to load association details'));
     }
-    throw Exception('Failed to load association details');
   }
 }
