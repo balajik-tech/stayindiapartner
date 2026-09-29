@@ -1515,14 +1515,19 @@ class _PostCardState extends State<_PostCard> {
                       children: [
                         Row(
                           children: [
-                            Text(
-                              widget.post.userName.isNotEmpty
-                                  ? StringUtils.capitalize(widget.post.userName)
-                                  : 'Unknown User',
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.darkText,
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.45,
+                              child: Text(
+                                widget.post.userName.isNotEmpty
+                                    ? StringUtils.capitalize(widget.post.userName)
+                                    : 'Unknown User',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.darkText,
+                                ),
                               ),
                             ),
                             const Spacer(),
@@ -1553,7 +1558,7 @@ class _PostCardState extends State<_PostCard> {
                           ],
                         ),
                         Text(
-                          '${_formatTimeAgo(widget.post.createdAt)}',
+                          _formatTimeAgo(widget.post.createdAt),
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             color: AppColors.greyText,
