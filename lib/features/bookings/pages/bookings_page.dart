@@ -471,7 +471,9 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll>
         onNotification: (notification) {
           if (notification.metrics.pixels >=
               notification.metrics.maxScrollExtent - 200) {
-            context.read<BookingsCubit>().loadMoreBookings();
+            // context.read<BookingsCubit>().loadMoreBookings();
+
+            //Stopping load more for backend no pagination support
           }
           return false;
         },

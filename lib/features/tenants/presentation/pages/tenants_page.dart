@@ -55,7 +55,9 @@ class _TenantsPageState extends State<TenantsPage> {
       if (_selectedTabIndex == 0) {
         final hostelId = context.read<HostelCubit>().state.selectedHostelId;
         if (hostelId != null) {
-          context.read<TenantCubit>().loadMoreTenants(hostelId);
+          // context.read<TenantCubit>().loadMoreTenants(hostelId);
+
+          //stopping load more, there is no support from backend.
         }
       }
     }
