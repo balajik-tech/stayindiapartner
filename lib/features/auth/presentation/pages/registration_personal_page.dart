@@ -140,8 +140,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
           (value) => value.toString().trim(),
     ).join(' - ');
 
-    if (fullName.isEmpty
-    // email.isEmpty ||
+    if (fullName.isEmpty || email.isEmpty
     // stateStr.isEmpty ||
     // district.isEmpty ||
     // pincode.isEmpty ||
@@ -432,7 +431,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
         ),
         SizedBox(height: 24.h),
         AuthTextField(
-          label: 'Email ID (optional)',
+          label: 'Email ID',
           controller: _emailController,
           hintText: 'name@example.com',
           keyboardType: TextInputType.emailAddress,
