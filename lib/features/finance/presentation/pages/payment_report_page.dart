@@ -467,37 +467,58 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
               ),
             ),
             SizedBox(height: 16.h),
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 0.5.sh),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: months.length,
-                itemBuilder: (context, index) {
-                  final month = months[index];
-                  final isSelected = month.year == _selectedDate.year &&
-                      month.month == _selectedDate.month;
-                  return ListTile(
-                    title: Text(
-                      DateFormat('MMMM yyyy').format(month),
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: AppColors.darkText,
-                      ),
-                    ),
-                    trailing: isSelected
-                        ? Icon(Icons.check_circle, color: const Color(0xFF388E3C), size: 24.sp)
-                        : Icon(Icons.radio_button_off, color: Colors.grey.shade400, size: 24.sp),
-                    onTap: () {
-                      setState(() {
-                        _selectedDate = month;
-                      });
-                      // _fetchData();
-                      // Navigator.pop(sheetContext);
+            StatefulBuilder(
+              builder: (context, setSheetState) {
+                return ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 0.5.sh),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: months.length,
+                    itemBuilder: (context, index) {
+                      final month = months[index];
+
+                      final isSelected =
+                          month.year == _selectedDate.year &&
+                              month.month == _selectedDate.month;
+
+                      return ListTile(
+                        title: Text(
+                          DateFormat('MMMM yyyy').format(month),
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                        trailing: Icon(
+                          isSelected
+                              ? Icons.check_circle
+                              : Icons.radio_button_off,
+                          color: isSelected
+                              ? const Color(0xFF388E3C)
+                              : Colors.grey.shade400,
+                          size: 24.sp,
+                        ),
+                        onTap: () {
+                          setSheetState(() {
+                            _selectedDate = month;
+                          });
+
+                          // If you also need to update the parent:
+                          setState(() {
+                            _selectedDate = month;
+                          });
+
+                          // _fetchData();
+                          // Navigator.pop(sheetContext);
+                        },
+                      );
                     },
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
             SizedBox(height: 16.h),
             Padding(
