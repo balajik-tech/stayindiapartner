@@ -11,9 +11,9 @@ class ApiConstants {
 
   static const String stagingUrl = 'https://api.stayindia.in';
 
-  static const String _prodUrl = '$stagingUrl$_api_Version';
+  static const String _baseURL = '$stagingUrl$_api_Version';
 
-  static final String environment = _prodUrl.startsWith(productionUrl) ? 'PROD' : 'STAGING';
+  static final String environment = _baseURL.startsWith(productionUrl) ? 'PROD' : 'STAGING';
 
 
   static const int paginationLimit = 100;
@@ -22,7 +22,7 @@ class ApiConstants {
   static const String ABOUT_US = "https://www.stayindia.in/aboutus.html";
   
   static String get baseUrl {
-    const url = String.fromEnvironment('API_BASE_URL', defaultValue: _prodUrl);
+    const url = String.fromEnvironment('API_BASE_URL', defaultValue: _baseURL);
     if (Platform.isAndroid && url.contains('localhost')) {
       return url.replaceAll('localhost', '10.0.2.2');
     }
@@ -31,7 +31,7 @@ class ApiConstants {
 
   static String get effectiveBaseUrl {
     const fromEnv = String.fromEnvironment('API_BASE_URL');
-    final url = fromEnv.isNotEmpty ? fromEnv : _prodUrl;
+    final url = fromEnv.isNotEmpty ? fromEnv : _baseURL;
     if (Platform.isAndroid && url.contains('localhost')) {
       return url.replaceAll('localhost', '10.0.2.2');
     }
@@ -206,7 +206,7 @@ class ApiConstants {
 
     if (path.startsWith('stay-india/')) {
       // return 'https://stay-india.s3.amazonaws.com/$path';
-      if(_prodUrl.startsWith("https://aws-api.stayindia.in")){
+      if(_baseURL.startsWith("https://aws-api.stayindia.in")){
         return 'https://stayindia-production.s3.ap-south-2.amazonaws.com/$path';
       }else{
         return 'https://stayindia.s3.ap-south-2.amazonaws.com/$path';
