@@ -96,8 +96,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       data: {
         'phone': sanitized,
         'role': 'OWNER',
-        // if (hashId != null && hashId.isNotEmpty) 'hashid': hashId,
-        // if (fileType != null) 'filetype': 2
+        if (hashId != null && hashId.isNotEmpty) 'hashid': hashId,
+        if (fileType != null) 'filetype': 2
       },
     );
 
