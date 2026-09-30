@@ -32,14 +32,10 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
   Future<void> loadCommunityData(String associationId) async {
     emit(const AssociateHomeDataLoading());
     try {
-      final results = await Future.wait([
-        getCommunityTheme(associationId),
-        getExecutiveCommittee(associationId),
-        getExecutiveMembers(associationId),
-        getItWingMembers(associationId),
-        getPortMembers(associationId),
-        getCommunityWings(associationId),
-      ]);
+      dynamic theme;
+      try {
+        theme = await getCommunityTheme(associationId);
+      } catch (_) {}
 
       AssociationDetailsEntity? details;
       String? detailsError;
@@ -47,32 +43,71 @@ class AssociateHomeDataCubit extends Cubit<AssociateHomeDataState> {
       try {
         details = await getAssociationDetails(associationId);
       } catch (e) {
-        detailsError = _extractDetailsError(e);
+        detailsError = _extractErrorString(e);
       }
+
+      List executiveCommittee = [];
+      List executiveMembers = [];
+      List itWingMembers = [];
+      List portMembers = [];
+      List communityWings = [];
+
+      try {
+        executiveCommittee = await getExecutiveCommittee(associationId);
+      } catch (e) {
+        detailsError ??= _extractErrorString(e);
+      }
+
+      try {
+        executiveMembers = await getExecutiveMembers(associationId);
+      } catch (e) {
+        detailsError ??= _extractErrorString(e);
+      }
+
+      try {
+        itWingMembers = await getItWingMembers(associationId);
+      } catch (e) {
+        detailsError ??= _extractErrorString(e);
+      }
+
+      try {
+        portMembers = await getPortMembers(associationId);
+      } catch (e) {
+        detailsError ??= _extractErrorString(e);
+      }
+
+      try {
+        communityWings = await getCommunityWings(associationId);
+      } catch (e) {
+        detailsError ??= _extractErrorString(e);
+      }
+
+      // Ensure theme is non-null
+      theme ??= await getCommunityTheme(associationId);
 
       emit(
         AssociateHomeDataLoaded(
-          theme: results[0] as dynamic,
-          executiveCommittee: (results[1] as List).cast(),
-          executiveMembers: (results[2] as List).cast(),
-          itWingMembers: (results[3] as List).cast(),
-          portMembers: (results[4] as List).cast(),
-          communityWings: (results[5] as List).cast(),
+          theme: theme,
+          executiveCommittee: executiveCommittee.cast(),
+          executiveMembers: executiveMembers.cast(),
+          itWingMembers: itWingMembers.cast(),
+          portMembers: portMembers.cast(),
+          communityWings: communityWings.cast(),
           details: details,
           detailsError: detailsError,
         ),
       );
     } catch (e) {
-      emit(AssociateHomeDataError('Failed to load community data: $e'));
+      emit(AssociateHomeDataError(_extractErrorString(e)));
     }
   }
 
-  String _extractDetailsError(Object error) {
-    if (error is Exception && error.toString().contains('DioException')) {
-      return 'Unable to load community details.';
+  String _extractErrorString(Object error) {
+    String msg = error.toString();
+    if (msg.startsWith('Exception: ')) {
+      msg = msg.substring('Exception: '.length);
     }
-
-    return error.toString().replaceFirst('Exception: ', '');
+    return msg;
   }
 
   /// Toggles a single accordion section open/closed.

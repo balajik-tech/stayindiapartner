@@ -50,10 +50,42 @@ class _CommunityHomeView extends StatelessWidget {
         }
         if (state is AssociateHomeDataError) {
           return Scaffold(
+            appBar: AppBar(
+              title: const Text('Community Portal'),
+              leading: const BackButton(),
+              elevation: 0,
+            ),
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Text(state.message, textAlign: TextAlign.center),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      size: 56,
+                      color: Colors.redAccent,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => context
+                          .read<AssociateHomeDataCubit>()
+                          .loadCommunityData(portalId),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                    ),
+                  ],
+                ),
               ),
             ),
           );

@@ -30,13 +30,17 @@ class AssociateStaticDataSource implements AssociateDataSource {
   final Dio _dio;
   const AssociateStaticDataSource(this._dio);
 
+  String _extractErrorMessageFromMap(Map map, String fallback) {
+    final msg = map['message'] ?? map['error'];
+    if (msg != null && msg.toString().trim().isNotEmpty) {
+      return msg.toString().trim();
+    }
+    return fallback;
+  }
+
   String _extractErrorMessage(DioException e, String fallback) {
     if (e.response?.data != null && e.response?.data is Map) {
-      final map = e.response!.data as Map;
-      final msg = map['message'] ?? map['error'];
-      if (msg != null && msg.toString().isNotEmpty) {
-        return msg.toString();
-      }
+      return _extractErrorMessageFromMap(e.response!.data as Map, fallback);
     }
     return fallback;
   }
@@ -47,11 +51,11 @@ class AssociateStaticDataSource implements AssociateDataSource {
       final response = await _dio.get(ApiConstants.associationsPortal);
       if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        
-        // Attempt to find the list of associations in various possible structures
-        List<dynamic>? list;
-        
         if (raw is Map<String, dynamic>) {
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            throw AuthException(message: _extractErrorMessageFromMap(raw, 'Failed to fetch associations'));
+          }
+          List<dynamic>? list;
           if (raw['data'] is Map<String, dynamic>) {
             final data = raw['data'] as Map<String, dynamic>;
             list = (data['associations'] ?? data['results'] ?? data['items']) as List<dynamic>?;
@@ -60,12 +64,11 @@ class AssociateStaticDataSource implements AssociateDataSource {
           } else if (raw['associations'] is List<dynamic>) {
             list = raw['associations'] as List<dynamic>;
           }
+          if (list != null) {
+            return list.map((json) => AssociationPortalModel.fromJson(json as Map<String, dynamic>)).toList();
+          }
         } else if (raw is List<dynamic>) {
-          list = raw;
-        }
-
-        if (list != null) {
-          return list.map((json) => AssociationPortalModel.fromJson(json as Map<String, dynamic>)).toList();
+          return raw.map((json) => AssociationPortalModel.fromJson(json as Map<String, dynamic>)).toList();
         }
       }
       throw AuthException(message: 'Failed to fetch associations: Invalid data structure or empty response');
@@ -80,9 +83,11 @@ class AssociateStaticDataSource implements AssociateDataSource {
       final response = await _dio.get('${ApiConstants.associationWorkingBody}/$associationId');
       if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        List<dynamic>? list;
-
         if (raw is Map<String, dynamic>) {
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            throw AuthException(message: _extractErrorMessageFromMap(raw, 'Failed to fetch executive committee'));
+          }
+          List<dynamic>? list;
           if (raw['data'] is Map<String, dynamic>) {
             final data = raw['data'] as Map<String, dynamic>;
             list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
@@ -91,10 +96,9 @@ class AssociateStaticDataSource implements AssociateDataSource {
           } else if (raw['roles'] is List<dynamic>) {
             list = raw['roles'] as List<dynamic>;
           }
-        }
-
-        if (list != null) {
-          return list.map((json) => AssociateCommitteeMemberModel.fromJson(json as Map<String, dynamic>)).toList();
+          if (list != null) {
+            return list.map((json) => AssociateCommitteeMemberModel.fromJson(json as Map<String, dynamic>)).toList();
+          }
         }
       }
       throw AuthException(message: 'Failed to fetch executive committee');
@@ -109,9 +113,11 @@ class AssociateStaticDataSource implements AssociateDataSource {
       final response = await _dio.get('${ApiConstants.associationExecutiveMembers}/$associationId');
       if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        List<dynamic>? list;
-
         if (raw is Map<String, dynamic>) {
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            throw AuthException(message: _extractErrorMessageFromMap(raw, 'Failed to fetch executive members'));
+          }
+          List<dynamic>? list;
           if (raw['data'] is Map<String, dynamic>) {
             final data = raw['data'] as Map<String, dynamic>;
             list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
@@ -120,10 +126,9 @@ class AssociateStaticDataSource implements AssociateDataSource {
           } else if (raw['roles'] is List<dynamic>) {
             list = raw['roles'] as List<dynamic>;
           }
-        }
-
-        if (list != null) {
-          return list.map((json) => AssociateExecutiveMemberModel.fromJson(json as Map<String, dynamic>)).toList();
+          if (list != null) {
+            return list.map((json) => AssociateExecutiveMemberModel.fromJson(json as Map<String, dynamic>)).toList();
+          }
         }
       }
       throw AuthException(message: 'Failed to fetch executive members');
@@ -138,9 +143,11 @@ class AssociateStaticDataSource implements AssociateDataSource {
       final response = await _dio.get('${ApiConstants.associationTeamLeads}/$associationId');
       if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        List<dynamic>? list;
-
         if (raw is Map<String, dynamic>) {
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            throw AuthException(message: _extractErrorMessageFromMap(raw, 'Failed to fetch IT wing members'));
+          }
+          List<dynamic>? list;
           if (raw['data'] is Map<String, dynamic>) {
             final data = raw['data'] as Map<String, dynamic>;
             list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
@@ -149,10 +156,9 @@ class AssociateStaticDataSource implements AssociateDataSource {
           } else if (raw['roles'] is List<dynamic>) {
             list = raw['roles'] as List<dynamic>;
           }
-        }
-
-        if (list != null) {
-          return list.map((json) => AssociateItWingMemberModel.fromJson(json as Map<String, dynamic>)).toList();
+          if (list != null) {
+            return list.map((json) => AssociateItWingMemberModel.fromJson(json as Map<String, dynamic>)).toList();
+          }
         }
       }
       throw AuthException(message: 'Failed to fetch IT wing members');
@@ -167,9 +173,11 @@ class AssociateStaticDataSource implements AssociateDataSource {
       final response = await _dio.get('${ApiConstants.associationPortMembers}/$associationId');
       if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        List<dynamic>? list;
-
         if (raw is Map<String, dynamic>) {
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            throw AuthException(message: _extractErrorMessageFromMap(raw, 'Failed to fetch port members'));
+          }
+          List<dynamic>? list;
           if (raw['data'] is Map<String, dynamic>) {
             final data = raw['data'] as Map<String, dynamic>;
             list = (data['roles'] ?? data['results'] ?? data['items']) as List<dynamic>?;
@@ -178,10 +186,9 @@ class AssociateStaticDataSource implements AssociateDataSource {
           } else if (raw['roles'] is List<dynamic>) {
             list = raw['roles'] as List<dynamic>;
           }
-        }
-
-        if (list != null) {
-          return list.map((json) => AssociatePortMemberModel.fromJson(json as Map<String, dynamic>)).toList();
+          if (list != null) {
+            return list.map((json) => AssociatePortMemberModel.fromJson(json as Map<String, dynamic>)).toList();
+          }
         }
       }
       throw AuthException(message: 'Failed to fetch port members');
@@ -199,14 +206,18 @@ class AssociateStaticDataSource implements AssociateDataSource {
       );
       if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        List<dynamic>? list;
         if (raw is Map<String, dynamic>) {
-          list = raw['data'] as List<dynamic>?;
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            throw AuthException(message: _extractErrorMessageFromMap(raw, 'Failed to fetch community wings'));
+          }
+          final list = raw['data'] as List<dynamic>?;
+          if (list != null) {
+            return list
+                .map((json) => CommunityWingModel.fromJson(json as Map<String, dynamic>))
+                .toList();
+          }
         } else if (raw is List<dynamic>) {
-          list = raw;
-        }
-        if (list != null) {
-          return list
+          return raw
               .map((json) => CommunityWingModel.fromJson(json as Map<String, dynamic>))
               .toList();
         }
@@ -223,9 +234,11 @@ class AssociateStaticDataSource implements AssociateDataSource {
       final response = await _dio.get('${ApiConstants.associationExecutiveStructure}/$execId');
       if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        List<dynamic>? list;
-
         if (raw is Map<String, dynamic>) {
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            throw AuthException(message: _extractErrorMessageFromMap(raw, 'Failed to fetch executive structure'));
+          }
+          List<dynamic>? list;
           if (raw['data'] is Map<String, dynamic>) {
             final data = raw['data'] as Map<String, dynamic>;
             list = (data['leaders'] ?? data['results'] ?? data['items']) as List<dynamic>?;
@@ -234,10 +247,9 @@ class AssociateStaticDataSource implements AssociateDataSource {
           } else if (raw['leaders'] is List<dynamic>) {
             list = raw['leaders'] as List<dynamic>;
           }
-        }
-
-        if (list != null) {
-          return list.map((json) => ExecutiveStructureLeaderModel.fromJson(json as Map<String, dynamic>)).toList();
+          if (list != null) {
+            return list.map((json) => ExecutiveStructureLeaderModel.fromJson(json as Map<String, dynamic>)).toList();
+          }
         }
       }
       throw AuthException(message: 'Failed to fetch executive structure');
@@ -255,11 +267,15 @@ class AssociateStaticDataSource implements AssociateDataSource {
       );
       if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        if (raw is Map<String, dynamic> && raw['data'] != null) {
-          final data = raw['data'] as Map<String, dynamic>;
-          final themeData = data['theme'] as Map<String, dynamic>?;
-          if (themeData != null) {
-            return AssociateCommunityThemeModel.fromJson(themeData);
+        if (raw is Map<String, dynamic>) {
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            // Error response from theme API, log or fallback below
+          } else if (raw['data'] != null && raw['data'] is Map<String, dynamic>) {
+            final data = raw['data'] as Map<String, dynamic>;
+            final themeData = data['theme'] as Map<String, dynamic>?;
+            if (themeData != null) {
+              return AssociateCommunityThemeModel.fromJson(themeData);
+            }
           }
         }
       }
@@ -286,10 +302,16 @@ class AssociateStaticDataSource implements AssociateDataSource {
   Future<AssociationDetailsModel> getAssociationDetails(String id) async {
     try {
       final response = await _dio.get('${ApiConstants.associationPortalDetails}/$id');
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data != null) {
         final raw = response.data;
-        final data = raw['data'] as Map<String, dynamic>;
-        return AssociationDetailsModel.fromJson(data);
+        if (raw is Map<String, dynamic>) {
+          if (raw['status'] == 'error' || raw['success'] == false) {
+            throw AuthException(message: _extractErrorMessageFromMap(raw, 'Failed to load association details'));
+          }
+          if (raw['data'] != null && raw['data'] is Map<String, dynamic>) {
+            return AssociationDetailsModel.fromJson(raw['data'] as Map<String, dynamic>);
+          }
+        }
       }
       throw AuthException(message: 'Failed to load association details');
     } on DioException catch (e) {

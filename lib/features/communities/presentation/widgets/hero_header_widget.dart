@@ -141,7 +141,35 @@ class HeroHeaderWidget extends StatelessWidget {
           ],
         ),
           const SizedBox(height: 8),
-
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _PillButton(
+                label: 'About Us',
+                onPressed: () => _showSheet(context, 'About Us'),
+              ),
+              _PillButton(
+                label: 'By Laws',
+                onPressed: () => _showSheet(context, 'By Laws'),
+              ),
+              _PillButton(
+                label: 'Founders',
+                onPressed: () => _showSheet(context, 'Founders'),
+              ),
+              _PillButton(
+                label: 'Donations',
+                onPressed: () => _showSheet(context, 'Donations'),
+              ),
+              if (details?.rulesRegulations != null && details!.rulesRegulations!.contents.isNotEmpty)...[
+                _PillButton(
+                  label: 'Rules & Regulation',
+                  onPressed: () => _showSheet(context, 'Rules'),
+                )
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
           if (detailsError != null && detailsError!.isNotEmpty) ...[
             const SizedBox(height: 8),
             Container(
@@ -170,34 +198,6 @@ class HeroHeaderWidget extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _PillButton(
-                label: 'About Us',
-                onPressed: () => _showSheet(context, 'About Us'),
-              ),
-              _PillButton(
-                label: 'By Laws',
-                onPressed: () => _showSheet(context, 'By Laws'),
-              ),
-              _PillButton(
-                label: 'Founders',
-                onPressed: () => _showSheet(context, 'Founders'),
-              ),
-              // _PillButton(
-              //   label: 'Donations',
-              //   onPressed: () => _showSheet(context, 'Donations'),
-              // ),
-              // if (details?.rulesRegulations != null)
-              //   _PillButton(
-              //     label: 'Rules & Regulation',
-              //     onPressed: () => _showSheet(context, 'Rules'),
-              //   ),
-            ],
-          ),
         ],
       ),
     );
@@ -287,7 +287,11 @@ class _LogoBadge extends StatelessWidget {
 class _PillButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
-  const _PillButton({required this.label, required this.onPressed});
+
+  const _PillButton({
+    required this.label,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -296,10 +300,23 @@ class _PillButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: Colors.white,
         side: const BorderSide(color: Colors.white30),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      child: Text(label, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }
