@@ -18,7 +18,7 @@ import '../../domain/entities/association_membership_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
 
-enum MembershipStatus { newUser, applied, approved, paid, renewalDue, expired ,rejected}
+enum MembershipStatus { newUser, applied, approved, paid, renewalDue, expired }
 
 class MembershipCardWidget extends StatefulWidget {
   final CommunityThemeEntity theme;
@@ -165,9 +165,6 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
           statusStr == 'APPROVED' ||
           statusStr == 'PAYMENT_PENDING') {
         return MembershipStatus.approved;
-      }  else if (timeline['rejected'] == true ||
-          statusStr == 'REJECTED') {
-        return MembershipStatus.rejected;
       } else if (timeline['applied'] == true ||
           statusStr == 'PENDING_APPROVAL' ||
           statusStr == 'APPLIED') {
@@ -178,8 +175,6 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         return MembershipStatus.paid;
       } else if (statusStr == 'APPROVED' || statusStr == 'PAYMENT_PENDING') {
         return MembershipStatus.approved;
-      } else if (statusStr == 'REJECTED') {
-        return MembershipStatus.rejected;
       } else if (statusStr == 'PENDING_APPROVAL' || statusStr == 'APPLIED') {
         return MembershipStatus.applied;
       }
@@ -214,13 +209,6 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       case MembershipStatus.applied:
         title = 'Thank you, $userFirstName';
         badgeText = 'Pending approval';
-        badgeColor = const Color(0xFFD3E0ED).withValues(alpha: 0.82);
-        textColor = Colors.black;
-        smallCircleColor = Colors.black;
-        break;
-      case MembershipStatus.rejected:
-        title = 'Thank you, $userFirstName';
-        badgeText = 'Rejected';
         badgeColor = const Color(0xFFD3E0ED).withValues(alpha: 0.82);
         textColor = Colors.black;
         smallCircleColor = Colors.black;
@@ -312,9 +300,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         currentStep = 3;
       } else if (timeline['approved'] == true) {
         currentStep = 2;
-      }  else if (timeline['rejected'] == true) {
-        currentStep = 2;
-      }else if (timeline['applied'] == true) {
+      } else if (timeline['applied'] == true) {
         currentStep = 1;
       } else {
         currentStep = 0;
@@ -327,9 +313,6 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
         case MembershipStatus.applied:
           currentStep = 1;
           break;
-        case MembershipStatus.rejected:
-          currentStep = 2;
-          break;
         case MembershipStatus.approved:
           currentStep = 2;
           break;
@@ -341,9 +324,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
       }
     }
 
-    final List<String> steps = status == MembershipStatus.rejected ?
-                        ['APPLIED', 'REJECTED', 'PAID', 'ID ISSUED']:
-                        ['APPLIED', 'APPROVED', 'PAID', 'ID ISSUED'];
+    final List<String> steps = ['APPLIED', 'APPROVED', 'PAID', 'ID ISSUED'];
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -362,9 +343,7 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
             Positioned(
               top: 8.h,
               left: 30.w,
-              width: status == MembershipStatus.rejected ?
-              (MediaQuery.of(context).size.width - 220.w) *
-                  (currentStep / 4) :
+              width:
                   (MediaQuery.of(context).size.width - 152.w) *
                   (currentStep / 4),
               child: Container(
@@ -440,11 +419,6 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
           onRequestToJoin: () => _showRequestToJoinSheet(context),
         );
       case MembershipStatus.applied:
-        return _AppliedMembershipView(
-          theme: widget.theme,
-          membership: membership,
-        );
-      case MembershipStatus.rejected:
         return _AppliedMembershipView(
           theme: widget.theme,
           membership: membership,
