@@ -50,6 +50,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   final _holderNameController = TextEditingController();
   final _panController = TextEditingController();
   BankAccountType _accountType = BankAccountType.savings;
+  EntityType _entityType = EntityType.individual;
   bool _confirmDialogShown = false;
   bool _isPanVerifiedToastShown = false;
 
@@ -139,12 +140,18 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   }
 
   bool _panAndBankHolderNamesMatch(AddBankAccountState state) {
+    if (_entityType == EntityType.proprietorship) {
+      return true;
+    }
     final bankName = state.verificationResult?.beneficiaryName ?? '';
     final panName = state.panVerificationResult?.fullname ?? '';
     return areNamesEquivalent(bankName, panName);
   }
 
   String _panAndBankHolderNameError(AddBankAccountState state) {
+    if (_entityType == EntityType.proprietorship) {
+      return '';
+    }
     final bankName = state.verificationResult?.beneficiaryName ?? '';
     final panName = state.panVerificationResult?.fullname ?? '';
 
@@ -167,6 +174,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
       accountHolderName: _holderNameController.text.trim(),
       accountType: _accountType,
       panNumber: _panController.text.trim().toUpperCase(),
+      entityType: _entityType,
     );
   }
 
@@ -611,6 +619,63 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                           //   ),
                           // ),
                           const SizedBox(height: 16),
+                          _FieldLabel('Entity Type'),
+                          DropdownButtonFormField<EntityType>(
+                            initialValue: _entityType,
+                            decoration: _inputDecoration(),
+                            style: GoogleFonts.inter(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            dropdownColor: Colors.white,
+                            items: EntityType.values.map((type) {
+                              return DropdownMenuItem<EntityType>(
+                                value: type,
+                                child: Text(
+                                  type.label,
+                                  style: GoogleFonts.inter(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _entityType = value;
+                                  if (value == EntityType.individual ||
+                                      value == EntityType.huf) {
+                                    _accountType = BankAccountType.savings;
+                                  } else {
+                                    _accountType = BankAccountType.current;
+                                  }
+                                });
+                                final cubitState =
+                                    context.read<AddBankAccountCubit>().state;
+                                if (cubitState.verifySuccess &&
+                                    cubitState.verificationResult != null &&
+                                    cubitState.panVerificationResult != null &&
+                                    _panAndBankHolderNamesMatch(cubitState) &&
+                                    !_confirmDialogShown) {
+                                  _confirmDialogShown = true;
+                                  WidgetsBinding.instance.addPostFrameCallback(
+                                    (_) {
+                                      if (mounted) {
+                                        _showConfirmBankAccountDialog(
+                                          context,
+                                          cubitState,
+                                        );
+                                      }
+                                    },
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 16),
                           _FieldLabel('Account Type'),
                           Row(
                             children: [
@@ -898,7 +963,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    'Name matched with bank records',
+                                    _entityType == EntityType.proprietorship
+                                        ? 'Proprietorship account (Name match skipped)'
+                                        : 'Name matched with bank records',
                                     style: GoogleFonts.inter(
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w600,

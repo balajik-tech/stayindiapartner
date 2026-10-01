@@ -4,6 +4,34 @@ enum BankAccountType { savings, current }
 
 enum AccountVerificationStatus { verified, pending, failed }
 
+enum EntityType {
+  individual('INDIVIDUAL', 'Individual'),
+  proprietorship('PROPRIETORSHIP', 'Proprietorship'),
+  privatePublicLimited(
+    'PRIVATE_PUBLIC_LIMITED',
+    'Private Limited/Public Limited',
+  ),
+  partnership('PARTNERSHIP', 'Partnership'),
+  llp('LLP', 'LLP'),
+  huf('HUF', 'HUF');
+
+  const EntityType(this.value, this.label);
+
+  /// Value sent to / received from the API.
+  final String value;
+
+  /// Human-readable label for the UI.
+  final String label;
+
+  /// Parses an API value into an [EntityType]. Returns null if unknown.
+  static EntityType? fromValue(String? value) {
+    for (final type in EntityType.values) {
+      if (type.value == value) return type;
+    }
+    return null;
+  }
+}
+
 extension BankAccountTypeX on BankAccountType {
   String get label => this == BankAccountType.savings ? 'Savings' : 'Current';
 }
@@ -16,6 +44,7 @@ class BankAccountEntity extends Equatable {
   final String accountNumber;
   final String ifscCode;
   final String accountHolderName;
+  final String businessType;
   final BankAccountType accountType;
   final bool isPrimary;
   final AccountVerificationStatus verificationStatus;
@@ -28,6 +57,7 @@ class BankAccountEntity extends Equatable {
     required this.accountNumber,
     required this.ifscCode,
     required this.accountHolderName,
+    required this.businessType,
     required this.accountType,
     required this.isPrimary,
     required this.verificationStatus,
@@ -59,6 +89,7 @@ class BankAccountEntity extends Equatable {
       accountNumber: accountNumber ?? this.accountNumber,
       ifscCode: ifscCode ?? this.ifscCode,
       accountHolderName: accountHolderName ?? this.accountHolderName,
+      businessType: businessType ?? this.businessType,
       accountType: accountType ?? this.accountType,
       isPrimary: isPrimary ?? this.isPrimary,
       verificationStatus: verificationStatus ?? this.verificationStatus,

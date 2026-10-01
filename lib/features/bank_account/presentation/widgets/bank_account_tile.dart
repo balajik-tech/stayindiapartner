@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 import '../../domain/entities/bank_account_entity.dart';
 import 'status_badge.dart';
@@ -20,7 +22,10 @@ class BankAccountTile extends StatelessWidget {
     this.isUpdating = false,
   });
 
-  void _showAccountDialog(BuildContext context, {required bool showDeleteAction}) {
+  void _showAccountDialog(
+    BuildContext context, {
+    required bool showDeleteAction,
+  }) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -42,7 +47,9 @@ class BankAccountTile extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        showDeleteAction ? 'Delete Bank Account' : 'Account Details',
+                        showDeleteAction
+                            ? 'Delete Bank Account'
+                            : 'Account Details',
                         style: GoogleFonts.inter(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -55,14 +62,20 @@ class BankAccountTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       child: const Padding(
                         padding: EdgeInsets.all(4),
-                        child: Icon(Icons.close, color: Colors.black87, size: 22),
+                        child: Icon(
+                          Icons.close,
+                          color: Colors.black87,
+                          size: 22,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  showDeleteAction ? 'Confirm to delete this account' : 'View Account',
+                  showDeleteAction
+                      ? 'Confirm to delete this account'
+                      : 'View Account',
                   style: GoogleFonts.inter(
                     fontSize: 13.5,
                     color: const Color(0xFF6B7280),
@@ -78,10 +91,21 @@ class BankAccountTile extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      _DetailRow(label: 'Account Holder Name', value: account.accountHolderName),
-                      _DetailRow(label: 'Account Number', value: account.accountNumber, monospace: true),
+                      _DetailRow(
+                        label: 'Account Holder Name',
+                        value: account.accountHolderName,
+                      ),
+                      _DetailRow(
+                        label: 'Account Number',
+                        value: account.accountNumber,
+                        monospace: true,
+                      ),
                       _DetailRow(label: 'Bank Name', value: account.bankName),
-                      _DetailRow(label: 'Branch', value: account.branchName, showDivider: false),
+                      _DetailRow(
+                        label: 'Branch',
+                        value: account.branchName,
+                        showDivider: false,
+                      ),
                     ],
                   ),
                 ),
@@ -127,7 +151,7 @@ class BankAccountTile extends StatelessWidget {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ] else ...[
                   SizedBox(
                     width: double.infinity,
@@ -162,10 +186,11 @@ class BankAccountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isVerificationPending = account.verificationStatus == AccountVerificationStatus.pending;
+    final isVerificationPending =
+        account.verificationStatus == AccountVerificationStatus.pending;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 24, right: 0,bottom: 8,top: 16),
+      padding: const EdgeInsets.only(left: 24, right: 0, bottom: 8, top: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -178,14 +203,14 @@ class BankAccountTile extends StatelessWidget {
                 child: account.isPrimary
                     ? const Icon(
                         Icons.check_circle_outline_rounded,
-                          color:  Color(0xFF254f85),
-                          size: 20,
-                        )
-                            : const Icon(
+                        color: Color(0xFF254f85),
+                        size: 20,
+                      )
+                    : const Icon(
                         Icons.radio_button_unchecked_rounded,
-                          color:  Color(0xFF858584),
-                          size: 20,
-                        )
+                        color: Color(0xFF858584),
+                        size: 20,
+                      ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -197,7 +222,11 @@ class BankAccountTile extends StatelessWidget {
                         Flexible(
                           child: Text(
                             '${account.bankName} ${account.maskedAccountNumber}',
-                            style:  GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600,color: Colors.black),
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -210,7 +239,11 @@ class BankAccountTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${account.accountHolderName} · ${account.ifscCode}',
-                      style:  GoogleFonts.inter(fontSize: 13, color: Color(0xFF5b5b5b),fontWeight: FontWeight.w600),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: Color(0xFF5b5b5b),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     // if (isVerificationPending) ...[
                     //   const SizedBox(height: 6),
@@ -235,77 +268,77 @@ class BankAccountTile extends StatelessWidget {
 
               isUpdating
                   ? const Padding(
-                padding: EdgeInsets.all(8),
-                child: SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              )
+                      padding: EdgeInsets.all(8),
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
                   : PopupMenuButton<String>(
-                tooltip: '',
-                offset: const Offset(0, 40),
-                elevation: 8,
-                color: Colors.white,
-                shadowColor: Colors.black26,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                icon: const Icon(
-                  Icons.more_vert_rounded,
-                  color: Color(0xFF6B7280),
-                  size: 22,
-                ),
-                onSelected: (value) {
-                  if (value == 'view') {
-                    _showAccountDialog(context, showDeleteAction: false);
-                  } else if (value == 'remove') {
-                    _showAccountDialog(context, showDeleteAction: true);
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem<String>(
-                    value: 'view',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.visibility_outlined,
-                          size: 20,
-                          color: Color(0xFF4B5563),
+                      tooltip: '',
+                      offset: const Offset(0, 40),
+                      elevation: 8,
+                      color: Colors.white,
+                      shadowColor: Colors.black26,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      icon: const Icon(
+                        Icons.more_vert_rounded,
+                        color: Color(0xFF6B7280),
+                        size: 22,
+                      ),
+                      onSelected: (value) {
+                        if (value == 'view') {
+                          _showAccountDialog(context, showDeleteAction: false);
+                        } else if (value == 'remove') {
+                          _showAccountDialog(context, showDeleteAction: true);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem<String>(
+                          value: 'view',
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.visibility_outlined,
+                                size: 20,
+                                color: Color(0xFF4B5563),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'View',
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'View',
-                          style: GoogleFonts.inter(
-                            fontWeight: FontWeight.w500,
+                        const PopupMenuDivider(height: 1),
+                        PopupMenuItem<String>(
+                          value: 'remove',
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.delete_outline,
+                                size: 20,
+                                color: Colors.red,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Delete',
+                                style: GoogleFonts.inter(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const PopupMenuDivider(height: 1),
-                  PopupMenuItem<String>(
-                    value: 'remove',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.delete_outline,
-                          size: 20,
-                          color: Colors.red,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Delete',
-                          style: GoogleFonts.inter(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              )
 
               // isUpdating
               //     ? const Padding(
@@ -331,7 +364,6 @@ class BankAccountTile extends StatelessWidget {
               //     const PopupMenuItem(value: 'remove', child: Text('Delete')),
               //   ],
               // ),
-
             ],
           ),
           if (!account.isPrimary && !isUpdating)
@@ -342,13 +374,74 @@ class BankAccountTile extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(0, 28),
                   padding: const EdgeInsets.symmetric(horizontal: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   side: const BorderSide(color: Color(0xFFD1D5DB)),
                   foregroundColor: Colors.black87,
                 ),
-                child:  Text('Set as Primary', style: GoogleFonts.inter(fontSize: 13)),
+                child: Text(
+                  'Set as Primary',
+                  style: GoogleFonts.inter(fontSize: 13),
+                ),
               ),
             ),
+
+          Container(
+            margin: const EdgeInsets.only(left: 30, right: 16,top: 8),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (account.businessType.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color:Color(0xFFFFE8DA),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      account.businessType,
+                      style: const TextStyle(
+                        color: Color(0xFFF26B1A),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+                SizedBox(width: 8),
+                if (account.accountType.name.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: account.accountType.name == 'savings' ?
+                      Color(0xFFDCFCE7):
+                      Color(0xFFF2E9FF),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      StringUtils.captialLetter(account.accountType.name),
+                      style:  TextStyle(
+                        color: account.accountType.name == 'savings' ?
+                        Color(0xFF15803D):
+                        Color(0xFF7e57c2),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          )
         ],
       ),
     );

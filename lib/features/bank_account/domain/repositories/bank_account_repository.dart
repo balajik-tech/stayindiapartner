@@ -21,6 +21,7 @@ abstract class BankAccountRepository {
     String? branchName,
     String? bankName,
     required String pan,
+    EntityType entityType = EntityType.individual,
   });
 
   Future<Either<Failure, BankAccountVerificationResult>> verifyBankAccount({

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../../domain/entities/bank_account_entity.dart';
 import '../../domain/entities/bank_account_verification_result.dart';
@@ -29,6 +30,7 @@ abstract class BankAccountDataSource {
     String? bankName,
     required String pan,
     bool setAsPrimary = true,
+    EntityType entityType = EntityType.individual,
   });
 
   Future<void> setPrimaryAccount({required String propertyId, required String accountId});
@@ -77,6 +79,7 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
     String? bankName,
     required String pan,
     bool setAsPrimary = true,
+    EntityType entityType = EntityType.individual,
   }) async {
     final payload = {
       'hostelId': propertyId,
@@ -90,7 +93,11 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       'setAsPrimary': setAsPrimary,
       'pan': pan,
       "subscriptionType": "HOSTEL",
+      "businessType": entityType.value,
     };
+
+    debugPrint("Bank Account payload: $payload");
+
 
     try {
       final response = await _dio.post(ApiConstants.bankAccounts, data: payload);

@@ -33,6 +33,7 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
     required String accountHolderName,
     required BankAccountType accountType,
     required String panNumber,
+    EntityType entityType = EntityType.individual,
   }) async {
     final branchName = state.verificationResult?.branchName ?? '';
     final bankName = state.verificationResult?.bankName ?? "";
@@ -50,6 +51,7 @@ class AddBankAccountCubit extends Cubit<AddBankAccountState> {
         branchName: branchName,
         bankName: bankName,
         panNumber: panNumber,
+        entityType: entityType,
       ),
     );
 

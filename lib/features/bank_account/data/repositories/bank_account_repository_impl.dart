@@ -33,6 +33,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
     String? branchName,
     String? bankName,
     required String pan,
+    EntityType entityType = EntityType.individual,
   }) async {
     try {
       final account = await dataSource.addBankAccount(
@@ -44,6 +45,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
         branchName: branchName,
         bankName: bankName,
         pan: pan,
+        entityType: entityType,
       );
       return Right(account);
     } catch (e) {
