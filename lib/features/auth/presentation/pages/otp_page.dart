@@ -619,35 +619,35 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           ),
         ),
 
-        if (Platform.isAndroid && _appSignature != null) ...[
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SelectableText(
-                'App Hash: $_appSignature',
-                style: GoogleFonts.outfit(
-                  fontSize: 11,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.copy, size: 18, color: Colors.black),
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: _appSignature!));
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('App hash copied'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
+        // if (Platform.isAndroid && _appSignature != null) ...[
+        //   const SizedBox(height: 8),
+        //   Row(
+        //     mainAxisAlignment: MainAxisAlignment.center,
+        //     children: [
+        //       SelectableText(
+        //         'App Hash: $_appSignature',
+        //         style: GoogleFonts.outfit(
+        //           fontSize: 11,
+        //           color: Colors.black,
+        //           fontWeight: FontWeight.w500,
+        //         ),
+        //       ),
+        //       IconButton(
+        //         icon: const Icon(Icons.copy, size: 18, color: Colors.black),
+        //         onPressed: () {
+        //           Clipboard.setData(ClipboardData(text: _appSignature!));
+        //
+        //           ScaffoldMessenger.of(context).showSnackBar(
+        //             const SnackBar(
+        //               content: Text('App hash copied'),
+        //               duration: Duration(seconds: 1),
+        //             ),
+        //           );
+        //         },
+        //       ),
+        //     ],
+        //   ),
+        // ],
       ],
     );
   }
