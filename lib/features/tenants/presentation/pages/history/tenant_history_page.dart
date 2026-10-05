@@ -28,6 +28,8 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
   late List<TenantPaymentItemEntity> _payments;
   late String _tenantName;
   String? _checkInDate;
+  int? _daysSinceFirstRental;
+  int? _totalTransactions;
   bool _isLoading = false;
 
   @override
@@ -59,11 +61,39 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
 
       if (response.statusCode == 200 && response.data != null) {
         final resData = response.data;
+        Map<String, dynamic>? dataMap;
         List listData = [];
-        if (resData is Map && resData['data'] is List) {
-          listData = resData['data'];
+
+        if (resData is Map<String, dynamic>) {
+          final dataField = resData['data'];
+          if (dataField is Map<String, dynamic>) {
+            dataMap = dataField;
+          } else if (dataField is List) {
+            listData = dataField;
+          } else if (resData['rentals'] is List) {
+            dataMap = resData;
+          }
         } else if (resData is List) {
           listData = resData;
+        }
+
+        int? days;
+        int? totalTransactions;
+        String? firstRentalDate;
+
+        if (dataMap != null) {
+          if (dataMap['rentals'] is List) {
+            listData = dataMap['rentals'] as List;
+          }
+          if (dataMap['daysSinceFirstRental'] is num) {
+            days = (dataMap['daysSinceFirstRental'] as num).toInt();
+          }
+          if (dataMap['totalTransactions'] is num) {
+            totalTransactions = (dataMap['totalTransactions'] as num).toInt();
+          }
+          if (dataMap['firstRentalDate'] != null) {
+            firstRentalDate = dataMap['firstRentalDate'].toString();
+          }
         }
 
         final List<TenantPaymentItemEntity> fetchedPayments = [];
@@ -92,6 +122,15 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
             if (nameFromApi != null && nameFromApi.isNotEmpty) {
               _tenantName = nameFromApi;
             }
+            if (days != null) {
+              _daysSinceFirstRental = days;
+            }
+            if (totalTransactions != null) {
+              _totalTransactions = totalTransactions;
+            }
+            if (firstRentalDate != null && firstRentalDate.isNotEmpty) {
+              _checkInDate = firstRentalDate;
+            }
             _isLoading = false;
           });
         }
@@ -113,19 +152,35 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
 
   TenantPaymentItemEntity _parseRentalItem(Map<String, dynamic> item) {
     final id = (item['_id'] ?? item['id'] ?? '').toString();
-    final statusStr =
-        (item['paymentStatus'] ?? item['status'] ?? '').toString().toUpperCase();
+
+    final paymentObj = item['payment'] is Map<String, dynamic>
+        ? item['payment'] as Map<String, dynamic>
+        : null;
+
+    final statusStr = (item['paymentStatus'] ??
+            paymentObj?['status'] ??
+            item['status'] ??
+            '')
+        .toString()
+        .toUpperCase();
     final isPaid = statusStr == 'SUCCESS' || statusStr == 'PAID';
 
     final payableAmt = (item['payableAmount'] is num)
         ? (item['payableAmount'] as num).toDouble()
         : double.tryParse((item['payableAmount'] ?? '').toString()) ?? 0.0;
 
+    final paidFromPayment = (paymentObj != null && paymentObj['amount'] is num)
+        ? (paymentObj['amount'] as num).toDouble()
+        : 0.0;
+
     final paidAmt = (item['paidAmount'] is num)
         ? (item['paidAmount'] as num).toDouble()
-        : (isPaid
-            ? payableAmt
-            : (double.tryParse((item['paidAmount'] ?? '').toString()) ?? 0.0));
+        : (paidFromPayment > 0
+            ? paidFromPayment
+            : (isPaid
+                ? payableAmt
+                : (double.tryParse((item['paidAmount'] ?? '').toString()) ??
+                    0.0)));
 
     final totalAmt = payableAmt > 0 ? payableAmt : paidAmt;
     final dueAmt = isPaid
@@ -135,15 +190,16 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
             : (totalAmt - paidAmt));
 
     final dateStr = (item['paymentDate'] ??
+            paymentObj?['paidAt'] ??
             item['createdAt'] ??
             item['startDate'] ??
             item['month'] ??
             '')
         .toString();
 
-    final paymentType = item['paymentType']?.toString() ??
+    final paymentType = paymentObj?['method']?.toString() ??
+        item['paymentType']?.toString() ??
         item['method']?.toString() ??
-        item['payment']?['method']?.toString() ??
         'RENT';
 
     return TenantPaymentItemEntity(
@@ -236,20 +292,32 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
         ? '${(totalPaid / 1000).toStringAsFixed(1)}K'
         : totalPaid.toStringAsFixed(0);
 
-    String days = '';
-    if (_checkInDate != null) {
+    String daysStr = '0';
+    if (_checkInDate != null && _checkInDate!.isNotEmpty) {
       try {
-        final start = DateTime.parse(_checkInDate!);
-        final diff = DateTime.now().difference(start).inDays;
-        days = diff.toString();
-      } catch (_) {}
+        final startDt = DateTime.parse(_checkInDate!).toLocal();
+        final now = DateTime.now();
+        final startZero = DateTime(startDt.year, startDt.month, startDt.day);
+        final nowZero = DateTime(now.year, now.month, now.day);
+        final diff = nowZero.difference(startZero).inDays;
+        daysStr = (diff >= 0 ? diff + 1 : 0).toString();
+      } catch (_) {
+        if (_daysSinceFirstRental != null) {
+          daysStr = (_daysSinceFirstRental! + 1).toString();
+        }
+      }
+    } else if (_daysSinceFirstRental != null) {
+      daysStr = (_daysSinceFirstRental! + 1).toString();
     }
+
+    final String transfersStr =
+        _totalTransactions != null ? _totalTransactions.toString() : '0';
 
     return Padding(
       padding: EdgeInsets.all(20.w),
       child: Row(
         children: [
-          Expanded(child: _buildSummaryCard(days, 'Days', Icons.access_time)),
+          Expanded(child: _buildSummaryCard(daysStr, 'Days', Icons.access_time)),
           SizedBox(width: 12.w),
           Expanded(
             child: _buildSummaryCard(
@@ -261,7 +329,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: _buildSummaryCard('0', 'Transfers', Icons.swap_horiz),
+            child: _buildSummaryCard(transfersStr, 'Transfers', Icons.swap_horiz),
           ),
         ],
       ),
