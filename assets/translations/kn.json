@@ -260,6 +260,7 @@
   "amount_due": "ಬಾಕಿ ಇರುವ ಮೊತ್ತ",
   "all_dues_clear": "ಎಲ್ಲಾ ಬಾಕಿಗಳು पಾವತಿಸಲಾಗಿದೆ",
   "pending_count_label": "{count} ಬಾಕಿ",
+  "pending_due_summary": "ಬಾಕಿ",
   "great_job": "ತುಂಬಾ ಒಳ್ಳೆಯ ಕೆಲಸ!",
   "payment_history": "ಪಾವತಿ ಇತಿಹಾಸ",
   "no_payment_records": "ಯಾವುದೇ ಪಾವತಿ ದಾಖಲೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ",

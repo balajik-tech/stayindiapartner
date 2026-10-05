@@ -661,7 +661,15 @@ class _AddTenantPageState extends State<AddTenantPage> {
       checkInDate = _checkInDate != null
           ? DateFormat('yyyy-MM-dd').format(_checkInDate!)
           : "";
-      checkOutDate = "";
+      checkOutDate = _checkInDate != null
+          ? DateFormat('yyyy-MM-dd').format(
+        DateTime(
+          _checkInDate!.year,
+          _checkInDate!.month + 1,
+          _checkInDate!.day - 1,
+        ),
+      )
+          : "";
       maintainance = double.tryParse(_maintenanceController.text.trim());
     } else if (_stayType == StayType.CUSTOM) {
       securityDeposit = double.tryParse(_customDepositController.text.trim());

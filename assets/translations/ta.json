@@ -260,6 +260,7 @@
   "amount_due": "நிலுவைத் தொகை",
   "all_dues_clear": "அனைத்து நிலுவைகளும் தீர்க்கப்பட்டன",
   "pending_count_label": "{count} நிலுவையில் உள்ளது",
+  "pending_due_summary": "நிலுவையில் உள்ளது",
   "great_job": "சிறந்த பணி!",
   "payment_history": "கட்டண வரலாறு",
   "no_payment_records": "கட்டணப் பதிவுகள் எதுவும் இல்லை",

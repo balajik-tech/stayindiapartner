@@ -1,5 +1,6 @@
 import 'package:stayindia_owner/features/payments/domain/entities/payment.dart';
 import 'package:stayindia_owner/features/payments/domain/entities/hostel_payment_summary.dart';
+import 'package:stayindia_owner/features/payments/domain/entities/tenant_rental_entity.dart';
 import 'package:stayindia_owner/features/payments/domain/repositories/payment_repository.dart';
 import '../datasources/payment_remote_datasource.dart';
 
@@ -112,5 +113,16 @@ class PaymentRepositoryImpl implements PaymentRepository {
     required String hostelId,
   }) {
     return remoteDataSource.getBills(tenantId: tenantId, hostelId: hostelId);
+  }
+
+  @override
+  Future<List<TenantRentalEntity>> getTenantRentals({
+    required String tenantId,
+    required String hostelId,
+  }) {
+    return remoteDataSource.getTenantRentals(
+      tenantId: tenantId,
+      hostelId: hostelId,
+    );
   }
 }

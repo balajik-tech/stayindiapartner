@@ -260,6 +260,7 @@
   "amount_due": "बकाया राशि",
   "all_dues_clear": "सभी बकाया साफ़ हैं",
   "pending_count_label": "{count} लंबित",
+  "pending_due_summary": "लंबित",
   "great_job": "बहुत बढ़िया!",
   "payment_history": "भुगतान इतिहास",
   "no_payment_records": "कोई भुगतान रिकॉर्ड नहीं मिला",

@@ -1,5 +1,6 @@
 import '../entities/payment.dart';
 import '../entities/hostel_payment_summary.dart';
+import '../entities/tenant_rental_entity.dart';
 
 abstract class PaymentRepository {
   Future<HostelPaymentSummary> getPayments({
@@ -49,6 +50,11 @@ abstract class PaymentRepository {
   Future<List<Map<String, dynamic>>> getReminderHistory({String? hostelId});
 
   Future<Map<String, dynamic>> getBills({
+    required String tenantId,
+    required String hostelId,
+  });
+
+  Future<List<TenantRentalEntity>> getTenantRentals({
     required String tenantId,
     required String hostelId,
   });

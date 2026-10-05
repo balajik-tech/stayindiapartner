@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import '../models/payment_model.dart';
 import '../models/hostel_payment_summary_model.dart';
+import '../models/tenant_rental_model.dart';
 
 abstract class PaymentRemoteDataSource {
   Future<HostelPaymentSummaryModel> getPayments({
@@ -11,6 +12,11 @@ abstract class PaymentRemoteDataSource {
   });
 
   Future<Map<String, dynamic>> getBills({
+    required String tenantId,
+    required String hostelId,
+  });
+
+  Future<List<TenantRentalModel>> getTenantRentals({
     required String tenantId,
     required String hostelId,
   });
@@ -260,6 +266,35 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
       throw Exception(msg);
     } catch (e) {
       throw Exception('Error loading bills: $e');
+    }
+  }
+
+  @override
+  Future<List<TenantRentalModel>> getTenantRentals({
+    required String tenantId,
+    required String hostelId,
+  }) async {
+    try {
+      final response = await dio.get(
+        ApiConstants.tenantRentalByTenantAndHostel(tenantId, hostelId),
+      );
+      if (response.statusCode == 200) {
+        final raw = response.data;
+        final List listData = raw is Map && raw['data'] is List
+            ? raw['data']
+            : (raw is List ? raw : []);
+        return listData
+            .map((item) =>
+                TenantRentalModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } on DioException catch (e) {
+      final msg =
+          e.response?.data?['message'] ?? e.message ?? 'Error loading tenant rentals';
+      throw Exception(msg);
+    } catch (e) {
+      throw Exception('Error loading tenant rentals: $e');
     }
   }
 }

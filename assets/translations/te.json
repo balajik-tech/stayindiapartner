@@ -265,6 +265,7 @@
   "amount_due": "బకాయి మొత్తం",
   "all_dues_clear": "బకాయిలన్నీ చెల్లించబడ్డాయి",
   "pending_count_label": "{count}పెండింగ్",
+  "pending_due_summary": "పెండింగ్",
   "great_job": "చాలా బాగుంది!",
   "payment_history": "చెల్లింపు చరిత్ర",
   "no_payment_records": "చెల్లింపు రికార్డులు ఏవీ కనుగొనబడలేదు",

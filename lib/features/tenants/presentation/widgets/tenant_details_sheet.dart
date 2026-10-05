@@ -6,12 +6,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
 import 'package:stayindia_owner/features/payments/domain/repositories/payment_repository.dart';
+import 'package:stayindia_owner/features/payments/domain/entities/tenant_rental_entity.dart';
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_state.dart';
 import 'package:stayindia_owner/features/tenants/presentation/pages/history/tenant_history_page.dart';
 import 'package:stayindia_owner/features/notices/presentation/pages/give_notice_page.dart';
-import 'package:stayindia_owner/features/tenants/presentation/pages/add_note_page.dart';
 import 'package:stayindia_owner/features/tenants/presentation/pages/complaints_history_page.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
@@ -61,7 +61,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
   late final TenantDetailCubit _cubit;
   final PaymentRepository _paymentRepository = sl<PaymentRepository>();
 
-  Map<String, dynamic>? _bills;
+  List<TenantRentalEntity>? _rentals;
 
   @override
   void initState() {
@@ -69,17 +69,17 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     _cubit = sl<TenantDetailCubit>();
     if (widget.tenantId.isNotEmpty && widget.hostelId.isNotEmpty) {
       _cubit.loadDetail(widget.tenantId, widget.hostelId);
-      _loadBills();
+      _loadRentals();
     }
   }
 
-  Future<void> _loadBills() async {
+  Future<void> _loadRentals() async {
     try {
-      final bills = await _paymentRepository.getBills(
+      final rentals = await _paymentRepository.getTenantRentals(
         tenantId: widget.tenantId,
         hostelId: widget.hostelId,
       );
-      if (mounted) setState(() => _bills = bills);
+      if (mounted) setState(() => _rentals = rentals);
     } catch (_) {}
   }
 
@@ -132,8 +132,8 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         SizedBox(height: 24.h),
                         _buildKycDocuments(detail),
                         SizedBox(height: 24.h),
-                        if (_bills != null) ...[
-                          _buildBillsSummary(_bills!),
+                        if (_rentals != null) ...[
+                          _buildBillsSummary(_rentals!),
                           SizedBox(height: 24.h),
                         ],
                         _buildPaymentHistory(context, detail),
@@ -928,20 +928,78 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     );
   }
 
-  Widget _buildBillsSummary(Map<String, dynamic> bills) {
-    final summary = bills['summary'] ?? {};
-    final totalDue =
-        (summary['totalDue'] ??
-                bills['totalDue'] ??
-                bills['pendingAmount'] ??
-                0)
-            .toDouble();
-    final pendingCount =
-        summary['pendingCount'] ??
-        bills['pendingCount'] ??
-        bills['pendingMonths'] ??
-        0;
-    final isDue = totalDue > 0;
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'CHECKED_IN':
+      case 'CHECKED IN':
+      case 'SUCCESS':
+      case 'PAID':
+        return const Color(0xFF27C26C);
+      case 'PENDING':
+        return Colors.orange;
+      case 'CHECKED_OUT':
+      case 'CHECKED OUT':
+        return Colors.grey;
+      case 'CANCELLED':
+      case 'FAILED':
+        return const Color(0xFFF04438);
+      default:
+        return AppColors.greyText;
+    }
+  }
+
+  String _formatStatusText(String status) {
+    switch (status.toUpperCase()) {
+      case 'CHECKED_IN':
+        return 'CHECKED IN';
+      case 'CHECKED_OUT':
+        return 'CHECKED OUT';
+      default:
+        return status.replaceAll('_', ' ').toUpperCase();
+    }
+  }
+
+  Widget _buildBillsSummary(List<TenantRentalEntity> rentals) {
+    double totalDue = 0;
+    int pendingCount = 0;
+    String? bookingStatus;
+    bool hasExceededEndDate = false;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    for (var item in rentals) {
+      bool isEndDateExceeded = false;
+      if (item.booking?.endDate != null && item.booking!.endDate!.isNotEmpty) {
+        try {
+          final endDt = DateTime.parse(item.booking!.endDate!).toLocal();
+          final endDateOnly = DateTime(endDt.year, endDt.month, endDt.day);
+          if (today.isAfter(endDateOnly)) {
+            isEndDateExceeded = true;
+            hasExceededEndDate = true;
+          }
+        } catch (_) {}
+      }
+
+      if (!item.isPaid || isEndDateExceeded) {
+        final amt = item.payableAmount > 0
+            ? item.payableAmount
+            : (item.bookingAmount > 0
+                ? item.bookingAmount
+                : (item.booking?.rent ?? 0.0));
+        totalDue += amt;
+        pendingCount++;
+      }
+    }
+
+    if (hasExceededEndDate || totalDue > 0) {
+      bookingStatus = 'PENDING';
+      if (pendingCount == 0) pendingCount = 1;
+    } else {
+      bookingStatus = 'PAID';
+    }
+
+    final isDue = totalDue > 0 || hasExceededEndDate;
     return _buildSection(
       'dues_summary'.tr(),
       Container(
@@ -967,19 +1025,45 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    isDue ? 'amount_due'.tr() : 'all_dues_clear'.tr(),
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                      color: isDue
-                          ? const Color(0xFFF04438).withValues(alpha: 0.6)
-                          : const Color(0xFF12B76A).withValues(alpha: 0.6),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        isDue ? 'amount_due'.tr() : 'all_dues_clear'.tr(),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: isDue
+                              ? const Color(0xFFF04438).withValues(alpha: 0.6)
+                              : const Color(0xFF12B76A).withValues(alpha: 0.6),
+                        ),
+                      ),
+                      if (bookingStatus.isNotEmpty) ...[
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(bookingStatus)
+                                .withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            _formatStatusText(bookingStatus),
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                              color: _getStatusColor(bookingStatus),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    isDue ? '${totalDue.toStringAsFixed(0)}' : 'great_job'.tr(),
+                    isDue ? totalDue.toStringAsFixed(0) : 'great_job'.tr(),
                     style: TextStyle(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.bold,
@@ -999,9 +1083,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
-                  'pending_count_label'.tr(
-                    namedArgs: {'count': pendingCount.toString()},
-                  ),
+                  'pending_due_summary'.tr(),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
@@ -1015,11 +1097,18 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     );
   }
 
+  List<TenantPaymentItemEntity> _getPaymentItems(TenantDetailEntity? detail) {
+    if (_rentals != null && _rentals!.isNotEmpty) {
+      return _rentals!.map((r) => r.toTenantPaymentItemEntity()).toList();
+    }
+    return detail?.payments ?? [];
+  }
+
   Widget _buildPaymentHistory(
     BuildContext context,
     TenantDetailEntity? detail,
   ) {
-    final payments = detail?.payments ?? [];
+    final payments = _getPaymentItems(detail);
     final preview = payments.take(4).toList();
     return _buildSection(
       'payment_history'.tr(),
@@ -1067,9 +1156,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 children: preview.asMap().entries.map((entry) {
                   final i = entry.key;
                   final p = entry.value;
-                  final color = p.status == 'PAID'
-                      ? const Color(0xFF27C26C)
-                      : const Color(0xFFF04438);
+                  final color = _getStatusColor(p.status);
                   return Column(
                     children: [
                       if (i > 0)
@@ -1081,7 +1168,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         ),
                       _buildPaymentItem(
                         _formatMonth(p.month),
-                        p.paymentDate != null
+                        p.paymentDate != null && p.paymentDate!.isNotEmpty
                             ? _formatDate(p.paymentDate!)
                             : '',
                         p.status,
@@ -1493,7 +1580,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
 
   String _formatMonth(String month) {
     try {
-      final parts = month.split('-');
+      final dt = DateTime.parse(month).toLocal();
       const months = [
         'Jan',
         'Feb',
@@ -1508,10 +1595,29 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
         'Nov',
         'Dec',
       ];
-      final m = int.parse(parts[1]) - 1;
-      return '${months[m]} ${parts[0]}';
+      return '${months[dt.month - 1]} ${dt.year}';
     } catch (_) {
-      return month;
+      try {
+        final parts = month.split('-');
+        const months = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+        final m = int.parse(parts[1]) - 1;
+        return '${months[m]} ${parts[0]}';
+      } catch (_) {
+        return month;
+      }
     }
   }
 }

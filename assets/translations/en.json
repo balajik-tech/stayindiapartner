@@ -266,6 +266,7 @@
   "amount_due": "Amount Due",
   "all_dues_clear": "All Dues Clear",
   "pending_count_label": "{count}pending",
+  "pending_due_summary": "pending",
   "great_job": "Great Job!",
   "payment_history": "Payment History",
   "no_payment_records": "No payment records found",
