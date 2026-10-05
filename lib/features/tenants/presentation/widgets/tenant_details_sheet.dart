@@ -1191,6 +1191,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         tenantName: widget.name,
                         payments: payments,
                         checkInDate: detail?.stay?.checkInDate,
+                        tenantId: widget.tenantId,
                       ),
                     ),
                   );

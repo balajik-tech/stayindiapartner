@@ -1,19 +1,162 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
+import 'package:stayindia_owner/injection_container.dart';
 
-class TenantHistoryPage extends StatelessWidget {
+class TenantHistoryPage extends StatefulWidget {
   final String tenantName;
   final List<TenantPaymentItemEntity> payments;
   final String? checkInDate;
+  final String? tenantId;
 
   const TenantHistoryPage({
     super.key,
     required this.tenantName,
     required this.payments,
     this.checkInDate,
+    this.tenantId,
   });
+
+  @override
+  State<TenantHistoryPage> createState() => _TenantHistoryPageState();
+}
+
+class _TenantHistoryPageState extends State<TenantHistoryPage> {
+  late List<TenantPaymentItemEntity> _payments;
+  late String _tenantName;
+  String? _checkInDate;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _payments = List.from(widget.payments);
+    _tenantName = widget.tenantName;
+    _checkInDate = widget.checkInDate;
+
+    if (widget.tenantId != null && widget.tenantId!.isNotEmpty) {
+      _fetchTenantHistory();
+    }
+  }
+
+  Future<void> _fetchTenantHistory() async {
+    if (widget.tenantId == null || widget.tenantId!.isEmpty) return;
+
+    if (_payments.isEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      final dio = sl<Dio>();
+      final response = await dio.get(
+        ApiConstants.tenantRentalByTenant(widget.tenantId!),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final resData = response.data;
+        List listData = [];
+        if (resData is Map && resData['data'] is List) {
+          listData = resData['data'];
+        } else if (resData is List) {
+          listData = resData;
+        }
+
+        final List<TenantPaymentItemEntity> fetchedPayments = [];
+        String? nameFromApi;
+
+        for (final item in listData) {
+          if (item is Map<String, dynamic>) {
+            final entity = _parseRentalItem(item);
+            fetchedPayments.add(entity);
+
+            if (nameFromApi == null && item['tenant'] is Map<String, dynamic>) {
+              final t = item['tenant'] as Map<String, dynamic>;
+              final fn = t['firstName']?.toString() ?? '';
+              final ln = t['lastName']?.toString() ?? '';
+              final full = '$fn $ln'.trim();
+              if (full.isNotEmpty) {
+                nameFromApi = full;
+              }
+            }
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            _payments = fetchedPayments;
+            if (nameFromApi != null && nameFromApi.isNotEmpty) {
+              _tenantName = nameFromApi;
+            }
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  TenantPaymentItemEntity _parseRentalItem(Map<String, dynamic> item) {
+    final id = (item['_id'] ?? item['id'] ?? '').toString();
+    final statusStr =
+        (item['paymentStatus'] ?? item['status'] ?? '').toString().toUpperCase();
+    final isPaid = statusStr == 'SUCCESS' || statusStr == 'PAID';
+
+    final payableAmt = (item['payableAmount'] is num)
+        ? (item['payableAmount'] as num).toDouble()
+        : double.tryParse((item['payableAmount'] ?? '').toString()) ?? 0.0;
+
+    final paidAmt = (item['paidAmount'] is num)
+        ? (item['paidAmount'] as num).toDouble()
+        : (isPaid
+            ? payableAmt
+            : (double.tryParse((item['paidAmount'] ?? '').toString()) ?? 0.0));
+
+    final totalAmt = payableAmt > 0 ? payableAmt : paidAmt;
+    final dueAmt = isPaid
+        ? 0.0
+        : ((item['dueAmount'] is num)
+            ? (item['dueAmount'] as num).toDouble()
+            : (totalAmt - paidAmt));
+
+    final dateStr = (item['paymentDate'] ??
+            item['createdAt'] ??
+            item['startDate'] ??
+            item['month'] ??
+            '')
+        .toString();
+
+    final paymentType = item['paymentType']?.toString() ??
+        item['method']?.toString() ??
+        item['payment']?['method']?.toString() ??
+        'RENT';
+
+    return TenantPaymentItemEntity(
+      id: id,
+      month: dateStr,
+      totalAmount: totalAmt,
+      paidAmount: paidAmt,
+      dueAmount: dueAmt > 0 ? dueAmt : 0.0,
+      status: statusStr,
+      paymentType: paymentType,
+      paymentDate: dateStr.isNotEmpty ? dateStr : null,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +168,26 @@ class TenantHistoryPage extends StatelessWidget {
           children: [
             const Divider(height: 1),
             _buildSummaryRow(),
-            _buildTimelineList(),
+            if (_isLoading)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 40.h),
+                child: const Center(child: CircularProgressIndicator()),
+              )
+            else if (_payments.isEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 40.h),
+                child: Center(
+                  child: Text(
+                    'No payment history found',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: AppColors.greyText,
+                    ),
+                  ),
+                ),
+              )
+            else
+              _buildTimelineList(),
             SizedBox(height: 30.h),
           ],
         ),
@@ -54,7 +216,7 @@ class TenantHistoryPage extends StatelessWidget {
             ),
           ),
           Text(
-            tenantName,
+            _tenantName,
             style: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
           ),
         ],
@@ -69,15 +231,15 @@ class TenantHistoryPage extends StatelessWidget {
   }
 
   Widget _buildSummaryRow() {
-    final double totalPaid = payments.fold(0, (sum, p) => sum + p.paidAmount);
+    final double totalPaid = _payments.fold(0, (sum, p) => sum + p.paidAmount);
     final String totalPaidStr = totalPaid >= 1000
         ? '${(totalPaid / 1000).toStringAsFixed(1)}K'
         : totalPaid.toStringAsFixed(0);
 
     String days = '';
-    if (checkInDate != null) {
+    if (_checkInDate != null) {
       try {
-        final start = DateTime.parse(checkInDate!);
+        final start = DateTime.parse(_checkInDate!);
         final diff = DateTime.now().difference(start).inDays;
         days = diff.toString();
       } catch (_) {}
@@ -147,13 +309,13 @@ class TenantHistoryPage extends StatelessWidget {
       child: ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: payments.length,
+        itemCount: _payments.length,
         itemBuilder: (context, index) {
-          final p = payments[index];
+          final p = _payments[index];
 
           return _buildTimelineItem(
             index == 0,
-            index == payments.length - 1,
+            index == _payments.length - 1,
             _formatMonth(p.month),
             p.paymentDate != null ? _formatDate(p.paymentDate!) : '',
             p.paidAmount.toStringAsFixed(0),
@@ -202,8 +364,9 @@ class TenantHistoryPage extends StatelessWidget {
   }
 
   String _formatMonth(String monthStr) {
+    if (monthStr.isEmpty) return '';
     try {
-      final parts = monthStr.split('-');
+      final dt = DateTime.tryParse(monthStr);
       const months = [
         'January',
         'February',
@@ -218,8 +381,17 @@ class TenantHistoryPage extends StatelessWidget {
         'November',
         'December',
       ];
-      final m = int.parse(parts[1]) - 1;
-      return '${months[m]} ${parts[0]}';
+      if (dt != null) {
+        return '${months[dt.month - 1]} ${dt.year}';
+      }
+      final parts = monthStr.split('-');
+      if (parts.length >= 2) {
+        final m = int.parse(parts[1]) - 1;
+        if (m >= 0 && m < 12) {
+          return '${months[m]} ${parts[0]}';
+        }
+      }
+      return monthStr;
     } catch (_) {
       return monthStr;
     }
