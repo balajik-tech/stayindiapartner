@@ -14,6 +14,7 @@ import 'package:stayindia_owner/features/tenants/presentation/pages/history/tena
 import 'package:stayindia_owner/features/notices/presentation/pages/give_notice_page.dart';
 import 'package:stayindia_owner/features/tenants/presentation/pages/complaints_history_page.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TenantDetailsSheet extends StatefulWidget {
   final String name;
@@ -517,7 +518,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     return _buildSection(
       'Parent / Guardian Details',
       Container(
-        padding: EdgeInsets.all(12.w),
+        padding: EdgeInsets.symmetric(horizontal:16,vertical: 4),
         decoration: BoxDecoration(
           color:  Colors.white,
           borderRadius: BorderRadius.circular(20.r),
@@ -541,17 +542,17 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 Row(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(8.w),
+                      padding: EdgeInsets.all(4.w),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFF7F2),
                         borderRadius: BorderRadius.circular(10.r),
                         border: Border.all(
-                          color: const Color(0xFFF26B1A).withValues(alpha: 0.2),
+                          color:  AppColors.primaryBlue.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Icon(
                         Icons.person_pin_rounded,
-                        color: const Color(0xFFF26B1A),
+                        color: AppColors.primaryBlue,
                         size: 20.sp,
                       ),
                     ),
@@ -578,9 +579,9 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                             Text(
                               g.relation.toUpperCase(),
                               style: TextStyle(
-                                fontSize: 11.sp,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFFF26B1A),
+                                color: AppColors.primaryBlue,
                                 letterSpacing: 0.5,
                               ),
                               maxLines: 1,
@@ -591,7 +592,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       ),
                     ),
 
-                    // Mobile Number - Right Side
+                    // Mobile Number
                     if (g.mobileNumber.isNotEmpty) ...[
                       SizedBox(width: 12.w),
                       Text(
@@ -603,6 +604,27 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(width: 8.w),
+
+                      // Call Button
+                      IconButton(
+                        onPressed: () async {
+                          final uri = Uri.parse('tel:${g.mobileNumber}');
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri);
+                          }
+                        },
+                        icon: Icon(
+                          Icons.call_rounded,
+                          color: AppColors.primaryBlue,
+                          size: 20.sp,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(
+                          minWidth: 36.w,
+                          minHeight: 36.w,
+                        ),
                       ),
                     ],
                   ],
