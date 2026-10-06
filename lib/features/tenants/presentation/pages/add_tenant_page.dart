@@ -1950,11 +1950,36 @@ class _AddTenantPageState extends State<AddTenantPage> {
   Future<void> _pickAadharPhoto() async {
     _pickDocumentPhoto(
       title: 'Upload Aadhar Card (Front)',
-      onImagePicked: (file) {
+      onImagePicked: (file) async {
+        File finalFile = file;
+        try {
+          final croppedFile = await ImageCropper().cropImage(
+            sourcePath: file.path,
+            compressQuality: 85,
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: 'Crop Aadhar Card (Front)',
+                toolbarColor: AppColors.primaryBlue,
+                toolbarWidgetColor: Colors.white,
+                initAspectRatio: CropAspectRatioPreset.original,
+                lockAspectRatio: false,
+              ),
+              IOSUiSettings(
+                title: 'Crop Aadhar Card (Front)',
+              ),
+            ],
+          );
+          if (croppedFile != null) {
+            finalFile = File(croppedFile.path);
+          }
+        } catch (e) {
+          debugPrint('Error cropping Aadhar Front: $e');
+        }
+
         setState(() {
-          _aadharPhoto = file;
+          _aadharPhoto = finalFile;
         });
-        _extractAadharText(file, isFront: true);
+        _extractAadharText(finalFile, isFront: true);
       },
     );
   }
@@ -1962,9 +1987,34 @@ class _AddTenantPageState extends State<AddTenantPage> {
   Future<void> _pickAadharPhotoBack() async {
     _pickDocumentPhoto(
       title: 'Upload Aadhar Card (Back)',
-      onImagePicked: (file) {
+      onImagePicked: (file) async {
+        File finalFile = file;
+        try {
+          final croppedFile = await ImageCropper().cropImage(
+            sourcePath: file.path,
+            compressQuality: 85,
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: 'Crop Aadhar Card (Back)',
+                toolbarColor: AppColors.primaryBlue,
+                toolbarWidgetColor: Colors.white,
+                initAspectRatio: CropAspectRatioPreset.original,
+                lockAspectRatio: false,
+              ),
+              IOSUiSettings(
+                title: 'Crop Aadhar Card (Back)',
+              ),
+            ],
+          );
+          if (croppedFile != null) {
+            finalFile = File(croppedFile.path);
+          }
+        } catch (e) {
+          debugPrint('Error cropping Aadhar Back: $e');
+        }
+
         setState(() {
-          _aadharPhotoBack = file;
+          _aadharPhotoBack = finalFile;
         });
       },
     );
