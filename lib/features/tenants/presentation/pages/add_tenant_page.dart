@@ -5,10 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
@@ -19,11 +18,8 @@ import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_c
 import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_state.dart';
 import 'package:stayindia_owner/injection_container.dart' as di;
 import 'package:stayindia_owner/features/profile/domain/usecases/room_usecases.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/payment_report_cubit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-
 
 enum StayType {
   MONTHLY,
@@ -38,9 +34,6 @@ class AddTenantPage extends StatefulWidget {
 }
 
 class _AddTenantPageState extends State<AddTenantPage> {
-
-
-
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
@@ -51,6 +44,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
   final _maintenanceController = TextEditingController();
   final _dayRentController = TextEditingController();
 
+  final List<TextEditingController> _emergencyNameControllers = [];
+  final List<TextEditingController> _emergencyMobileControllers = [];
+  final List<String?> _emergencyNameErrors = [];
+  final List<String?> _emergencyMobileErrors = [];
+
   DateTime? _checkOutDate;
   StayType _stayType = StayType.MONTHLY;
 
@@ -59,15 +57,14 @@ class _AddTenantPageState extends State<AddTenantPage> {
   bool _isAC = false;
   bool _isNew = true;
 
-  File? _csvFile;
-
   File? _userPhoto;
   File? _aadharPhoto;
   File? _aadharPhotoBack;
+  File? _employeeIdProof;
   bool _isDetectingFace = false;
   bool _isExtractingText = false;
 
-  Map<String, String> _extractedAadharData = {
+  final Map<String, String> _extractedAadharData = {
     'aadharNumber': '',
     'name': '',
     'dob': '',
@@ -87,7 +84,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
   RoomDetail? _selectedRoom;
   List<String> _beds = [];
   String? _selectedBed;
-
 
   @override
   void initState() {
@@ -117,7 +113,19 @@ class _AddTenantPageState extends State<AddTenantPage> {
     _dayRentController.dispose();
     _maintenanceController.dispose();
     _customDepositController.dispose();
+    for (final controller in _emergencyNameControllers) {
+      controller.dispose();
+    }
+    for (final controller in _emergencyMobileControllers) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  String _getRelationForIndex(int index) {
+    if (index == 0) return 'Father';
+    if (index == 1) return 'Mother';
+    return 'Guardian ${index - 1}';
   }
 
   Future<void> _loadHostelRooms(Hostel hostel) async {
@@ -261,6 +269,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
     String? userPhotoPath,
     String? aadharPhotoPath,
     String? aadharCardbackPath,
+    String? employeeIdProofPath,
+    List<Map<String, String>>? guardianMobiles,
     required double securityDeposit,
     required double rent,
     required String checkInDate,
@@ -288,6 +298,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
             userPhotoPath: userPhotoPath,
             aadharPhotoPath: aadharPhotoPath,
             aadharCardbackPath: aadharCardbackPath,
+            employeeIdProofPath: employeeIdProofPath,
+            guardianMobiles: guardianMobiles,
             securityDeposit: securityDeposit,
             rent: rent,
             checkInDate: checkInDate,
@@ -340,15 +352,12 @@ class _AddTenantPageState extends State<AddTenantPage> {
       return false;
     }
 
-    // Remove spaces and non-numeric characters
     final number = aadhaar.replaceAll(RegExp(r'\D'), '');
 
-    // Must contain exactly 12 digits
     if (number.length != 12) {
       return false;
     }
 
-    // Aadhaar cannot start with 0 or 1
     if (number.startsWith('0') || number.startsWith('1')) {
       return false;
     }
@@ -383,7 +392,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
     int checksum = 0;
 
-    // Process from right to left
     final digits = number
         .split('')
         .map(int.parse)
@@ -398,85 +406,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return checksum == 0;
   }
 
-
-  Future<void> _pickCSVFile() async {
-    try {
-      // Use FilePicker.platform.pickFiles if available, otherwise try FilePicker.pickFiles
-      // Some environments might have conflicting definitions or version issues.
-      final result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['csv', 'xlsx'],
-      );
-
-      if (result != null && result.files.single.path != null) {
-        final path = result.files.single.path!;
-        final ext = path.split('.').last.toLowerCase();
-        if (ext == 'csv' || ext == 'xlsx') {
-          setState(() {
-            _csvFile = File(path);
-          });
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Please select a valid .csv or .xlsx file'),
-                backgroundColor: Colors.redAccent,
-              ),
-            );
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Error picking file: $e');
-    }
-  }
-
-  Widget _buildOrText() {
-    return Row(
-      children: [
-        Expanded(
-          child: Divider(
-            color: AppColors.greyText.withValues(alpha: 0.2),
-            thickness: 1,
-          ),
-        ),
-
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          child: Text(
-            'Or',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.grayColor2,
-            ),
-          ),
-        ),
-
-        Expanded(
-          child: Divider(
-            color: AppColors.greyText.withValues(alpha: 0.2),
-            thickness: 1,
-          ),
-        ),
-      ],
-    );
-  }
-
   void _submit(BuildContext context) {
-    // if (_csvFile != null) {
-    //   _submitBulkTenantUpload();
-    //   return;
-    // }
-
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final rentText = _rentController.text.trim();
-    final depositText = _depositController.text.trim();
-
-    final dayRentText = _dayRentController.text.trim();
-    final maintainanceText = _maintenanceController.text.trim();
-    final customDepositeText = _customDepositController.text.trim();
 
     final aadharNumber = _extractedAadharData['aadharNumber']!;
     final extractedAadhaar = aadharNumber;
@@ -484,10 +417,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
     final extractedAadhaarDOB = _extractedAadharData['dob'] ?? '';
     final extractedAadhaarGender = _extractedAadharData['gender'] ?? '';
     final extractedAadhaarAddress = _extractedAadharData['address'] ?? '';
-
-
-
-
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -522,6 +451,41 @@ class _AddTenantPageState extends State<AddTenantPage> {
       }
     }
 
+    // Process Guardian Mobiles
+    final List<Map<String, String>> guardianMobiles = [];
+    bool hasGuardianError = false;
+
+    for (int i = 0; i < _emergencyMobileControllers.length; i++) {
+      final cName = _emergencyNameControllers[i].text.trim();
+      final cPhone = _emergencyMobileControllers[i].text.trim();
+      final cRelation = _getRelationForIndex(i);
+
+      if (cPhone.isNotEmpty) {
+        if (cPhone.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(cPhone)) {
+          setState(() {
+            _emergencyMobileErrors[i] = "Enter a valid 10-digit number";
+          });
+          hasGuardianError = true;
+        } else {
+          guardianMobiles.add({
+            'name': cName,
+            'mobileNumber': cPhone,
+            'relation': cRelation,
+          });
+        }
+      }
+    }
+
+    if (hasGuardianError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid 10-digit mobile number for guardian'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     if (_selectedHostel == null ||
         _selectedSharing == null ||
         _selectedFloor == null ||
@@ -554,7 +518,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
         ),
       );
       return;
-
     }
 
     if (_stayType == StayType.CUSTOM) {
@@ -589,7 +552,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       return;
     }
 
-    if (aadharNumber.isEmpty || aadharNumber!.length != 12) {
+    if (aadharNumber.isEmpty || aadharNumber.length != 12) {
       String found = aadharNumber;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -608,17 +571,14 @@ class _AddTenantPageState extends State<AddTenantPage> {
     } else {
       debugPrint('Invalid Aadhaar number');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Invalid Aadhaar number.'
-          ),
+        const SnackBar(
+          content: Text('Invalid Aadhaar number.'),
           backgroundColor: Colors.redAccent,
         ),
       );
       return;
     }
     debugPrint("Aaadhar Number ::: $extractedAadhaar");
-
 
     final authState = context.read<AuthCubit>().state;
     String? ownerPhone;
@@ -685,7 +645,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
     String? roomType = _isAC == true ? "AC" : "NON-AC";
 
-    debugPrint("is NEW::::::::::${_isNew}");
+    debugPrint("is NEW::::::::::$_isNew");
 
     if (_isNew) {
       _showCollectPaymentDialog(
@@ -698,16 +658,18 @@ class _AddTenantPageState extends State<AddTenantPage> {
         userPhotoPath: _userPhoto?.path,
         aadharPhotoPath: _aadharPhoto?.path,
         aadharCardbackPath: _aadharPhotoBack?.path,
+        employeeIdProofPath: _employeeIdProof?.path,
+        guardianMobiles: guardianMobiles,
         securityDeposit: securityDeposit ?? 0,
         rent: rent ?? 0,
         checkInDate: checkInDate,
         checkOutDate: checkOutDate,
         maintainance: maintainance ?? 0,
         roomType: roomType,
-        aadhaarNumber: extractedAadhaar ?? '',
-        dob: extractedAadhaarDOB ?? '',
-        gender: extractedAadhaarGender.toLowerCase() ?? '',
-        address: extractedAadhaarAddress ?? '',
+        aadhaarNumber: extractedAadhaar,
+        dob: extractedAadhaarDOB,
+        gender: extractedAadhaarGender.toLowerCase(),
+        address: extractedAadhaarAddress,
       );
       return;
     }
@@ -725,6 +687,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
       userPhotoPath: _userPhoto?.path,
       aadharPhotoPath: _aadharPhoto?.path,
       aadharCardbackPath: _aadharPhotoBack?.path,
+      employeeIdProofPath: _employeeIdProof?.path,
+      guardianMobiles: guardianMobiles,
 
       deposit: securityDeposit,
       rent: rent ?? 0,
@@ -732,15 +696,15 @@ class _AddTenantPageState extends State<AddTenantPage> {
           ? DateTime.parse(checkInDate)
           : DateTime.now(),
       bookingType: _stayType.name.toString(),
-      maintenance:maintainance.toString(),
-      roomType:roomType,
+      maintenance: maintainance.toString(),
+      roomType: roomType,
       endDate: (checkOutDate.isNotEmpty)
           ? DateTime.parse(checkOutDate)
           : DateTime.now(),
-      aadhaarNumber: extractedAadhaar ?? '',
-      dob: extractedAadhaarDOB ?? '',
-      gender: extractedAadhaarGender.toLowerCase() ?? '',
-      address: extractedAadhaarAddress ?? '',
+      aadhaarNumber: extractedAadhaar,
+      dob: extractedAadhaarDOB,
+      gender: extractedAadhaarGender.toLowerCase(),
+      address: extractedAadhaarAddress,
     );
   }
 
@@ -818,9 +782,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // _buildBulkUploadSection(),
-                          // SizedBox(height: 8.h),
-                          // _buildOrText(),
                           _buildTenantToggle(),
                           SizedBox(height: 32.h),
                           _buildSectionTitle('property_selection'.tr()),
@@ -864,6 +825,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             _emailController,
                             keyboardType: TextInputType.emailAddress,
                           ),
+
+                          SizedBox(height: 32.h),
+                          _buildEmergencyContactsSection(),
 
                           SizedBox(height: 32.h),
                           _buildSectionTitle('room_allocation'.tr()),
@@ -1024,6 +988,249 @@ class _AddTenantPageState extends State<AddTenantPage> {
     );
   }
 
+  Widget _buildEmergencyContactsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(
+          "Parent / Guardian Details",
+          subtitle: "Add up to 5 parent or guardian contacts",
+        ),
+        SizedBox(height: 12.h),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _emergencyMobileControllers.length,
+          separatorBuilder: (context, index) => SizedBox(height: 16.h),
+          itemBuilder: (context, index) {
+            final relation = _getRelationForIndex(index);
+            return Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: const Color(0xFFD5DEE9), width: 1),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(6.w),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF7F2),
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Icon(
+                              Icons.person_pin_rounded,
+                              size: 16.sp,
+                              color: const Color(0xFFF26B1A),
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            relation,
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ],
+                      ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _emergencyNameControllers[index].dispose();
+                            _emergencyMobileControllers[index].dispose();
+                            _emergencyNameControllers.removeAt(index);
+                            _emergencyMobileControllers.removeAt(index);
+                            _emergencyNameErrors.removeAt(index);
+                            _emergencyMobileErrors.removeAt(index);
+                          });
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.all(4.w),
+                          child: const Icon(
+                            Icons.remove_circle_outline_rounded,
+                            color: Colors.redAccent,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildField(
+                    label: "$relation Name",
+                    controller: _emergencyNameControllers[index],
+                    icon: Icons.person_outline_rounded,
+                    hintText: "Enter name",
+                    showChevron: true,
+                    iconBgColor: const Color(0xFFFFF7F2),
+                    iconColor: const Color(0xFFF26B1A),
+                    imagePath: '',
+                    errorText: _emergencyNameErrors[index],
+                    onChanged: (val) {
+                      setState(() {
+                        _emergencyNameErrors[index] = null;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildField(
+                    label: "$relation Mobile Number",
+                    controller: _emergencyMobileControllers[index],
+                    icon: Icons.phone_android_outlined,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
+                    hintText: "Enter 10-digit mobile number",
+                    showChevron: true,
+                    iconBgColor: const Color(0xFFFFF7F2),
+                    iconColor: const Color(0xFFF26B1A),
+                    imagePath: '',
+                    errorText: _emergencyMobileErrors[index],
+                    onChanged: (val) {
+                      setState(() {
+                        if (val.isNotEmpty && (val.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(val))) {
+                          _emergencyMobileErrors[index] = "Enter a valid 10-digit number";
+                        } else {
+                          _emergencyMobileErrors[index] = null;
+                        }
+                      });
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        if (_emergencyMobileControllers.length < 5)
+          Padding(
+            padding: EdgeInsets.only(top: 12.h),
+            child: OutlinedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _emergencyNameControllers.add(TextEditingController());
+                  _emergencyMobileControllers.add(TextEditingController());
+                  _emergencyNameErrors.add(null);
+                  _emergencyMobileErrors.add(null);
+                });
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF1E56A0),
+                side: const BorderSide(color: Color(0xFF1E56A0)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+              ),
+              icon: const Icon(Icons.add_rounded, size: 20),
+              label: Text(
+                "Add ${_getRelationForIndex(_emergencyMobileControllers.length)}",
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14.sp),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    IconData? icon,
+    String hintText = '',
+    bool showChevron = false,
+    Color? iconBgColor,
+    Color? iconColor,
+    String? imagePath,
+    String? errorText,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    ValueChanged<String>? onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF475569),
+          ),
+        ),
+        SizedBox(height: 6.h),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          onChanged: onChanged,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF1E293B),
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: GoogleFonts.inter(
+              color: const Color(0xFF94A3B8),
+              fontSize: 14.sp,
+            ),
+            prefixIcon: icon != null
+                ? Container(
+                    margin: EdgeInsets.all(8.w),
+                    padding: EdgeInsets.all(6.w),
+                    decoration: BoxDecoration(
+                      color: iconBgColor ?? const Color(0xFFFFF7F2),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 16.sp,
+                      color: iconColor ?? const Color(0xFFF26B1A),
+                    ),
+                  )
+                : null,
+            filled: true,
+            fillColor: const Color(0xFFF8FAFC),
+            contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: const BorderSide(color: Color(0xFFD5DEE9)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: errorText != null ? Colors.redAccent : const Color(0xFFD5DEE9),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: errorText != null ? Colors.redAccent : AppColors.primaryBlue,
+                width: 1.5,
+              ),
+            ),
+            errorText: errorText,
+            errorStyle: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: Colors.redAccent,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSubmitButton(BuildContext context, AddTenantState state) {
     bool isSubmitting = state is AddTenantSubmitting;
     return SizedBox(
@@ -1056,14 +1263,30 @@ class _AddTenantPageState extends State<AddTenantPage> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 16.sp,
-        fontWeight: FontWeight.bold,
-        color: AppColors.primaryBlue,
-      ),
+  Widget _buildSectionTitle(String title, {String? subtitle}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryBlue,
+          ),
+        ),
+        if (subtitle != null && subtitle.isNotEmpty) ...[
+          SizedBox(height: 4.h),
+          Text(
+            subtitle,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: const Color(0xFF64748B),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -1207,7 +1430,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
             if (picked != null) {
               setState(() {
                 _checkInDate = picked;
-                _checkOutDate = null; // Reset checkout date
+                _checkOutDate = null;
               });
             }
           },
@@ -1294,38 +1517,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
       ],
     );
   }
-
-  // Widget _buildReadOnlyDetail(String label, String? value) {
-  //   return Padding(
-  //     padding: EdgeInsets.only(bottom: 8.h),
-  //     child: Row(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         SizedBox(
-  //           width: 120.w,
-  //           child: Text(
-  //             '$label:',
-  //             style: TextStyle(
-  //               fontSize: 13.sp,
-  //               fontWeight: FontWeight.bold,
-  //               color: AppColors.greyText,
-  //             ),
-  //           ),
-  //         ),
-  //         Expanded(
-  //           child: Text(
-  //             value ?? 'N/A',
-  //             style: TextStyle(
-  //               fontSize: 13.sp,
-  //               color: AppColors.darkText,
-  //               fontWeight: FontWeight.w500,
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildTenantToggle() {
     return Container(
@@ -1775,7 +1966,42 @@ class _AddTenantPageState extends State<AddTenantPage> {
         setState(() {
           _aadharPhotoBack = file;
         });
-        // _extractAadharText(file, isFront: false);
+      },
+    );
+  }
+
+  Future<void> _pickEmployeeCardPhoto() async {
+    _pickDocumentPhoto(
+      title: 'Upload Employee Card',
+      onImagePicked: (file) async {
+        try {
+          final croppedFile = await ImageCropper().cropImage(
+            sourcePath: file.path,
+            compressQuality: 85,
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: 'Crop Employee Card',
+                toolbarColor: AppColors.primaryBlue,
+                toolbarWidgetColor: Colors.white,
+                initAspectRatio: CropAspectRatioPreset.original,
+                lockAspectRatio: false,
+              ),
+              IOSUiSettings(
+                title: 'Crop Employee Card',
+              ),
+            ],
+          );
+          if (croppedFile != null) {
+            setState(() {
+              _employeeIdProof = File(croppedFile.path);
+            });
+          }
+        } catch (e) {
+          debugPrint('Error cropping employee card: $e');
+          setState(() {
+            _employeeIdProof = file;
+          });
+        }
       },
     );
   }
@@ -1793,20 +2019,16 @@ class _AddTenantPageState extends State<AddTenantPage> {
       String fullText = recognizedText.text;
       debugPrint('OCR Text: $fullText');
       
-      // Sanitize common OCR errors for number detection
       String sanitizedText = fullText.replaceAll(RegExp(r'[oO]'), '0').replaceAll(RegExp(r'[iIlL|]'), '1');
       
-      // Try to find 12-digit Aadhar number in any image
       String extractedAadhar = '';
       
-      // 1. Try formatted XXXX XXXX XXXX
       final aadharRegex = RegExp(r'(\d{4}\s*\d{4}\s*\d{4})');
       final aadharMatch = aadharRegex.firstMatch(sanitizedText);
       
       if (aadharMatch != null) {
         extractedAadhar = aadharMatch.group(0)!.replaceAll(RegExp(r'\s+'), '');
       } else {
-        // 2. Fallback: Extract all digits and look for a 12-digit sequence
         String digitsOnly = sanitizedText.replaceAll(RegExp(r'\D'), '');
         final fallbackRegex = RegExp(r'\d{12}');
         final fallbackMatch = fallbackRegex.firstMatch(digitsOnly);
@@ -1820,7 +2042,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
           _extractedAadharData['aadharNumber'] = extractedAadhar;
         }
 
-        // DOB & Gender usually on front
         final dobRegex = RegExp(r'(?:DOB|Year of Birth|D\.O\.B)[:\s]*(\d{2}[/-]\d{2}[/-]\d{4}|\d{4})', caseSensitive: false);
         final genderRegex = RegExp(r'(Male|Female|Transgender|MALE|FEMALE)', caseSensitive: false);
         
@@ -1830,7 +2051,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
         if (dobMatch != null) _extractedAadharData['dob'] = dobMatch.group(1)!;
         if (genderMatch != null) _extractedAadharData['gender'] = genderMatch.group(0)!;
 
-        // Name extraction (usually front)
         if (fullText.toLowerCase().contains('government') || fullText.toLowerCase().contains('india') || dobMatch != null) {
            List<String> lines = fullText.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
            for (int i = 0; i < lines.length; i++) {
@@ -1848,7 +2068,6 @@ class _AddTenantPageState extends State<AddTenantPage> {
            }
         }
 
-        // Address extraction (usually back)
         if (fullText.toLowerCase().contains('address')) {
           List<String> lines = fullText.split('\n');
           int addressIndex = -1;
@@ -2034,7 +2253,17 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 loadingText: 'Scanning...',
               ),
             ),
-            const Expanded(child: SizedBox()),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: _buildImageUploadCard(
+                file: _employeeIdProof,
+                onTap: _pickEmployeeCardPhoto,
+                title: 'Employee Card',
+                subtitle: 'Camera / Gallery (Crop)',
+                icon: Icons.badge_outlined,
+                iconColor: const Color(0xFF8E24AA),
+              ),
+            ),
           ],
         ),
       ],
@@ -2076,7 +2305,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
-                  cacheHeight: 400, // Optimized to prevent OutOfMemory crashes on Android
+                  cacheHeight: 400,
                   errorBuilder: (context, error, stackTrace) {
                     return const Center(
                       child: Icon(Icons.broken_image, color: Colors.red),
@@ -2184,6 +2413,8 @@ class _CollectPaymentBottomSheet extends StatefulWidget {
   final String? userPhotoPath;
   final String? aadharPhotoPath;
   final String? aadharCardbackPath;
+  final String? employeeIdProofPath;
+  final List<Map<String, String>>? guardianMobiles;
   final double securityDeposit;
   final double rent;
   final String checkInDate;
@@ -2210,6 +2441,8 @@ class _CollectPaymentBottomSheet extends StatefulWidget {
     this.userPhotoPath,
     this.aadharPhotoPath,
     this.aadharCardbackPath,
+    this.employeeIdProofPath,
+    this.guardianMobiles,
     required this.securityDeposit,
     required this.rent,
     required this.checkInDate,
@@ -2237,8 +2470,8 @@ class _CollectPaymentBottomSheetState
   late TextEditingController _collectingNowController;
   final TextEditingController _discountController = TextEditingController();
   double _discountAmount = 0.0;
-  String _paymentMethod = 'Cash'; // 'Cash', 'UPI', 'Link'
-  String _collectionType = 'Full amount'; // 'Full amount', 'Deposit only', 'Nothing now'
+  String _paymentMethod = 'Cash';
+  String _collectionType = 'Full amount';
   bool _isSubmitting = false;
 
   @override
@@ -2402,7 +2635,6 @@ class _CollectPaymentBottomSheetState
     setState(() => _isSubmitting = true);
 
     try {
-      // 1. Submit Add Tenant
       final response = await widget.addTenantCubit.submit(
         hostel: widget.selectedHostel,
         room: widget.selectedRoom,
@@ -2415,6 +2647,8 @@ class _CollectPaymentBottomSheetState
         userPhotoPath: widget.userPhotoPath,
         aadharPhotoPath: widget.aadharPhotoPath,
         aadharCardbackPath: widget.aadharCardbackPath,
+        employeeIdProofPath: widget.employeeIdProofPath,
+        guardianMobiles: widget.guardianMobiles,
         deposit: widget.securityDeposit,
         rent: widget.rent,
         startDate: (widget.checkInDate.isNotEmpty)
@@ -2433,7 +2667,6 @@ class _CollectPaymentBottomSheetState
       );
 
       if (response != null && mounted) {
-        // Extract IDs from response
         final data = response['data'] ?? response;
         final String tenantId = (data['tenant']?['_id'] ?? data['tenantId'] ?? data['id'] ?? '').toString();
         final String bookingId = (data['bookingId'] ?? data['_id'] ?? '').toString();
@@ -2442,11 +2675,6 @@ class _CollectPaymentBottomSheetState
         double collectingNow = double.tryParse(_collectingNowController.text) ?? 0;
 
         if (collectingNow > 0) {
-          // 2. Submit Payment
-          // Logic for splitting the collecting amount (Rent first, then deposit, etc. or just as categorized)
-          // For simplicity, if they pay "Deposit only", we attribute to deposit. 
-          // If "Full amount", we split it based on the components.
-          
           double rentPaid = 0;
           double depositPaid = 0;
           double maintenancePaid = 0;
@@ -2458,7 +2686,6 @@ class _CollectPaymentBottomSheetState
              depositPaid = widget.securityDeposit;
              maintenancePaid = widget.maintainance;
           } else {
-             // Custom amount or custom split - for now assume Rent -> Deposit -> Maintenance
              double remaining = collectingNow;
              rentPaid = remaining >= widget.rent ? widget.rent : remaining;
              remaining -= rentPaid;
@@ -2484,8 +2711,8 @@ class _CollectPaymentBottomSheetState
         }
         
         if (mounted) {
-          Navigator.pop(context); // Close dialog
-          Navigator.pop(context, true); // Close AddTenantPage
+          Navigator.pop(context);
+          Navigator.pop(context, true);
         }
       }
     } catch (e) {
@@ -2712,8 +2939,6 @@ class _CollectPaymentBottomSheetState
                 _buildMethodBtn('Cash'),
                 SizedBox(width: 8.w),
                 _buildMethodBtn('UPI / QR', value: 'UPI'),
-                // SizedBox(width: 8.w),
-                // _buildMethodBtn('Payment link', value: 'Link'),
               ],
             ),
             SizedBox(height: 24.h),

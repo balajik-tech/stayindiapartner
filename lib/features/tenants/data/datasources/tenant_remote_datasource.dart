@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:dio/dio.dart';
@@ -31,6 +32,8 @@ abstract class TenantRemoteDataSource {
     String? userPhotoPath,
     String? aadharPhotoPath,
     String? aadharCardbackPath,
+    String? employeeIdProofPath,
+    List<Map<String, String>>? guardianMobiles,
     String? bookingType,
     String? maintenance,
     String? roomType,
@@ -121,6 +124,8 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     String? userPhotoPath,
     String? aadharPhotoPath,
     String? aadharCardbackPath,
+    String? employeeIdProofPath,
+    List<Map<String, String>>? guardianMobiles,
     String? bookingType,
     String? maintenance,
     String? roomType,
@@ -160,6 +165,10 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     if (gender != null) map['gender'] = gender;
     if (address != null) map['address'] = address;
 
+    if (guardianMobiles != null && guardianMobiles.isNotEmpty) {
+      map['guardianMobiles'] = jsonEncode(guardianMobiles);
+    }
+
     final formData = FormData.fromMap(map);
 
     if (userPhotoPath != null && userPhotoPath.isNotEmpty) {
@@ -192,6 +201,18 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
           'aadharCardback',
           await MultipartFile.fromFile(
             aadharCardbackPath,
+            contentType: DioMediaType('image', 'jpeg'),
+          ),
+        ),
+      );
+    }
+
+    if (employeeIdProofPath != null && employeeIdProofPath.isNotEmpty) {
+      formData.files.add(
+        MapEntry(
+          'employeeIdProof',
+          await MultipartFile.fromFile(
+            employeeIdProofPath,
             contentType: DioMediaType('image', 'jpeg'),
           ),
         ),

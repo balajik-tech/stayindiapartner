@@ -26,6 +26,8 @@ abstract class TenantRepository {
     String? userPhotoPath,
     String? aadharPhotoPath,
     String? aadharCardbackPath,
+    String? employeeIdProofPath,
+    List<Map<String, String>>? guardianMobiles,
     String? bookingType,
     String? maintenance,
     String? roomType,
