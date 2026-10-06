@@ -198,19 +198,101 @@ class TenantPaymentItemModel extends TenantPaymentItemEntity {
     required super.paymentType,
     super.paymentDate,
     super.dueDate,
+    super.rent,
+    super.deposit,
+    super.maintenance,
   });
 
-  factory TenantPaymentItemModel.fromJson(Map<String, dynamic> json) {
+  factory TenantPaymentItemModel.fromJson(Map<String, dynamic> item) {
+    final id = (item['_id'] ?? item['id'] ?? '').toString();
+
+    final paymentObj = item['payment'] is Map<String, dynamic>
+        ? item['payment'] as Map<String, dynamic>
+        : null;
+
+    final bookingObj = item['booking'] is Map<String, dynamic>
+        ? item['booking'] as Map<String, dynamic>
+        : null;
+
+    final statusStr = (item['paymentStatus'] ??
+            paymentObj?['status'] ??
+            item['status'] ??
+            '')
+        .toString()
+        .toUpperCase();
+    final isPaid = statusStr == 'SUCCESS' || statusStr == 'PAID';
+
+    final payableAmt = (item['payableAmount'] is num)
+        ? (item['payableAmount'] as num).toDouble()
+        : (double.tryParse((item['payableAmount'] ?? '').toString()) ??
+            _toDouble(item['totalAmount']));
+
+    final paidFromPayment = (paymentObj != null && paymentObj['amount'] is num)
+        ? (paymentObj['amount'] as num).toDouble()
+        : 0.0;
+
+    final paidAmt = (item['paidAmount'] is num)
+        ? (item['paidAmount'] as num).toDouble()
+        : (paidFromPayment > 0
+            ? paidFromPayment
+            : (isPaid
+                ? payableAmt
+                : (double.tryParse((item['paidAmount'] ?? '').toString()) ??
+                    0.0)));
+
+    final totalAmt = payableAmt > 0 ? payableAmt : paidAmt;
+    final dueAmt = isPaid
+        ? 0.0
+        : ((item['dueAmount'] is num)
+            ? (item['dueAmount'] as num).toDouble()
+            : (totalAmt - paidAmt));
+
+    final dateStr = (item['paymentDate'] ??
+            paymentObj?['paidAt'] ??
+            item['createdAt'] ??
+            item['startDate'] ??
+            item['month'] ??
+            '')
+        .toString();
+
+    final paymentType = paymentObj?['method']?.toString() ??
+        item['paymentType']?.toString() ??
+        item['method']?.toString() ??
+        'RENT';
+
+    final rentVal = (item['bookingAmount'] is num)
+        ? (item['bookingAmount'] as num).toDouble()
+        : ((item['rent'] is num)
+            ? (item['rent'] as num).toDouble()
+            : ((bookingObj != null && bookingObj['rent'] is num)
+                ? (bookingObj['rent'] as num).toDouble()
+                : double.tryParse((item['bookingAmount'] ?? item['rent'] ?? '').toString())));
+
+    final depositVal = (item['deposit'] is num)
+        ? (item['deposit'] as num).toDouble()
+        : ((bookingObj != null && bookingObj['deposit'] is num)
+            ? (bookingObj['deposit'] as num).toDouble()
+            : double.tryParse((item['deposit'] ?? '').toString()));
+
+    final maintenanceVal = (item['maintenance'] is num)
+        ? (item['maintenance'] as num).toDouble()
+        : ((bookingObj != null && bookingObj['maintenance'] is num)
+            ? (bookingObj['maintenance'] as num).toDouble()
+            : double.tryParse((item['maintenance'] ?? '').toString()));
+
     return TenantPaymentItemModel(
-      id: (json['_id'] ?? json['id'] ?? '').toString(),
-      month: json['month']?.toString() ?? '',
-      totalAmount: _toDouble(json['totalAmount']),
-      paidAmount: _toDouble(json['paidAmount']),
-      dueAmount: _toDouble(json['dueAmount']),
-      status: json['status']?.toString() ?? '',
-      paymentType: json['paymentType']?.toString() ?? '',
-      paymentDate: json['paymentDate']?.toString(),
-      dueDate: json['dueDate']?.toString(),
+      id: id,
+      month: dateStr,
+      totalAmount: totalAmt,
+      paidAmount: paidAmt,
+      dueAmount: dueAmt > 0 ? dueAmt : 0.0,
+      status: statusStr,
+      paymentType: paymentType,
+      paymentDate: dateStr.isNotEmpty ? dateStr : null,
+      dueDate: item['dueDate']?.toString() ?? bookingObj?['endDate']?.toString(),
+      rent: rentVal,
+      deposit: depositVal,
+      maintenance: maintenanceVal,
     );
   }
 }

@@ -79,6 +79,9 @@ class TenantRentalEntity extends Equatable {
       paymentType: payment?.method ?? 'RENT',
       paymentDate: dateStr.isNotEmpty ? dateStr : null,
       dueDate: booking?.endDate,
+      rent: bookingAmount ,
+      deposit:  deposit,
+      maintenance:  maintenance,
     );
   }
 

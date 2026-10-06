@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/tenants/data/models/tenant_model.dart';
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
@@ -101,7 +102,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
 
         for (final item in listData) {
           if (item is Map<String, dynamic>) {
-            final entity = _parseRentalItem(item);
+            final entity = TenantPaymentItemModel.fromJson(item);
             fetchedPayments.add(entity);
 
             if (nameFromApi == null && item['tenant'] is Map<String, dynamic>) {
@@ -148,70 +149,6 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
         });
       }
     }
-  }
-
-  TenantPaymentItemEntity _parseRentalItem(Map<String, dynamic> item) {
-    final id = (item['_id'] ?? item['id'] ?? '').toString();
-
-    final paymentObj = item['payment'] is Map<String, dynamic>
-        ? item['payment'] as Map<String, dynamic>
-        : null;
-
-    final statusStr = (item['paymentStatus'] ??
-            paymentObj?['status'] ??
-            item['status'] ??
-            '')
-        .toString()
-        .toUpperCase();
-    final isPaid = statusStr == 'SUCCESS' || statusStr == 'PAID';
-
-    final payableAmt = (item['payableAmount'] is num)
-        ? (item['payableAmount'] as num).toDouble()
-        : double.tryParse((item['payableAmount'] ?? '').toString()) ?? 0.0;
-
-    final paidFromPayment = (paymentObj != null && paymentObj['amount'] is num)
-        ? (paymentObj['amount'] as num).toDouble()
-        : 0.0;
-
-    final paidAmt = (item['paidAmount'] is num)
-        ? (item['paidAmount'] as num).toDouble()
-        : (paidFromPayment > 0
-            ? paidFromPayment
-            : (isPaid
-                ? payableAmt
-                : (double.tryParse((item['paidAmount'] ?? '').toString()) ??
-                    0.0)));
-
-    final totalAmt = payableAmt > 0 ? payableAmt : paidAmt;
-    final dueAmt = isPaid
-        ? 0.0
-        : ((item['dueAmount'] is num)
-            ? (item['dueAmount'] as num).toDouble()
-            : (totalAmt - paidAmt));
-
-    final dateStr = (item['paymentDate'] ??
-            paymentObj?['paidAt'] ??
-            item['createdAt'] ??
-            item['startDate'] ??
-            item['month'] ??
-            '')
-        .toString();
-
-    final paymentType = paymentObj?['method']?.toString() ??
-        item['paymentType']?.toString() ??
-        item['method']?.toString() ??
-        'RENT';
-
-    return TenantPaymentItemEntity(
-      id: id,
-      month: dateStr,
-      totalAmount: totalAmt,
-      paidAmount: paidAmt,
-      dueAmount: dueAmt > 0 ? dueAmt : 0.0,
-      status: statusStr,
-      paymentType: paymentType,
-      paymentDate: dateStr.isNotEmpty ? dateStr : null,
-    );
   }
 
   @override
@@ -382,12 +319,15 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
           final p = _payments[index];
 
           return _buildTimelineItem(
-            index == 0,
-            index == _payments.length - 1,
-            _formatMonth(p.month),
-            p.paymentDate != null ? _formatDate(p.paymentDate!) : '',
-            p.paidAmount.toStringAsFixed(0),
-            p.paymentType,
+            isFirst: index == 0,
+            isLast: index == _payments.length - 1,
+            month: _formatMonth(p.month),
+            date: p.paymentDate != null ? _formatDate(p.paymentDate!) : '',
+            amount: p.paidAmount.toStringAsFixed(0),
+            method: p.paymentType,
+            rent: p.rent,
+            deposit: p.deposit,
+            maintenance: p.maintenance,
           );
         },
       ),
@@ -465,14 +405,19 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
     }
   }
 
-  Widget _buildTimelineItem(
-    bool isFirst,
-    bool isLast,
-    String month,
-    String date,
-    String amount,
-    String method,
-  ) {
+  Widget _buildTimelineItem({
+    required bool isFirst,
+    required bool isLast,
+    required String month,
+    required String date,
+    required String amount,
+    required String method,
+    double? rent,
+    double? deposit,
+    double? maintenance,
+  }) {
+    final hasBreakdown = rent != null || deposit != null || maintenance != null;
+
     return IntrinsicHeight(
       child: Row(
         children: [
@@ -510,75 +455,123 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                 ),
                 borderRadius: BorderRadius.circular(16.r),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Payment Received',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkText,
-                        ),
-                      ),
-                      Text(
-                        month,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: AppColors.greyText,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        date,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: AppColors.greyText,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        amount,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkText,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.roomCardBorder),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Text(
-                          method,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkText,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Payment Received',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkText,
+                            ),
                           ),
-                        ),
+                          Text(
+                            month,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: AppColors.greyText,
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          Text(
+                            date,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: AppColors.greyText,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            amount,
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkText,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 4.h,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.roomCardBorder),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Text(
+                              method,
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkText,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  if (hasBreakdown) ...[
+                    SizedBox(height: 12.h),
+                    Divider(
+                      height: 1,
+                      color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+                    ),
+                    SizedBox(height: 10.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (rent != null)
+                          _buildBreakdownItem('Rent', rent),
+                        if (deposit != null)
+                          _buildBreakdownItem('Security Deposit', deposit),
+                        if (maintenance != null)
+                          _buildBreakdownItem('Maintenance', maintenance),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBreakdownItem(String label, double val) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.sp,
+            color: AppColors.greyText,
+          ),
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          '₹${val.toStringAsFixed(0)}',
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkText,
+          ),
+        ),
+      ],
     );
   }
 }

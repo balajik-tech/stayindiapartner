@@ -212,6 +212,9 @@ class TenantPaymentItemEntity extends Equatable {
   final String paymentType;
   final String? paymentDate;
   final String? dueDate;
+  final double? rent;
+  final double? deposit;
+  final double? maintenance;
 
   const TenantPaymentItemEntity({
     required this.id,
@@ -223,6 +226,9 @@ class TenantPaymentItemEntity extends Equatable {
     required this.paymentType,
     this.paymentDate,
     this.dueDate,
+    this.rent,
+    this.deposit,
+    this.maintenance,
   });
 
   @override
@@ -236,6 +242,9 @@ class TenantPaymentItemEntity extends Equatable {
     paymentType,
     paymentDate,
     dueDate,
+    rent,
+    deposit,
+    maintenance,
   ];
 }
 
