@@ -66,6 +66,21 @@ class TenantEntity extends Equatable {
   ];
 }
 
+class GuardianMobileEntity extends Equatable {
+  final String name;
+  final String mobileNumber;
+  final String relation;
+
+  const GuardianMobileEntity({
+    required this.name,
+    required this.mobileNumber,
+    required this.relation,
+  });
+
+  @override
+  List<Object?> get props => [name, mobileNumber, relation];
+}
+
 class TenantDetailEntity extends Equatable {
   final String id;
   final String name;
@@ -80,6 +95,8 @@ class TenantDetailEntity extends Equatable {
   final List<TenantPaymentItemEntity> payments;
   final double outstandingAmount;
   final String? parentMobile;
+  final List<GuardianMobileEntity> guardianMobiles;
+  final String? employeeIdProof;
   final bool isAway;
   final String? awayMessage;
   final DlKycEntity? dlKyc;
@@ -98,6 +115,8 @@ class TenantDetailEntity extends Equatable {
     required this.payments,
     required this.outstandingAmount,
     this.parentMobile,
+    this.guardianMobiles = const [],
+    this.employeeIdProof,
     this.isAway = false,
     this.awayMessage,
     this.dlKyc,
@@ -141,6 +160,8 @@ class TenantDetailEntity extends Equatable {
     payments,
     outstandingAmount,
     parentMobile,
+    guardianMobiles,
+    employeeIdProof,
     isAway,
     awayMessage,
     dlKyc,

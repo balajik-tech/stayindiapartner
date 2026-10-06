@@ -132,6 +132,16 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         SizedBox(height: 24.h),
                         _buildKycDocuments(detail),
                         SizedBox(height: 24.h),
+                        if (detail?.guardianMobiles != null &&
+                            detail!.guardianMobiles.isNotEmpty) ...[
+                          _buildGuardianMobilesSection(detail),
+                          SizedBox(height: 24.h),
+                        ],
+                        if (detail?.employeeIdProof != null &&
+                            detail!.employeeIdProof!.isNotEmpty) ...[
+                          _buildEmployeeIdProofSection(detail),
+                          SizedBox(height: 24.h),
+                        ],
                         if (_rentals != null) ...[
                           _buildBillsSummary(_rentals!),
                           SizedBox(height: 24.h),
@@ -497,6 +507,111 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildGuardianMobilesSection(TenantDetailEntity? detail) {
+    final list = detail?.guardianMobiles ?? [];
+    if (list.isEmpty) return const SizedBox.shrink();
+
+    return _buildSection(
+      'Parent / Guardian Details',
+      Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color:  Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Column(
+          children: list.asMap().entries.map((entry) {
+            final idx = entry.key;
+            final g = entry.value;
+            return Column(
+              children: [
+                if (idx > 0)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 0.h),
+                    child: Divider(
+                      color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+                    ),
+                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF7F2),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(
+                          color: const Color(0xFFF26B1A).withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.person_pin_rounded,
+                        color: const Color(0xFFF26B1A),
+                        size: 20.sp,
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+
+                    // Name & Relation
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (g.name.isNotEmpty)
+                            Text(
+                              g.name,
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkText,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          if (g.relation.isNotEmpty) ...[
+                            SizedBox(height: 2.h),
+                            Text(
+                              g.relation.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFF26B1A),
+                                letterSpacing: 0.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                    // Mobile Number - Right Side
+                    if (g.mobileNumber.isNotEmpty) ...[
+                      SizedBox(width: 12.w),
+                      Text(
+                        g.mobileNumber,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: AppColors.greyText,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                )
+              ],
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
@@ -922,6 +1037,187 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 ),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmployeeIdProofSection(TenantDetailEntity? detail) {
+    final proofUrl = ApiConstants.getImageUrl(detail?.employeeIdProof);
+    if (proofUrl == null || proofUrl.isEmpty) return const SizedBox.shrink();
+
+    return _buildSection(
+      'Employee Card ID Proof',
+      Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+          ),
+          borderRadius: BorderRadius.circular(16.r),
+          color: const Color(0xFFF9FAFB),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44.w,
+                  height: 44.w,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(
+                      color: AppColors.roomCardBorder.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.badge_outlined,
+                    size: 24.sp,
+                    color: const Color(0xFF8E24AA),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Employee Card / Work ID',
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkText,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        'Uploaded Employment Proof',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.greyText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+            SizedBox(height: 12.h),
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    backgroundColor: Colors.transparent,
+                    insetPadding: EdgeInsets.all(10.w),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        InteractiveViewer(
+                          panEnabled: true,
+                          minScale: 0.5,
+                          maxScale: 4.0,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12.r),
+                            child: Image.network(
+                              proofUrl,
+                              fit: BoxFit.contain,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                color: Colors.white,
+                                padding: EdgeInsets.all(20.w),
+                                child: const Text(
+                                  'Failed to load Employee Card image',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 10.h,
+                          right: 10.w,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.black.withValues(
+                              alpha: 0.5,
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                height: 150.h,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  color: Colors.white,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12.r),
+                  child: Image.network(
+                    proofUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                    errorBuilder: (context, error, stackTrace) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.redAccent,
+                            size: 30.sp,
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            'Failed to load Employee Card image',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.greyText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Center(
+              child: Text(
+                'Tap to view and zoom',
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.greyText,
+                ),
+              ),
+            ),
           ],
         ),
       ),

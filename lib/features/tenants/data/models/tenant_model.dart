@@ -78,6 +78,8 @@ class TenantDetailModel extends TenantDetailEntity {
     required super.payments,
     required super.outstandingAmount,
     super.parentMobile,
+    super.guardianMobiles = const [],
+    super.employeeIdProof,
     super.isAway = false,
     super.awayMessage,
     super.dlKyc,
@@ -98,6 +100,17 @@ class TenantDetailModel extends TenantDetailEntity {
 
     final kycData = tenantData['kyc'] as Map<String, dynamic>?;
     final dlKycData = tenantData['dlKyc'] as Map<String, dynamic>?;
+
+    final rawGuardianMobiles = (json['guardianMobiles'] as List<dynamic>?) ??
+        (tenantData['guardianMobiles'] as List<dynamic>?) ?? [];
+
+    final guardianMobilesList = rawGuardianMobiles
+        .whereType<Map<String, dynamic>>()
+        .map((g) => GuardianMobileModel.fromJson(g))
+        .toList();
+
+    final employeeIdProofStr = json['employeeIdProof']?.toString() ??
+        tenantData['employeeIdProof']?.toString();
 
     return TenantDetailModel(
       id: (tenantData['_id'] ?? tenantData['id'] ?? '').toString(),
@@ -120,7 +133,9 @@ class TenantDetailModel extends TenantDetailEntity {
           )
           .toList(),
       outstandingAmount: _toDouble(paymentsData['outstandingAmount']),
-      parentMobile: tenantData['parentMobile']?.toString(),
+      parentMobile: tenantData['parentMobile']?.toString() ?? json['parentMobile']?.toString(),
+      guardianMobiles: guardianMobilesList,
+      employeeIdProof: employeeIdProofStr,
       isAway: tenantData['isAway'] == true,
       awayMessage: tenantData['awayMessage']?.toString(),
       dlKyc: dlKycData != null ? DlKycModel.fromJson(dlKycData) : null,
@@ -293,6 +308,22 @@ class TenantPaymentItemModel extends TenantPaymentItemEntity {
       rent: rentVal,
       deposit: depositVal,
       maintenance: maintenanceVal,
+    );
+  }
+}
+
+class GuardianMobileModel extends GuardianMobileEntity {
+  const GuardianMobileModel({
+    required super.name,
+    required super.mobileNumber,
+    required super.relation,
+  });
+
+  factory GuardianMobileModel.fromJson(Map<String, dynamic> json) {
+    return GuardianMobileModel(
+      name: json['name']?.toString() ?? '',
+      mobileNumber: json['mobileNumber']?.toString() ?? '',
+      relation: json['relation']?.toString() ?? '',
     );
   }
 }
