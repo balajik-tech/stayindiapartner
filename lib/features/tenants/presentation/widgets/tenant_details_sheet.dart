@@ -1037,28 +1037,6 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                               : const Color(0xFF12B76A).withValues(alpha: 0.6),
                         ),
                       ),
-                      if (bookingStatus.isNotEmpty) ...[
-                        SizedBox(width: 8.w),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6.w,
-                            vertical: 2.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(bookingStatus)
-                                .withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(4.r),
-                          ),
-                          child: Text(
-                            _formatStatusText(bookingStatus),
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                              color: _getStatusColor(bookingStatus),
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                   SizedBox(height: 2.h),
