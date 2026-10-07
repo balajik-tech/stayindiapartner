@@ -247,14 +247,17 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
       daysStr = (_daysSinceFirstRental! + 1).toString();
     }
 
-    final String transfersStr =
-        _totalTransactions != null ? _totalTransactions.toString() : '0';
+    final String transfersStr = _totalTransactions != null
+        ? _totalTransactions.toString()
+        : '0';
 
     return Padding(
       padding: EdgeInsets.all(20.w),
       child: Row(
         children: [
-          Expanded(child: _buildSummaryCard(daysStr, 'Days', Icons.access_time)),
+          Expanded(
+            child: _buildSummaryCard(daysStr, 'Days', Icons.access_time),
+          ),
           SizedBox(width: 12.w),
           Expanded(
             child: _buildSummaryCard(
@@ -266,7 +269,11 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: _buildSummaryCard(transfersStr, 'Transfers', Icons.swap_horiz),
+            child: _buildSummaryCard(
+              transfersStr,
+              'Transfers',
+              Icons.swap_horiz,
+            ),
           ),
         ],
       ),
@@ -428,13 +435,36 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                 height: 20.h,
                 color: isFirst ? Colors.transparent : Colors.grey[300],
               ),
-              Container(
+              (method.toUpperCase() == 'RAZORPAY')
+                  ? Container(
+                width: 38.w,
+                height: 38.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(
+                    color: const Color(0xFFE2E8F0),
+                    width: 1,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.r),
+                  child: Image.asset(
+                    'assets/images/login_logo.jpg',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+                  : Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: const BoxDecoration(
                   color: Color(0xFF27C26C),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.money, size: 16.sp, color: Colors.white),
+                child: Icon(
+                  Icons.money,
+                  size: 16.sp,
+                  color: Colors.white,
+                ),
               ),
               Expanded(
                 child: Container(
@@ -507,7 +537,9 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                               vertical: 4.h,
                             ),
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.roomCardBorder),
+                              border: Border.all(
+                                color: AppColors.roomCardBorder,
+                              ),
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Text(
@@ -533,8 +565,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (rent != null)
-                          _buildBreakdownItem('Rent', rent),
+                        if (rent != null) _buildBreakdownItem('Rent', rent),
                         if (deposit != null)
                           _buildBreakdownItem('Security Deposit', deposit),
                         if (maintenance != null)
@@ -557,10 +588,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 11.sp,
-            color: AppColors.greyText,
-          ),
+          style: TextStyle(fontSize: 11.sp, color: AppColors.greyText),
         ),
         SizedBox(height: 2.h),
         Text(
