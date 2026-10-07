@@ -1070,7 +1070,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
           if (images.isNotEmpty) ...[
             SizedBox(height: 20.h),
             SizedBox(
-              height: 60.h,
+              height: 65.h,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
@@ -1078,8 +1078,9 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                 itemBuilder: (context, idx) {
                   final imgPath = images[idx];
                   return Container(
-                    width: 55.w,
+                    width: 60.w,
                     margin: EdgeInsets.only(right: 12.w),
+                    padding: EdgeInsets.all(5.r),
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
