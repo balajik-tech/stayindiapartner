@@ -272,7 +272,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(
                 context,
                 'away',
-                isLoading ? '...' : (status?.unknown.toString() ?? '0'),
+                isLoading ? '...' : (occupancy?.awayBeds.toString() ?? '0'),
                 'away'.tr(),
                 const Color(0xFFE91E63),
                 Icons.luggage_rounded,

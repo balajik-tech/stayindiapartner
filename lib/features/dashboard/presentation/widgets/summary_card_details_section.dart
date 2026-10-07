@@ -9,6 +9,8 @@ import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/notifications/domain/repositories/notification_repository.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 
+import '../../../../core/utils/text_utils.dart';
+
 class DetailTenantItem {
   final String id;
   final String shortId;
@@ -103,7 +105,7 @@ class _SummaryCardDetailsSectionState extends State<SummaryCardDetailsSection> {
               final minutes = ((index * 7) + 12) % 60;
               final timeStr = '${hours.toString().padLeft(2, '0')} h:${minutes.toString().padLeft(2, '0')} ago';
               subtitle = bed.awayReturnDate != null && bed.awayReturnDate!.isNotEmpty
-                  ? 'Return: ${bed.awayReturnDate}'
+                  ? 'Return: ${TextUtils.formatDate(bed.awayReturnDate)}'
                   : 'last active: $timeStr';
               break;
             case 'notice':
