@@ -289,8 +289,10 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                         height: 50.h,
                         width: 105.w,
                         child: OutlinedButton(
-                          onPressed: () =>
-                              context.read<PropertySetupCubit>().previousStep(),
+                          onPressed: () => {
+                            FocusScope.of(context).unfocus(),
+                            context.read<PropertySetupCubit>().previousStep()
+                          },
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(
                               color: Color(0xFF16539B),
@@ -319,6 +321,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                               !context.read<PropertySetupCubit>().isStepValid)
                           ? null
                           : () {
+                              FocusScope.of(context).unfocus();
                               if (isLastStep) {
                                 if (isValid) {
                                   context
