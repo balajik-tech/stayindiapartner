@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart' as ll;
+import 'package:stayindia_owner/core/utils/text_utils.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'geofence_intro_screen.dart';
@@ -675,7 +676,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          TextUtils.capitalize(label),
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,
