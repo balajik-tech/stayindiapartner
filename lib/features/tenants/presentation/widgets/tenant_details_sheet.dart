@@ -705,11 +705,12 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
   }
 
   Widget _buildKycDocuments(TenantDetailEntity? detail) {
-    final verified = detail?.kycVerified ?? false;
+    // final verified = detail?.kycVerified ?? false;
     final aadharPhotoUrl = ApiConstants.getImageUrl(detail?.aadharCardPhoto);
     final aadharPhotoBackUrl = ApiConstants.getImageUrl(detail?.idPhotoBack);
     final maskedAadhaar = detail?.aadhaarNumber;
     final dlKyc = detail?.dlKyc;
+    final verified = (dlKyc?.isAadharVerified ?? false);
 
     return _buildSection(
       'kyc_docs'.tr(),
@@ -811,7 +812,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                   ),
               ],
             ),
-            if (aadharPhotoUrl != null && aadharPhotoUrl.isNotEmpty) ...[
+            if (aadharPhotoUrl != null && aadharPhotoUrl.isNotEmpty && !verified) ...[
               SizedBox(height: 12.h),
               const Divider(height: 1, color: Color(0xFFE5E7EB)),
               SizedBox(height: 12.h),
@@ -935,7 +936,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 ),
               ),
             ],
-            if (aadharPhotoBackUrl != null && aadharPhotoBackUrl.isNotEmpty) ...[
+            if (aadharPhotoBackUrl != null && aadharPhotoBackUrl.isNotEmpty && !verified) ...[
               SizedBox(height: 12.h),
               const Divider(height: 1, color: Color(0xFFE5E7EB)),
               SizedBox(height: 12.h),
