@@ -511,6 +511,16 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     );
   }
 
+  bool _isValidIndianMobile(String phone) {
+    final clean = phone.replaceAll(RegExp(r'\D'), '');
+    if (clean.length == 10) {
+      return RegExp(r'^[6-9]\d{9}$').hasMatch(clean);
+    } else if (clean.length == 12 && clean.startsWith('91')) {
+      return RegExp(r'^91[6-9]\d{9}$').hasMatch(clean);
+    }
+    return false;
+  }
+
   Widget _buildGuardianMobilesSection(TenantDetailEntity? detail) {
     final list = detail?.guardianMobiles ?? [];
     if (list.isEmpty) return const SizedBox.shrink();
@@ -518,9 +528,9 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     return _buildSection(
       'Parent / Guardian Details',
       Container(
-        padding: EdgeInsets.symmetric(horizontal:16,vertical: 4),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
-          color:  Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
             color: AppColors.roomCardBorder.withValues(alpha: 0.5),
@@ -530,6 +540,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
           children: list.asMap().entries.map((entry) {
             final idx = entry.key;
             final g = entry.value;
+            final isValidMobile = _isValidIndianMobile(g.mobileNumber);
             return Column(
               children: [
                 if (idx > 0)
@@ -547,7 +558,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         color: const Color(0xFFFFF7F2),
                         borderRadius: BorderRadius.circular(10.r),
                         border: Border.all(
-                          color:  AppColors.primaryBlue.withValues(alpha: 0.2),
+                          color: AppColors.primaryBlue.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Icon(
@@ -599,7 +610,9 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         g.mobileNumber,
                         style: TextStyle(
                           fontSize: 13.sp,
-                          color: AppColors.greyText,
+                          color: isValidMobile
+                              ? AppColors.greyText
+                              : Colors.redAccent,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -610,14 +623,32 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       // Call Button
                       IconButton(
                         onPressed: () async {
-                          final uri = Uri.parse('tel:${g.mobileNumber}');
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(uri);
+                          final clean = g.mobileNumber.replaceAll(RegExp(r'\D'), '');
+                          final numberToCall =
+                              clean.length == 12 && clean.startsWith('91')
+                                  ? clean.substring(2)
+                                  : clean;
+                          if (isValidMobile) {
+                            final uri = Uri.parse('tel:$numberToCall');
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri);
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Invalid mobile number: ${g.mobileNumber}',
+                                ),
+                                backgroundColor: Colors.redAccent,
+                              ),
+                            );
                           }
                         },
                         icon: Icon(
                           Icons.call_rounded,
-                          color: AppColors.primaryBlue,
+                          color: isValidMobile
+                              ? AppColors.primaryBlue
+                              : AppColors.greyText,
                           size: 20.sp,
                         ),
                         padding: EdgeInsets.zero,

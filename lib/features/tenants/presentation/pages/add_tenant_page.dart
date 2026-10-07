@@ -461,9 +461,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
       final cRelation = _getRelationForIndex(i);
 
       if (cPhone.isNotEmpty) {
-        if (cPhone.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(cPhone)) {
+        if (cPhone.length != 10 || !RegExp(r'^[6-9]\d{9}$').hasMatch(cPhone)) {
           setState(() {
-            _emergencyMobileErrors[i] = "Enter a valid 10-digit number";
+            _emergencyMobileErrors[i] = "Enter a valid 10-digit mobile number";
           });
           hasGuardianError = true;
         } else {
@@ -1099,8 +1099,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
                     errorText: _emergencyMobileErrors[index],
                     onChanged: (val) {
                       setState(() {
-                        if (val.isNotEmpty && (val.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(val))) {
-                          _emergencyMobileErrors[index] = "Enter a valid 10-digit number";
+                        if (val.isNotEmpty && (val.length != 10 || !RegExp(r'^[6-9]\d{9}$').hasMatch(val))) {
+                          _emergencyMobileErrors[index] = "Enter a valid 10-digit mobile number";
                         } else {
                           _emergencyMobileErrors[index] = null;
                         }
