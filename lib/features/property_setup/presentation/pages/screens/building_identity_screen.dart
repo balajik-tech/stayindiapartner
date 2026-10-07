@@ -310,28 +310,28 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
 
                     SizedBox(height: 32.h),
 
-                    Text(
-                      'property_images'.tr(),
-                      style: TextStyle(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF1E3A8A),
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      'property_images_sub'.tr(),
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: const Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 16.h),
-                    _buildImageCategories(context, state),
+                    // Text(
+                    //   'property_images'.tr(),
+                    //   style: TextStyle(
+                    //     fontSize: 22.sp,
+                    //     fontWeight: FontWeight.w900,
+                    //     color: const Color(0xFF1E3A8A),
+                    //     letterSpacing: -0.5,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 8.h),
+                    // Text(
+                    //   'property_images_sub'.tr(),
+                    //   style: TextStyle(
+                    //     fontSize: 14.sp,
+                    //     color: const Color(0xFF64748B),
+                    //     fontWeight: FontWeight.w500,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 16.h),
+                    // _buildImageCategories(context, state),
 
-                    SizedBox(height: 32.h),
+                    // SizedBox(height: 32.h),
 
                     //  commented compliance documents
 
@@ -948,145 +948,115 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomPaint(
-            painter: DashedRectPainter(
-              color: images.isNotEmpty
-                  ? const Color(0xFFFF7A00).withValues(alpha: 0.5)
-                  : const Color(0xFFCBD5E1),
-              strokeWidth: 1.5,
-              gap: 4,
-            ),
-            child: Container(
-              width: double.infinity,
-              height: 180.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.r),
-                image: images.isNotEmpty
-                    ? DecorationImage(
-                        image: FileImage(File(images.last)),
-                        fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                          Colors.black.withValues(alpha: 0.1),
-                          BlendMode.darken,
-                        ),
-                      )
-                    : null,
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              _showTopImagePickerBottomSheet(context);
+            },
+            child: CustomPaint(
+              painter: DashedRectPainter(
+                color: images.isNotEmpty
+                    ? const Color(0xFFFF7A00).withValues(alpha: 0.5)
+                    : const Color(0xFFCBD5E1),
+                strokeWidth: 1.5,
+                gap: 4,
               ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  if (images.isEmpty)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(12.r),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFF7ED),
-                            shape: BoxShape.circle,
+              child: Container(
+                width: double.infinity,
+                height: 180.h,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.r),
+                  image: images.isNotEmpty
+                      ? DecorationImage(
+                          image: FileImage(File(images.last)),
+                          fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(
+                            Colors.black.withValues(alpha: 0.1),
+                            BlendMode.darken,
                           ),
-                          child: Icon(
-                            Icons.add_photo_alternate_outlined,
-                            color: const Color(0xFFEA580C),
-                            size: 32.sp,
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          'Add photos',
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w900,
-                            color: const Color(0xFF1E293B),
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'JPG or PNG · up to 5 MB each',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: const Color(0xFF64748B),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    )
-                  else
-                    Positioned(
-                      top: 12.r,
-                      right: 12.r,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.collections_rounded,
-                              color: Colors.white,
-                              size: 14.sp,
+                        )
+                      : null,
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (images.isEmpty)
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(12.r),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFF7ED),
+                              shape: BoxShape.circle,
                             ),
-                            SizedBox(width: 6.w),
-                            Text(
-                              '${images.length} Photos',
-                              style: TextStyle(
+                            child: Icon(
+                              Icons.add_photo_alternate_outlined,
+                              color: const Color(0xFFEA580C),
+                              size: 32.sp,
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            'Add photos',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF1E293B),
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            'JPG or PNG · up to 5 MB each',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: const Color(0xFF64748B),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Positioned(
+                        top: 12.r,
+                        right: 12.r,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(20.r),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.collections_rounded,
                                 color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w800,
+                                size: 14.sp,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 6.w),
+                              Text(
+                                '${images.length} Photos',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 24.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildSourceActionButton(
-                  context,
-                  icon: Icons.photo_library_rounded,
-                  label: 'Gallery',
-                  isPrimary: true,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    cubit.pickCategoryImage(
-                      'Exterior',
-                      source: ImageSource.gallery,
-                    );
-                  },
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildSourceActionButton(
-                  context,
-                  icon: Icons.camera_alt_rounded,
-                  label: 'Camera',
-                  isPrimary: false,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    cubit.pickCategoryImage(
-                      'Exterior',
-                      source: ImageSource.camera,
-                    );
-                  },
-                ),
-              ),
-            ],
           ),
           SizedBox(height: 16.h),
           Text(
@@ -1100,7 +1070,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
           if (images.isNotEmpty) ...[
             SizedBox(height: 20.h),
             SizedBox(
-              height: 90.h,
+              height: 60.h,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
@@ -1108,7 +1078,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                 itemBuilder: (context, idx) {
                   final imgPath = images[idx];
                   return Container(
-                    width: 90.w,
+                    width: 55.w,
                     margin: EdgeInsets.only(right: 12.w),
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -1133,8 +1103,8 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                           ),
                         ),
                         Positioned(
-                          top: -4.r,
-                          right: -4.r,
+                          top: -3.r,
+                          right: -3.r,
                           child: GestureDetector(
                             onTap: () {
                               HapticFeedback.mediumImpact();
@@ -1166,44 +1136,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     );
   }
 
-  Widget _buildSourceActionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isPrimary,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 14.h),
-        decoration: BoxDecoration(
-          color: isPrimary ? const Color(0xFFF97316) : Colors.white,
-          borderRadius: BorderRadius.circular(14.r),
-          border: isPrimary ? null : Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isPrimary ? Colors.white : const Color(0xFF1E293B),
-              size: 20.sp,
-            ),
-            SizedBox(width: 8.w),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w800,
-                color: isPrimary ? Colors.white : const Color(0xFF1E293B),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildFilePicker(
     BuildContext context, {
@@ -1522,11 +1455,165 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     );
   }
 
+  void _showTopImagePickerBottomSheet(BuildContext context) {
+    final cubit = context.read<PropertySetupCubit>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(32.r),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+              ),
+              SizedBox(height: 24.h),
+              Text(
+                'property_images'.tr(),
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF1E3A8A),
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                'Add photo using camera or gallery',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 24.h),
+              _buildImageSourceListItem(
+                context,
+                icon: Icons.camera_alt_rounded,
+                title: 'camera'.tr(),
+                subtitle: 'Take a photo with your camera',
+                onTap: () {
+                  Navigator.pop(context);
+                  cubit.pickCategoryImage(
+                    'Exterior',
+                    source: ImageSource.camera,
+                    maxImages: 10,
+                  );
+                },
+              ),
+              SizedBox(height: 12.h),
+              _buildImageSourceListItem(
+                context,
+                icon: Icons.photo_library_rounded,
+                title: 'gallery'.tr(),
+                subtitle: 'Choose an existing photo from gallery',
+                onTap: () {
+                  Navigator.pop(context);
+                  cubit.pickCategoryImage(
+                    'Exterior',
+                    source: ImageSource.gallery,
+                    maxImages: 10,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImageSourceListItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFF7ED),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFFFF7A00),
+                size: 24.sp,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: const Color(0xFF94A3B8),
+              size: 22.sp,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showImageSourceSheet(
     BuildContext context,
     String category,
-    String categoryName,
-  ) {
+    String categoryName, {
+    int maxImages = 5,
+  }) {
     final cubit = context.read<PropertySetupCubit>();
     showModalBottomSheet(
       context: context,

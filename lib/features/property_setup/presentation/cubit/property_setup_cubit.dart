@@ -220,14 +220,19 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
   Future<void> pickCategoryImage(
     String category, {
     ImageSource source = ImageSource.gallery,
+    int maxImages = 5,
   }) async {
     try {
       final currentMap = Map<String, List<String>>.from(
         state.categorizedImages,
       );
       final currentImages = List<String>.from(currentMap[category] ?? []);
-      if (currentImages.length >= 5) {
-        emit(state.copyWith(error: 'Maximum 5 images allowed per category.'));
+      if (currentImages.length >= maxImages) {
+        emit(
+          state.copyWith(
+            error: 'Maximum $maxImages images allowed for this category.',
+          ),
+        );
         return;
       }
 
