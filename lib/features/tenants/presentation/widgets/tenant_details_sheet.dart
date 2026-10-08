@@ -14,6 +14,8 @@ import 'package:stayindia_owner/features/tenants/presentation/pages/history/tena
 import 'package:stayindia_owner/features/notices/presentation/pages/give_notice_page.dart';
 import 'package:stayindia_owner/features/tenants/presentation/pages/complaints_history_page.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/features/finance/presentation/cubit/payment_report_cubit.dart';
+import 'package:stayindia_owner/features/tenants/presentation/widgets/collect_payment_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TenantDetailsSheet extends StatefulWidget {
@@ -82,6 +84,45 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
       );
       if (mounted) setState(() => _rentals = rentals);
     } catch (_) {}
+  }
+
+  void _openCollectPaymentForRental({
+    required double rent,
+    required double deposit,
+    required double maintenance,
+    required double totalAmount,
+    String? bookingId,
+    String checkInDate = '',
+    String checkOutDate = '',
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return BlocProvider(
+          create: (_) => sl<PaymentReportCubit>(),
+          child: CollectPaymentBottomSheet(
+            tenantId: widget.tenantId,
+            hostelId: widget.hostelId,
+            bookingId: bookingId,
+            rent: rent,
+            securityDeposit: deposit,
+            maintainance: maintenance,
+            totalAmount: totalAmount,
+            checkInDate: checkInDate,
+            checkOutDate: checkOutDate,
+          ),
+        );
+      },
+    ).then((updated) {
+      if (updated == true) {
+        _loadRentals();
+        if (widget.tenantId.isNotEmpty && widget.hostelId.isNotEmpty) {
+          _cubit.loadDetail(widget.tenantId, widget.hostelId);
+        }
+      }
+    });
   }
 
   @override
@@ -1363,62 +1404,154 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 : const Color(0xFF12B76A).withValues(alpha: 0.3),
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            Icon(
-              isDue ? Icons.warning_amber_rounded : Icons.verified_rounded,
-              color: isDue ? const Color(0xFFF04438) : const Color(0xFF12B76A),
-              size: 32.sp,
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            Row(
+              children: [
+                Icon(
+                  isDue ? Icons.warning_amber_rounded : Icons.verified_rounded,
+                  color: isDue ? const Color(0xFFF04438) : const Color(0xFF12B76A),
+                  size: 32.sp,
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          Text(
+                            isDue ? 'amount_due'.tr() : 'all_dues_clear'.tr(),
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: isDue
+                                  ? const Color(0xFFF04438).withValues(alpha: 0.6)
+                                  : const Color(0xFF12B76A).withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 2.h),
                       Text(
-                        isDue ? 'amount_due'.tr() : 'all_dues_clear'.tr(),
+                        isDue ? totalDue.toStringAsFixed(0) : 'great_job'.tr(),
                         style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.bold,
                           color: isDue
-                              ? const Color(0xFFF04438).withValues(alpha: 0.6)
-                              : const Color(0xFF12B76A).withValues(alpha: 0.6),
+                              ? const Color(0xFFF04438)
+                              : const Color(0xFF12B76A),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    isDue ? totalDue.toStringAsFixed(0) : 'great_job'.tr(),
-                    style: TextStyle(
-                      fontSize: 22.sp,
-                      fontWeight: FontWeight.bold,
-                      color: isDue
-                          ? const Color(0xFFF04438)
-                          : const Color(0xFF12B76A),
+                ),
+                if (pendingCount > 0)...[
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF04438),
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Text(
+                      'pending_due_summary'.tr(),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
-            if (pendingCount > 0)
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF04438),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Text(
-                  'pending_due_summary'.tr(),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                if (isDue) ...[
+                  SizedBox(width: 8.w),
+                  InkWell(
+                    onTap: () {
+                      final pendingRentals = rentals.where((r) => !r.isPaid);
+
+                      final firstPending = pendingRentals.isNotEmpty
+                          ? pendingRentals.first
+                          : rentals.first;
+
+                      String renewCheckInDate = '';
+                      String renewCheckOutDate = '';
+
+                      if (hasExceededEndDate) {
+                        TenantRentalEntity? exceededRental;
+                        for (var r in rentals) {
+                          if (r.booking?.endDate != null &&
+                              r.booking!.endDate!.isNotEmpty) {
+                            try {
+                              final endDt =
+                                  DateTime.parse(r.booking!.endDate!).toLocal();
+                              final endDateOnly =
+                                  DateTime(endDt.year, endDt.month, endDt.day);
+                              if (today.isAfter(endDateOnly)) {
+                                exceededRental = r;
+                                break;
+                              }
+                            } catch (_) {}
+                          }
+                        }
+                        final target = exceededRental ?? firstPending;
+                        if (target.booking?.endDate != null &&
+                            target.booking!.endDate!.isNotEmpty) {
+                          try {
+                            final prevEndDt =
+                                DateTime.parse(target.booking!.endDate!)
+                                    .toLocal();
+                            final newCheckInDt =
+                                prevEndDt.add(const Duration(days: 1));
+                            final newCheckOutDt = DateTime(
+                                newCheckInDt.year, newCheckInDt.month + 1, 0);
+
+                            renewCheckInDate =
+                                DateFormat('yyyy-MM-dd').format(newCheckInDt);
+                            renewCheckOutDate =
+                                DateFormat('yyyy-MM-dd').format(newCheckOutDt);
+                          } catch (_) {}
+                        }
+                      }
+
+                      _openCollectPaymentForRental(
+                        rent: firstPending.bookingAmount > 0
+                            ? firstPending.bookingAmount
+                            : (firstPending.booking?.rent ?? 0.0),
+                        deposit: firstPending.deposit > 0
+                            ? firstPending.deposit
+                            : (firstPending.booking?.deposit ?? 0.0),
+                        maintenance: firstPending.maintenance > 0
+                            ? firstPending.maintenance
+                            : (firstPending.booking?.maintenance ?? 0.0),
+                        totalAmount: totalDue,
+                        bookingId: firstPending.booking?.id ?? firstPending.id,
+                        checkInDate: renewCheckInDate,
+                        checkOutDate: renewCheckOutDate,
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E3A8A),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Text(
+                        hasExceededEndDate ? 'Renew now' : 'Collect now',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                ]
+
+              ],
+            ),
           ],
         ),
       ),
@@ -1494,14 +1627,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                             alpha: 0.5,
                           ),
                         ),
-                      _buildPaymentItem(
-                        _formatMonth(p.month),
-                        p.paymentDate != null && p.paymentDate!.isNotEmpty
-                            ? _formatDate(p.paymentDate!)
-                            : '',
-                        p.status,
-                        color,
-                      ),
+                      _buildPaymentItem(p, color),
                     ],
                   );
                 }).toList(),
@@ -1558,58 +1684,88 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
   }
 
   Widget _buildPaymentItem(
-    String month,
-    String date,
-    String status,
+    TenantPaymentItemEntity item,
     Color statusColor,
   ) {
+    final statusUpper = item.status.toUpperCase();
+    final isPending = statusUpper.contains('PENDING') || statusUpper == 'CHECKED IN';
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            month,
-            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _formatMonth(item.month),
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
+              ),
+              if (item.paymentDate != null && item.paymentDate!.isNotEmpty) ...[
+                SizedBox(height: 2.h),
+                Text(
+                  _formatDate(item.paymentDate!),
+                  style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+                ),
+              ],
+            ],
           ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text(
-                    date,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: AppColors.greyText,
-                    ),
-                    textAlign: TextAlign.end,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 4.h,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  item.status,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 12.w),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 4.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    status,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
+              ),
+              if (isPending) ...[
+                SizedBox(width: 8.w),
+                InkWell(
+                  onTap: () {
+                    _openCollectPaymentForRental(
+                      rent: item.rent ?? 0.0,
+                      deposit: item.deposit ?? 0.0,
+                      maintenance: item.maintenance ?? 0.0,
+                      totalAmount: item.dueAmount > 0 ? item.dueAmount : item.totalAmount,
+                      bookingId: item.id,
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E3A8A),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      'Collect now',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
+
         ],
       ),
     );
