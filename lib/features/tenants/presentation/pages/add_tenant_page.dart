@@ -741,7 +741,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       dob: extractedAadhaarDOB,
       gender: extractedAadhaarGender.toLowerCase(),
       address: extractedAadhaarAddress,
-      totalAmount:totalAmount
+      totalAmount: double.parse(totalAmount.toStringAsFixed(2)),
     );
   }
 
