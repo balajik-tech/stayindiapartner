@@ -43,6 +43,7 @@ abstract class TenantRemoteDataSource {
     String? dob,
     String? gender,
     String? address,
+    double? totalAmount
   });
 
   Future<Map<String, dynamic>> bulkUploadTenants(File file, String hostelId);
@@ -135,6 +136,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     String? dob,
     String? gender,
     String? address,
+    double? totalAmount
   }) async {
     AppLogger.info('Adding manual tenant for hostel: $hostelId');
     final map = <String, dynamic>{
@@ -164,6 +166,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     if (dob != null) map['dob'] = dob;
     if (gender != null) map['gender'] = gender;
     if (address != null) map['address'] = address;
+    if(totalAmount != null) map['totalAmount'] = totalAmount;
 
     if (guardianMobiles != null && guardianMobiles.isNotEmpty) {
       map['guardianMobiles'] = jsonEncode(guardianMobiles);

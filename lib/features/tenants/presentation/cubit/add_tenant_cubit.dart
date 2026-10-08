@@ -128,6 +128,7 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     String? dob,
     String? gender,
     String? address,
+    double? totalAmount
   }) async {
     emit(AddTenantSubmitting());
     try {
@@ -157,7 +158,7 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         dob: dob,
         gender: gender,
         address: address,
-
+        totalAmount:totalAmount
     );
       emit(AddTenantSuccess(data: response));
       return response;

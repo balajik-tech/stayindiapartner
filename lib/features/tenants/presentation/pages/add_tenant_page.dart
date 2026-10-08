@@ -298,6 +298,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     required String dob,
     required String gender,
     required String address,
+    required double totalAmount
   }) {
     showModalBottomSheet(
       context: context,
@@ -332,6 +333,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
             selectedBed: _selectedBed!,
             stayType: _stayType,
             addTenantCubit: _addTenantCubit,
+            totalAmount:totalAmount
           ),
         );
       },
@@ -551,15 +553,15 @@ class _AddTenantPageState extends State<AddTenantPage> {
       }
     }
 
-    if (_userPhoto == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please take a user photo (Face validation required)'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
+    // if (_userPhoto == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text('Please take a user photo (Face validation required)'),
+    //       backgroundColor: Colors.redAccent,
+    //     ),
+    //   );
+    //   return;
+    // }
 
     if (_aadharPhoto == null || _aadharPhotoBack == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -633,6 +635,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
     String checkInDate = "";
     String checkOutDate = "";
     double? maintainance = 0;
+    // Calculate prorated rent
+    double calculatedRent = rent ?? 0.0;
+    double totalAmount = 0.0;
 
     if (_stayType == StayType.MONTHLY) {
       securityDeposit = double.tryParse(_depositController.text.trim());
@@ -641,15 +646,25 @@ class _AddTenantPageState extends State<AddTenantPage> {
           ? DateFormat('yyyy-MM-dd').format(_checkInDate!)
           : "";
       checkOutDate = _checkInDate != null
-          ? DateFormat('yyyy-MM-dd').format(
+          ? DateFormat(
+        'yyyy-MM-dd',
+      ).format(
         DateTime(
           _checkInDate!.year,
           _checkInDate!.month + 1,
-          _checkInDate!.day - 1,
+          0, // Last day of check-in month
         ),
       )
           : "";
       maintainance = double.tryParse(_maintenanceController.text.trim());
+      if (_checkInDate != null && rent != null) {
+        final DateTime monthEnd = DateTime(_checkInDate!.year, _checkInDate!.month + 1, 0);
+        final int daysInMonth = monthEnd.day;
+        final int occupiedDays = monthEnd.day - _checkInDate!.day + 1;
+
+        calculatedRent = (rent / daysInMonth) * occupiedDays;
+      }
+      totalAmount = calculatedRent + securityDeposit! + maintainance!;
     } else if (_stayType == StayType.CUSTOM) {
       securityDeposit = double.tryParse(_customDepositController.text.trim());
       rent = double.tryParse(_dayRentController.text.trim());
@@ -660,6 +675,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
           ? DateFormat('yyyy-MM-dd').format(_checkOutDate!)
           : "";
       maintainance = 0;
+      totalAmount = calculatedRent + securityDeposit! + maintainance;
     }
 
     String? roomType = _isAC == true ? "AC" : "NON-AC";
@@ -689,6 +705,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
         dob: extractedAadhaarDOB,
         gender: extractedAadhaarGender.toLowerCase(),
         address: extractedAadhaarAddress,
+        totalAmount: double.parse(
+          double.tryParse(totalAmount as String)?.toStringAsFixed(2) ?? "0.00",
+        ),
       );
       return;
     }
@@ -724,6 +743,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       dob: extractedAadhaarDOB,
       gender: extractedAadhaarGender.toLowerCase(),
       address: extractedAadhaarAddress,
+      totalAmount:totalAmount
     );
   }
 
@@ -2585,6 +2605,7 @@ class _CollectPaymentBottomSheet extends StatefulWidget {
   final String selectedBed;
   final StayType stayType;
   final AddTenantCubit addTenantCubit;
+  final double totalAmount;
 
   const _CollectPaymentBottomSheet({
     required this.phone,
@@ -2612,6 +2633,7 @@ class _CollectPaymentBottomSheet extends StatefulWidget {
     required this.selectedBed,
     required this.stayType,
     required this.addTenantCubit,
+    required this.totalAmount
   });
 
   @override
@@ -2628,12 +2650,65 @@ class _CollectPaymentBottomSheetState
   String _collectionType = 'Full amount';
   bool _isSubmitting = false;
 
+  int get _occupiedDays {
+    if (widget.checkInDate.isEmpty) return 0;
+    try {
+      final checkIn = DateTime.parse(widget.checkInDate);
+      if (widget.stayType == StayType.MONTHLY) {
+        final monthEnd = DateTime(checkIn.year, checkIn.month + 1, 0);
+        return monthEnd.day - checkIn.day + 1;
+      } else if (widget.stayType == StayType.CUSTOM && widget.checkOutDate.isNotEmpty) {
+        final checkOut = DateTime.parse(widget.checkOutDate);
+        return checkOut.difference(checkIn).inDays + 1;
+      }
+    } catch (_) {}
+    return 0;
+  }
+
+  int get _daysInMonth {
+    if (widget.checkInDate.isEmpty) return 30;
+    try {
+      final checkIn = DateTime.parse(widget.checkInDate);
+      final monthEnd = DateTime(checkIn.year, checkIn.month + 1, 0);
+      return monthEnd.day;
+    } catch (_) {}
+    return 30;
+  }
+
+  double get _calculatedProratedRent {
+    if (widget.stayType == StayType.MONTHLY) {
+      if (_occupiedDays > 0 && _daysInMonth > 0) {
+        return (widget.rent / _daysInMonth) * _occupiedDays;
+      }
+    } else if (widget.stayType == StayType.CUSTOM) {
+      if (_occupiedDays > 0) {
+        return widget.rent * _occupiedDays;
+      }
+    }
+    return widget.rent;
+  }
+
+  bool get _isProrated {
+    if (widget.stayType == StayType.MONTHLY) {
+      return _occupiedDays > 0 && _occupiedDays < _daysInMonth;
+    } else if (widget.stayType == StayType.CUSTOM) {
+      return true;
+    }
+    return false;
+  }
+
+  double get _baseTotal {
+    if (widget.totalAmount > 0) {
+      return widget.totalAmount;
+    }
+    return _calculatedProratedRent + widget.securityDeposit + widget.maintainance;
+  }
+
   @override
   void initState() {
     super.initState();
-    double total = widget.rent + widget.securityDeposit + widget.maintainance;
     _collectingNowController =
-        TextEditingController(text: total.toStringAsFixed(0));
+        TextEditingController(text: _baseTotal.toStringAsFixed(0));
   }
 
   @override
@@ -2645,18 +2720,10 @@ class _CollectPaymentBottomSheetState
 
   void _onCollectionTypeChanged(String type) {
     double totalDue =
-        (widget.rent + widget.securityDeposit + widget.maintainance - _discountAmount)
-            .clamp(0, double.infinity);
+        (_baseTotal - _discountAmount).clamp(0, double.infinity);
     setState(() {
       _collectionType = type;
-      if (type == 'Full amount') {
-        _collectingNowController.text = totalDue.toStringAsFixed(0);
-      } else if (type == 'Deposit only') {
-        _collectingNowController.text =
-            widget.securityDeposit.toStringAsFixed(0);
-      } else {
-        _collectingNowController.text = '0';
-      }
+      _collectingNowController.text = totalDue.toStringAsFixed(0);
     });
   }
 
@@ -2723,13 +2790,9 @@ class _CollectPaymentBottomSheetState
                 onPressed: () {
                   setState(() {
                     _discountAmount = 0.0;
-                    double totalDue =
-                        (widget.rent + widget.securityDeposit + widget.maintainance)
-                            .clamp(0, double.infinity);
-                    if (_collectionType == 'Full amount') {
-                      _collectingNowController.text =
-                          totalDue.toStringAsFixed(0);
-                    }
+                    double totalDue = _baseTotal.clamp(0, double.infinity);
+                    _collectingNowController.text =
+                        totalDue.toStringAsFixed(0);
                   });
                   Navigator.pop(dialogContext);
                 },
@@ -2749,8 +2812,7 @@ class _CollectPaymentBottomSheetState
               onPressed: () {
                 double discount =
                     double.tryParse(_discountController.text.trim()) ?? 0.0;
-                double maxTotal =
-                    widget.rent + widget.securityDeposit + widget.maintainance;
+                double maxTotal = _baseTotal;
                 if (discount > maxTotal) {
                   discount = maxTotal;
                 }
@@ -2758,10 +2820,8 @@ class _CollectPaymentBottomSheetState
                   _discountAmount = discount;
                   double totalDue =
                       (maxTotal - _discountAmount).clamp(0, double.infinity);
-                  if (_collectionType == 'Full amount') {
-                    _collectingNowController.text =
-                        totalDue.toStringAsFixed(0);
-                  }
+                  _collectingNowController.text =
+                      totalDue.toStringAsFixed(0);
                 });
                 Navigator.pop(dialogContext);
               },
@@ -2787,6 +2847,9 @@ class _CollectPaymentBottomSheetState
 
   Future<void> _handleProceed() async {
     setState(() => _isSubmitting = true);
+
+    double finalTotal = (_baseTotal - _discountAmount).clamp(0, double.infinity);
+    final String totalAmount = finalTotal.toStringAsFixed(2);
 
     try {
       final response = await widget.addTenantCubit.submit(
@@ -2818,6 +2881,7 @@ class _CollectPaymentBottomSheetState
         dob: widget.dob,
         gender: widget.gender,
         address: widget.address,
+        totalAmount: double.tryParse(totalAmount) ?? 0.0,
       );
 
       if (response != null && mounted) {
@@ -2826,34 +2890,19 @@ class _CollectPaymentBottomSheetState
         final String bookingId = (data['bookingId'] ?? data['_id'] ?? '').toString();
         final String hostelId = (data['hostel']?['_id'] ?? widget.selectedHostel.id).toString();
 
-        double collectingNow = double.tryParse(_collectingNowController.text) ?? 0;
+        double collectingNow = finalTotal;
 
         if (collectingNow > 0) {
-          double rentPaid = 0;
-          double depositPaid = 0;
-          double maintenancePaid = 0;
-          
-          if (_collectionType == 'Deposit only') {
-             depositPaid = collectingNow;
-          } else if (_collectionType == 'Full amount') {
-             rentPaid = widget.rent;
-             depositPaid = widget.securityDeposit;
-             maintenancePaid = widget.maintainance;
-          } else {
-             double remaining = collectingNow;
-             rentPaid = remaining >= widget.rent ? widget.rent : remaining;
-             remaining -= rentPaid;
-             depositPaid = remaining >= widget.securityDeposit ? widget.securityDeposit : remaining;
-             remaining -= depositPaid;
-             maintenancePaid = remaining >= widget.maintainance ? widget.maintainance : remaining;
-          }
+          double rentPaid = _calculatedProratedRent;
+          double depositPaid = widget.securityDeposit;
+          double maintenancePaid = widget.maintainance;
 
           await context.read<PaymentReportCubit>().submitPayment(
                 tenantId: tenantId,
                 hostelId: hostelId,
                 bookingId: bookingId,
-                amount: collectingNow,
-                rent: rentPaid,
+                amount: double.parse(collectingNow.toStringAsFixed(2)),
+                rent: double.parse(rentPaid.toStringAsFixed(2)),
                 deposit: depositPaid,
                 utilities: 0,
                 others: maintenancePaid,
@@ -2882,12 +2931,23 @@ class _CollectPaymentBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    double originalTotal = widget.rent + widget.securityDeposit + widget.maintainance;
-    double totalDue = (originalTotal - _discountAmount).clamp(0, double.infinity);
+    double originalTotal = _baseTotal;
+    double finalTotal = (originalTotal - _discountAmount).clamp(0, double.infinity);
     final authState = context.read<AuthCubit>().state;
     String collectorName = "You";
     if (authState is AuthAuthenticated) {
       collectorName = "${authState.owner.name} (you)";
+    }
+
+    String? rentSubtitle;
+    if (_isProrated) {
+      rentSubtitle = '$_occupiedDays days stay (Prorated: ₹${NumberFormat('#,##,###').format(_calculatedProratedRent)})';
+    } else if (widget.checkInDate.isNotEmpty) {
+      try {
+        final checkIn = DateTime.parse(widget.checkInDate);
+        final monthEnd = DateTime(checkIn.year, checkIn.month + 1, 0);
+        rentSubtitle = '${DateFormat('dd MMM').format(checkIn)} - ${DateFormat('dd MMM').format(monthEnd)}';
+      } catch (_) {}
     }
 
     return Container(
@@ -2949,7 +3009,7 @@ class _CollectPaymentBottomSheetState
               ),
               child: Column(
                 children: [
-                  _buildDueItem('Rent', widget.rent),
+                  _buildDueItem('Rent', widget.rent, subtitle: rentSubtitle),
                   SizedBox(height: 12.h),
                   _buildDueItem('Security deposit', widget.securityDeposit),
                   SizedBox(height: 12.h),
@@ -2990,7 +3050,8 @@ class _CollectPaymentBottomSheetState
                         ),
                       ],
                     ),
-                  ] else ...[
+                  ]
+                  else ...[
                     GestureDetector(
                       onTap: _showDiscountDialog,
                       child: Row(
@@ -3011,73 +3072,121 @@ class _CollectPaymentBottomSheetState
                     padding: EdgeInsets.symmetric(vertical: 16.h),
                     child: Divider(color: Colors.grey[200]),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Total due',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
+                  if (_discountAmount > 0) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total due',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[500],
+                            decoration: TextDecoration.lineThrough,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '₹${NumberFormat('#,##,###').format(totalDue)}',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1E3A8A),
+                        Text(
+                          '₹${NumberFormat('#,##,###').format(originalTotal)}',
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[500],
+                            decoration: TextDecoration.lineThrough,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total amount',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          '₹${NumberFormat('#,##,###').format(finalTotal)}',
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF1E3A8A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total amount',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          '₹${NumberFormat('#,##,###').format(originalTotal)}',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF1E3A8A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
-            SizedBox(height: 24.h),
-            Text(
-              'Collecting now',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
-              ),
-            ),
-            SizedBox(height: 8.h),
-            TextField(
-              controller: _collectingNowController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFF1F5F9),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-              ),
-            ),
-            SizedBox(height: 16.h),
-            Row(
-              children: [
-                _buildToggleBtn('Full amount'),
-                SizedBox(width: 8.w),
-                _buildToggleBtn('Deposit only'),
-                SizedBox(width: 8.w),
-                _buildToggleBtn('Nothing now'),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'Balance carried forward: ₹${(totalDue - (double.tryParse(_collectingNowController.text) ?? 0)).toStringAsFixed(0)}',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Colors.grey[500],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            // SizedBox(height: 24.h),
+            // Text(
+            //   'Collecting now',
+            //   style: TextStyle(
+            //     fontSize: 14.sp,
+            //     fontWeight: FontWeight.w600,
+            //     color: Colors.grey[600],
+            //   ),
+            // ),
+            // SizedBox(height: 8.h),
+            // TextField(
+            //   controller: _collectingNowController,
+            //   keyboardType: TextInputType.number,
+            //   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+            //   decoration: InputDecoration(
+            //     filled: true,
+            //     fillColor: const Color(0xFFF1F5F9),
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(12.r),
+            //       borderSide: BorderSide.none,
+            //     ),
+            //     contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            //   ),
+            // ),
+            // SizedBox(height: 16.h),
+            // Row(
+            //   children: [
+            //     _buildToggleBtn('Full amount'),
+            //     SizedBox(width: 8.w),
+            //     _buildToggleBtn('Deposit only'),
+            //     SizedBox(width: 8.w),
+            //     _buildToggleBtn('Nothing now'),
+            //   ],
+            // ),
+            // SizedBox(height: 12.h),
+            // Text(
+            //   'Balance carried forward: ₹${(totalDue - (double.tryParse(_collectingNowController.text) ?? 0)).toStringAsFixed(0)}',
+            //   style: TextStyle(
+            //     fontSize: 12.sp,
+            //     color: Colors.grey[500],
+            //     fontWeight: FontWeight.w500,
+            //   ),
+            // ),
             SizedBox(height: 24.h),
             Text(
               'Payment method',
@@ -3156,9 +3265,10 @@ class _CollectPaymentBottomSheetState
     );
   }
 
-  Widget _buildDueItem(String label, double amount) {
+  Widget _buildDueItem(String label, double amount, {String? subtitle}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -3171,14 +3281,17 @@ class _CollectPaymentBottomSheetState
                 fontWeight: FontWeight.w500,
               ),
             ),
-            if (label == 'Rent')
+            if (subtitle != null && subtitle.isNotEmpty) ...[
+              SizedBox(height: 2.h),
               Text(
-                '${DateFormat('dd MMM').format(DateTime.now())} - ${DateFormat('dd MMM').format(DateTime.now().add(const Duration(days: 30)))}, pro-rated',
+                subtitle,
                 style: TextStyle(
                   fontSize: 11.sp,
-                  color: Colors.grey[400],
+                  color: const Color(0xFF2563EB),
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+            ],
           ],
         ),
         Text(

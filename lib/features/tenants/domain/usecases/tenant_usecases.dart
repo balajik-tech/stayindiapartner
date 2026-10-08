@@ -73,6 +73,7 @@ class AddTenantUseCase {
     String? dob,
     String? gender,
     String? address,
+    double? totalAmount
   }) {
     return repository.addManualTenant(
       phone: phone,
@@ -99,6 +100,7 @@ class AddTenantUseCase {
       dob: dob,
       gender: gender,
       address: address,
+      totalAmount:totalAmount
     );
   }
 }

@@ -55,6 +55,7 @@ class TenantRepositoryImpl implements TenantRepository {
     String? dob,
     String? gender,
     String? address,
+    double? totalAmount
   }) => remote.addManualTenant(
     phone: phone,
     hostelId: hostelId,
@@ -80,6 +81,7 @@ class TenantRepositoryImpl implements TenantRepository {
     dob: dob,
     gender: gender,
     address: address,
+    totalAmount:totalAmount
   );
 
   @override
