@@ -48,6 +48,20 @@ class _AddTenantPageState extends State<AddTenantPage> {
   final List<TextEditingController> _emergencyMobileControllers = [];
   final List<String?> _emergencyNameErrors = [];
   final List<String?> _emergencyMobileErrors = [];
+  final List<String> _allEmergencyRelations = [
+    'Father',
+    'Mother',
+    'Guardian 1',
+    'Guardian 2',
+    'Guardian 3',
+  ];
+  final List<String> _emergencyRelations = [];
+
+  List<String> get _availableRelations {
+    return _allEmergencyRelations
+        .where((r) => !_emergencyRelations.contains(r))
+        .toList();
+  }
 
   DateTime? _checkOutDate;
   StayType _stayType = StayType.MONTHLY;
@@ -123,6 +137,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
   }
 
   String _getRelationForIndex(int index) {
+    if (index < _emergencyRelations.length) {
+      return _emergencyRelations[index];
+    }
     if (index == 0) return 'Father';
     if (index == 1) return 'Mother';
     return 'Guardian ${index - 1}';
@@ -458,7 +475,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
     for (int i = 0; i < _emergencyMobileControllers.length; i++) {
       final cName = _emergencyNameControllers[i].text.trim();
       final cPhone = _emergencyMobileControllers[i].text.trim();
-      final cRelation = _getRelationForIndex(i);
+      final cRelation = i < _emergencyRelations.length
+          ? _emergencyRelations[i]
+          : _getRelationForIndex(i);
 
       if (cPhone.isNotEmpty) {
         if (cPhone.length != 10 || !RegExp(r'^[6-9]\d{9}$').hasMatch(cPhone)) {
@@ -996,14 +1015,19 @@ class _AddTenantPageState extends State<AddTenantPage> {
           "Parent / Guardian Details",
           subtitle: "Add up to 5 parent or guardian contacts",
         ),
-        SizedBox(height: 12.h),
+        if (_emergencyRelations.isNotEmpty) SizedBox(height: 12.h),
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _emergencyMobileControllers.length,
+          itemCount: _emergencyRelations.length,
           separatorBuilder: (context, index) => SizedBox(height: 16.h),
           itemBuilder: (context, index) {
-            final relation = _getRelationForIndex(index);
+            final currentRelation = _emergencyRelations[index];
+            final cardAvailableRelations = [
+              currentRelation,
+              ..._availableRelations,
+            ];
+
             return Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
@@ -1032,12 +1056,43 @@ class _AddTenantPageState extends State<AddTenantPage> {
                             ),
                           ),
                           SizedBox(width: 8.w),
-                          Text(
-                            relation,
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1E293B),
+                          DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: currentRelation,
+                              icon: Padding(
+                                padding: EdgeInsets.only(left: 4.w),
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: const Color(0xFFF26B1A),
+                                  size: 18.sp,
+                                ),
+                              ),
+                              isDense: true,
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1E293B),
+                              ),
+                              items: cardAvailableRelations.map((rel) {
+                                return DropdownMenuItem<String>(
+                                  value: rel,
+                                  child: Text(
+                                    rel,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (newRel) {
+                                if (newRel != null && newRel != currentRelation) {
+                                  setState(() {
+                                    _emergencyRelations[index] = newRel;
+                                  });
+                                }
+                              },
                             ),
                           ),
                         ],
@@ -1045,9 +1100,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       InkWell(
                         onTap: () {
                           setState(() {
+                            _emergencyRelations.removeAt(index);
                             _emergencyNameControllers[index].dispose();
-                            _emergencyMobileControllers[index].dispose();
                             _emergencyNameControllers.removeAt(index);
+                            _emergencyMobileControllers[index].dispose();
                             _emergencyMobileControllers.removeAt(index);
                             _emergencyNameErrors.removeAt(index);
                             _emergencyMobileErrors.removeAt(index);
@@ -1066,7 +1122,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   ),
                   SizedBox(height: 12.h),
                   _buildField(
-                    label: "$relation Name",
+                    label: "$currentRelation Name",
                     controller: _emergencyNameControllers[index],
                     icon: Icons.person_outline_rounded,
                     hintText: "Enter name",
@@ -1083,7 +1139,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   ),
                   SizedBox(height: 12.h),
                   _buildField(
-                    label: "$relation Mobile Number",
+                    label: "$currentRelation Mobile Number",
                     controller: _emergencyMobileControllers[index],
                     icon: Icons.phone_android_outlined,
                     keyboardType: TextInputType.phone,
@@ -1099,8 +1155,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
                     errorText: _emergencyMobileErrors[index],
                     onChanged: (val) {
                       setState(() {
-                        if (val.isNotEmpty && (val.length != 10 || !RegExp(r'^[6-9]\d{9}$').hasMatch(val))) {
-                          _emergencyMobileErrors[index] = "Enter a valid 10-digit mobile number";
+                        if (val.isNotEmpty &&
+                            (val.length != 10 ||
+                                !RegExp(r'^[6-9]\d{9}$').hasMatch(val))) {
+                          _emergencyMobileErrors[index] =
+                              "Enter a valid 10-digit mobile number";
                         } else {
                           _emergencyMobileErrors[index] = null;
                         }
@@ -1112,30 +1171,75 @@ class _AddTenantPageState extends State<AddTenantPage> {
             );
           },
         ),
-        if (_emergencyMobileControllers.length < 5)
+        if (_availableRelations.isNotEmpty)
           Padding(
             padding: EdgeInsets.only(top: 12.h),
-            child: OutlinedButton.icon(
-              onPressed: () {
-                setState(() {
-                  _emergencyNameControllers.add(TextEditingController());
-                  _emergencyMobileControllers.add(TextEditingController());
-                  _emergencyNameErrors.add(null);
-                  _emergencyMobileErrors.add(null);
-                });
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF1E56A0),
-                side: const BorderSide(color: Color(0xFF1E56A0)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: const Color(0xFFD5DEE9)),
               ),
-              icon: const Icon(Icons.add_rounded, size: 20),
-              label: Text(
-                "Add ${_getRelationForIndex(_emergencyMobileControllers.length)}",
-                style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14.sp),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: null,
+                  hint: Row(
+                    children: [
+                      Icon(
+                        Icons.add_circle_outline_rounded,
+                        color: const Color(0xFF1E56A0),
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        _emergencyRelations.isEmpty
+                            ? "Select Relation to Add"
+                            : "Add Relation",
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF1E56A0),
+                        ),
+                      ),
+                    ],
+                  ),
+                  items: _availableRelations.map((relation) {
+                    return DropdownMenuItem<String>(
+                      value: relation,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.person_outline_rounded,
+                            size: 18.sp,
+                            color: const Color(0xFFF26B1A),
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            relation,
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (selectedRelation) {
+                    if (selectedRelation != null) {
+                      setState(() {
+                        _emergencyRelations.add(selectedRelation);
+                        _emergencyNameControllers.add(TextEditingController());
+                        _emergencyMobileControllers.add(TextEditingController());
+                        _emergencyNameErrors.add(null);
+                        _emergencyMobileErrors.add(null);
+                      });
+                    }
+                  },
+                ),
               ),
             ),
           ),
