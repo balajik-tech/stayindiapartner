@@ -333,7 +333,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
           ),
         );
       },
-    );
+    ).then((success) {
+      if (success == true && mounted) {
+        Navigator.pop(context, true);
+      }
+    });
   }
 
   String formatSharingType(String type) {
@@ -701,9 +705,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         dob: extractedAadhaarDOB,
         gender: extractedAadhaarGender.toLowerCase(),
         address: extractedAadhaarAddress,
-        totalAmount: double.parse(
-          double.tryParse(totalAmount as String)?.toStringAsFixed(2) ?? "0.00",
-        ),
+        totalAmount: double.parse(totalAmount.toStringAsFixed(2)),
       );
       return;
     }
@@ -759,7 +761,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            if (!_isNew) {
+            if (mounted) {
               Navigator.pop(context, true);
             }
           } else if (state is AddTenantError) {
