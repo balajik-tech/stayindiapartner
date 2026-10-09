@@ -1545,7 +1545,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   : (_checkInDate ?? DateTime.now()),
               firstDate: _isNew
                   ? DateTime(now.year, now.month, now.day)
-                  : DateTime(2000),
+                  : DateTime(now.year, now.month, now.day),
               lastDate: DateTime(2100),
             );
 

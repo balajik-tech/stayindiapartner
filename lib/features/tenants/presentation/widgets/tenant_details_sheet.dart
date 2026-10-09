@@ -1731,30 +1731,83 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
               if (isPending) ...[
                 SizedBox(width: 8.w),
                 InkWell(
-                  onTap: () {
-                    String checkInDateStr = detail?.stay?.startDate ??
+                  onTap: () async {
+                    DateTime initialStartDt = DateTime.now();
+                    String rawStart = detail?.stay?.startDate ??
                         item.paymentDate ??
                         item.month;
-                    String checkOutDateStr = detail?.stay?.endDate ??
-                        item.dueDate ??
-                        '';
-                    String forthePeriodStr = '';
-                    if (checkOutDateStr.isNotEmpty) {
+
+                    final DateTime now = DateTime.now();
+
+                    final DateTime firstDate = rawStart.isNotEmpty
+                        ? DateTime(
+                      DateTime.parse(rawStart).year,
+                      DateTime.parse(rawStart).month,
+                      1,
+                    )
+                        : DateTime(now.year, now.month, 1);
+
+                    final DateTime lastDate = DateTime(
+                      firstDate.year,
+                      firstDate.month + 1,
+                      0,
+                    );
+
+                    if (rawStart.isNotEmpty) {
                       try {
-                        final endDt =
-                            DateTime.parse(checkOutDateStr).toLocal();
-                        forthePeriodStr =
-                            DateFormat('MMMMyyyy').format(endDt);
+                        initialStartDt = DateTime.parse(rawStart).toLocal();
                       } catch (_) {}
                     }
 
+                    final DateTime? pickedStartDate = await showDatePicker(
+                      context: context,
+                      initialDate: initialStartDt,
+                      firstDate: firstDate,
+                      lastDate: lastDate,
+                      helpText: 'Select Start Date for Payment',
+                    );
+
+                    if (pickedStartDate == null) return;
+
+                    final monthEndDt = DateTime(
+                      pickedStartDate.year,
+                      pickedStartDate.month + 1,
+                      0,
+                    );
+
+                    final int daysInMonth = monthEndDt.day;
+                    final int occupiedDays =
+                        monthEndDt.day - pickedStartDate.day + 1;
+
+                    final double baseRent =
+                        item.rent ?? (detail?.stay?.rent ?? 0.0);
+                    final double depositAmt =
+                        item.deposit ?? (detail?.stay?.deposit ?? 0.0);
+                    final double maintenanceAmt = item.maintenance ?? 0.0;
+
+                    double calculatedProratedRent = baseRent;
+                    if (daysInMonth > 0 &&
+                        occupiedDays > 0 &&
+                        occupiedDays < daysInMonth) {
+                      calculatedProratedRent =
+                          (baseRent / daysInMonth) * occupiedDays;
+                    }
+
+                    double calculatedTotalAmount =
+                        calculatedProratedRent + depositAmt + maintenanceAmt;
+
+                    String checkInDateStr =
+                        DateFormat('yyyy-MM-dd').format(pickedStartDate);
+                    String checkOutDateStr =
+                        DateFormat('yyyy-MM-dd').format(monthEndDt);
+                    String forthePeriodStr =
+                        DateFormat('MMMMyyyy').format(monthEndDt);
+
                     _openCollectPaymentForRental(
-                      rent: item.rent ?? (detail?.stay?.rent ?? 0.0),
-                      deposit: item.deposit ?? (detail?.stay?.deposit ?? 0.0),
-                      maintenance: item.maintenance ?? 0.0,
-                      totalAmount: item.dueAmount > 0
-                          ? item.dueAmount
-                          : item.totalAmount,
+                      rent: baseRent,
+                      deposit: depositAmt,
+                      maintenance: maintenanceAmt,
+                      totalAmount: calculatedTotalAmount,
                       bookingId: item.id.isNotEmpty
                           ? item.id
                           : (detail?.stay?.bookingId),
