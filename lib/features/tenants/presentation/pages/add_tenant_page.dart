@@ -2387,7 +2387,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
               child: _buildImageUploadCard(
                 file: _userPhoto,
                 onTap: _isDetectingFace ? null : _pickUserPhoto,
-                title: 'User Photo *',
+                title: 'User Photo',
                 subtitle: 'Face Scan (Camera)',
                 icon: Icons.face_retouching_natural_rounded,
                 iconColor: const Color(0xFF2C599D),
