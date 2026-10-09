@@ -62,6 +62,9 @@ class PaymentRepositoryImpl implements PaymentRepository {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   }) {
     return remoteDataSource.createCashOrder(
       tenantId: tenantId,
@@ -74,6 +77,9 @@ class PaymentRepositoryImpl implements PaymentRepository {
       others: others,
       dueDate: dueDate,
       notes: notes,
+      startDate: startDate,
+      endDate: endDate,
+      forthePeriod: forthePeriod,
     );
   }
 
@@ -89,6 +95,9 @@ class PaymentRepositoryImpl implements PaymentRepository {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   }) {
     return remoteDataSource.createUpiOrder(
       tenantId: tenantId,
@@ -101,6 +110,9 @@ class PaymentRepositoryImpl implements PaymentRepository {
       others: others,
       dueDate: dueDate,
       notes: notes,
+      startDate: startDate,
+      endDate: endDate,
+      forthePeriod: forthePeriod,
     );
   }
 

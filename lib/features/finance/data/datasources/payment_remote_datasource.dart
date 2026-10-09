@@ -35,6 +35,9 @@ abstract class PaymentRemoteDataSource {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   });
 
   Future<String> createUpiOrder({
@@ -48,6 +51,9 @@ abstract class PaymentRemoteDataSource {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   });
 
   Future<void> recordCashPayment({
@@ -156,23 +162,37 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   }) async {
     try {
+      final Map<String, dynamic> data = {
+        "tenant": tenantId,
+        "hostel": hostelId,
+        "booking": bookingId,
+        "amount": amount,
+        "rent": rent,
+        "deposit": deposit,
+        "utilities": utilities,
+        "others": others,
+        "dueDate": dueDate,
+        "receiptNumber": "",
+        "notes": notes ?? "",
+      };
+      if (startDate != null && startDate.isNotEmpty) {
+        data["startDate"] = startDate;
+      }
+      if (endDate != null && endDate.isNotEmpty) {
+        data["endDate"] = endDate;
+      }
+      if (forthePeriod != null && forthePeriod.isNotEmpty) {
+        data["forthePeriod"] = forthePeriod;
+      }
+
       final response = await dio.post(
         ApiConstants.tenantRentalOrderCash,
-        data: {
-          "tenant": tenantId,
-          "hostel": hostelId,
-          "booking": bookingId,
-          "amount": amount,
-          "rent": rent,
-          "deposit": deposit,
-          "utilities": utilities,
-          "others": others,
-          "dueDate": dueDate,
-          "receiptNumber": "",
-          "notes": notes ?? "",
-        },
+        data: data,
       );
       return response.data['data']['rentalId'];
     } catch (e) {
@@ -192,23 +212,37 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   }) async {
     try {
+      final Map<String, dynamic> data = {
+        "tenant": tenantId,
+        "hostel": hostelId,
+        "booking": bookingId,
+        "amount": amount,
+        "rent": rent,
+        "deposit": deposit,
+        "utilities": utilities,
+        "others": others,
+        "dueDate": dueDate,
+        "receiptNumber": "",
+        "notes": notes ?? "",
+      };
+      if (startDate != null && startDate.isNotEmpty) {
+        data["startDate"] = startDate;
+      }
+      if (endDate != null && endDate.isNotEmpty) {
+        data["endDate"] = endDate;
+      }
+      if (forthePeriod != null && forthePeriod.isNotEmpty) {
+        data["forthePeriod"] = forthePeriod;
+      }
+
       final response = await dio.post(
         ApiConstants.tenantRentalOrderUpi,
-        data: {
-          "tenant": tenantId,
-          "hostel": hostelId,
-          "booking": bookingId,
-          "amount": amount,
-          "rent": rent,
-          "deposit": deposit,
-          "utilities": utilities,
-          "others": others,
-          "dueDate": dueDate,
-          "receiptNumber": "",
-          "notes": notes ?? "",
-        },
+        data: data,
       );
       return response.data['data']['rentalId'];
     } catch (e) {

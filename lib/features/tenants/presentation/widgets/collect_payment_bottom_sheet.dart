@@ -33,6 +33,7 @@ class CollectPaymentBottomSheet extends StatefulWidget {
   final double rent;
   final String checkInDate;
   final String checkOutDate;
+  final String? forthePeriod;
   final double maintainance;
   final String? roomType;
   final String? aadhaarNumber;
@@ -66,6 +67,7 @@ class CollectPaymentBottomSheet extends StatefulWidget {
     required this.rent,
     this.checkInDate = '',
     this.checkOutDate = '',
+    this.forthePeriod,
     required this.maintainance,
     this.roomType,
     this.aadhaarNumber,
@@ -362,6 +364,18 @@ class _CollectPaymentBottomSheetState
             ? DateTime.parse(widget.checkInDate).toIso8601String()
             : DateTime.now().toIso8601String();
 
+        String startDatePayload = widget.checkInDate.isNotEmpty
+            ? (widget.checkInDate.contains('T')
+                ? DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.checkInDate))
+                : widget.checkInDate)
+            : '';
+
+        String endDatePayload = widget.checkOutDate.isNotEmpty
+            ? (widget.checkOutDate.contains('T')
+                ? DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.checkOutDate))
+                : widget.checkOutDate)
+            : '';
+
         await context.read<PaymentReportCubit>().submitPayment(
               tenantId: tenantId,
               hostelId: hostelId,
@@ -374,6 +388,9 @@ class _CollectPaymentBottomSheetState
               category: 'Rent',
               mode: _paymentMethod,
               date: paymentDateStr,
+              startDate: startDatePayload,
+              endDate: endDatePayload,
+              forthePeriod: widget.forthePeriod,
               sendWhatsapp: true,
             );
       }

@@ -122,6 +122,9 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
     required String category,
     required String mode,
     required String date,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
     String? referenceNo,
     String? note,
     String? screenshotPath,
@@ -141,6 +144,9 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
           others: others,
           dueDate: date,
           notes: note,
+          startDate: startDate,
+          endDate: endDate,
+          forthePeriod: forthePeriod,
         );
 
         // Step 2: Record Cash Payment immediately
@@ -163,6 +169,9 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
           others: others,
           dueDate: date,
           notes: note,
+          startDate: startDate,
+          endDate: endDate,
+          forthePeriod: forthePeriod,
         );
 
         // Step 2: Record UPI Payment immediately with UTR number

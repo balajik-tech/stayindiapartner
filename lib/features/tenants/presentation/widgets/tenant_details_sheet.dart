@@ -94,6 +94,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     String? bookingId,
     String checkInDate = '',
     String checkOutDate = '',
+    String? forthePeriod,
   }) {
     showModalBottomSheet(
       context: context,
@@ -112,6 +113,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
             totalAmount: totalAmount,
             checkInDate: checkInDate,
             checkOutDate: checkOutDate,
+            forthePeriod: forthePeriod,
           ),
         );
       },
@@ -1351,46 +1353,60 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
   }
 
   Widget _buildBillsSummary(List<TenantRentalEntity> rentals) {
-    double totalDue = 0;
-    int pendingCount = 0;
-    String? bookingStatus;
-    bool hasExceededEndDate = false;
+    if (rentals.isEmpty) return const SizedBox.shrink();
 
+    final item = rentals.first;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    for (var item in rentals) {
-      bool isEndDateExceeded = false;
-      if (item.booking?.endDate != null && item.booking!.endDate!.isNotEmpty) {
-        try {
-          final endDt = DateTime.parse(item.booking!.endDate!).toLocal();
-          final endDateOnly = DateTime(endDt.year, endDt.month, endDt.day);
-          if (today.isAfter(endDateOnly)) {
-            isEndDateExceeded = true;
-            hasExceededEndDate = true;
-          }
-        } catch (_) {}
-      }
+    bool hasExceededEndDate = false;
+    double calculatedRentForRenewal =  (item.booking?.rent ?? 0.0);
+    String renewCheckInDate = '';
+    String renewCheckOutDate = '';
+    String forthePeriod = '';
 
-      if (!item.isPaid || isEndDateExceeded) {
-        final amt = item.payableAmount > 0
+    if (item.booking?.endDate != null && item.booking!.endDate!.isNotEmpty) {
+      try {
+        final endDt = DateTime.parse(item.booking!.endDate!).toLocal();
+        final endDateOnly = DateTime(endDt.year, endDt.month, endDt.day);
+        if (today.isAfter(endDateOnly)) {
+          hasExceededEndDate = true;
+
+          final newCheckInDt = endDt.add(const Duration(days: 1));
+
+          int unpaidMonths = (today.year - newCheckInDt.year) * 12 +
+              (today.month - newCheckInDt.month) +
+              1;
+          if (unpaidMonths < 1) unpaidMonths = 1;
+
+          final targetEndDt = DateTime(newCheckInDt.year, newCheckInDt.month + unpaidMonths, 0);
+
+          renewCheckInDate = DateFormat('yyyy-MM-dd').format(newCheckInDt);
+          renewCheckOutDate = DateFormat('yyyy-MM-dd').format(targetEndDt);
+          forthePeriod = DateFormat('MMMMyyyy').format(targetEndDt);
+
+          final baseMonthlyRent =  (item.booking?.rent ?? 0.0);
+          calculatedRentForRenewal = baseMonthlyRent * unpaidMonths;
+        }
+      } catch (_) {}
+    }
+
+    double totalDue = 0;
+    if (!item.isPaid || hasExceededEndDate) {
+      if (hasExceededEndDate) {
+        totalDue = calculatedRentForRenewal;
+      } else {
+        totalDue = item.payableAmount > 0
             ? item.payableAmount
             : (item.bookingAmount > 0
                 ? item.bookingAmount
                 : (item.booking?.rent ?? 0.0));
-        totalDue += amt;
-        pendingCount++;
       }
     }
 
-    if (hasExceededEndDate || totalDue > 0) {
-      bookingStatus = 'PENDING';
-      if (pendingCount == 0) pendingCount = 1;
-    } else {
-      bookingStatus = 'PAID';
-    }
+    final isDue = (totalDue > 0 || hasExceededEndDate);
+    final pendingCount = isDue ? 1 : 0;
 
-    final isDue = totalDue > 0 || hasExceededEndDate;
     return _buildSection(
       'dues_summary'.tr(),
       Container(
@@ -1446,7 +1462,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                     ],
                   ),
                 ),
-                if (pendingCount > 0)...[
+                if (pendingCount > 0) ...[
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                     decoration: BoxDecoration(
@@ -1467,66 +1483,42 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                   SizedBox(width: 8.w),
                   InkWell(
                     onTap: () {
-                      final pendingRentals = rentals.where((r) => !r.isPaid);
+                      String checkInDateStr = renewCheckInDate;
+                      String checkOutDateStr = renewCheckOutDate;
+                      String forthePeriodStr = forthePeriod;
 
-                      final firstPending = pendingRentals.isNotEmpty
-                          ? pendingRentals.first
-                          : rentals.first;
-
-                      String renewCheckInDate = '';
-                      String renewCheckOutDate = '';
-
-                      if (hasExceededEndDate) {
-                        TenantRentalEntity? exceededRental;
-                        for (var r in rentals) {
-                          if (r.booking?.endDate != null &&
-                              r.booking!.endDate!.isNotEmpty) {
-                            try {
-                              final endDt =
-                                  DateTime.parse(r.booking!.endDate!).toLocal();
-                              final endDateOnly =
-                                  DateTime(endDt.year, endDt.month, endDt.day);
-                              if (today.isAfter(endDateOnly)) {
-                                exceededRental = r;
-                                break;
-                              }
-                            } catch (_) {}
-                          }
-                        }
-                        final target = exceededRental ?? firstPending;
-                        if (target.booking?.endDate != null &&
-                            target.booking!.endDate!.isNotEmpty) {
+                      if (!hasExceededEndDate) {
+                        checkInDateStr = item.booking?.checkInDate ??
+                            item.booking?.startDate ??
+                            '';
+                        checkOutDateStr = item.booking?.endDate ?? '';
+                        if (checkOutDateStr.isNotEmpty) {
                           try {
-                            final prevEndDt =
-                                DateTime.parse(target.booking!.endDate!)
-                                    .toLocal();
-                            final newCheckInDt =
-                                prevEndDt.add(const Duration(days: 1));
-                            final newCheckOutDt = DateTime(
-                                newCheckInDt.year, newCheckInDt.month + 1, 0);
-
-                            renewCheckInDate =
-                                DateFormat('yyyy-MM-dd').format(newCheckInDt);
-                            renewCheckOutDate =
-                                DateFormat('yyyy-MM-dd').format(newCheckOutDt);
+                            final endDt =
+                                DateTime.parse(checkOutDateStr).toLocal();
+                            forthePeriodStr =
+                                DateFormat('MMMMyyyy').format(endDt);
                           } catch (_) {}
                         }
                       }
 
                       _openCollectPaymentForRental(
-                        rent: firstPending.bookingAmount > 0
-                            ? firstPending.bookingAmount
-                            : (firstPending.booking?.rent ?? 0.0),
-                        deposit: firstPending.deposit > 0
-                            ? firstPending.deposit
-                            : (firstPending.booking?.deposit ?? 0.0),
-                        maintenance: firstPending.maintenance > 0
-                            ? firstPending.maintenance
-                            : (firstPending.booking?.maintenance ?? 0.0),
+                        rent: hasExceededEndDate
+                            ? calculatedRentForRenewal
+                            : (item.bookingAmount > 0
+                                ? item.bookingAmount
+                                : (item.booking?.rent ?? 0.0)),
+                        deposit: item.deposit > 0
+                            ? item.deposit
+                            : (item.booking?.deposit ?? 0.0),
+                        maintenance: item.maintenance > 0
+                            ? item.maintenance
+                            : (item.booking?.maintenance ?? 0.0),
                         totalAmount: totalDue,
-                        bookingId: firstPending.booking?.id ?? firstPending.id,
-                        checkInDate: renewCheckInDate,
-                        checkOutDate: renewCheckOutDate,
+                        bookingId: item.booking?.id ?? item.id,
+                        checkInDate: checkInDateStr,
+                        checkOutDate: checkOutDateStr,
+                        forthePeriod: forthePeriodStr,
                       );
                     },
                     child: Container(
@@ -1548,8 +1540,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                       ),
                     ),
                   ),
-                ]
-
+                ],
               ],
             ),
           ],
@@ -1627,7 +1618,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                             alpha: 0.5,
                           ),
                         ),
-                      _buildPaymentItem(p, color),
+                      _buildPaymentItem(p, color, detail),
                     ],
                   );
                 }).toList(),
@@ -1686,6 +1677,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
   Widget _buildPaymentItem(
     TenantPaymentItemEntity item,
     Color statusColor,
+    TenantDetailEntity? detail,
   ) {
     final statusUpper = item.status.toUpperCase();
     final isPending = statusUpper.contains('PENDING') || statusUpper == 'CHECKED IN';
@@ -1735,12 +1727,35 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 SizedBox(width: 8.w),
                 InkWell(
                   onTap: () {
+                    String checkInDateStr = detail?.stay?.startDate ??
+                        item.paymentDate ??
+                        item.month;
+                    String checkOutDateStr = detail?.stay?.endDate ??
+                        item.dueDate ??
+                        '';
+                    String forthePeriodStr = '';
+                    if (checkOutDateStr.isNotEmpty) {
+                      try {
+                        final endDt =
+                            DateTime.parse(checkOutDateStr).toLocal();
+                        forthePeriodStr =
+                            DateFormat('MMMMyyyy').format(endDt);
+                      } catch (_) {}
+                    }
+
                     _openCollectPaymentForRental(
-                      rent: item.rent ?? 0.0,
-                      deposit: item.deposit ?? 0.0,
+                      rent: item.rent ?? (detail?.stay?.rent ?? 0.0),
+                      deposit: item.deposit ?? (detail?.stay?.deposit ?? 0.0),
                       maintenance: item.maintenance ?? 0.0,
-                      totalAmount: item.dueAmount > 0 ? item.dueAmount : item.totalAmount,
-                      bookingId: item.id,
+                      totalAmount: item.dueAmount > 0
+                          ? item.dueAmount
+                          : item.totalAmount,
+                      bookingId: item.id.isNotEmpty
+                          ? item.id
+                          : (detail?.stay?.bookingId),
+                      checkInDate: checkInDateStr,
+                      checkOutDate: checkOutDateStr,
+                      forthePeriod: forthePeriodStr,
                     );
                   },
                   child: Container(

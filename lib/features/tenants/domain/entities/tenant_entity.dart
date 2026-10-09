@@ -177,6 +177,8 @@ class TenantStayDetailEntity extends Equatable {
   final double rent;
   final double deposit;
   final String? checkInDate;
+  final String? startDate;
+  final String? endDate;
   final String? accessCode;
   final String? qrToken;
   final String? status;
@@ -194,6 +196,8 @@ class TenantStayDetailEntity extends Equatable {
     required this.rent,
     required this.deposit,
     this.checkInDate,
+    this.startDate,
+    this.endDate,
     this.accessCode,
     this.qrToken,
     this.status,
@@ -213,6 +217,8 @@ class TenantStayDetailEntity extends Equatable {
     rent,
     deposit,
     checkInDate,
+    startDate,
+    endDate,
     accessCode,
     qrToken,
     status,

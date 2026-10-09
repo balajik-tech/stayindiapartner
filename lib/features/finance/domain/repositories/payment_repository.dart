@@ -33,6 +33,9 @@ abstract class PaymentRepository {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   });
 
   Future<String> createUpiOrder({
@@ -46,6 +49,9 @@ abstract class PaymentRepository {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   });
 
   Future<void> recordCashPayment({

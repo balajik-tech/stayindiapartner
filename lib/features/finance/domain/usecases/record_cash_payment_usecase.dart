@@ -16,6 +16,9 @@ class CreateCashOrderUseCase {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   }) {
     return repository.createCashOrder(
       tenantId: tenantId,
@@ -28,6 +31,9 @@ class CreateCashOrderUseCase {
       others: others,
       dueDate: dueDate,
       notes: notes,
+      startDate: startDate,
+      endDate: endDate,
+      forthePeriod: forthePeriod,
     );
   }
 }
@@ -68,6 +74,9 @@ class CreateUpiOrderUseCase {
     double others = 0,
     required String dueDate,
     String? notes,
+    String? startDate,
+    String? endDate,
+    String? forthePeriod,
   }) {
     return repository.createUpiOrder(
       tenantId: tenantId,
@@ -80,6 +89,9 @@ class CreateUpiOrderUseCase {
       others: others,
       dueDate: dueDate,
       notes: notes,
+      startDate: startDate,
+      endDate: endDate,
+      forthePeriod: forthePeriod,
     );
   }
 }
