@@ -499,10 +499,14 @@ class _CollectPaymentBottomSheetState
               child: Column(
                 children: [
                   _buildDueItem('Rent', widget.rent, subtitle: rentSubtitle),
-                  SizedBox(height: 12.h),
-                  _buildDueItem('Security deposit', widget.securityDeposit),
-                  SizedBox(height: 12.h),
-                  _buildDueItem('Maintainance', widget.maintainance),
+                  if (widget.securityDeposit > 0) ...[
+                    SizedBox(height: 12.h),
+                    _buildDueItem('Security deposit', widget.securityDeposit),
+                  ],
+                  if (widget.maintainance > 0) ...[
+                    SizedBox(height: 12.h),
+                    _buildDueItem('Maintainance', widget.maintainance),
+                  ],
                   SizedBox(height: 12.h),
                   // if (_discountAmount > 0) ...[
                   //   Row(

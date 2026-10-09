@@ -1357,6 +1357,7 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
 
     final item = rentals.first;
     final now = DateTime.now();
+    // final testNow = DateTime(now.year, now.month + 3, now.day);
     final today = DateTime(now.year, now.month, now.day);
 
     bool hasExceededEndDate = false;
@@ -1508,12 +1509,16 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                             : (item.bookingAmount > 0
                                 ? item.bookingAmount
                                 : (item.booking?.rent ?? 0.0)),
-                        deposit: item.deposit > 0
-                            ? item.deposit
-                            : (item.booking?.deposit ?? 0.0),
-                        maintenance: item.maintenance > 0
-                            ? item.maintenance
-                            : (item.booking?.maintenance ?? 0.0),
+                        deposit: hasExceededEndDate
+                            ? 0.0
+                            : (item.deposit > 0
+                                ? item.deposit
+                                : (item.booking?.deposit ?? 0.0)),
+                        maintenance: hasExceededEndDate
+                            ? 0.0
+                            : (item.maintenance > 0
+                                ? item.maintenance
+                                : (item.booking?.maintenance ?? 0.0)),
                         totalAmount: totalDue,
                         bookingId: item.booking?.id ?? item.id,
                         checkInDate: checkInDateStr,
