@@ -819,7 +819,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildTenantToggle(),
+                          // _buildTenantToggle(),
                           SizedBox(height: 32.h),
                           _buildSectionTitle('property_selection'.tr()),
                           SizedBox(height: 16.h),
@@ -1541,11 +1541,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
             final DateTime? picked = await showDatePicker(
               context: context,
               initialDate: _isNew
-                  ? DateTime(now.year, now.month, now.day)
+                  ? DateTime(now.year, now.month, 1)
                   : (_checkInDate ?? DateTime.now()),
               firstDate: _isNew
-                  ? DateTime(now.year, now.month, now.day)
-                  : DateTime(now.year, now.month, now.day),
+                  ? DateTime(now.year, now.month, 1)
+                  : DateTime(now.year, now.month, 1),
               lastDate: DateTime(2100),
             );
 
