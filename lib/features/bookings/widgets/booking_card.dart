@@ -11,6 +11,7 @@ import 'qr_check_in_dialog.dart';
 import 'package:stayindia_owner/features/tenants/presentation/widgets/tenant_details_sheet.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/responsive_widgets.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/widgets/checkout_settlement_modal.dart';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
@@ -494,48 +495,27 @@ class BookingCard extends StatelessWidget {
   }
 
   void _showCheckoutConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        title: Text(
-          StringUtils.translate('confirm_checkout_title', context: context),
-        ),
-        content: Text(
-          StringUtils.translate(
-            'confirm_checkout_desc',
-            context: context,
-            namedArgs: {'name': booking.tenantName},
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(StringUtils.translate('no', context: context)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<BookingsCubit>().checkoutBooking(booking.id);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-            ),
-            child: Text(
-              StringUtils.translate('checkout', context: context),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+    CheckoutSettlementModal.show(
+      context,
+      tenantName: booking.tenantName.isNotEmpty ? booking.tenantName : 'Tenant',
+      tenantId: booking.tenantId ?? '',
+      hostelId: booking.hostelId ?? '',
+      bookingId: booking.id,
+      securityDeposit: 0.0,
+      onCheckoutConfirmed: ({
+        required double securityDeposit,
+        required double pendingRent,
+        required double utilityDue,
+        required double finalSettlement,
+      }) {
+        context.read<BookingsCubit>().checkoutBooking(
+              booking.id,
+              securityDeposit: securityDeposit,
+              pendingRent: pendingRent,
+              utilityDue: utilityDue,
+              finalSettlement: finalSettlement,
+            );
+      },
     );
   }
 
