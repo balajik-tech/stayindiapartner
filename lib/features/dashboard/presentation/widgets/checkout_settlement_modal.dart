@@ -108,35 +108,38 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
   Future<void> _fetchSettlementData() async {
     try {
       final paymentRepo = sl<PaymentRepository>();
-      final bills = await paymentRepo.getBills(
+      final rentals = await paymentRepo.getTenantRentals(
         tenantId: widget.tenantId,
         hostelId: widget.hostelId,
       );
 
-      final items = bills['items'] as List? ?? [];
       double rentAccumulator = 0.0;
       double utilityAccumulator = 0.0;
+      double depositAccumulator = 0.0;
 
-      for (var item in items) {
-        if (item is Map) {
-          final type = (item['paymentType'] ?? '').toString().toUpperCase();
-          final due = (item['dueAmount'] ?? 0.0).toDouble();
+      for (var rental in rentals) {
+        if (!rental.isPaid) {
+          double rentVal = rental.bookingAmount;
+          double utilVal = rental.electricityBill +
+              rental.parkingBill +
+              rental.maintenance;
 
-          if (type == 'RENT') {
-            rentAccumulator += due;
-          } else if (type == 'ELECTRICITY' ||
-              type == 'METER' ||
-              type == 'UTILITY' ||
-              type == 'MAINTENANCE') {
-            utilityAccumulator += due;
-          } else {
-            rentAccumulator += due;
+          if (rentVal == 0 && utilVal == 0 && rental.payableAmount > 0) {
+            rentVal = rental.payableAmount;
           }
+
+          rentAccumulator += rentVal;
+          utilityAccumulator += utilVal;
         }
+        depositAccumulator += rental.deposit;
       }
 
+      final secDeposit = widget.securityDeposit > 0
+          ? widget.securityDeposit
+          : depositAccumulator;
+
       setState(() {
-        _securityDeposit = widget.securityDeposit;
+        _securityDeposit = secDeposit;
         _pendingRent = rentAccumulator;
         _utilityDue = utilityAccumulator;
         _totalDues = _pendingRent + _utilityDue;
