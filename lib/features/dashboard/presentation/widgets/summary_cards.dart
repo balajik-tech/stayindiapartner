@@ -218,7 +218,7 @@ class SummaryCardsSection extends StatelessWidget {
                   'overdue',
                   isLoading
                       ? '...'
-                      : (ops?.overdueRent.count.toString() ?? '0'),
+                      : (occupancy?.overdueBeds.toString() ?? '0'),
                   'payment_dues'.tr(),
                   const Color(0xFF800000),
                   Icons.payments_rounded,
