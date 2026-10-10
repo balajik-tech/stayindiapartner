@@ -1252,55 +1252,55 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
         SizedBox(height: 16.h),
 
-        Row(
-          children: [
-            Expanded(
-              child: _buildDarkBillCard(
-                icon: Icons.bolt_rounded,
-                iconColor: const Color(0xFFFFD54F),
-                label: 'ELECTRICITY',
-                controller: _electricityController,
-                currentBillValue: _electricityBillAmount,
-                onSend: () {
-                  final double? amt = double.tryParse(_electricityController.text);
-                  if (amt == null || amt <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter a valid amount greater than 0.'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                    return;
-                  }
-                  _showConfirmSendBillDialog(context, 'ELECTRICITY', amt);
-                },
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _buildDarkBillCard(
-                icon: Icons.two_wheeler_rounded,
-                iconColor: orange,
-                label: 'PARKING',
-                controller: _parkingController,
-                currentBillValue: _parkingBillAmount,
-                onSend: () {
-                  final double? amt = double.tryParse(_parkingController.text);
-                  if (amt == null || amt <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter a valid amount greater than 0.'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                    return;
-                  }
-                  _showConfirmSendBillDialog(context, 'PARKING', amt);
-                },
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       child: _buildDarkBillCard(
+        //         icon: Icons.bolt_rounded,
+        //         iconColor: const Color(0xFFFFD54F),
+        //         label: 'ELECTRICITY',
+        //         controller: _electricityController,
+        //         currentBillValue: _electricityBillAmount,
+        //         onSend: () {
+        //           final double? amt = double.tryParse(_electricityController.text);
+        //           if (amt == null || amt <= 0) {
+        //             ScaffoldMessenger.of(context).showSnackBar(
+        //               const SnackBar(
+        //                 content: Text('Please enter a valid amount greater than 0.'),
+        //                 behavior: SnackBarBehavior.floating,
+        //               ),
+        //             );
+        //             return;
+        //           }
+        //           _showConfirmSendBillDialog(context, 'ELECTRICITY', amt);
+        //         },
+        //       ),
+        //     ),
+        //     SizedBox(width: 12.w),
+        //     Expanded(
+        //       child: _buildDarkBillCard(
+        //         icon: Icons.two_wheeler_rounded,
+        //         iconColor: orange,
+        //         label: 'PARKING',
+        //         controller: _parkingController,
+        //         currentBillValue: _parkingBillAmount,
+        //         onSend: () {
+        //           final double? amt = double.tryParse(_parkingController.text);
+        //           if (amt == null || amt <= 0) {
+        //             ScaffoldMessenger.of(context).showSnackBar(
+        //               const SnackBar(
+        //                 content: Text('Please enter a valid amount greater than 0.'),
+        //                 behavior: SnackBarBehavior.floating,
+        //               ),
+        //             );
+        //             return;
+        //           }
+        //           _showConfirmSendBillDialog(context, 'PARKING', amt);
+        //         },
+        //       ),
+        //     ),
+        //   ],
+        // ),
 
         SizedBox(height: 16.h),
 
