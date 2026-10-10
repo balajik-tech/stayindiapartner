@@ -785,153 +785,201 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
   }
 
   Widget _buildRoomDetailsCard(BuildContext context) {
-    final roomType = widget.state.roomType ?? 'NON-AC';
-    final isAc =
-        roomType.toUpperCase().contains('AC') &&
-        !roomType.toUpperCase().contains('NON');
+    return BlocBuilder<TenantDetailCubit, TenantDetailState>(
+      builder: (context, tenantState) {
+        double rent = widget.state.rent ?? 0;
+        double deposit = widget.state.deposit ?? 0;
+        double maintenance = widget.state.maintenance ?? 0;
+        double electricityBill = widget.state.dailyRent ?? 0;
+        String roomType = widget.state.roomType ?? 'NON-AC';
+        String? sharingType = widget.state.sharingType;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(20.r),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        if (tenantState is TenantDetailLoaded) {
+          final detail = tenantState.detail;
+          final stay = detail.stay;
+
+          if (detail.payments.isNotEmpty) {
+            final firstPayment = detail.payments.first;
+            if (firstPayment.rent != null && firstPayment.rent! > 0) {
+              rent = firstPayment.rent!;
+            } else if (stay != null && stay.rent > 0) {
+              rent = stay.rent;
+            }
+
+            if (firstPayment.maintenance != null) {
+              maintenance = firstPayment.maintenance!;
+            }
+
+            if (firstPayment.deposit != null && firstPayment.deposit! > 0) {
+              deposit = firstPayment.deposit!;
+            } else if (stay != null && stay.deposit > 0) {
+              deposit = stay.deposit;
+            }
+          } else if (stay != null) {
+            rent = stay.rent;
+            deposit = stay.deposit;
+          }
+
+          if (stay != null) {
+            if (stay.electricityBill != null) {
+              electricityBill = stay.electricityBill!;
+            }
+            if (stay.acType != null && stay.acType!.isNotEmpty) {
+              roomType = stay.acType!;
+            }
+            if (stay.sharingType != null && stay.sharingType!.isNotEmpty) {
+              sharingType = stay.sharingType;
+            }
+          }
+        }
+
+        final isAc = roomType.toUpperCase().contains('AC') &&
+            !roomType.toUpperCase().contains('NON');
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(20.r),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(24.r),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Room Configuration',
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1E293B),
-                ),
-              ),
               Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (widget.state.sharingType != null && widget.state.sharingType!.isNotEmpty) ...[
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF7ED),
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(color: const Color(0xFFFFEDD5)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.people_rounded,
-                            size: 13.sp,
-                            color: const Color(0xFFEA580C),
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            StringUtils.formatSharingType(widget.state.sharingType!, context).toUpperCase(),
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w900,
-                              color: const Color(0xFFC2410C),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Text(
+                    'Room Configuration',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1E293B),
                     ),
-                    SizedBox(width: 8.w),
-                  ],
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: isAc
-                          ? const Color(0xFFE0F2FE)
-                          : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(
-                        color: isAc
-                            ? const Color(0xFFBAE6FD)
-                            : const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isAc ? Icons.ac_unit_rounded : Icons.mode_fan_off_rounded,
-                          size: 13.sp,
-                          color: isAc
-                              ? const Color(0xFF0284C7)
-                              : const Color(0xFF64748B),
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          roomType.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w900,
-                            color: isAc
-                                ? const Color(0xFF0369A1)
-                                : const Color(0xFF475569),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (sharingType != null && sharingType.isNotEmpty) ...[
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF7ED),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(color: const Color(0xFFFFEDD5)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.people_rounded,
+                                size: 13.sp,
+                                color: const Color(0xFFEA580C),
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                StringUtils.formatSharingType(sharingType, context).toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: const Color(0xFFC2410C),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                        SizedBox(width: 8.w),
                       ],
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: isAc
+                              ? const Color(0xFFE0F2FE)
+                              : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: isAc
+                                ? const Color(0xFFBAE6FD)
+                                : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isAc ? Icons.ac_unit_rounded : Icons.mode_fan_off_rounded,
+                              size: 13.sp,
+                              color: isAc
+                                  ? const Color(0xFF0284C7)
+                                  : const Color(0xFF64748B),
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              roomType.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w900,
+                                color: isAc
+                                    ? const Color(0xFF0369A1)
+                                    : const Color(0xFF475569),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDetailGridItem(
+                      Icons.payments_rounded,
+                      'Monthly Rent',
+                      '₹${rent.toInt()}',
+                      const Color(0xFF0F172A),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: _buildDetailGridItem(
+                      Icons.build_circle_rounded,
+                      'Maintenance',
+                      '₹${maintenance.toInt()}',
+                      const Color(0xFF475569),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDetailGridItem(
+                      Icons.shield_rounded,
+                      'Security Deposit',
+                      '₹${deposit.toInt()}',
+                      const Color(0xFF475569),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: _buildDetailGridItem(
+                      Icons.bolt_rounded,
+                      'Electricity Bill',
+                      '₹${electricityBill.toInt()}',
+                      const Color(0xFF475569),
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          SizedBox(height: 16.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailGridItem(
-                  Icons.payments_rounded,
-                  'Monthly Rent',
-                  '₹${widget.state.rent?.toInt() ?? 0}',
-                  const Color(0xFF0F172A),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildDetailGridItem(
-                  Icons.build_circle_rounded,
-                  'Maintenance',
-                  '₹${widget.state.maintenance?.toInt() ?? 0}',
-                  const Color(0xFF475569),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailGridItem(
-                  Icons.shield_rounded,
-                  'Security Deposit',
-                  '₹${widget.state.deposit?.toInt() ?? 0}',
-                  const Color(0xFF475569),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildDetailGridItem(
-                  Icons.today_rounded,
-                  'Daily Rent',
-                  '₹${widget.state.dailyRent?.toInt() ?? 0}',
-                  const Color(0xFF475569),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
