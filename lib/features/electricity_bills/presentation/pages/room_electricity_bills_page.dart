@@ -283,20 +283,20 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                           ),
                         ],
                       ),
-                      IconButton(
-                        onPressed: () => _openSettingsSheet(context, state),
-                        icon: Icon(
-                          Icons.settings_outlined,
-                          color: Colors.white,
-                          size: 22.sp,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                        ),
-                      ),
+                      // IconButton(
+                      //   onPressed: () => _openSettingsSheet(context, state),
+                      //   icon: Icon(
+                      //     Icons.settings_outlined,
+                      //     color: Colors.white,
+                      //     size: 22.sp,
+                      //   ),
+                      //   style: IconButton.styleFrom(
+                      //     backgroundColor: Colors.white.withValues(alpha: 0.1),
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(10.r),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
