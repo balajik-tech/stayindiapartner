@@ -248,10 +248,10 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           _MenuTile(
                             icon: Icons.account_balance_rounded,
                             title: 'my_pg'.tr(),
-                            imagePath: 'assets/images/profile_bankaccount.png',
+                            imagePath: 'assets/images/profile_electricity.png',
                             subtitle: 'room_electricity_bills'.tr(),
-                            iconBgColor: const Color(0xFFE1F5EE),
-                            iconColor: const Color(0xFF0F6E56),
+                            iconBgColor: const Color(0xFFFFE8F8),
+                            iconColor: const Color(0xFF16A34A),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
