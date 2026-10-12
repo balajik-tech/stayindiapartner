@@ -128,330 +128,336 @@ class _CollectTenantPaymentSheetState extends State<CollectTenantPaymentSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.9,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFCBD5E1),
-                  borderRadius: BorderRadius.circular(2.r),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCBD5E1),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              'Record Tenant Share Payment',
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF0F172A),
+              SizedBox(height: 16.h),
+              Text(
+                'Record Tenant Share Payment',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF0F172A),
+                ),
               ),
-            ),
-            SizedBox(height: 16.h),
+              SizedBox(height: 16.h),
 
-            // Tenant Info Card
-            Container(
-              padding: EdgeInsets.all(14.r),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40.w,
-                    height: 40.w,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF112D4E),
-                      borderRadius: BorderRadius.circular(10.r),
+              // Tenant Info Card
+              Container(
+                padding: EdgeInsets.all(14.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40.w,
+                      height: 40.w,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF112D4E),
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        widget.bedNumber.isNotEmpty ? widget.bedNumber : 'T',
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      widget.bedNumber.isNotEmpty ? widget.bedNumber : 'T',
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.tenantName,
+                            style: GoogleFonts.inter(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF0F172A),
+                            ),
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            'Bed ${widget.bedNumber}',
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      '₹${widget.shareAmount.toStringAsFixed(0)}',
                       style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 14.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
+                        color: const Color(0xFF166534),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 18.h),
+
+              // Payment Method Selector
+              Text(
+                'PAYMENT METHOD',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF64748B),
+                  letterSpacing: 0.5,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => setState(() => _paymentMethod = 'UPI'),
+                      borderRadius: BorderRadius.circular(12.r),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        decoration: BoxDecoration(
+                          color: _paymentMethod == 'UPI'
+                              ? const Color(0xFF112D4E)
+                              : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: _paymentMethod == 'UPI'
+                                ? const Color(0xFF112D4E)
+                                : const Color(0xFFCBD5E1),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.qr_code_rounded,
+                              size: 18.sp,
+                              color: _paymentMethod == 'UPI' ? Colors.white : const Color(0xFF334155),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'UPI',
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: _paymentMethod == 'UPI' ? Colors.white : const Color(0xFF334155),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.tenantName,
-                          style: GoogleFonts.inter(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0F172A),
+                    child: InkWell(
+                      onTap: () => setState(() => _paymentMethod = 'CASH'),
+                      borderRadius: BorderRadius.circular(12.r),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        decoration: BoxDecoration(
+                          color: _paymentMethod == 'CASH'
+                              ? const Color(0xFF112D4E)
+                              : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: _paymentMethod == 'CASH'
+                                ? const Color(0xFF112D4E)
+                                : const Color(0xFFCBD5E1),
                           ),
                         ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          'Bed ${widget.bedNumber}',
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            color: const Color(0xFF64748B),
-                          ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.payments_outlined,
+                              size: 18.sp,
+                              color: _paymentMethod == 'CASH' ? Colors.white : const Color(0xFF334155),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'CASH',
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: _paymentMethod == 'CASH' ? Colors.white : const Color(0xFF334155),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '₹${widget.shareAmount.toStringAsFixed(0)}',
-                    style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF166534),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
 
-            SizedBox(height: 18.h),
+              SizedBox(height: 16.h),
 
-            // Payment Method Selector
-            Text(
-              'PAYMENT METHOD',
-              style: GoogleFonts.inter(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF64748B),
-                letterSpacing: 0.5,
+              // Reference
+              Text(
+                'REFERENCE / TRANSACTION ID',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF64748B),
+                  letterSpacing: 0.5,
+                ),
               ),
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () => setState(() => _paymentMethod = 'UPI'),
+              SizedBox(height: 6.h),
+              TextFormField(
+                controller: _referenceController,
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF1E293B),
+                ),
+                decoration: InputDecoration(
+                  hintText: _paymentMethod == 'UPI' ? 'e.g. UPI982736182' : 'Reference (optional)',
+                  hintStyle: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: const Color(0xFF94A3B8),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    borderSide: const BorderSide(color: Color(0xFF112D4E), width: 1.5),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 16.h),
+
+              // Notes
+              Text(
+                'NOTES (OPTIONAL)',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF64748B),
+                  letterSpacing: 0.5,
+                ),
+              ),
+              SizedBox(height: 6.h),
+              TextFormField(
+                controller: _notesController,
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF1E293B),
+                ),
+                decoration: InputDecoration(
+                  hintText: 'e.g. Received via GPay',
+                  hintStyle: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: const Color(0xFF94A3B8),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    borderSide: const BorderSide(color: Color(0xFF112D4E), width: 1.5),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20.h),
+
+              // Confirm Payment Primary Button
+              ElevatedButton(
+                onPressed: _isLoading ? null : _handleConfirm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF112D4E),
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 48.h),
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                      decoration: BoxDecoration(
-                        color: _paymentMethod == 'UPI'
-                            ? const Color(0xFF112D4E)
-                            : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: _paymentMethod == 'UPI'
-                              ? const Color(0xFF112D4E)
-                              : const Color(0xFFCBD5E1),
+                  ),
+                  elevation: 0,
+                ),
+                child: _isLoading
+                    ? SizedBox(
+                        width: 20.w,
+                        height: 20.w,
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        'Confirm Payment',
+                        style: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.qr_code_rounded,
-                            size: 18.sp,
-                            color: _paymentMethod == 'UPI' ? Colors.white : const Color(0xFF334155),
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            'UPI',
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: _paymentMethod == 'UPI' ? Colors.white : const Color(0xFF334155),
-                            ),
-                          ),
-                        ],
-                      ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF64748B),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: InkWell(
-                    onTap: () => setState(() => _paymentMethod = 'CASH'),
-                    borderRadius: BorderRadius.circular(12.r),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                      decoration: BoxDecoration(
-                        color: _paymentMethod == 'CASH'
-                            ? const Color(0xFF112D4E)
-                            : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: _paymentMethod == 'CASH'
-                              ? const Color(0xFF112D4E)
-                              : const Color(0xFFCBD5E1),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.payments_outlined,
-                            size: 18.sp,
-                            color: _paymentMethod == 'CASH' ? Colors.white : const Color(0xFF334155),
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            'CASH',
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: _paymentMethod == 'CASH' ? Colors.white : const Color(0xFF334155),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 16.h),
-
-            // Reference
-            Text(
-              'REFERENCE / TRANSACTION ID',
-              style: GoogleFonts.inter(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF64748B),
-                letterSpacing: 0.5,
               ),
-            ),
-            SizedBox(height: 6.h),
-            TextFormField(
-              controller: _referenceController,
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                color: const Color(0xFF1E293B),
-              ),
-              decoration: InputDecoration(
-                hintText: _paymentMethod == 'UPI' ? 'e.g. UPI982736182' : 'Reference (optional)',
-                hintStyle: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: const Color(0xFF94A3B8),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                filled: true,
-                fillColor: const Color(0xFFF8FAFC),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                  borderSide: const BorderSide(color: Color(0xFF112D4E), width: 1.5),
-                ),
-              ),
-            ),
-
-            SizedBox(height: 16.h),
-
-            // Notes
-            Text(
-              'NOTES (OPTIONAL)',
-              style: GoogleFonts.inter(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF64748B),
-                letterSpacing: 0.5,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            TextFormField(
-              controller: _notesController,
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                color: const Color(0xFF1E293B),
-              ),
-              decoration: InputDecoration(
-                hintText: 'e.g. Received via GPay',
-                hintStyle: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: const Color(0xFF94A3B8),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                filled: true,
-                fillColor: const Color(0xFFF8FAFC),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                  borderSide: const BorderSide(color: Color(0xFF112D4E), width: 1.5),
-                ),
-              ),
-            ),
-
-            SizedBox(height: 24.h),
-
-            // Confirm Payment Primary Button
-            ElevatedButton(
-              onPressed: _isLoading ? null : _handleConfirm,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF112D4E),
-                foregroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 48.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                elevation: 0,
-              ),
-              child: _isLoading
-                  ? SizedBox(
-                      width: 20.w,
-                      height: 20.w,
-                      child: const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      'Confirm Payment',
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
-
-            SizedBox(height: 8.h),
-
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF64748B),
-                ),
-                child: Text(
-                  'Cancel',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
