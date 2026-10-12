@@ -378,36 +378,36 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
           ),
           Row(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.r),
-                  // border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      '0',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1B54A4),
-                      ),
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      'rewards'.tr(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: const Color(0xFF7A8699),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 12.w),
+              // Container(
+              //   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              //   decoration: BoxDecoration(
+              //     color: Colors.white,
+              //     borderRadius: BorderRadius.circular(12.r),
+              //     // border: Border.all(color: const Color(0xFFE2E8F0)),
+              //   ),
+              //   child: Column(
+              //     children: [
+              //       Text(
+              //         '0',
+              //         style: TextStyle(
+              //           fontSize: 14,
+              //           fontWeight: FontWeight.w700,
+              //           color: const Color(0xFF1B54A4),
+              //         ),
+              //       ),
+              //       SizedBox(width: 4.w),
+              //       Text(
+              //         'rewards'.tr(),
+              //         style: TextStyle(
+              //           fontSize: 10,
+              //           color: const Color(0xFF7A8699),
+              //           fontWeight: FontWeight.w500,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              // SizedBox(width: 12.w),
               BouncingWrapper(
                 onTap: () {
                   HapticFeedback.lightImpact();
