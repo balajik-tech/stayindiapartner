@@ -131,6 +131,7 @@ class ApiConstants {
   static const String paymentRemindBulk = '/payments/remind-bulk';
   static const String paymentReminders = '/payments/reminders';
   static const String bills = '/bills';
+  static const String electricityBills = '/electricity-bills';
   static const String bankAccounts = '/bankaccounts';
 
   static const String externalBankVerification = '/digilocker/bank-verification';

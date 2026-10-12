@@ -38,6 +38,7 @@ import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_condi
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/request_service/presentation/pages/request_service_page.dart';
 import 'package:stayindia_owner/features/request_service/presentation/pages/my_requests_page.dart';
+import 'package:stayindia_owner/features/electricity_bills/presentation/pages/room_electricity_bills_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -241,6 +242,20 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const BankAccountsPage(),
+                              ),
+                            ),
+                          ),
+                          _MenuTile(
+                            icon: Icons.account_balance_rounded,
+                            title: 'my_pg'.tr(),
+                            imagePath: 'assets/images/profile_bankaccount.png',
+                            subtitle: 'room_electricity_bills'.tr(),
+                            iconBgColor: const Color(0xFFE1F5EE),
+                            iconColor: const Color(0xFF0F6E56),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RoomElectricityBillsPage(),
                               ),
                             ),
                           ),
