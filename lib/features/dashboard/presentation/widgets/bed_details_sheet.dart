@@ -790,9 +790,15 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         double rent = widget.state.rent ?? 0;
         double deposit = widget.state.deposit ?? 0;
         double maintenance = widget.state.maintenance ?? 0;
-        double electricityBill = widget.state.dailyRent ?? 0;
+        double electricityBill = 0;
+        double dailyRent = widget.state.dailyRent ?? 0;
         String roomType = widget.state.roomType ?? 'NON-AC';
         String? sharingType = widget.state.sharingType;
+
+        final bool isOccupied = _currentStatus != BedStatus.free &&
+            _currentStatus != BedStatus.maintenance &&
+            widget.state.tenantId != null &&
+            widget.state.tenantId!.isNotEmpty;
 
         if (tenantState is TenantDetailLoaded) {
           final detail = tenantState.detail;
@@ -967,12 +973,19 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: _buildDetailGridItem(
-                      Icons.bolt_rounded,
-                      'Electricity Bill',
-                      '₹${electricityBill.toInt()}',
-                      const Color(0xFF475569),
-                    ),
+                    child: isOccupied
+                        ? _buildDetailGridItem(
+                            Icons.bolt_rounded,
+                            'Electricity Bill',
+                            '₹${electricityBill.toInt()}',
+                            const Color(0xFF475569),
+                          )
+                        : _buildDetailGridItem(
+                            Icons.today_rounded,
+                            'Daily Rent',
+                            '₹${dailyRent.toInt()}',
+                            const Color(0xFF475569),
+                          ),
                   ),
                 ],
               ),
