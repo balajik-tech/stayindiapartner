@@ -44,6 +44,13 @@ class ElectricityBillCubit extends Cubit<ElectricityBillState> {
 
       for (final floor in dashboardData.occupancy.floors) {
         for (final room in floor.rooms) {
+          final hasOccupiedBed = room.beds.any((bed) {
+            final s = bed.status.toUpperCase();
+            return s == 'OCCUPIED' || s == 'NOTICE' || s == 'AWAY';
+          });
+
+          if (!hasOccupiedBed) continue;
+
           final code = StringUtils.formatRoomNumber(
             room.roomNumber,
             floor.floorNum ?? floor.floorName,
@@ -79,7 +86,7 @@ class ElectricityBillCubit extends Cubit<ElectricityBillState> {
         isLoading: false,
         rooms: mergedRooms,
       ));
-      AppLogger.success('Electricity bills rooms loaded successfully: ${mergedRooms.length}');
+      AppLogger.success('Electricity bills occupied rooms loaded successfully: ${mergedRooms.length}');
 
       await fetchBillsForHostel();
     } catch (e, stackTrace) {
