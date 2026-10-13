@@ -31,17 +31,26 @@ class TenantRentalModel extends TenantRentalEntity {
     super.notes,
     super.createdAt,
     super.updatedAt,
+    super.electricityBillShare,
+    super.electricityBillStatus,
     super.booking,
     super.payment,
   });
 
   factory TenantRentalModel.fromJson(Map<String, dynamic> json) {
+    final elecShare = _toDouble(json['electricityBillShare']);
+    final elecStatus = json['electricityBillStatus']?.toString() ?? '';
+    double elecBill = _toDouble(json['electricityBill']);
+    if (elecBill == 0 && elecShare > 0 && elecStatus.toUpperCase() != 'PAID') {
+      elecBill = elecShare;
+    }
+
     return TenantRentalModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
       bookingAmount: _toDouble(json['bookingAmount']),
       deposit: _toDouble(json['deposit']),
       maintenance: _toDouble(json['maintenance']),
-      electricityBill: _toDouble(json['electricityBill']),
+      electricityBill: elecBill,
       parkingBill: _toDouble(json['parkingBill']),
       discountAmount: _toDouble(json['discountAmount']),
       payableAmount: _toDouble(json['payableAmount']),
@@ -53,6 +62,8 @@ class TenantRentalModel extends TenantRentalEntity {
       notes: json['notes']?.toString(),
       createdAt: json['createdAt']?.toString(),
       updatedAt: json['updatedAt']?.toString(),
+      electricityBillShare: elecShare,
+      electricityBillStatus: elecStatus,
       booking: json['booking'] is Map<String, dynamic>
           ? TenantRentalBookingModel.fromJson(
               json['booking'] as Map<String, dynamic>)

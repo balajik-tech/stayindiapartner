@@ -18,6 +18,8 @@ class TenantRentalEntity extends Equatable {
   final String? notes;
   final String? createdAt;
   final String? updatedAt;
+  final double electricityBillShare;
+  final String electricityBillStatus;
   final TenantRentalBookingEntity? booking;
   final TenantRentalPaymentDetailEntity? payment;
 
@@ -38,6 +40,8 @@ class TenantRentalEntity extends Equatable {
     this.notes,
     this.createdAt,
     this.updatedAt,
+    this.electricityBillShare = 0.0,
+    this.electricityBillStatus = '',
     this.booking,
     this.payment,
   });
@@ -46,6 +50,11 @@ class TenantRentalEntity extends Equatable {
     final status = paymentStatus.toUpperCase();
     final pStatus = (payment?.status ?? '').toUpperCase();
     return status == 'SUCCESS' || status == 'PAID' || pStatus == 'SUCCESS';
+  }
+
+  bool get isElectricityBillPending {
+    final status = electricityBillStatus.toUpperCase();
+    return status == 'PENDING' || status == 'UNPAID';
   }
 
   TenantPaymentItemEntity toTenantPaymentItemEntity() {
@@ -79,9 +88,9 @@ class TenantRentalEntity extends Equatable {
       paymentType: payment?.method ?? 'RENT',
       paymentDate: dateStr.isNotEmpty ? dateStr : null,
       dueDate: booking?.endDate,
-      rent: bookingAmount ,
-      deposit:  deposit,
-      maintenance:  maintenance,
+      rent: bookingAmount,
+      deposit: deposit,
+      maintenance: maintenance,
     );
   }
 
@@ -103,6 +112,8 @@ class TenantRentalEntity extends Equatable {
         notes,
         createdAt,
         updatedAt,
+        electricityBillShare,
+        electricityBillStatus,
         booking,
         payment,
       ];

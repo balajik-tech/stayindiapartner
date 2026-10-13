@@ -130,6 +130,13 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
 
           rentAccumulator += rentVal;
           utilityAccumulator += utilVal;
+        } else {
+          if (rental.isElectricityBillPending) {
+            final pendingElec = rental.electricityBillShare > 0
+                ? rental.electricityBillShare
+                : rental.electricityBill;
+            utilityAccumulator += pendingElec;
+          }
         }
         depositAccumulator += rental.deposit;
       }

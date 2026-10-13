@@ -280,9 +280,17 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
       );
       if (response.statusCode == 200) {
         final raw = response.data;
-        final List listData = raw is Map && raw['data'] is List
-            ? raw['data']
-            : (raw is List ? raw : []);
+        List listData = [];
+        if (raw is Map && raw['data'] != null) {
+          if (raw['data'] is List) {
+            listData = raw['data'];
+          } else if (raw['data'] is Map && raw['data']['rentals'] is List) {
+            listData = raw['data']['rentals'];
+          }
+        } else if (raw is List) {
+          listData = raw;
+        }
+
         return listData
             .map((item) =>
                 TenantRentalModel.fromJson(item as Map<String, dynamic>))
