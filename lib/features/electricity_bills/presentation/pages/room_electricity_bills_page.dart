@@ -993,25 +993,14 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
           ),
           SizedBox(height: 4.h),
           Text(
-            'Configure rooms in settings to start tracking electricity bills.',
+            'No tenants are currently occupying beds.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 13.sp,
               color: const Color(0xFF64748B),
             ),
           ),
-          SizedBox(height: 16.h),
-          ElevatedButton(
-            onPressed: () => _openSettingsSheet(context, state),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF112D4E),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-            ),
-            child: const Text('Open Settings'),
-          ),
+          SizedBox(height: 8.h),
         ],
       ),
     );
