@@ -193,31 +193,54 @@ class BankAccountRemoteDataSourceImpl implements BankAccountDataSource {
       'clientRefNum': clientRef,
     };
 
-    final response = await _dio.post(
-      ApiConstants.externalBankVerification,
-      data: payload,
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'jwt-token': ApiConstants.bankJwtToken,
-        },
-      ),
-    );
+    try {
+      final response = await _dio.post(
+        ApiConstants.externalBankVerification,
+        data: payload,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'jwt-token': ApiConstants.bankJwtToken,
+          },
+        ),
+      );
 
-    final raw = response.data;
-    if (raw is! Map<String, dynamic> || raw['status'] != true) {
-      final message = raw['message']?.toString() ?? 'Bank account verification failed.';
-      throw Exception(message);
+      final raw = response.data;
+      if (raw is! Map<String, dynamic> || raw['status'] != true) {
+        final message = raw['message']?.toString() ?? 'Bank account verification failed.';
+        throw Exception(message);
+      }
+
+      final result = raw['data'] as Map<String, dynamic>?;
+      if (result == null || result['status']?.toString().toUpperCase() != 'SUCCESS') {
+        final message = result?['message']?.toString() ??
+            result?['status']?.toString() ??
+            raw['message']?.toString() ??
+            'Bank account verification did not succeed.';
+        throw Exception(message);
+      }
+
+      return BankAccountVerificationResult.fromJson(result);
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+
+      String errorMessage = 'Bank account verification failed.';
+
+      if (responseData is Map) {
+        errorMessage = responseData['message']?.toString() ??
+            (responseData['data'] is Map ? responseData['data']['message']?.toString() : null) ??
+            responseData['error']?.toString() ??
+            responseData['detail']?.toString() ??
+            errorMessage;
+      } else if (responseData is String && responseData.trim().isNotEmpty) {
+        errorMessage = responseData;
+      }
+
+      throw Exception(errorMessage);
+    } catch (e) {
+      rethrow;
     }
-
-    final result = raw['data'] as Map<String, dynamic>?;
-    if (result == null || result['status']?.toString().toUpperCase() != 'SUCCESS') {
-      final message = result?['status']?.toString() ?? 'Bank account verification did not succeed.';
-      throw Exception(message);
-    }
-
-    return BankAccountVerificationResult.fromJson(result);
   }
 
   @override
