@@ -4,6 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/features/electricity_bills/data/models/electricity_bill_model.dart';
 
+import '../../../../core/theme/app_colors.dart';
+
 class AddElectricityBillSheet extends StatefulWidget {
   final String hostelId;
   final List<ElectricityRoomModel> rooms;
@@ -332,12 +334,12 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
                                   padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? const Color(0xFF112D4E)
+                                        ?  AppColors.primaryBlue
                                         : Colors.white,
                                     borderRadius: BorderRadius.circular(20.r),
                                     border: Border.all(
                                       color: isSelected
-                                          ? const Color(0xFF112D4E)
+                                          ?  AppColors.primaryBlue
                                           : const Color(0xFFCBD5E1),
                                     ),
                                   ),
@@ -669,7 +671,7 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
               ElevatedButton(
                 onPressed: _isSaving ? null : _handleSave,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF112D4E),
+                  backgroundColor: AppColors.primaryBlue,
                   foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 48.h),
                   shape: RoundedRectangleBorder(

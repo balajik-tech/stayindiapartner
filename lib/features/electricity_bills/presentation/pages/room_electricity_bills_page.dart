@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../injection_container.dart';
 import '../../../profile/presentation/cubit/hostel_cubit.dart';
 import '../../../profile/presentation/cubit/hostel_state.dart';
@@ -100,7 +101,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF112D4E),
+              primary:  AppColors.primaryBlue,
               onPrimary: Colors.white,
               onSurface: Color(0xFF1E293B),
             ),
@@ -237,7 +238,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
     return BlocBuilder<ElectricityBillCubit, ElectricityBillState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: const Color(0xFF112D4E),
+          backgroundColor: AppColors.primaryBlue,
           body: SafeArea(
             bottom: false,
             child: Column(
@@ -284,8 +285,8 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                               Text(
                                 state.subtitle,
                                 style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: const Color(0xFF94A3B8),
+                                  fontSize: 11.sp,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -370,7 +371,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                               context: context,
                               state: state,
                             ),
-                            backgroundColor: const Color(0xFF112D4E),
+                            backgroundColor:  AppColors.primaryBlue,
                             elevation: 4,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30.r),
@@ -556,10 +557,10 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF112D4E) : Colors.white,
+          color: isSelected ? AppColors.primaryBlue : Colors.white,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: isSelected ? const Color(0xFF112D4E) : const Color(0xFFCBD5E1),
+            color: isSelected ? AppColors.primaryBlue : const Color(0xFFCBD5E1),
           ),
         ),
         child: Text(
@@ -652,7 +653,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                 width: 40.w,
                 height: 40.w,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF112D4E),
+                  color: AppColors.primaryBlue,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 alignment: Alignment.center,
@@ -786,7 +787,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                               child: Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF112D4E),
+                                  color:  AppColors.primaryBlue,
                                   borderRadius: BorderRadius.circular(6.r),
                                 ),
                                 child: Text(
@@ -845,7 +846,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF112D4E),
+                                    color:  AppColors.primaryBlue,
                                     borderRadius: BorderRadius.circular(4.r),
                                   ),
                                   child: Text(
@@ -911,7 +912,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                     child: Container(
                                       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF112D4E),
+                                        color:  AppColors.primaryBlue,
                                         borderRadius: BorderRadius.circular(6.r),
                                       ),
                                       child: Text(
