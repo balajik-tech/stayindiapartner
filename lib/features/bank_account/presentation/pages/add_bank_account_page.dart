@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -336,6 +337,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             decoration: _inputDecoration(),
                             onChanged: (_) => setState(() {}),
                             style: GoogleFonts.inter(color: Colors.black),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                           ),
                           const SizedBox(height: 16),
                           _FieldLabel('Confirm Account Number'),
@@ -344,6 +348,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             keyboardType: TextInputType.number,
                             decoration: _inputDecoration(),
                             onChanged: (_) => setState(() {}),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             style: GoogleFonts.inter(color: Colors.black),
                           ),
                           if (_confirmAccountNumberController
@@ -386,6 +393,14 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             decoration: _inputDecoration().copyWith(
                               counterText: '',
                             ),
+                            inputFormatters: [
+                              TextInputFormatter.withFunction((oldValue, newValue) {
+                                return newValue.copyWith(
+                                  text: newValue.text.toUpperCase(),
+                                  selection: newValue.selection,
+                                );
+                              }),
+                            ],
                             onChanged: (_) => setState(() {}),
                             style: GoogleFonts.inter(color: Colors.black),
                           ),
@@ -477,6 +492,14 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                                       color: const Color(0xFF6B7280),
                                     ),
                                   ),
+                                  inputFormatters: [
+                                    TextInputFormatter.withFunction((oldValue, newValue) {
+                                      return newValue.copyWith(
+                                        text: newValue.text.toUpperCase(),
+                                        selection: newValue.selection,
+                                      );
+                                    }),
+                                  ],
                                   onChanged: (_) => setState(() {}),
                                   style: GoogleFonts.inter(color: Colors.black),
                                 ),
