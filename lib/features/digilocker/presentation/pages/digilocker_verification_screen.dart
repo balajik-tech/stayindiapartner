@@ -71,6 +71,7 @@ class _DigiLockerVerificationScreenState
   KycResult _convertToKycResult(DigiLockerResponse response) {
     final data = response.data;
     return KycResult(
+      isAadharVerified: response.success,
       name: data?.name,
       fatherName: data?.fathername,
       aadharNumber: data?.aadharNo,
@@ -90,9 +91,27 @@ class _DigiLockerVerificationScreenState
 
   void _handleError(String error) {
     if (!mounted) return;
+
+    // Ignore non-fatal subresource errors (e.g. Chrome ORB blocking opaque cross-origin resources)
+    if (_isNonFatalWebViewError(error)) {
+      debugPrint('DigiLocker: Ignored non-fatal WebView error: $error');
+      return;
+    }
+
     setState(() {
       _errorMessage = error;
     });
+  }
+
+  /// Returns true for non-fatal web resource loading errors that shouldn't interrupt the user flow.
+  bool _isNonFatalWebViewError(String error) {
+    final lower = error.toLowerCase();
+    return lower.contains('err_blocked_by_orb') ||
+        lower.contains('err_blocked_by_client') ||
+        lower.contains('err_cache_miss') ||
+        lower.contains('err_corp_failed') ||
+        lower.contains('err_blocked_by_response') ||
+        lower.contains('favicon');
   }
 
   void _handleClose() {
@@ -102,46 +121,43 @@ class _DigiLockerVerificationScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('DigiLocker Verification')),
-      body: Stack(
-        children: [
-          if (_errorMessage != null)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                    const SizedBox(height: 12),
-                    Text(
-                      _errorMessage!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _errorMessage = null;
-                        });
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('DigiLocker Verification')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 12),
+                Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
                 ),
-              ),
-            )
-          else
-            DigiLockerWidget(
-              config: _config,
-              onSuccess: _handleSuccess,
-              onError: _handleError,
-              onClose: _handleClose,
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _errorMessage = null;
+                    });
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
-        ],
-      ),
+          ),
+        ),
+      );
+    }
+
+    return DigiLockerWidget(
+      config: _config,
+      onSuccess: _handleSuccess,
+      onError: _handleError,
+      onClose: _handleClose,
     );
   }
 }
