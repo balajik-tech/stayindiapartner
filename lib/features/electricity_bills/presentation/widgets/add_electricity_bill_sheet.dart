@@ -9,6 +9,8 @@ class AddElectricityBillSheet extends StatefulWidget {
   final List<ElectricityRoomModel> rooms;
   final String? initialRoomCode;
   final ElectricityBillModel? initialBill;
+  final DateTime? defaultStartDate;
+  final DateTime? defaultEndDate;
   final Future<bool> Function(ElectricityBillModel bill) onSave;
   final Function(String billId)? onDelete;
 
@@ -18,6 +20,8 @@ class AddElectricityBillSheet extends StatefulWidget {
     required this.rooms,
     this.initialRoomCode,
     this.initialBill,
+    this.defaultStartDate,
+    this.defaultEndDate,
     required this.onSave,
     this.onDelete,
   });
@@ -28,6 +32,8 @@ class AddElectricityBillSheet extends StatefulWidget {
     required List<ElectricityRoomModel> rooms,
     String? initialRoomCode,
     ElectricityBillModel? initialBill,
+    DateTime? defaultStartDate,
+    DateTime? defaultEndDate,
     required Future<bool> Function(ElectricityBillModel bill) onSave,
     Function(String billId)? onDelete,
   }) {
@@ -44,6 +50,8 @@ class AddElectricityBillSheet extends StatefulWidget {
           rooms: rooms,
           initialRoomCode: initialRoomCode,
           initialBill: initialBill,
+          defaultStartDate: defaultStartDate,
+          defaultEndDate: defaultEndDate,
           onSave: onSave,
           onDelete: onDelete,
         ),
@@ -86,9 +94,9 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
     } else {
       _selectedRoomCode = widget.initialRoomCode ??
           (widget.rooms.isNotEmpty ? widget.rooms.first.code : '');
-      _billStartDate = DateTime(now.year, now.month, 1);
-      _billEndDate = DateTime(now.year, now.month + 1, 0);
-      _dueDate = DateTime(now.year, now.month + 1, 5);
+      _billStartDate = widget.defaultStartDate ?? DateTime(now.year, now.month, 1);
+      _billEndDate = widget.defaultEndDate ?? DateTime(now.year, now.month + 1, 0);
+      _dueDate = _billEndDate.add(const Duration(days: 5));
       _monthController = TextEditingController(
         text: DateFormat('MMMM yyyy').format(_billStartDate),
       );

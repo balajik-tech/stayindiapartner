@@ -88,6 +88,7 @@ class TenantDetailModel extends TenantDetailEntity {
   factory TenantDetailModel.fromJson(Map<String, dynamic> json) {
     final tenantData = (json['tenant'] as Map<String, dynamic>?) ?? {};
     final stayData = json['stay'] as Map<String, dynamic>?;
+    final elecBillsData = json['electricityBills'] as Map<String, dynamic>?;
     final paymentsData = (json['payments'] as Map<String, dynamic>?) ?? {};
     final paymentItems = (paymentsData['items'] as List<dynamic>?) ?? [];
 
@@ -126,7 +127,7 @@ class TenantDetailModel extends TenantDetailEntity {
         kycData?['idPhotoBack']?.toString() ?? '',
       aadhaarNumber:
         kycData?['aadhaarNumber']?.toString() ?? '',
-      stay: stayData != null ? TenantStayDetailModel.fromJson(stayData) : null,
+      stay: stayData != null ? TenantStayDetailModel.fromJson(stayData, elecBillsData) : null,
       payments: paymentItems
           .map(
             (p) => TenantPaymentItemModel.fromJson(p as Map<String, dynamic>),
@@ -164,9 +165,18 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
     super.acType,
   });
 
-  factory TenantStayDetailModel.fromJson(Map<String, dynamic> json) {
+  factory TenantStayDetailModel.fromJson(
+    Map<String, dynamic> json, [
+    Map<String, dynamic>? elecBillsData,
+  ]) {
     final room = (json['room'] as Map<String, dynamic>?) ?? {};
     final floorRaw = room['floor'];
+
+    double elecBill = _toDouble(json['electricityBill']);
+    if (elecBill == 0 && elecBillsData != null && elecBillsData['totalDueAmount'] != null) {
+      elecBill = _toDouble(elecBillsData['totalDueAmount']);
+    }
+
     return TenantStayDetailModel(
       bookingId:
           (json['bookingId'] is Map
@@ -198,7 +208,7 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
       accessCode: json['accessCode']?.toString(),
       qrToken: json['qrToken']?.toString(),
       status: json['status']?.toString(),
-      electricityBill: _toDouble(json['electricityBill']),
+      electricityBill: elecBill,
       parkingBill: _toDouble(json['parkingBill']),
       sharingType: (room['sharingType'] ?? json['sharingType'])?.toString(),
       acType: (room['roomType'] ?? json['roomType'])?.toString(),

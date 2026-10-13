@@ -136,12 +136,20 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
     final isEditing = initialBill != null;
 
     if (!isEditing) {
-      final existingRoomCodes = state.bills
+      final billsInCurrentRange = state.bills.where((b) {
+        final inRange = (b.date.isAfter(state.fromDate.subtract(const Duration(seconds: 1))) ||
+                b.date.isAtSameMomentAs(state.fromDate)) &&
+            (b.date.isBefore(state.toDate.add(const Duration(days: 1))) ||
+                b.date.isAtSameMomentAs(state.toDate));
+        return inRange;
+      }).toList();
+
+      final existingRoomCodes = billsInCurrentRange
           .map((b) => b.roomCode.toLowerCase())
           .where((code) => code.isNotEmpty)
           .toSet();
 
-      final existingRoomIds = state.bills
+      final existingRoomIds = billsInCurrentRange
           .map((b) => b.roomId)
           .where((id) => id.isNotEmpty)
           .toSet();
@@ -166,6 +174,8 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
         rooms: availableRooms,
         initialRoomCode: initialRoomCode,
         initialBill: initialBill,
+        defaultStartDate: state.fromDate,
+        defaultEndDate: state.toDate,
         onSave: (bill) async {
           return await context.read<ElectricityBillCubit>().createElectricityBill(bill);
         },

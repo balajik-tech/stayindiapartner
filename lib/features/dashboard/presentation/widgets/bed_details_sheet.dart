@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
@@ -828,7 +829,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
           if (stay != null) {
             if (stay.electricityBill != null) {
-              electricityBill = stay.electricityBill!;
+              electricityBill = stay.electricityBill!.roundToDouble();
             }
             if (stay.acType != null && stay.acType!.isNotEmpty) {
               roomType = stay.acType!;
@@ -1376,12 +1377,79 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Assigned Tenant',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1E293B),
+              GestureDetector(
+                onTap: () {
+                  final tId = detail?.id ?? widget.state.tenantId;
+                  final hId = widget.state.hostelId;
+                  final rNum =
+                      detail?.stay?.roomTypename ??
+                      widget.state.roomNumber ??
+                      'N/A';
+                  if (tId != null &&
+                      tId.isNotEmpty &&
+                      hId != null &&
+                      hId.isNotEmpty) {
+                    TenantDetailsSheet.show(
+                      context,
+                      name: name,
+                      imageUrl: ApiConstants.getImageUrl(avatar),
+                      room: rNum,
+                      tenantId: tId,
+                      hostelId: hId,
+                    );
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 12.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFe9f5fe),
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(
+                      color: const Color(0xFFeaeff3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFdfe9fd),
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(
+                            color: const Color(0xFFDBEAFE),
+                            width: 1,
+                          ),
+                        ),
+                        child:Padding(
+                          padding: EdgeInsets.all(4.r),
+                          child: Icon(
+                            Icons.people_alt_rounded,
+                            size: 20.sp,
+                            color: const Color(0xFF2563EB),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          'Tenant Overview',
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF212e38),
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 16.sp,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: 12.h),
