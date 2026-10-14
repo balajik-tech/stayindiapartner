@@ -2305,7 +2305,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
       child: ElevatedButton(
         onPressed: () => Navigator.pop(context),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: AppColors.primaryBlue,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
@@ -2316,12 +2316,12 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           children: [
             Icon(
               Icons.check_circle_outline_rounded,
-              color: _statusTextColor,
+              color: Colors.white,
               size: 20.sp,
             ),
             SizedBox(width: 8.w),
             Text(
-              'done'.tr(),
+              'done'.tr().toUpperCase(),
               style: TextStyle(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w900,
