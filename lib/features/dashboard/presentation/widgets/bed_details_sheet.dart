@@ -1487,27 +1487,27 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () {
-                    final tId = detail?.id ?? widget.state.tenantId;
-                    final hId = widget.state.hostelId;
-                    final rNum =
-                        detail?.stay?.roomTypename ??
-                        widget.state.roomNumber ??
-                        'N/A';
-                    if (tId != null &&
-                        tId.isNotEmpty &&
-                        hId != null &&
-                        hId.isNotEmpty) {
-                      TenantDetailsSheet.show(
-                        context,
-                        name: name,
-                        imageUrl: ApiConstants.getImageUrl(avatar),
-                        room: rNum,
-                        tenantId: tId,
-                        hostelId: hId,
-                      );
-                    }
-                  },
+                  // onTap: () {
+                  //   final tId = detail?.id ?? widget.state.tenantId;
+                  //   final hId = widget.state.hostelId;
+                  //   final rNum =
+                  //       detail?.stay?.roomTypename ??
+                  //       widget.state.roomNumber ??
+                  //       'N/A';
+                  //   if (tId != null &&
+                  //       tId.isNotEmpty &&
+                  //       hId != null &&
+                  //       hId.isNotEmpty) {
+                  //     TenantDetailsSheet.show(
+                  //       context,
+                  //       name: name,
+                  //       imageUrl: ApiConstants.getImageUrl(avatar),
+                  //       room: rNum,
+                  //       tenantId: tId,
+                  //       hostelId: hId,
+                  //     );
+                  //   }
+                  // },
                   borderRadius: BorderRadius.circular(12.r),
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 6.h),
@@ -1575,7 +1575,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                             ],
                           ),
                         ),
-                        Icon(Icons.chevron_right_rounded, color: const Color(0xFF94A3B8), size: 22.sp),
+                        // Icon(Icons.chevron_right_rounded, color: const Color(0xFF94A3B8), size: 22.sp),
                       ],
                     ),
                   ),
