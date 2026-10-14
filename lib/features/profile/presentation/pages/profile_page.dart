@@ -250,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                             title: 'my_pg'.tr(),
                             imagePath: 'assets/images/profile_electricity.png',
                             subtitle: 'room_electricity_bills'.tr(),
-                            iconBgColor: const Color(0xFFFFE8F8),
+                            iconBgColor: const Color(0xFFFFF5CC),
                             iconColor: const Color(0xFF16A34A),
                             onTap: () => Navigator.push(
                               context,
