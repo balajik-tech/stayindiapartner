@@ -180,8 +180,21 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
         onSave: (bill) async {
           return await context.read<ElectricityBillCubit>().createElectricityBill(bill);
         },
-        onDelete: (billId) {
-          context.read<ElectricityBillCubit>().deleteBill(billId);
+        onDelete: (billId) async {
+          try {
+            await context.read<ElectricityBillCubit>().deleteBill(billId);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Electricity bill deleted successfully.')),
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to delete bill: $e')),
+              );
+            }
+          }
         },
       );
     } else {
@@ -203,8 +216,21 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
         onSave: (bill) async {
           return await context.read<ElectricityBillCubit>().updateElectricityBillApi(bill);
         },
-        onDelete: (billId) {
-          context.read<ElectricityBillCubit>().deleteBill(billId);
+        onDelete: (billId) async {
+          try {
+            await context.read<ElectricityBillCubit>().deleteBill(billId);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Electricity bill deleted successfully.')),
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to delete bill: $e')),
+              );
+            }
+          }
         },
       );
     }

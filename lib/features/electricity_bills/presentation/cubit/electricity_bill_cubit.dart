@@ -305,9 +305,18 @@ class ElectricityBillCubit extends Cubit<ElectricityBillState> {
     addBill(bill);
   }
 
-  void deleteBill(String billId) {
-    final updatedBills = state.bills.where((b) => b.id != billId).toList();
-    emit(state.copyWith(bills: updatedBills));
+  Future<bool> deleteBill(String billId) async {
+    try {
+      if (_remoteDataSource != null) {
+        await _remoteDataSource.deleteElectricityBill(billId);
+      }
+      final updatedBills = state.bills.where((b) => b.id != billId).toList();
+      emit(state.copyWith(bills: updatedBills));
+      return true;
+    } catch (e) {
+      AppLogger.error('Error calling deleteElectricityBill API', e);
+      rethrow;
+    }
   }
 
   void updateSettings({

@@ -5,6 +5,7 @@ import '../../../../core/utils/logger.dart';
 abstract class ElectricityRemoteDataSource {
   Future<Map<String, dynamic>> createElectricityBill(Map<String, dynamic> payload);
   Future<Map<String, dynamic>> updateElectricityBill(String billId, Map<String, dynamic> payload);
+  Future<Map<String, dynamic>> deleteElectricityBill(String billId);
   Future<Map<String, dynamic>> updateTenantBillStatus({
     required String billId,
     required String tenantId,
@@ -76,6 +77,31 @@ class ElectricityRemoteDataSourceImpl implements ElectricityRemoteDataSource {
       throw Exception(msg);
     } catch (e) {
       AppLogger.error('Error in updateElectricityBill: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> deleteElectricityBill(String billId) async {
+    try {
+      final url = '${ApiConstants.electricityBills}/$billId';
+      AppLogger.info('Deleting electricity bill via DELETE to $url');
+      final response = await _dio.delete(url);
+
+      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          return data;
+        }
+        return {'status': 'success'};
+      }
+      throw Exception('Failed to delete electricity bill');
+    } on DioException catch (e) {
+      AppLogger.error('Dio error in deleteElectricityBill: ${e.message}');
+      final msg = e.response?.data?['message']?.toString() ?? e.message ?? 'Failed to delete electricity bill';
+      throw Exception(msg);
+    } catch (e) {
+      AppLogger.error('Error in deleteElectricityBill: $e');
       rethrow;
     }
   }
