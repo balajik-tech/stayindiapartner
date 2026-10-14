@@ -581,24 +581,24 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                   DateFilterType.thisMonth,
                 ),
               ),
-              SizedBox(width: 8.w),
-              _buildFilterPill(
-                context,
-                label: 'Last month',
-                isSelected: state.filterType == DateFilterType.lastMonth,
-                onTap: () => context.read<ElectricityBillCubit>().setFilterType(
-                  DateFilterType.lastMonth,
-                ),
-              ),
-              SizedBox(width: 8.w),
-              _buildFilterPill(
-                context,
-                label: 'Last 30 days',
-                isSelected: state.filterType == DateFilterType.last30Days,
-                onTap: () => context.read<ElectricityBillCubit>().setFilterType(
-                  DateFilterType.last30Days,
-                ),
-              ),
+              // SizedBox(width: 8.w),
+              // _buildFilterPill(
+              //   context,
+              //   label: 'Last month',
+              //   isSelected: state.filterType == DateFilterType.lastMonth,
+              //   onTap: () => context.read<ElectricityBillCubit>().setFilterType(
+              //     DateFilterType.lastMonth,
+              //   ),
+              // ),
+              // SizedBox(width: 8.w),
+              // _buildFilterPill(
+              //   context,
+              //   label: 'Last 30 days',
+              //   isSelected: state.filterType == DateFilterType.last30Days,
+              //   onTap: () => context.read<ElectricityBillCubit>().setFilterType(
+              //     DateFilterType.last30Days,
+              //   ),
+              // ),
             ],
           ),
         ],
