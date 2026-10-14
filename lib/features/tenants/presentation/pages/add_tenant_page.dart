@@ -1541,11 +1541,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
             final DateTime? picked = await showDatePicker(
               context: context,
               initialDate: _isNew
-                  ? DateTime(now.year, now.month, 1)
+                  ? DateTime(now.year, now.month, now.day)
                   : (_checkInDate ?? DateTime.now()),
               firstDate: _isNew
-                  ? DateTime(now.year, now.month, 1)
-                  : DateTime(now.year, now.month, 1),
+                  ? DateTime(now.year, now.month, now.day)
+                  : DateTime(now.year, now.month, now.day),
               lastDate: DateTime(2100),
             );
 
