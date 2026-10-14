@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/features/electricity_bills/data/datasources/electricity_remote_datasource.dart';
 import 'package:stayindia_owner/features/payments/domain/repositories/payment_repository.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
@@ -70,6 +71,8 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
   double _totalDues = 0.0;
   double _finalSettlement = 0.0;
 
+  final List<String> _pendingBillIds = [];
+
   late TextEditingController _depositController;
   late TextEditingController _pendingRentController;
   late TextEditingController _utilityController;
@@ -116,6 +119,7 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
       double rentAccumulator = 0.0;
       double utilityAccumulator = 0.0;
       double depositAccumulator = 0.0;
+      _pendingBillIds.clear();
 
       for (var rental in rentals) {
         if (!rental.isPaid) {
@@ -138,7 +142,47 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
             utilityAccumulator += pendingElec;
           }
         }
+        if (rental.isElectricityBillPending &&
+            rental.electricityBillId != null &&
+            rental.electricityBillId!.isNotEmpty) {
+          if (!_pendingBillIds.contains(rental.electricityBillId)) {
+            _pendingBillIds.add(rental.electricityBillId!);
+          }
+        }
         depositAccumulator += rental.deposit;
+      }
+
+      if (_pendingBillIds.isEmpty && utilityAccumulator > 0) {
+        try {
+          final res = await sl<ElectricityRemoteDataSource>().fetchElectricityBills(
+            hostelId: widget.hostelId,
+          );
+          final items = res['data']?['items'] ?? res['data'] ?? [];
+          if (items is List) {
+            for (var item in items) {
+              if (item is Map) {
+                final billId = item['_id']?.toString();
+                final splits = item['tenantSplits'];
+                if (billId != null && splits is List) {
+                  for (var split in splits) {
+                    if (split is Map) {
+                      final tId = (split['tenant'] is Map
+                              ? split['tenant']['_id']
+                              : split['tenant'])
+                          ?.toString();
+                      final status = split['status']?.toString().toUpperCase();
+                      if (tId == widget.tenantId && status == 'PENDING') {
+                        if (!_pendingBillIds.contains(billId)) {
+                          _pendingBillIds.add(billId);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (_) {}
       }
 
       final secDeposit = widget.securityDeposit > 0
@@ -370,20 +414,45 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
 
             _SlideToConfirmButton(
               label: 'Slide to Confirm Check-out',
-              onConfirmed: () {
-                Navigator.pop(context);
-                widget.onCheckoutConfirmed(
-                  securityDeposit: _securityDeposit,
-                  pendingRent: _pendingRent,
-                  utilityDue: _utilityDue,
-                  finalSettlement: _finalSettlement,
-                );
-              },
+              onConfirmed: _handleConfirmCheckout,
             ),
           ],
         ],
       ),
     );
+  }
+
+  Future<void> _handleConfirmCheckout() async {
+    if (_pendingBillIds.isNotEmpty) {
+      final elecDS = sl<ElectricityRemoteDataSource>();
+      for (final billId in _pendingBillIds) {
+        try {
+          await elecDS.updateTenantBillStatus(
+            billId: billId,
+            tenantId: widget.tenantId,
+            payload: {
+              "status": "PAID",
+              "paymentMethod": "CASH",
+              "reference": "",
+              "notes": "",
+            },
+          );
+        } catch (_) {
+          // Continue if error or already paid
+        }
+      }
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+      final finalSettlementWithoutUtility = _securityDeposit - _pendingRent;
+      widget.onCheckoutConfirmed(
+        securityDeposit: _securityDeposit,
+        pendingRent: _pendingRent,
+        utilityDue: 0,
+        finalSettlement: finalSettlementWithoutUtility,
+      );
+    }
   }
 
   Widget _buildFinancialInputRow(

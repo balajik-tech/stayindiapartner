@@ -20,6 +20,7 @@ class TenantRentalEntity extends Equatable {
   final String? updatedAt;
   final double electricityBillShare;
   final String electricityBillStatus;
+  final String? electricityBillId;
   final TenantRentalBookingEntity? booking;
   final TenantRentalPaymentDetailEntity? payment;
 
@@ -42,6 +43,7 @@ class TenantRentalEntity extends Equatable {
     this.updatedAt,
     this.electricityBillShare = 0.0,
     this.electricityBillStatus = '',
+    this.electricityBillId,
     this.booking,
     this.payment,
   });
@@ -114,6 +116,7 @@ class TenantRentalEntity extends Equatable {
         updatedAt,
         electricityBillShare,
         electricityBillStatus,
+        electricityBillId,
         booking,
         payment,
       ];

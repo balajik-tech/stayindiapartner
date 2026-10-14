@@ -33,6 +33,7 @@ class TenantRentalModel extends TenantRentalEntity {
     super.updatedAt,
     super.electricityBillShare,
     super.electricityBillStatus,
+    super.electricityBillId,
     super.booking,
     super.payment,
   });
@@ -44,6 +45,15 @@ class TenantRentalModel extends TenantRentalEntity {
     if (elecBill == 0 && elecShare > 0 && elecStatus.toUpperCase() != 'PAID') {
       elecBill = elecShare;
     }
+
+    final elecBillDetails = json['electricityBillDetails'];
+    String? elecBillId;
+    if (elecBillDetails is Map) {
+      elecBillId = elecBillDetails['_id']?.toString();
+    } else if (elecBillDetails != null) {
+      elecBillId = elecBillDetails.toString();
+    }
+    elecBillId ??= json['electricityBillId']?.toString();
 
     return TenantRentalModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
@@ -64,6 +74,7 @@ class TenantRentalModel extends TenantRentalEntity {
       updatedAt: json['updatedAt']?.toString(),
       electricityBillShare: elecShare,
       electricityBillStatus: elecStatus,
+      electricityBillId: elecBillId,
       booking: json['booking'] is Map<String, dynamic>
           ? TenantRentalBookingModel.fromJson(
               json['booking'] as Map<String, dynamic>)
