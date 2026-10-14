@@ -792,6 +792,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         double deposit = widget.state.deposit ?? 0;
         double maintenance = widget.state.maintenance ?? 0;
         double electricityBill = 0;
+        String? electricityBillStatus;
         double dailyRent = widget.state.dailyRent ?? 0;
         String roomType = widget.state.roomType ?? 'NON-AC';
         String? sharingType = widget.state.sharingType;
@@ -804,6 +805,14 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         if (tenantState is TenantDetailLoaded) {
           final detail = tenantState.detail;
           final stay = detail.stay;
+
+          electricityBill = detail.electricityBillShare ??
+              detail.electricityBill ??
+              stay?.electricityBillShare ??
+              stay?.electricityBill ??
+              0;
+
+          electricityBillStatus = detail.electricityBillStatus ?? stay?.electricityBillStatus;
 
           if (detail.payments.isNotEmpty) {
             final firstPayment = detail.payments.first;
@@ -828,9 +837,6 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           }
 
           if (stay != null) {
-            if (stay.electricityBill != null) {
-              electricityBill = stay.electricityBill!.roundToDouble();
-            }
             if (stay.acType != null && stay.acType!.isNotEmpty) {
               roomType = stay.acType!;
             }
@@ -842,6 +848,12 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
 
         final isAc = roomType.toUpperCase().contains('AC') &&
             !roomType.toUpperCase().contains('NON');
+
+        final String elecBillStr = electricityBill == 0
+            ? '₹0'
+            : (electricityBill % 1 == 0
+                ? '₹${electricityBill.toInt()}'
+                : '₹${electricityBill.toStringAsFixed(2)}');
 
         return Container(
           width: double.infinity,
@@ -978,8 +990,9 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
                         ? _buildDetailGridItem(
                             Icons.bolt_rounded,
                             'Electricity Bill',
-                            '₹${electricityBill.toInt()}',
+                            elecBillStr,
                             const Color(0xFF475569),
+                            status: electricityBillStatus,
                           )
                         : _buildDetailGridItem(
                             Icons.today_rounded,
@@ -1001,8 +1014,10 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
     IconData icon,
     String label,
     String value,
-    Color valueColor,
-  ) {
+    Color valueColor, {
+    String? status,
+  }) {
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
@@ -1014,15 +1029,25 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(icon, size: 14.sp, color: const Color(0xFF94A3B8)),
-              SizedBox(width: 6.w),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF64748B),
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(icon, size: 14.sp, color: const Color(0xFF94A3B8)),
+                    SizedBox(width: 4.w),
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF64748B),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -1184,10 +1209,16 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
       listener: (context, tenantState) {
         if (tenantState is TenantDetailLoaded) {
           final detail = tenantState.detail;
-          if (_electricityBillAmount == null && detail.stay?.electricityBill != null) {
-            _electricityBillAmount = detail.stay!.electricityBill;
-            if (_electricityBillAmount! > 0) {
-              _electricityController.text = _electricityBillAmount!.toStringAsFixed(0);
+          if (_electricityBillAmount == null) {
+            final bill = detail.electricityBillShare ??
+                detail.electricityBill ??
+                detail.stay?.electricityBillShare ??
+                detail.stay?.electricityBill;
+            if (bill != null && bill > 0) {
+              _electricityBillAmount = bill;
+              _electricityController.text = bill % 1 == 0
+                  ? bill.toInt().toString()
+                  : bill.toStringAsFixed(2);
             }
           }
           if (_parkingBillAmount == null && detail.stay?.parkingBill != null) {

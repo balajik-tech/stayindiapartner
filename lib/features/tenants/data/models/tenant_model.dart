@@ -83,6 +83,9 @@ class TenantDetailModel extends TenantDetailEntity {
     super.isAway = false,
     super.awayMessage,
     super.dlKyc,
+    super.electricityBill,
+    super.electricityBillShare,
+    super.electricityBillStatus,
   });
 
   factory TenantDetailModel.fromJson(Map<String, dynamic> json) {
@@ -113,6 +116,10 @@ class TenantDetailModel extends TenantDetailEntity {
     final employeeIdProofStr = json['employeeIdProof']?.toString() ??
         tenantData['employeeIdProof']?.toString();
 
+    final elecBill = _toDouble(json['electricityBill'] ?? stayData?['electricityBill']);
+    final elecBillShare = _toDouble(json['electricityBillShare'] ?? stayData?['electricityBillShare']);
+    final elecBillStatus = (json['electricityBillStatus'] ?? stayData?['electricityBillStatus'])?.toString();
+
     return TenantDetailModel(
       id: (tenantData['_id'] ?? tenantData['id'] ?? '').toString(),
       name: name,
@@ -140,6 +147,9 @@ class TenantDetailModel extends TenantDetailEntity {
       isAway: tenantData['isAway'] == true,
       awayMessage: tenantData['awayMessage']?.toString(),
       dlKyc: dlKycData != null ? DlKycModel.fromJson(dlKycData) : null,
+      electricityBill: elecBill,
+      electricityBillShare: elecBillShare,
+      electricityBillStatus: elecBillStatus,
     );
   }
 }
@@ -160,6 +170,8 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
     super.qrToken,
     super.status,
     super.electricityBill,
+    super.electricityBillShare,
+    super.electricityBillStatus,
     super.parkingBill,
     super.sharingType,
     super.acType,
@@ -176,6 +188,9 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
     if (elecBill == 0 && elecBillsData != null && elecBillsData['totalDueAmount'] != null) {
       elecBill = _toDouble(elecBillsData['totalDueAmount']);
     }
+
+    final elecBillShare = _toDouble(json['electricityBillShare']);
+    final elecBillStatus = json['electricityBillStatus']?.toString();
 
     return TenantStayDetailModel(
       bookingId:
@@ -209,6 +224,8 @@ class TenantStayDetailModel extends TenantStayDetailEntity {
       qrToken: json['qrToken']?.toString(),
       status: json['status']?.toString(),
       electricityBill: elecBill,
+      electricityBillShare: elecBillShare,
+      electricityBillStatus: elecBillStatus,
       parkingBill: _toDouble(json['parkingBill']),
       sharingType: (room['sharingType'] ?? json['sharingType'])?.toString(),
       acType: (room['roomType'] ?? json['roomType'])?.toString(),

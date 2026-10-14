@@ -100,6 +100,9 @@ class TenantDetailEntity extends Equatable {
   final bool isAway;
   final String? awayMessage;
   final DlKycEntity? dlKyc;
+  final double? electricityBill;
+  final double? electricityBillShare;
+  final String? electricityBillStatus;
 
   const TenantDetailEntity({
     required this.id,
@@ -120,6 +123,9 @@ class TenantDetailEntity extends Equatable {
     this.isAway = false,
     this.awayMessage,
     this.dlKyc,
+    this.electricityBill,
+    this.electricityBillShare,
+    this.electricityBillStatus,
   });
 
   TenantEntity toTenantEntity(String hostelId) {
@@ -165,6 +171,9 @@ class TenantDetailEntity extends Equatable {
     isAway,
     awayMessage,
     dlKyc,
+    electricityBill,
+    electricityBillShare,
+    electricityBillStatus,
   ];
 }
 
@@ -183,6 +192,8 @@ class TenantStayDetailEntity extends Equatable {
   final String? qrToken;
   final String? status;
   final double? electricityBill;
+  final double? electricityBillShare;
+  final String? electricityBillStatus;
   final double? parkingBill;
   final String? sharingType;
   final String? acType;
@@ -202,6 +213,8 @@ class TenantStayDetailEntity extends Equatable {
     this.qrToken,
     this.status,
     this.electricityBill,
+    this.electricityBillShare,
+    this.electricityBillStatus,
     this.parkingBill,
     this.sharingType,
     this.acType,
@@ -223,6 +236,8 @@ class TenantStayDetailEntity extends Equatable {
     qrToken,
     status,
     electricityBill,
+    electricityBillShare,
+    electricityBillStatus,
     parkingBill,
     sharingType,
     acType,
