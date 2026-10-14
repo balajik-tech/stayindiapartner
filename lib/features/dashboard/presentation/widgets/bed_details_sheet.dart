@@ -1291,7 +1291,13 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
               child: SizedBox(
                 height: 52.h,
                 child: ElevatedButton.icon(
-                  onPressed: () => _showActiveActionsBottomSheet(context, detail),
+                  onPressed: () {
+                    if (isBooked) {
+                      _openCheckInDialog(context);
+                    } else {
+                      _navigateToRoomSelection(context, detail);
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isBooked ? const Color(0xFFE3F2FD) : const Color(0xFFE8F5E9),
                     foregroundColor: isBooked ? const Color(0xFF1976D2) : const Color(0xFF2E7D32),
