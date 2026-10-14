@@ -124,7 +124,7 @@ class ElectricityBillCubit extends Cubit<ElectricityBillState> {
       }
 
       emit(state.copyWith(bills: billsList));
-      AppLogger.success('Fetched ${billsList.length} electricity bills from API for range $dateFromStr to $dateToStr');
+      // AppLogger.success('Fetched ${billsList.length} electricity bills from API for range $dateFromStr to $dateToStr');
     } catch (e) {
       AppLogger.error('Failed to fetch electricity bills from API', e);
     }
