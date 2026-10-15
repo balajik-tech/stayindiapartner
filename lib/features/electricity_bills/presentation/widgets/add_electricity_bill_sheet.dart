@@ -96,8 +96,21 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
     } else {
       _selectedRoomCode = widget.initialRoomCode ??
           (widget.rooms.isNotEmpty ? widget.rooms.first.code : '');
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+
       _billStartDate = widget.defaultStartDate ?? DateTime(now.year, now.month, 1);
-      _billEndDate = widget.defaultEndDate ?? DateTime(now.year, now.month + 1, 0);
+      if (!_billStartDate.isBefore(today)) {
+        _billStartDate = yesterday;
+      }
+      final minEndDate = _billStartDate.add(const Duration(days: 1));
+      _billEndDate = widget.defaultEndDate ?? now;
+      if (_billEndDate.isBefore(minEndDate)) {
+        _billEndDate = minEndDate;
+      }
+      if (_billEndDate.isAfter(now)) {
+        _billEndDate = now;
+      }
       _dueDate = _billEndDate.add(const Duration(days: 5));
       _monthController = TextEditingController(
         text: DateFormat('MMMM yyyy').format(_billStartDate),
@@ -117,13 +130,27 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
 
   Future<void> _pickDate({
     required DateTime initial,
+    DateTime? firstDate,
+    DateTime? lastDate,
     required ValueChanged<DateTime> onPicked,
   }) async {
+    final now = DateTime.now();
+    final effectiveFirst = firstDate ?? DateTime(2020);
+    final effectiveLast = lastDate ?? now;
+
+    DateTime effectiveInitial = initial;
+    if (effectiveInitial.isBefore(effectiveFirst)) {
+      effectiveInitial = effectiveFirst;
+    }
+    if (effectiveInitial.isAfter(effectiveLast)) {
+      effectiveInitial = effectiveLast;
+    }
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: initial,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      initialDate: effectiveInitial,
+      firstDate: effectiveFirst,
+      lastDate: effectiveLast,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -146,8 +173,13 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
     setState(() {
       _billStartDate = date;
       _monthController.text = DateFormat('MMMM yyyy').format(date);
-      if (_billEndDate.isBefore(date)) {
-        _billEndDate = DateTime(date.year, date.month + 1, 0);
+      final now = DateTime.now();
+      final minEndDate = date.add(const Duration(days: 1));
+      if (_billEndDate.isBefore(minEndDate)) {
+        _billEndDate = minEndDate;
+      }
+      if (_billEndDate.isAfter(now)) {
+        _billEndDate = now;
       }
       if (_dueDate.isBefore(_billEndDate)) {
         _dueDate = _billEndDate.add(const Duration(days: 5));
@@ -378,10 +410,15 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
                               ),
                               SizedBox(height: 6.h),
                               InkWell(
-                                onTap: () => _pickDate(
-                                  initial: _billStartDate,
-                                  onPicked: _onStartDateChanged,
-                                ),
+                                onTap: () {
+                                  final now = DateTime.now();
+                                  final yesterday = DateTime(now.year, now.month, now.day - 1);
+                                  _pickDate(
+                                    initial: _billStartDate.isAfter(yesterday) ? yesterday : _billStartDate,
+                                    lastDate: yesterday,
+                                    onPicked: _onStartDateChanged,
+                                  );
+                                },
                                 borderRadius: BorderRadius.circular(10.r),
                                 child: Container(
                                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
@@ -428,14 +465,24 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
                               ),
                               SizedBox(height: 6.h),
                               InkWell(
-                                onTap: () => _pickDate(
-                                  initial: _billEndDate,
-                                  onPicked: (picked) {
-                                    setState(() {
-                                      _billEndDate = picked;
-                                    });
-                                  },
-                                ),
+                                onTap: () {
+                                  final minEndDate = _billStartDate.add(const Duration(days: 1));
+                                  final now = DateTime.now();
+                                  final effectiveLast = now.isBefore(minEndDate) ? minEndDate : now;
+                                  _pickDate(
+                                    initial: _billEndDate.isBefore(minEndDate) ? minEndDate : _billEndDate,
+                                    firstDate: minEndDate,
+                                    lastDate: effectiveLast,
+                                    onPicked: (picked) {
+                                      setState(() {
+                                        _billEndDate = picked;
+                                        if (_dueDate.isBefore(_billEndDate)) {
+                                          _dueDate = _billEndDate.add(const Duration(days: 5));
+                                        }
+                                      });
+                                    },
+                                  );
+                                },
                                 borderRadius: BorderRadius.circular(10.r),
                                 child: Container(
                                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
