@@ -371,6 +371,11 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Status filter section
+                              _buildStatusFilterCard(context, state),
+
+                              SizedBox(height: 12.h),
+
                               // Filter by date section
                               _buildDateFilterCard(context, state),
 
@@ -444,6 +449,114 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildStatusFilterCard(
+    BuildContext context,
+    ElectricityBillState state,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Filter by status',
+            style: GoogleFonts.inter(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF0F172A),
+            ),
+          ),
+          SizedBox(height: 12.h),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                _buildStatusFilterPill(
+                  context,
+                  label: 'ALL',
+                  isSelected: state.statusFilter == BillStatusFilter.all,
+                  onTap: () => context.read<ElectricityBillCubit>().setStatusFilter(
+                    BillStatusFilter.all,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                _buildStatusFilterPill(
+                  context,
+                  label: 'PAID',
+                  isSelected: state.statusFilter == BillStatusFilter.paid,
+                  onTap: () => context.read<ElectricityBillCubit>().setStatusFilter(
+                    BillStatusFilter.paid,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                _buildStatusFilterPill(
+                  context,
+                  label: 'PENDING',
+                  isSelected: state.statusFilter == BillStatusFilter.pending,
+                  onTap: () => context.read<ElectricityBillCubit>().setStatusFilter(
+                    BillStatusFilter.pending,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                _buildStatusFilterPill(
+                  context,
+                  label: 'PARTIALLY PAID',
+                  isSelected: state.statusFilter == BillStatusFilter.partiallyPaid,
+                  onTap: () => context.read<ElectricityBillCubit>().setStatusFilter(
+                    BillStatusFilter.partiallyPaid,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusFilterPill(
+    BuildContext context, {
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20.r),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryBlue : Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryBlue : const Color(0xFFCBD5E1),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? Colors.white : const Color(0xFF334155),
+          ),
+        ),
+      ),
     );
   }
 
@@ -681,8 +794,29 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
           (b.date.isBefore(state.toDate.add(const Duration(days: 1))) ||
               b.date.isAtSameMomentAs(state.toDate));
 
-      return matchesRoom && inRange;
+      bool matchesStatus = true;
+      final st = b.status?.toUpperCase() ?? 'PENDING';
+      switch (state.statusFilter) {
+        case BillStatusFilter.all:
+          matchesStatus = true;
+          break;
+        case BillStatusFilter.paid:
+          matchesStatus = st == 'PAID' || st == 'COMPLETED' || b.isPaid;
+          break;
+        case BillStatusFilter.pending:
+          matchesStatus = st == 'PENDING' || st == 'UNPAID';
+          break;
+        case BillStatusFilter.partiallyPaid:
+          matchesStatus = st == 'PARTIALLY_PAID' || st == 'PARTIAL' || (b.isPaidOrPartiallyPaid && !b.isPaid);
+          break;
+      }
+
+      return matchesRoom && inRange && matchesStatus;
     }).toList();
+
+    if (state.statusFilter != BillStatusFilter.all && roomBills.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     // Sort bills by date descending
     roomBills.sort((a, b) => b.date.compareTo(a.date));
@@ -780,13 +914,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
             const Divider(color: Color(0xFFF1F5F9), height: 1),
             SizedBox(height: 8.h),
             ...roomBills.map((bill) {
-              final dateStr = DateFormat('dd MMM yyyy').format(bill.date);
-              final label = (bill.note != null && bill.note!.isNotEmpty)
-                  ? '$dateStr - ${bill.note}'
-                  : dateStr;
-              final labelDate = dateStr;
-
-              final bool pendingStatus =  (bill.status?.toUpperCase() == 'PENDING');
+              final labelDate = DateFormat('dd MMM yyyy').format(bill.date);
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -825,27 +953,25 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(width: 6.w),
-                                if(pendingStatus)...[
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Edit',
-                                        style: TextStyle(
-                                          color: AppColors.primaryBlue,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      SizedBox(width: 1),
-                                      Icon(
-                                        Icons.edit_rounded,
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Edit',
+                                      style: TextStyle(
                                         color: AppColors.primaryBlue,
-                                        size: 10,
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w700,
                                       ),
-                                    ],
-                                  )
-                                ]
+                                    ),
+                                    SizedBox(width: 2.w),
+                                    Icon(
+                                      Icons.edit_rounded,
+                                      color: AppColors.primaryBlue,
+                                      size: 10.sp,
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),

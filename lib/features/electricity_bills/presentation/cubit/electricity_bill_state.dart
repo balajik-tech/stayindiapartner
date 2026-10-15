@@ -3,6 +3,8 @@ import '../../data/models/electricity_bill_model.dart';
 
 enum DateFilterType { thisMonth, lastMonth, last30Days, custom }
 
+enum BillStatusFilter { all, paid, pending, partiallyPaid }
+
 class ElectricityBillState extends Equatable {
   final bool isLoading;
   final String? errorMessage;
@@ -12,6 +14,7 @@ class ElectricityBillState extends Equatable {
   final List<ElectricityRoomModel> rooms;
   final List<ElectricityBillModel> bills;
   final DateFilterType filterType;
+  final BillStatusFilter statusFilter;
   final DateTime fromDate;
   final DateTime toDate;
 
@@ -24,6 +27,7 @@ class ElectricityBillState extends Equatable {
     this.rooms = const [],
     this.bills = const [],
     this.filterType = DateFilterType.thisMonth,
+    this.statusFilter = BillStatusFilter.all,
     DateTime? fromDate,
     DateTime? toDate,
   })  : fromDate = fromDate ?? _getStartOfCurrentMonth(),
@@ -43,6 +47,7 @@ class ElectricityBillState extends Equatable {
     List<ElectricityRoomModel>? rooms,
     List<ElectricityBillModel>? bills,
     DateFilterType? filterType,
+    BillStatusFilter? statusFilter,
     DateTime? fromDate,
     DateTime? toDate,
   }) {
@@ -55,6 +60,7 @@ class ElectricityBillState extends Equatable {
       rooms: rooms ?? this.rooms,
       bills: bills ?? this.bills,
       filterType: filterType ?? this.filterType,
+      statusFilter: statusFilter ?? this.statusFilter,
       fromDate: fromDate ?? this.fromDate,
       toDate: toDate ?? this.toDate,
     );
@@ -118,6 +124,7 @@ class ElectricityBillState extends Equatable {
         rooms,
         bills,
         filterType,
+        statusFilter,
         fromDate,
         toDate,
       ];

@@ -288,6 +288,10 @@ class ElectricityBillCubit extends Cubit<ElectricityBillState> {
     fetchBillsForHostel(fromDate: adjustedFrom, toDate: adjustedTo);
   }
 
+  void setStatusFilter(BillStatusFilter statusFilter) {
+    emit(state.copyWith(statusFilter: statusFilter));
+  }
+
   void addBill(ElectricityBillModel bill) {
     final updatedBills = List<ElectricityBillModel>.from(state.bills);
     final existingIndex = updatedBills.indexWhere((b) => b.id == bill.id);
