@@ -41,10 +41,7 @@ class TenantRentalModel extends TenantRentalEntity {
   factory TenantRentalModel.fromJson(Map<String, dynamic> json) {
     final elecShare = _toDouble(json['electricityBillShare']);
     final elecStatus = json['electricityBillStatus']?.toString() ?? '';
-    double elecBill = _toDouble(json['electricityBill']);
-    if (elecBill == 0 && elecShare > 0 && elecStatus.toUpperCase() != 'PAID') {
-      elecBill = elecShare;
-    }
+    final elecBill = _toDouble(json['electricityBill']);
 
     final elecBillDetails = json['electricityBillDetails'];
     String? elecBillId;
