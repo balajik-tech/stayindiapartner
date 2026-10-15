@@ -891,6 +891,8 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
             ...roomBills.map((bill) {
               final labelDate = DateFormat('dd MMM yyyy').format(bill.date);
 
+              final isPendingStatus = bill.status?.toUpperCase() == 'PENDING';
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -928,25 +930,28 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(width: 6.w),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Edit',
-                                      style: TextStyle(
-                                        color: AppColors.primaryBlue,
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w700,
+                                if(isPendingStatus)...[
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Edit',
+                                        style: TextStyle(
+                                          color: AppColors.primaryBlue,
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(width: 2.w),
-                                    Icon(
-                                      Icons.edit_rounded,
-                                      color: AppColors.primaryBlue,
-                                      size: 10.sp,
-                                    ),
-                                  ],
-                                ),
+                                      SizedBox(width: 2.w),
+                                      Icon(
+                                        Icons.edit_rounded,
+                                        color: AppColors.primaryBlue,
+                                        size: 10.sp,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+
                               ],
                             ),
                           ),
