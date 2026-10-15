@@ -1982,13 +1982,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
         source: ImageSource.camera,
         preferredCameraDevice: CameraDevice.front,
         imageQuality: 85,
-        maxWidth: 1200,
-        maxHeight: 1200,
       );
 
       if (image == null) return;
 
-      if (!mounted) return;
       setState(() {
         _isDetectingFace = true;
       });
@@ -1996,27 +1993,22 @@ class _AddTenantPageState extends State<AddTenantPage> {
       final inputImage = InputImage.fromFilePath(image.path);
       final faceDetector = FaceDetector(
         options: FaceDetectorOptions(
-          performanceMode: FaceDetectorMode.fast,
+          performanceMode: FaceDetectorMode.accurate,
         ),
       );
 
-      List<Face> faces = [];
-      try {
-        faces = await faceDetector.processImage(inputImage);
-      } finally {
-        await faceDetector.close();
-      }
+      final List<Face> faces = await faceDetector.processImage(inputImage);
+      await faceDetector.close();
 
-      if (!mounted) return;
       setState(() {
         _isDetectingFace = false;
       });
 
       if (faces.isNotEmpty) {
+        setState(() {
+          _userPhoto = File(image.path);
+        });
         if (mounted) {
-          setState(() {
-            _userPhoto = File(image.path);
-          });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Face successfully detected and verified!'),
@@ -2063,10 +2055,10 @@ class _AddTenantPageState extends State<AddTenantPage> {
         }
       }
     } catch (e) {
+      setState(() {
+        _isDetectingFace = false;
+      });
       if (mounted) {
-        setState(() {
-          _isDetectingFace = false;
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Face detection error: $e'),
