@@ -193,7 +193,7 @@ class _TenantsPageState extends State<TenantsPage> {
   Widget _buildAppHeader() {
     return SliverToBoxAdapter(
       child: Container(
-        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 14.h),
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
         decoration: BoxDecoration(
           color: AppColors.primaryBlue,
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(20.r)),

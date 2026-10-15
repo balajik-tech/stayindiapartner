@@ -279,15 +279,22 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
     return BlocBuilder<ElectricityBillCubit, ElectricityBillState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.primaryBlue,
+          backgroundColor: const Color(0xFFF8FAFC),
           body: SafeArea(
             bottom: false,
             child: Column(
               children: [
                 // Top Blue Header
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
-                  child: Row(
+                Container(
+                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(32.r),
+                      bottomRight: Radius.circular(32.r),
+                    ),
+                  ),
+                  child:Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
@@ -352,16 +359,15 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                     ],
                   ),
                 ),
-
                 // Main White Card Container
                 Expanded(
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(24.r),
-                      ),
+                      // borderRadius: BorderRadius.vertical(
+                      //   top: Radius.circular(24.r),
+                      // ),
                     ),
                     child: Stack(
                       children: [
@@ -506,25 +512,39 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                 borderRadius: BorderRadius.circular(12.r),
                 onChanged: (BillStatusFilter? newValue) {
                   if (newValue != null) {
-                    context.read<ElectricityBillCubit>().setStatusFilter(newValue);
+                    context.read<ElectricityBillCubit>().setStatusFilter(
+                      newValue,
+                    );
                   }
                 },
                 items: [
                   DropdownMenuItem(
                     value: BillStatusFilter.all,
-                    child: Text('ALL', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                    child: Text(
+                      'ALL',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: BillStatusFilter.paid,
-                    child: Text('PAID', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                    child: Text(
+                      'PAID',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: BillStatusFilter.pending,
-                    child: Text('PENDING', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                    child: Text(
+                      'PENDING',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: BillStatusFilter.partiallyPaid,
-                    child: Text('PARTIALLY PAID', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                    child: Text(
+                      'PARTIALLY PAID',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ],
               ),
@@ -782,7 +802,10 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
           matchesStatus = st == 'PENDING' || st == 'UNPAID';
           break;
         case BillStatusFilter.partiallyPaid:
-          matchesStatus = st == 'PARTIALLY_PAID' || st == 'PARTIAL' || (b.isPaidOrPartiallyPaid && !b.isPaid);
+          matchesStatus =
+              st == 'PARTIALLY_PAID' ||
+              st == 'PARTIAL' ||
+              (b.isPaidOrPartiallyPaid && !b.isPaid);
           break;
       }
 
@@ -833,9 +856,12 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
               Container(
                 width: 40.w,
                 height: 40.w,
+                padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 14.h),
                 decoration: BoxDecoration(
                   color: AppColors.primaryBlue,
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(20.r),
+                  ),
                 ),
                 alignment: Alignment.center,
                 child: Text(
@@ -930,7 +956,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(width: 6.w),
-                                if(isPendingStatus)...[
+                                if (isPendingStatus) ...[
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -951,7 +977,6 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                     ],
                                   ),
                                 ],
-
                               ],
                             ),
                           ),

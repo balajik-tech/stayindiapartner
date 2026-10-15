@@ -241,7 +241,7 @@ class _BookingsPageWithScrollState extends State<_BookingsPageWithScroll>
 
   Widget _buildPowerfulHeader(BuildContext context, BookingsState state) {
     return Container(
-      padding: EdgeInsets.fromLTRB(8.w, 12.h, 16.w, 24.h),
+      padding: EdgeInsets.fromLTRB(6.w, 16.h, 8.w, 20.h),
       decoration: BoxDecoration(
         color: AppColors.primaryBlue,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
