@@ -167,7 +167,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
 
       if (availableRooms.isEmpty && state.rooms.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
               'All rooms already have electricity bills for this period.',
             ),
@@ -473,89 +473,64 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Filter by status',
+            'Choose your payment status',
             style: GoogleFonts.inter(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF0F172A),
             ),
           ),
-          SizedBox(height: 12.h),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: [
-                _buildStatusFilterPill(
-                  context,
-                  label: 'ALL',
-                  isSelected: state.statusFilter == BillStatusFilter.all,
-                  onTap: () => context.read<ElectricityBillCubit>().setStatusFilter(
-                    BillStatusFilter.all,
-                  ),
+          SizedBox(height: 10.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<BillStatusFilter>(
+                value: state.statusFilter,
+                isExpanded: true,
+                icon: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: const Color(0xFF64748B),
+                  size: 22.sp,
                 ),
-                SizedBox(width: 8.w),
-                _buildStatusFilterPill(
-                  context,
-                  label: 'PAID',
-                  isSelected: state.statusFilter == BillStatusFilter.paid,
-                  onTap: () => context.read<ElectricityBillCubit>().setStatusFilter(
-                    BillStatusFilter.paid,
-                  ),
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1E293B),
                 ),
-                SizedBox(width: 8.w),
-                _buildStatusFilterPill(
-                  context,
-                  label: 'PENDING',
-                  isSelected: state.statusFilter == BillStatusFilter.pending,
-                  onTap: () => context.read<ElectricityBillCubit>().setStatusFilter(
-                    BillStatusFilter.pending,
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+                onChanged: (BillStatusFilter? newValue) {
+                  if (newValue != null) {
+                    context.read<ElectricityBillCubit>().setStatusFilter(newValue);
+                  }
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: BillStatusFilter.all,
+                    child: Text('ALL', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                   ),
-                ),
-                SizedBox(width: 8.w),
-                _buildStatusFilterPill(
-                  context,
-                  label: 'PARTIALLY PAID',
-                  isSelected: state.statusFilter == BillStatusFilter.partiallyPaid,
-                  onTap: () => context.read<ElectricityBillCubit>().setStatusFilter(
-                    BillStatusFilter.partiallyPaid,
+                  DropdownMenuItem(
+                    value: BillStatusFilter.paid,
+                    child: Text('PAID', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                   ),
-                ),
-              ],
+                  DropdownMenuItem(
+                    value: BillStatusFilter.pending,
+                    child: Text('PENDING', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  ),
+                  DropdownMenuItem(
+                    value: BillStatusFilter.partiallyPaid,
+                    child: Text('PARTIALLY PAID', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStatusFilterPill(
-    BuildContext context, {
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20.r),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryBlue : Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : const Color(0xFFCBD5E1),
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12.sp,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? Colors.white : const Color(0xFF334155),
-          ),
-        ),
       ),
     );
   }
@@ -583,7 +558,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Filter by date',
+            'Filter by Date',
             style: GoogleFonts.inter(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
