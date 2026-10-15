@@ -80,10 +80,10 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
   }
 
   Future<void> _pickDateRange(
-    BuildContext context,
-    ElectricityBillState state,
-    bool isFromDate,
-  ) async {
+      BuildContext context,
+      ElectricityBillState state,
+      bool isFromDate,
+      ) async {
     final cubit = context.read<ElectricityBillCubit>();
     final initialDate = isFromDate ? state.fromDate : state.toDate;
     final firstDate = isFromDate
@@ -142,11 +142,11 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
       final billsInCurrentRange = state.bills.where((b) {
         final inRange =
             (b.date.isAfter(
-                  state.fromDate.subtract(const Duration(seconds: 1)),
-                ) ||
+              state.fromDate.subtract(const Duration(seconds: 1)),
+            ) ||
                 b.date.isAtSameMomentAs(state.fromDate)) &&
-            (b.date.isBefore(state.toDate.add(const Duration(days: 1))) ||
-                b.date.isAtSameMomentAs(state.toDate));
+                (b.date.isBefore(state.toDate.add(const Duration(days: 1))) ||
+                    b.date.isAtSameMomentAs(state.toDate));
         return inRange;
       }).toList();
 
@@ -359,15 +359,16 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                     ],
                   ),
                 ),
+
                 // Main White Card Container
                 Expanded(
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC),
-                      // borderRadius: BorderRadius.vertical(
-                      //   top: Radius.circular(24.r),
-                      // ),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(24.r),
+                      ),
                     ),
                     child: Stack(
                       children: [
@@ -459,9 +460,9 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
   }
 
   Widget _buildStatusFilterCard(
-    BuildContext context,
-    ElectricityBillState state,
-  ) {
+      BuildContext context,
+      ElectricityBillState state,
+      ) {
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
@@ -512,39 +513,25 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                 borderRadius: BorderRadius.circular(12.r),
                 onChanged: (BillStatusFilter? newValue) {
                   if (newValue != null) {
-                    context.read<ElectricityBillCubit>().setStatusFilter(
-                      newValue,
-                    );
+                    context.read<ElectricityBillCubit>().setStatusFilter(newValue);
                   }
                 },
                 items: [
                   DropdownMenuItem(
                     value: BillStatusFilter.all,
-                    child: Text(
-                      'ALL',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    ),
+                    child: Text('ALL', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                   ),
                   DropdownMenuItem(
                     value: BillStatusFilter.paid,
-                    child: Text(
-                      'PAID',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    ),
+                    child: Text('PAID', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                   ),
                   DropdownMenuItem(
                     value: BillStatusFilter.pending,
-                    child: Text(
-                      'PENDING',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    ),
+                    child: Text('PENDING', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                   ),
                   DropdownMenuItem(
                     value: BillStatusFilter.partiallyPaid,
-                    child: Text(
-                      'PARTIALLY PAID',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    ),
+                    child: Text('PARTIALLY PAID', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
@@ -556,9 +543,9 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
   }
 
   Widget _buildDateFilterCard(
-    BuildContext context,
-    ElectricityBillState state,
-  ) {
+      BuildContext context,
+      ElectricityBillState state,
+      ) {
     final dateFormat = DateFormat('dd MMM yyyy');
 
     return Container(
@@ -715,11 +702,11 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
   }
 
   Widget _buildFilterPill(
-    BuildContext context, {
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
+      BuildContext context, {
+        required String label,
+        required bool isSelected,
+        required VoidCallback onTap,
+      }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20.r),
@@ -769,25 +756,25 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
   }
 
   Widget _buildRoomCard(
-    BuildContext context,
-    ElectricityBillState state,
-    ElectricityRoomModel room,
-  ) {
+      BuildContext context,
+      ElectricityBillState state,
+      ElectricityRoomModel room,
+      ) {
     // Filter bills for this room within the date range
     final roomBills = state.bills.where((b) {
       final matchesRoom =
           (b.roomId.isNotEmpty && b.roomId == room.id) ||
-          (b.roomCode.isNotEmpty &&
-              b.roomCode.toLowerCase() == room.code.toLowerCase()) ||
-          b.roomName.toLowerCase() == room.name.toLowerCase();
+              (b.roomCode.isNotEmpty &&
+                  b.roomCode.toLowerCase() == room.code.toLowerCase()) ||
+              b.roomName.toLowerCase() == room.name.toLowerCase();
 
       final inRange =
           (b.date.isAfter(
-                state.fromDate.subtract(const Duration(seconds: 1)),
-              ) ||
+            state.fromDate.subtract(const Duration(seconds: 1)),
+          ) ||
               b.date.isAtSameMomentAs(state.fromDate)) &&
-          (b.date.isBefore(state.toDate.add(const Duration(days: 1))) ||
-              b.date.isAtSameMomentAs(state.toDate));
+              (b.date.isBefore(state.toDate.add(const Duration(days: 1))) ||
+                  b.date.isAtSameMomentAs(state.toDate));
 
       bool matchesStatus = true;
       final st = b.status?.toUpperCase() ?? 'PENDING';
@@ -802,10 +789,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
           matchesStatus = st == 'PENDING' || st == 'UNPAID';
           break;
         case BillStatusFilter.partiallyPaid:
-          matchesStatus =
-              st == 'PARTIALLY_PAID' ||
-              st == 'PARTIAL' ||
-              (b.isPaidOrPartiallyPaid && !b.isPaid);
+          matchesStatus = st == 'PARTIALLY_PAID' || st == 'PARTIAL' || (b.isPaidOrPartiallyPaid && !b.isPaid);
           break;
       }
 
@@ -821,7 +805,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
 
     final totalAmount = roomBills.fold<double>(
       0.0,
-      (sum, item) => sum + item.amount,
+          (sum, item) => sum + item.amount,
     );
 
     String subtitleText;
@@ -856,12 +840,9 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
               Container(
                 width: 40.w,
                 height: 40.w,
-                padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 14.h),
                 decoration: BoxDecoration(
                   color: AppColors.primaryBlue,
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(20.r),
-                  ),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
                 alignment: Alignment.center,
                 child: Text(
@@ -956,7 +937,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(width: 6.w),
-                                if (isPendingStatus) ...[
+                                if(isPendingStatus)...[
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -977,6 +958,7 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                     ],
                                   ),
                                 ],
+
                               ],
                             ),
                           ),
@@ -1006,20 +988,20 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                   shareAmount: bill.amount,
                                   onConfirm:
                                       ({
-                                        required paymentMethod,
-                                        required reference,
-                                        required notes,
-                                      }) async {
-                                        return await context
-                                            .read<ElectricityBillCubit>()
-                                            .updateTenantBillStatusApi(
-                                              billId: bill.id,
-                                              tenantId: '',
-                                              paymentMethod: paymentMethod,
-                                              reference: reference,
-                                              notes: notes,
-                                            );
-                                      },
+                                    required paymentMethod,
+                                    required reference,
+                                    required notes,
+                                  }) async {
+                                    return await context
+                                        .read<ElectricityBillCubit>()
+                                        .updateTenantBillStatusApi(
+                                      billId: bill.id,
+                                      tenantId: '',
+                                      paymentMethod: paymentMethod,
+                                      reference: reference,
+                                      notes: notes,
+                                    );
+                                  },
                                 );
                               },
                               child: Container(
@@ -1068,8 +1050,8 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
 
                           final tenantId =
                               tenantObj['_id']?.toString() ??
-                              splitMap['tenantId']?.toString() ??
-                              '';
+                                  splitMap['tenantId']?.toString() ??
+                                  '';
                           final firstName =
                               tenantObj['firstName']?.toString() ?? '';
                           final lastName =
@@ -1089,10 +1071,10 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                               double.tryParse(
                                 splitMap['shareAmount']?.toString() ?? '0',
                               ) ??
-                              0.0;
+                                  0.0;
                           final statusStr =
                               splitMap['status']?.toString().toUpperCase() ??
-                              'PENDING';
+                                  'PENDING';
                           final isSplitPaid =
                               statusStr == 'PAID' || statusStr == 'COMPLETED';
 
@@ -1165,21 +1147,21 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                                         shareAmount: shareAmount,
                                         onConfirm:
                                             ({
-                                              required paymentMethod,
-                                              required reference,
-                                              required notes,
-                                            }) async {
-                                              return await context
-                                                  .read<ElectricityBillCubit>()
-                                                  .updateTenantBillStatusApi(
-                                                    billId: bill.id,
-                                                    tenantId: tenantId,
-                                                    paymentMethod:
-                                                        paymentMethod,
-                                                    reference: reference,
-                                                    notes: notes,
-                                                  );
-                                            },
+                                          required paymentMethod,
+                                          required reference,
+                                          required notes,
+                                        }) async {
+                                          return await context
+                                              .read<ElectricityBillCubit>()
+                                              .updateTenantBillStatusApi(
+                                            billId: bill.id,
+                                            tenantId: tenantId,
+                                            paymentMethod:
+                                            paymentMethod,
+                                            reference: reference,
+                                            notes: notes,
+                                          );
+                                        },
                                       );
                                     },
                                     child: Container(
@@ -1247,9 +1229,9 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
   }
 
   Widget _buildEmptyRoomsView(
-    BuildContext context,
-    ElectricityBillState state,
-  ) {
+      BuildContext context,
+      ElectricityBillState state,
+      ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 20.w),
