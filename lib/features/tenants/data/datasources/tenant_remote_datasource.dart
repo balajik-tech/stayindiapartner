@@ -43,7 +43,8 @@ abstract class TenantRemoteDataSource {
     String? dob,
     String? gender,
     String? address,
-    double? totalAmount
+    double? totalAmount,
+    bool? isexistingTenant,
   });
 
   Future<Map<String, dynamic>> bulkUploadTenants(File file, String hostelId);
@@ -136,7 +137,8 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     String? dob,
     String? gender,
     String? address,
-    double? totalAmount
+    double? totalAmount,
+    bool? isexistingTenant,
   }) async {
     AppLogger.info('Adding manual tenant for hostel: $hostelId');
     final map = <String, dynamic>{
@@ -232,8 +234,17 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     }
     debugPrint("========form fields========");
 
+    var url = ApiConstants.tenantsManual;
+
+    if (isexistingTenant == true) {
+      url = ApiConstants.tenantsExistManual;
+    } else {
+      url = ApiConstants.tenantsManual;
+    }
+    debugPrint("========form fields========URL: ${url}");
+
     final response = await _dio.post(
-      ApiConstants.tenantsManual,
+      url,
       data: formData,
     );
     if (response.statusCode == 200 || response.statusCode == 201) {

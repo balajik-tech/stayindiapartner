@@ -162,6 +162,7 @@ class ApiConstants {
   static const String bookingsConfirmed = '/bookings/confirmed';
 
   static const String tenantsManual = '/tenants/manual';
+  static const String tenantsExistManual = '/tenants/manual/exists';
   static const String tenantRentalOrderCash = '/tenant-rental/orderby/cash';
   static const String tenantRentalOrderUpi = '/tenant-rental/orderby/upi';
   static const String tenantRentalPayments = '/tenant-rental/payments';

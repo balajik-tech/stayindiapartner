@@ -73,7 +73,8 @@ class AddTenantUseCase {
     String? dob,
     String? gender,
     String? address,
-    double? totalAmount
+    double? totalAmount,
+    bool? isexistingTenant,
   }) {
     return repository.addManualTenant(
       phone: phone,
@@ -91,16 +92,17 @@ class AddTenantUseCase {
       aadharCardbackPath: aadharCardbackPath,
       employeeIdProofPath: employeeIdProofPath,
       guardianMobiles: guardianMobiles,
-      bookingType:bookingType,
-        maintenance:maintenance,
-        roomType:roomType,
-        endDate:endDate,
-        email:email,
+      bookingType: bookingType,
+      maintenance: maintenance,
+      roomType: roomType,
+      endDate: endDate,
+      email: email,
       aadhaarNumber: aadhaarNumber,
       dob: dob,
       gender: gender,
       address: address,
-      totalAmount:totalAmount
+      totalAmount: totalAmount,
+      isexistingTenant: isexistingTenant,
     );
   }
 }

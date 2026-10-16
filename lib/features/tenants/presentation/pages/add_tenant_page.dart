@@ -742,6 +742,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       gender: extractedAadhaarGender.toLowerCase(),
       address: extractedAadhaarAddress,
       totalAmount: double.parse(totalAmount.toStringAsFixed(2)),
+      isexistingTenant: (_isNew==false)
     );
   }
 
@@ -819,7 +820,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // _buildTenantToggle(),
+                          _buildTenantToggle(),
                           SizedBox(height: 32.h),
                           _buildSectionTitle('property_selection'.tr()),
                           SizedBox(height: 16.h),
@@ -1542,11 +1543,13 @@ class _AddTenantPageState extends State<AddTenantPage> {
               context: context,
               initialDate: _isNew
                   ? DateTime(now.year, now.month, now.day)
-                  : (_checkInDate ?? DateTime.now()),
+                  : (_checkInDate ?? DateTime(now.year, now.month, now.day - 1)),
               firstDate: _isNew
                   ? DateTime(now.year, now.month, now.day)
-                  : DateTime(now.year, now.month, now.day),
-              lastDate: DateTime(2100),
+                  : DateTime(2000),
+              lastDate: _isNew
+                  ? DateTime(2100)
+                  : DateTime(now.year, now.month, now.day - 1),
             );
 
             if (picked != null) {

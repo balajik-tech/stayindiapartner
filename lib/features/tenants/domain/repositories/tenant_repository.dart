@@ -37,7 +37,8 @@ abstract class TenantRepository {
     String? dob,
     String? gender,
     String? address,
-    double? totalAmount
+    double? totalAmount,
+    bool? isexistingTenant,
   });
 
   Future<Map<String, dynamic>> bulkUploadTenants(File file, String hostelId);

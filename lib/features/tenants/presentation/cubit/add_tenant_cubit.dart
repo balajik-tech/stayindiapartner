@@ -128,7 +128,8 @@ class AddTenantCubit extends Cubit<AddTenantState> {
     String? dob,
     String? gender,
     String? address,
-    double? totalAmount
+    double? totalAmount,
+    bool? isexistingTenant,
   }) async {
     emit(AddTenantSubmitting());
     try {
@@ -149,16 +150,17 @@ class AddTenantCubit extends Cubit<AddTenantState> {
         aadharCardbackPath: aadharCardbackPath,
         employeeIdProofPath: employeeIdProofPath,
         guardianMobiles: guardianMobiles,
-        bookingType:bookingType,
-        maintenance:maintenance,
-        roomType:roomType,
+        bookingType: bookingType,
+        maintenance: maintenance,
+        roomType: roomType,
         endDate: "${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}",
-        email:email,
+        email: email,
         aadhaarNumber: aadhaarNumber,
         dob: dob,
         gender: gender,
         address: address,
-        totalAmount:totalAmount
+        totalAmount: totalAmount,
+        isexistingTenant: isexistingTenant,
     );
       emit(AddTenantSuccess(data: response));
       return response;
