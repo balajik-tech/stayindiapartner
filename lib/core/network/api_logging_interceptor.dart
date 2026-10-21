@@ -118,18 +118,17 @@ class ApiLoggingInterceptor extends Interceptor {
 
   bool _isSensitiveKey(String key) {
     final normalized = key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-      return normalized.contains('authorization');
-    // return normalized.contains('authorization') ||
-    //     normalized.contains('token') ||
-    //     normalized.contains('secret') ||
-    //     normalized.contains('password') ||
-    //     normalized.contains('otp') ||
-    //     normalized.contains('phone') ||
-    //     normalized.contains('mobile') ||
-    //     normalized.contains('email') ||
-    //     normalized.contains('apikey') ||
-    //     normalized == 'name' ||
-    //     normalized == 'userid' ||
-    //     normalized == 'portalid';
+    return normalized.contains('authorization') ||
+        normalized.contains('token') ||
+        normalized.contains('secret') ||
+        normalized.contains('password') ||
+        normalized.contains('otp') ||
+        normalized.contains('phone') ||
+        normalized.contains('mobile') ||
+        normalized.contains('email') ||
+        normalized.contains('apikey') ||
+        normalized == 'name' ||
+        normalized == 'userid' ||
+        normalized == 'portalid';
   }
 }

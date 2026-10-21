@@ -2,12 +2,12 @@ name: stayindia_owner
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.10+14
+version: 1.0.11+15
 
 environment:
   sdk: ^3.10.7
 
-dependencies:
+dependencies:¯
   flutter:
     sdk: flutter
 
