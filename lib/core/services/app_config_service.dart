@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/core/network/api_logging_interceptor.dart';
 
 import '../utils/logger.dart';
 
@@ -70,7 +71,9 @@ class AppConfigService {
                 receiveTimeout: const Duration(seconds: 10),
                 sendTimeout: const Duration(seconds: 10),
               ),
-            );
+            ) {
+    _dio.interceptors.add(ApiLoggingInterceptor());
+  }
 
   bool get isLoaded => _config != null;
   AppConfigData get data => _config ?? AppConfigData.fallback();
@@ -87,7 +90,7 @@ class AppConfigService {
       AppLogger.debug('AppConfig load already in progress...');
       return _config;
     }
-    
+
     // If not forcing and already loaded, return existing
     if (!force && _config != null) return _config;
 

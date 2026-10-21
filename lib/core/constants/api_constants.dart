@@ -13,7 +13,8 @@ class ApiConstants {
 
   static const String _baseURL = '$stagingUrl$_api_Version';
 
-  static final String environment = _baseURL.startsWith(productionUrl) ? 'PROD' : 'STAGING';
+  static String get environment =>
+      effectiveBaseUrl.startsWith(productionUrl) ? 'PROD' : 'STAGING';
 
 
   static const int paginationLimit = 100;

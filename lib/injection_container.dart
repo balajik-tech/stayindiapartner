@@ -34,6 +34,7 @@ import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/core/network/error_interceptor.dart';
 import 'package:stayindia_owner/core/network/connectivity_interceptor.dart';
 import 'package:stayindia_owner/core/network/retry_interceptor.dart';
+import 'package:stayindia_owner/core/network/api_logging_interceptor.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/core/location/location_cubit.dart';
 import 'package:stayindia_owner/core/location/location_service.dart';
@@ -129,15 +130,11 @@ Future<void> init() async {
           }
           options.headers['Accept'] = 'application/json';
 
-          AppLogger.debug('[REQUEST] ${options.method} ${options.uri}');
           return handler.next(options);
         },
-        onResponse: (response, handler) {
-          AppLogger.debug(
-            '[RESPONSE] ${response.requestOptions.method} ${response.requestOptions.uri} -> Status: ${response.statusCode}',
-          );
-          return handler.next(response);
-        },
+      ),
+      ApiLoggingInterceptor(),
+      InterceptorsWrapper(
         onError: (DioException e, handler) async {
           final isAuthPath =
               e.requestOptions.path.contains('/auth/') ||
