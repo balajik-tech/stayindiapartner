@@ -210,10 +210,9 @@ class ApiConstants {
     if (path.startsWith('http')) return path;
 
     if (path.startsWith('stay-india/')) {
-      // return 'https://stay-india.s3.amazonaws.com/$path';
-      if(_baseURL.startsWith("https://aws-api.stayindia.in")){
+      if (effectiveBaseUrl.startsWith(productionUrl)) {
         return 'https://stayindia-production.s3.ap-south-2.amazonaws.com/$path';
-      }else{
+      } else {
         return 'https://stayindia.s3.ap-south-2.amazonaws.com/$path';
       }
     }
