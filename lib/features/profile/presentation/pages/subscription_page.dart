@@ -996,11 +996,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   itemBuilder: (context, index) {
                     final plan = planOptions[index];
                     final isSelected = plan.key == selectedKey;
+                    final statusInfo = _getSubscriptionStatus(activeSub);
+                    final isRunning = statusInfo.label == 'Running';
                     return _buildPlanCardScreen4(
                       property.id,
                       plan,
                       beds,
                       isSelected,
+                      isDisabled: isRunning,
                     );
                   },
                 ),
@@ -1011,33 +1014,34 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ),
 
-        // Bottom Sticky Action Bar (Proceed to Payment)
-        Container(
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Total Amount',
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        color: Colors.grey.shade500,
-                        fontWeight: FontWeight.w600,
+        // Bottom Sticky Action Bar (Proceed to Payment) - Hidden if active (running)
+        if (_getSubscriptionStatus(activeSub).label != 'Running')
+          Container(
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Amount',
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
                     SizedBox(height: 2.h),
                     Row(
                       children: [
@@ -1129,8 +1133,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     String hostelId,
     PlanOption plan,
     int beds,
-    bool isSelected,
-  ) {
+    bool isSelected, {
+    bool isDisabled = false,
+  }) {
     final breakdown = plan.breakdown;
     final mrpPerBed = plan.mrpPerBed;
     final pricePerBed = plan.pricePerBed;
@@ -1162,7 +1167,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         : const Color(0xFFEA580C); // Orange for 12m
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedPlan[hostelId] = plan.key),
+      onTap: isDisabled ? null : () => setState(() => _selectedPlan[hostelId] = plan.key),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

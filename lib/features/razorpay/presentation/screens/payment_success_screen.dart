@@ -150,7 +150,7 @@ class _PaymentSuccessBody extends StatelessWidget {
                       border: Border.all(color: const Color(0xFFE5E7EB)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
+                          color: Colors.black.withValues(alpha: 0.02),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -461,7 +461,7 @@ class _ConfettiSuccessIcon extends StatelessWidget {
             height: 140.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF22C55E).withOpacity(0.08),
+              color: const Color(0xFF22C55E).withValues(alpha: 0.08),
             ),
           ),
           // Middle halo
@@ -470,7 +470,7 @@ class _ConfettiSuccessIcon extends StatelessWidget {
             height: 115.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF22C55E).withOpacity(0.15),
+              color: const Color(0xFF22C55E).withValues(alpha: 0.15),
             ),
           ),
           // Solid green circle
