@@ -1583,11 +1583,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               ),
             ),
           ),
-          Icon(
-            Icons.help_outline_rounded,
-            size: 22.sp,
-            color: AppColors.primaryBlue,
-          ),
+          // Icon(
+          //   Icons.help_outline_rounded,
+          //   size: 22.sp,
+          //   color: AppColors.primaryBlue,
+          // ),
         ],
       ),
     );
