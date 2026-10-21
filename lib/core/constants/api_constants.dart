@@ -3,27 +3,34 @@ import 'dart:io';
 import '../services/app_config_service.dart';
 
 class ApiConstants {
-
-
   static const String _api_Version = '/api/v1';
 
-  static const String productionUrl = 'https://aws-api.stayindia.in';
-
-  static const String stagingUrl = 'https://api.stayindia.in';
-
-  static const String _baseURL = '$stagingUrl$_api_Version';
-
-  static String get environment =>
-      effectiveBaseUrl.startsWith(productionUrl) ? 'PROD' : 'STAGING';
-
+  static const String environment = String.fromEnvironment(
+    'APP_ENV',
+    defaultValue: 'STAGING',
+  );
+  static const String _baseURL = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://api.stayindia.in$_api_Version',
+  );
+  static const String _s3BucketUrl = String.fromEnvironment(
+    'S3_BUCKET_URL',
+    defaultValue: 'https://stayindia.s3.ap-south-2.amazonaws.com',
+  );
 
   static const int paginationLimit = 100;
 
-  static const String TERMS_AND_CONDITIONS = "https://www.stayindia.in/privacy.html";
-  static const String ABOUT_US = "https://www.stayindia.in/aboutus.html";
-  
+  static const String TERMS_AND_CONDITIONS = String.fromEnvironment(
+    'TERMS_AND_CONDITIONS_URL',
+    defaultValue: 'https://www.stayindia.in/privacy.html',
+  );
+  static const String ABOUT_US = String.fromEnvironment(
+    'ABOUT_US_URL',
+    defaultValue: 'https://www.stayindia.in/aboutus.html',
+  );
+
   static String get baseUrl {
-    const url = String.fromEnvironment('API_BASE_URL', defaultValue: _baseURL);
+    const url = _baseURL;
     if (Platform.isAndroid && url.contains('localhost')) {
       return url.replaceAll('localhost', '10.0.2.2');
     }
@@ -31,8 +38,7 @@ class ApiConstants {
   }
 
   static String get effectiveBaseUrl {
-    const fromEnv = String.fromEnvironment('API_BASE_URL');
-    final url = fromEnv.isNotEmpty ? fromEnv : _baseURL;
+    const url = _baseURL;
     if (Platform.isAndroid && url.contains('localhost')) {
       return url.replaceAll('localhost', '10.0.2.2');
     }
@@ -89,7 +95,8 @@ class ApiConstants {
   static const String tenants = '/tenants';
   static const String tenantDetail = '/tenants';
   static String bulkTenants(String hostelId) => '/tenants/$hostelId/bulk';
-  static String tenantImportTemplate(String hostelId) => '/tenants/hostels/$hostelId/tenant-import-template';
+  static String tenantImportTemplate(String hostelId) =>
+      '/tenants/hostels/$hostelId/tenant-import-template';
 
   static const String community = '/community';
 
@@ -105,18 +112,29 @@ class ApiConstants {
   static const String associationPortalDetails = '/association-portal/details';
   static const String associationTheme = '/association-portal/theme';
   static const String communityWings = '/community-wings';
-  static const String associationWorkingBody = '/association-portal/working-body';
+  static const String associationWorkingBody =
+      '/association-portal/working-body';
   static const String associationTeamLeads = '/association-portal/teamleads';
-  static const String associationExecutiveMembers = '/association-portal/executive-members';
-  static const String associationPortMembers = '/association-portal/portal-members';
-  static const String associationExecutiveStructure = '/association-portal/structure/leaders';
-  static const String associationEligibleProperties = '/association-memberships/eligible-properties';
-  static const String associationMembershipApplications = '/association-memberships/applications';
-  static const String associationMyApplications = '/association-memberships/applications/mine';
-  static String associationPaymentDetails(String membershipId) => '/association-memberships/applications/$membershipId/payment-details';
-  static String associationCreatePaymentOrder(String membershipId) => '/association-memberships/applications/$membershipId/payment-order';
-  static String associationCreateRenewalOrder(String membershipId) => '/association-memberships/memberships/$membershipId/renewal-order';
-  static const String associationVerifyPayment = '/association-memberships/payments/verify';
+  static const String associationExecutiveMembers =
+      '/association-portal/executive-members';
+  static const String associationPortMembers =
+      '/association-portal/portal-members';
+  static const String associationExecutiveStructure =
+      '/association-portal/structure/leaders';
+  static const String associationEligibleProperties =
+      '/association-memberships/eligible-properties';
+  static const String associationMembershipApplications =
+      '/association-memberships/applications';
+  static const String associationMyApplications =
+      '/association-memberships/applications/mine';
+  static String associationPaymentDetails(String membershipId) =>
+      '/association-memberships/applications/$membershipId/payment-details';
+  static String associationCreatePaymentOrder(String membershipId) =>
+      '/association-memberships/applications/$membershipId/payment-order';
+  static String associationCreateRenewalOrder(String membershipId) =>
+      '/association-memberships/memberships/$membershipId/renewal-order';
+  static const String associationVerifyPayment =
+      '/association-memberships/payments/verify';
   static const String sos = '/sos';
   static const String socialPosts = '/posts';
 
@@ -135,13 +153,16 @@ class ApiConstants {
   static const String electricityBills = '/electricity-bills';
   static const String bankAccounts = '/bankaccounts';
 
-  static const String externalBankVerification = '/digilocker/bank-verification';
-      //'https://api.digiverification.com/api/v2/account-verification/verify';
+  static const String externalBankVerification =
+      '/digilocker/bank-verification';
+  //'https://api.digiverification.com/api/v2/account-verification/verify';
   static const String panVerification = '/digilocker/pan-verification';
-      //'https://api.digiverification.com/api/v4/pan/comprehensive';
+  //'https://api.digiverification.com/api/v4/pan/comprehensive';
 
-  static const String panJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTkyNjU2OX0=.RdCyQR79CF73Ozvf8SH_Xweby7UQ1VhVz2ljN5hq9Ro=";
-  static const String bankJwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTkyNjU2OX0=.RdCyQR79CF73Ozvf8SH_Xweby7UQ1VhVz2ljN5hq9Ro=";
+  static const String panJwtToken =
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTkyNjU2OX0=.RdCyQR79CF73Ozvf8SH_Xweby7UQ1VhVz2ljN5hq9Ro=";
+  static const String bankJwtToken =
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXJ0bmVySWQiOiJFU1AwMDE0MiIsInRpbWVzdGFtcCI6MTc4NTkyNjU2OX0=.RdCyQR79CF73Ozvf8SH_Xweby7UQ1VhVz2ljN5hq9Ro=";
 
   static String get razorpayKey => AppConfigService.instance.razorpayKey;
   static String get digilockerCompanyName =>
@@ -152,7 +173,8 @@ class ApiConstants {
 
   static const String subscriptionPlans = '/subscriptions/plans';
   static const String subscriptionSubscribe = '/subscriptions/subscribe';
-  static const String subscriptionVerifyPayment = '/subscriptions/verify-payment';
+  static const String subscriptionVerifyPayment =
+      '/subscriptions/verify-payment';
   static const String subscriptionPaymentSummary = '/subscriptions/payments';
   static const String subscriptionPaymentReceipt = '/subscriptions/payments';
 
@@ -167,10 +189,16 @@ class ApiConstants {
   static const String tenantRentalOrderCash = '/tenant-rental/orderby/cash';
   static const String tenantRentalOrderUpi = '/tenant-rental/orderby/upi';
   static const String tenantRentalPayments = '/tenant-rental/payments';
-  static String tenantRentalPaymentCash(String rentalId) => '/tenant-rental/$rentalId/payment/cash';
-  static String tenantRentalPaymentUpi(String rentalId) => '/tenant-rental/$rentalId/payment/upi';
-  static String tenantRentalByTenant(String tenantId) => '/tenant-rental/tenant/$tenantId';
-  static String tenantRentalByTenantAndHostel(String tenantId, String hostelId) => '/tenant-rental/tenant/$tenantId/hostel/$hostelId';
+  static String tenantRentalPaymentCash(String rentalId) =>
+      '/tenant-rental/$rentalId/payment/cash';
+  static String tenantRentalPaymentUpi(String rentalId) =>
+      '/tenant-rental/$rentalId/payment/upi';
+  static String tenantRentalByTenant(String tenantId) =>
+      '/tenant-rental/tenant/$tenantId';
+  static String tenantRentalByTenantAndHostel(
+    String tenantId,
+    String hostelId,
+  ) => '/tenant-rental/tenant/$tenantId/hostel/$hostelId';
 
   static const String staff = '/staff';
 
@@ -201,7 +229,10 @@ class ApiConstants {
   static const String generateReferral = '/referrals/generate';
   static const String rateUs = '/app-config/rate-us?app=PARTNER';
 
-  static const String partnerAppLink = "http://stayindia.in/partner";
+  static const String partnerAppLink = String.fromEnvironment(
+    'PARTNER_APP_URL',
+    defaultValue: 'http://stayindia.in/partner',
+  );
 
   static String? getImageUrl(String? path) {
     if (path == null || path.isEmpty) {
@@ -210,11 +241,7 @@ class ApiConstants {
     if (path.startsWith('http')) return path;
 
     if (path.startsWith('stay-india/')) {
-      if (effectiveBaseUrl.startsWith(productionUrl)) {
-        return 'https://stayindia-production.s3.ap-south-2.amazonaws.com/$path';
-      } else {
-        return 'https://stayindia.s3.ap-south-2.amazonaws.com/$path';
-      }
+      return '$_s3BucketUrl/$path';
     }
 
     String serverRoot = baseUrl;

@@ -1,33 +1,62 @@
 {
-  // API_BASE_URL selects the backend. These are the only defines needed to
-  // switch between staging and production.
-  //
-  // APP_CONFIG_APP (defaults to PARTNER) and APP_CONFIG_API_KEY (has a
-  // source-code default) can optionally override the remote app-config
-  // request headers. If overriding the key, supply it locally; do not commit
-  // secrets here. Dart defines are compiled into the app and are not secret
-  // storage.
-  //
-  // DigiLocker credentials are loaded from the remote app-config response in
-  // the current app flow, so DIGILOCKER_* defines are not needed.
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "StayIndia Owner (Staging)",
+      "name": "StayIndia Owner (Staging - Debug)",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
       "toolArgs": [
-        "--dart-define=API_BASE_URL=https://api.stayindia.in/api/v1"
+        "--dart-define-from-file=config/env.dev.json"
       ]
     },
     {
-      "name": "StayIndia Owner (Production)",
+      "name": "StayIndia Owner (Staging - Profile)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "profile",
+      "toolArgs": [
+        "--dart-define-from-file=config/env.dev.json"
+      ]
+    },
+    {
+      "name": "StayIndia Owner (Staging - Release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "release",
+      "toolArgs": [
+        "--dart-define-from-file=config/env.dev.json"
+      ]
+    },
+    {
+      "name": "StayIndia Owner (Production - Debug)",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
       "toolArgs": [
-        "--dart-define=API_BASE_URL=https://aws-api.stayindia.in/api/v1"
+        "--dart-define-from-file=config/env.prod.json"
+      ]
+    },
+    {
+      "name": "StayIndia Owner (Production - Profile)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "profile",
+      "toolArgs": [
+        "--dart-define-from-file=config/env.prod.json"
+      ]
+    },
+    {
+      "name": "StayIndia Owner (Production - Release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "release",
+      "toolArgs": [
+        "--dart-define-from-file=config/env.prod.json"
       ]
     }
   ]
