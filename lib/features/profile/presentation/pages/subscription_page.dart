@@ -3,20 +3,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/core/utils/text_utils.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
-import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../domain/entities/subscription_response.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/subscription_cubit.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_payment_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_failed_screen.dart';
-import 'package:stayindia_owner/features/razorpay/domain/entities/razorpay_payment_result.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import '../../../../injection_container.dart';
@@ -30,26 +27,20 @@ class SubscriptionPage extends StatefulWidget {
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
-  // Tracks the selected plan per hostel id for hostels not yet subscribed.
+  // Tracks the selected plan per hostel id
   final Map<String, String> _selectedPlan = {};
-  final ScrollController _propertyScrollController = ScrollController();
   int? _localSelectedIndex;
 
-  @override
-  void initState() {
-    super.initState();
+  // View state: false = Select Property screen, true = Select Service Duration screen
+  bool _isSelectingPlan = false;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final state = context.read<HostelCubit>().state;
-      if (state is HostelLoaded) {
-        _scrollToSelected(state.selectedHostelIndex);
-      }
-    });
-  }
+  // Search filter query
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void dispose() {
-    _propertyScrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -67,8 +58,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final int totalAmountToPay = (subscription.totalAmount * 100).round();
 
     final profileState = context.read<ProfileCubit>().state;
-    final String email = profileState is ProfileLoaded ? profileState.profile.email : "";
-    final String mobile = profileState is ProfileLoaded ? profileState.profile.phone : "";
+    final String email =
+        profileState is ProfileLoaded ? profileState.profile.email : "";
+    final String mobile =
+        profileState is ProfileLoaded ? profileState.profile.phone : "";
 
     Navigator.push(
       context,
@@ -115,8 +108,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  String _formatNumber(int n) {
-    final s = n.toString();
+  String _formatNumber(num n) {
+    final s = n.toStringAsFixed(0);
     final buffer = StringBuffer();
     for (int i = 0; i < s.length; i++) {
       if (i != 0 && (s.length - i) % 3 == 0) buffer.write(',');
@@ -143,400 +136,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
   }
 
-  Widget _buildActiveNewCard(
-    BuildContext context,
-    SubscriptionProperty property,
-    ActiveSubscription subscription,
-  ) {
-    final now = DateTime.now();
-    final endDate = subscription.endDate ?? now;
-    final daysRemaining = subscription.daysRemaining ?? 0;
-
-    final lapseTime = endDate.difference(now).inDays;
-    final bool isPaused = lapseTime <= -7;
-
-    // final bool isPaused = subscription.status == 'PAUSED';
-    final bool isExpiring = !isPaused && daysRemaining <= 7 && daysRemaining >= 0;
-
-    final phoneNumber = subscription.supportCall;
-    final whatsappText = subscription.supportWhatsappText;
-    final whatsappUrl = subscription.supportWhatsappUrl;
-
-    final isLinkRequired = subscription.isLinkRequired;
-
-
-    String badgeText = 'Active';
-    Color badgeBg = const Color(0xFFDCFCE7);
-    Color badgeTextCol = const Color(0xFF166534);
-
-    Color borderCardColor = const Color(0xFFF59E0B).withOpacity(0.5);
-
-    if (isPaused) {
-      badgeText = 'Paused';
-      badgeBg = const Color(0xFFFFCCCC);
-      badgeTextCol = Colors.red.shade900 ;
-      // borderCardColor =  Colors.red.shade900;
-    } else if (isExpiring) {
-      if(daysRemaining  == 0){
-        badgeText = 'Lapsed';
-      }else{
-        badgeText = 'Ends in $daysRemaining days';
-      }
-      badgeBg = const Color(0xFFFEF3C7);
-      badgeTextCol = const Color(0xFF6d4714);
-    }
-
-    return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: isPaused
-              ? borderCardColor
-              : Colors.grey.shade200,
-          width: 1.5,
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.r),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    property.name,
-                    style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 4.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: badgeBg,
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Text(
-                    badgeText,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: badgeTextCol,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              '${property.address} · ${property.totalBeds} beds',
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                color: AppColors.grayColor4,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 16.h),
-            if(isLinkRequired==true &&  badgeText == 'Active')...[
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        _callPhoneNumber(phoneNumber!);
-                      },
-                      icon: Icon(Icons.call_outlined, size: 18.sp, color: AppColors.primaryBlue),
-                      label: Text(
-                        'Call',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.primaryBlue),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryBlue,
-                        side: BorderSide(color: AppColors.primaryBlue),
-                        padding: EdgeInsets.symmetric(vertical: 10.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
-                      },
-                      icon: SizedBox(
-                        width: 18.w,
-                        height: 18.h,
-                        child: Image.asset(
-                            'assets/images/whatsapp_black.png',
-                            fit: BoxFit.contain,
-                            color: AppColors.white
-                        ),
-                      ),
-                      label: Text(
-                        'WhatsApp',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.white),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.freeGreen,
-                        backgroundColor: AppColors.freeGreen,
-                        side: BorderSide(color: AppColors.freeGreen),
-                        padding: EdgeInsets.symmetric(vertical: 10.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8.h),
-            ],
-            Divider(height: 1, color: Colors.grey.shade100),
-            SizedBox(height: 8.h),
-            if (isPaused) ...[
-              Text(
-                'Bookings and listing tools are paused since ${_formatDate(subscription.updatedAt ?? now)}.',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 16.h),
-              // Row(
-              //   children: [
-              //     CircleAvatar(
-              //       radius: 18.r,
-              //       backgroundColor: Colors.blue.shade100,
-              //       child: Text(
-              //         'RK',
-              //         style: TextStyle(
-              //           fontSize: 12.sp,
-              //           color: Colors.blue.shade800,
-              //           fontWeight: FontWeight.bold,
-              //         ),
-              //       ),
-              //     ),
-              //     SizedBox(width: 12.w),
-              //     Column(
-              //       crossAxisAlignment: CrossAxisAlignment.start,
-              //       children: [
-              //         Text(
-              //           'Ravi Kumar',
-              //           style: GoogleFonts.inter(
-              //             fontSize: 16.sp,
-              //             fontWeight: FontWeight.w500,
-              //             color: Colors.black,
-              //           ),
-              //         ),
-              //         Text(
-              //           'Your account manager',
-              //           style: GoogleFonts.inter(
-              //             fontSize: 12.sp,
-              //             color: Colors.grey.shade600,
-              //             fontWeight: FontWeight.w500,
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   ],
-              // ),
-              // SizedBox(height: 20.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                       // _callPhoneNumber(phoneNumber!);
-                      },
-                      icon: Icon(Icons.call_outlined, size: 18.sp, color: AppColors.primaryBlue),
-                      label: Text(
-                        'Call',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.primaryBlue),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryBlue,
-                        side: BorderSide(color: AppColors.primaryBlue),
-                        padding: EdgeInsets.symmetric(vertical: 10.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
-                      },
-                      icon: SizedBox(
-                        width: 18.w,
-                        height: 18.h,
-                        child: Image.asset(
-                          'assets/images/whatsapp_black.png',
-                          fit: BoxFit.contain,
-                            color: AppColors.white
-                        ),
-                      ),
-                      label: Text(
-                        'WhatsApp',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.white),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.freeGreen,
-                        backgroundColor: AppColors.freeGreen,
-                        side: BorderSide(color: AppColors.freeGreen),
-                        padding: EdgeInsets.symmetric(vertical: 10.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ]
-            else if (isExpiring) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Valid till',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.grayColor4,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    _formatDate(endDate),
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8.h),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: [
-              //     Text(
-              //       'Auto-renew',
-              //       style: GoogleFonts.inter(
-              //         fontSize: 14.sp,
-              //         color: AppColors.grayColor4,
-              //         fontWeight: FontWeight.w500,
-              //       ),
-              //     ),
-              //     Text(
-              //       subscription.autoRenew ? 'On' : 'Off',
-              //       style: GoogleFonts.inter(
-              //         fontSize: 14.sp,
-              //         color: Colors.black,
-              //         fontWeight: FontWeight.w600,
-              //       ),
-              //     ),
-              //   ],
-              // ),
-              SizedBox(height: 20.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        _callPhoneNumber(phoneNumber!);
-                      },
-                      icon: Icon(Icons.call_outlined, size: 18.sp, color: AppColors.primaryBlue),
-                      label: Text(
-                        'Call',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.primaryBlue),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryBlue,
-                        side: BorderSide(color: AppColors.primaryBlue),
-                        padding: EdgeInsets.symmetric(vertical: 10.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        _shareOnWhatsApp(phoneNumber: phoneNumber.toString() ,message: whatsappUrl);
-                      },
-                      icon: SizedBox(
-                        width: 18.w,
-                        height: 18.h,
-                        child: Image.asset(
-                            'assets/images/whatsapp_black.png',
-                            fit: BoxFit.contain,
-                            color: AppColors.white
-                        ),
-                      ),
-                      label: Text(
-                        'WhatsApp',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600,color: AppColors.white),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.freeGreen,
-                        backgroundColor: AppColors.freeGreen,
-                        side: BorderSide(color: AppColors.freeGreen),
-                        padding: EdgeInsets.symmetric(vertical: 10.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ]
-            else ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Valid till',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.grayColor4,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    _formatDate(endDate),
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  double calculateTotalAmount(
+    double amount,
+    double gst,
+    bool priceIncludesGst,
+  ) =>
+      priceIncludesGst ? amount : amount + gst;
 
   Future<void> _callPhoneNumber(String phoneNumber) async {
     if (phoneNumber.trim().isEmpty) return;
@@ -583,6 +188,60 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
   }
 
+  /// Determines subscription status text and colors
+  /// Rules as requested:
+  /// - If active subscription object is null or empty: "Inactive"
+  /// - If active: "Running"
+  /// - If already expired or paused: "Paused"
+  _StatusInfo _getSubscriptionStatus(ActiveSubscription? activeSubscription) {
+    if (activeSubscription == null) {
+      return const _StatusInfo(
+        label: 'Inactive',
+        badgeBg: Color(0xFFFEF3C7),
+        badgeFg: Color(0xFFD97706),
+      );
+    }
+
+    final now = DateTime.now();
+    final endDate = activeSubscription.endDate ?? now;
+    final daysRemaining = activeSubscription.daysRemaining ??
+        endDate.difference(now).inDays;
+
+    final isExpired = daysRemaining <= 0 || endDate.isBefore(now);
+    final isPaused = activeSubscription.status == 'PAUSED' || isExpired;
+
+    if (isPaused) {
+      return const _StatusInfo(
+        label: 'Paused',
+        badgeBg: Color(0xFFEFF6FF),
+        badgeFg: Color(0xFF2563EB),
+      );
+    }
+
+    if (activeSubscription.status == 'ACTIVE') {
+      return const _StatusInfo(
+        label: 'Running',
+        badgeBg: Color(0xFFDCFCE7),
+        badgeFg: Color(0xFF166534),
+      );
+    }
+
+    if (activeSubscription.status == 'PENDING' ||
+        activeSubscription.status == 'PENDING_PAYMENT') {
+      return const _StatusInfo(
+        label: 'Pending',
+        badgeBg: Color(0xFFFEF3C7),
+        badgeFg: Color(0xFFD97706),
+      );
+    }
+
+    return const _StatusInfo(
+      label: 'Inactive',
+      badgeBg: Color(0xFFFEF3C7),
+      badgeFg: Color(0xFFD97706),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -599,20 +258,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       child: MultiBlocListener(
         listeners: [
           BlocListener<HostelCubit, HostelState>(
-            listenWhen: (previous, current) {
-              if (previous is HostelLoaded && current is HostelLoaded) {
-                return previous.selectedHostelIndex !=
-                    current.selectedHostelIndex;
-              }
-              return previous is! HostelLoaded && current is HostelLoaded;
-            },
             listener: (context, state) {
               if (state is HostelLoaded && state.hostels.isNotEmpty) {
-                // Only follow global selection if the user hasn't made a local choice on this page
                 if (_localSelectedIndex == null) {
                   final hostel = state.hostels[state.selectedHostelIndex];
                   _loadSubscriptionData(context, hostel.id);
-                  _scrollToSelected(state.selectedHostelIndex);
                 }
               }
             },
@@ -642,8 +292,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                 if (hostelState is HostelLoaded &&
                     hostelState.hostels.isNotEmpty) {
-                  final hostel =
-                      hostelState.hostels[hostelState.selectedHostelIndex];
+                  final selectedIdx =
+                      _localSelectedIndex ?? hostelState.selectedHostelIndex;
+                  final hostel = hostelState.hostels[selectedIdx];
                   propertyId = hostel.id;
                   propertyName = hostel.name;
 
@@ -694,45 +345,22 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             int selectedIndex = 0;
             if (hostelState is HostelLoaded) {
               hostels = hostelState.hostels;
-
-              // Determine global index from cubit
               int globalIndex = hostelState.selectedHostelIndex;
               final selectedId = hostelState.selectedHostelId;
               if (selectedId != null) {
-                final foundIndex = hostels.indexWhere((h) => h.id == selectedId);
+                final foundIndex =
+                    hostels.indexWhere((h) => h.id == selectedId);
                 if (foundIndex != -1) globalIndex = foundIndex;
               }
-
-              // Use local index if user changed it on this page, otherwise default to global
               selectedIndex = _localSelectedIndex ?? globalIndex;
             }
 
             return BlocBuilder<SubscriptionCubit, SubscriptionState>(
               builder: (context, subscriptionState) {
-                final subscriptionResponses =
-                    subscriptionState.subscriptionResponses;
-
-                int needsAttentionCount = 0;
-                for (var hostel in hostels) {
-                  final response = subscriptionResponses[hostel.id];
-                  if (response?.activeSubscription != null) {
-                    final sub = response!.activeSubscription!;
-                    final now = DateTime.now();
-                    final daysRemaining = sub.endDate != null
-                        ? sub.endDate!.difference(now).inDays
-                        : 0;
-                    if (sub.status == 'PAUSED' ||
-                        (sub.status == 'ACTIVE' && daysRemaining <= 7)) {
-                      needsAttentionCount++;
-                    }
-                  } else if (response != null &&
-                      response.activeSubscription == null) {
-                    needsAttentionCount++;
-                  }
-                }
+                final responses = subscriptionState.subscriptionResponses;
 
                 if (subscriptionState is SubscriptionError &&
-                    subscriptionResponses.isEmpty) {
+                    responses.isEmpty) {
                   return Scaffold(
                     backgroundColor: Colors.white,
                     body: Center(
@@ -740,6 +368,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text('Error: ${subscriptionState.message}'),
+                          SizedBox(height: 12.h),
                           ElevatedButton(
                             onPressed: () {
                               if (hostels.isNotEmpty) {
@@ -756,117 +385,27 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   );
                 }
 
+                final selectedHostel = hostels.isNotEmpty &&
+                        selectedIndex < hostels.length
+                    ? hostels[selectedIndex]
+                    : null;
+
                 return Scaffold(
-                  backgroundColor: Colors.white,
+                  backgroundColor: const Color(0xFFF8FAFC),
                   body: SafeArea(
-                    child: Column(
-                      children: [
-                        _buildHeader(
-                          context,
-                          total: hostels.length,
-                          needsAttention: needsAttentionCount,
-                        ),
-                        if (hostels.length > 1)
-                          _buildPropertySelector(
+                    child: _isSelectingPlan && selectedHostel != null
+                        ? _buildServiceDurationView(
+                            context,
+                            selectedHostel,
+                            responses[selectedHostel.id],
+                            subscriptionState,
+                          )
+                        : _buildSelectPropertyView(
+                            context,
                             hostels,
                             selectedIndex,
-                            context,
-                            subscriptionResponses,
+                            responses,
                           ),
-                        Expanded(
-                          child: Container(
-                            color: SubscriptionColors.backgroundColor,
-                            child: hostels.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'No properties added yet.',
-                                      style: GoogleFonts.inter(
-                                        color: AppColors.greyText,
-                                        fontSize: 14.sp,
-                                      ),
-                                    ),
-                                  )
-                                : ListView.builder(
-                                    padding: EdgeInsets.fromLTRB(
-                                      20.w,
-                                      16.h,
-                                      20.w,
-                                      MediaQuery.of(context).padding.bottom +
-                                          24.h,
-                                    ),
-                                    itemCount: 2,
-                                    itemBuilder: (builderContext, index) {
-                                      if (index == 1) {
-                                        return Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 24.h,
-                                          ),
-                                          child: Text(
-                                            '',
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12.sp,
-                                              color: Colors.grey.shade500,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        );
-                                      }
-
-                                      final hostel = hostels[selectedIndex];
-                                      final response =
-                                          subscriptionResponses[hostel.id];
-
-                                      if (response == null) {
-                                        return Container(
-                                          height: 100.h,
-                                          margin: EdgeInsets.only(bottom: 16.h),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(
-                                              16.r,
-                                            ),
-                                          ),
-                                          child: const Center(
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        );
-                                      }
-
-                                      return Container(
-                                        padding: EdgeInsets.only(bottom: 0.h),
-                                        child: Column(
-                                          children: [
-                                            if (response.activeSubscription !=
-                                                    null &&
-                                                (response
-                                                            .activeSubscription!
-                                                            .status ==
-                                                        'ACTIVE' ||
-                                                    response
-                                                            .activeSubscription!
-                                                            .status ==
-                                                        'PAUSED'))
-                                              _buildActiveNewCard(
-                                                builderContext,
-                                                response.property,
-                                                response.activeSubscription!,
-                                              )
-                                            else
-                                              _buildPlanSelectionCard(
-                                                builderContext,
-                                                response.property,
-                                                response.plans,
-                                              ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 );
               },
@@ -877,311 +416,366 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  void _scrollToSelected(int index) {
-    if (!_propertyScrollController.hasClients) return;
-
-    const double estimatedChipWidth = 120; // Adjust if needed
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    final targetOffset =
-        (index * estimatedChipWidth) -
-        (screenWidth / 2) +
-        (estimatedChipWidth / 2);
-
-    _propertyScrollController.animateTo(
-      targetOffset.clamp(
-        0.0,
-        _propertyScrollController.position.maxScrollExtent,
-      ),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  Widget _buildPropertySelector(
+  // =========================================================================
+  // VIEW 1: SELECT PROPERTY SCREEN (Screen 1 & Screen 3)
+  // =========================================================================
+  Widget _buildSelectPropertyView(
+    BuildContext context,
     List<Hostel> hostels,
     int selectedIndex,
-    BuildContext context,
     Map<String, SubscriptionResponse> responses,
   ) {
-    return Container(
-      height: 48.h,
-      margin: EdgeInsets.only(top: 8.h),
-      child: ListView.builder(
-        controller: _propertyScrollController,
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
-        itemCount: hostels.length,
-        itemBuilder: (itemContext, index) {
-          final hostelId = hostels[index].id;
-          final isSelected = index == selectedIndex;
-          final response = responses[hostelId];
-          final isActive = response?.activeSubscription?.status == 'ACTIVE';
-          final status = response?.activeSubscription?.status;
-          final isPending = status == 'PENDING' || status == 'PENDING_PAYMENT';
+    final filteredHostels = hostels.where((h) {
+      if (_searchQuery.trim().isEmpty) return true;
+      final query = _searchQuery.toLowerCase();
+      return h.name.toLowerCase().contains(query) ||
+          h.address.toLowerCase().contains(query);
+    }).toList();
 
-          final now = DateTime.now();
-          final endDate = response?.activeSubscription?.endDate ?? now;
-          final daysRemaining = response?.activeSubscription?.daysRemaining ?? 0;
-
-          final lapseTime = endDate.difference(now).inDays;
-          final bool isPaused = lapseTime <= -7;
-
-          Color? pauseSelectedDotColor = Colors.white;
-          Color? pauseUnselectedDotColor = SubscriptionColors.green;
-
-          if(isPaused){
-            pauseSelectedDotColor = Colors.red.shade900;
-            pauseUnselectedDotColor =  Colors.red.shade900;
-          }
-
-          return Padding(
-            padding: EdgeInsets.only(right: 8.w),
-            child: ChoiceChip(
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    hostels[index].name,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w600,
-                      color: isSelected
-                          ? Colors.white
-                          : SubscriptionColors.navy,
-                    ),
-                  ),
-                  if (isActive || isPending) ...[
-                    SizedBox(width: 6.w),
-                    Container(
-                      width: 6.w,
-                      height: 6.w,
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? (isSelected
-                                  ? pauseSelectedDotColor
-                                  : pauseUnselectedDotColor)
-                            : (isSelected
-                                  ? Colors.white
-                                  : AppColors.orangeColor),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              selected: isSelected,
-              onSelected: (bool selected) {
-                if (selected) {
-                  setState(() {
-                    _localSelectedIndex = index;
-                  });
-                  _loadSubscriptionData(context, hostels[index].id);
-
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToSelected(index);
-                  });
-                }
-              },
-              selectedColor: SubscriptionColors.navy,
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.r),
-                side: BorderSide(
-                  color: isSelected
-                      ? SubscriptionColors.navy
-                      : Colors.grey.shade300,
-                ),
-              ),
-              showCheckmark: false,
-              elevation: isSelected ? 2 : 0,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------
-  // Header
-  // ---------------------------------------------------------------------
-  Widget _buildHeader(
-    BuildContext context, {
-    int total = 0,
-    int needsAttention = 0,
-  }) {
-    return Container(
-      padding: EdgeInsets.only(left: 4, right: 16, top: 12, bottom: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
+    return Column(
+      children: [
+        // Top Header
+        _buildHeader(
+          context,
+          title: 'Property Onboarding',
+          onBack: () => Navigator.pop(context),
         ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black87),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Expanded(
+
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Properties',
-                  style: GoogleFonts.inter(
-                    color: Colors.black,
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w700,
+                // Search Bar & Count Heading
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${filteredHostels.length} Properties',
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10.h),
+
+                // Search Bar Input
+                TextField(
+                  controller: _searchController,
+                  onChanged: (val) => setState(() => _searchQuery = val),
+                  decoration: InputDecoration(
+                    hintText: 'Search property or location',
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      color: Colors.grey.shade400,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Colors.grey.shade400,
+                      size: 20.sp,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.primaryBlue),
+                    ),
                   ),
                 ),
-                Text(
-                  '$total properties · $needsAttention needs attention',
-                  style: GoogleFonts.inter(
-                    color: Colors.grey.shade600,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
+                SizedBox(height: 16.h),
+
+                // Property List Cards
+                if (filteredHostels.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40.h),
+                    child: Center(
+                      child: Text(
+                        'No properties found.',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredHostels.length,
+                    separatorBuilder: (context, index) => SizedBox(height: 12.h),
+                    itemBuilder: (context, index) {
+                      final hostel = filteredHostels[index];
+                      final originalIndex = hostels.indexOf(hostel);
+                      final isSelected = originalIndex == selectedIndex;
+                      final response = responses[hostel.id];
+                      final statusInfo =
+                          _getSubscriptionStatus(response?.activeSubscription);
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _localSelectedIndex = originalIndex;
+                          });
+                          _loadSubscriptionData(context, hostel.id);
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(12.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primaryBlue
+                                  : Colors.grey.shade200,
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                            boxShadow: [
+                              if (isSelected)
+                                BoxShadow(
+                                  color: AppColors.primaryBlue.withValues(alpha: 0.06),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Radio Selection Dot
+                              Container(
+                                width: 22.w,
+                                height: 22.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.primaryBlue
+                                        : Colors.grey.shade400,
+                                    width: isSelected ? 6.w : 1.5.w,
+                                  ),
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 12.w),
+
+                              // Property Thumbnail
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12.r),
+                                child: Container(
+                                  width: 60.w,
+                                  height: 60.w,
+                                  color: Colors.blue.shade50,
+                                  child: (hostel.coverImage != null &&
+                                          hostel.coverImage!.isNotEmpty)
+                                      ? Image.network(
+                                          hostel.coverImage!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              Image.asset(
+                                            'assets/images/property_build.png',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )
+                                      : Image.asset(
+                                          'assets/images/property_build.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                ),
+                              ),
+                              SizedBox(width: 12.w),
+
+                              // Property Details
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      hostel.name,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF1E293B),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.location_on_outlined,
+                                          size: 13.sp,
+                                          color: Colors.grey.shade500,
+                                        ),
+                                        SizedBox(width: 3.w),
+                                        Expanded(
+                                          child: Text(
+                                            hostel.address,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12.sp,
+                                              color: Colors.grey.shade600,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 3.h),
+                                    Row(
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/bed_icon.png',
+                                          width: 13.w,
+                                          height: 13.w,
+                                          color: Colors.grey.shade500,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          '${hostel.totalBeds ?? 0} beds',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.sp,
+                                            color: Colors.grey.shade600,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+
+                              // Status Badge & Chevron Right
+                              Row(
+                                children: [
+                                  _buildStatusPill(statusInfo),
+                                  SizedBox(width: 4.w),
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: Colors.grey.shade400,
+                                    size: 20.sp,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------
-  // Shared row builders
-  // ---------------------------------------------------------------------
-  Widget _buildStatusBadge(String label, Color fg, Color bg, {IconData? icon}) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: fg,
-          width: 0.7, // instead of 0.2
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 12.sp, color: fg),
-            SizedBox(width: 4.w),
-          ],
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w700,
-              color: fg,
+
+        // Bottom Sticky Bar (Pay Service Button)
+        Container(
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(color: Colors.grey.shade200, width: 1),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationRow(String address) {
-    return Row(
-      children: [
-        Icon(
-          Icons.location_on_outlined,
-          size: 14.sp,
-          color: AppColors.greyText,
-        ),
-        SizedBox(width: 4.w),
-        Expanded(
-          child: Text(
-            address,
-            style: GoogleFonts.inter(
-              fontSize: 13.sp,
-              color: SubscriptionColors.grayText,
-              fontWeight: FontWeight.w600,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBedsRow(int beds) {
-    return Row(
-      children: [
-        Image.asset('assets/images/bed_icon.png', width: 14.w, height: 14.w),
-        SizedBox(width: 4.w),
-        Text(
-          '$beds Beds',
-          style: GoogleFonts.inter(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.primaryBlue,
-          ),
-        ),
-      ],
-    );
-  }
-
-  double calculateTotalAmount(
-    double amount,
-    double gst,
-    bool priceIncludesGst,
-  ) => priceIncludesGst ? amount : amount + gst;
-
-  // ---------------------------------------------------------------------
-  // Not-subscribed card: plan picker + price breakup + pay button
-  // ---------------------------------------------------------------------
-  Widget _buildPlanSelectionCard(
-    BuildContext context,
-    SubscriptionProperty property,
-    List<SubscriptionPlan> plans,
-  ) {
-    final beds = property.totalBeds;
-    final planOptions = plans.map(PlanOption.fromEntity).toList();
-
-    if (planOptions.isEmpty) {
-      return Container(
-        padding: EdgeInsets.all(16.w),
-        margin: EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.roomCardBorder),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSubscriptionHeader(
-              hostelName: property.name,
-              status: 'Loading plans...',
-              statusColor: SubscriptionColors.orange,
-              backgroundColor: SubscriptionColors.orangeLight,
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'Please wait while subscription options are loaded.',
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                color: AppColors.greyText,
-                fontWeight: FontWeight.w600,
+          child: SizedBox(
+            width: double.infinity,
+            height: 48.h,
+            child: ElevatedButton(
+              onPressed: hostels.isEmpty
+                  ? null
+                  : () {
+                      final selectedHostel = hostels[selectedIndex];
+                      _loadSubscriptionData(context, selectedHostel.id);
+                      setState(() {
+                        _isSelectingPlan = true;
+                      });
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              child: Text(
+                'Pay Service',
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
               ),
             ),
-          ],
+          ),
         ),
+      ],
+    );
+  }
+
+  // =========================================================================
+  // VIEW 2: SELECT SERVICE DURATION SCREEN (Screen 2 & Screen 4)
+  // =========================================================================
+  Widget _buildServiceDurationView(
+    BuildContext context,
+    Hostel hostel,
+    SubscriptionResponse? response,
+    SubscriptionState subscriptionState,
+  ) {
+    if (response == null) {
+      return Column(
+        children: [
+          _buildHeader(
+            context,
+            title: 'Select Service Duration',
+            onBack: () => setState(() => _isSelectingPlan = false),
+          ),
+          const Expanded(
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ],
+      );
+    }
+
+    final property = response.property;
+    final activeSub = response.activeSubscription;
+    final planOptions = response.plans.map(PlanOption.fromEntity).toList();
+
+    if (planOptions.isEmpty) {
+      return Column(
+        children: [
+          _buildHeader(
+            context,
+            title: 'Select Service Duration',
+            onBack: () => setState(() => _isSelectingPlan = false),
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                'No subscription plans available.',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
@@ -1192,592 +786,621 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       orElse: () => planOptions.first,
     );
 
-    final totalToPay = calculateTotalAmount(
-      selectedPlan.breakdown?.totalAmount ?? 0,
-      selectedPlan.breakdown?.gstAmount ?? 0,
+    // Selected plan price calculations
+    final beds = property.totalBeds;
+    final selectedBreakdown = selectedPlan.breakdown;
+    final mrpTotal = selectedBreakdown?.mrpTotal ??
+        (selectedPlan.mrpPerBed * beds * selectedPlan.months);
+    final subtotal = selectedBreakdown?.totalAmount ??
+        (selectedPlan.pricePerBed * beds * selectedPlan.months);
+    final gstAmount = selectedBreakdown?.gstAmount ??
+        (selectedPlan.priceIncludesGst
+            ? 0
+            : (subtotal * selectedPlan.gstPercentage / 100));
+    final totalPayable = calculateTotalAmount(
+      subtotal,
+      gstAmount,
       selectedPlan.priceIncludesGst,
     );
 
-    final subscriptionState = context.watch<SubscriptionCubit>().state;
-    final isProcessing =
-        subscriptionState is SubscriptionProcessing &&
+    final isProcessing = subscriptionState is SubscriptionProcessing &&
         subscriptionState.propertyId == property.id;
 
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSubscriptionHeader(
-            hostelName: property.name,
-            status: 'Not subscribed',
-            statusColor: AppColors.orangeColor,
-            backgroundColor: SubscriptionColors.orangeLight,
-          ),
-          _buildLocationRow(property.address),
-          SizedBox(height: 0.h),
-          _buildBedsRow(beds),
-          SizedBox(height: 16.h),
-          Text(
-            'CHOOSE A PLAN · PRICE PER BED / MONTH',
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.greyText,
-              letterSpacing: 0.5,
+    final basePricePerBedMonth = selectedPlan.pricePerBed.round();
+
+    return Column(
+      children: [
+        // Top Header
+        _buildHeader(
+          context,
+          title: 'Select Service Duration',
+          onBack: () => setState(() => _isSelectingPlan = false),
+        ),
+
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Property Banner Card (matches Screen 4 top banner)
+                Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0F7FF),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: const Color(0xFFDBEAFE)),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12.r),
+                        child: Container(
+                          width: 54.w,
+                          height: 54.w,
+                          color: Colors.blue.shade100,
+                          child: (hostel.coverImage != null &&
+                                  hostel.coverImage!.isNotEmpty)
+                              ? Image.network(
+                                  hostel.coverImage!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Image.asset(
+                                    'assets/images/property_build.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Image.asset(
+                                  'assets/images/property_build.png',
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              property.name,
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF1E293B),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 3.h),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on_outlined,
+                                  size: 13.sp,
+                                  color: Colors.grey.shade600,
+                                ),
+                                SizedBox(width: 2.w),
+                                Expanded(
+                                  child: Text(
+                                    property.address,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 3.h),
+                            Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/bed_icon.png',
+                                  width: 13.w,
+                                  height: 13.w,
+                                  color: AppColors.primaryBlue,
+                                ),
+                                SizedBox(width: 4.w),
+                                Text(
+                                  '$beds Beds',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    color: AppColors.primaryBlue,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 3.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE2E8F0),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.lock_outline,
+                                  size: 11.sp,
+                                  color: const Color(0xFF475569),
+                                ),
+                                SizedBox(width: 3.w),
+                                Text(
+                                  'Fixed Price',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF475569),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 6.h),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '₹$basePricePerBedMonth ',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primaryBlue,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'per bed / mo',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Active Subscription Status Banner (If running or paused)
+                if (activeSub != null) ...[
+                  SizedBox(height: 12.h),
+                  _buildActiveSubscriptionBanner(context, activeSub),
+                ],
+
+                SizedBox(height: 16.h),
+
+                // Plans Selection Cards (Screen 4 structure)
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: planOptions.length,
+                  separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                  itemBuilder: (context, index) {
+                    final plan = planOptions[index];
+                    final isSelected = plan.key == selectedKey;
+                    return _buildPlanCardScreen4(
+                      property.id,
+                      plan,
+                      beds,
+                      isSelected,
+                    );
+                  },
+                ),
+
+                SizedBox(height: 20.h),
+              ],
             ),
           ),
-          SizedBox(height: 12.h),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12.h,
-            crossAxisSpacing: 12.w,
-            childAspectRatio: 1.48,
-            children: planOptions.map((plan) {
-              final isSelected = plan.key == selectedKey;
-              return _buildPlanTile(property.id, plan, isSelected);
-            }).toList(),
-          ),
-          SizedBox(height: 20.h),
-          _buildPriceBreakup(selectedPlan, beds),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: isProcessing
-                  ? null
-                  : () {
-                      _selectedPlan[property.id] = selectedPlan.key;
-                      context.read<SubscriptionCubit>().subscribe(
-                        property.id,
-                        selectedPlan.id,
-                        'UPI',
-                      );
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                elevation: 0,
+        ),
+
+        // Bottom Sticky Action Bar (Proceed to Payment)
+        Container(
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
               ),
-              child: isProcessing
-                  ? SizedBox(
-                      height: 20.h,
-                      width: 20.h,
-                      child: const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total Amount',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w600,
                       ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    ),
+                    SizedBox(height: 2.h),
+                    Row(
                       children: [
                         Text(
-                          'Pay ₹${_formatNumber(totalToPay.round())}',
+                          '₹${_formatNumber(totalPayable.round())}',
                           style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryBlue,
                           ),
                         ),
-                        SizedBox(width: 8.w),
-                        Icon(
-                          Icons.arrow_forward,
-                          color: Colors.white,
-                          size: 18.sp,
+                        SizedBox(width: 6.w),
+                        Text(
+                          '₹${_formatNumber(mrpTotal.round())}',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            color: Colors.grey.shade400,
+                            decoration: TextDecoration.lineThrough,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubscriptionHeader({
-    required String hostelName,
-    required String status,
-    required Color statusColor,
-    required Color backgroundColor,
-    IconData? icon,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                hostelName,
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.blackColor,
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              ),
+              ElevatedButton(
+                onPressed: isProcessing
+                    ? null
+                    : () {
+                        _selectedPlan[property.id] = selectedPlan.key;
+                        context.read<SubscriptionCubit>().subscribe(
+                              property.id,
+                              selectedPlan.id,
+                              'UPI',
+                            );
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 14.h,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  elevation: 0,
+                ),
+                child: isProcessing
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.h,
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Proceed to Payment',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 18.sp,
+                          ),
+                        ],
+                      ),
               ),
             ],
           ),
         ),
-        SizedBox(width: 8.w),
-        _buildStatusBadge(status, statusColor, backgroundColor, icon: icon),
       ],
     );
   }
 
-  Widget _buildPlanTile(String hostelId, PlanOption plan, bool isSelected) {
-    final price = plan.pricePerBed.round();
-    final priceColor = isSelected
-        ? AppColors.orangeColor
-        : SubscriptionColors.blue;
+  // =========================================================================
+  // SCREEN 4 PLAN TILE WIDGET (Exact fields & layout as requested)
+  // =========================================================================
+  Widget _buildPlanCardScreen4(
+    String hostelId,
+    PlanOption plan,
+    int beds,
+    bool isSelected,
+  ) {
+    final breakdown = plan.breakdown;
+    final mrpPerBed = plan.mrpPerBed;
+    final pricePerBed = plan.pricePerBed;
+    final durationMonths = plan.months;
+
+    final mrpTotal = breakdown?.mrpTotal ?? (mrpPerBed * beds * durationMonths);
+    final subtotal =
+        breakdown?.totalAmount ?? (pricePerBed * beds * durationMonths);
+    final discountAmount =
+        breakdown?.discountAmount ?? (mrpTotal - subtotal);
+    final gstAmount = breakdown?.gstAmount ??
+        (plan.priceIncludesGst ? 0 : (subtotal * plan.gstPercentage / 100));
+
+    final totalPayable = calculateTotalAmount(
+      subtotal,
+      gstAmount,
+      plan.priceIncludesGst,
+    );
+
+    final savings = mrpTotal - subtotal;
+
+    final isShortTerm = durationMonths <= 6;
+    final tagline = isShortTerm
+        ? 'Ideal for short to medium term • Save ₹${_formatNumber(savings.round())}'
+        : 'Best value for long term • Save ₹${_formatNumber(savings.round())}';
+
+    final badgeColor = isShortTerm
+        ? const Color(0xFF16A34A) // Green for 6m
+        : const Color(0xFFEA580C); // Orange for 12m
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPlan[hostelId] = plan.key),
-      child: Padding(
-        padding: EdgeInsets.only(top: plan.isBestValue ? 10.h : 10.h),
-        child: Stack(
-          clipBehavior: Clip.none,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryBlue : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? SubscriptionColors.orangeLight
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.orangeColor
-                      : AppColors.roomCardBorder,
-                  width: isSelected ? 1.5 : 1,
-                ),
-              ),
+            // Plan Header (Radio + Title + Discount Badge)
+            Padding(
+              padding: EdgeInsets.all(16.w),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// Plan Name
-                  Text(
-                    plan.label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.darkText,
-                      height: 1.1,
-                    ),
-                  ),
-
-                  SizedBox(height: 2.h),
-
-                  /// Duration
-                  Text(
-                    TextUtils.capitalize(plan.duration),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.greyText,
-                      height: 1.1,
-                    ),
-                  ),
-
-                  SizedBox(height: 8.h),
-
-                  /// Price
-                  Wrap(
-                    spacing: 4.w,
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                  Row(
                     children: [
-                      Text(
-                        '₹${plan.mrpPerBed.round()}',
-                        style: GoogleFonts.inter(
-                          fontSize: 11.sp,
-                          color: AppColors.greyText,
-                          fontWeight: FontWeight.w700,
-                          decoration: TextDecoration.lineThrough,
+                      // Radio circle
+                      Container(
+                        width: 22.w,
+                        height: 22.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primaryBlue
+                                : Colors.grey.shade400,
+                            width: isSelected ? 6.w : 1.5.w,
+                          ),
+                          color: Colors.white,
                         ),
                       ),
+                      SizedBox(width: 10.w),
+
+                      // Plan Title
                       Text(
-                        '₹$price',
+                        plan.label,
                         style: GoogleFonts.inter(
-                          fontSize: 15.sp,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
-                          color: priceColor,
+                          color: const Color(0xFF1E293B),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+
+                      // Discount Tag Badge
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: badgeColor,
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.local_offer_rounded,
+                              size: 11.sp,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'Save Discount ${plan.discountPercent}%',
+                              style: GoogleFonts.inter(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-
-                  SizedBox(height: 2.h),
-
-                  /// Discount
-                  Text(
-                    'Save ${plan.discountPercent}%',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w700,
-                      color: SubscriptionColors.green,
-                      height: 1.1,
+                  SizedBox(height: 6.h),
+                  Padding(
+                    padding: EdgeInsets.only(left: 32.w),
+                    child: Text(
+                      tagline,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  // Detailed breakdown rows (Screen 4)
+                  _buildDetailRowItem(
+                    icon: Icons.king_bed_outlined,
+                    label: 'Number of Beds',
+                    value: '$beds',
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildDetailRowItem(
+                    icon: Icons.currency_rupee_rounded,
+                    label: 'Price per bed / month',
+                    value: '₹${pricePerBed.round()}',
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildDetailRowItem(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Service Period',
+                    value:
+                        '$durationMonths ${durationMonths == 1 ? 'Month' : 'Months'}',
+                  ),
+
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    child: const _DottedLineDivider(),
+                  ),
+
+                  _buildDetailRowItem(
+                    icon: Icons.calculate_outlined,
+                    label: 'Total Amount (Before Discount)',
+                    value: '₹${_formatNumber(mrpTotal.round())}',
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildDetailRowItem(
+                    icon: Icons.discount_outlined,
+                    label: 'Save Discount (${plan.discountPercent}%)',
+                    value: '- ₹${_formatNumber(discountAmount.round())}',
+                    valueColor: const Color(0xFF16A34A),
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildDetailRowItem(
+                    icon: Icons.description_outlined,
+                    label: 'Subtotal (After Discount)',
+                    value: '₹${_formatNumber(subtotal.round())}',
+                    valueColor: const Color(0xFF1E293B),
+                    isBold: true,
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildDetailRowItem(
+                    icon: Icons.percent_rounded,
+                    label: 'GST (${plan.gstPercentage}%)',
+                    value: '+ ₹${_formatNumber(gstAmount.round())}',
                   ),
                 ],
               ),
             ),
 
-            if (plan.isBestValue)
-              Positioned(
-                top: -10.h,
-                right: 10.w,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 3.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.orangeColor,
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Text(
-                    'BEST VALUE',
-                    style: GoogleFonts.inter(
-                      fontSize: 8.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
+            // Highlighted Total Payment Box at bottom of card
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 14.h,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16.r),
+                  bottomRight: Radius.circular(16.r),
                 ),
               ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet_outlined,
+                        color: const Color(0xFF1D4ED8),
+                        size: 22.sp,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        'Total Payable Amount',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1D4ED8),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '₹${_formatNumber(totalPayable.round())}',
+                        style: GoogleFonts.inter(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1D4ED8),
+                        ),
+                      ),
+                      Text(
+                        '(₹${_formatNumber(subtotal.round())} + ${plan.gstPercentage}% GST)',
+                        style: GoogleFonts.inter(
+                          fontSize: 10.sp,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  // Widget _buildPlanTile(
-  //     String hostelId,
-  //     PlanOption plan,
-  //     bool isSelected,
-  //     ) {
-  //   final price = plan.pricePerBed.round();
-  //   final priceColor = isSelected ? AppColors.orangeColor : SubscriptionColors.blue;
-  //
-  //   return GestureDetector(
-  //     onTap: () => setState(() => _selectedPlan[hostelId] = plan.key),
-  //     child: Padding(
-  //       padding: EdgeInsets.only(
-  //         top: plan.isBestValue ? 0.h : 0,
-  //       ),
-  //       child: Stack(
-  //         clipBehavior: Clip.none,
-  //         children: [
-  //           Container(
-  //             width: double.infinity,
-  //             padding: EdgeInsets.all(12.w),
-  //             decoration: BoxDecoration(
-  //               color: isSelected
-  //                   ? SubscriptionColors.orangeLight
-  //                   : Colors.white,
-  //               borderRadius: BorderRadius.circular(12.r),
-  //               border: Border.all(
-  //                 color: isSelected
-  //                     ? AppColors.orangeColor
-  //                     : AppColors.roomCardBorder,
-  //                 width: isSelected ? 1.5 : 1,
-  //               ),
-  //             ),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Text(
-  //                   plan.label,
-  //                   style: GoogleFonts.inter(
-  //                     fontSize: 13.sp,
-  //                     fontWeight: FontWeight.w800,
-  //                     color: AppColors.darkText,
-  //                   ),
-  //                 ),
-  //
-  //                 SizedBox(height: 2.h),
-  //
-  //                 Text(
-  //                   TextUtils.capitalize(plan.duration),
-  //                   style: GoogleFonts.inter(
-  //                     fontSize: 11.sp,
-  //                     fontWeight: FontWeight.w700,
-  //                     color: AppColors.greyText,
-  //                   ),
-  //                 ),
-  //                 SizedBox(height: 12),
-  //                 Row(
-  //                   children: [
-  //                     Text(
-  //                       '₹${plan.mrpPerBed.round()}',
-  //                       style: GoogleFonts.inter(
-  //                         fontSize: 12.sp,
-  //                         color: AppColors.greyText,
-  //                         fontWeight: FontWeight.w700,
-  //                         decoration: TextDecoration.lineThrough,
-  //                       ),
-  //                     ),
-  //                     SizedBox(width: 6.w),
-  //                     Text(
-  //                       '₹$price',
-  //                       style: GoogleFonts.inter(
-  //                         fontSize: 17.sp,
-  //                         fontWeight: FontWeight.w800,
-  //                         color: priceColor,
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //
-  //                 SizedBox(height: 2.h),
-  //
-  //                 Text(
-  //                   'Save ${plan.discountPercent}%',
-  //                   style: GoogleFonts.inter(
-  //                     fontSize: 11.sp,
-  //                     fontWeight: FontWeight.w700,
-  //                     color: SubscriptionColors.green,
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //
-  //           if (plan.isBestValue)
-  //             Positioned(
-  //               top: -12.h,
-  //               right: 12.w,
-  //               child: Container(
-  //                 padding: EdgeInsets.symmetric(
-  //                   horizontal: 12.w,
-  //                   vertical: 4.h,
-  //                 ),
-  //                 decoration: BoxDecoration(
-  //                   color: AppColors.orangeColor,
-  //                   borderRadius: BorderRadius.circular(20.r),
-  //                 ),
-  //                 child: Text(
-  //                   'BEST VALUE',
-  //                   style: GoogleFonts.inter(
-  //                     fontSize: 9.sp,
-  //                     fontWeight: FontWeight.w700,
-  //                     color: Colors.white,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  Widget _buildPriceBreakup(PlanOption plan, int beds) {
-    final breakdown = plan.breakdown;
-    if (breakdown == null) return const SizedBox.shrink();
-
-    final mrpTotal = breakdown.mrpTotal;
-    final discountAmount = breakdown.discountAmount;
-    final gstAmount = breakdown.gstAmount;
-    final baseAmount = breakdown.totalAmount;
-
-    final totalToPay = calculateTotalAmount(
-      baseAmount,
-      gstAmount,
-      plan.priceIncludesGst,
-    );
-
-    final savings = mrpTotal - totalToPay;
-
-    String savingsAmount = breakdown.savingsText ?? "";
-    if (!savingsAmount.contains('₹')) {
-      // If it's just a number, format it
-      final val = double.tryParse(savingsAmount);
-      if (val != null) {
-        savingsAmount = '₹${_formatNumber(val.round())}';
-      } else {
-        savingsAmount = '₹${_formatNumber(savings.round())}';
-      }
-    } else {
-      savingsAmount =
-          RegExp(r'₹[\d,]+(?:\.\d+)?').firstMatch(savingsAmount)?.group(0) ??
-          "₹${_formatNumber(savings.round())}";
-    }
-
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: SubscriptionColors.priceBoxBg,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.roomCardBorder, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'PRICE BREAKUP · ${plan.label.toUpperCase()} PLAN',
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w800,
-              color: SubscriptionColors.grayText,
-              letterSpacing: 0.5,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          _buildBreakupRow(
-            'Total (${breakdown.formula ?? ''})',
-            '₹${_formatNumber(mrpTotal.round())}',
-            isStrikethrough: true,
-          ),
-          SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Image.asset(
-                    'assets/images/discount.png',
-                    width: 12.w,
-                    height: 12.w,
-                    fit: BoxFit.contain,
-                    color: SubscriptionColors.green,
-                    colorBlendMode: BlendMode.srcIn,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    'You save (${plan.discountPercent}% off)',
-                    style: GoogleFonts.inter(
-                      fontSize: 13.sp,
-                      color: const Color(0xFF4E8B57),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                '- ₹${_formatNumber(discountAmount.round())}',
-                style: GoogleFonts.inter(
-                  fontSize: 13.sp,
-                  color: const Color(0xFF4E8B57),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          if (gstAmount > 0) ...[
-            SizedBox(height: 8.h),
-            _buildBreakupRow(
-              'GST (${plan.gstPercentage}%)',
-              '+ ₹${_formatNumber(gstAmount.round())}',
-              valueColor: SubscriptionColors.navy,
-            ),
-          ],
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 10.h),
-            child: Divider(height: 1, color: AppColors.roomCardBorder),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Total to pay',
-                style: GoogleFonts.inter(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.blackColor,
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '₹${_formatNumber(totalToPay.round())}',
-                    style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                  Text(
-                    '(Incl. GST)',
-                    style: GoogleFonts.inter(
-                      fontSize: 10.sp,
-                      color: SubscriptionColors.grayText,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
-            decoration: BoxDecoration(
-              color: SubscriptionColors.greenLight,
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: const Color(0xFFADC8AF), width: 0.8),
-            ),
-            child: Text(
-              "🎉 You're saving $savingsAmount with the ${plan.label.toLowerCase()}",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w800,
-                color: SubscriptionColors.green,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBreakupRow(
-    String label,
-    String value, {
-    bool isStrikethrough = false,
+  Widget _buildDetailRowItem({
+    required IconData icon,
+    required String label,
+    required String value,
     Color? valueColor,
+    bool isBold = false,
   }) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Icon(icon, size: 16.sp, color: Colors.grey.shade500),
+        SizedBox(width: 8.w),
         Expanded(
           child: Text(
             label,
             style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              color: const Color(0xFF5f616c),
+              fontSize: 12.5.sp,
+              color: const Color(0xFF64748B),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1785,294 +1408,262 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         Text(
           value,
           style: GoogleFonts.inter(
-            fontSize: 12.sp,
-            color: valueColor ?? const Color(0xFF5f616c),
-            decoration: isStrikethrough ? TextDecoration.lineThrough : null,
+            fontSize: 13.sp,
+            fontWeight: isBold ? FontWeight.w800 : FontWeight.w700,
+            color: valueColor ?? const Color(0xFF334155),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPendingCard(
+  // Active Subscription Banner widget (for running/paused)
+  Widget _buildActiveSubscriptionBanner(
     BuildContext context,
-    SubscriptionProperty property,
     ActiveSubscription subscription,
   ) {
+    final statusInfo = _getSubscriptionStatus(subscription);
+    final phoneNumber = subscription.supportCall;
+    final whatsappUrl = subscription.supportWhatsappUrl;
+
     return Container(
-      padding: EdgeInsets.all(16.w),
-      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSubscriptionHeader(
-            hostelName: property.name,
-            status: 'Payment Pending',
-            statusColor: SubscriptionColors.orange,
-            backgroundColor: SubscriptionColors.orangeLight,
-            icon: Icons.hourglass_empty,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Current Subscription',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1E293B),
+                ),
+              ),
+              _buildStatusPill(statusInfo),
+            ],
           ),
-          _buildLocationRow(property.address),
-          _buildBedsRow(property.totalBeds),
-          SizedBox(height: 16.h),
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: SubscriptionColors.priceBoxBg,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
-            ),
-            child: Column(
+          SizedBox(height: 8.h),
+          if (subscription.endDate != null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Amount to Pay',
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: SubscriptionColors.grayText,
-                      ),
+                Text(
+                  'Valid till',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                Text(
+                  _formatDate(subscription.endDate!),
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1E293B),
+                  ),
+                ),
+              ],
+            ),
+          if (phoneNumber != null && phoneNumber.isNotEmpty) ...[
+            SizedBox(height: 12.h),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _callPhoneNumber(phoneNumber),
+                    icon: Icon(
+                      Icons.call_outlined,
+                      size: 16.sp,
+                      color: AppColors.primaryBlue,
                     ),
-                    Text(
-                      '₹${_formatNumber(subscription.totalAmount.round())}',
+                    label: Text(
+                      'Call Support',
                       style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.primaryBlue,
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(height: 16.h),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _navigateToRazorpay(context, subscription),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primaryBlue),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.r),
                       ),
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
                     ),
-                    child: Text(
-                      'Complete Payment',
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _shareOnWhatsApp(
+                      phoneNumber: phoneNumber,
+                      message: whatsappUrl,
+                    ),
+                    icon: Image.asset(
+                      'assets/images/whatsapp_black.png',
+                      width: 16.w,
+                      height: 16.w,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      'WhatsApp',
                       style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.freeGreen,
+                      side: BorderSide(color: AppColors.freeGreen),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
                     ),
                   ),
                 ),
               ],
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildActiveCard(
-    BuildContext context,
-    SubscriptionProperty property,
-    ActiveSubscription subscription,
-  ) {
-    final beds = property.totalBeds;
-    final planSnapshot = subscription.planSnapshot;
-    final plan = PlanOption.fromEntity(planSnapshot);
-    final price = plan.pricePerBed.round();
-
-    final start = subscription.startDate ?? DateTime.now();
-    final end =
-        subscription.endDate ?? start.add(Duration(days: plan.months * 30));
-
-    final now = DateTime.now();
-    final totalDays = end.difference(start).inDays.clamp(1, 100000);
-    final elapsedDays = now.difference(start).inDays.clamp(0, totalDays);
-    final progress = elapsedDays / totalDays;
-    final daysRemaining = end.difference(now).inDays.clamp(0, totalDays);
-
+  // Header Builder
+  Widget _buildHeader(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onBack,
+  }) {
     return Container(
-      padding: EdgeInsets.all(16.w),
-      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          _buildSubscriptionHeader(
-            hostelName: property.name,
-            status: 'Active',
-            statusColor: SubscriptionColors.green,
-            backgroundColor: SubscriptionColors.greenLight,
-            icon: Icons.check_circle,
-          ),
-          _buildLocationRow(property.address),
-          _buildBedsRow(beds),
-          SizedBox(height: 16.h),
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-              gradient: const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFFFFFFFF),
-                  Color(0xFFFCFCFD),
-                  Color(0xFFF8F6F3),
-                ],
-                stops: [0.0, 0.6, 1.0],
+          GestureDetector(
+            onTap: onBack,
+            child: Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade100,
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 16.sp,
+                color: const Color(0xFF1E293B),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${plan.label} plan',
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
-                        color: SubscriptionColors.navy,
-                      ),
-                    ),
-                    Text(
-                      '₹$price / bed / mo',
-                      style: GoogleFonts.inter(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold,
-                        color: SubscriptionColors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'FROM',
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            color: SubscriptionColors.grayText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          _formatDate(start),
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkText,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'TO',
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            color: SubscriptionColors.grayText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          _formatDate(end),
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10.h),
-                _buildGradientProgress(progress),
-                SizedBox(height: 8.h),
-                Text(
-                  '$daysRemaining days remaining · renews at ${plan.label.toLowerCase()} rate',
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: SubscriptionColors.grayText,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF1E293B),
+              ),
             ),
+          ),
+          Icon(
+            Icons.help_outline_rounded,
+            size: 22.sp,
+            color: AppColors.primaryBlue,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGradientProgress(double progress) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10.r),
-      child: Container(
-        height: 6.h,
-        color: const Color(0xFFE8ECF2), // Track color
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: FractionallySizedBox(
-            // widthFactor: 0.8,
-            widthFactor: progress.clamp(0.0, 1.0),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.r),
-                gradient: const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF3F5CA8), // Blue
-                    Color(0xFF6A5F8F), // Blue-Purple
-                    Color(0xFF9D6B66), // Brown
-                    Color(0xFFD58B45), // Orange
-                  ],
-                  stops: [0.0, 0.35, 0.7, 1.0],
-                ),
-              ),
+  // Status Pill Widget
+  Widget _buildStatusPill(_StatusInfo statusInfo) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: statusInfo.badgeBg,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6.w,
+            height: 6.w,
+            decoration: BoxDecoration(
+              color: statusInfo.badgeFg,
+              shape: BoxShape.circle,
             ),
           ),
-        ),
+          SizedBox(width: 4.w),
+          Text(
+            statusInfo.label,
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w700,
+              color: statusInfo.badgeFg,
+            ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _StatusInfo {
+  final String label;
+  final Color badgeBg;
+  final Color badgeFg;
+
+  const _StatusInfo({
+    required this.label,
+    required this.badgeBg,
+    required this.badgeFg,
+  });
+}
+
+class _DottedLineDivider extends StatelessWidget {
+  const _DottedLineDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final boxWidth = constraints.maxWidth;
+        const dashWidth = 4.0;
+        const dashHeight = 1.0;
+        final dashCount = (boxWidth / (2 * dashWidth)).floor();
+        return Flex(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          direction: Axis.horizontal,
+          children: List.generate(dashCount, (_) {
+            return SizedBox(
+              width: dashWidth,
+              height: dashHeight,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: Colors.grey.shade300),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }
