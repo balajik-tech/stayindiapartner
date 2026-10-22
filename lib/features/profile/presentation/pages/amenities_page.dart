@@ -271,8 +271,15 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
     if (n.contains('study') || n.contains('desk')) {
       return const Color(0xFF6366F1);
     }
-    return const Color(0xFF8B5CF6);
+    return _customAmenityColor;
   }
+
+  // Amenities that don't match a predefined type (i.e. ones the owner typed
+  // in) get this color, and can be deleted.
+  static const Color _customAmenityColor = Color(0xFF8B5CF6);
+
+  bool _isCustomAmenity(String name) =>
+      _getAmenityBaseColor(name) == _customAmenityColor;
 
   Widget _buildAmenitiesList() {
     if (_amenities.isEmpty) {
@@ -347,19 +354,38 @@ class _AmenitiesPageState extends State<AmenitiesPage> {
                     letterSpacing: -0.2,
                   ),
                 ),
-                trailing: Transform.scale(
-                  scale: 0.85,
-                  child: Switch(
-                    value: isActive,
-                    onChanged: (value) {
-                      HapticFeedback.lightImpact();
-                      setState(() => amenity['isActive'] = value);
-                    },
-                    activeThumbColor: Colors.white,
-                    activeTrackColor: baseColor,
-                    inactiveTrackColor: const Color(0xFFE2E8F0),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_isCustomAmenity(name))
+                      IconButton(
+                        tooltip: 'Remove',
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(
+                          Icons.delete_outline_rounded,
+                          color: AppColors.sosRed,
+                          size: 20.sp,
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          setState(() => _amenities.removeAt(index));
+                        },
+                      ),
+                    Transform.scale(
+                      scale: 0.85,
+                      child: Switch(
+                        value: isActive,
+                        onChanged: (value) {
+                          HapticFeedback.lightImpact();
+                          setState(() => amenity['isActive'] = value);
+                        },
+                        activeThumbColor: Colors.white,
+                        activeTrackColor: baseColor,
+                        inactiveTrackColor: const Color(0xFFE2E8F0),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );

@@ -127,9 +127,14 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
     return '';
   }
 
+  // Property whose menu is on screen; a hostel refresh only reloads the
+  // menu when the selected property actually changed.
+  String? _loadedHostelId;
+
   void _loadDay() {
     final hostelId = _hostelId;
     if (hostelId.isEmpty) return;
+    _loadedHostelId = hostelId;
     _cubit.loadMenu(hostelId, _dayKeys[_selectedDayIndex]);
   }
 
@@ -633,7 +638,12 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
           ),
           BlocListener<HostelCubit, HostelState>(
             listener: (context, state) {
-              if (state is HostelLoaded && state.hostels.isNotEmpty) {
+              // Saving a meal refreshes the hostel list; the menu on screen
+              // is already up to date, so don't reload it (and flash a
+              // loader) unless the property changed.
+              if (state is HostelLoaded &&
+                  state.hostels.isNotEmpty &&
+                  _hostelId != _loadedHostelId) {
                 _loadDay();
               }
             },
@@ -1285,6 +1295,8 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
                         style: TextStyle(fontSize: 16.sp),
                       ),
                       SizedBox(width: 8.w),
+                      _VegMark(isVeg: item.isVeg),
+                      SizedBox(width: 6.w),
                       Expanded(
                         child: Text(
                           foodName.toUpperCase(),
@@ -1316,6 +1328,33 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
               },
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Standard Indian food mark: green square/dot for veg, red for non-veg.
+class _VegMark extends StatelessWidget {
+  final bool isVeg;
+
+  const _VegMark({required this.isVeg});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isVeg ? const Color(0xFF16A34A) : const Color(0xFFB91C1C);
+    return Tooltip(
+      message: isVeg ? 'Veg' : 'Non-veg',
+      child: Container(
+        width: 12.r,
+        height: 12.r,
+        padding: EdgeInsets.all(2.r),
+        decoration: BoxDecoration(
+          border: Border.all(color: color, width: 1.2),
+          borderRadius: BorderRadius.circular(2.r),
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
       ),
     );
   }

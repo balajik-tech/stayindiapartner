@@ -23,6 +23,7 @@ class HouseRulesPage extends StatefulWidget {
 class _HouseRulesPageState extends State<HouseRulesPage> {
   final _entryTimeController = TextEditingController();
   final _visitorPolicyController = TextEditingController();
+  static const int _maxVisitorPolicyLength = 500;
   final _rulesController = TextEditingController();
   int _penaltyDate = 7;
 
@@ -224,6 +225,7 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
             _visitorPolicyController,
             hint: 'Enter visitor policy...',
             maxLines: 2,
+            maxLength: _maxVisitorPolicyLength,
             icon: Icons.people_outline_rounded,
           ),
         ],
@@ -417,6 +419,7 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
     TextEditingController controller, {
     required String hint,
     int maxLines = 1,
+    int? maxLength,
     required IconData icon,
     bool readOnly = false,
     VoidCallback? onTap,
@@ -430,6 +433,8 @@ class _HouseRulesPageState extends State<HouseRulesPage> {
       child: TextField(
         controller: controller,
         maxLines: maxLines,
+        // Shows a "n/max" counter and stops input at the limit.
+        maxLength: maxLength,
         readOnly: readOnly,
         onTap: onTap,
         style: TextStyle(

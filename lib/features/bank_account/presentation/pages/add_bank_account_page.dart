@@ -95,20 +95,46 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
     super.dispose();
   }
 
+  // Controller listeners also fire on cursor/selection changes; only react
+  // when the text itself changed.
+  String _lastIfsc = '';
+  String _lastPan = '';
+
   void _onIfscChanged() {
     final code = _ifscController.text.trim().toUpperCase();
+    if (code == _lastIfsc) return;
+    _lastIfsc = code;
+    // The IFSC doesn't affect PAN verification, so it is left untouched;
+    // resetting it here un-verified the PAN and kept Continue disabled.
     if (mounted) {
-      context.read<AddBankAccountCubit>().resetPanVerification();
       context.read<AddBankAccountCubit>().lookupIfscCode(code);
     }
   }
 
   void _onPanChanged() {
     final currentPan = _panController.text.trim().toUpperCase();
+    if (currentPan == _lastPan) return;
+    _lastPan = currentPan;
     if (mounted && currentPan.isNotEmpty) {
       context.read<AddBankAccountCubit>().resetPanVerification();
     }
     setState(() {});
+  }
+
+  /// Why Continue is disabled, or null when it can be pressed.
+  String? _continueBlocker(AddBankAccountState state) {
+    final account = _accountNumberController.text.trim();
+    if (account.isEmpty) return 'Enter the account number.';
+    if (_confirmAccountNumberController.text.trim().isEmpty) {
+      return 'Re-enter the account number to confirm it.';
+    }
+    if (!_numbersMatch) return 'Account numbers do not match.';
+    if (_ifscController.text.trim().length != 11) {
+      return 'Enter a valid 11-character IFSC code.';
+    }
+    if (!_isPanValid) return 'Enter a valid PAN (e.g. ABCDE1234F).';
+    if (!state.panVerifySuccess) return 'Tap Verify to verify your PAN.';
+    return null;
   }
 
   bool get _isPanValid {
@@ -767,6 +793,19 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                         ),
                       ),
                     ],
+                    if (!state.isVerifying && _continueBlocker(state) != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: Text(
+                          _continueBlocker(state)!,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 12.5,
+                            color: const Color(0xFF6B7280),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       child: ElevatedButton(
