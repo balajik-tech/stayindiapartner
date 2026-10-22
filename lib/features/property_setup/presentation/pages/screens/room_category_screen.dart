@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/widgets/max_input_text_formatter.dart';
 
 class RoomPricing {
   final int sharing;
@@ -33,6 +35,10 @@ class RoomCategoryScreen extends StatefulWidget {
 class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
   String _selectedType = 'NON_AC';
   late List<int> _activeSharingTypes;
+
+  // Sharing numbers run from 1 to 10, so at most 10 options can exist.
+  static const int _maxSharingOptions = 10;
+  bool get _canAddSharing => _activeSharingTypes.length < _maxSharingOptions;
 
   late Map<String, Map<int, Map<String, TextEditingController>>> _controllers;
   late Map<String, Map<int, Map<String, FocusNode>>> _focusNodes;
@@ -528,7 +534,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
         children: [
           _buildStaticHeaderCell(),
           ..._activeSharingTypes.map((sharing) => _buildStaticRowCell(sharing)),
-          _buildStaticAddRowCell(),
+          if (_canAddSharing) _buildStaticAddRowCell(),
         ],
       ),
     );
@@ -698,7 +704,7 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
             ..._activeSharingTypes.map(
               (sharing) => _buildScrollableRow(sharing),
             ),
-            _buildScrollableAddRowPlaceholder(),
+            if (_canAddSharing) _buildScrollableAddRowPlaceholder(),
           ],
         ),
       ),
@@ -803,7 +809,13 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
                 : TextInputAction.next,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
-              MaxValueTextInputFormatter(50000),
+              MaxValueTextInputFormatter(
+                50000,
+                onExceeded: () => AppToast.show(
+                  context,
+                  'Maximum amount allowed is ₹50,000.',
+                ),
+              ),
             ],
             onSubmitted: (_) {
               if (field == 'rent') {
@@ -979,33 +991,3 @@ class _RoomCategoryScreenState extends State<RoomCategoryScreen> {
   }
 }
 
-class MaxValueTextInputFormatter extends TextInputFormatter {
-  final int maxValue;
-
-  MaxValueTextInputFormatter(this.maxValue);
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    if (newValue.text.isEmpty) {
-      return newValue;
-    }
-
-    final value = int.tryParse(newValue.text);
-    if (value == null) {
-      return oldValue;
-    }
-
-    if (value > maxValue) {
-      final cappedText = maxValue.toString();
-      return TextEditingValue(
-        text: cappedText,
-        selection: TextSelection.collapsed(offset: cappedText.length),
-      );
-    }
-
-    return newValue;
-  }
-}

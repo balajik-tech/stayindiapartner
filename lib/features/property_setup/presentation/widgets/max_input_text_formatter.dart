@@ -1,15 +1,19 @@
 import 'package:flutter/services.dart';
 
+/// Rejects an edit that would push the number above [maxValue], keeping the
+/// value exactly as the user typed it so far. It never rewrites the number
+/// to [maxValue]; [onExceeded] is called instead so the UI can explain why.
 class MaxValueTextInputFormatter extends TextInputFormatter {
   final int maxValue;
+  final void Function()? onExceeded;
 
-  MaxValueTextInputFormatter(this.maxValue);
+  MaxValueTextInputFormatter(this.maxValue, {this.onExceeded});
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue;
     }
@@ -20,11 +24,8 @@ class MaxValueTextInputFormatter extends TextInputFormatter {
     }
 
     if (value > maxValue) {
-      final cappedText = maxValue.toString();
-      return TextEditingValue(
-        text: cappedText,
-        selection: TextSelection.collapsed(offset: cappedText.length),
-      );
+      onExceeded?.call();
+      return oldValue;
     }
 
     return newValue;

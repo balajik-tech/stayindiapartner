@@ -8,7 +8,8 @@ import 'package:stayindia_owner/features/property_setup/presentation/cubit/prope
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 
-import '../../../../profile/presentation/pages/room_master_page.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/widgets/max_input_text_formatter.dart';
 
 class PriceMasterScreen extends StatefulWidget {
   const PriceMasterScreen({super.key});
@@ -786,7 +787,13 @@ class _PremiumPriceInputState extends State<_PremiumPriceInput> {
                     ),
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
-                      MaxValueTextInputFormatter(50000),
+                      MaxValueTextInputFormatter(
+                        50000,
+                        onExceeded: () => AppToast.show(
+                          context,
+                          'Maximum amount allowed is ₹50,000.',
+                        ),
+                      ),
                     ],
                     style: TextStyle(
                       fontSize: 14.sp,
@@ -846,7 +853,13 @@ class _DialogTextField extends StatelessWidget {
         ),
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
-          MaxValueTextInputFormatter(50000),
+          MaxValueTextInputFormatter(
+            50000,
+            onExceeded: () => AppToast.show(
+              context,
+              'Maximum amount allowed is ₹50,000.',
+            ),
+          ),
         ],
         style: TextStyle(
           fontSize: 16.sp,

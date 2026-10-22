@@ -11,6 +11,8 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/widgets/max_input_text_formatter.dart';
 
 class RoomMasterPage extends StatelessWidget {
   const RoomMasterPage({super.key});
@@ -41,6 +43,10 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
   String _selectedType = 'AC';
   bool _isEditing = false;
   late List<int> _activeSharingTypes;
+
+  // Sharing numbers run from 1 to 10, so at most 10 options can exist.
+  static const int _maxSharingOptions = 10;
+  bool get _canAddSharing => _activeSharingTypes.length < _maxSharingOptions;
   late Map<String, Map<int, Map<String, TextEditingController>>> _controllers;
   late Map<String, Map<int, Map<String, FocusNode>>> _focusNodes;
   bool _initializedFromState = false;
@@ -635,7 +641,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
         children: [
           _buildStaticHeaderCell(),
           ..._activeSharingTypes.map((sharing) => _buildStaticRowCell(sharing)),
-          if (_isEditing) _buildStaticAddRowCell(),
+          if (_isEditing && _canAddSharing) _buildStaticAddRowCell(),
         ],
       ),
     );
@@ -817,7 +823,7 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
                 (sharing) => _buildScrollableRow(sharing),
           ),
 
-          if (_isEditing)
+          if (_isEditing && _canAddSharing)
             _buildScrollableAddRowPlaceholder(),
         ],
       ),
@@ -941,7 +947,13 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
             : TextInputAction.next,
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
-          MaxValueTextInputFormatter(50000),
+          MaxValueTextInputFormatter(
+            50000,
+            onExceeded: () => AppToast.show(
+              context,
+              'Maximum amount allowed is ₹50,000.',
+            ),
+          ),
         ],
         onSubmitted: (_) {
           if (field == 'rent') {
@@ -1190,33 +1202,3 @@ class _RoomMasterViewState extends State<_RoomMasterView> {
   }
 }
 
-class MaxValueTextInputFormatter extends TextInputFormatter {
-  final int maxValue;
-
-  MaxValueTextInputFormatter(this.maxValue);
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    if (newValue.text.isEmpty) {
-      return newValue;
-    }
-
-    final value = int.tryParse(newValue.text);
-    if (value == null) {
-      return oldValue;
-    }
-
-    if (value > maxValue) {
-      final cappedText = maxValue.toString();
-      return TextEditingValue(
-        text: cappedText,
-        selection: TextSelection.collapsed(offset: cappedText.length),
-      );
-    }
-
-    return newValue;
-  }
-}

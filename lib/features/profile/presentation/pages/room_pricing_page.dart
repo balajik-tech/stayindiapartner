@@ -13,7 +13,8 @@ import 'package:stayindia_owner/features/navigation/presentation/pages/main_navi
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/injection_container.dart';
 
-import '../../../property_setup/presentation/pages/screens/room_category_screen.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/widgets/max_input_text_formatter.dart';
 
 class RoomPricingPage extends StatefulWidget {
   final Hostel hostel;
@@ -815,7 +816,13 @@ class _PriceInputState extends State<_PriceInput> {
                     ),
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
-                      MaxValueTextInputFormatter(50000),
+                      MaxValueTextInputFormatter(
+                        50000,
+                        onExceeded: () => AppToast.show(
+                          context,
+                          'Maximum amount allowed is ₹50,000.',
+                        ),
+                      ),
                     ],
                     style: TextStyle(
                       fontSize: 14.sp,
