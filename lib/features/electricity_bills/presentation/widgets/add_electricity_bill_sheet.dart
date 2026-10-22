@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/features/electricity_bills/data/models/electricity_bill_model.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/error_helper.dart';
+import '../../../../core/widgets/app_toast.dart';
 
 class AddElectricityBillSheet extends StatefulWidget {
   final String hostelId;
@@ -67,6 +69,7 @@ class AddElectricityBillSheet extends StatefulWidget {
 
 class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
   late String _selectedRoomCode;
+  bool _showRoomError = false;
   late DateTime _billStartDate;
   late DateTime _billEndDate;
   late DateTime _dueDate;
@@ -187,15 +190,64 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
     });
   }
 
+  Future<void> _pickRoom() async {
+    if (widget.rooms.isEmpty) {
+      AppToast.show(context, 'No rooms found for this property. Add rooms first.');
+      return;
+    }
+    final code = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          children: [
+            for (final room in widget.rooms)
+              ListTile(
+                title: Text(room.code),
+                trailing: room.code == _selectedRoomCode
+                    ? const Icon(Icons.check_rounded, color: AppColors.primaryBlue)
+                    : null,
+                onTap: () => Navigator.pop(sheetContext, room.code),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (code != null && mounted) {
+      setState(() {
+        _selectedRoomCode = code;
+        _showRoomError = false;
+      });
+    }
+  }
+
   Future<void> _handleSave() async {
     if (_isSaving) return;
 
-    if (_formKey.currentState?.validate() ?? false) {
+    // Validate here, on the sheet, before calling the server; a missing room
+    // used to come back as "roomID should not be empty".
+    final hasRoom = _selectedRoomCode.trim().isNotEmpty;
+    setState(() => _showRoomError = !hasRoom);
+    final isFormValid = _formKey.currentState?.validate() ?? false;
+    if (!hasRoom) {
+      AppToast.show(
+        context,
+        widget.rooms.isEmpty
+            ? 'No rooms found for this property. Add rooms first.'
+            : 'Please select the Room Number.',
+      );
+      return;
+    }
+
+    if (isFormValid) {
       final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
       if (amount <= 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter a valid bill amount')),
-        );
+        AppToast.show(context, 'Please enter a valid bill amount.');
         return;
       }
 
@@ -241,12 +293,7 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
             _isSaving = false;
           });
           if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Electricity bill saved successfully'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            AppToast.show(context, 'Electricity bill saved successfully.');
             Navigator.pop(context);
           }
         }
@@ -255,12 +302,7 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
           setState(() {
             _isSaving = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          AppToast.show(context, ErrorHelper.toFriendlyMessage(e));
         }
       }
     }
@@ -325,22 +367,61 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
                       ),
                     ),
                     SizedBox(height: 6.h),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      child: Text(
-                        _selectedRoomCode,
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1E293B),
+                    // Tap to pick a room (it isn't typed in).
+                    InkWell(
+                      onTap: isEditing ? null : _pickRoom,
+                      borderRadius: BorderRadius.circular(10.r),
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: _showRoomError
+                                ? AppColors.sosRed
+                                : Colors.transparent,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _selectedRoomCode.isNotEmpty
+                                    ? _selectedRoomCode
+                                    : widget.rooms.isEmpty
+                                    ? 'No rooms found for this property'
+                                    : 'Select room',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: _selectedRoomCode.isNotEmpty
+                                      ? const Color(0xFF1E293B)
+                                      : const Color(0xFF94A3B8),
+                                ),
+                              ),
+                            ),
+                            if (!isEditing && widget.rooms.isNotEmpty)
+                              Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: const Color(0xFF64748B),
+                                size: 20.sp,
+                              ),
+                          ],
                         ),
                       ),
                     ),
+                    if (_showRoomError) ...[
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Please select the Room Number',
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          color: AppColors.sosRed,
+                        ),
+                      ),
+                    ],
                     SizedBox(height: 10.h),
 
                     // Room selection pills
@@ -358,6 +439,7 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
                                     : () {
                                   setState(() {
                                     _selectedRoomCode = room.code;
+                                    _showRoomError = false;
                                   });
                                 },
                                 borderRadius: BorderRadius.circular(20.r),
@@ -659,6 +741,16 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
                           borderRadius: BorderRadius.circular(10.r),
                           borderSide: const BorderSide(color: Color(0xFF112D4E), width: 1.5),
                         ),
+                        // Without these an invalid field fell back to a plain
+                        // red underline.
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          borderSide: const BorderSide(color: AppColors.sosRed),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          borderSide: const BorderSide(color: AppColors.sosRed, width: 1.5),
+                        ),
                       ),
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
@@ -703,6 +795,16 @@ class _AddElectricityBillSheetState extends State<AddElectricityBillSheet> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.r),
                           borderSide: const BorderSide(color: Color(0xFF112D4E), width: 1.5),
+                        ),
+                        // Without these an invalid field fell back to a plain
+                        // red underline.
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          borderSide: const BorderSide(color: AppColors.sosRed),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          borderSide: const BorderSide(color: AppColors.sosRed, width: 1.5),
                         ),
                       ),
                     ),

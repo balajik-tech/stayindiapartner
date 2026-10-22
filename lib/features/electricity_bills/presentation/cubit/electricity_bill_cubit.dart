@@ -164,8 +164,9 @@ class ElectricityBillCubit extends Cubit<ElectricityBillState> {
         return true;
       }
     } catch (e) {
+      // Don't add the bill locally: it wasn't saved, and showing it in the
+      // list would hide the failure.
       AppLogger.error('Error calling createElectricityBill API', e);
-      addBill(bill);
       rethrow;
     }
 

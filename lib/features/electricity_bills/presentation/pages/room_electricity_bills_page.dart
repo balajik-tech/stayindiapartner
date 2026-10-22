@@ -297,7 +297,10 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                   child:Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      // Expanded so a long property name is truncated with
+                      // "…" instead of running off the screen.
+                      Expanded(
+                        child: Row(
                         children: [
                           Container(
                             width: 38.w,
@@ -318,11 +321,14 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                             ),
                           ),
                           SizedBox(width: 12.w),
-                          Column(
+                          Expanded(
+                            child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 state.pgName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.inter(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.w700,
@@ -332,6 +338,8 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                               SizedBox(height: 2.h),
                               Text(
                                 state.subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.inter(
                                   fontSize: 11.sp,
                                   color: Colors.white,
@@ -340,7 +348,9 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
                               ),
                             ],
                           ),
+                          ),
                         ],
+                      ),
                       ),
                       // IconButton(
                       //   onPressed: () => _openSettingsSheet(context, state),
