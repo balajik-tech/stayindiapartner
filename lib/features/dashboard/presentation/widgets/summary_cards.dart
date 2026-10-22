@@ -167,11 +167,15 @@ class SummaryCardsSection extends StatelessWidget {
         final status = data?.occupancyStatus;
         final ops = data?.dailyOperations;
 
-        final int totalRoomsCount = occupancy?.floors.fold<int>(
-              0,
-              (sum, floor) => sum + floor.rooms.length,
-            ) ??
-            0;
+        final int? totalRoomsCount = occupancy?.floors.fold<int>(
+          0,
+          (sum, floor) => sum + floor.rooms.length,
+        );
+
+        // Without loaded data (initial state, failed load) show a dash, not
+        // 0 — a 0 here reads as "this property has no rooms/beds".
+        String count(int? value) =>
+            isLoading ? '...' : (value?.toString() ?? '–');
 
         return SizedBox(
           height: 64.h,
@@ -193,7 +197,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(
                 context,
                 'total_rooms',
-                isLoading ? '...' : totalRoomsCount.toString(),
+                count(totalRoomsCount),
                 'total_rooms'.tr(),
                 const Color(0xFF007FFF),
                 Icons.door_front_door_rounded,
@@ -204,7 +208,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(
                 context,
                 'total',
-                isLoading ? '...' : (occupancy?.totalBeds.toString() ?? '0'),
+                count(occupancy?.totalBeds),
                 'total_beds'.tr(),
                 const Color(0xFF2C599D),
                 Icons.bed_rounded,
@@ -216,9 +220,7 @@ class SummaryCardsSection extends StatelessWidget {
                 _buildCard(
                   context,
                   'overdue',
-                  isLoading
-                      ? '...'
-                      : (occupancy?.overdueBeds.toString() ?? '0'),
+                  count(occupancy?.overdueBeds),
                   'payment_dues'.tr(),
                   const Color(0xFF800000),
                   Icons.payments_rounded,
@@ -227,7 +229,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(
                 context,
                 'occupied',
-                isLoading ? '...' : (occupancy?.occupiedBeds.toString() ?? '0'),
+                count(occupancy?.occupiedBeds),
                 'occupied'.tr(),
                 const Color(0xFFFF8600),
                 Icons.person_pin_rounded,
@@ -238,7 +240,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(
                 context,
                 'free',
-                isLoading ? '...' : (occupancy?.freeBeds.toString() ?? '0'),
+                count(occupancy?.freeBeds),
                 'vacant_beds'.tr(),
                 const Color(0xFF87CEEB),
                 Icons.add_box_rounded,
@@ -249,7 +251,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(
                 context,
                 'reserved',
-                isLoading ? '...' : (occupancy?.reservedBeds.toString() ?? '0'),
+                count(occupancy?.reservedBeds),
                 'pre_booked'.tr(),
                 const Color(0xFF9C27B0),
                 Icons.event_available_rounded,
@@ -258,7 +260,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(
                 context,
                 'notice',
-                isLoading ? '...' : (occupancy?.noticeBeds.toString() ?? '0'),
+                count(occupancy?.noticeBeds),
                 'move_out_notice'.tr(),
                 const Color(0xFFFFB300),
                 Icons.notifications_active_rounded,
@@ -266,13 +268,13 @@ class SummaryCardsSection extends StatelessWidget {
               ),
               _buildAttendanceCard(
                 context,
-                isLoading ? '...' : (status?.inside.toString() ?? '0'),
-                isLoading ? '...' : (status?.outside.toString() ?? '0'),
+                count(status?.inside),
+                count(status?.outside),
               ),
               _buildCard(
                 context,
                 'away',
-                isLoading ? '...' : (occupancy?.awayBeds.toString() ?? '0'),
+                count(occupancy?.awayBeds),
                 'away'.tr(),
                 const Color(0xFFE91E63),
                 Icons.luggage_rounded,
@@ -281,9 +283,7 @@ class SummaryCardsSection extends StatelessWidget {
               _buildCard(
                 context,
                 'repair',
-                isLoading
-                    ? '...'
-                    : (occupancy?.maintenanceBeds.toString() ?? '0'),
+                count(occupancy?.maintenanceBeds),
                 'minor_repair'.tr(),
                 const Color(0xFFCBD5E1),
                 Icons.handyman_rounded,

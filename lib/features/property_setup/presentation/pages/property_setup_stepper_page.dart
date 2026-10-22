@@ -47,9 +47,9 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
     if (widget.existingHostel != null) {
       _propertySetupCubit.prefillFromHostel(widget.existingHostel!);
     } else if (widget.existingHostel == null) {
-      if (_propertySetupCubit.state.hostelId != null ||
-          (_propertySetupCubit.state.rooms.isEmpty &&
-              _propertySetupCubit.state.hostelId == null)) {
+      // Continue an unfinished draft (e.g. after the app was closed or
+      // crashed mid-setup) instead of silently throwing it away.
+      if (!_propertySetupCubit.state.hasUnfinishedDraft) {
         _propertySetupCubit.resetState();
       }
     }

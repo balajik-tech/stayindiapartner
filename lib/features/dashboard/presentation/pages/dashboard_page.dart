@@ -18,6 +18,7 @@ import '../widgets/dashboard_search_bar.dart';
 import '../widgets/floor_list_section.dart';
 import '../widgets/summary_card_details_section.dart';
 import '../widgets/dashboard_shimmer.dart';
+import '../widgets/unfinished_property_setup_card.dart';
 import '../widgets/staff_dashboard_view.dart';
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
 import 'package:stayindia_owner/features/bookings/cubit/bookings_cubit.dart';
@@ -252,6 +253,9 @@ class _DashboardPageState extends State<DashboardPage>
                       parent: AlwaysScrollableScrollPhysics(),
                     ),
                     slivers: [
+                      const SliverToBoxAdapter(
+                        child: UnfinishedPropertySetupCard(),
+                      ),
                       if (hostelState is HostelLoaded && hostelState.hostels.isNotEmpty)...[
                         const SliverToBoxAdapter(child: UnifiedHeader()),
                         SliverToBoxAdapter(

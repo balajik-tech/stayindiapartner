@@ -286,6 +286,16 @@ class PropertySetupState extends Equatable {
     );
   }
 
+  /// A new property the owner started but hasn't finished (it only reaches
+  /// the server on Finish, so it exists solely in this saved draft).
+  bool get hasUnfinishedDraft =>
+      hostelId == null &&
+      currentStep < 5 &&
+      (currentStep > 0 ||
+          buildingName.trim().isNotEmpty ||
+          rooms.isNotEmpty ||
+          categorizedImages.values.any((images) => images.isNotEmpty));
+
   @override
   List<Object?> get props => [
     currentStep,
