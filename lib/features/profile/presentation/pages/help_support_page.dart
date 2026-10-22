@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
+import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_conditions_page.dart';
 
 class HelpSupportPage extends StatefulWidget {
   const HelpSupportPage({super.key});
@@ -278,22 +280,35 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             ),
           ),
           SizedBox(height: 16.h),
+          // TODO: link the video tutorials and user guide once their URLs
+          // are available.
           _buildLinkItem(
             StringUtils.translate('video_tutorials_link', context: context),
+            () => AppToast.show(context, 'Video tutorials are coming soon.'),
           ),
           _buildLinkItem(
             StringUtils.translate('user_guide_link', context: context),
+            () => AppToast.show(context, 'The user guide is coming soon.'),
           ),
           _buildLinkItem(
             StringUtils.translate('privacy_policy', context: context),
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const TermsAndConditionsPage(readOnly: true),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLinkItem(String title) {
-    return Container(
+  Widget _buildLinkItem(String title, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
@@ -314,6 +329,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
           ),
           Icon(Icons.open_in_new, size: 18.sp, color: const Color(0xFF98A2B3)),
         ],
+      ),
       ),
     );
   }

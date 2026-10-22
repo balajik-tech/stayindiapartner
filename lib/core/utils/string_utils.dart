@@ -50,6 +50,22 @@ class StringUtils {
     Map<String, String>? namedArgs,
     BuildContext? context,
   }) {
+    final text = _translate(key, namedArgs: namedArgs, context: context);
+    if (namedArgs == null || namedArgs.isEmpty) return text;
+    // The built-in fallback texts below contain {placeholders} that
+    // easy_localization never sees; fill them in here (e.g. the privacy
+    // page showed "Last updated: {date}").
+    return namedArgs.entries.fold(
+      text,
+      (result, arg) => result.replaceAll('{${arg.key}}', arg.value),
+    );
+  }
+
+  static String _translate(
+    String key, {
+    Map<String, String>? namedArgs,
+    BuildContext? context,
+  }) {
     if (key == 'floor_n') {
       final nStr = namedArgs?['n'] ?? '';
       final n = int.tryParse(nStr);

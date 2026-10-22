@@ -7,6 +7,7 @@ import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TermsAndConditionsPage extends StatefulWidget {
   final bool readOnly;
@@ -197,9 +198,17 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
           StringUtils.translate('contact_us_title', context: context),
         ),
         SizedBox(height: 12.h),
-        _buildContactRow(Icons.email_outlined, 'support@stayindia.in'),
+        _buildContactRow(
+          Icons.email_outlined,
+          'support@stayindia.in',
+          Uri(scheme: 'mailto', path: 'support@stayindia.in'),
+        ),
         SizedBox(height: 8.h),
-        _buildContactRow(Icons.phone_outlined, '+91 9888936836'),
+        _buildContactRow(
+          Icons.phone_outlined,
+          '+91 9888936836',
+          Uri(scheme: 'tel', path: '+919888936836'),
+        ),
 
         SizedBox(height: 32.h),
         Text(
@@ -217,20 +226,29 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
     );
   }
 
-  Widget _buildContactRow(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, size: 16.sp, color: AppColors.primaryBlue),
-        SizedBox(width: 8.w),
-        Text(
-          text,
-          style: GoogleFonts.dmSans(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.darkText,
-          ),
+  /// Tapping opens the mail app / dialer.
+  Widget _buildContactRow(IconData icon, String text, Uri uri) {
+    return InkWell(
+      onTap: () => launchUrl(uri),
+      borderRadius: BorderRadius.circular(6.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 4.h),
+        child: Row(
+          children: [
+            Icon(icon, size: 16.sp, color: AppColors.primaryBlue),
+            SizedBox(width: 8.w),
+            Text(
+              text,
+              style: GoogleFonts.dmSans(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryBlue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
