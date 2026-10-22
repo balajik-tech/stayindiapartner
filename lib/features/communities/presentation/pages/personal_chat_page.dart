@@ -720,6 +720,17 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
     }
   }
 
+  /// The server doesn't send delivery receipts yet; these are the fields it
+  /// is expected to use. Until then every sent message shows a single tick.
+  bool _isDeliveredOrRead(Map m) {
+    final status = m['status']?.toString().toLowerCase();
+    return status == 'delivered' ||
+        status == 'read' ||
+        status == 'seen' ||
+        m['deliveredAt'] != null ||
+        m['readAt'] != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -1130,8 +1141,15 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
                                 ),
                                 if (isMe) ...[
                                   SizedBox(width: 4.w),
+                                  // Clock while sending, one tick once sent,
+                                  // two only when the server reports the
+                                  // message as delivered or read.
                                   Icon(
-                                    m['isTemp'] == true ? Icons.access_time_rounded : Icons.done_all_rounded,
+                                    m['isTemp'] == true
+                                        ? Icons.access_time_rounded
+                                        : _isDeliveredOrRead(m)
+                                        ? Icons.done_all_rounded
+                                        : Icons.done_rounded,
                                     color: Colors.white.withValues(alpha: 0.8),
                                     size: 11.sp,
                                   ),

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../injection_container.dart';
 
+import '../../../../core/widgets/shimmer_loading.dart';
 import '../cubit/associate_home_cubit.dart';
 import '../cubit/associate_home_state.dart';
 import '../cubit/association_membership_cubit.dart';
@@ -45,8 +46,7 @@ class _CommunityHomeView extends StatelessWidget {
       builder: (context, state) {
         if (state is AssociateHomeDataLoading ||
             state is AssociateHomeDataInitial) {
-          return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
+          return const _CommunityHomeSkeleton();
         }
         if (state is AssociateHomeDataError) {
           return Scaffold(
@@ -282,6 +282,35 @@ class _CommunityHomeView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Shimmer placeholder in the shape of the portal (header, membership card,
+/// sections) shown while it loads, instead of a full-screen spinner.
+class _CommunityHomeSkeleton extends StatelessWidget {
+  const _CommunityHomeSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(leading: const BackButton(), elevation: 0),
+      body: ShimmerEffect(
+        child: ListView(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: [
+            const Skeleton(height: 160, borderRadius: 16),
+            const SizedBox(height: 16),
+            const Skeleton(height: 110, borderRadius: 16),
+            const SizedBox(height: 24),
+            for (var i = 0; i < 4; i++) ...[
+              const Skeleton(height: 56, borderRadius: 12),
+              const SizedBox(height: 12),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
