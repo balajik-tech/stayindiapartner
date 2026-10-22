@@ -1,4 +1,3 @@
-```bash
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -116,4 +115,3 @@ case "$ARTIFACT" in
     printf 'IPA:        build/ios/ipa/*.ipa\n'
     ;;
 esac
-```
