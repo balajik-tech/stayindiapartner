@@ -12,6 +12,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/services/token_storage.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import '../cubit/auth_cubit.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/complete_profile_usecase.dart';
@@ -46,6 +47,28 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
   // If AppColors already exposes an orange/accent color, swap this out for that instead.
   static const Color _accentOrange = Color(0xFFE8763C);
 
+  static const int _maxNameLength = 50;
+
+  // Letters in any script (plus their combining marks, needed for Indic
+  // names), spaces, and the punctuation names use: . ' -
+  // Emojis, digits and other symbols are rejected.
+  static final RegExp _nameChar = RegExp(r"[\p{L}\p{M} .'-]", unicode: true);
+  static final RegExp _hasLetter = RegExp(r'\p{L}', unicode: true);
+
+  late final List<TextInputFormatter> _nameFormatters = [
+    FilteringTextInputFormatter.allow(_nameChar),
+    TextInputFormatter.withFunction((oldValue, newValue) {
+      if (newValue.text.characters.length > _maxNameLength) {
+        AppToast.show(
+          context,
+          'Name can have at most $_maxNameLength characters.',
+        );
+      }
+      return _nameLengthLimit.formatEditUpdate(oldValue, newValue);
+    }),
+  ];
+  final _nameLengthLimit = LengthLimitingTextInputFormatter(_maxNameLength);
+
   @override
   void initState() {
     super.initState();
@@ -72,9 +95,91 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _showImageSourcePicker() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_camera_rounded,
+                  color: AppColors.primaryBlue,
+                ),
+                title: Text('Take a photo', style: GoogleFonts.outfit()),
+                onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_library_rounded,
+                  color: AppColors.primaryBlue,
+                ),
+                title: Text('Choose from gallery', style: GoogleFonts.outfit()),
+                onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (source != null) await _pickImage(source);
+  }
+
+  /// Shown when the user has denied camera/photo access. The OS only shows
+  /// its own permission prompt once, so after a denial we point to Settings.
+  Future<void> _showPermissionDeniedDialog(ImageSource source) {
+    final what = source == ImageSource.camera ? 'camera' : 'photos';
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          'Allow $what access',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Stay India Partner needs $what access to set your profile photo. '
+          'Please allow it in Settings.',
+          style: GoogleFonts.outfit(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Not now', style: GoogleFonts.outfit()),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Geolocator.openAppSettings();
+            },
+            child: Text('Open Settings', style: GoogleFonts.outfit()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile;
+    try {
+      // Triggers the system permission prompt the first time.
+      pickedFile = await picker.pickImage(source: source);
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (e.code.contains('access_denied')) {
+        await _showPermissionDeniedDialog(source);
+      } else {
+        AppToast.show(context, 'Could not open the ${source.name}.');
+      }
+      return;
+    }
 
     if (pickedFile != null) {
       HapticFeedback.mediumImpact();
@@ -147,9 +252,13 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     // street.isEmpty
     ) {
       HapticFeedback.vibrate();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
-      );
+      AppToast.show(context, 'Please fill all required fields');
+      return;
+    }
+
+    if (!_hasLetter.hasMatch(fullName)) {
+      HapticFeedback.vibrate();
+      AppToast.show(context, 'Please enter a valid name.');
       return;
     }
 
@@ -186,16 +295,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message, style: GoogleFonts.outfit()),
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.red.shade400,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-            ),
-          );
+          AppToast.show(context, state.message);
         }
       },
       child: Scaffold(
@@ -330,7 +430,7 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
       child: Column(
         children: [
           BouncingWrapper(
-            onTap: _pickImage,
+            onTap: _showImageSourcePicker,
             child: Stack(
               children: [
                 Container(
@@ -394,11 +494,19 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
                     //     ),
                     //   ],
                     // ),
-                    child: Image.asset(
-                      'assets/images/cameraicon.png',
-                      width: 24.sp,
-                      height: 24.sp,
-                      fit: BoxFit.contain,
+                    // Vector icon instead of the 24x24 cameraicon.png, which
+                    // looked blurry when scaled up on high-density screens.
+                    width: 26.sp,
+                    height: 26.sp,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBlue,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: Icon(
+                      Icons.photo_camera_rounded,
+                      size: 14.sp,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -428,6 +536,8 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
           hintText: 'e.g. Rahul Sharma',
           // Latest design uses an orange outline on the fields.
           borderColor: _accentOrange,
+          keyboardType: TextInputType.name,
+          inputFormatters: _nameFormatters,
         ),
         SizedBox(height: 24.h),
         AuthTextField(

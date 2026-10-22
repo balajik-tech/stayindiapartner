@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
@@ -19,6 +20,7 @@ class AuthTextField extends StatefulWidget {
   // Optional override for the field's outline color (defaults to the
   // existing grey/blue behaviour when not provided) and label accent.
   final Color? borderColor;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AuthTextField({
     super.key,
@@ -33,6 +35,7 @@ class AuthTextField extends StatefulWidget {
     this.textInputAction,
     this.onSubmitted,
     this.borderColor,
+    this.inputFormatters,
   });
 
   @override
@@ -104,6 +107,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
             keyboardType: widget.keyboardType,
             maxLines: widget.maxLines,
             obscureText: widget.obscureText,
+            inputFormatters: widget.inputFormatters,
             focusNode: _internalFocusNode,
             textInputAction: widget.textInputAction,
             onSubmitted: widget.onSubmitted,
