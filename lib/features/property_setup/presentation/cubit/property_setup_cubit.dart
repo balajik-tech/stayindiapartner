@@ -217,12 +217,17 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     emit(state.copyWith(pincode: pincode));
   }
 
+  static const int maxPropertyImageBytes = 5 * 1024 * 1024;
+
   Future<void> pickCategoryImage(
     String category, {
     ImageSource source = ImageSource.gallery,
     int maxImages = 5,
   }) async {
     try {
+      // Clear the previous error so the same message can be shown again
+      // (an identical state would not be emitted).
+      if (state.error != null) emit(state.copyWith());
       final currentMap = Map<String, List<String>>.from(
         state.categorizedImages,
       );
@@ -238,6 +243,16 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
 
       final XFile? pickedFile = await _picker.pickImage(source: source);
       if (pickedFile != null) {
+        // Check size before the quality check, which would otherwise reject
+        // an oversized photo as "blurry".
+        if (await pickedFile.length() > maxPropertyImageBytes) {
+          emit(
+            state.copyWith(
+              error: 'This image is larger than 5 MB. Please choose a smaller image.',
+            ),
+          );
+          return;
+        }
         emit(state.copyWith(isSaving: true));
         final qualityError = await QualityCheckerService.checkImageQuality(
           pickedFile.path,

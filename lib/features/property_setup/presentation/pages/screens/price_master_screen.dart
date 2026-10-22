@@ -579,42 +579,15 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                 final dailyRent =
                     double.tryParse(dailyRentController.text) ?? 0.0;
 
-                if (rent <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Please enter a valid rent amount'.tr()),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                if (deposit <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Please enter a valid deposit amount'.tr()),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                if (maintenance <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Please enter a valid maintenance amount'.tr()),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                if (dailyRent <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Please enter a valid daily rent amount'.tr()),
-                      backgroundColor: Colors.red,
-                    ),
+                // Apply whichever amounts were entered; only an entirely
+                // empty form is rejected.
+                if (rent <= 0 &&
+                    deposit <= 0 &&
+                    maintenance <= 0 &&
+                    dailyRent <= 0) {
+                  AppToast.show(
+                    context,
+                    'Enter at least one amount to apply to all rooms.',
                   );
                   return;
                 }
@@ -645,12 +618,7 @@ class _PriceMasterScreenState extends State<PriceMasterScreen> {
                 }
 
                 Navigator.pop(dialogContext);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('bulk_prices_applied'.tr()),
-                    backgroundColor: const Color(0xFF10B981),
-                  ),
-                );
+                AppToast.show(context, 'bulk_prices_applied'.tr());
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF16539B),
@@ -846,6 +814,12 @@ class _DialogTextField extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
           hintText: hint,
+          // Light so the example amount isn't mistaken for an entered value.
+          hintStyle: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFFCBD5E1),
+          ),
           filled: false,
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
