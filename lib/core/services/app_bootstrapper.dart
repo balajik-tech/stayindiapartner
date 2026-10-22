@@ -18,6 +18,7 @@ import '../../firebase_options.dart';
 import '../../injection_container.dart' as di;
 import '../constants/api_constants.dart';
 import '../services/token_storage.dart';
+import '../widgets/app_scaffold_messenger.dart';
 import '../services/cache_service.dart';
 import '../services/notification_service.dart';
 import '../services/app_config_service.dart';
@@ -364,10 +365,12 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                               data: MediaQuery.of(context).copyWith(
                                 textScaler: const TextScaler.linear(1.0),
                               ),
-                              child: SafeArea(
-                                top: false,
-                                bottom: true,
-                                child: child!,
+                              child: AppScaffoldMessenger(
+                                child: SafeArea(
+                                  top: false,
+                                  bottom: true,
+                                  child: child!,
+                                ),
                               ),
                             );
                           },
