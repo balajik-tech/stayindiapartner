@@ -542,7 +542,19 @@ class PropertySetupCubit extends HydratedCubit<PropertySetupState> {
     syncRoomCategoriesAndPricing();
   }
 
+  /// Highest sharing (beds per room) a room can have. Beds are named A, B, C…
+  /// and an unbounded value used to build millions of beds and crash the app.
+  static const int maxSharing = 10;
+
   void updateRoomSharing(int index, int sharing) {
+    if (sharing < 1 || sharing > maxSharing) {
+      emit(
+        state.copyWith(
+          error: 'Sharing must be between 1 and $maxSharing beds per room.',
+        ),
+      );
+      return;
+    }
     final rooms = List<Map<String, dynamic>>.from(
       state.rooms.map((r) => Map<String, dynamic>.from(r)),
     );

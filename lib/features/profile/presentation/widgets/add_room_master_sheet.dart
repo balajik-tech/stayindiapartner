@@ -7,6 +7,8 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/room_detail.dart';
 import 'package:stayindia_owner/core/error/app_exceptions.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 
 class AddRoomMasterSheet extends StatefulWidget {
   final RoomDetail? room;
@@ -190,6 +192,9 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
                                   if (val == 'Custom...') {
                                     final customVal =
                                         await _showCustomSharingDialog(context);
+                                    if (!_isValidCustomSharing(customVal)) {
+                                      return;
+                                    }
                                     if (customVal != null && customVal > 0) {
                                       setState(() {
                                         _selectedSharingType =
@@ -547,6 +552,20 @@ class _AddRoomMasterSheetState extends State<AddRoomMasterSheet> {
   String _translate(String key, String fallback) {
     final val = key.tr();
     return val == key ? fallback : val;
+  }
+
+  /// Rejects out-of-range custom sharing (an unbounded value used to build
+  /// that many beds and crash the app). Null means the dialog was cancelled.
+  bool _isValidCustomSharing(int? value) {
+    if (value == null) return true;
+    if (value < 1 || value > PropertySetupCubit.maxSharing) {
+      AppToast.show(
+        context,
+        'Enter a sharing number between 1 and ${PropertySetupCubit.maxSharing}.',
+      );
+      return false;
+    }
+    return true;
   }
 
   Future<int?> _showCustomSharingDialog(BuildContext context) async {

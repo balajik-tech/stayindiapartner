@@ -548,10 +548,12 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
 
   Future<int?> _showCustomSharingDialog(BuildContext context) async {
     final controller = TextEditingController();
+    String? errorText;
     return showDialog<int>(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
@@ -578,11 +580,18 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               TextField(
                 controller: controller,
                 keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(2),
+                ],
                 autofocus: true,
+                onChanged: (_) {
+                  if (errorText != null) setDialogState(() => errorText = null);
+                },
                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
                   hintText: 'e.g. 6',
+                  errorText: errorText,
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
                   contentPadding: EdgeInsets.symmetric(
@@ -619,6 +628,15 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
             ElevatedButton(
               onPressed: () {
                 final val = int.tryParse(controller.text);
+                if (val == null ||
+                    val < 1 ||
+                    val > PropertySetupCubit.maxSharing) {
+                  setDialogState(
+                    () => errorText =
+                        'Enter a number between 1 and ${PropertySetupCubit.maxSharing}',
+                  );
+                  return;
+                }
                 Navigator.pop(context, val);
               },
               style: ElevatedButton.styleFrom(
@@ -634,6 +652,7 @@ class _RoomConfigScreenState extends State<RoomConfigScreen> {
               ),
             ),
           ],
+          ),
         );
       },
     );
