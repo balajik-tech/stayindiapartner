@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +11,9 @@ import 'package:stayindia_owner/features/finance/presentation/cubit/payment_repo
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:stayindia_owner/core/utils/error_helper.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
+import 'package:stayindia_owner/features/property_setup/presentation/widgets/max_input_text_formatter.dart';
 
 class RecordPaymentBottomSheetNew extends StatefulWidget {
   final List<TenantEntity> tenants;
@@ -46,6 +50,41 @@ class _RecordPaymentBottomSheetNewState
   String _selectedMode = 'Cash';
   bool _sendWhatsapp = true;
   File? _screenshot;
+  bool _isSaving = false;
+
+  static const int _maxAmount = 500000;
+  static const int _maxReferenceLength = 22;
+
+  late final List<TextInputFormatter> _amountFormatters = [
+    FilteringTextInputFormatter.digitsOnly,
+    MaxValueTextInputFormatter(
+      _maxAmount,
+      onExceeded: () => AppToast.show(
+        context,
+        'Maximum amount allowed is ₹5,00,000.',
+      ),
+    ),
+  ];
+
+  // UTR / reference numbers are letters and digits only (UPI UTRs are 12
+  // digits; bank references run up to 22 characters).
+  late final List<TextInputFormatter> _referenceFormatters = [
+    TextInputFormatter.withFunction((oldValue, newValue) {
+      if (RegExp(r'[^A-Za-z0-9]').hasMatch(newValue.text)) {
+        AppToast.show(
+          context,
+          'UTR / reference number can only contain letters and numbers.',
+        );
+        return oldValue;
+      }
+      return newValue.copyWith(text: newValue.text.toUpperCase());
+    }),
+    LengthLimitingTextInputFormatter(_maxReferenceLength),
+  ];
+
+  /// Save stays disabled until a tenant is chosen and an amount entered.
+  bool get _canSave =>
+      !_isSaving && _selectedTenant != null && _totalAmount > 0;
 
   @override
   void dispose() {
@@ -89,17 +128,15 @@ class _RecordPaymentBottomSheetNewState
     }
   }
 
-  void _savePayment() {
-    if (_selectedTenant == null || _totalAmount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a tenant and enter amount'),
-        ),
-      );
-      return;
-    }
+  Future<void> _savePayment() async {
+    if (!_canSave) return;
+    FocusScope.of(context).unfocus();
+    setState(() => _isSaving = true);
 
-    context.read<PaymentReportCubit>().submitPayment(
+    try {
+      // Wait for the result: previously the sheet closed immediately and a
+      // failure was never shown.
+      await context.read<PaymentReportCubit>().submitPayment(
       tenantId: _selectedTenant!.id,
       hostelId: _selectedTenant!.hostelId,
       bookingId: _selectedTenant!.bookingId,
@@ -118,7 +155,24 @@ class _RecordPaymentBottomSheetNewState
       screenshotPath: _screenshot?.path,
       sendWhatsapp: _sendWhatsapp,
     );
-    Navigator.pop(context);
+      if (!mounted) return;
+      AppToast.show(context, 'Payment recorded successfully.');
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      AppToast.show(context, ErrorHelper.toFriendlyMessage(e));
+    }
+  }
+
+  Future<void> _copyReference() async {
+    final reference = _referenceController.text.trim();
+    if (reference.isEmpty) {
+      AppToast.show(context, 'Enter the UTR / reference number first.');
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: reference));
+    if (mounted) AppToast.show(context, 'UTR / reference number copied.');
   }
 
   @override
@@ -190,6 +244,32 @@ class _RecordPaymentBottomSheetNewState
   }
 
   Widget _buildTenantSelector() {
+    if (widget.tenants.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline_rounded, color: AppColors.grayColor3),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                'No tenants found. Add a tenant to record a payment.',
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  color: AppColors.grayColor3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
@@ -295,6 +375,7 @@ class _RecordPaymentBottomSheetNewState
                 child: TextField(
                   controller: _activeController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: _amountFormatters,
                   onChanged: (val) => setState(() {}),
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
@@ -443,13 +524,24 @@ class _RecordPaymentBottomSheetNewState
               Expanded(
                 child: TextField(
                   controller: _referenceController,
+                  inputFormatters: _referenceFormatters,
+                  textCapitalization: TextCapitalization.characters,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Enter UTR number',
                   ),
                 ),
               ),
-              Icon(Icons.copy_rounded, size: 18.sp, color: AppColors.greyText),
+              IconButton(
+                tooltip: 'Copy',
+                visualDensity: VisualDensity.compact,
+                onPressed: _copyReference,
+                icon: Icon(
+                  Icons.copy_rounded,
+                  size: 18.sp,
+                  color: AppColors.greyText,
+                ),
+              ),
             ],
           ),
         ),
@@ -634,7 +726,7 @@ class _RecordPaymentBottomSheetNewState
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _savePayment,
+        onPressed: _canSave ? _savePayment : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryBlue,
           foregroundColor: Colors.white,
@@ -644,13 +736,22 @@ class _RecordPaymentBottomSheetNewState
           ),
           elevation: 0,
         ),
-        child: Text(
-          'Save payment',
-          style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        child: _isSaving
+            ? SizedBox(
+                width: 20.r,
+                height: 20.r,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                'Save payment',
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
       ),
     );
   }

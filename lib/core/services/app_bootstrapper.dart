@@ -366,10 +366,17 @@ class _AppBootstrapperState extends State<AppBootstrapper>
                                 textScaler: const TextScaler.linear(1.0),
                               ),
                               child: AppScaffoldMessenger(
-                                child: SafeArea(
-                                  top: false,
-                                  bottom: true,
-                                  child: child!,
+                                // Tapping anywhere that isn't a button or an
+                                // input closes the keyboard, on every screen.
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  onTap: () => FocusManager.instance.primaryFocus
+                                      ?.unfocus(),
+                                  child: SafeArea(
+                                    top: false,
+                                    bottom: true,
+                                    child: child!,
+                                  ),
                                 ),
                               ),
                             );
