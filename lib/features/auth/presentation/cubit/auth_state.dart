@@ -62,6 +62,21 @@ class AuthError extends AuthState {
   List<Object?> get props => [message];
 }
 
+/// Too many OTP requests/attempts; OTP login is blocked until [lockedUntil].
+class AuthOtpLimitReached extends AuthError {
+  final DateTime lockedUntil;
+
+  AuthOtpLimitReached({required this.lockedUntil})
+    : super(message: otpLimitMessage(lockedUntil));
+
+  static String otpLimitMessage(DateTime lockedUntil) =>
+      "You've exceeded the OTP attempt limit. Please try again after "
+      '${DateFormat.jm().format(lockedUntil)}.';
+
+  @override
+  List<Object?> get props => [message, lockedUntil];
+}
+
 class AuthGoogleNeedsPhone extends AuthState {
   final String email;
   final String firstName;

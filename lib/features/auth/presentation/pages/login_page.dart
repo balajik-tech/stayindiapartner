@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -14,6 +15,7 @@ import 'package:smart_auth/smart_auth.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../cubit/auth_cubit.dart';
@@ -55,6 +57,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   bool _isFetchingSimHint = false;
 
   bool _isTermsAccepted = false;
+  bool _isPhoneValid = false;
+
+  // Set while OTP login is blocked after too many attempts.
+  DateTime? _otpLockedUntil;
+  Timer? _otpLockTimer;
 
   final SmartAuth _smartAuth = SmartAuth.instance;
   String? _appSignature;
@@ -72,12 +79,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     _passwordFocusNode.addListener(() {
       setState(() => _isPasswordFocused = _passwordFocusNode.hasFocus);
     });
+    _phoneController.addListener(_onPhoneChanged);
 
     setState(() {
       _isStaffLogin = widget.isStaffLogin ?? false;
     });
     _onPhoneFieldTap();
-    _listenForSmsOtp();
+    _loadAppSignature();
+    _loadOtpLock();
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -101,8 +110,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _smartAuth.removeSmsRetrieverApiListener();
-    _smartAuth.removeUserConsentApiListener();
+    _otpLockTimer?.cancel();
     _phoneController.dispose();
     _phoneFocusNode.dispose();
     _passwordController.dispose();
@@ -117,10 +125,37 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       .replaceAll('-', '')
       .trim();
 
+  bool get _isOtpLocked => _otpLockedUntil != null;
+
+  /// Send OTP stays disabled until the number is a valid Indian mobile
+  /// number, the terms are accepted and OTP login isn't locked.
+  bool get _canSubmit =>
+      _isTermsAccepted && _isPhoneValid && (_isStaffLogin || !_isOtpLocked);
+
+  void _onPhoneChanged() {
+    final isValid = RegExp(r'^[6-9]\d{9}$').hasMatch(_cleanPhone);
+    if (isValid != _isPhoneValid) setState(() => _isPhoneValid = isValid);
+  }
+
+  Future<void> _loadOtpLock() async {
+    final lockedUntil = await context.read<AuthCubit>().otpLockedUntil();
+    if (mounted) _setOtpLock(lockedUntil);
+  }
+
+  void _setOtpLock(DateTime? lockedUntil) {
+    _otpLockTimer?.cancel();
+    setState(() => _otpLockedUntil = lockedUntil);
+    if (lockedUntil == null) return;
+    _otpLockTimer = Timer(lockedUntil.difference(DateTime.now()), () {
+      if (mounted) setState(() => _otpLockedUntil = null);
+    });
+  }
+
   void _onSendOtp(BuildContext context) {
+    if (!_canSubmit) return;
     final phone = _cleanPhone;
     if (phone.length < 10) {
-      _showSnackBar(context, 'Please enter a valid 10-digit mobile number.');
+      _showToast(context, 'Please enter a valid 10-digit mobile number.');
       return;
     }
     context.read<AuthCubit>().sendOtp(
@@ -134,28 +169,18 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     final phone = _cleanPhone;
     final password = _passwordController.text.trim();
     if (phone.length < 10) {
-      _showSnackBar(context, 'Please enter a valid 10-digit mobile number.');
+      _showToast(context, 'Please enter a valid 10-digit mobile number.');
       return;
     }
     if (password.isEmpty) {
-      _showSnackBar(context, 'Please enter your staff password.');
+      _showToast(context, 'Please enter your staff password.');
       return;
     }
     context.read<AuthCubit>().staffLogin(phone, password);
   }
 
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: GoogleFonts.outfit()),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-        ),
-      );
+  void _showToast(BuildContext context, String message) {
+    AppToast.show(context, message);
   }
 
   // ==========================================================================
@@ -209,7 +234,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     } on PlatformException catch (e) {
       // debugPrint('[SIM] Phone number hint failed: ${e.code} — ${e.message}');
       if (mounted) {
-        _showSnackBar(
+        _showToast(
           context,
           'Could not detect a SIM number. Please enter it manually.',
         );
@@ -255,7 +280,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 
 
-  Future<void> _listenForSmsOtp() async {
+  /// Only fetches the app signature (sent as `hashid` with the OTP request).
+  /// The OTP page owns SMS listening: smart_auth keeps a single listener, so
+  /// listening here as well could swallow the OTP SMS and break auto-fill.
+  Future<void> _loadAppSignature() async {
     final signatureResult = await _smartAuth.getAppSignature();
 
     final signature =
@@ -263,54 +291,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         ? signatureResult.requireData
         : null;
 
-    debugPrint('====================================');
-    debugPrint('STAY INDIA SMS RETRIEVER');
-    debugPrint('Package: com.stayindia.stayindiauser');
     debugPrint('App Signature: $signature');
-    debugPrint('====================================');
 
     if (mounted) {
       setState(() {
         _appSignature = signature;
       });
-      // if (_appSignature != null && _appSignature!.isNotEmpty) {
-      //   _sendSmsApi();
-      // }
     }
-
-    final result = await _smartAuth.getSmsWithRetrieverApi();
-
-    if (!mounted) return;
-
-    if (result.hasData) {
-      final detectedCode = result.requireData.code;
-
-      debugPrint('Detected OTP: $detectedCode');
-
-      if (detectedCode != null) {
-        _fillOtpFields(detectedCode);
-      }
-    } else {
-      debugPrint('SMS Retriever failed: $result');
-
-      _listenForSmsUserConsent();
-    }
-  }
-
-  Future<void> _listenForSmsUserConsent() async {
-    final result = await _smartAuth.getSmsWithUserConsentApi();
-    if (!mounted) return;
-
-    if (result.hasData) {
-      final detectedCode = result.requireData.code;
-      if (detectedCode != null) {
-
-      }
-    }
-  }
-
-  void _fillOtpFields(String detectedCode) {
-    // Dummy handler on login page
   }
 
   @override
@@ -371,26 +358,48 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             ),
           );
         } else if (state is AuthError) {
-          _showSnackBar(context, state.message);
+          if (state is AuthOtpLimitReached) _setOtpLock(state.lockedUntil);
+          // The OTP page shows its own errors; only alert when this page is
+          // on top, otherwise the same alert shows twice.
+          if (ModalRoute.of(context)?.isCurrent ?? true) {
+            _showToast(context, state.message);
+          }
         }
       },
       builder: (context, state) {
         final isLoading = state is AuthLoading;
         return Scaffold(
           backgroundColor: AppColors.white,
+          // The Dialog below already lifts itself above the keyboard; also
+          // resizing the Scaffold relaid out the whole page every frame.
+          resizeToAvoidBottomInset: false,
           body: Stack(
             children: [
-              LoginOnBoardingScreen(),
-              // Transparent overlay
+              // Static background: isolate it from keyboard insets and
+              // repaints so the blur isn't recomputed while typing.
               Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 8,
-                    sigmaY: 8,
-                  ),
-                  child: Container(
-                    color: Colors.black.withValues(
-                      alpha: 0.50,
+                child: RepaintBoundary(
+                  child: MediaQuery.removeViewInsets(
+                    context: context,
+                    removeBottom: true,
+                    child: Stack(
+                      children: [
+                        const LoginOnBoardingScreen(),
+                        // Transparent overlay
+                        Positioned.fill(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(
+                              sigmaX: 8,
+                              sigmaY: 8,
+                            ),
+                            child: Container(
+                              color: Colors.black.withValues(
+                                alpha: 0.50,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -403,7 +412,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   child: Container(
                     width: double.infinity,
                     constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * .85,
+                      maxHeight: MediaQuery.sizeOf(context).height * .85,
                       maxWidth: 420.w,
                     ),
                     decoration: BoxDecoration(
@@ -562,6 +571,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                     child: TextField(
                                       controller: _phoneController,
                                       focusNode: _phoneFocusNode,
+                                      enabled: _isStaffLogin || !_isOtpLocked,
                                       keyboardType: TextInputType.phone,
                                       maxLength: 10,
                                       inputFormatters: [
@@ -577,7 +587,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                       scrollPadding: EdgeInsets.only(bottom: 150.h),
                                       decoration: InputDecoration(
                                         counterText: '',
-                                        hintText: '(000) 000-0000',
+                                        hintText: 'Enter 10-digit mobile number ',
                                         hintStyle: GoogleFonts.outfit(
                                           color: Colors.grey.shade400,
                                           fontSize: 16.sp,
@@ -697,20 +707,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(8.r),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(8.r),
-                                onTap: isLoading
+                                onTap: isLoading || !_canSubmit
                                     ? null
                                     : () {
-                                  if (!_isTermsAccepted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Please accept Terms and Privacy Policy',
-                                        ),
-                                      ),
-                                    );
-                                    return;
-                                  }
-
                                   _isStaffLogin
                                       ? _onStaffLogin(context)
                                       : _onSendOtp(context);
@@ -720,7 +719,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: _isTermsAccepted
+                                      colors: _canSubmit
                                           ? [
                                         AppColors.inputBoxColor,
                                         AppColors.inputBoxColor,
@@ -733,7 +732,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                       end: Alignment.bottomRight,
                                     ),
                                     borderRadius: BorderRadius.circular(8.r),
-                                    boxShadow: _isTermsAccepted
+                                    boxShadow: _canSubmit
                                         ? [
                                       BoxShadow(
                                         color: AppColors.inputBoxColor.withValues(alpha: 0.35),
@@ -764,6 +763,20 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ),
                               ),
                             ),
+                            if (_isOtpLocked && !_isStaffLogin) ...[
+                              SizedBox(height: 12.h),
+                              Text(
+                                AuthOtpLimitReached.otpLimitMessage(
+                                  _otpLockedUntil!,
+                                ),
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.sosRed,
+                                ),
+                              ),
+                            ],
                             SizedBox(height: 18.h),
 
                             // ---- terms footer ----

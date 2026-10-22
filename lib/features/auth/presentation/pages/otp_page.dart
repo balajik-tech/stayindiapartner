@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,8 +9,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 import 'package:smart_auth/smart_auth.dart';
 import 'package:dio/dio.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 import '../cubit/auth_cubit.dart';
 import '../widgets/auth_widgets.dart';
@@ -62,6 +66,10 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   bool _showConfirmStartFresh = false;
   bool _isRestoring = false;
 
+  // Set while OTP login is blocked after too many attempts.
+  DateTime? _otpLockedUntil;
+  Timer? _otpLockTimer;
+
   final SmartAuth _smartAuth = SmartAuth.instance;
   late String? _currentDevOtp;
   late AnimationController _entranceController;
@@ -73,6 +81,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
     super.initState();
     _currentDevOtp = widget.devOtp;
     _startCountdown();
+    _loadOtpLock();
 
     // Start listening for an incoming SMS containing the OTP, via the
     // Android SMS Retriever API. This requires the app signature hash
@@ -107,6 +116,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _timer?.cancel();
+    _otpLockTimer?.cancel();
     _entranceController.dispose();
     if (Platform.isAndroid) {
       _smartAuth.removeSmsRetrieverApiListener(); // stop the Retriever listener
@@ -140,7 +150,35 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       ? _iosPinController.text.trim()
       : _controllers.map((c) => c.text).join();
 
+  bool get _isOtpLocked => _otpLockedUntil != null;
+
+  Future<void> _loadOtpLock() async {
+    final lockedUntil = await context.read<AuthCubit>().otpLockedUntil();
+    if (mounted) _setOtpLock(lockedUntil);
+  }
+
+  void _setOtpLock(DateTime? lockedUntil) {
+    _otpLockTimer?.cancel();
+    setState(() => _otpLockedUntil = lockedUntil);
+    if (lockedUntil == null) return;
+    _otpLockTimer = Timer(lockedUntil.difference(DateTime.now()), () {
+      if (mounted) setState(() => _otpLockedUntil = null);
+    });
+  }
+
+  void _showToast(String message) => AppToast.show(context, message);
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   Future<void> _listenForSmsOtp() async {
+    // Arm the retriever before anything else so an SMS that arrives quickly
+    // isn't missed while the signature is being read.
+    final smsFuture = _smartAuth.getSmsWithRetrieverApi();
     final signatureResult = await _smartAuth.getAppSignature();
 
     final signature = signatureResult.hasData
@@ -159,7 +197,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       });
     }
 
-    final result = await _smartAuth.getSmsWithRetrieverApi();
+    final result = await smsFuture;
 
     if (!mounted) return;
 
@@ -226,18 +264,14 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
 
   void _onVerify(BuildContext context) {
     if (context.read<AuthCubit>().state is AuthLoading) return;
+    if (_isOtpLocked) {
+      _showToast(AuthOtpLimitReached.otpLimitMessage(_otpLockedUntil!));
+      return;
+    }
     setState(() => _hasError = false);
     if (_otp.length < 6) {
       setState(() => _hasError = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Please enter the 6-digit OTP.',
-            style: GoogleFonts.outfit(),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showToast('Please enter the 6-digit OTP.');
       return;
     }
     context.read<AuthCubit>().verifyOtp(
@@ -251,6 +285,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   }
 
   void _onResend(BuildContext context) {
+    if (_isOtpLocked || context.read<AuthCubit>().state is AuthLoading) return;
     _hasAutoSubmitted = false;
     setState(() => _hasError = false);
     if (Platform.isIOS) {
@@ -262,13 +297,13 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
         c.clear();
       }
       _focusNodes.first.requestFocus();
+      // Re-arm the listener before requesting the new SMS.
+      _listenForSmsOtp();
       context.read<AuthCubit>().resendOtp(
         widget.phone,
         hashId: _appSignature,
         fileType: 2,
       );
-      // Re-arm the listener for the newly sent SMS.
-      _listenForSmsOtp();
     }
   }
 
@@ -304,10 +339,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final isTimerRunning = _countdown > 0;
-    return PopScope(
-      canPop: !isTimerRunning,
-      child: BlocListener<AuthCubit, AuthState>(
+    return BlocListener<AuthCubit, AuthState>(
         listenWhen: (_, current) =>
             current is AuthOtpSent ||
             current is AuthError ||
@@ -320,32 +352,14 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             _startCountdown();
             setState(() => _currentDevOtp = state.devOtp);
             // _sendSmsApi();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'OTP resent successfully.',
-                  style: GoogleFonts.outfit(),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            _showToast('OTP resent successfully.');
           } else if (state is AuthError) {
             _hasAutoSubmitted = false;
             setState(() => _hasError = true);
-            if (!_isRestoring) {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(state.message, style: GoogleFonts.outfit()),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-            }
+            if (state is AuthOtpLimitReached) _setOtpLock(state.lockedUntil);
+            if (!_isRestoring) _showToast(state.message);
           } else if (state is AuthAccountRestored) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Account restored successfully!')),
-            );
+            _showToast('Account restored successfully!');
           }
         },
         child: BlocBuilder<AuthCubit, AuthState>(
@@ -353,9 +367,21 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             final isLoading = state is AuthLoading;
             return Scaffold(
               backgroundColor: AppColors.white,
+              // The Dialog below already lifts itself above the keyboard;
+              // also resizing the Scaffold relaid out the page every frame.
+              resizeToAvoidBottomInset: false,
               body: Stack(
                 children: [
-                  LoginOnBoardingScreen(),
+                  // Static background, isolated from keyboard insets.
+                  Positioned.fill(
+                    child: RepaintBoundary(
+                      child: MediaQuery.removeViewInsets(
+                        context: context,
+                        removeBottom: true,
+                        child: const LoginOnBoardingScreen(),
+                      ),
+                    ),
+                  ),
                   // Transparent overlay
                   Positioned.fill(
                     child: Container(
@@ -375,7 +401,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                       child: Container(
                         width: double.infinity,
                         constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height * .85,
+                          maxHeight: MediaQuery.sizeOf(context).height * .85,
                           maxWidth: 420.w,
                         ),
                         decoration: BoxDecoration(
@@ -409,7 +435,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             );
           },
         ),
-      ),
     );
   }
 
@@ -451,7 +476,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       );
     }
 
-    final isTimerRunning = _countdown > 0;
+    final canEnterOtp = !isLoading && !_isOtpLocked;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -461,16 +486,14 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
         Align(
           alignment: Alignment.centerRight,
           child: GestureDetector(
-            onTap: isTimerRunning ? null : () => Navigator.of(context).pop(),
+            onTap: () => Navigator.of(context).pop(),
             behavior: HitTestBehavior.opaque,
             child: Padding(
-              padding: EdgeInsets.all(4.r),
+              padding: EdgeInsets.all(8.r),
               child: Icon(
                 Icons.close_rounded,
                 size: 22.sp,
-                color: isTimerRunning
-                    ? AppColors.primaryBlue.withValues(alpha: 0.3)
-                    : AppColors.primaryBlue,
+                color: AppColors.primaryBlue,
               ),
             ),
           ),
@@ -526,12 +549,27 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             : _OtpInputGrid(
                 controllers: _controllers,
                 focusNodes: _focusNodes,
+                enabled: canEnterOtp,
                 onOtpPasted: _fillOtpFields,
               ),
 
         SizedBox(height: 4.h),
-        // ---- phone field ----
-        _ResendRow(countdown: _countdown, onResend: () => _onResend(context)),
+        // ---- resend / lockout message ----
+        if (_isOtpLocked)
+          Padding(
+            padding: EdgeInsets.only(top: 12.h, bottom: 4.h),
+            child: Text(
+              AuthOtpLimitReached.otpLimitMessage(_otpLockedUntil!),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.sosRed,
+              ),
+            ),
+          )
+        else
+          _ResendRow(countdown: _countdown, onResend: () => _onResend(context)),
 
         // ---- password field (staff login only) ----
         SizedBox(height: 8.h),
@@ -542,13 +580,15 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(8.r),
           child: InkWell(
             borderRadius: BorderRadius.circular(8.r),
-            onTap: isLoading ? null : () => _onVerify(context),
+            onTap: canEnterOtp ? () => _onVerify(context) : null,
             child: Container(
               height: 52.h,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.inputBoxColor, AppColors.inputBoxColor],
+                  colors: _isOtpLocked
+                      ? [Colors.grey.shade400, Colors.grey.shade400]
+                      : [AppColors.inputBoxColor, AppColors.inputBoxColor],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -598,6 +638,8 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                     fontWeight: FontWeight.bold,
                     decoration: TextDecoration.underline,
                   ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => _openUrl(ApiConstants.TERMS_AND_CONDITIONS),
                 ),
                 const TextSpan(text: ' & '),
                 TextSpan(
@@ -607,6 +649,8 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                     fontWeight: FontWeight.bold,
                     decoration: TextDecoration.underline,
                   ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => _openUrl(ApiConstants.TERMS_AND_CONDITIONS),
                 ),
               ],
             ),
@@ -735,7 +779,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             controller: _iosPinController,
             focusNode: _iosFocusNode,
             autofocus: true,
-            enabled: !isLoading,
+            enabled: !isLoading && !_isOtpLocked,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             autofillHints: const [AutofillHints.oneTimeCode],
@@ -805,11 +849,13 @@ class _HeroPatternPainter extends CustomPainter {
 class _OtpInputGrid extends StatefulWidget {
   final List<TextEditingController> controllers;
   final List<FocusNode> focusNodes;
+  final bool enabled;
   final Function(String)? onOtpPasted;
 
   const _OtpInputGrid({
     required this.controllers,
     required this.focusNodes,
+    this.enabled = true,
     this.onOtpPasted,
   });
 
@@ -880,6 +926,7 @@ class _OtpInputGridState extends State<_OtpInputGrid> {
                 child: TextField(
                   controller: widget.controllers[i],
                   focusNode: widget.focusNodes[i],
+                  enabled: widget.enabled,
                   textAlign: TextAlign.center,
                   textAlignVertical: TextAlignVertical.center,
                   keyboardType: TextInputType.number,

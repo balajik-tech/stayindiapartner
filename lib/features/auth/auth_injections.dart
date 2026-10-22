@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 
 import 'package:stayindia_owner/core/services/token_storage.dart';
 import 'data/datasources/auth_remote_datasource.dart';
+import 'data/datasources/otp_attempt_local_datasource.dart';
 import 'data/repositories/auth_repository_impl.dart';
 import 'domain/repositories/auth_repository.dart';
 import 'domain/usecases/complete_profile_usecase.dart';
@@ -29,6 +30,7 @@ void registerAuthFeature(GetIt sl) {
       repository: sl(),
       notificationService: sl(),
       cacheService: sl(),
+      otpAttemptLocalDataSource: sl(),
     ),
   );
 
@@ -50,5 +52,9 @@ void registerAuthFeature(GetIt sl) {
       dio: sl<Dio>(),
       tokenStorage: sl<TokenStorage>(),
     ),
+  );
+
+  sl.registerLazySingleton<OtpAttemptLocalDataSource>(
+    () => OtpAttemptLocalDataSourceImpl(),
   );
 }

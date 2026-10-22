@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:stayindia_owner/core/utils/image_utils.dart';
 import 'package:stayindia_owner/core/services/app_config_service.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:stayindia_owner/features/auth/data/datasources/otp_attempt_local_datasource.dart';
 import 'package:stayindia_owner/features/auth/domain/entities/owner_entity.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/complete_profile_usecase.dart';
 import 'package:stayindia_owner/features/auth/domain/usecases/get_current_owner_usecase.dart';
@@ -40,6 +41,7 @@ class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _repository;
   final NotificationService _notificationService;
   final CacheService _cacheService;
+  final OtpAttemptLocalDataSource _otpAttempts;
 
   AuthCubit({
     required RequestOtpUseCase requestOtpUseCase,
@@ -53,6 +55,7 @@ class AuthCubit extends Cubit<AuthState> {
     required AuthRepository repository,
     required NotificationService notificationService,
     required CacheService cacheService,
+    required OtpAttemptLocalDataSource otpAttemptLocalDataSource,
   }) : _requestOtp = requestOtpUseCase,
        _verifyOtp = verifyOtpUseCase,
        _getCurrentOwner = getCurrentOwnerUseCase,
@@ -64,6 +67,7 @@ class AuthCubit extends Cubit<AuthState> {
        _repository = repository,
        _notificationService = notificationService,
        _cacheService = cacheService,
+       _otpAttempts = otpAttemptLocalDataSource,
        super(AuthInitial()) {
     AppLogger.debug('AuthCubit initialized with ${_cacheService.runtimeType}');
   }
@@ -133,27 +137,64 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  /// End of the current OTP lockout, or null when OTP login is allowed.
+  Future<DateTime?> otpLockedUntil() => _otpAttempts.getLockedUntil();
+
   Future<void> sendOtp(String phone, {String? hashId, int? fileType}) async {
     emit(AuthLoading());
     try {
+      final lockedUntil = await _otpAttempts.registerRequest();
+      if (lockedUntil != null) {
+        emit(AuthOtpLimitReached(lockedUntil: lockedUntil));
+        return;
+      }
       final devOtp = await _requestOtp(phone, hashId: hashId, fileType: fileType);
       emit(AuthOtpSent(phone: phone, devOtp: devOtp));
       AppLogger.info('OTP sent to $phone');
     } catch (e) {
       AppLogger.error('sendOtp failed', e);
-      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+      await _emitOtpFailure(e);
     }
   }
 
   Future<void> resendOtp(String phone, {String? hashId, int? fileType}) async {
     emit(AuthLoading());
     try {
+      final lockedUntil = await _otpAttempts.registerRequest();
+      if (lockedUntil != null) {
+        emit(AuthOtpLimitReached(lockedUntil: lockedUntil));
+        return;
+      }
       final devOtp = await _requestOtp(phone, hashId: hashId, fileType: fileType);
       emit(AuthOtpSent(phone: phone, devOtp: devOtp, isResend: true));
     } catch (e) {
       AppLogger.error('resendOtp failed', e);
-      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+      await _emitOtpFailure(e);
     }
+  }
+
+  /// Emits [AuthOtpLimitReached] (and persists the lockout) when the server
+  /// rejected the OTP call for too many attempts, otherwise [AuthError].
+  Future<void> _emitOtpFailure(Object e) async {
+    if (!_isOtpRateLimited(e)) {
+      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+      return;
+    }
+    final lockedUntil = await _otpAttempts.lock(duration: _retryAfter(e));
+    emit(AuthOtpLimitReached(lockedUntil: lockedUntil));
+  }
+
+  bool _isOtpRateLimited(Object e) {
+    if (e is DioException && e.response?.statusCode == 429) return true;
+    return ErrorHelper.toFriendlyMessage(e).toLowerCase().contains('too many');
+  }
+
+  Duration? _retryAfter(Object e) {
+    if (e is! DioException) return null;
+    final seconds = int.tryParse(
+      e.response?.headers.value('retry-after') ?? '',
+    );
+    return seconds != null && seconds > 0 ? Duration(seconds: seconds) : null;
   }
 
   Future<void> verifyOtp(
@@ -166,6 +207,11 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
+      final lockedUntil = await _otpAttempts.getLockedUntil();
+      if (lockedUntil != null) {
+        emit(AuthOtpLimitReached(lockedUntil: lockedUntil));
+        return;
+      }
       final result = await _verifyOtp(
         phone,
         otp,
@@ -177,6 +223,7 @@ class AuthCubit extends Cubit<AuthState> {
       AppLogger.info(
         'AuthCubit: OTP verified for ${result.owner.id}. isNewUser: ${result.isNewUser}, isProfileComplete: ${result.owner.isProfileComplete}',
       );
+      await _otpAttempts.reset();
 
       if (result.owner.deactivatedOn != null) {
         final deactivatedDate = result.owner.deactivatedOn!;
@@ -214,7 +261,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
     } catch (e) {
       AppLogger.error('verifyOtp failed', e);
-      emit(AuthError(message: ErrorHelper.toFriendlyMessage(e)));
+      await _emitOtpFailure(e);
     }
   }
 
