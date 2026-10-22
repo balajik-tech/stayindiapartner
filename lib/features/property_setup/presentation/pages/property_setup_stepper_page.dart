@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/room_cubit.dart';
@@ -29,6 +30,13 @@ class PropertySetupStepperPage extends StatefulWidget {
 }
 
 class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
+  // Indian PIN codes are 6 digits and never start with 0.
+  static final RegExp _pincodePattern = RegExp(r'^[1-9][0-9]{5}$');
+  // GSTIN: state code, PAN, entity number, 'Z', checksum.
+  static final RegExp _gstPattern = RegExp(
+    r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$',
+  );
+
   late final PageController _pageController;
   late final PropertySetupCubit _propertySetupCubit;
 
@@ -82,12 +90,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                 previous.error != current.error,
             listener: (context, state) {
               if (state.error != null && state.error!.isNotEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.error!),
-                    backgroundColor: Colors.redAccent,
-                  ),
-                );
+                AppToast.show(context, state.error!);
               }
               if (state.currentStep < totalSteps + 1) {
                 _pageController.animateToPage(
@@ -395,28 +398,23 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                                   error = 'detailed_address_hint'.tr();
                                 } else if (s.area.isEmpty || s.city.isEmpty || s.state.isEmpty || s.pincode.isEmpty) {
                                   error = 'validation_error'.tr();
+                                } else if (!_pincodePattern.hasMatch(s.pincode.trim())) {
+                                  error = 'Please enter a valid 6-digit pincode.';
+                                } else if (s.gstNumber.trim().isNotEmpty &&
+                                    !_gstPattern.hasMatch(s.gstNumber.trim())) {
+                                  error = 'Please enter a valid 15-character GST number (e.g. 29ABCDE1234F1Z5).';
                                 } else if (exteriorImages.isEmpty) {
                                   error = 'err_exterior_image_req'.tr();
                                 }
 
                                 if (error != null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(error),
-                                      backgroundColor: Colors.redAccent,
-                                    ),
-                                  );
+                                  AppToast.show(context, error);
                                 } else {
                                   cubit.nextStep();
                                 }
                               } else if (state.currentStep == 1) {
                                 if (state.roomCategories.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('err_room_type_req'.tr()),
-                                      backgroundColor: Colors.redAccent,
-                                    ),
-                                  );
+                                  AppToast.show(context, 'err_room_type_req'.tr());
                                 } else {
                                   context.read<PropertySetupCubit>().nextStep();
                                 }
@@ -425,12 +423,7 @@ class _PropertySetupStepperPageState extends State<PropertySetupStepperPage> {
                                     .read<PropertySetupCubit>()
                                     .totalRooms;
                                 if (totalRooms == 0) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('err_room_req'.tr()),
-                                      backgroundColor: Colors.redAccent,
-                                    ),
-                                  );
+                                  AppToast.show(context, 'err_room_req'.tr());
                                 } else {
                                   context.read<PropertySetupCubit>().nextStep();
                                 }

@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import 'package:stayindia_owner/core/utils/text_utils.dart';
+import 'package:stayindia_owner/core/widgets/app_toast.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 import 'geofence_intro_screen.dart';
@@ -21,6 +22,40 @@ class BuildingIdentityScreen extends StatefulWidget {
 }
 
 class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
+  static const int maxPropertyImages = 10;
+  static const int maxPropertyNameLength = 100;
+
+  late final _nameLengthLimit = LengthLimitingTextInputFormatter(
+    maxPropertyNameLength,
+  );
+
+  late final List<TextInputFormatter> _nameFormatters = [
+    TextInputFormatter.withFunction((oldValue, newValue) {
+      if (newValue.text.characters.length > maxPropertyNameLength) {
+        AppToast.show(
+          context,
+          'Property name can have at most $maxPropertyNameLength characters.',
+        );
+      }
+      return _nameLengthLimit.formatEditUpdate(oldValue, newValue);
+    }),
+  ];
+
+  // GSTIN: 15 characters, letters and digits only, always upper-case.
+  static final List<TextInputFormatter> _gstFormatters = [
+    FilteringTextInputFormatter.allow(RegExp('[a-zA-Z0-9]')),
+    LengthLimitingTextInputFormatter(15),
+    TextInputFormatter.withFunction(
+      (oldValue, newValue) =>
+          newValue.copyWith(text: newValue.text.toUpperCase()),
+    ),
+  ];
+
+  static final List<TextInputFormatter> _pincodeFormatters = [
+    FilteringTextInputFormatter.digitsOnly,
+    LengthLimitingTextInputFormatter(6),
+  ];
+
   late TextEditingController _nameController;
   late TextEditingController _gstController;
   late TextEditingController _addressController;
@@ -70,15 +105,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
           prev.error != curr.error ||
           prev.isSaving != curr.isSaving,
       listener: (context, state) {
-        if (state.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.error!),
-              backgroundColor: Colors.redAccent,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        // Cubit errors are shown once, by the stepper page.
         if (state.isSaving) {}
 
         if (_nameController.text != state.buildingName) {
@@ -164,6 +191,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                         hint: 'property_name_hint'.tr(),
                         icon: Icons.business_rounded,
                         controller: _nameController,
+                        inputFormatters: _nameFormatters,
                         onChanged: (val) => context
                             .read<PropertySetupCubit>()
                             .updateBuildingName(val),
@@ -175,6 +203,8 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                         hint: 'gst_number_hint'.tr(),
                         icon: Icons.description_rounded,
                         controller: _gstController,
+                        inputFormatters: _gstFormatters,
+                        textCapitalization: TextCapitalization.characters,
                         onChanged: (val) => context
                             .read<PropertySetupCubit>()
                             .updateGstNumber(val),
@@ -299,6 +329,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                             hint: 'pin_code_hint'.tr(),
                             icon: Icons.pin_drop_rounded,
                             controller: _pincodeController,
+                            inputFormatters: _pincodeFormatters,
                             onChanged: (val) => context
                                 .read<PropertySetupCubit>()
                                 .updatePincode(val),
@@ -671,6 +702,8 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
     TextEditingController? controller,
     String? initialValue,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -717,6 +750,8 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                           controller: controller,
                           onChanged: onChanged,
                           keyboardType: keyboardType,
+                          inputFormatters: inputFormatters,
+                          textCapitalization: textCapitalization,
                           decoration: InputDecoration(
                             hintText: hint,
                             hintStyle: TextStyle(
@@ -949,10 +984,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              _showTopImagePickerBottomSheet(context);
-            },
+            onTap: () => _onAddPropertyImage(context, images.length),
             child: CustomPaint(
               painter: DashedRectPainter(
                 color: images.isNotEmpty
@@ -1016,7 +1048,13 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                           ),
                         ],
                       )
-                    else
+                    else ...[
+                      if (images.length < maxPropertyImages)
+                        Positioned(
+                          left: 12.r,
+                          bottom: 12.r,
+                          child: _buildAddMoreChip(),
+                        ),
                       Positioned(
                         top: 12.r,
                         right: 12.r,
@@ -1053,6 +1091,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                           ),
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),
@@ -1060,7 +1099,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
           ),
           SizedBox(height: 16.h),
           Text(
-            '${images.length} of 10 added · first photo becomes the cover',
+            '${images.length} of $maxPropertyImages added · first photo becomes the cover',
             style: TextStyle(
               fontSize: 12.sp,
               color: const Color(0xFF94A3B8),
@@ -1074,8 +1113,12 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
-                itemCount: images.length,
+                itemCount: images.length +
+                    (images.length < maxPropertyImages ? 1 : 0),
                 itemBuilder: (context, idx) {
+                  if (idx == images.length) {
+                    return _buildAddImageTile(context, images.length);
+                  }
                   final imgPath = images[idx];
                   return Container(
                     width: 60.w,
@@ -1138,6 +1181,65 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
   }
 
 
+
+  void _onAddPropertyImage(BuildContext context, int imageCount) {
+    if (imageCount >= maxPropertyImages) {
+      AppToast.show(
+        context,
+        'You can add up to $maxPropertyImages photos. Remove one to add another.',
+      );
+      return;
+    }
+    HapticFeedback.selectionClick();
+    _showTopImagePickerBottomSheet(context);
+  }
+
+  Widget _buildAddMoreChip() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFF7A00),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.add_a_photo_rounded, color: Colors.white, size: 14.sp),
+          SizedBox(width: 6.w),
+          Text(
+            'Add more',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddImageTile(BuildContext context, int imageCount) {
+    return GestureDetector(
+      onTap: () => _onAddPropertyImage(context, imageCount),
+      child: Container(
+        width: 50.w,
+        margin: EdgeInsets.only(right: 12.w, top: 5.r, bottom: 5.r),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF7ED),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: const Color(0xFFFF7A00).withValues(alpha: 0.5),
+          ),
+        ),
+        child: Icon(
+          Icons.add_rounded,
+          color: const Color(0xFFEA580C),
+          size: 24.sp,
+        ),
+      ),
+    );
+  }
 
   Widget _buildFilePicker(
     BuildContext context, {
@@ -1514,7 +1616,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   cubit.pickCategoryImage(
                     'Exterior',
                     source: ImageSource.camera,
-                    maxImages: 10,
+                    maxImages: maxPropertyImages,
                   );
                 },
               ),
@@ -1529,7 +1631,7 @@ class _BuildingIdentityScreenState extends State<BuildingIdentityScreen> {
                   cubit.pickCategoryImage(
                     'Exterior',
                     source: ImageSource.gallery,
-                    maxImages: 10,
+                    maxImages: maxPropertyImages,
                   );
                 },
               ),
