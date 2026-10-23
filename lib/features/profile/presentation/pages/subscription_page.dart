@@ -15,6 +15,7 @@ import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_failed_screen.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'my_invoices_page.dart';
 
 import '../../../../injection_container.dart';
@@ -605,9 +606,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                   height: 60.w,
                                   color: Colors.blue.shade50,
                                   child: (hostel.coverImage != null &&
-                                          hostel.coverImage!.isNotEmpty)
-                                      ? Image.network(
-                                          hostel.coverImage!,
+                                          hostel.coverImage!.isNotEmpty &&
+                                          ApiConstants.getImageUrl(hostel.coverImage!) != null)
+                                      ? Image(
+                                          image: CachedNetworkImageProvider(
+                                            ApiConstants.getImageUrl(hostel.coverImage!)!,
+                                          ),
                                           fit: BoxFit.cover,
                                           errorBuilder: (context, error, stackTrace) =>
                                               Image.asset(
@@ -869,9 +873,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           height: 54.w,
                           color: Colors.blue.shade100,
                           child: (hostel.coverImage != null &&
-                                  hostel.coverImage!.isNotEmpty)
-                              ? Image.network(
-                                  hostel.coverImage!,
+                                  hostel.coverImage!.isNotEmpty &&
+                                  ApiConstants.getImageUrl(hostel.coverImage!) != null)
+                              ? Image(
+                                  image: CachedNetworkImageProvider(
+                                    ApiConstants.getImageUrl(hostel.coverImage!)!,
+                                  ),
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) => Image.asset(
                                     'assets/images/property_build.png',
