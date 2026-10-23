@@ -15,6 +15,7 @@ import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_failed_screen.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
+import 'my_invoices_page.dart';
 
 import '../../../../injection_container.dart';
 import '../models/plan_option.dart';
@@ -1615,11 +1616,35 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               ),
             ),
           ),
-          // Icon(
-          //   Icons.help_outline_rounded,
-          //   size: 22.sp,
-          //   color: AppColors.primaryBlue,
-          // ),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const MyInvoicesPage(),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(8.r),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: AppColors.primaryBlue,
+                  width: 1.2,
+                ),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                'MY INVOICES',
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryBlue,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
