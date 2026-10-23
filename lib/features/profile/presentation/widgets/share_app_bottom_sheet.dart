@@ -20,6 +20,23 @@ class ShareAppBottomSheet extends StatefulWidget {
     this.appIconAsset = 'assets/images/login_logo_nobg.png',
   });
 
+  /// Referral invite; `{link}` is replaced with the owner's referral link.
+  static const String referralMessage = '🚀 ATTENTION PG OWNERS! 🏢\n'
+      'GO DIGITAL WITH STAY INDIA!\n'
+      '\n'
+      '✅ Unlimited Free Tenant Leads\n'
+      '🛡️ Verified Tenant Management\n'
+      '💰 Automated Rent Reminders\n'
+      '🛏️ Smart Bed Management\n'
+      '📲 Paperless, Stress-Free Operations\n'
+      '\n'
+      '🎁 BONUS: 1-Month FREE Trial – Full Access!\n'
+      '\n'
+      '📥 Download Now 👇\n'
+      '{link}\n'
+      '\n'
+      '🇮🇳 Stay India – The Future of Living!';
+
   final String appName;
   final String appTagline;
   final String shareLink;
@@ -31,11 +48,7 @@ class ShareAppBottomSheet extends StatefulWidget {
         String appName = 'Stay India Partner',
         String appTagline = 'Manage Simply · Grow Rapidly',
         String shareLink = 'https://stayindia.in/partner',
-        String shareMessage =
-        "Hi! I’ve been using Stay India Partner for my PG, and it's a game-changer. "
-            "Get 100% verified tenants with lifetime free leads—no broker commissions! "
-            "Easily manage beds, rent, and tenants all in one place. "
-            "Download the app and grow your business rapidly:",
+        String shareMessage = referralMessage,
         String appIconAsset = 'assets/images/app_icon.png',
       }) {
     return showModalBottomSheet<void>(
@@ -62,8 +75,15 @@ class _ShareAppBottomSheetState
 
   bool _isActionInProgress = false;
 
-  String get _fullMessage =>
-      '${widget.shareMessage} ${widget.shareLink}';
+  String get _fullMessage => widget.shareMessage.contains('{link}')
+      ? widget.shareMessage.replaceAll('{link}', widget.shareLink)
+      : '${widget.shareMessage} ${widget.shareLink}';
+
+  // The link is shown separately below the preview, so leave it out here.
+  String get _previewMessage => widget.shareMessage
+      .replaceAll('{link}', '')
+      .replaceAll(RegExp(r'\n{3,}'), '\n\n')
+      .trim();
 
   /// Only one action can run at a time.
   Future<void> _runAction(
@@ -227,7 +247,7 @@ class _ShareAppBottomSheetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.shareMessage,
+            _previewMessage,
             style: GoogleFonts.inter(
               fontSize: 15,
               height: 1.4,
