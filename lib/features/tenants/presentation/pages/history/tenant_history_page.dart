@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/tenants/data/models/tenant_model.dart';
@@ -13,17 +14,35 @@ class TenantHistoryPage extends StatefulWidget {
   final String? checkInDate;
   final String? tenantId;
 
+  /// Current dues from the tenant details sheet. When null, falls back to the
+  /// unpaid amounts on the rentals listed here.
+  final double? dueAmount;
+
   const TenantHistoryPage({
     super.key,
     required this.tenantName,
     required this.payments,
     this.checkInDate,
     this.tenantId,
+    this.dueAmount,
   });
 
   @override
   State<TenantHistoryPage> createState() => _TenantHistoryPageState();
 }
+
+const _successGreen = Color(0xFF12B76A);
+const _successGreenBg = Color(0xFFECFDF3);
+const _dueRed = Color(0xFFF04438);
+const _dueRedBg = Color(0xFFFFF1F0);
+const _pendingOrange = Color(0xFFF79009);
+const _pendingOrangeBg = Color(0xFFFFFAEB);
+
+final _rupees = NumberFormat.currency(
+  locale: 'en_IN',
+  symbol: '₹',
+  decimalDigits: 0,
+);
 
 class _TenantHistoryPageState extends State<TenantHistoryPage> {
   late List<TenantPaymentItemEntity> _payments;
@@ -154,34 +173,38 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: _buildAppBar(context),
-      body: SingleChildScrollView(
-        child: Column(
+      body: RefreshIndicator(
+        color: AppColors.primaryBlue,
+        onRefresh: _fetchTenantHistory,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
           children: [
-            const Divider(height: 1),
-            _buildSummaryRow(),
+            _buildSummaryCard(),
+            SizedBox(height: 24.h),
+            _buildSectionHeader(),
+            SizedBox(height: 12.h),
             if (_isLoading)
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 40.h),
-                child: const Center(child: CircularProgressIndicator()),
-              )
-            else if (_payments.isEmpty)
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 40.h),
-                child: Center(
-                  child: Text(
-                    'No payment history found',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: AppColors.greyText,
-                    ),
+                padding: EdgeInsets.symmetric(vertical: 48.h),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryBlue,
                   ),
                 ),
               )
+            else if (_payments.isEmpty)
+              _buildEmptyState()
             else
-              _buildTimelineList(),
-            SizedBox(height: 30.h),
+              ..._payments.asMap().entries.map(
+                (e) => _buildTimelineItem(
+                  e.value,
+                  isFirst: e.key == 0,
+                  isLast: e.key == _payments.length - 1,
+                ),
+              ),
           ],
         ),
       ),
@@ -191,10 +214,16 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
       elevation: 0,
       centerTitle: false,
+      titleSpacing: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: AppColors.darkText),
+        icon: Icon(
+          Icons.arrow_back_ios_new_rounded,
+          size: 20.sp,
+          color: AppColors.darkText,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
       title: Column(
@@ -204,373 +233,467 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
             'Tenant History',
             style: TextStyle(
               color: AppColors.darkText,
-              fontSize: 20.sp,
+              fontSize: 18.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
             _tenantName,
-            style: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: AppColors.greyText, fontSize: 13.sp),
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.close, color: AppColors.greyText),
-        ),
-      ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(height: 1, color: AppColors.roomCardBorder),
+      ),
     );
   }
 
-  Widget _buildSummaryRow() {
-    final double totalPaid = _payments.fold(0, (sum, p) => sum + p.paidAmount);
-    final String totalPaidStr = totalPaid >= 1000
-        ? '${(totalPaid / 1000).toStringAsFixed(1)}K'
-        : totalPaid.toStringAsFixed(0);
-
-    String daysStr = '0';
+  int get _daysStayed {
     if (_checkInDate != null && _checkInDate!.isNotEmpty) {
-      try {
-        final startDt = DateTime.parse(_checkInDate!).toLocal();
+      final startDt = DateTime.tryParse(_checkInDate!)?.toLocal();
+      if (startDt != null) {
         final now = DateTime.now();
-        final startZero = DateTime(startDt.year, startDt.month, startDt.day);
-        final nowZero = DateTime(now.year, now.month, now.day);
-        final diff = nowZero.difference(startZero).inDays;
-        daysStr = (diff >= 0 ? diff + 1 : 0).toString();
-      } catch (_) {
-        if (_daysSinceFirstRental != null) {
-          daysStr = (_daysSinceFirstRental! + 1).toString();
-        }
+        final diff = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).difference(DateTime(startDt.year, startDt.month, startDt.day)).inDays;
+        return diff >= 0 ? diff + 1 : 0;
       }
-    } else if (_daysSinceFirstRental != null) {
-      daysStr = (_daysSinceFirstRental! + 1).toString();
     }
-
-    final String transfersStr = _totalTransactions != null
-        ? _totalTransactions.toString()
-        : '0';
-
-    return Padding(
-      padding: EdgeInsets.all(20.w),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildSummaryCard(daysStr, 'Days', Icons.access_time),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: _buildSummaryCard(
-              totalPaidStr,
-              'Total Paid',
-              Icons.currency_rupee,
-              valueColor: const Color(0xFF27C26C),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: _buildSummaryCard(
-              transfersStr,
-              'Transfers',
-              Icons.swap_horiz,
-            ),
-          ),
-        ],
-      ),
-    );
+    return _daysSinceFirstRental != null ? _daysSinceFirstRental! + 1 : 0;
   }
 
-  Widget _buildSummaryCard(
-    String value,
-    String label,
-    IconData icon, {
-    Color? valueColor,
-  }) {
+  double get _dues =>
+      widget.dueAmount ?? _payments.fold(0.0, (sum, p) => sum + p.dueAmount);
+
+  Widget _buildSummaryCard() {
+    final totalPaid = _payments.fold(0.0, (sum, p) => sum + p.paidAmount);
+    final dues = _dues;
+    final since = _checkInDate != null
+        ? DateTime.tryParse(_checkInDate!)?.toLocal()
+        : null;
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColors.roomCardBorder.withValues(alpha: 0.5),
-        ),
-        borderRadius: BorderRadius.circular(12.r),
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryBlue.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20.sp, color: AppColors.greyText),
+          Text(
+            'Total Paid',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Colors.white.withValues(alpha: 0.75),
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            _rupees.format(totalPaid),
+            style: TextStyle(
+              fontSize: 28.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          if (since != null) ...[
+            SizedBox(height: 6.h),
+            Row(
+              children: [
+                Icon(
+                  Icons.event_available_rounded,
+                  size: 14.sp,
+                  color: Colors.white.withValues(alpha: 0.75),
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  'Staying since ${DateFormat('d MMM yyyy').format(since)}',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: Colors.white.withValues(alpha: 0.75),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          SizedBox(height: 18.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatTile(
+                  icon: Icons.schedule_rounded,
+                  label: 'Days',
+                  value: '$_daysStayed',
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: _buildStatTile(
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Payments',
+                  value: '${_totalTransactions ?? _payments.length}',
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(child: _buildDuesTile(dues)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatTile({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: AppColors.glassWhite,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18.sp, color: Colors.white),
           SizedBox(height: 8.h),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 20.sp,
+              fontSize: 17.sp,
               fontWeight: FontWeight.bold,
-              color: valueColor ?? AppColors.darkText,
+              color: Colors.white,
             ),
           ),
           Text(
             label,
-            style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: Colors.white.withValues(alpha: 0.75),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTimelineList() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: _payments.length,
-        itemBuilder: (context, index) {
-          final p = _payments[index];
-
-          return _buildTimelineItem(
-            isFirst: index == 0,
-            isLast: index == _payments.length - 1,
-            month: _formatMonth(p.month),
-            date: p.paymentDate != null ? _formatDate(p.paymentDate!) : '',
-            amount: p.paidAmount.toStringAsFixed(0),
-            method: p.paymentType,
-            rent: p.rent,
-            deposit: p.deposit,
-            maintenance: p.maintenance,
-          );
-        },
+  Widget _buildDuesTile(double dues) {
+    final hasDues = dues > 0;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: hasDues ? _dueRedBg : _successGreenBg,
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            hasDues ? Icons.warning_amber_rounded : Icons.verified_rounded,
+            size: 18.sp,
+            color: hasDues ? _dueRed : _successGreen,
+          ),
+          SizedBox(height: 8.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              hasDues ? _rupees.format(dues) : 'Clear',
+              style: TextStyle(
+                fontSize: 17.sp,
+                fontWeight: FontWeight.bold,
+                color: hasDues ? _dueRed : _successGreen,
+              ),
+            ),
+          ),
+          Text(
+            'Dues',
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: (hasDues ? _dueRed : _successGreen).withValues(alpha: 0.8),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  String _formatDate(String isoDate) {
-    try {
-      final dt = DateTime.parse(isoDate).toLocal();
-      const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ];
-      return '${months[dt.month - 1]} ${dt.day}${_getDaySuffix(dt.day)}, ${dt.year}';
-    } catch (_) {
-      return isoDate;
-    }
+  Widget _buildSectionHeader() {
+    return Row(
+      children: [
+        Text(
+          'Payment History',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkText,
+          ),
+        ),
+        SizedBox(width: 8.w),
+        if (_payments.isNotEmpty)
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+            decoration: BoxDecoration(
+              color: AppColors.totalBlue,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Text(
+              '${_payments.length}',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.totalBlueText,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
-  String _getDaySuffix(int day) {
-    if (day >= 11 && day <= 13) return 'th';
-    switch (day % 10) {
-      case 1:
-        return 'st';
-      case 2:
-        return 'nd';
-      case 3:
-        return 'rd';
+  Widget _buildEmptyState() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 40.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.roomCardBorder),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.history_rounded,
+            size: 36.sp,
+            color: AppColors.greyText.withValues(alpha: 0.5),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'No payment history found',
+            style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(String? isoDate, String pattern) {
+    if (isoDate == null || isoDate.isEmpty) return '';
+    final dt = DateTime.tryParse(isoDate);
+    return dt != null ? DateFormat(pattern).format(dt.toLocal()) : isoDate;
+  }
+
+  ({String label, Color color, Color background}) _statusStyle(String status) {
+    switch (status.toUpperCase()) {
+      case 'SUCCESS':
+      case 'PAID':
+        return (
+          label: 'Paid',
+          color: _successGreen,
+          background: _successGreenBg,
+        );
+      case 'FAILED':
+      case 'CANCELLED':
+        return (label: 'Failed', color: _dueRed, background: _dueRedBg);
       default:
-        return 'th';
+        return (
+          label: 'Pending',
+          color: _pendingOrange,
+          background: _pendingOrangeBg,
+        );
     }
   }
 
-  String _formatMonth(String monthStr) {
-    if (monthStr.isEmpty) return '';
-    try {
-      final dt = DateTime.tryParse(monthStr);
-      const months = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
-      if (dt != null) {
-        return '${months[dt.month - 1]} ${dt.year}';
-      }
-      final parts = monthStr.split('-');
-      if (parts.length >= 2) {
-        final m = int.parse(parts[1]) - 1;
-        if (m >= 0 && m < 12) {
-          return '${months[m]} ${parts[0]}';
-        }
-      }
-      return monthStr;
-    } catch (_) {
-      return monthStr;
-    }
-  }
-
-  Widget _buildTimelineItem({
+  Widget _buildTimelineItem(
+    TenantPaymentItemEntity p, {
     required bool isFirst,
     required bool isLast,
-    required String month,
-    required String date,
-    required String amount,
-    required String method,
-    double? rent,
-    double? deposit,
-    double? maintenance,
   }) {
-    final hasBreakdown = rent != null || deposit != null || maintenance != null;
+    final style = _statusStyle(p.status);
+    final isPaid = style.label == 'Paid';
+    final amount = isPaid || p.paidAmount > 0 ? p.paidAmount : p.totalAmount;
+    final breakdown = <(String, double)>[
+      if ((p.rent ?? 0) > 0) ('Rent', p.rent!),
+      if ((p.deposit ?? 0) > 0) ('Deposit', p.deposit!),
+      if ((p.maintenance ?? 0) > 0) ('Maintenance', p.maintenance!),
+    ];
 
     return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Column(
-            children: [
-              Container(
-                width: 2,
-                height: 20.h,
-                color: isFirst ? Colors.transparent : Colors.grey[300],
-              ),
-              (method.toUpperCase() == 'RAZORPAY')
-                  ? Container(
-                width: 38.w,
-                height: 38.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(
-                    color: const Color(0xFFE2E8F0),
-                    width: 1,
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: Image.asset(
-                    'assets/images/login_logo.jpg',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              )
-                  : Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF27C26C),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.money,
-                  size: 16.sp,
-                  color: Colors.white,
-                ),
-              ),
-              Expanded(
-                child: Container(
+          SizedBox(
+            width: 36.w,
+            child: Column(
+              children: [
+                Container(
                   width: 2,
-                  color: isLast ? Colors.transparent : Colors.grey[300],
+                  height: 18.h,
+                  color: isFirst
+                      ? Colors.transparent
+                      : AppColors.roomCardBorder,
                 ),
-              ),
-            ],
+                _buildMethodBadge(p.paymentType, style.color),
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isLast
+                        ? Colors.transparent
+                        : AppColors.roomCardBorder,
+                  ),
+                ),
+              ],
+            ),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Container(
-              margin: EdgeInsets.only(bottom: 16.h, top: 12.h),
-              padding: EdgeInsets.all(16.w),
+              margin: EdgeInsets.only(bottom: 14.h),
+              padding: EdgeInsets.all(14.w),
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: AppColors.roomCardBorder.withValues(alpha: 0.5),
-                ),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: AppColors.roomCardBorder),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.cardShadow,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Payment Received',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkText,
-                            ),
-                          ),
-                          Text(
-                            month,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: AppColors.greyText,
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          Text(
-                            date,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              color: AppColors.greyText,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            amount,
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkText,
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 10.w,
-                              vertical: 4.h,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.roomCardBorder,
-                              ),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Text(
-                              method,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isPaid ? 'Payment Received' : 'Payment Due',
                               style: TextStyle(
-                                fontSize: 12.sp,
+                                fontSize: 15.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.darkText,
                               ),
                             ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              _formatDate(
+                                p.paymentDate ?? p.month,
+                                'd MMM yyyy, h:mm a',
+                              ),
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.greyText,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            _rupees.format(amount),
+                            style: TextStyle(
+                              fontSize: 17.sp,
+                              fontWeight: FontWeight.bold,
+                              color: isPaid ? AppColors.darkText : style.color,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          _buildChip(
+                            style.label,
+                            style.color,
+                            style.background,
                           ),
                         ],
                       ),
                     ],
                   ),
-                  if (hasBreakdown) ...[
-                    SizedBox(height: 12.h),
-                    Divider(
-                      height: 1,
-                      color: AppColors.roomCardBorder.withValues(alpha: 0.5),
-                    ),
-                    SizedBox(height: 10.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (rent != null) _buildBreakdownItem('Rent', rent),
-                        if (deposit != null)
-                          _buildBreakdownItem('Security Deposit', deposit),
-                        if (maintenance != null)
-                          _buildBreakdownItem('Maintenance', maintenance),
+                  SizedBox(height: 10.h),
+                  Row(
+                    children: [
+                      _buildChip(
+                        p.paymentType.toUpperCase(),
+                        AppColors.totalBlueText,
+                        AppColors.totalBlue,
+                      ),
+                      if (!isPaid && (p.dueDate ?? '').isNotEmpty) ...[
+                        SizedBox(width: 8.w),
+                        Text(
+                          'Due ${_formatDate(p.dueDate, 'd MMM yyyy')}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: style.color,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ],
+                    ],
+                  ),
+                  if (breakdown.isNotEmpty) ...[
+                    SizedBox(height: 12.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 10.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundGrey,
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Column(
+                        children: [
+                          for (final (label, value) in breakdown)
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 3.h),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    label,
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: AppColors.greyText,
+                                    ),
+                                  ),
+                                  Text(
+                                    _rupees.format(value),
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.darkText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ],
                 ],
@@ -582,24 +705,58 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
     );
   }
 
-  Widget _buildBreakdownItem(String label, double val) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 11.sp, color: AppColors.greyText),
+  Widget _buildMethodBadge(String method, Color statusColor) {
+    if (method.toUpperCase() == 'RAZORPAY') {
+      return Container(
+        width: 36.w,
+        height: 36.w,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(color: AppColors.border),
         ),
-        SizedBox(height: 2.h),
-        Text(
-          '₹${val.toStringAsFixed(0)}',
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.darkText,
-          ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10.r),
+          child: Image.asset('assets/images/login_logo.jpg', fit: BoxFit.cover),
         ),
-      ],
+      );
+    }
+
+    final icon = switch (method.toUpperCase()) {
+      'UPI' => Icons.qr_code_2_rounded,
+      'CASH' => Icons.payments_rounded,
+      'CARD' => Icons.credit_card_rounded,
+      'BANK' || 'BANK_TRANSFER' || 'NEFT' => Icons.account_balance_rounded,
+      _ => Icons.currency_rupee_rounded,
+    };
+
+    return Container(
+      width: 36.w,
+      height: 36.w,
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+        border: Border.all(color: statusColor.withValues(alpha: 0.35)),
+      ),
+      child: Icon(icon, size: 18.sp, color: statusColor),
+    );
+  }
+
+  Widget _buildChip(String text, Color color, Color background) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
     );
   }
 }

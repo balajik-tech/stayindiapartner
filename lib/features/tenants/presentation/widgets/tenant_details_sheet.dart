@@ -1339,10 +1339,17 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     }
   }
 
-  Widget _buildBillsSummary(List<TenantRentalEntity> rentals) {
-    if (rentals.isEmpty) return const SizedBox.shrink();
-
-    final item = rentals.first;
+  /// What the tenant owes right now on their latest rental: the unpaid
+  /// payable, or the rent for every month since the booking ran out.
+  ({
+    double totalDue,
+    bool hasExceededEndDate,
+    double calculatedRentForRenewal,
+    String renewCheckInDate,
+    String renewCheckOutDate,
+    String forthePeriod,
+  })
+  _computeDues(TenantRentalEntity item) {
     final now = DateTime.now();
     // final testNow = DateTime(now.year, now.month + 3, now.day);
     final today = DateTime(now.year, now.month, now.day);
@@ -1391,6 +1398,28 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                 : (item.booking?.rent ?? 0.0));
       }
     }
+
+    return (
+      totalDue: totalDue,
+      hasExceededEndDate: hasExceededEndDate,
+      calculatedRentForRenewal: calculatedRentForRenewal,
+      renewCheckInDate: renewCheckInDate,
+      renewCheckOutDate: renewCheckOutDate,
+      forthePeriod: forthePeriod,
+    );
+  }
+
+  Widget _buildBillsSummary(List<TenantRentalEntity> rentals) {
+    if (rentals.isEmpty) return const SizedBox.shrink();
+
+    final item = rentals.first;
+    final dues = _computeDues(item);
+    final totalDue = dues.totalDue;
+    final hasExceededEndDate = dues.hasExceededEndDate;
+    final calculatedRentForRenewal = dues.calculatedRentForRenewal;
+    final renewCheckInDate = dues.renewCheckInDate;
+    final renewCheckOutDate = dues.renewCheckOutDate;
+    final forthePeriod = dues.forthePeriod;
 
     final isDue = (totalDue > 0 || hasExceededEndDate);
     final pendingCount = isDue ? 1 : 0;
@@ -1629,6 +1658,9 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
                         payments: payments,
                         checkInDate: detail?.stay?.checkInDate,
                         tenantId: widget.tenantId,
+                        dueAmount: (_rentals?.isNotEmpty ?? false)
+                            ? _computeDues(_rentals!.first).totalDue
+                            : null,
                       ),
                     ),
                   );

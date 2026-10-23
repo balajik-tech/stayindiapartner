@@ -79,12 +79,6 @@ class _ShareAppBottomSheetState
       ? widget.shareMessage.replaceAll('{link}', widget.shareLink)
       : '${widget.shareMessage} ${widget.shareLink}';
 
-  // The link is shown separately below the preview, so leave it out here.
-  String get _previewMessage => widget.shareMessage
-      .replaceAll('{link}', '')
-      .replaceAll(RegExp(r'\n{3,}'), '\n\n')
-      .trim();
-
   /// Only one action can run at a time.
   Future<void> _runAction(
       Future<void> Function() action,
@@ -111,37 +105,41 @@ class _ShareAppBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    final media = MediaQuery.of(context);
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: media.size.height * 0.8),
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(32),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          20,
-        ),
+        padding: EdgeInsets.fromLTRB(20, 12, 20, 16 + media.padding.bottom),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildDragHandle(),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             _buildHeader(context),
-            const SizedBox(height: 20),
-            _buildAppCard(),
             const SizedBox(height: 16),
-            _buildMessageCard(context),
+            // Only the middle scrolls; the header and share buttons stay visible.
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildMessageCard(),
+                    const SizedBox(height: 12),
+                    _buildLinkCard(context),
+                    const SizedBox(height: 12),
+                    _buildQrSection(context),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             _buildShareActionsRow(context),
-            const SizedBox(height: 16),
-            _buildOrDivider(),
-            const SizedBox(height: 16),
-            _buildQrSection(context),
           ],
         ),
       ),
@@ -163,21 +161,39 @@ class _ShareAppBottomSheetState
 
   Widget _buildHeader(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'refer_friend'.tr(),
-          style: GoogleFonts.inter(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: Colors.black,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'refer_friend'.tr(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Invite PG owners to ${widget.appName}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: const Color(0xFF6B6A67),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
         IconButton(
-          icon: const Icon(
-            Icons.close,
-            color: Colors.grey,
-          ),
+          visualDensity: VisualDensity.compact,
+          icon: const Icon(Icons.close, color: Colors.grey),
           onPressed: _isActionInProgress
               ? null
               : () => Navigator.of(context).pop(),
@@ -186,134 +202,117 @@ class _ShareAppBottomSheetState
     );
   }
 
-  Widget _buildAppCard() {
+  /// Preview of exactly what gets shared, with the link highlighted.
+  Widget _buildMessageCard() {
+    final base = GoogleFonts.inter(
+      fontSize: 13.5,
+      height: 1.5,
+      color: const Color(0xFF1F1F1E),
+      fontWeight: FontWeight.w500,
+    );
+    final headline = base.copyWith(
+      fontSize: 15,
+      fontWeight: FontWeight.w800,
+      color: Colors.black,
+    );
+    final link = base.copyWith(
+      color: AppColors.primaryBlue,
+      fontWeight: FontWeight.w600,
+      decoration: TextDecoration.underline,
+      decorationColor: AppColors.primaryBlue,
+    );
+
+    // Paragraphs are separated by blank lines; the first one is the headline
+    // and the last one is the sign-off.
+    final paragraphs = _fullMessage.split('\n\n');
+    final children = <Widget>[];
+    for (var i = 0; i < paragraphs.length; i++) {
+      final isFirst = i == 0;
+      final isLast = i == paragraphs.length - 1 && paragraphs.length > 1;
+      final style = isFirst
+          ? headline
+          : isLast
+              ? base.copyWith(fontWeight: FontWeight.w700)
+              : base;
+
+      final parts = paragraphs[i].split(widget.shareLink);
+      final spans = <TextSpan>[];
+      for (var j = 0; j < parts.length; j++) {
+        spans.add(TextSpan(text: parts[j]));
+        if (j < parts.length - 1) {
+          spans.add(TextSpan(text: widget.shareLink, style: link));
+        }
+      }
+
+      if (i > 0) children.add(const SizedBox(height: 10));
+      children.add(Text.rich(TextSpan(style: style, children: spans)));
+    }
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFCFCFB),
+        color: const Color(0xFFF6F7F9),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE8EAED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildLinkCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F7F9),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE8EAED)),
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              'assets/images/logo.jpg',
-              width: 48,
-              height: 48,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 12),
+          Icon(Icons.link_rounded, size: 20, color: Colors.grey.shade700),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.appName,
+                  widget.shareLink,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black,
+                    fontSize: 14,
+                    color: AppColors.primaryBlue,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  widget.appTagline,
+                  'Your personal invite link',
                   style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: const Color(0xFF575654),
+                    fontSize: 11.5,
+                    color: const Color(0xFF6B6A67),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMessageCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 0,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFCFCFB),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _previewMessage,
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              height: 1.4,
-              color: Colors.black,
-              fontWeight: FontWeight.w500,
+          TextButton.icon(
+            onPressed: _isActionInProgress
+                ? null
+                : () => _runAction(() => _copyLink(context)),
+            icon: Icon(Icons.copy_rounded, size: 16, color: AppColors.primaryBlue),
+            label: Text(
+              'Copy',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryBlue,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          const Divider(
-            height: 0,
-            thickness: 0.2,
-            color: Color(0xFFCECECE),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Image.asset(
-                'assets/images/link.png',
-                width: 14,
-                color: Colors.grey.shade700,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 8,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.shareLink,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: AppColors.primaryBlue,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      'Your personal invite link',
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        color: const Color(0xFF52514F),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: TextButton(
-                  onPressed: _isActionInProgress
-                      ? null
-                      : () => _runAction(
-                        () => _copyLink(context),
-                  ),
-                  child: Text(
-                    'Copy',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -322,7 +321,6 @@ class _ShareAppBottomSheetState
 
   Widget _buildShareActionsRow(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _ShareActionButton(
           icon: Icons.chat_bubble,
@@ -332,11 +330,8 @@ class _ShareAppBottomSheetState
           label: 'WhatsApp',
           onTap: _isActionInProgress
               ? () {}
-              : () => _runAction(
-                () => _shareViaWhatsApp(context),
-          ),
+              : () => _runAction(() => _shareViaWhatsApp(context)),
         ),
-
         _ShareActionButton(
           icon: Icons.sms,
           image: 'assets/images/comment.png',
@@ -345,67 +340,19 @@ class _ShareAppBottomSheetState
           label: 'SMS',
           onTap: _isActionInProgress
               ? () {}
-              : () => _runAction(
-                () => _shareViaSms(context),
-          ),
+              : () => _runAction(() => _shareViaSms(context)),
         ),
-
         _ShareActionButton(
-          icon: Icons.copy_all_outlined,
-          image: 'assets/images/copy.png',
-          iconColor: Colors.black87,
-          backgroundColor: Colors.white,
-          label: 'Copy link',
-          onTap: _isActionInProgress
-              ? () {}
-              : () => _runAction(
-                () => _copyLink(context),
-          ),
-        ),
-
-        _ShareActionButton(
-          icon: Icons.more_horiz,
+          icon: Icons.ios_share_rounded,
           image: '',
           iconColor: Colors.black87,
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xFFEEEFF1),
           label: 'More',
           onTap: _isActionInProgress
               ? () {}
-              : () => _runAction(
-                () => _shareViaSystemSheet(context),
-          ),
+              : () => _runAction(() => _shareViaSystemSheet(context)),
         ),
-      ],
-    );
-  }
-
-  Widget _buildOrDivider() {
-    return Row(
-      children: [
-        Expanded(
-          child: Divider(
-            color: Colors.grey.shade300,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-          ),
-          child: Text(
-            'or share in person',
-            style: GoogleFonts.inter(
-              color: const Color(0xFF898782),
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Divider(
-            color: Colors.grey.shade300,
-          ),
-        ),
-      ],
+      ].map((button) => Expanded(child: button)).toList(),
     );
   }
 
@@ -416,43 +363,53 @@ class _ShareAppBottomSheetState
           ? null
           : () => _showEnlargedQr(context),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFFCFCFB),
+          color: const Color(0xFFF6F7F9),
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE8EAED)),
         ),
         child: Row(
           children: [
-            QrImageView(
-              data: widget.shareLink,
-              version: QrVersions.auto,
-              size: 64,
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: QrImageView(
+                data: widget.shareLink,
+                version: QrVersions.auto,
+                size: 56,
+                padding: EdgeInsets.zero,
+              ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Scan to download',
+                    'Share in person',
                     style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
                       color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Tap to enlarge for scanning',
+                    'Tap to enlarge the QR code for scanning',
                     style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: const Color(0xFF52514F),
+                      fontSize: 12,
+                      color: const Color(0xFF6B6A67),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
             ),
+            Icon(Icons.chevron_right_rounded, color: Colors.grey.shade500),
           ],
         ),
       ),
@@ -593,7 +550,13 @@ class _ShareActionButton extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(label, style:  GoogleFonts.inter(fontSize: 13,color: Color(0xFF646361),fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 13,color: Color(0xFF646361),fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );

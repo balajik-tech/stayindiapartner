@@ -827,93 +827,98 @@ class _NavBarItem extends StatelessWidget {
         child: GestureDetector(
           onTap: () => onTap(index),
           behavior: HitTestBehavior.opaque,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Transform.translate(
-                offset: Offset(0, -16.h),
-                child: Container(
-                  width: 56.w,
-                  height: 56.w,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2C599D),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFFF98125),
-                      width: 3,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF2C599D).withValues(alpha: 0.35),
-                        blurRadius: 12,
-                        spreadRadius: 1.5,
-                        offset: const Offset(0, 6),
+          // Circle is sized by width (.w) but the bar by height (.h), so on
+          // some screens the column is a fraction too tall; scale it down.
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Transform.translate(
+                  offset: Offset(0, -16.h),
+                  child: Container(
+                    width: 56.w,
+                    height: 56.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2C599D),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFF98125),
+                        width: 3,
                       ),
-                    ],
-                  ),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Center(
-                        child: Icon(
-                          icon,
-                          color: Colors.white,
-                          size: 28.sp,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2C599D).withValues(alpha: 0.35),
+                          blurRadius: 12,
+                          spreadRadius: 1.5,
+                          offset: const Offset(0, 6),
                         ),
-                      ),
-                      if (unreadCount > 0)
-                        Positioned(
-                          top: -2.h,
-                          right: -2.w,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 1.5),
-                            ),
-                            constraints: BoxConstraints(
-                              minWidth: 18.w,
-                              minHeight: 18.w,
-                            ),
-                            child: Center(
-                              child: Text(
-                                unreadCount > 99 ? '99+' : '$unreadCount',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9.sp,
-                                  fontWeight: FontWeight.w900,
+                      ],
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Center(
+                          child: Icon(
+                            icon,
+                            color: Colors.white,
+                            size: 28.sp,
+                          ),
+                        ),
+                        if (unreadCount > 0)
+                          Positioned(
+                            top: -2.h,
+                            right: -2.w,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 1.5),
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 18.w,
+                                minHeight: 18.w,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  unreadCount > 99 ? '99+' : '$unreadCount',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.w900,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Transform.translate(
-                offset: Offset(0, -12.h),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: isSelected
-                            ? const Color(0xFF2C599D)
-                            : const Color(0xFF5A6E85),
-                        fontSize: 11.sp,
-                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                Transform.translate(
+                  offset: Offset(0, -12.h),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: isSelected
+                              ? const Color(0xFF2C599D)
+                              : const Color(0xFF5A6E85),
+                          fontSize: 11.sp,
+                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
