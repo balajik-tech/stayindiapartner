@@ -385,6 +385,7 @@ class _OwnersListPageState extends State<OwnersListPage> {
                   '${ApiConstants.baseUrl}${ApiConstants.ownerCommunities}/personal-chat/get-or-create',
                   data: {'targetUserId': o['id']},
                 );
+                if (!context.mounted) return;
                 Navigator.pop(context);
                 if (response.statusCode == 200) {
                   final chatData = response.data['data'];
@@ -407,6 +408,7 @@ class _OwnersListPageState extends State<OwnersListPage> {
                   _fetchChatsList();
                 }
               } catch (e) {
+                if (!context.mounted) return;
                 Navigator.pop(context);
                 debugPrint('Error starting personal chat: $e');
                 ScaffoldMessenger.of(context).showSnackBar(

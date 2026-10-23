@@ -791,9 +791,9 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
 
     dynamic data;
     final Map<String, dynamic> payload = {
-      if (content != null) 'content': content,
-      if (removeImage != null) 'removeImage': removeImage,
-      if (removePoll != null) 'removePoll': removePoll,
+      'content': ?content,
+      'removeImage': ?removeImage,
+      'removePoll': ?removePoll,
       if (pollOptions != null && pollOptions.isNotEmpty)
         'poll': {
           'options': pollOptions.map((o) => {'text': o}).toList(),

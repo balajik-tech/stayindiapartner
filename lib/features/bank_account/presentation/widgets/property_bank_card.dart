@@ -67,7 +67,7 @@ class PropertyBankCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if(property.accounts.length>0)...[
+                if(property.accounts.isNotEmpty)...[
                   StatusBadge.verified()
                 ]
 

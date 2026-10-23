@@ -2,21 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/features/finance/presentation/pages/payment_report_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import '../cubit/finance_cubit.dart';
 import '../cubit/finance_state.dart';
-import '../cubit/payment_report_cubit.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/revenue_chart.dart';
 import '../widgets/revenue_breakdown_chart.dart';
-import '../../data/services/pdf_export_service.dart';
 import 'package:intl/intl.dart';
-import 'payment_report_page.dart';
-import '../cubit/payment_report_cubit.dart';
-import 'package:stayindia_owner/injection_container.dart';
-import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class FinancialDashboardPage extends StatefulWidget {
@@ -169,51 +162,6 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                 ),
                 // _buildExportButton(state), //commend export button
               ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExportButton(FinanceState state) {
-    final hasData = state.stats != null;
-    return BouncingWrapper(
-      onTap: !hasData
-          ? null
-          : () async {
-              final hostelState = context.read<HostelCubit>().state;
-              String hostelName = 'All Properties';
-              if (hostelState is HostelLoaded &&
-                  hostelState.hostels.isNotEmpty) {
-                hostelName =
-                    hostelState.hostels[hostelState.selectedHostelIndex].name;
-              }
-
-              await PdfExportService.exportFinancialReport(
-                hostelName: hostelName,
-                stats: state.stats!,
-                trends: state.revenueTrends,
-              );
-            },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.ios_share_rounded, color: Colors.white, size: 20.sp),
-            SizedBox(width: 8.w),
-            Text(
-              StringUtils.translate('export', context: context),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w800,
-              ),
             ),
           ],
         ),

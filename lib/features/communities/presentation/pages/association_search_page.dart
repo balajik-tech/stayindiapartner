@@ -314,7 +314,7 @@ class _AssociationSearchPageState extends State<AssociationSearchPage> {
     return ListView.separated(
       padding: EdgeInsets.only(top: 8.h, bottom: 24.h),
       itemCount: results.length,
-      separatorBuilder: (_, __) => Divider(
+      separatorBuilder: (_, _) => Divider(
         height: 1,
         indent: 20.w,
         endIndent: 20.w,
@@ -566,7 +566,7 @@ class _AssociationAvatar extends StatelessWidget {
             ? CachedNetworkImage(
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                errorWidget: (_, __, ___) => _initialsLabel(),
+                errorWidget: (_, _, _) => _initialsLabel(),
               )
             : _initialsLabel(),
       ),

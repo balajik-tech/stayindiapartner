@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/services/token_storage.dart';
@@ -37,7 +36,6 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
   final _pincodeController = TextEditingController();
   final _streetController = TextEditingController();
 
-  bool _isFetchingLocation = false;
   File? _selectedImage;
 
   late final AnimationController _animController;
@@ -274,10 +272,6 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
       phone = await sl<TokenStorage>().getPhone() ?? '';
     }
 
-    final int spaceIndex = fullName.indexOf(' ');
-    final String parsedFirstName = spaceIndex == -1 ? fullName : fullName.substring(0, spaceIndex);
-    final String parsedLastName = spaceIndex == -1 ? "" : fullName.substring(spaceIndex + 1);
-
     authCubit.completeProfile(
       ProfileParams(
         firstName: fullName.toString().trim(),
@@ -396,32 +390,6 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
         //   ),
         // ),
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Lets get to know you',
-          style: GoogleFonts.outfit(
-            fontSize: 28.sp,
-            fontWeight: FontWeight.w800,
-            color: AppColors.darkText,
-            letterSpacing: -0.5,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        Text(
-          'This helps us personalize your dashboard and verify your identity.',
-          style: GoogleFonts.outfit(
-            fontSize: 15.sp,
-            color: AppColors.greyText.withValues(alpha: 0.8),
-            height: 1.4,
-          ),
-        ),
-      ],
     );
   }
 
@@ -627,105 +595,6 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     );
   }
 
-  Future<void> _fetchLocation() async {
-    setState(() => _isFetchingLocation = true);
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        throw Exception('Location services are disabled.');
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw Exception('Location permissions are denied');
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        throw Exception('Location permissions are permanently denied');
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
-
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks.first;
-
-        final addressParts = [
-          place.street,
-          place.thoroughfare,
-          place.subThoroughfare,
-          place.subLocality,
-          place.locality,
-          place.subAdministrativeArea,
-          place.administrativeArea,
-          place.country,
-        ].where((e) => e != null && e.toString().trim().isNotEmpty).join(", ");
-
-        setState(() {
-          // _streetController.text = "${place.name ?? ''} ${place.subLocality ?? ''}".trim();
-          _streetController.text = addressParts.trim();
-          _districtController.text =
-              place.locality ?? place.subAdministrativeArea ?? '';
-          _stateController.text = place.administrativeArea ?? '';
-          _pincodeController.text = place.postalCode ?? '';
-        });
-
-        HapticFeedback.lightImpact();
-      }
-    } catch (e) {
-      if (mounted) {
-        String errMsg = e.toString();
-        if (errMsg.startsWith('Exception: ')) {
-          errMsg = errMsg.substring(11);
-        }
-
-        SnackBarAction? action;
-        if (e.toString().contains('Location services are disabled')) {
-          action = SnackBarAction(
-            label: 'Enable',
-            textColor: Colors.white,
-            onPressed: () async {
-              await Geolocator.openLocationSettings();
-            },
-          );
-        } else if (e.toString().contains('permissions are denied') ||
-            e.toString().contains('permanently denied')) {
-          action = SnackBarAction(
-            label: 'Settings',
-            textColor: Colors.white,
-            onPressed: () async {
-              await Geolocator.openAppSettings();
-            },
-          );
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to fetch location: $errMsg'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.primaryBlue,
-            action: action,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isFetchingLocation = false);
-      }
-    }
-  }
-
   Widget _buildStickyButton() {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
@@ -759,26 +628,4 @@ class _RegistrationPersonalPageState extends State<RegistrationPersonalPage>
     );
   }
 
-  Widget _buildLoginRedirect(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Already have an account? ',
-          style: GoogleFonts.outfit(fontSize: 15.sp, color: AppColors.greyText),
-        ),
-        BouncingWrapper(
-          onTap: () => context.read<AuthCubit>().logout(),
-          child: Text(
-            'Login',
-            style: GoogleFonts.outfit(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primaryBlue,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }

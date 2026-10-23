@@ -9,14 +9,12 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
-import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../domain/entities/subscription_response.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/subscription_cubit.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_payment_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_failed_screen.dart';
-import 'package:stayindia_owner/features/razorpay/domain/entities/razorpay_payment_result.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import '../../../../injection_container.dart';
@@ -159,7 +157,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final bool isExpiring = !isPaused && daysRemaining <= 7 && daysRemaining >= 0;
 
     final phoneNumber = subscription.supportCall;
-    final whatsappText = subscription.supportWhatsappText;
     final whatsappUrl = subscription.supportWhatsappUrl;
 
     final isLinkRequired = subscription.isLinkRequired;
@@ -169,7 +166,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     Color badgeBg = const Color(0xFFDCFCE7);
     Color badgeTextCol = const Color(0xFF166534);
 
-    Color borderCardColor = const Color(0xFFF59E0B).withOpacity(0.5);
+    Color borderCardColor = const Color(0xFFF59E0B).withValues(alpha: 0.5);
 
     if (isPaused) {
       badgeText = 'Paused';
@@ -922,7 +919,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
           final now = DateTime.now();
           final endDate = response?.activeSubscription?.endDate ?? now;
-          final daysRemaining = response?.activeSubscription?.daysRemaining ?? 0;
 
           final lapseTime = endDate.difference(now).inDays;
           final bool isPaused = lapseTime <= -7;
@@ -1794,285 +1790,4 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  Widget _buildPendingCard(
-    BuildContext context,
-    SubscriptionProperty property,
-    ActiveSubscription subscription,
-  ) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSubscriptionHeader(
-            hostelName: property.name,
-            status: 'Payment Pending',
-            statusColor: SubscriptionColors.orange,
-            backgroundColor: SubscriptionColors.orangeLight,
-            icon: Icons.hourglass_empty,
-          ),
-          _buildLocationRow(property.address),
-          _buildBedsRow(property.totalBeds),
-          SizedBox(height: 16.h),
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: SubscriptionColors.priceBoxBg,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Amount to Pay',
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: SubscriptionColors.grayText,
-                      ),
-                    ),
-                    Text(
-                      '₹${_formatNumber(subscription.totalAmount.round())}',
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryBlue,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16.h),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _navigateToRazorpay(context, subscription),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                    child: Text(
-                      'Complete Payment',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActiveCard(
-    BuildContext context,
-    SubscriptionProperty property,
-    ActiveSubscription subscription,
-  ) {
-    final beds = property.totalBeds;
-    final planSnapshot = subscription.planSnapshot;
-    final plan = PlanOption.fromEntity(planSnapshot);
-    final price = plan.pricePerBed.round();
-
-    final start = subscription.startDate ?? DateTime.now();
-    final end =
-        subscription.endDate ?? start.add(Duration(days: plan.months * 30));
-
-    final now = DateTime.now();
-    final totalDays = end.difference(start).inDays.clamp(1, 100000);
-    final elapsedDays = now.difference(start).inDays.clamp(0, totalDays);
-    final progress = elapsedDays / totalDays;
-    final daysRemaining = end.difference(now).inDays.clamp(0, totalDays);
-
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSubscriptionHeader(
-            hostelName: property.name,
-            status: 'Active',
-            statusColor: SubscriptionColors.green,
-            backgroundColor: SubscriptionColors.greenLight,
-            icon: Icons.check_circle,
-          ),
-          _buildLocationRow(property.address),
-          _buildBedsRow(beds),
-          SizedBox(height: 16.h),
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-              gradient: const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFFFFFFFF),
-                  Color(0xFFFCFCFD),
-                  Color(0xFFF8F6F3),
-                ],
-                stops: [0.0, 0.6, 1.0],
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${plan.label} plan',
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
-                        color: SubscriptionColors.navy,
-                      ),
-                    ),
-                    Text(
-                      '₹$price / bed / mo',
-                      style: GoogleFonts.inter(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold,
-                        color: SubscriptionColors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'FROM',
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            color: SubscriptionColors.grayText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          _formatDate(start),
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkText,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'TO',
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            color: SubscriptionColors.grayText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          _formatDate(end),
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10.h),
-                _buildGradientProgress(progress),
-                SizedBox(height: 8.h),
-                Text(
-                  '$daysRemaining days remaining · renews at ${plan.label.toLowerCase()} rate',
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: SubscriptionColors.grayText,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGradientProgress(double progress) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10.r),
-      child: Container(
-        height: 6.h,
-        color: const Color(0xFFE8ECF2), // Track color
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: FractionallySizedBox(
-            // widthFactor: 0.8,
-            widthFactor: progress.clamp(0.0, 1.0),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.r),
-                gradient: const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF3F5CA8), // Blue
-                    Color(0xFF6A5F8F), // Blue-Purple
-                    Color(0xFF9D6B66), // Brown
-                    Color(0xFFD58B45), // Orange
-                  ],
-                  stops: [0.0, 0.35, 0.7, 1.0],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

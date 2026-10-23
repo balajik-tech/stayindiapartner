@@ -43,14 +43,13 @@ class UnifiedHeader extends StatelessWidget {
           color: Colors.white,
           child: Row(
             children: [
-              Container(
+              SizedBox(
                 width: 48.w,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      child: Image.asset(
+                    Image.asset(
                         'assets/images/login_logo_nobg.png',
                         fit: BoxFit.contain,
                         height: 44.h,
@@ -60,7 +59,6 @@ class UnifiedHeader extends StatelessWidget {
                           color: Colors.grey,
                         ),
                       ),
-                    ),
                     // Commented partner text in logo
                     // Container(
                     //   width: double.infinity,

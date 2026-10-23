@@ -89,7 +89,7 @@ class BankAccountEntity extends Equatable {
       accountNumber: accountNumber ?? this.accountNumber,
       ifscCode: ifscCode ?? this.ifscCode,
       accountHolderName: accountHolderName ?? this.accountHolderName,
-      businessType: businessType ?? this.businessType,
+      businessType: businessType,
       accountType: accountType ?? this.accountType,
       isPrimary: isPrimary ?? this.isPrimary,
       verificationStatus: verificationStatus ?? this.verificationStatus,

@@ -11,8 +11,6 @@ import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/tenant_state.dart';
 import 'package:stayindia_owner/features/tenants/presentation/pages/history/tenant_history_page.dart';
-import 'package:stayindia_owner/features/notices/presentation/pages/give_notice_page.dart';
-import 'package:stayindia_owner/features/tenants/presentation/pages/complaints_history_page.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/payment_report_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/widgets/collect_payment_bottom_sheet.dart';
@@ -1341,17 +1339,6 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
     }
   }
 
-  String _formatStatusText(String status) {
-    switch (status.toUpperCase()) {
-      case 'CHECKED_IN':
-        return 'CHECKED IN';
-      case 'CHECKED_OUT':
-        return 'CHECKED OUT';
-      default:
-        return status.replaceAll('_', ' ').toUpperCase();
-    }
-  }
-
   Widget _buildBillsSummary(List<TenantRentalEntity> rentals) {
     if (rentals.isEmpty) return const SizedBox.shrink();
 
@@ -1841,160 +1828,6 @@ class _TenantDetailsSheetState extends State<TenantDetailsSheet> {
 
         ],
       ),
-    );
-  }
-
-  Widget _buildComplaintsHistory(BuildContext context) {
-    return _buildSection(
-      'complaints_history'.tr(),
-      Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
-          border: Border.all(
-            color: AppColors.roomCardBorder.withValues(alpha: 0.5),
-          ),
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: AppColors.roomCardBorder.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.report_problem_outlined,
-                    color: Colors.orange,
-                    size: 24.sp,
-                  ),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'maintenance_issues'.tr(),
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkText,
-                        ),
-                      ),
-                      Text(
-                        'track_problems'.tr(),
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.greyText,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ComplaintsHistoryPage(hostelId: widget.hostelId),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'history'.tr(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFooterActions(BuildContext context, TenantDetailEntity? detail) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  if (detail != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GiveNoticePage(
-                          tenant: detail.toTenantEntity(widget.hostelId),
-                        ),
-                      ),
-                    );
-                  }
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  side: BorderSide(color: AppColors.roomCardBorder),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                ),
-                child: Text(
-                  'give_notice'.tr(),
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
-                  ),
-                ),
-              ),
-            ),
-            // SizedBox(width: 12.w),
-
-            // Commented Add Note
-
-            // Expanded(
-            //   child: OutlinedButton(
-            //     onPressed: () {
-            //       Navigator.push(
-            //         context,
-            //         MaterialPageRoute(
-            //           builder: (context) => const AddNotePage(),
-            //         ),
-            //       );
-            //     },
-            //     style: OutlinedButton.styleFrom(
-            //       padding: EdgeInsets.symmetric(vertical: 14.h),
-            //       side: BorderSide(color: AppColors.roomCardBorder),
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(10.r),
-            //       ),
-            //     ),
-            //     child: Text(
-            //       'Add Note',
-            //       style: TextStyle(
-            //         fontSize: 16.sp,
-            //         fontWeight: FontWeight.bold,
-            //         color: AppColors.darkText,
-            //       ),
-            //     ),
-            //   ),
-            // ),
-          ],
-        ),
-      ],
     );
   }
 

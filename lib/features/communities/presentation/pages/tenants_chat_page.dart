@@ -130,11 +130,11 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
   }
 
   Future<void> _loadStarredMessages() async {
+    final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
     try {
       final prefs = await SharedPreferences.getInstance();
-      final page = context.findAncestorWidgetOfExactType<TenantsChatPage>()!;
       final List<String>? starred = prefs.getStringList('starred_messages_${page.hostelId}');
-      if (starred != null) {
+      if (starred != null && mounted) {
         setState(() {
           _starredMessageIds.addAll(starred);
         });
@@ -157,6 +157,7 @@ class _TenantsChatViewState extends State<_TenantsChatView> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList('starred_messages_${page.hostelId}', _starredMessageIds.toList());
     } catch (_) {}
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(allStarred ? "Messages unstarred" : "Messages starred"),

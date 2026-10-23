@@ -5,11 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/registration_personal_page.dart';
-import 'package:stayindia_owner/features/auth/presentation/pages/login_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:stayindia_owner/core/widgets/animated_splash_text.dart';
 
-import 'LoginOnBoardingScreen.dart';
+import 'login_on_boarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

@@ -10,25 +10,23 @@ abstract class SubscriptionState extends Equatable {
 }
 
 class SubscriptionInitial extends SubscriptionState {
-  const SubscriptionInitial({Map<String, SubscriptionResponse> subscriptionResponses = const {}})
-      : super(subscriptionResponses: subscriptionResponses);
+  const SubscriptionInitial({super.subscriptionResponses});
 }
 
 class SubscriptionLoading extends SubscriptionState {
   final String? loadingPropertyId;
 
   const SubscriptionLoading({
-    Map<String, SubscriptionResponse> subscriptionResponses = const {},
+    super.subscriptionResponses,
     this.loadingPropertyId,
-  }) : super(subscriptionResponses: subscriptionResponses);
+  });
 
   @override
   List<Object?> get props => [subscriptionResponses, loadingPropertyId];
 }
 
 class SubscriptionLoaded extends SubscriptionState {
-  const SubscriptionLoaded({required Map<String, SubscriptionResponse> subscriptionResponses})
-      : super(subscriptionResponses: subscriptionResponses);
+  const SubscriptionLoaded({required super.subscriptionResponses});
 }
 
 class SubscriptionProcessing extends SubscriptionState {
@@ -36,8 +34,8 @@ class SubscriptionProcessing extends SubscriptionState {
 
   const SubscriptionProcessing({
     required this.propertyId,
-    Map<String, SubscriptionResponse> subscriptionResponses = const {},
-  }) : super(subscriptionResponses: subscriptionResponses);
+    super.subscriptionResponses,
+  });
 
   @override
   List<Object?> get props => [subscriptionResponses, propertyId];
@@ -48,8 +46,8 @@ class SubscriptionSubscribed extends SubscriptionState {
 
   const SubscriptionSubscribed({
     required this.activeSubscription,
-    required Map<String, SubscriptionResponse> subscriptionResponses,
-  }) : super(subscriptionResponses: subscriptionResponses);
+    required super.subscriptionResponses,
+  });
 
   @override
   List<Object?> get props => [subscriptionResponses, activeSubscription];
@@ -62,8 +60,8 @@ class SubscriptionPaymentVerified extends SubscriptionState {
   const SubscriptionPaymentVerified({
     required this.message,
     required this.summary,
-    Map<String, SubscriptionResponse> subscriptionResponses = const {},
-  }) : super(subscriptionResponses: subscriptionResponses);
+    super.subscriptionResponses,
+  });
 
   @override
   List<Object?> get props => [subscriptionResponses, message, summary];
@@ -76,8 +74,8 @@ class SubscriptionPaymentVerificationFailed extends SubscriptionState {
   const SubscriptionPaymentVerificationFailed({
     required this.message,
     this.summary,
-    Map<String, SubscriptionResponse> subscriptionResponses = const {},
-  }) : super(subscriptionResponses: subscriptionResponses);
+    super.subscriptionResponses,
+  });
 
   @override
   List<Object?> get props => [subscriptionResponses, message, summary];
@@ -88,8 +86,8 @@ class SubscriptionError extends SubscriptionState {
 
   const SubscriptionError({
     required this.message,
-    Map<String, SubscriptionResponse> subscriptionResponses = const {},
-  }) : super(subscriptionResponses: subscriptionResponses);
+    super.subscriptionResponses,
+  });
 
   @override
   List<Object?> get props => [subscriptionResponses, message];

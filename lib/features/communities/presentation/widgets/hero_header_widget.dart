@@ -24,7 +24,6 @@ class HeroHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = theme.primaryColor.toColor();
-    final primaryLight = theme.primaryColorLight.toColor();
     final accent = theme.accentColor.toColor();
 
     final name = details?.name.toUpperCase() ?? '';
@@ -266,7 +265,7 @@ class _LogoBadge extends StatelessWidget {
                 width: 110,
                 height: 110,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => Image.asset(
+                errorBuilder: (_, _, _) => Image.asset(
                   'assets/images/associate_logo.png',
                   width: 92,
                   height: 92,

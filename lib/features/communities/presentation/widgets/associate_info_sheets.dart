@@ -348,7 +348,6 @@ class _FoundersSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = theme.primaryColor.toColor();
     final accent = theme.accentColor.toColor();
     final badgeBg = theme.badgeBackground.toColor();
     final badgeText = theme.badgeText.toColor();

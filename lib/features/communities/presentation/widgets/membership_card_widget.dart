@@ -6,11 +6,8 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/api_constants.dart';
-import '../../../../injection_container.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
-import '../../../razorpay/presentation/bloc/razorpay_cubit.dart';
-import '../../../razorpay/presentation/bloc/razorpay_state.dart';
 import '../../../razorpay/presentation/screens/razorpay_payment_screen.dart';
 import '../../../navigation/presentation/pages/main_navigation_page.dart';
 import '../cubit/association_membership_cubit.dart';
@@ -529,62 +526,6 @@ class _MembershipCardWidgetState extends State<MembershipCardWidget> {
     return const SizedBox.shrink();
   }
 
-  Widget _buildPreviewToggles(MembershipStatus currentStatus) {
-    return Column(
-      children: [
-        const Divider(color: Colors.white12),
-        SizedBox(height: 8.h),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'PREVIEW',
-                style: GoogleFonts.inter(
-                  color: Colors.white24,
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1,
-                ),
-              ),
-              SizedBox(width: 16.w),
-              _previewButton('Active', MembershipStatus.paid, currentStatus),
-              _previewButton('Renewal due', MembershipStatus.renewalDue, currentStatus),
-              _previewButton('Lapsed', MembershipStatus.expired, currentStatus),
-              _previewButton('New user', MembershipStatus.newUser, currentStatus),
-              _previewButton('Applied', MembershipStatus.applied, currentStatus),
-              _previewButton('Approved', MembershipStatus.approved, currentStatus),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _previewButton(String label, MembershipStatus status, MembershipStatus currentStatus) {
-    final isSelected = currentStatus == status;
-    return Padding(
-      padding: EdgeInsets.only(right: 12.w),
-      child: InkWell(
-        onTap: () => setState(() {
-          _previewStatus = status;
-        }),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            color: isSelected
-                ? widget.theme.accentColor.toColor()
-                : Colors.white54,
-            fontSize: 12.sp,
-            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-            decoration: isSelected ? TextDecoration.underline : null,
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showRequestToJoinSheet(BuildContext context) {
 
     final profileState = context.read<ProfileCubit>().state;
@@ -887,7 +828,6 @@ class _ActiveMembershipView extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = theme.accentColor.toColor();
     final memId = membership?.membershipId ?? '';
-    final expiry = membership?.expiredAt;
     final validUntil = membership?.validUntil;
     final whatsappLink = membership?.whatsappLink;
 
@@ -940,7 +880,6 @@ class _RenewalDueMembershipView extends StatelessWidget {
     final accent = theme.accentColor.toColor();
 
     final now = DateTime.now();
-    final expiry = membership?.expiredAt ?? now.add(const Duration(days: 28));
     // final validUntil = membership?.validUntil ?? now.add(const Duration(days: 28));
     // final daysRemaining = validUntil.difference(now).inDays;
 
@@ -1306,7 +1245,7 @@ class _PropertySummaryBox extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: properties.length,
-            separatorBuilder: (_, __) => Padding(
+            separatorBuilder: (_, _) => Padding(
               padding: EdgeInsets.symmetric(vertical: 12.h),
               child: Divider(color: Colors.white12, height: 1),
             ),
@@ -1442,12 +1381,6 @@ class _MembershipIdBox extends StatelessWidget {
     // required String membershipId,
     required String whatsappLink,
   }) async {
-    final message =
-        'Hello, my Membership ID is . '
-        'Please share my membership certificate and receipt.';
-
-    final encodedMessage = Uri.encodeComponent(message);
-
     final whatsappUrl = Uri.parse(
       whatsappLink,
     );
@@ -1560,65 +1493,6 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-class _OutlineButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  const _OutlineButton({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white, size: 18.sp),
-      label: Text(
-        label,
-        style: GoogleFonts.inter(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: 13.sp,
-        ),
-      ),
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.white24),
-        padding: EdgeInsets.symmetric(vertical: 12.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-      ),
-    );
-  }
-}
-
-class _TextLink extends StatelessWidget {
-  final String label;
-  final VoidCallback? onTap;
-
-  const _TextLink({required this.label, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap ?? () {},
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          color: Colors.white54,
-          fontSize: 13.sp,
-          fontWeight: FontWeight.w500,
-          decoration: TextDecoration.underline,
-          decorationColor: Colors.white30,
-        ),
-      ),
-    );
-  }
-}
-
 class _RequestToJoinSheet extends StatefulWidget {
   final CommunityThemeEntity theme;
   final String? portalId;
@@ -1627,8 +1501,7 @@ class _RequestToJoinSheet extends StatefulWidget {
   const _RequestToJoinSheet({
     required this.theme,
     this.portalId,
-    this.initialProperties,
-  });
+  }) : initialProperties = null;
 
   @override
   State<_RequestToJoinSheet> createState() => _RequestToJoinSheetState();
@@ -1637,7 +1510,7 @@ class _RequestToJoinSheet extends StatefulWidget {
 class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
   late List<MembershipPropertyEntity> _properties;
   late List<bool> _selected;
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   void initState() {
@@ -2051,35 +1924,6 @@ class _RequestToJoinSheetState extends State<_RequestToJoinSheet> {
   }
 }
 
-class _DashedDivider extends StatelessWidget {
-  const _DashedDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const dashWidth = 6.0;
-        const dashSpace = 4.0;
-        final dashCount = (constraints.maxWidth / (dashWidth + dashSpace))
-            .floor();
-        return Row(
-          children: List.generate(
-            dashCount,
-            (_) => Padding(
-              padding: const EdgeInsets.only(right: dashSpace),
-              child: Container(
-                width: dashWidth,
-                height: 1,
-                color: Colors.white24,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 class _PayMembershipSheet extends StatefulWidget {
   final CommunityThemeEntity theme;
   final AssociationMembershipEntity? membership;
@@ -2124,7 +1968,7 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
       }
     }
 
-    if (memberName == null || memberName.isEmpty) {
+    if (memberName.isEmpty) {
       if (authState is AuthAuthenticated) {
         memberName = authState.owner.name.trim();
       }
@@ -2276,7 +2120,7 @@ class _PayMembershipSheetState extends State<_PayMembershipSheet> {
                       order = await cubit.generatePaymentOrder(membershipId);
                     }
 
-                    if (order != null && mounted) {
+                    if (order != null && context.mounted) {
                       _navigateToRazorpay(
                         context,
                         amount: (order['amount'] as num).toDouble() / 100,

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 
 import '../../domain/entities/association_details_entity.dart';
 

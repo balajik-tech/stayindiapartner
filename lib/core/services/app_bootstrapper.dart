@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,13 +15,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/navigation/presentation/pages/main_navigation_page.dart';
 import '../../firebase_options.dart';
 import '../../injection_container.dart' as di;
-import '../constants/api_constants.dart';
 import '../services/token_storage.dart';
 import '../widgets/app_scaffold_messenger.dart';
 import '../services/cache_service.dart';
 import '../services/notification_service.dart';
 import '../services/app_config_service.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_cubit.dart';
 import '../utils/logger.dart';
@@ -31,7 +28,7 @@ import '../widgets/animated_splash_text.dart';
 // Features / Auth imports
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/cubit/guest_session_cubit.dart';
-import '../../features/auth/presentation/pages/LoginOnBoardingScreen.dart';
+import '../../features/auth/presentation/pages/login_on_boarding_screen.dart';
 import '../../features/auth/presentation/pages/link_phone_page.dart';
 import '../../features/auth/presentation/pages/registration_personal_page.dart';
 import '../../features/profile/presentation/cubit/hostel_cubit.dart';
@@ -64,15 +61,10 @@ class AppBootstrapper extends StatefulWidget {
 
 class _AppBootstrapperState extends State<AppBootstrapper>
     with SingleTickerProviderStateMixin {
-  double _progress = 0.0;
-  String _statusText = 'Preparing system...';
-  bool _hasError = false;
-  String _errorDetails = '';
   bool _systemInitialized = false;
 
   // Onboarding/Auth Decision State
   bool _hasSeenOnboarding = false;
-  bool _isCheckingOnboarding = true;
   AuthState? _lastActiveState;
 
   @override
@@ -82,12 +74,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
   }
 
   Future<void> _startStagedInitialization() async {
-    setState(() {
-      _progress = 0.05;
-      _statusText = 'Loading localization system...';
-      _hasError = false;
-      _errorDetails = '';
-    });
+    setState(() {});
 
     try {
       // 1. Initial system checks
@@ -115,10 +102,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       );
       await EasyLocalization.ensureInitialized();
 
-      setState(() {
-        _progress = 0.20;
-        _statusText = 'Building secure storage...';
-      });
+      setState(() {});
 
       final storageDir = await getApplicationDocumentsDirectory();
       HydratedBloc.storage = await HydratedStorage.build(
@@ -126,10 +110,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       );
       await Hive.initFlutter();
 
-      setState(() {
-        _progress = 0.45;
-        _statusText = 'Connecting Stay India Cloud...';
-      });
+      setState(() {});
 
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
@@ -153,10 +134,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
         return true;
       };
 
-      setState(() {
-        _progress = 0.65;
-        _statusText = 'Initializing services & dependencies...';
-      });
+      setState(() {});
 
       await di.init();
 
@@ -165,10 +143,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       }
       di.sl.registerSingleton<AppConfigService>(configService);
 
-      setState(() {
-        _progress = 0.80;
-        _statusText = 'Optimizing caches & notifications...';
-      });
+      setState(() {});
 
       await di.sl<CacheService>().checkAndFlushOnUpdate();
       await di.sl<NotificationService>().init();
@@ -195,17 +170,13 @@ class _AppBootstrapperState extends State<AppBootstrapper>
 
       AppLogger.info('Stay India Owner App Initialized via Bootstrapper');
 
-      setState(() {
-        _progress = 1.0;
-        _statusText = 'Welcome Owner';
-      });
+      setState(() {});
 
       await Future.delayed(const Duration(milliseconds: 300));
 
       if (mounted) {
         setState(() {
           _systemInitialized = true;
-          _isCheckingOnboarding = false;
         });
       }
     } catch (e, stack) {
@@ -215,10 +186,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
         stack,
       );
       if (mounted) {
-        setState(() {
-          _hasError = true;
-          _errorDetails = e.toString();
-        });
+        setState(() {});
       }
     }
   }

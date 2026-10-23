@@ -29,15 +29,9 @@ import '../widgets/share_app_bottom_sheet.dart';
 import 'account_settings_page.dart';
 import 'help_support_page.dart';
 import 'subscription_page.dart';
-import 'hostel_profile_page.dart';
-import 'amenities_page.dart';
-import 'house_rules_page.dart';
-import 'food_menu_page.dart';
 import 'hostel_configuration_page.dart';
 import 'package:stayindia_owner/features/auth/presentation/pages/terms_and_conditions_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
-import 'package:stayindia_owner/features/request_service/presentation/pages/request_service_page.dart';
-import 'package:stayindia_owner/features/request_service/presentation/pages/my_requests_page.dart';
 import 'package:stayindia_owner/features/electricity_bills/presentation/pages/room_electricity_bills_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -131,8 +125,8 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
           final profile = _cachedProfile;
           final name = (profile?.dlKyc?.name?.trim().isNotEmpty == true)
               ? profile!.dlKyc!.name!.trim()
-              : (((profile?.firstName?.trim().isNotEmpty == true) ||
-                        (profile?.lastName?.trim().isNotEmpty == true))
+              : (((profile?.firstName.trim().isNotEmpty == true) ||
+                        (profile?.lastName.trim().isNotEmpty == true))
                     ? '${profile?.lastName ?? ''} ${profile?.firstName ?? ''} '
                           .trim()
                     : (owner?.name ?? ''));
@@ -346,7 +340,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           iconBgColor: const Color(0xFFE6F1FB),
                           iconColor: const Color(0xFF185FA5),
                           onTap: () => {
-                            _openUrl(ApiConstants.ABOUT_US)
+                            _openUrl(ApiConstants.aboutUs)
                           },
                         ),
                       ],
@@ -908,43 +902,6 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
     if (confirm == true && context.mounted) context.read<AuthCubit>().logout();
   }
 
-  void _handleDeleteAccount(BuildContext context) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.r),
-        ),
-        title: Text(
-          'delete_account'.tr(),
-          style: const TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppColors.error,
-          ),
-        ),
-        content: Text('delete_account_confirm'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: Text(
-              'delete_permanently'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true && context.mounted) {
-      context.read<AuthCubit>().deleteAccount();
-    }
-  }
-
   void _handleDeactivateAccount(BuildContext context) async {
     final action = await showDialog<String>(
       context: context,
@@ -1280,11 +1237,8 @@ class _MenuTile extends StatelessWidget {
     required this.onTap,
     required this.iconBgColor,
     required this.iconColor,
-    this.badge,
     this.imagePath="",
-    this.showChevron = true,
-    this.isDestructive = false,
-  });
+  }) : badge = null, showChevron = true, isDestructive = false;
 
   @override
   Widget build(BuildContext context) {
@@ -1360,37 +1314,6 @@ class _MenuTile extends StatelessWidget {
                 ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  final String text;
-  final Color color;
-  final Color bgColor;
-
-  const _StatusBadge({
-    required this.text,
-    required this.color,
-    required this.bgColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(6.r),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 9.sp,
-          fontWeight: FontWeight.w700,
-          color: color,
         ),
       ),
     );
@@ -1585,32 +1508,6 @@ class _ReferralCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SocialIcon extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-
-  const _SocialIcon({required this.icon, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(10.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Icon(icon, color: color, size: 22.sp),
     );
   }
 }

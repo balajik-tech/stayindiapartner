@@ -12,7 +12,6 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cub
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
-import 'hostel_documents_page.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'dart:io';
@@ -1051,48 +1050,4 @@ class _HostelProfilePageState extends State<HostelProfilePage> {
     }
   }
 
-  Widget _buildDocumentsTile() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: ListTile(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                HostelDocumentsPage(hostelId: _hostelId(context)),
-          ),
-        ),
-        contentPadding: EdgeInsets.all(16.r),
-        leading: Container(
-          padding: EdgeInsets.all(10.r),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF4E6),
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: const Icon(
-            Icons.description_rounded,
-            color: Color(0xFFF08C00),
-          ),
-        ),
-        title: Text(
-          StringUtils.translate('property_documents', context: context),
-          style: TextStyle(
-            fontSize: 15.sp,
-            fontWeight: FontWeight.w800,
-            color: AppColors.darkText,
-          ),
-        ),
-        subtitle: Text(
-          StringUtils.translate('manage_docs_sub', context: context),
-          style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-      ),
-    );
-  }
 }

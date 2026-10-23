@@ -27,13 +27,13 @@ class AppColors {
 
   static const Color blackColor = Color(0xFF000000);
 
-  static const Color grayColor2 = const Color(0xFF9da1a9);
+  static const Color grayColor2 = Color(0xFF9da1a9);
 
-  static const Color grayLight = const Color(0xFF737880);
+  static const Color grayLight = Color(0xFF737880);
 
-  static const Color grayColor3 = const Color(0xFF6c717a);
+  static const Color grayColor3 = Color(0xFF6c717a);
 
-  static const Color grayColor4 = const Color(0xFF595856);
+  static const Color grayColor4 = Color(0xFF595856);
 
   static const Color buttonColors = Color(0xff17539B);
 

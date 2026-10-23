@@ -39,7 +39,7 @@ class AssociationMembershipModel extends AssociationMembershipEntity {
           (json['status'] == 'ACTIVE' && json['id'] != null
               ? json['id'].toString()
               : null),
-      whatsappLink: json['whatsappLink']?.toString() ?? null,
+      whatsappLink: json['whatsappLink']?.toString(),
       timeline: json['timeline'] is Map ? Map<String, dynamic>.from(json['timeline'] as Map) : null,
       properties: (json['properties'] as List? ?? [])
           .map((e) => MembershipPropertyModel.fromJson(e as Map<String, dynamic>))

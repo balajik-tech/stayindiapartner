@@ -22,7 +22,6 @@ class CommunityWingMemberTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textSecondary = theme.textSecondary.toColor();
     final accent = theme.accentColor.toColor();
     final textPrimary = theme.textPrimary.toColor();
 

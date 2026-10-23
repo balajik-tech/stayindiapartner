@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -241,7 +240,7 @@ class AuthLogoBadge extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Container(
+        SizedBox(
             width: double.infinity,
             child: Container(
               alignment: Alignment.center,
@@ -274,7 +273,7 @@ class AuthNewLogoBadge extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Container(
+        SizedBox(
             width: double.infinity,
             child: Container(
               alignment: Alignment.center,

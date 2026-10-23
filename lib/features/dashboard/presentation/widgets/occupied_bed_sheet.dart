@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/custom_avatar.dart';
 import 'package:stayindia_owner/core/widgets/side_view_bed_icon.dart';
@@ -19,7 +18,6 @@ import 'package:stayindia_owner/injection_container.dart';
 
 const Color _navy = Color(0xFF1B2838);
 const Color _orange = Color(0xFFE8722A);
-const Color _orangeLight = Color(0xFFFFF3ED);
 
 class OccupiedBedSheet extends StatelessWidget {
   final String roomNumber;

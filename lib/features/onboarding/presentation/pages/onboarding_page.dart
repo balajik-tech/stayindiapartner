@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/bed_card.dart';
@@ -113,8 +112,7 @@ class _PageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
+    return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Illustration is exported at a logical width of 340pt.
@@ -158,8 +156,7 @@ class _PageView extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 }
 

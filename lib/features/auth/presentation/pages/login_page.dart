@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,11 +15,10 @@ import 'package:stayindia_owner/core/constants/api_constants.dart';
 
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/app_toast.dart';
-import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../cubit/auth_cubit.dart';
 import '../widgets/auth_widgets.dart';
-import 'LoginOnBoardingScreen.dart';
+import 'login_on_boarding_screen.dart';
 import 'otp_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -47,7 +45,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   String? _googleAvatar;
 
   bool _isStaffLogin = false;
-  bool _useSmsOtp = false;
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
   bool _isPasswordFocused = false;
@@ -67,8 +64,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   String? _appSignature;
 
   late AnimationController _entranceController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -91,19 +86,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _entranceController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _entranceController,
-            curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
-          ),
-        );
 
     _entranceController.forward();
   }
@@ -231,7 +213,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           );
         });
       }
-    } on PlatformException catch (e) {
+    } on PlatformException {
       // debugPrint('[SIM] Phone number hint failed: ${e.code} — ${e.message}');
       if (mounted) {
         _showToast(
@@ -783,8 +765,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  child: Checkbox(
+                                Checkbox(
                                     value: _isTermsAccepted,
                                     onChanged: (value) {
                                       setState(() {
@@ -794,7 +775,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                     activeColor: AppColors.inputBoxColor,
                                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   ),
-                                ),
                                 Expanded(
                                   child: Container(
                                     margin: EdgeInsets.only(top: 8.h),
@@ -811,7 +791,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                             ),
                                             recognizer: TapGestureRecognizer()
                                               ..onTap = () {
-                                                _openUrl(ApiConstants.TERMS_AND_CONDITIONS);
+                                                _openUrl(ApiConstants.termsAndConditions);
                                               },
                                           ),
                                           const TextSpan(text: ' & '),
@@ -824,7 +804,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                             ),
                                             recognizer: TapGestureRecognizer()
                                               ..onTap = () {
-                                                _openUrl(ApiConstants.TERMS_AND_CONDITIONS);
+                                                _openUrl(ApiConstants.termsAndConditions);
                                               },
                                           ),
                                         ],
@@ -893,37 +873,3 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 }
 
-class _HeroPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.04)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    final path = Path();
-    for (var i = 0; i < 6; i++) {
-      path.addOval(
-        Rect.fromCircle(
-          center: Offset(size.width * 0.85, size.height * 0.15),
-          radius: 60.0 + (i * 45),
-        ),
-      );
-    }
-    canvas.drawPath(path, paint);
-
-    final path2 = Path();
-    for (var i = 0; i < 4; i++) {
-      path2.addOval(
-        Rect.fromCircle(
-          center: Offset(size.width * 0.1, size.height * 0.85),
-          radius: 40.0 + (i * 35),
-        ),
-      );
-    }
-    canvas.drawPath(path2, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}

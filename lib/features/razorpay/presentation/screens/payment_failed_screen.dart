@@ -7,12 +7,9 @@ import 'package:stayindia_owner/features/profile/domain/entities/payment_summary
 import 'package:stayindia_owner/features/profile/presentation/cubit/subscription_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/screens/razorpay_payment_screen.dart';
-import 'package:stayindia_owner/features/razorpay/presentation/screens/payment_success_screen.dart';
 import 'package:stayindia_owner/features/razorpay/presentation/bloc/razorpay_cubit.dart';
-import 'package:stayindia_owner/features/razorpay/domain/entities/razorpay_payment_result.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/injection_container.dart';
-import '../../../profile/presentation/pages/subscription_page.dart';
 
 class PaymentFailedScreen extends StatelessWidget {
   final PaymentSummary? summary;
@@ -138,7 +135,6 @@ class _PaymentFailedBody extends StatelessWidget {
 
   void _onRetry(BuildContext context) {
     final cubit = context.read<SubscriptionCubit>();
-    final pId = summary?.propertyName ?? propertyId; // Simplified, propertyName is not ID
     // Wait, propertyId is passed explicitly.
     final actualPropertyId = propertyId ?? ""; // We should ensure it's passed
     final actualPlanId = planId ?? "";
@@ -178,7 +174,7 @@ class _PaymentFailedBody extends StatelessWidget {
             displayTransactionId = summary?.transactionId;
             displayDate = _formatDate(summary!.paymentDate);
           } else {
-            displayAmount = (activeSubscription?.razorpayAmount?.toDouble() ?? 0.0) / 100 ?? 0.0;
+            displayAmount = (activeSubscription?.razorpayAmount?.toDouble() ?? 0.0) / 100;
             displayPropertyName = activeSubscription?.propertyName;
             displayPlanName = activeSubscription?.planSnapshot.planName ?? 'Subscription Plan';
             displayTransactionId = '';
@@ -386,7 +382,7 @@ class _FailureIcon extends StatelessWidget {
             height: 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
             ),
           ),
           Container(
@@ -394,7 +390,7 @@ class _FailureIcon extends StatelessWidget {
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withOpacity(0.14),
+              color: color.withValues(alpha: 0.14),
             ),
           ),
           Container(

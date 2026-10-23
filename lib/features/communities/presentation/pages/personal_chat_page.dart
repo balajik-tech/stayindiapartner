@@ -38,7 +38,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
   final FocusNode _focusNode = FocusNode();
   final List<Map<String, dynamic>> _messages = [];
   bool _isLoading = true;
-  bool _isSending = false;
   StreamSubscription? _socketSubscription;
   StreamSubscription? _messageEditedSub;
   Timer? _presenceTimer;
@@ -236,7 +235,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
 
     setState(() {
       _messages.add(optimisticMessage);
-      _isSending = true;
     });
     _scrollToBottom();
 
@@ -255,7 +253,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
             if (idx != -1) {
               _messages[idx] = Map<String, dynamic>.from(newMsg);
             }
-            _isSending = false;
           });
         }
         return;
@@ -267,7 +264,6 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
     if (mounted) {
       setState(() {
         _messages.removeWhere((m) => m['_id'] == tempId);
-        _isSending = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to send message. Please retry.')),

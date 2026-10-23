@@ -334,7 +334,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         );
       },
     ).then((success) {
-      if (success == true && mounted) {
+      if (success == true && context.mounted) {
         Navigator.pop(context, true);
       }
     });
@@ -699,7 +699,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         rent: rent ?? 0,
         checkInDate: checkInDate,
         checkOutDate: checkOutDate,
-        maintainance: maintainance ?? 0,
+        maintainance: maintainance,
         roomType: roomType,
         aadhaarNumber: extractedAadhaar,
         dob: extractedAadhaarDOB,

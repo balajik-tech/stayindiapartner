@@ -280,7 +280,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             ),
           ),
           SizedBox(height: 16.h),
-          // TODO: link the video tutorials and user guide once their URLs
+          // link the video tutorials and user guide once their URLs
           // are available.
           _buildLinkItem(
             StringUtils.translate('video_tutorials_link', context: context),

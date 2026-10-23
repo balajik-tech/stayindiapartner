@@ -8,7 +8,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 import 'package:smart_auth/smart_auth.dart';
-import 'package:dio/dio.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stayindia_owner/core/constants/api_constants.dart';
@@ -18,7 +17,7 @@ import 'package:stayindia_owner/core/widgets/bouncing_button.dart';
 import '../cubit/auth_cubit.dart';
 import '../widgets/auth_widgets.dart';
 import '../widgets/account_recovery_widgets.dart';
-import 'LoginOnBoardingScreen.dart';
+import 'login_on_boarding_screen.dart';
 
 class OtpPage extends StatefulWidget {
   final String phone;
@@ -58,7 +57,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   int _countdown = 30;
   Timer? _timer;
 
-  bool _useSmsOtp = false;
   bool _hasAutoSubmitted = false;
   String? _appSignature; // debug helper — see initState
 
@@ -71,15 +69,11 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
   Timer? _otpLockTimer;
 
   final SmartAuth _smartAuth = SmartAuth.instance;
-  late String? _currentDevOtp;
   late AnimationController _entranceController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
-    _currentDevOtp = widget.devOtp;
     _startCountdown();
     _loadOtpLock();
 
@@ -96,19 +90,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _entranceController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _entranceController,
-            curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
-          ),
-        );
 
     _entranceController.forward();
   }
@@ -245,7 +226,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
           _controllers[i].text = otp[i];
         }
       }
-      _useSmsOtp = true;
     });
 
     FocusScope.of(context).unfocus();
@@ -350,7 +330,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
             Navigator.popUntil(context, (route) => route.isFirst);
           } else if (state is AuthOtpSent && state.isResend) {
             _startCountdown();
-            setState(() => _currentDevOtp = state.devOtp);
             // _sendSmsApi();
             _showToast('OTP resent successfully.');
           } else if (state is AuthError) {
@@ -385,8 +364,8 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                   // Transparent overlay
                   Positioned.fill(
                     child: Container(
-                      color: Colors.black.withOpacity(
-                        0.75,
+                      color: Colors.black.withValues(
+                        alpha: 0.75,
                       ), // Change opacity as needed
                     ),
                   ),
@@ -639,7 +618,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                     decoration: TextDecoration.underline,
                   ),
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => _openUrl(ApiConstants.TERMS_AND_CONDITIONS),
+                    ..onTap = () => _openUrl(ApiConstants.termsAndConditions),
                 ),
                 const TextSpan(text: ' & '),
                 TextSpan(
@@ -650,7 +629,7 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
                     decoration: TextDecoration.underline,
                   ),
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => _openUrl(ApiConstants.TERMS_AND_CONDITIONS),
+                    ..onTap = () => _openUrl(ApiConstants.termsAndConditions),
                 ),
               ],
             ),
@@ -818,32 +797,6 @@ class _OtpPageState extends State<OtpPage> with TickerProviderStateMixin {
       },
     );
   }
-}
-
-class _HeroPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    for (var i = 0; i < 5; i++) {
-      canvas.drawCircle(
-        Offset(size.width * 0.9, size.height * 0.1),
-        50.0 + (i * 40),
-        paint,
-      );
-      canvas.drawCircle(
-        Offset(size.width * 0.1, size.height * 0.8),
-        30.0 + (i * 30),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class _OtpInputGrid extends StatefulWidget {
@@ -1025,35 +978,3 @@ class _ResendRow extends StatelessWidget {
   }
 }
 
-class _DevOtpBanner extends StatelessWidget {
-  final String otp;
-  const _DevOtpBanner({required this.otp});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: AppColors.freeGreen.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.freeGreen.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.auto_awesome, size: 16.sp, color: AppColors.freeGreen),
-          SizedBox(width: 8.w),
-          Text(
-            'TEST OTP: $otp',
-            style: GoogleFonts.outfit(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.freeGreen,
-              letterSpacing: 2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

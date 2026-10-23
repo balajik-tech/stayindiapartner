@@ -33,7 +33,6 @@ import 'package:stayindia_owner/features/finance/presentation/cubit/finance_cubi
 import 'package:stayindia_owner/injection_container.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
-import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../widgets/global_action_sheet.dart';
 import 'package:stayindia_owner/features/profile/presentation/pages/floor_management_page.dart';
 import 'package:stayindia_owner/features/offers/presentation/pages/offers_management_page.dart';
@@ -253,6 +252,8 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Reading the locale subscribes this page to language changes so it rebuilds.
+    // ignore: unused_local_variable
     final currentLocale = context.locale;
     // AppLogger.info('Rebuilding MainNavigationPage with locale: $currentLocale');
 

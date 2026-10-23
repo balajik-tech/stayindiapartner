@@ -241,7 +241,7 @@ class TenantRemoteDataSourceImpl implements TenantRemoteDataSource {
     } else {
       url = ApiConstants.tenantsManual;
     }
-    debugPrint("========form fields========URL: ${url}");
+    debugPrint("========form fields========URL: $url");
 
     final response = await _dio.post(
       url,

@@ -1,9 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/error/app_exceptions.dart';
 import '../../domain/entities/payment_report_entity.dart';
-import '../../domain/entities/revenue_summary.dart';
 import '../../domain/usecases/get_payment_report_usecase.dart';
 import '../../domain/usecases/record_payment_usecase.dart';
 import '../../domain/usecases/record_cash_payment_usecase.dart';
@@ -72,7 +70,9 @@ class PaymentReportCubit extends Cubit<PaymentReportState> {
     final currentState = state;
     if (currentState is! PaymentReportLoaded ||
         currentState.isLoadingMore ||
-        !currentState.hasMore) return;
+        !currentState.hasMore) {
+      return;
+    }
 
     final int nextPage = currentState.page + 1;
     emit(currentState.copyWith(isLoadingMore: true));

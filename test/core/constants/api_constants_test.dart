@@ -17,9 +17,9 @@ void main() {
       '$expectedBucket/stay-india/documents/avatar.jpg',
     );
     expect(
-      ApiConstants.TERMS_AND_CONDITIONS,
+      ApiConstants.termsAndConditions,
       'https://www.stayindia.in/privacy.html',
     );
-    expect(ApiConstants.ABOUT_US, 'https://www.stayindia.in/aboutus.html');
+    expect(ApiConstants.aboutUs, 'https://www.stayindia.in/aboutus.html');
   });
 }

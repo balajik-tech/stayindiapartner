@@ -218,44 +218,6 @@ class BookingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(String label, String value, IconData icon) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              icon,
-              size: 12.sp,
-              color: AppColors.greyText.withValues(alpha: 0.6),
-            ),
-            SizedBox(width: 4.w),
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w800,
-                color: AppColors.greyText.withValues(alpha: 0.6),
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.darkText,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-
   Widget _buildStatusBadge() {
     final color = _getStatusColor();
     return Container(

@@ -6,13 +6,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/bank_account/presentation/pages/bank_accounts_page.dart';
-import 'package:stayindia_owner/features/dashboard/presentation/widgets/bed_card.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/pages/property_setup_stepper_page.dart';
-import '../../../communities/presentation/widgets/dotted_circle_painter.dart';
-import '../widgets/dash_dotter_line.dart';
 import '../widgets/dashed_divider.dart';
 import 'hostel_profile_page.dart';
 import 'amenities_page.dart';
@@ -24,7 +20,6 @@ class HostelConfigurationPage extends StatelessWidget {
   const HostelConfigurationPage({super.key});
 
   void _handleAddProperty(BuildContext context) {
-    final profileState = context.read<ProfileCubit>().state;
 
     Navigator.push(
       context,
@@ -147,53 +142,6 @@ class HostelConfigurationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAddPropertyButton(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF5F8FC),
-      ),
-      child: BouncingWrapper(
-        onTap: () => _handleAddProperty(context),
-        child: CustomPaint(
-          painter: DashedBorderPainter(
-            color: const Color(0xFFa5bddb),
-            strokeWidth: 2,
-            dashWidth: 6,
-            dashSpace: 4,
-          ),
-          child: Container(
-            height: 52.h,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F8FC),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.add,
-                  size: 20.sp,
-                  color: AppColors.primaryBlue,
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  'add_property'.tr(),
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryBlue,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildBankButton(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16),
@@ -290,34 +238,6 @@ class _HostelConfigCard extends StatelessWidget {
   final int index;
 
   const _HostelConfigCard({required this.hostel, required this.index});
-
-  void _handleAddProperty(BuildContext context) {
-    final profileState = context.read<ProfileCubit>().state;
-    bool isVerified = false;
-
-    if (profileState is ProfileLoaded) {
-      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
-    } else if (profileState is ProfileUpdateSuccess) {
-      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
-    }
-
-    if (isVerified) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const PropertySetupStepperPage(),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('ekyc_pending'.tr()),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -520,34 +440,6 @@ class _ConfigSubItem extends StatelessWidget {
     this.isLast = false,
     required this.onTap,
   });
-
-  void _handleAddProperty(BuildContext context) {
-    final profileState = context.read<ProfileCubit>().state;
-    bool isVerified = false;
-
-    if (profileState is ProfileLoaded) {
-      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
-    } else if (profileState is ProfileUpdateSuccess) {
-      isVerified = profileState.profile.dlKyc?.isAadharVerified ?? false;
-    }
-
-    if (isVerified) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const PropertySetupStepperPage(),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('ekyc_pending'.tr()),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

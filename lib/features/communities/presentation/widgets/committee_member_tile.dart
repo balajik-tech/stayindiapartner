@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/associate_member_entity.dart';
 import '../../domain/entities/community_theme_entity.dart';
 import 'hex_color.dart';
@@ -25,9 +24,6 @@ class CommitteeMemberTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = theme.primaryColor.toColor();
     final textSecondary = theme.textSecondary.toColor();
-    final badgeBg = theme.badgeBackground.toColor();
-    final badgeBorder = theme.badgeBorder.toColor();
-    final badgeText = theme.badgeText.toColor();
     final accent = theme.accentColor.toColor();
     final textPrimary = theme.textPrimary.toColor();
 
@@ -83,7 +79,7 @@ class CommitteeMemberTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     InkWell(
-                      onTap: () => _makePhoneCall(member.phone ?? ''),
+                      onTap: () => _makePhoneCall(member.phone),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -100,7 +96,7 @@ class CommitteeMemberTile extends StatelessWidget {
                     const SizedBox(width: 16),
 
                     InkWell(
-                      onTap: () => _openWhatsApp(member.phone ?? ''),
+                      onTap: () => _openWhatsApp(member.phone),
                       child: Image.asset(
                         'assets/images/whatsapp.png',
                         width: 18,

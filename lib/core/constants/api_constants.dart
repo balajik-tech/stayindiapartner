@@ -3,7 +3,7 @@ import 'dart:io';
 import '../services/app_config_service.dart';
 
 class ApiConstants {
-  static const String _api_Version = '/api/v1';
+  static const String _apiVersion = '/api/v1';
 
   static const String environment = String.fromEnvironment(
     'APP_ENV',
@@ -11,7 +11,7 @@ class ApiConstants {
   );
   static const String _baseURL = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.stayindia.in$_api_Version',
+    defaultValue: 'https://api.stayindia.in$_apiVersion',
   );
   static const String _s3BucketUrl = String.fromEnvironment(
     'S3_BUCKET_URL',
@@ -20,11 +20,11 @@ class ApiConstants {
 
   static const int paginationLimit = 100;
 
-  static const String TERMS_AND_CONDITIONS = String.fromEnvironment(
+  static const String termsAndConditions = String.fromEnvironment(
     'TERMS_AND_CONDITIONS_URL',
     defaultValue: 'https://www.stayindia.in/privacy.html',
   );
-  static const String ABOUT_US = String.fromEnvironment(
+  static const String aboutUs = String.fromEnvironment(
     'ABOUT_US_URL',
     defaultValue: 'https://www.stayindia.in/aboutus.html',
   );

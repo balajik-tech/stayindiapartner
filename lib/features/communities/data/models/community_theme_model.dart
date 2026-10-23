@@ -33,9 +33,9 @@ class AssociateCommunityThemeModel extends CommunityThemeEntity {
       textOnPrimary: themeData['textOnPrimary']?.toString() ?? '#FFFFFF',
       textPrimary: themeData['textPrimary']?.toString() ?? '#1A1A1A',
       textSecondary: themeData['textSecondary']?.toString() ?? '#6B7280',
-      badgeBackground: primaryColor ?? themeData['badgeBackground']?.toString() ?? '#E7F0DD',
-      badgeBorder:primaryColor ?? themeData['badgeBorder']?.toString() ?? '#9CCB6B',
-      badgeText: accentColor ?? themeData['badgeText']?.toString() ?? '#3E7A34',
+      badgeBackground: primaryColor,
+      badgeBorder: primaryColor,
+      badgeText: accentColor,
     );
   }
 

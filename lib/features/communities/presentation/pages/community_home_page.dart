@@ -15,7 +15,6 @@ import '../widgets/committee_member_tile.dart';
 import '../widgets/executive_member_tile.dart';
 import '../widgets/it_wing_member_tile.dart';
 import '../widgets/community_wing_member_tile.dart';
-import '../widgets/port_member_tile.dart';
 import '../widgets/hex_color.dart';
 import 'executive_member_detail_page.dart';
 

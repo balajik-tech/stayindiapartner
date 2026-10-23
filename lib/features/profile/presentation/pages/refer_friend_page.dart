@@ -171,7 +171,7 @@ class ReferFriendPage extends StatelessWidget {
             );
             if (await canLaunchUrl(whatsappUri)) {
               await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
-            } else {
+            } else if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Could not launch WhatsApp")),
               );
@@ -215,7 +215,7 @@ class ReferFriendPage extends StatelessWidget {
         SizedBox(height: 16.h),
         BouncingWrapper(
           onTap: () {
-            Share.share(shareMessage);
+            SharePlus.instance.share(ShareParams(text: shareMessage));
           },
           child: Container(
             height: 56.h,

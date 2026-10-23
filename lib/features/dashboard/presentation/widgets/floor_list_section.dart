@@ -5,11 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/core/theme/app_colors.dart';
-import 'package:stayindia_owner/features/dashboard/presentation/widgets/AppCustomButton.dart';
+import 'package:stayindia_owner/features/dashboard/presentation/widgets/app_custom_button.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
-import '../../../navigation/presentation/pages/main_navigation_page.dart';
-import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../property_setup/presentation/pages/property_setup_stepper_page.dart';
 import '../cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
@@ -401,7 +399,6 @@ class FloorListSection extends StatelessWidget {
 
 
   void _handlePropertySetupTap(BuildContext context) {
-    final profileState = context.read<ProfileCubit>().state;
 
     // bool isKYCVerified = false;
     //

@@ -4,13 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stayindia_owner/features/navigation/presentation/pages/main_navigation_page.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
 import 'package:stayindia_owner/features/profile/presentation/pages/hostel_configuration_page.dart';
 import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_cubit.dart';
-import 'package:stayindia_owner/features/property_setup/presentation/cubit/property_setup_state.dart';
 
-import '../../../../tenants/presentation/widgets/AppLanguageStrings.dart';
+import '../../../../tenants/presentation/widgets/app_language_strings.dart';
 
 class SetupSuccessScreen extends StatefulWidget {
   const SetupSuccessScreen({super.key});

@@ -1,11 +1,8 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../injection_container.dart' as di;
-import '../../../profile/presentation/pages/account_settings_page.dart';
 import '../../domain/entities/kyc_result.dart';
 import '../cubit/digilocker_cubit.dart';
 import '../cubit/digilocker_state.dart';

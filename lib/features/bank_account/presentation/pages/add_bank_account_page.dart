@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../injection_container.dart';
-import '../../../profile/presentation/cubit/hostel_cubit.dart';
 import '../../domain/entities/bank_account_entity.dart';
 import '../cubit/add_bank_account_cubit.dart';
 import 'package:diacritic/diacritic.dart';
@@ -291,12 +290,6 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
             }
           },
           builder: (context, state) {
-            final bool namesMatch = _panAndBankHolderNamesMatch(state);
-            final bool canProceedToVerification =
-                !state.isVerifying &&
-                _isFormValid &&
-                state.panVerifySuccess &&
-                namesMatch;
             final String nameMismatchError = _panAndBankHolderNameError(state);
 
             return Stack(
@@ -862,7 +855,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                 if (state.isSubmitting || state.isVerifying)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       child: const Center(child: CircularProgressIndicator()),
                     ),
                   ),
@@ -1161,7 +1154,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Center(

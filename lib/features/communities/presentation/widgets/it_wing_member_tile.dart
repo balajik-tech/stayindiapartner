@@ -23,9 +23,6 @@ class ItWingMemberTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textSecondary = theme.textSecondary.toColor();
-    final badgeBg = theme.badgeBackground.toColor();
-    final badgeBorder = theme.badgeBorder.toColor();
-    final badgeText = theme.badgeText.toColor();
     final accent = theme.accentColor.toColor();
     final textPrimary = theme.textPrimary.toColor();
 
@@ -70,7 +67,7 @@ class ItWingMemberTile extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             InkWell(
-                              onTap: () => _makePhoneCall(member.phone ?? ''),
+                              onTap: () => _makePhoneCall(member.phone),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -87,7 +84,7 @@ class ItWingMemberTile extends StatelessWidget {
                             const SizedBox(width: 16),
 
                             InkWell(
-                              onTap: () => _openWhatsApp(member.phone ?? ''),
+                              onTap: () => _openWhatsApp(member.phone),
                               child: Image.asset(
                                 'assets/images/whatsapp.png',
                                 width: 18,

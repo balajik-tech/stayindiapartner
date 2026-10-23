@@ -11,19 +11,16 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   final SubscribeToPlanUseCase _subscribeToPlan;
   final VerifySubscriptionPaymentUseCase _verifyPayment;
   final GetPaymentSummaryUseCase _getPaymentSummary;
-  final GetPaymentReceiptUseCase _getPaymentReceipt;
 
   SubscriptionCubit({
     required GetSubscriptionPlansUseCase getSubscriptionPlansUseCase,
     required SubscribeToPlanUseCase subscribeToPlanUseCase,
     required VerifySubscriptionPaymentUseCase verifyPaymentUseCase,
     required GetPaymentSummaryUseCase getPaymentSummaryUseCase,
-    required GetPaymentReceiptUseCase getPaymentReceiptUseCase,
   })  : _getSubscriptionPlans = getSubscriptionPlansUseCase,
         _subscribeToPlan = subscribeToPlanUseCase,
         _verifyPayment = verifyPaymentUseCase,
         _getPaymentSummary = getPaymentSummaryUseCase,
-        _getPaymentReceipt = getPaymentReceiptUseCase,
         super(SubscriptionInitial());
 
   Future<void> loadSubscriptionPlans(String propertyId, {bool forceRefresh = false}) async {

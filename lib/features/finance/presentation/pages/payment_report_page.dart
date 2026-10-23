@@ -371,8 +371,9 @@ class _PaymentReportPageState extends State<PaymentReportPage> {
   Widget _buildHostelSelector() {
     return BlocBuilder<HostelCubit, HostelState>(
       builder: (context, state) {
-        if (state is! HostelLoaded || state.hostels.isEmpty)
+        if (state is! HostelLoaded || state.hostels.isEmpty) {
           return const SizedBox();
+        }
 
         final selectedHostel = state.hostels.cast<Hostel>().firstWhere(
           (h) => h.id == _selectedHostelId,

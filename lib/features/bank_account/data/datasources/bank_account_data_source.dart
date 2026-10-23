@@ -5,7 +5,6 @@ import '../../domain/entities/bank_account_entity.dart';
 import '../../domain/entities/bank_account_verification_result.dart';
 import '../../domain/entities/bank_branch_details.dart';
 import '../../domain/entities/pan_verification_result.dart';
-import '../../domain/entities/property_entity.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/services/token_storage.dart';
 import '../models/bank_account_model.dart';

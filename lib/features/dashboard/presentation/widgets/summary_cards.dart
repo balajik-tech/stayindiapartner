@@ -5,7 +5,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:stayindia_owner/core/widgets/bouncing_wrapper.dart';
 import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_cubit.dart';
-import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state.dart';
 import 'package:stayindia_owner/features/auth/presentation/cubit/auth_cubit.dart';
 
 class SummaryCard extends StatelessWidget {
@@ -148,10 +147,8 @@ class SummaryCardsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hostelState = context.watch<HostelCubit>().state;
-    final totalProperties = hostelState is HostelLoaded
-        ? hostelState.hostels.length
-        : 0;
+    // Rebuild when the selected property changes.
+    context.watch<HostelCubit>();
     final authState = context.watch<AuthCubit>().state;
     final owner = authState is AuthAuthenticated ? authState.owner : null;
     final role = owner?.role.toLowerCase() ?? 'owner';
@@ -165,7 +162,6 @@ class SummaryCardsSection extends StatelessWidget {
             : null;
         final occupancy = data?.occupancy;
         final status = data?.occupancyStatus;
-        final ops = data?.dailyOperations;
 
         final int? totalRoomsCount = occupancy?.floors.fold<int>(
           0,

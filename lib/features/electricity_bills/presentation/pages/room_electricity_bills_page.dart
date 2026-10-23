@@ -11,7 +11,6 @@ import '../../data/models/electricity_bill_model.dart';
 import '../cubit/electricity_bill_cubit.dart';
 import '../cubit/electricity_bill_state.dart';
 import '../widgets/add_electricity_bill_sheet.dart';
-import '../widgets/electricity_settings_sheet.dart';
 import '../widgets/collect_tenant_payment_sheet.dart';
 
 class RoomElectricityBillsPage extends StatelessWidget {
@@ -249,23 +248,6 @@ class _RoomElectricityBillsViewState extends State<_RoomElectricityBillsView> {
         },
       );
     }
-  }
-
-  void _openSettingsSheet(BuildContext context, ElectricityBillState state) {
-    ElectricitySettingsSheet.show(
-      context: context,
-      currentPgName: state.pgName,
-      currentSubtitle: state.subtitle,
-      rooms: state.rooms,
-      bills: state.bills,
-      onSave: ({required pgName, required subtitle, required rooms}) {
-        context.read<ElectricityBillCubit>().updateSettings(
-          pgName: pgName,
-          subtitle: subtitle,
-          rooms: rooms,
-        );
-      },
-    );
   }
 
   String _formatAmount(double amount) {

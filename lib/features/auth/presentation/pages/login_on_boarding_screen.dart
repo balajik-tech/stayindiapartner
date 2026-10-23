@@ -102,7 +102,7 @@ class LoginOnBoardingScreen extends StatelessWidget {
                         height: 1.2,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0,
-                        color: const Color(0xff17539B),
+                        color: Color(0xff17539B),
                       ),
                     ),
                   ),
@@ -148,7 +148,7 @@ class LoginOnBoardingScreen extends StatelessWidget {
                                 backgroundColor: const Color(0xff17539B),
                                 elevation: 8,
                                 shadowColor:
-                                    const Color(0xffB8C4FF).withOpacity(.5),
+                                    const Color(0xffB8C4FF).withValues(alpha: .5),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),

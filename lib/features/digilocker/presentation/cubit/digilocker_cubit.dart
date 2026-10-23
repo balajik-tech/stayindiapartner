@@ -52,15 +52,9 @@ class DigiLockerCubit extends Cubit<DigiLockerState> {
     try {
       // Split full name into first & last name
       final fullName = result.name?.trim() ?? '';
-      final nameParts = fullName.split(RegExp(r'\s+'));
-
-      final derivedFirstName = nameParts.isNotEmpty ? nameParts.first : null;
-      final derivedLastName = nameParts.length > 1
-          ? nameParts.sublist(1).join(' ')
-          : null;
       // Build data map for API call
       final data = <String, dynamic>{
-        if (fullName != null) 'firstName': fullName,
+        'firstName': fullName,
         'lastName': "",
         // if (phone != null) 'phone': phone,
         if (email != null && email.trim().isNotEmpty) 'email': email.trim(),

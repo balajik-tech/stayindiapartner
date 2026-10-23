@@ -71,7 +71,6 @@ void registerProfileFeature(GetIt sl) {
       subscribeToPlanUseCase: sl(),
       verifyPaymentUseCase: sl(),
       getPaymentSummaryUseCase: sl(),
-      getPaymentReceiptUseCase: sl(),
     ),
   );
 

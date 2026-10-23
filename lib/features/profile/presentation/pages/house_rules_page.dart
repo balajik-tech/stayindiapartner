@@ -10,7 +10,6 @@ import 'package:stayindia_owner/features/profile/presentation/cubit/hostel_state
 import 'package:stayindia_owner/features/profile/presentation/cubit/settings_cubit.dart';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:intl/intl.dart';
 import 'package:stayindia_owner/core/utils/string_utils.dart';
 
 class HouseRulesPage extends StatefulWidget {

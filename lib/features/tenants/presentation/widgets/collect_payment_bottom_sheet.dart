@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,8 +8,11 @@ import 'package:stayindia_owner/features/finance/presentation/cubit/payment_repo
 import 'package:stayindia_owner/features/profile/domain/entities/hostel.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_cubit.dart';
 
+// Values are sent to the API as bookingType via `.name`, so keep them uppercase.
 enum StayType {
+  // ignore: constant_identifier_names
   MONTHLY,
+  // ignore: constant_identifier_names
   CUSTOM,
 }
 
@@ -91,9 +93,8 @@ class _CollectPaymentBottomSheetState
     extends State<CollectPaymentBottomSheet> {
   late TextEditingController _collectingNowController;
   final TextEditingController _discountController = TextEditingController();
-  double _discountAmount = 0.0;
+  final double _discountAmount = 0.0;
   String _paymentMethod = 'Cash';
-  String _collectionType = 'Full amount';
   bool _isSubmitting = false;
 
   int get _occupiedDays {
@@ -165,133 +166,6 @@ class _CollectPaymentBottomSheetState
     _collectingNowController.dispose();
     _discountController.dispose();
     super.dispose();
-  }
-
-  void _onCollectionTypeChanged(String type) {
-    double totalDue =
-        (_baseTotal - _discountAmount).clamp(0, double.infinity);
-    setState(() {
-      _collectionType = type;
-      _collectingNowController.text = totalDue.toStringAsFixed(0);
-    });
-  }
-
-  void _showDiscountDialog() {
-    _discountController.text =
-        _discountAmount > 0 ? _discountAmount.toStringAsFixed(0) : '';
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          title: Text(
-            'Add Discount or Waiver',
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1E3A8A),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Enter discount or waiver amount',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: Colors.grey[600],
-                ),
-              ),
-              SizedBox(height: 12.h),
-              TextField(
-                controller: _discountController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                autofocus: true,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-                decoration: InputDecoration(
-                  prefixText: '₹ ',
-                  prefixStyle: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                  filled: true,
-                  fillColor: const Color(0xFFF1F5F9),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 14.h,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            if (_discountAmount > 0)
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _discountAmount = 0.0;
-                    double totalDue = _baseTotal.clamp(0, double.infinity);
-                    _collectingNowController.text =
-                        totalDue.toStringAsFixed(0);
-                  });
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text(
-                  'Remove',
-                  style: TextStyle(
-                    color: Colors.redAccent,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                double discount =
-                    double.tryParse(_discountController.text.trim()) ?? 0.0;
-                double maxTotal = _baseTotal;
-                if (discount > maxTotal) {
-                  discount = maxTotal;
-                }
-                setState(() {
-                  _discountAmount = discount;
-                  double totalDue =
-                      (maxTotal - _discountAmount).clamp(0, double.infinity);
-                  _collectingNowController.text =
-                      totalDue.toStringAsFixed(0);
-                });
-                Navigator.pop(dialogContext);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E3A8A),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-              child: const Text(
-                'Apply',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<void> _handleProceed() async {
@@ -376,6 +250,7 @@ class _CollectPaymentBottomSheetState
                 : widget.checkOutDate)
             : '';
 
+        if (!mounted) return;
         await context.read<PaymentReportCubit>().submitPayment(
               tenantId: tenantId,
               hostelId: hostelId,

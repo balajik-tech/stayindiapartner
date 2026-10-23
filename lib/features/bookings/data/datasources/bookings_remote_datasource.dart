@@ -304,10 +304,10 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
       await dio.post(
         '${ApiConstants.checkoutBooking}/$bookingId',
         data: {
-          if (securityDeposit != null) 'securityDeposit': securityDeposit,
-          if (pendingRent != null) 'pendingRent': pendingRent,
-          if (utilityDue != null) 'utilityDue': utilityDue,
-          if (finalSettlement != null) 'finalSettlement': finalSettlement,
+          'securityDeposit': ?securityDeposit,
+          'pendingRent': ?pendingRent,
+          'utilityDue': ?utilityDue,
+          'finalSettlement': ?finalSettlement,
         },
       );
     } catch (e) {

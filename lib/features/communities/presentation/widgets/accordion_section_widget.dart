@@ -40,19 +40,6 @@ class AccordionSectionWidget extends StatelessWidget {
     final textSecondary = theme.textSecondary.toColor();
     final cardColor = theme.cardColor.toColor();
 
-    String? statusText;
-    if (timeline != null) {
-      if (timeline!['idIssued'] == true) {
-        statusText = 'ID ISSUED';
-      } else if (timeline!['paid'] == true) {
-        statusText = 'PAID';
-      } else if (timeline!['approved'] == true) {
-        statusText = 'APPROVED';
-      } else if (timeline!['applied'] == true) {
-        statusText = 'APPLIED';
-      }
-    }
-
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       decoration: BoxDecoration(
@@ -137,7 +124,7 @@ class AccordionSectionWidget extends StatelessWidget {
               children: [
                 const Divider(height: 1),
                 ...children,
-                if (footer != null) footer!,
+                ?footer,
               ],
             )
                 : const SizedBox.shrink(),

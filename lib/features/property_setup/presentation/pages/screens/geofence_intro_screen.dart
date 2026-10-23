@@ -378,24 +378,6 @@ class _GeofenceIntroScreenState extends State<GeofenceIntroScreen> {
     );
   }
 
-  void _showExplanationDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        title: Text('geofence_help_title'.tr()),
-        content: Text('geofence_help_content'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('btn_ok'.tr()),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// Faint background roads + park-like blocks to sell the "map" feel

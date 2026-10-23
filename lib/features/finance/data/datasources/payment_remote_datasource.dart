@@ -137,8 +137,8 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
         'category': category,
         'mode': mode,
         'date': date,
-        if (referenceNo != null) 'referenceNo': referenceNo,
-        if (note != null) 'note': note,
+        'referenceNo': ?referenceNo,
+        'note': ?note,
         'sendWhatsapp': sendWhatsapp,
         if (screenshotPath != null)
           'screenshot': await MultipartFile.fromFile(screenshotPath),

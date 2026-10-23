@@ -1189,13 +1189,6 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
     );
   }
 
-  void _resetGeneralNoticeForm() {
-    setState(() {
-      _titleController.clear();
-      _reasonController.clear();
-    });
-  }
-
   Future<void> _submitVacantNotice(BuildContext context) async {
     final hostelState = context.read<HostelCubit>().state;
     if (hostelState is! HostelLoaded || hostelState.hostels.isEmpty) return;
@@ -1210,6 +1203,7 @@ class _GiveNoticePageState extends State<GiveNoticePage> {
             vacatingDate: DateFormat('yyyy-MM-dd').format(_vacatingDate),
             reason: _reasonController.text,
           );
+      if (!context.mounted) return;
       await _showVacantNoticeSuccessDialog(context);
     }
   }

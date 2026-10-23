@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -397,7 +396,7 @@ class _RecordPaymentBottomSheetNewState
                 Padding(
                   padding: EdgeInsets.only(top: 8.h),
                   child: Text(
-                    '${_selectedCategory}: ₹${_activeController.text.toString()}',
+                    '$_selectedCategory: ₹${_activeController.text.toString()}',
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,

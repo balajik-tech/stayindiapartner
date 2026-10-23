@@ -13,10 +13,6 @@ import 'package:stayindia_owner/features/communities/presentation/cubit/owner_co
 import 'package:stayindia_owner/features/communities/presentation/cubit/social_feed_cubit.dart';
 import 'package:stayindia_owner/features/communities/domain/entities/community_entity.dart';
 import 'package:stayindia_owner/features/communities/presentation/pages/register_association_bottom_sheet.dart';
-import 'package:stayindia_owner/features/communities/presentation/pages/tenants_chat_page.dart';
-import 'package:stayindia_owner/features/communities/presentation/pages/explore_communities_page.dart';
-import 'package:stayindia_owner/features/communities/presentation/pages/community_detail_page.dart';
-import 'package:stayindia_owner/features/communities/presentation/widgets/comments_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
@@ -510,9 +506,6 @@ class _OwnersCommunityPageState extends State<OwnersCommunityPage> {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       child: BlocBuilder<OwnerCommunityCubit, OwnerCommunityState>(
         builder: (context, state) {
-          final communities = state is OwnerCommunityLoaded
-              ? state.joinedCommunities
-              : <CommunityDetailsEntity>[];
           final associations = state is OwnerCommunityLoaded
               ? state.associations.where((a) {
                   final query = _searchController.text.toLowerCase();
@@ -1419,47 +1412,6 @@ class _PostCardState extends State<_PostCard> {
     }
 
     final isOfficialPost = widget.post.visibility?.toUpperCase() != 'GLOBAL';
-    final accentColor = isOfficialPost
-        ? const Color(0xFF2563EB)
-        : const Color(0xFFEA580C);
-    final indicatorIcon = isOfficialPost ? '🔹' : '🔸';
-
-    String displayRole;
-    if (isOfficialPost) {
-      final role =
-          (widget.post.userRole != null && widget.post.userRole!.isNotEmpty)
-          ? widget.post.userRole!
-          : 'president_admin_role'.tr();
-
-      final city = widget.post.userCity;
-      final state = widget.post.userState;
-
-      if (city != null &&
-          city.isNotEmpty &&
-          state != null &&
-          state.isNotEmpty) {
-        //displayRole = ''$role; · $city, $state';
-      } else if (city != null && city.isNotEmpty) {
-        //displayRole =  '$role · $city';
-      } else {
-        //displayRole = role;
-      }
-    } else {
-      final city = widget.post.userCity;
-      final state = widget.post.userState;
-      if (city != null &&
-          city.isNotEmpty &&
-          state != null &&
-          state.isNotEmpty) {
-        displayRole = '$city, $state';
-      } else if (city != null && city.isNotEmpty) {
-        displayRole = city;
-      } else if (state != null && state.isNotEmpty) {
-        displayRole = state;
-      } else {
-        displayRole = 'pg_owner_role'.tr();
-      }
-    }
 
     return Column(
       children: [
@@ -1546,8 +1498,7 @@ class _PostCardState extends State<_PostCard> {
                                 child: Text(
                                   StringUtils.capitalize(
                                         widget.post.userRole!.toLowerCase(),
-                                      ) ??
-                                      "",
+                                      ),
                                   style: GoogleFonts.inter(
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w700,
@@ -1715,13 +1666,12 @@ class _PostCardState extends State<_PostCard> {
                     onTap: () {
                       final content = widget.post.content;
                       final userName = widget.post.userName;
-                      final appLink = ApiConstants.partnerAppLink;
 
                       final shareMessage =
                           'Post by $userName on Stay India Official Feed:\n\n'
                           '$content\n\n';
 
-                      Share.share(shareMessage);
+                      SharePlus.instance.share(ShareParams(text: shareMessage));
                     },
                     child: Row(
                       children: [
@@ -2075,64 +2025,4 @@ class _PostCardState extends State<_PostCard> {
     );
   }
 
-  void _showDeleteConfirmDialog(BuildContext context, SocialPostEntity post) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        title: Text(
-          'Delete Post?',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: AppColors.darkText,
-            fontSize: 18.sp,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to delete this post? This action cannot be undone.',
-          style: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: AppColors.greyText,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<SocialFeedCubit>().deletePost(post.id);
-              Navigator.pop(dialogContext);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Post deleted successfully'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Delete',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

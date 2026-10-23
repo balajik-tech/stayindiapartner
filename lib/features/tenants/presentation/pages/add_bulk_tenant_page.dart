@@ -9,7 +9,6 @@ import 'package:stayindia_owner/core/theme/app_colors.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_cubit.dart';
 import 'package:stayindia_owner/features/tenants/presentation/cubit/add_tenant_state.dart';
 import 'package:stayindia_owner/injection_container.dart' as di;
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
@@ -180,6 +179,7 @@ class _AddBulkTenantPageState extends State<AddBulkTenantPage> {
       debugPrint('❌ File does not exist: $path');
       return;
     }
+    if (!mounted) return;
 
     final hostelState = context.read<HostelCubit>().state;
     String? hostelId;
