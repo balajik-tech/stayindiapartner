@@ -391,7 +391,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     : null;
 
                 return Scaffold(
-                  backgroundColor: const Color(0xFFF8FAFC),
+                  backgroundColor: Colors.white,
                   body: SafeArea(
                     child: _isSelectingPlan && selectedHostel != null
                         ? _buildServiceDurationView(
