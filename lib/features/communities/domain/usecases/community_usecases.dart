@@ -13,15 +13,15 @@ class GetCommunityMessagesUseCase {
   GetCommunityMessagesUseCase(this.repository);
   Future<List<CommunityMessageEntity>> call(
     String hostelId, {
-    int limit = 50,
-    String? before,
-  }) => repository.getMessages(hostelId, limit: limit, before: before);
+    int page = 1,
+    int limit = 20,
+  }) => repository.getMessages(hostelId, page: page, limit: limit);
 }
 
 class SendCommunityMessageUseCase {
   final CommunityRepository repository;
   SendCommunityMessageUseCase(this.repository);
-  Future<void> call(String hostelId, String text) =>
+  Future<CommunityMessageEntity?> call(String hostelId, String text) =>
       repository.sendMessage(hostelId, text);
 }
 
@@ -42,7 +42,7 @@ class DeleteCommunityMessageUseCase {
 class SendCommunityImageUseCase {
   final CommunityRepository repository;
   SendCommunityImageUseCase(this.repository);
-  Future<void> call(String hostelId, String imagePath) =>
+  Future<CommunityMessageEntity?> call(String hostelId, String imagePath) =>
       repository.sendImageMessage(hostelId, imagePath);
 }
 
@@ -308,14 +308,12 @@ class UpdateSocialPostUseCase {
     bool? removeImage,
     List<String>? pollOptions,
     bool? removePoll,
-  }) =>
-      repository.updateSocialPost(
-        postId: postId,
-        content: content,
-        imagePath: imagePath,
-        removeImage: removeImage,
-        pollOptions: pollOptions,
-        removePoll: removePoll,
-      );
+  }) => repository.updateSocialPost(
+    postId: postId,
+    content: content,
+    imagePath: imagePath,
+    removeImage: removeImage,
+    pollOptions: pollOptions,
+    removePoll: removePoll,
+  );
 }
-

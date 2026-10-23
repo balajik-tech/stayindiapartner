@@ -100,6 +100,8 @@ class ApiConstants {
 
   static const String community = '/community';
   static String communityChat(String chatId) => '/community/chat/$chatId';
+  static String communityChatMessages(String hostelId) =>
+      '/community/chat/$hostelId/messages';
 
   static const String ownerCommunity = '/owner-community';
   static const String ownerCommunities = '/owner-communities';

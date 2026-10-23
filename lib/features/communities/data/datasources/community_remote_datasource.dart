@@ -7,13 +7,16 @@ abstract class CommunityRemoteDataSource {
   Future<CommunityDetailsModel> getCommunityDetails(String hostelId);
   Future<List<CommunityMessageModel>> getMessages(
     String hostelId, {
+    int page,
     int limit,
-    String? before,
   });
-  Future<void> sendMessage(String hostelId, String text);
+  Future<CommunityMessageModel?> sendMessage(String hostelId, String text);
   Future<void> editMessage(String hostelId, String messageId, String text);
   Future<void> deleteMessage(String hostelId, String messageId);
-  Future<void> sendImageMessage(String hostelId, String imagePath);
+  Future<CommunityMessageModel?> sendImageMessage(
+    String hostelId,
+    String imagePath,
+  );
   Future<List<AnnouncementModel>> getAnnouncements(String hostelId);
   Future<void> postAnnouncement(String hostelId, String title, String content);
   Future<List<OwnerDiscussionModel>> getOwnerDiscussions(String hostelId);
@@ -120,14 +123,22 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
   @override
   Future<CommunityDetailsModel> getCommunityDetails(String hostelId) async {
     AppLogger.info('Fetching community details for hostel: $hostelId');
-    final response = await _dio.get('${ApiConstants.community}/$hostelId');
+    // GET /community/:hostelId was removed; the hostel group's details now
+    // only come back as the `community` block of the chat messages response.
+    final response = await _dio.get(
+      ApiConstants.communityChatMessages(hostelId),
+      queryParameters: {'page': 1, 'limit': 1},
+    );
 
     if (response.statusCode == 200) {
       final raw = response.data;
       final data = (raw is Map && raw['data'] is Map)
           ? raw['data'] as Map<String, dynamic>
           : raw as Map<String, dynamic>;
-      return CommunityDetailsModel.fromJson(data);
+      final community = data['community'] is Map
+          ? data['community'] as Map<String, dynamic>
+          : data;
+      return CommunityDetailsModel.fromJson(community);
     }
     throw Exception('Failed to fetch community details');
   }
@@ -135,18 +146,13 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
   @override
   Future<List<CommunityMessageModel>> getMessages(
     String hostelId, {
-    int limit = 50,
-    String? before,
+    int page = 1,
+    int limit = 20,
   }) async {
-    AppLogger.info(
-      'Fetching community messages (limit: $limit, before: $before)',
-    );
-    final queryParams = <String, dynamic>{'limit': limit};
-    if (before != null) queryParams['before'] = before;
-
+    AppLogger.info('Fetching community messages (page: $page, limit: $limit)');
     final response = await _dio.get(
-      '${ApiConstants.community}/$hostelId/messages',
-      queryParameters: queryParams,
+      ApiConstants.communityChatMessages(hostelId),
+      queryParameters: {'page': page, 'limit': limit},
     );
 
     if (response.statusCode == 200) {
@@ -155,15 +161,20 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
           ? raw['data'] as Map<String, dynamic>
           : raw as Map<String, dynamic>;
       final messages = data['messages'] as List<dynamic>? ?? [];
+      // The chat UI expects oldest-first, whatever order the page comes in.
       return messages
           .map((m) => CommunityMessageModel.fromJson(m as Map<String, dynamic>))
-          .toList();
+          .toList()
+        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
     }
     throw Exception('Failed to fetch messages');
   }
 
   @override
-  Future<void> sendMessage(String hostelId, String text) async {
+  Future<CommunityMessageModel?> sendMessage(
+    String hostelId,
+    String text,
+  ) async {
     AppLogger.info('Sending community message');
     final response = await _dio.post(
       '${ApiConstants.community}/message',
@@ -173,13 +184,18 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to send message');
     }
+    return _createdMessage(response.data);
   }
 
   @override
-  Future<void> editMessage(String hostelId, String messageId, String text) async {
+  Future<void> editMessage(
+    String hostelId,
+    String messageId,
+    String text,
+  ) async {
     AppLogger.info('Editing community message: $messageId');
     final response = await _dio.patch(
-      '${ApiConstants.community}/$hostelId/message/$messageId',
+      '${ApiConstants.communityChat(hostelId)}/message/$messageId',
       data: {'text': text},
     );
 
@@ -192,7 +208,7 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
   Future<void> deleteMessage(String hostelId, String messageId) async {
     AppLogger.info('Deleting community message: $messageId');
     final response = await _dio.delete(
-      '${ApiConstants.community}/$hostelId/message/$messageId',
+      '${ApiConstants.communityChat(hostelId)}/message/$messageId',
     );
 
     if (response.statusCode != 200) {
@@ -201,7 +217,10 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
   }
 
   @override
-  Future<void> sendImageMessage(String hostelId, String imagePath) async {
+  Future<CommunityMessageModel?> sendImageMessage(
+    String hostelId,
+    String imagePath,
+  ) async {
     AppLogger.info('Sending community image message');
     final formData = FormData.fromMap({
       'hostelId': hostelId,
@@ -217,6 +236,15 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to send image message');
     }
+    return _createdMessage(response.data);
+  }
+
+  /// The created message from a POST /community/message response, so the
+  /// optimistic temp_ entry can be swapped for one with the real server id.
+  CommunityMessageModel? _createdMessage(dynamic raw) {
+    final data = raw is Map ? raw['data'] : null;
+    if (data is! Map || data['_id'] == null) return null;
+    return CommunityMessageModel.fromJson(Map<String, dynamic>.from(data));
   }
 
   @override
@@ -661,7 +689,10 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data']?['feed'] ?? [];
       return data
-          .map((p) => SocialPostModel.fromOfficialFeedJson(p as Map<String, dynamic>))
+          .map(
+            (p) =>
+                SocialPostModel.fromOfficialFeedJson(p as Map<String, dynamic>),
+          )
           .toList();
     }
     throw Exception('Failed to fetch official feed');

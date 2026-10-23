@@ -14,12 +14,12 @@ class CommunityRepositoryImpl implements CommunityRepository {
   @override
   Future<List<CommunityMessageEntity>> getMessages(
     String hostelId, {
-    int limit = 50,
-    String? before,
-  }) => remote.getMessages(hostelId, limit: limit, before: before);
+    int page = 1,
+    int limit = 20,
+  }) => remote.getMessages(hostelId, page: page, limit: limit);
 
   @override
-  Future<void> sendMessage(String hostelId, String text) =>
+  Future<CommunityMessageEntity?> sendMessage(String hostelId, String text) =>
       remote.sendMessage(hostelId, text);
 
   @override
@@ -31,8 +31,10 @@ class CommunityRepositoryImpl implements CommunityRepository {
       remote.deleteMessage(hostelId, messageId);
 
   @override
-  Future<void> sendImageMessage(String hostelId, String imagePath) =>
-      remote.sendImageMessage(hostelId, imagePath);
+  Future<CommunityMessageEntity?> sendImageMessage(
+    String hostelId,
+    String imagePath,
+  ) => remote.sendImageMessage(hostelId, imagePath);
 
   @override
   Future<List<AnnouncementEntity>> getAnnouncements(String hostelId) =>
@@ -244,13 +246,12 @@ class CommunityRepositoryImpl implements CommunityRepository {
     bool? removeImage,
     List<String>? pollOptions,
     bool? removePoll,
-  }) =>
-      remote.updateSocialPost(
-        postId: postId,
-        content: content,
-        imagePath: imagePath,
-        removeImage: removeImage,
-        pollOptions: pollOptions,
-        removePoll: removePoll,
-      );
+  }) => remote.updateSocialPost(
+    postId: postId,
+    content: content,
+    imagePath: imagePath,
+    removeImage: removeImage,
+    pollOptions: pollOptions,
+    removePoll: removePoll,
+  );
 }

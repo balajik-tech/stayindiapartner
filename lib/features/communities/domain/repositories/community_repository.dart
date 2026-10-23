@@ -4,13 +4,16 @@ abstract class CommunityRepository {
   Future<CommunityDetailsEntity> getCommunityDetails(String hostelId);
   Future<List<CommunityMessageEntity>> getMessages(
     String hostelId, {
-    int limit = 50,
-    String? before,
+    int page = 1,
+    int limit = 20,
   });
-  Future<void> sendMessage(String hostelId, String text);
+  Future<CommunityMessageEntity?> sendMessage(String hostelId, String text);
   Future<void> editMessage(String hostelId, String messageId, String text);
   Future<void> deleteMessage(String hostelId, String messageId);
-  Future<void> sendImageMessage(String hostelId, String imagePath);
+  Future<CommunityMessageEntity?> sendImageMessage(
+    String hostelId,
+    String imagePath,
+  );
 
   Future<List<AnnouncementEntity>> getAnnouncements(String hostelId);
   Future<void> postAnnouncement(String hostelId, String title, String content);

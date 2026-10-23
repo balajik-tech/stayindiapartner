@@ -33,6 +33,8 @@ class CommunityCubit extends Cubit<CommunityState> {
   final Map<String, List<AnnouncementEntity>> _announcementsCache = {};
   final Map<String, List<OwnerDiscussionEntity>> _discussionsCache = {};
   final Map<String, bool> _hasMoreMessagesCache = {};
+  final Map<String, int> _messagesPageCache = {};
+  static const int _messagesPageSize = 20;
 
   CommunityCubit({
     required GetCommunityDetailsUseCase getCommunityDetailsUseCase,
@@ -91,7 +93,9 @@ class CommunityCubit extends Cubit<CommunityState> {
     });
 
     _messageEditedSubscription?.cancel();
-    _messageEditedSubscription = _socketService.messageEditedStream.listen((data) {
+    _messageEditedSubscription = _socketService.messageEditedStream.listen((
+      data,
+    ) {
       final editedMessage = CommunityMessageModel.fromJson(data);
       final roomId = editedMessage.roomId ?? _activeHostelId;
 
@@ -110,7 +114,9 @@ class CommunityCubit extends Cubit<CommunityState> {
     });
 
     _messageDeletedSubscription?.cancel();
-    _messageDeletedSubscription = _socketService.messageDeletedStream.listen((data) {
+    _messageDeletedSubscription = _socketService.messageDeletedStream.listen((
+      data,
+    ) {
       final roomId = data['roomId']?.toString() ?? _activeHostelId;
       final deletedId = data['id']?.toString() ?? '';
 
@@ -166,24 +172,32 @@ class CommunityCubit extends Cubit<CommunityState> {
 
     try {
       final results = await Future.wait([
-        _getDetails(hostelId),
-        _getMessages(hostelId, limit: 50),
+        // Details are header-only; never let them block the chat from loading.
+        _getDetails(
+          hostelId,
+        ).then<CommunityDetailsEntity?>((d) => d).catchError((Object e) {
+          AppLogger.error('getCommunityDetails failed', e);
+          return null;
+        }),
+        _getMessages(hostelId, limit: _messagesPageSize),
         _getAnnouncements(hostelId),
         _getDiscussions(hostelId),
       ]);
 
       if (isClosed) return;
 
-      final details = results[0] as CommunityDetailsEntity;
+      final details =
+          results[0] as CommunityDetailsEntity? ?? _detailsCache[hostelId];
       final messages = results[1] as List<CommunityMessageEntity>;
       final announcements = results[2] as List<AnnouncementEntity>;
       final discussions = results[3] as List<OwnerDiscussionEntity>;
 
-      _detailsCache[hostelId] = details;
+      if (details != null) _detailsCache[hostelId] = details;
       _messagesCache[hostelId] = messages;
       _announcementsCache[hostelId] = announcements;
       _discussionsCache[hostelId] = discussions;
-      _hasMoreMessagesCache[hostelId] = messages.length >= 50;
+      _messagesPageCache[hostelId] = 1;
+      _hasMoreMessagesCache[hostelId] = messages.length >= _messagesPageSize;
 
       if (_activeHostelId == hostelId) {
         emit(
@@ -208,11 +222,18 @@ class CommunityCubit extends Cubit<CommunityState> {
 
   Future<void> refreshMessages(String hostelId) async {
     try {
-      final messages = await _getMessages(hostelId, limit: 50);
+      final messages = await _getMessages(hostelId, limit: _messagesPageSize);
       _messagesCache[hostelId] = messages;
+      _messagesPageCache[hostelId] = 1;
+      _hasMoreMessagesCache[hostelId] = messages.length >= _messagesPageSize;
 
       if (_activeHostelId == hostelId && state is CommunityLoaded) {
-        emit((state as CommunityLoaded).copyWith(messages: messages));
+        emit(
+          (state as CommunityLoaded).copyWith(
+            messages: messages,
+            hasMoreMessages: _hasMoreMessagesCache[hostelId]!,
+          ),
+        );
       }
     } catch (e) {
       AppLogger.error('refreshMessages failed', e);
@@ -221,20 +242,33 @@ class CommunityCubit extends Cubit<CommunityState> {
 
   Future<void> loadOlderMessages(String hostelId) async {
     final s = state;
-    if (s is! CommunityLoaded || !s.hasMoreMessages || s.isLoadingMoreMessages) {
+    if (s is! CommunityLoaded ||
+        !s.hasMoreMessages ||
+        s.isLoadingMoreMessages) {
       return;
     }
 
     emit(s.copyWith(isLoadingMoreMessages: true));
     try {
-      final oldestId = s.messages.isNotEmpty ? s.messages.first.id : null;
-      final older = await _getMessages(hostelId, limit: 50, before: oldestId);
+      final nextPage = (_messagesPageCache[hostelId] ?? 1) + 1;
+      final older = await _getMessages(
+        hostelId,
+        page: nextPage,
+        limit: _messagesPageSize,
+      );
 
       if (isClosed) return;
 
-      final updatedMessages = [...older, ..._messagesCache[hostelId]!];
+      // New messages shift page offsets, so a page can overlap what we have.
+      final current = _messagesCache[hostelId] ?? s.messages;
+      final knownIds = current.map((m) => m.id).toSet();
+      final updatedMessages = [
+        ...older.where((m) => !knownIds.contains(m.id)),
+        ...current,
+      ];
       _messagesCache[hostelId] = updatedMessages;
-      _hasMoreMessagesCache[hostelId] = older.length >= 50;
+      _messagesPageCache[hostelId] = nextPage;
+      _hasMoreMessagesCache[hostelId] = older.length >= _messagesPageSize;
 
       if (_activeHostelId == hostelId) {
         emit(
@@ -288,7 +322,8 @@ class CommunityCubit extends Cubit<CommunityState> {
     }
 
     try {
-      await _sendMessage(hostelId, text);
+      final sent = await _sendMessage(hostelId, text);
+      if (sent != null) _replaceTempMessage(hostelId, tempId, sent);
     } catch (e) {
       AppLogger.error('sendMessage failed', e);
       if (state is CommunityLoaded) {
@@ -300,14 +335,61 @@ class CommunityCubit extends Cubit<CommunityState> {
     }
   }
 
+  /// Swaps the optimistic temp_ message for the server copy, or just drops it
+  /// if the socket echo already added the real message.
+  void _replaceTempMessage(
+    String hostelId,
+    String tempId,
+    CommunityMessageEntity sent,
+  ) {
+    final current = _messagesCache[hostelId];
+    if (current == null) return;
+
+    final alreadyAdded = current.any((m) => m.id == sent.id);
+    final updated = <CommunityMessageEntity>[];
+    for (final m in current) {
+      if (m.id != tempId) {
+        updated.add(m);
+      } else if (!alreadyAdded) {
+        updated.add(
+          CommunityMessageEntity(
+            id: sent.id,
+            senderId: sent.senderId.isNotEmpty ? sent.senderId : m.senderId,
+            senderName: m.senderName,
+            senderAvatar: m.senderAvatar,
+            text: sent.text.isNotEmpty ? sent.text : m.text,
+            imageUrl: sent.imageUrl ?? m.imageUrl,
+            roomId: m.roomId,
+            createdAt: sent.createdAt,
+            type: m.type,
+            isMe: true,
+          ),
+        );
+      }
+    }
+    _messagesCache[hostelId] = updated;
+
+    if (_activeHostelId == hostelId && state is CommunityLoaded) {
+      emit((state as CommunityLoaded).copyWith(messages: updated));
+    }
+  }
+
   Future<void> editMessage(String messageId, String newText) async {
     final currentState = state;
-    if (currentState is! CommunityLoaded || newText.trim().isEmpty || _activeHostelId == null) return;
+    if (currentState is! CommunityLoaded ||
+        newText.trim().isEmpty ||
+        _activeHostelId == null) {
+      return;
+    }
+    // Still sending: the server doesn't know this id yet.
+    if (messageId.startsWith('temp_')) return;
 
-    final currentMessages = List<CommunityMessageEntity>.from(currentState.messages);
+    final currentMessages = List<CommunityMessageEntity>.from(
+      currentState.messages,
+    );
     final index = currentMessages.indexWhere((m) => m.id == messageId);
     CommunityMessageEntity? oldMessage;
-    
+
     if (index != -1) {
       oldMessage = currentMessages[index];
       final optimisticMessage = CommunityMessageEntity(
@@ -335,8 +417,12 @@ class CommunityCubit extends Cubit<CommunityState> {
       AppLogger.error('editMessage failed', e);
       if (oldMessage != null && state is CommunityLoaded) {
         final fallbackState = state as CommunityLoaded;
-        final fallbackMessages = List<CommunityMessageEntity>.from(fallbackState.messages);
-        final fallbackIndex = fallbackMessages.indexWhere((m) => m.id == messageId);
+        final fallbackMessages = List<CommunityMessageEntity>.from(
+          fallbackState.messages,
+        );
+        final fallbackIndex = fallbackMessages.indexWhere(
+          (m) => m.id == messageId,
+        );
         if (fallbackIndex != -1) {
           fallbackMessages[fallbackIndex] = oldMessage;
           _messagesCache[_activeHostelId!] = fallbackMessages;
@@ -349,8 +435,12 @@ class CommunityCubit extends Cubit<CommunityState> {
   Future<void> deleteMessage(String messageId) async {
     final currentState = state;
     if (currentState is! CommunityLoaded || _activeHostelId == null) return;
+    // Still sending: the server doesn't know this id yet.
+    if (messageId.startsWith('temp_')) return;
 
-    final currentMessages = List<CommunityMessageEntity>.from(currentState.messages);
+    final currentMessages = List<CommunityMessageEntity>.from(
+      currentState.messages,
+    );
     final index = currentMessages.indexWhere((m) => m.id == messageId);
     CommunityMessageEntity? oldMessage;
 
@@ -381,8 +471,12 @@ class CommunityCubit extends Cubit<CommunityState> {
       AppLogger.error('deleteMessage failed', e);
       if (oldMessage != null && state is CommunityLoaded) {
         final fallbackState = state as CommunityLoaded;
-        final fallbackMessages = List<CommunityMessageEntity>.from(fallbackState.messages);
-        final fallbackIndex = fallbackMessages.indexWhere((m) => m.id == messageId);
+        final fallbackMessages = List<CommunityMessageEntity>.from(
+          fallbackState.messages,
+        );
+        final fallbackIndex = fallbackMessages.indexWhere(
+          (m) => m.id == messageId,
+        );
         if (fallbackIndex != -1) {
           fallbackMessages[fallbackIndex] = oldMessage;
           _messagesCache[_activeHostelId!] = fallbackMessages;
@@ -420,7 +514,8 @@ class CommunityCubit extends Cubit<CommunityState> {
     }
 
     try {
-      await _sendImage(hostelId, imagePath);
+      final sent = await _sendImage(hostelId, imagePath);
+      if (sent != null) _replaceTempMessage(hostelId, tempId, sent);
     } catch (e) {
       AppLogger.error('sendImageMessage failed', e);
       if (state is CommunityLoaded) {
