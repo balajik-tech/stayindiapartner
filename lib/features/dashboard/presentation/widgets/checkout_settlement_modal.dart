@@ -16,7 +16,8 @@ class CheckoutSettlementModal extends StatefulWidget {
     required double pendingRent,
     required double utilityDue,
     required double finalSettlement,
-  }) onCheckoutConfirmed;
+  })
+  onCheckoutConfirmed;
 
   const CheckoutSettlementModal({
     super.key,
@@ -40,7 +41,8 @@ class CheckoutSettlementModal extends StatefulWidget {
       required double pendingRent,
       required double utilityDue,
       required double finalSettlement,
-    }) onCheckoutConfirmed,
+    })
+    onCheckoutConfirmed,
   }) {
     showModalBottomSheet(
       context: context,
@@ -70,8 +72,14 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
   double _utilityDue = 0.0;
   double _totalDues = 0.0;
   double _finalSettlement = 0.0;
+  // Dues as loaded from the server, so editing the fields can't bypass the check.
+  double _fetchedDues = 0.0;
 
   final List<String> _pendingBillIds = [];
+
+  double get _blockingDues =>
+      _fetchedDues > _totalDues ? _fetchedDues : _totalDues;
+  bool get _hasPendingDues => _blockingDues > 0;
 
   late TextEditingController _depositController;
   late TextEditingController _pendingRentController;
@@ -124,9 +132,8 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
       for (var rental in rentals) {
         if (!rental.isPaid) {
           double rentVal = rental.bookingAmount;
-          double utilVal = rental.electricityBill +
-              rental.parkingBill +
-              rental.maintenance;
+          double utilVal =
+              rental.electricityBill + rental.parkingBill + rental.maintenance;
 
           if (rentVal == 0 && utilVal == 0 && rental.payableAmount > 0) {
             rentVal = rental.payableAmount;
@@ -151,9 +158,8 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
 
       if (_pendingBillIds.isEmpty && utilityAccumulator > 0) {
         try {
-          final res = await sl<ElectricityRemoteDataSource>().fetchElectricityBills(
-            hostelId: widget.hostelId,
-          );
+          final res = await sl<ElectricityRemoteDataSource>()
+              .fetchElectricityBills(hostelId: widget.hostelId);
           final items = res['data']?['items'] ?? res['data'] ?? [];
           if (items is List) {
             for (var item in items) {
@@ -163,10 +169,11 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
                 if (billId != null && splits is List) {
                   for (var split in splits) {
                     if (split is Map) {
-                      final tId = (split['tenant'] is Map
-                              ? split['tenant']['_id']
-                              : split['tenant'])
-                          ?.toString();
+                      final tId =
+                          (split['tenant'] is Map
+                                  ? split['tenant']['_id']
+                                  : split['tenant'])
+                              ?.toString();
                       final status = split['status']?.toString().toUpperCase();
                       if (tId == widget.tenantId && status == 'PENDING') {
                         if (!_pendingBillIds.contains(billId)) {
@@ -192,6 +199,7 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
         _utilityDue = utilityAccumulator;
         _totalDues = _pendingRent + _utilityDue;
         _finalSettlement = _securityDeposit - _totalDues;
+        _fetchedDues = _totalDues;
 
         _depositController.text = _securityDeposit.toStringAsFixed(0);
         _pendingRentController.text = _pendingRent.toStringAsFixed(0);
@@ -311,12 +319,12 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
-                color: _totalDues > 0
+                color: _hasPendingDues
                     ? const Color(0xFFFEF2F2)
                     : const Color(0xFFF0FDF4),
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
-                  color: _totalDues > 0
+                  color: _hasPendingDues
                       ? const Color(0xFFFCA5A5)
                       : const Color(0xFF86EFAC),
                 ),
@@ -324,27 +332,42 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
               child: Row(
                 children: [
                   Icon(
-                    _totalDues > 0
+                    _hasPendingDues
                         ? Icons.warning_amber_rounded
                         : Icons.check_circle_outline,
-                    color: _totalDues > 0
+                    color: _hasPendingDues
                         ? const Color(0xFFDC2626)
                         : const Color(0xFF16A34A),
                     size: 20.sp,
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
-                    child: Text(
-                      _totalDues > 0
-                          ? 'Pending Dues Found'
-                          : 'Clear to Checkout',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: _totalDues > 0
-                            ? const Color(0xFF991B1B)
-                            : const Color(0xFF166534),
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _hasPendingDues
+                              ? 'Pending Dues Found'
+                              : 'Clear to Checkout',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                            color: _hasPendingDues
+                                ? const Color(0xFF991B1B)
+                                : const Color(0xFF166534),
+                          ),
+                        ),
+                        if (_hasPendingDues) ...[
+                          SizedBox(height: 2.h),
+                          Text(
+                            'Collect ₹${_blockingDues.toStringAsFixed(0)} in pending dues before checking out this tenant.',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: const Color(0xFF991B1B),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
@@ -410,7 +433,10 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
             SizedBox(height: 28.h),
 
             _SlideToConfirmButton(
-              label: 'Slide to Confirm Check-out',
+              label: _hasPendingDues
+                  ? 'Clear dues to Check-out'
+                  : 'Slide to Confirm Check-out',
+              enabled: !_hasPendingDues,
               onConfirmed: _handleConfirmCheckout,
             ),
           ],
@@ -420,6 +446,8 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
   }
 
   Future<void> _handleConfirmCheckout() async {
+    if (_hasPendingDues) return;
+
     if (_pendingBillIds.isNotEmpty) {
       final elecDS = sl<ElectricityRemoteDataSource>();
       for (final billId in _pendingBillIds) {
@@ -478,21 +506,30 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
             height: 40.h,
             child: TextField(
               controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               textAlign: TextAlign.end,
               onChanged: (_) => _onValuesChanged(),
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
-                color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                color: isPositive
+                    ? const Color(0xFF16A34A)
+                    : const Color(0xFFDC2626),
               ),
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 8.w,
+                  vertical: 8.h,
+                ),
                 prefixText: isPositive ? '+ ₹' : '- ₹',
                 prefixStyle: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
-                  color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                  color: isPositive
+                      ? const Color(0xFF16A34A)
+                      : const Color(0xFFDC2626),
                 ),
                 isDense: true,
                 filled: true,
@@ -508,7 +545,9 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.r),
                   borderSide: BorderSide(
-                    color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                    color: isPositive
+                        ? const Color(0xFF16A34A)
+                        : const Color(0xFFDC2626),
                   ),
                 ),
               ),
@@ -522,9 +561,14 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
 
 class _SlideToConfirmButton extends StatefulWidget {
   final String label;
+  final bool enabled;
   final VoidCallback onConfirmed;
 
-  const _SlideToConfirmButton({required this.label, required this.onConfirmed});
+  const _SlideToConfirmButton({
+    required this.label,
+    required this.onConfirmed,
+    this.enabled = true,
+  });
 
   @override
   State<_SlideToConfirmButton> createState() => _SlideToConfirmButtonState();
@@ -565,7 +609,7 @@ class _SlideToConfirmButtonState extends State<_SlideToConfirmButton> {
                 left: _position,
                 child: GestureDetector(
                   onHorizontalDragUpdate: (details) {
-                    if (_confirmed) return;
+                    if (_confirmed || !widget.enabled) return;
                     setState(() {
                       _position += details.delta.dx;
                       if (_position < 0) _position = 0;
@@ -573,7 +617,7 @@ class _SlideToConfirmButtonState extends State<_SlideToConfirmButton> {
                     });
                   },
                   onHorizontalDragEnd: (details) {
-                    if (_confirmed) return;
+                    if (_confirmed || !widget.enabled) return;
                     if (_position >= maxDistance * 0.85) {
                       setState(() {
                         _position = maxDistance;
@@ -592,18 +636,26 @@ class _SlideToConfirmButtonState extends State<_SlideToConfirmButton> {
                     width: 48.h,
                     height: 48.h,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444),
+                      color: widget.enabled
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFFCBD5E1),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+                          color:
+                              (widget.enabled
+                                      ? const Color(0xFFEF4444)
+                                      : const Color(0xFFCBD5E1))
+                                  .withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: Icon(
-                      Icons.arrow_forward_rounded,
+                      widget.enabled
+                          ? Icons.arrow_forward_rounded
+                          : Icons.lock_outline_rounded,
                       color: Colors.white,
                       size: 22.sp,
                     ),
