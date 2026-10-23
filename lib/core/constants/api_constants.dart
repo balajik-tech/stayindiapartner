@@ -99,6 +99,7 @@ class ApiConstants {
       '/tenants/hostels/$hostelId/tenant-import-template';
 
   static const String community = '/community';
+  static String communityChat(String chatId) => '/community/chat/$chatId';
 
   static const String ownerCommunity = '/owner-community';
   static const String ownerCommunities = '/owner-communities';

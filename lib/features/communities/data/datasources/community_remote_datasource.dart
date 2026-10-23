@@ -490,11 +490,13 @@ class CommunityRemoteDataSourceImpl implements CommunityRemoteDataSource {
     AppLogger.info('Searching associations: $query');
     final response = await _dio.get(
       ApiConstants.associationsSearch,
-      queryParameters: {'query': query},
+      queryParameters: {'search': query},
     );
 
     if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+      final data = response.data['data'];
+      final list = data is Map ? data['associations'] : data;
+      return List<Map<String, dynamic>>.from(list ?? []);
     }
     throw Exception('Failed to search associations');
   }

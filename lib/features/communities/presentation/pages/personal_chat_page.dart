@@ -139,9 +139,10 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
   Future<void> _fetchMessageHistory() async {
     try {
       final dio = sl<Dio>();
-      final response = await dio.get('${ApiConstants.baseUrl}${ApiConstants.community}/${widget.chatId}/messages');
+      final response = await dio.get('${ApiConstants.baseUrl}${ApiConstants.communityChat(widget.chatId)}/messages');
       if (response.statusCode == 200) {
-        final List<dynamic> fetched = response.data['data']?['messages'] ?? [];
+        final List<dynamic> fetched =
+            response.data['data']?['messages'] ?? response.data['messages'] ?? [];
         if (mounted) {
           setState(() {
             _messages.clear();
@@ -197,7 +198,7 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
       try {
         final dio = sl<Dio>();
         final response = await dio.patch(
-          '${ApiConstants.baseUrl}${ApiConstants.community}/${widget.chatId}/message/$msgId',
+          '${ApiConstants.baseUrl}${ApiConstants.communityChat(widget.chatId)}/message/$msgId',
           data: {'text': text},
         );
         if (response.statusCode == 200) {
@@ -243,7 +244,7 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
       final dio = sl<Dio>();
       final response = await dio.post(
         '${ApiConstants.baseUrl}${ApiConstants.community}/message',
-        data: {'hostelId': widget.chatId, 'text': text},
+        data: {'chatId': widget.chatId, 'text': text},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -388,7 +389,7 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
     try {
       final dio = sl<Dio>();
       final response = await dio.delete(
-        '${ApiConstants.baseUrl}${ApiConstants.community}/${widget.chatId}/message/$messageId',
+        '${ApiConstants.baseUrl}${ApiConstants.communityChat(widget.chatId)}/message/$messageId',
       );
       if (response.statusCode == 200) {
         return;
@@ -689,7 +690,7 @@ class _PersonalChatPageState extends State<PersonalChatPage> {
       final dio = sl<Dio>();
       final response = await dio.post(
         '${ApiConstants.baseUrl}${ApiConstants.community}/message',
-        data: {'hostelId': targetChatId, 'text': text},
+        data: {'chatId': targetChatId, 'text': text},
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
