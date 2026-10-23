@@ -213,7 +213,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     if (isPaused) {
       return const _StatusInfo(
         label: 'Paused',
-        badgeBg: Color(0xFFEFF6FF),
+        badgeBg: Color(0xFFebf1fd),
         badgeFg: Color(0xFF2563EB),
       );
     }
@@ -448,9 +448,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Search Bar & Count Heading
+// Properties Count & Search Bar in Row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       '${filteredHostels.length} Properties',
@@ -460,41 +459,65 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         color: const Color(0xFF1E293B),
                       ),
                     ),
+                    SizedBox(width: 24.w),
+                    Expanded(
+                      child: SizedBox(
+                        height: 40.h,
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (val) => setState(() => _searchQuery = val),
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            color: const Color(0xFF1E293B),
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Search property or location',
+                            hintStyle: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: Colors.grey.shade400,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Color(0xFF53576f),
+                              size: 18.sp,
+                            ),
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: 36.w,
+                              minHeight: 40.h,
+                            ),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8.h,
+                              horizontal: 10.w,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryBlue,
+                                width: 1.2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
-                ),
-                SizedBox(height: 10.h),
-
-                // Search Bar Input
-                TextField(
-                  controller: _searchController,
-                  onChanged: (val) => setState(() => _searchQuery = val),
-                  decoration: InputDecoration(
-                    hintText: 'Search property or location',
-                    hintStyle: GoogleFonts.inter(
-                      fontSize: 13.sp,
-                      color: Colors.grey.shade400,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.grey.shade400,
-                      size: 20.sp,
-                    ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                      borderSide: const BorderSide(color: AppColors.primaryBlue),
-                    ),
-                  ),
                 ),
                 SizedBox(height: 16.h),
 
@@ -536,12 +559,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         child: Container(
                           padding: EdgeInsets.all(12.w),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16.r),
+                            color: isSelected ? Color(0xFFeef5fd) : Colors.white,
+                            borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
                               color: isSelected
                                   ? AppColors.primaryBlue
-                                  : Colors.grey.shade200,
+                                  : Color(0xFFe5e9ec),
                               width: isSelected ? 1.5 : 1,
                             ),
                             boxShadow: [
@@ -554,6 +577,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                             ],
                           ),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               // Radio Selection Dot
                               Container(
@@ -619,7 +643,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                         Icon(
                                           Icons.location_on_outlined,
                                           size: 13.sp,
-                                          color: Colors.grey.shade500,
+                                          color: Color(0xFF60677b),
                                         ),
                                         SizedBox(width: 3.w),
                                         Expanded(
@@ -627,7 +651,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                             hostel.address,
                                             style: GoogleFonts.inter(
                                               fontSize: 12.sp,
-                                              color: Colors.grey.shade600,
+                                              color: Color(0xFF60677b),
                                               fontWeight: FontWeight.w500,
                                             ),
                                             maxLines: 1,
@@ -643,14 +667,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                           'assets/images/bed_icon.png',
                                           width: 13.w,
                                           height: 13.w,
-                                          color: Colors.grey.shade500,
+                                          color: Color(0xFF60677b),
                                         ),
                                         SizedBox(width: 4.w),
                                         Text(
                                           '${hostel.totalBeds ?? 0} beds',
                                           style: GoogleFonts.inter(
                                             fontSize: 12.sp,
-                                            color: Colors.grey.shade600,
+                                            color: Color(0xFF60677b),
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -662,15 +686,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                               SizedBox(width: 8.w),
 
                               // Status Badge & Chevron Right
-                              Row(
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   _buildStatusPill(statusInfo),
-                                  SizedBox(width: 4.w),
+                                  SizedBox(height: 2.h),
                                   Icon(
                                     Icons.chevron_right_rounded,
-                                    color: Colors.grey.shade400,
+                                    color: AppColors.primaryBlue,
                                     size: 20.sp,
                                   ),
+                                  SizedBox(height: 18.h),
                                 ],
                               ),
                             ],
@@ -828,7 +855,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 Container(
                   padding: EdgeInsets.all(12.w),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0F7FF),
+                    color: const Color(0xFFf5f7fe),
                     borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(color: const Color(0xFFDBEAFE)),
                   ),
@@ -927,7 +954,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                               vertical: 3.h,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE2E8F0),
+                              color: const Color(0xFFe0eaf4),
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Row(
@@ -936,7 +963,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                 Icon(
                                   Icons.lock_outline,
                                   size: 11.sp,
-                                  color: const Color(0xFF475569),
+                                  color: const Color(0xFF485774),
                                 ),
                                 SizedBox(width: 3.w),
                                 Text(
@@ -944,7 +971,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                   style: GoogleFonts.inter(
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF475569),
+                                    color: const Color(0xFF485774),
                                   ),
                                 ),
                               ],
@@ -967,7 +994,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                   style: GoogleFonts.inter(
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.grey.shade600,
+                                    color: Color(0xFF576275),
                                   ),
                                 ),
                               ],
