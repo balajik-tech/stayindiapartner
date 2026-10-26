@@ -205,17 +205,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
 
     final now = DateTime.now();
-    final endDate = activeSubscription.endDate ?? now;
-    final daysRemaining = activeSubscription.daysRemaining ??
-        endDate.difference(now).inDays;
+    final endDate = activeSubscription.endDate;
 
-    final isExpired = daysRemaining <= 0 || endDate.isBefore(now);
-    final isPaused = activeSubscription.status == 'PAUSED' ||
+    int daysRemaining = activeSubscription.daysRemaining ?? 0;
+    if (activeSubscription.daysRemaining == null && endDate != null) {
+      daysRemaining = endDate.difference(now).inDays;
+    }
+
+    final isExpired = daysRemaining <= 0 ||
+        (endDate != null && (endDate.isBefore(now) || endDate.difference(now).inDays <= 0));
+
+    final isStopped = activeSubscription.status == 'PAUSED' ||
         activeSubscription.status == 'EXPIRED' ||
         activeSubscription.status == 'CANCELLED' ||
+        activeSubscription.status == 'INACTIVE' ||
+        activeSubscription.status == 'STOPPED' ||
         isExpired;
 
-    if (isPaused) {
+    if (isStopped) {
       return const _StatusInfo(
         label: 'Service Stopped',
         badgeBg: Color(0xFFFDE8E8),
@@ -1761,19 +1768,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       daysRemaining = months * 30;
     }
 
-    final isExpired = (daysRemaining <= 0 || (endDate != null && endDate.isBefore(now))) &&
-        activeSubscription.status != 'ACTIVE';
+    final isExpired = daysRemaining <= 0 ||
+        (endDate != null && (endDate.isBefore(now) || endDate.difference(now).inDays <= 0));
     final isStopped = activeSubscription.status == 'PAUSED' ||
         activeSubscription.status == 'EXPIRED' ||
         activeSubscription.status == 'CANCELLED' ||
+        activeSubscription.status == 'INACTIVE' ||
+        activeSubscription.status == 'STOPPED' ||
         isExpired;
 
     final Color badgeBg;
     final Color badgeFg;
     final String titleText;
     final String valueText;
-
-    debugPrint("Service Stoppped ${activeSubscription.status}");
 
     if (isStopped) {
       titleText = 'Service Stopped on';
