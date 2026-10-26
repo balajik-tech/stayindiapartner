@@ -21,6 +21,7 @@ import 'package:stayindia_owner/injection_container.dart' as di;
 import 'package:stayindia_owner/features/profile/domain/usecases/room_usecases.dart';
 import 'package:stayindia_owner/features/finance/presentation/cubit/payment_report_cubit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AddTenantPage extends StatefulWidget {
   const AddTenantPage({super.key});
@@ -183,7 +184,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         _isLoadingRooms = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
           SnackBar(
             content: Text('Failed to load hostel details: $e'),
             backgroundColor: Colors.redAccent,
@@ -258,11 +259,12 @@ class _AddTenantPageState extends State<AddTenantPage> {
       _selectedRoom = room;
       _selectedBed = null;
       _beds = beds;
-      _rentController.text = room.rent.toString();
-      _depositController.text = room.deposit.toString();
-      _dayRentController.text = room.dailyRent.toString();
-      _maintenanceController.text = room.maintenance.toString();
-      _customDepositController.text = room.deposit.toString();
+      // Whole rupees: these fields are digits-only, so "5000.0" would turn into 50000 on edit.
+      _rentController.text = room.rent.toStringAsFixed(0);
+      _depositController.text = room.deposit.toStringAsFixed(0);
+      _dayRentController.text = room.dailyRent.toStringAsFixed(0);
+      _maintenanceController.text = room.maintenance.toStringAsFixed(0);
+      _customDepositController.text = room.deposit.toStringAsFixed(0);
     });
   }
 
@@ -438,7 +440,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     final extractedAadhaarAddress = _extractedAadharData['address'] ?? '';
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         SnackBar(
           content: Text('please_enter_full_name'.tr()),
           backgroundColor: Colors.redAccent,
@@ -447,8 +449,8 @@ class _AddTenantPageState extends State<AddTenantPage> {
       return;
     }
 
-    if (phone.isEmpty || phone.length != 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(phone)) {
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         SnackBar(
           content: Text('enter_valid_phone'.tr()),
           backgroundColor: Colors.redAccent,
@@ -460,7 +462,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     if (_emailController.text.isNotEmpty) {
       final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
       if (!emailRegex.hasMatch(_emailController.text.trim())) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
           SnackBar(
             content: Text('enter_valid_email'.tr()),
             backgroundColor: Colors.redAccent,
@@ -498,7 +500,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     }
 
     if (hasGuardianError) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         const SnackBar(
           content: Text('Please enter a valid 10-digit mobile number for guardian'),
           backgroundColor: Colors.redAccent,
@@ -512,7 +514,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
         _selectedFloor == null ||
         _selectedRoom == null ||
         _selectedBed == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         const SnackBar(
           content: Text('Please select all room allocation details'),
           backgroundColor: Colors.redAccent,
@@ -522,7 +524,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     }
 
     if (rentText.isEmpty || (double.tryParse(rentText) ?? 0) <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         SnackBar(
           content: Text('enter_valid_rent'.tr()),
           backgroundColor: Colors.redAccent,
@@ -532,7 +534,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     }
 
     if (_checkInDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         SnackBar(
           content: Text('select_check_in_date'.tr()),
           backgroundColor: Colors.redAccent,
@@ -543,7 +545,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
     if (_stayType == StayType.CUSTOM) {
       if (_checkOutDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
           SnackBar(
             content: Text('select_check_out_date'.tr()),
             backgroundColor: Colors.redAccent,
@@ -554,7 +556,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     }
 
     // if (_userPhoto == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
+    //   (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
     //     const SnackBar(
     //       content: Text('Please take a user photo (Face validation required)'),
     //       backgroundColor: Colors.redAccent,
@@ -564,7 +566,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     // }
 
     if (_aadharPhoto == null || _aadharPhotoBack == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         const SnackBar(
           content: Text('Please upload both Front and Back of Aadhar Card'),
           backgroundColor: Colors.redAccent,
@@ -575,7 +577,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
     if (aadharNumber.isEmpty || aadharNumber.length != 12) {
       String found = aadharNumber;
-      ScaffoldMessenger.of(context).showSnackBar(
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         SnackBar(
           content: Text(
               found.isEmpty
@@ -591,7 +593,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       debugPrint('Valid Aadhaar format/checksum');
     } else {
       debugPrint('Invalid Aadhaar number');
-      ScaffoldMessenger.of(context).showSnackBar(
+      (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
         const SnackBar(
           content: Text('Invalid Aadhaar number.'),
           backgroundColor: Colors.redAccent,
@@ -614,7 +616,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
           : cleanOwnerPhone;
 
       if (phone == last10Owner) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
           const SnackBar(
             content: Text('Owner cannot be added as a tenant'),
             backgroundColor: Colors.redAccent,
@@ -756,7 +758,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
       child: BlocListener<AddTenantCubit, AddTenantState>(
         listener: (context, state) {
           if (state is AddTenantSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
               SnackBar(
                 content: Text(state.message ?? 'tenant_added_success'.tr()),
                 backgroundColor: Colors.green,
@@ -766,7 +768,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
               Navigator.pop(context, true);
             }
           } else if (state is AddTenantError) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: Colors.redAccent,
@@ -843,6 +845,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                               FilteringTextInputFormatter.allow(
                                 RegExp(r'[a-zA-Z\s]'),
                               ),
+                              LengthLimitingTextInputFormatter(50),
                             ],
                           ),
                           SizedBox(height: 16.h),
@@ -947,6 +950,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                               keyboardType: TextInputType.number,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(7),
                               ],
                             ),
                             SizedBox(height: 16.h),
@@ -958,6 +962,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                               keyboardType: TextInputType.number,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(7),
                               ],
                             ),
                             SizedBox(height: 16.h),
@@ -968,6 +973,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                               keyboardType: TextInputType.number,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(7),
                               ],
                             ),
                             SizedBox(height: 16.h),
@@ -984,6 +990,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                               keyboardType: TextInputType.number,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(7),
                               ],
                             ),
                             SizedBox(height: 16.h),
@@ -994,6 +1001,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                               keyboardType: TextInputType.number,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(7),
                               ],
                             ),
                             SizedBox(height: 16.h),
@@ -1413,6 +1421,24 @@ class _AddTenantPageState extends State<AddTenantPage> {
     );
   }
 
+  Widget _buildLabel(String label) {
+    final style = TextStyle(
+      fontSize: 14.sp,
+      color: AppColors.greyText,
+      fontWeight: FontWeight.w500,
+    );
+    if (!label.endsWith('*')) return Text(label, style: style);
+    return Text.rich(
+      TextSpan(
+        text: label.substring(0, label.length - 1),
+        style: style,
+        children: const [
+          TextSpan(text: '*', style: TextStyle(color: Colors.redAccent)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTextField(
     String label,
     IconData icon,
@@ -1423,14 +1449,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.greyText,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        _buildLabel(label),
         SizedBox(height: 8.h),
         TextField(
           controller: controller,
@@ -1469,14 +1488,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.greyText,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        _buildLabel(label),
         SizedBox(height: 8.h),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -1488,6 +1500,15 @@ class _AddTenantPageState extends State<AddTenantPage> {
             child: DropdownButton<T>(
               isExpanded: true,
               value: value,
+              disabledHint: isLoading
+                  ? null
+                  : Text(
+                      'No options available',
+                      style: TextStyle(
+                        color: AppColors.greyText.withValues(alpha: 0.5),
+                        fontSize: 15.sp,
+                      ),
+                    ),
               hint: isLoading
                   ? SizedBox(
                       height: 20.h,
@@ -1526,14 +1547,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.greyText,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        _buildLabel(label),
         SizedBox(height: 8.h),
         GestureDetector(
           onTap: () async {
@@ -1592,14 +1606,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.greyText,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        _buildLabel(label),
         SizedBox(height: 8.h),
         GestureDetector(
           onTap: () async {
@@ -1979,6 +1986,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
   }
 
   Future<void> _pickUserPhoto() async {
+    FocusScope.of(context).unfocus();
     try {
       final picker = ImagePicker();
       final XFile? image = await picker.pickImage(
@@ -2020,7 +2028,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
           setState(() {
             _userPhoto = File(image.path);
           });
-          ScaffoldMessenger.of(context).showSnackBar(
+          (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
             const SnackBar(
               content: Text('Face successfully detected and verified!'),
               backgroundColor: Colors.green,
@@ -2050,7 +2058,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
                 ],
               ),
               content: const Text(
-                'Google ML Kit could not detect a valid human face in the photo. Please take a clear picture of the tenant\'s face with good lighting.',
+                'We couldn\'t detect a face in this photo. Please take a clear picture of the tenant\'s face in good lighting.',
               ),
               actions: [
                 TextButton(
@@ -2070,13 +2078,52 @@ class _AddTenantPageState extends State<AddTenantPage> {
         setState(() {
           _isDetectingFace = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Face detection error: $e'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        _showPhotoError(e);
       }
+    }
+  }
+
+  bool _isPermissionDenied(Object e) =>
+      e is PlatformException &&
+      (e.code == 'camera_access_denied' || e.code == 'photo_access_denied');
+
+  void _showPhotoError(Object e) {
+    if (!mounted) return;
+    debugPrint('Photo pick error: $e');
+    final denied = _isPermissionDenied(e);
+    (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
+      SnackBar(
+        content: Text(
+          denied
+              ? 'Camera or photo access is turned off. Please allow it in Settings to continue.'
+              : 'Could not load the photo. Please try again.',
+        ),
+        backgroundColor: Colors.redAccent,
+        action: denied
+            ? SnackBarAction(
+                label: 'Settings',
+                textColor: Colors.white,
+                onPressed: () => Geolocator.openAppSettings(),
+              )
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _pickImageFrom(
+    ImageSource source,
+    Function(File) onImagePicked,
+  ) async {
+    try {
+      final XFile? image = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 85,
+      );
+      if (image != null) {
+        onImagePicked(File(image.path));
+      }
+    } catch (e) {
+      _showPhotoError(e);
     }
   }
 
@@ -2189,6 +2236,15 @@ class _AddTenantPageState extends State<AddTenantPage> {
     );
   }
 
+  /// The back of an Aadhaar card carries the address but no DOB or gender.
+  bool _looksLikeAadhaarBack(String text) {
+    final lower = text.toLowerCase();
+    final hasFrontMarkers = RegExp(
+      r'dob|d\.o\.b|year of birth|male|female|transgender',
+    ).hasMatch(lower);
+    return lower.contains('address') && !hasFrontMarkers;
+  }
+
   Future<void> _extractAadharText(File imageFile, {required bool isFront}) async {
     setState(() {
       _isExtractingText = true;
@@ -2218,6 +2274,21 @@ class _AddTenantPageState extends State<AddTenantPage> {
         if (fallbackMatch != null) {
           extractedAadhar = fallbackMatch.group(0)!;
         }
+      }
+
+      if (isFront && _looksLikeAadhaarBack(fullText)) {
+        await textRecognizer.close();
+        if (!mounted) return;
+        setState(() {
+          _aadharPhoto = null;
+        });
+        (ScaffoldMessenger.of(context)..hideCurrentSnackBar()).showSnackBar(
+          const SnackBar(
+            content: Text('Please upload the Aadhaar Front side.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
       }
 
       setState(() {
@@ -2273,9 +2344,11 @@ class _AddTenantPageState extends State<AddTenantPage> {
     } catch (e) {
       debugPrint('Error extracting text: $e');
     } finally {
-      setState(() {
-        _isExtractingText = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isExtractingText = false;
+        });
+      }
     }
   }
 
@@ -2283,6 +2356,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     required String title,
     required Function(File) onImagePicked,
   }) async {
+    FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -2334,16 +2408,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   'Take Photo (Camera)',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
-                onTap: () async {
+                onTap: () {
                   Navigator.pop(bottomSheetContext);
-                  final picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(
-                    source: ImageSource.camera,
-                    imageQuality: 85,
-                  );
-                  if (image != null) {
-                    onImagePicked(File(image.path));
-                  }
+                  _pickImageFrom(ImageSource.camera, onImagePicked);
                 },
               ),
               ListTile(
@@ -2362,16 +2429,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                   'Choose from Gallery',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
-                onTap: () async {
+                onTap: () {
                   Navigator.pop(bottomSheetContext);
-                  final picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(
-                    source: ImageSource.gallery,
-                    imageQuality: 85,
-                  );
-                  if (image != null) {
-                    onImagePicked(File(image.path));
-                  }
+                  _pickImageFrom(ImageSource.gallery, onImagePicked);
                 },
               ),
               SizedBox(height: 16.h),

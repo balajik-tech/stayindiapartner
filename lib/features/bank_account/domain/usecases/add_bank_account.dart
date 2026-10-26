@@ -45,6 +45,9 @@ class AddBankAccount implements UseCase<BankAccountEntity, AddBankAccountParams>
     if (params.accountNumber.trim().isEmpty) {
       return const Left(ValidationFailure(message: 'Enter an account number.'));
     }
+    if (!RegExp(r'^\d{9,18}$').hasMatch(params.accountNumber.trim())) {
+      return const Left(ValidationFailure(message: 'Account number must be 9 to 18 digits.'));
+    }
     if (params.accountNumber != params.confirmAccountNumber) {
       return const Left(ValidationFailure(message: 'Account numbers do not match.'));
     }

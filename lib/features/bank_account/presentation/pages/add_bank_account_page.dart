@@ -124,6 +124,9 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
   String? _continueBlocker(AddBankAccountState state) {
     final account = _accountNumberController.text.trim();
     if (account.isEmpty) return 'Enter the account number.';
+    if (account.length < 9) {
+      return 'Account number must be 9 to 18 digits.';
+    }
     if (_confirmAccountNumberController.text.trim().isEmpty) {
       return 'Re-enter the account number to confirm it.';
     }
@@ -358,6 +361,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             style: GoogleFonts.inter(color: Colors.black),
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(18),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -369,6 +373,7 @@ class _AddBankAccountViewState extends State<_AddBankAccountView> {
                             onChanged: (_) => setState(() {}),
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(18),
                             ],
                             style: GoogleFonts.inter(color: Colors.black),
                           ),
