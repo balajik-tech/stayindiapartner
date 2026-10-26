@@ -170,14 +170,15 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                           _MenuTile(
                             icon: Icons.workspace_premium_rounded,
                             imagePath: 'assets/images/profile_management.png',
-                            title: 'management_plans'.tr(),
-                            subtitle: hostelCount == 1
-                                ? 'management_plan_subtitle_single'.tr(
-                              namedArgs: {'count': hostelCount.toString()},
-                            )
-                                : 'management_plans_subtitle'.tr(
-                              namedArgs: {'count': hostelCount.toString()},
-                            ),
+                            title: 'subscription'.tr(),
+                            subtitle: 'subscription_sub'.tr(),
+                            // subtitle: hostelCount == 1
+                            //     ? 'management_plan_subtitle_single'.tr(
+                            //   namedArgs: {'count': hostelCount.toString()},
+                            // )
+                            //     : 'management_plans_subtitle'.tr(
+                            //   namedArgs: {'count': hostelCount.toString()},
+                            // ),
                             iconBgColor: const Color(0xFFEEEDFE),
                             iconColor: const Color(0xFF3C3489),
                             // badge: const _StatusBadge(
