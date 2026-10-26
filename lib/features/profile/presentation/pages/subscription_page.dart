@@ -815,7 +815,26 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       );
     }
 
-    final defaultKey = planOptions.first.key;
+    String defaultKey = planOptions.first.key;
+
+    if (activeSub != null &&
+        _getSubscriptionStatus(activeSub).label == 'Running') {
+      final activePlanCode = activeSub.planSnapshot.planCode.toLowerCase();
+      final activePlanId = activeSub.plan;
+      final activeSnapshotId = activeSub.planSnapshot.id;
+
+      final matchedPlan = planOptions.firstWhere(
+        (p) =>
+            p.id == activePlanId ||
+            p.id == activeSnapshotId ||
+            p.key == activePlanCode ||
+            p.key.contains(activePlanCode) ||
+            activePlanCode.contains(p.key),
+        orElse: () => planOptions.first,
+      );
+      defaultKey = matchedPlan.key;
+    }
+
     final selectedKey = _planKeyFor(property.id, defaultKey);
     final selectedPlan = planOptions.firstWhere(
       (p) => p.key == selectedKey,
