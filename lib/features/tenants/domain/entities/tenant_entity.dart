@@ -258,6 +258,9 @@ class TenantPaymentItemEntity extends Equatable {
   final double? deposit;
   final double? maintenance;
 
+  /// Tenant's electricity/utility share for this rental.
+  final double? utilityBill;
+
   const TenantPaymentItemEntity({
     required this.id,
     required this.month,
@@ -271,6 +274,7 @@ class TenantPaymentItemEntity extends Equatable {
     this.rent,
     this.deposit,
     this.maintenance,
+    this.utilityBill,
   });
 
   @override
@@ -287,6 +291,7 @@ class TenantPaymentItemEntity extends Equatable {
     rent,
     deposit,
     maintenance,
+    utilityBill,
   ];
 }
 

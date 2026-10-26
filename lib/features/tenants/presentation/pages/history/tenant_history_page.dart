@@ -37,6 +37,35 @@ const _dueRed = Color(0xFFF04438);
 const _dueRedBg = Color(0xFFFFF1F0);
 const _pendingOrange = Color(0xFFF79009);
 const _pendingOrangeBg = Color(0xFFFFFAEB);
+const _utilityPurple = Color(0xFF7A5AF8);
+const _utilityPurpleBg = Color(0xFFF4F3FF);
+
+/// Payment components shown as filters and as the per-entry breakdown.
+enum _Category {
+  rent('Rent', Icons.home_rounded, _successGreen, _successGreenBg),
+  deposit('Deposit', Icons.shield_rounded, _pendingOrange, _pendingOrangeBg),
+  maintenance(
+    'Maintenance',
+    Icons.build_rounded,
+    AppColors.primaryBlue,
+    AppColors.totalBlue,
+  ),
+  utility('Utility Bill', Icons.bolt_rounded, _utilityPurple, _utilityPurpleBg);
+
+  const _Category(this.label, this.icon, this.color, this.background);
+
+  final String label;
+  final IconData icon;
+  final Color color;
+  final Color background;
+
+  double amountOf(TenantPaymentItemEntity p) => switch (this) {
+    _Category.rent => p.rent ?? 0,
+    _Category.deposit => p.deposit ?? 0,
+    _Category.maintenance => p.maintenance ?? 0,
+    _Category.utility => p.utilityBill ?? 0,
+  };
+}
 
 final _rupees = NumberFormat.currency(
   locale: 'en_IN',
@@ -49,8 +78,8 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
   late String _tenantName;
   String? _checkInDate;
   int? _daysSinceFirstRental;
-  int? _totalTransactions;
   bool _isLoading = false;
+  _Category? _filter;
 
   @override
   void initState() {
@@ -98,7 +127,6 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
         }
 
         int? days;
-        int? totalTransactions;
         String? firstRentalDate;
 
         if (dataMap != null) {
@@ -107,9 +135,6 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
           }
           if (dataMap['daysSinceFirstRental'] is num) {
             days = (dataMap['daysSinceFirstRental'] as num).toInt();
-          }
-          if (dataMap['totalTransactions'] is num) {
-            totalTransactions = (dataMap['totalTransactions'] as num).toInt();
           }
           if (dataMap['firstRentalDate'] != null) {
             firstRentalDate = dataMap['firstRentalDate'].toString();
@@ -145,9 +170,6 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
             if (days != null) {
               _daysSinceFirstRental = days;
             }
-            if (totalTransactions != null) {
-              _totalTransactions = totalTransactions;
-            }
             if (firstRentalDate != null && firstRentalDate.isNotEmpty) {
               _checkInDate = firstRentalDate;
             }
@@ -172,6 +194,11 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final filter = _filter;
+    final visible = filter == null
+        ? _payments
+        : _payments.where((p) => filter.amountOf(p) > 0).toList();
+
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
       appBar: _buildAppBar(context),
@@ -180,12 +207,12 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
         onRefresh: _fetchTenantHistory,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
+          padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h),
           children: [
-            _buildSummaryCard(),
-            SizedBox(height: 24.h),
-            _buildSectionHeader(),
+            _buildSummaryRow(),
             SizedBox(height: 12.h),
+            _buildFilterChips(),
+            SizedBox(height: 10.h),
             if (_isLoading)
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 48.h),
@@ -195,16 +222,10 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                   ),
                 ),
               )
-            else if (_payments.isEmpty)
+            else if (visible.isEmpty)
               _buildEmptyState()
             else
-              ..._payments.asMap().entries.map(
-                (e) => _buildTimelineItem(
-                  e.value,
-                  isFirst: e.key == 0,
-                  isLast: e.key == _payments.length - 1,
-                ),
-              ),
+              ...visible.map(_buildPaymentCard),
           ],
         ),
       ),
@@ -271,201 +292,201 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
   double get _dues =>
       widget.dueAmount ?? _payments.fold(0.0, (sum, p) => sum + p.dueAmount);
 
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryRow() {
     final totalPaid = _payments.fold(0.0, (sum, p) => sum + p.paidAmount);
     final dues = _dues;
-    final since = _checkInDate != null
-        ? DateTime.tryParse(_checkInDate!)?.toLocal()
-        : null;
+    final hasDues = dues > 0;
+    final days = _daysStayed;
 
-    return Container(
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryBlue.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Total Paid',
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: Colors.white.withValues(alpha: 0.75),
+          Expanded(
+            child: _buildSummaryTile(
+              icon: Icons.currency_rupee_rounded,
+              label: 'Paid Amount',
+              color: _successGreen,
+              background: _successGreenBg,
+              value: _buildAmountText(_rupees.format(totalPaid), _successGreen),
             ),
           ),
-          SizedBox(height: 4.h),
-          Text(
-            _rupees.format(totalPaid),
-            style: TextStyle(
-              fontSize: 28.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          if (since != null) ...[
-            SizedBox(height: 6.h),
-            Row(
-              children: [
-                Icon(
-                  Icons.event_available_rounded,
-                  size: 14.sp,
-                  color: Colors.white.withValues(alpha: 0.75),
-                ),
-                SizedBox(width: 6.w),
-                Text(
-                  'Staying since ${DateFormat('d MMM yyyy').format(since)}',
+          SizedBox(width: 8.w),
+          Expanded(
+            child: _buildSummaryTile(
+              icon: Icons.schedule_rounded,
+              label: 'Number of Days',
+              color: AppColors.primaryBlue,
+              background: AppColors.totalBlue,
+              value: Text.rich(
+                TextSpan(
+                  text: '$days',
                   style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.white.withValues(alpha: 0.75),
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
                   ),
+                  children: [
+                    TextSpan(
+                      text: days == 1 ? ' Day' : ' Days',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.greyText,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ],
-          SizedBox(height: 18.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatTile(
-                  icon: Icons.schedule_rounded,
-                  label: 'Days',
-                  value: '$_daysStayed',
-                ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: _buildSummaryTile(
+              icon: hasDues
+                  ? Icons.receipt_long_rounded
+                  : Icons.verified_rounded,
+              label: 'Dues',
+              color: hasDues ? _dueRed : _successGreen,
+              background: hasDues ? _dueRedBg : _successGreenBg,
+              value: _buildAmountText(
+                hasDues ? _rupees.format(dues) : 'Clear',
+                hasDues ? _dueRed : _successGreen,
               ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: _buildStatTile(
-                  icon: Icons.receipt_long_rounded,
-                  label: 'Payments',
-                  value: '${_totalTransactions ?? _payments.length}',
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(child: _buildDuesTile(dues)),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatTile({
+  Widget _buildAmountText(String text, Color color) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 18.sp,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryTile({
     required IconData icon,
     required String label,
-    required String value,
+    required Widget value,
+    required Color color,
+    required Color background,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+      padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
-        color: AppColors.glassWhite,
+        color: background,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18.sp, color: Colors.white),
-          SizedBox(height: 8.h),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 17.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          Container(
+            padding: EdgeInsets.all(5.w),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
             ),
+            child: Icon(icon, size: 14.sp, color: color),
           ),
+          SizedBox(height: 6.h),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 11.sp,
-              color: Colors.white.withValues(alpha: 0.75),
-            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 11.sp, color: AppColors.greyText),
           ),
+          SizedBox(height: 2.h),
+          value,
         ],
       ),
     );
   }
 
-  Widget _buildDuesTile(double dues) {
-    final hasDues = dues > 0;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: hasDues ? _dueRedBg : _successGreenBg,
-        borderRadius: BorderRadius.circular(14.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildFilterChips() {
+    return SizedBox(
+      height: 36.h,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
         children: [
-          Icon(
-            hasDues ? Icons.warning_amber_rounded : Icons.verified_rounded,
-            size: 18.sp,
-            color: hasDues ? _dueRed : _successGreen,
+          _buildFilterChip(
+            label: 'All',
+            icon: Icons.list_alt_rounded,
+            color: AppColors.primaryBlue,
+            background: AppColors.totalBlue,
+            selected: _filter == null,
+            onTap: () => setState(() => _filter = null),
           ),
-          SizedBox(height: 8.h),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              hasDues ? _rupees.format(dues) : 'Clear',
-              style: TextStyle(
-                fontSize: 17.sp,
-                fontWeight: FontWeight.bold,
-                color: hasDues ? _dueRed : _successGreen,
-              ),
+          for (final c in _Category.values) ...[
+            SizedBox(width: 8.w),
+            _buildFilterChip(
+              label: c.label,
+              icon: c.icon,
+              color: c.color,
+              background: c.background,
+              selected: _filter == c,
+              // Tapping the active filter again goes back to All.
+              onTap: () => setState(() => _filter = _filter == c ? null : c),
             ),
-          ),
-          Text(
-            'Dues',
-            style: TextStyle(
-              fontSize: 11.sp,
-              color: (hasDues ? _dueRed : _successGreen).withValues(alpha: 0.8),
-            ),
-          ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader() {
-    return Row(
-      children: [
-        Text(
-          'Payment History',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColors.darkText,
+  Widget _buildFilterChip({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required Color background,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        decoration: BoxDecoration(
+          color: selected ? background : Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: selected
+                ? color.withValues(alpha: 0.4)
+                : AppColors.roomCardBorder,
           ),
         ),
-        SizedBox(width: 8.w),
-        if (_payments.isNotEmpty)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-            decoration: BoxDecoration(
-              color: AppColors.totalBlue,
-              borderRadius: BorderRadius.circular(10.r),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16.sp,
+              color: selected ? color : AppColors.greyText,
             ),
-            child: Text(
-              '${_payments.length}',
+            SizedBox(width: 6.w),
+            Text(
+              label,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.totalBlueText,
+                color: selected ? color : AppColors.darkText,
               ),
             ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -486,7 +507,9 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
           ),
           SizedBox(height: 12.h),
           Text(
-            'No payment history found',
+            _filter == null
+                ? 'No payment history found'
+                : 'No ${_filter!.label.toLowerCase()} payments found',
             style: TextStyle(fontSize: 14.sp, color: AppColors.greyText),
           ),
         ],
@@ -521,224 +544,160 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
     }
   }
 
-  Widget _buildTimelineItem(
-    TenantPaymentItemEntity p, {
-    required bool isFirst,
-    required bool isLast,
-  }) {
+  Widget _buildPaymentCard(TenantPaymentItemEntity p) {
     final style = _statusStyle(p.status);
     final isPaid = style.label == 'Paid';
     final amount = isPaid || p.paidAmount > 0 ? p.paidAmount : p.totalAmount;
-    final breakdown = <(String, double)>[
-      if ((p.rent ?? 0) > 0) ('Rent', p.rent!),
-      if ((p.deposit ?? 0) > 0) ('Deposit', p.deposit!),
-      if ((p.maintenance ?? 0) > 0) ('Maintenance', p.maintenance!),
-    ];
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            width: 36.w,
-            child: Column(
-              children: [
-                Container(
-                  width: 2,
-                  height: 18.h,
-                  color: isFirst
-                      ? Colors.transparent
-                      : AppColors.roomCardBorder,
-                ),
-                _buildMethodBadge(p.paymentType, style.color),
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: isLast
-                        ? Colors.transparent
-                        : AppColors.roomCardBorder,
-                  ),
-                ),
-              ],
-            ),
+    // A single-component entry is titled after that component; mixed entries
+    // are a regular rent payment.
+    final present = _Category.values.where((c) => c.amountOf(p) > 0).toList();
+    final single = present.length == 1 ? present.first : null;
+    final title = switch (single) {
+      _Category.deposit => 'Security Deposit',
+      _Category.maintenance => 'Maintenance Charge',
+      _Category.utility => 'Electricity Bill',
+      _ => isPaid ? 'Payment Received' : 'Payment Due',
+    };
+    final lead = single ?? _Category.rent;
+
+    final subtitle = [
+      _formatDate(p.paymentDate ?? p.month, 'MMM d, yyyy • h:mm a'),
+      if (!isPaid && (p.dueDate ?? '').isNotEmpty)
+        'Due ${_formatDate(p.dueDate, 'd MMM')}',
+    ].where((s) => s.isNotEmpty).join(' • ');
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.all(10.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.roomCardBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.only(bottom: 14.h),
-              padding: EdgeInsets.all(14.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: AppColors.roomCardBorder),
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppColors.cardShadow,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  color: lead.background,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  single == null ? Icons.payments_rounded : lead.icon,
+                  size: 20.sp,
+                  color: lead.color,
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isPaid ? 'Payment Received' : 'Payment Due',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.darkText,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              _formatDate(
-                                p.paymentDate ?? p.month,
-                                'd MMM yyyy, h:mm a',
-                              ),
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: AppColors.greyText,
-                              ),
-                            ),
-                          ],
-                        ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkText,
                       ),
-                      SizedBox(width: 8.w),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            _rupees.format(amount),
-                            style: TextStyle(
-                              fontSize: 17.sp,
-                              fontWeight: FontWeight.bold,
-                              color: isPaid ? AppColors.darkText : style.color,
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          _buildChip(
-                            style.label,
-                            style.color,
-                            style.background,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.h),
-                  Row(
-                    children: [
-                      _buildChip(
-                        p.paymentType.toUpperCase(),
-                        AppColors.totalBlueText,
-                        AppColors.totalBlue,
-                      ),
-                      if (!isPaid && (p.dueDate ?? '').isNotEmpty) ...[
-                        SizedBox(width: 8.w),
-                        Text(
-                          'Due ${_formatDate(p.dueDate, 'd MMM yyyy')}',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: style.color,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (breakdown.isNotEmpty) ...[
-                    SizedBox(height: 12.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 10.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundGrey,
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Column(
-                        children: [
-                          for (final (label, value) in breakdown)
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 3.h),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    label,
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: AppColors.greyText,
-                                    ),
-                                  ),
-                                  Text(
-                                    _rupees.format(value),
-                                    style: TextStyle(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.darkText,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: isPaid ? AppColors.greyText : style.color,
                       ),
                     ),
                   ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    _rupees.format(amount),
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                      color: isPaid ? AppColors.darkText : style.color,
+                    ),
+                  ),
+                  if (!isPaid) ...[
+                    SizedBox(height: 2.h),
+                    _buildChip(style.label, style.color, style.background),
+                  ],
                 ],
               ),
-            ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            children: [
+              for (final c in _Category.values) ...[
+                if (c != _Category.values.first) SizedBox(width: 6.w),
+                Expanded(child: _buildBreakdownCell(c, c.amountOf(p))),
+              ],
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMethodBadge(String method, Color statusColor) {
-    if (method.toUpperCase() == 'RAZORPAY') {
-      return Container(
-        width: 36.w,
-        height: 36.w,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10.r),
-          child: Image.asset('assets/images/login_logo.jpg', fit: BoxFit.cover),
-        ),
-      );
-    }
-
-    final icon = switch (method.toUpperCase()) {
-      'UPI' => Icons.qr_code_2_rounded,
-      'CASH' => Icons.payments_rounded,
-      'CARD' => Icons.credit_card_rounded,
-      'BANK' || 'BANK_TRANSFER' || 'NEFT' => Icons.account_balance_rounded,
-      _ => Icons.currency_rupee_rounded,
-    };
-
+  Widget _buildBreakdownCell(_Category c, double value) {
+    final active = value > 0;
     return Container(
-      width: 36.w,
-      height: 36.w,
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: statusColor.withValues(alpha: 0.12),
-        shape: BoxShape.circle,
-        border: Border.all(color: statusColor.withValues(alpha: 0.35)),
+        color: active ? c.background : AppColors.backgroundSecondary,
+        borderRadius: BorderRadius.circular(8.r),
       ),
-      child: Icon(icon, size: 18.sp, color: statusColor),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              c.label,
+              style: TextStyle(
+                fontSize: 10.sp,
+                color: active ? c.color : AppColors.greyText,
+              ),
+            ),
+          ),
+          SizedBox(height: 2.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              _rupees.format(value),
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                color: active ? c.color : AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

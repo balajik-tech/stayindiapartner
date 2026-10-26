@@ -93,6 +93,8 @@ class TenantRentalEntity extends Equatable {
       rent: bookingAmount,
       deposit: deposit,
       maintenance: maintenance,
+      utilityBill:
+          electricityBillShare > 0 ? electricityBillShare : electricityBill,
     );
   }
 

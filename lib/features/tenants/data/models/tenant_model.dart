@@ -247,6 +247,7 @@ class TenantPaymentItemModel extends TenantPaymentItemEntity {
     super.rent,
     super.deposit,
     super.maintenance,
+    super.utilityBill,
   });
 
   factory TenantPaymentItemModel.fromJson(Map<String, dynamic> item) {
@@ -326,6 +327,11 @@ class TenantPaymentItemModel extends TenantPaymentItemEntity {
             ? (bookingObj['maintenance'] as num).toDouble()
             : double.tryParse((item['maintenance'] ?? '').toString()));
 
+    final elecShare = _toDouble(item['electricityBillShare']);
+    final utilityVal = elecShare > 0
+        ? elecShare
+        : _toDouble(item['electricityBill'] ?? item['utilityBill']);
+
     return TenantPaymentItemModel(
       id: id,
       month: dateStr,
@@ -339,6 +345,7 @@ class TenantPaymentItemModel extends TenantPaymentItemEntity {
       rent: rentVal,
       deposit: depositVal,
       maintenance: maintenanceVal,
+      utilityBill: utilityVal,
     );
   }
 }
