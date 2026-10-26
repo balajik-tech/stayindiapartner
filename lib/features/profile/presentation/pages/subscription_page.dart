@@ -719,45 +719,45 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
 
         // Bottom Sticky Bar (Pay Service Button)
-        Container(
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.grey.shade200, width: 1),
-            ),
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            height: 48.h,
-            child: ElevatedButton(
-              onPressed: hostels.isEmpty
-                  ? null
-                  : () {
-                      final selectedHostel = hostels[selectedIndex];
-                      _loadSubscriptionData(context, selectedHostel.id);
-                      setState(() {
-                        _isSelectingPlan = true;
-                      });
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-              child: Text(
-                'Pay Service',
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
+        // Container(
+        //   padding: EdgeInsets.all(16.w),
+        //   decoration: BoxDecoration(
+        //     color: Colors.white,
+        //     border: Border(
+        //       top: BorderSide(color: Colors.grey.shade200, width: 1),
+        //     ),
+        //   ),
+        //   child: SizedBox(
+        //     width: double.infinity,
+        //     height: 48.h,
+        //     child: ElevatedButton(
+        //       onPressed: hostels.isEmpty
+        //           ? null
+        //           : () {
+        //               final selectedHostel = hostels[selectedIndex];
+        //               _loadSubscriptionData(context, selectedHostel.id);
+        //               setState(() {
+        //                 _isSelectingPlan = true;
+        //               });
+        //             },
+        //       style: ElevatedButton.styleFrom(
+        //         backgroundColor: AppColors.primaryBlue,
+        //         elevation: 0,
+        //         shape: RoundedRectangleBorder(
+        //           borderRadius: BorderRadius.circular(12.r),
+        //         ),
+        //       ),
+        //       child: Text(
+        //         'Pay Service',
+        //         style: GoogleFonts.inter(
+        //           fontSize: 16.sp,
+        //           fontWeight: FontWeight.w700,
+        //           color: Colors.white,
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
