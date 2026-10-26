@@ -693,18 +693,28 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                               ),
                               SizedBox(width: 8.w),
 
-                              // Status Badge & Service Validity
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.start,
+                              Row(
                                 children: [
-                                  _buildStatusPill(statusInfo),
-                                  SizedBox(height: 6.h),
-                                  _buildServiceValidityBadge(
-                                    response?.activeSubscription,
+                                  // Status Badge & Service Validity
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      _buildStatusPill(statusInfo),
+                                      SizedBox(height: 6.h),
+                                      _buildServiceValidityBadge(
+                                        response?.activeSubscription,
+                                      ),
+                                    ],
                                   ),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    size: 20,
+                                    color: AppColors.primaryBlue,
+                                  )
                                 ],
-                              ),
+                              )
+
                             ],
                           ),
                         ),
