@@ -1271,18 +1271,22 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     double discountAmount;
     double gstAmount;
     double totalPayable;
+    double taxableAmount;
 
     if (plan.breakdown != null) {
       final bd = plan.breakdown!;
+      taxableAmount = bd.taxableAmount > 0 ? bd.taxableAmount : bd.mrpTotal;
       mrpTotal = bd.mrpTotal > 0
           ? bd.mrpTotal
           : (mrpPerBed > 0 ? mrpPerBed * beds * months : pricePerBed * beds * months);
-      subtotal = bd.taxableAmount > 0 ? bd.taxableAmount : (pricePerBed * beds * months);
-      discountAmount = bd.discountAmount > 0
-          ? bd.discountAmount
-          : (mrpTotal - subtotal > 0 ? mrpTotal - subtotal : 0);
+      discountAmount = bd.discountAmount;
+      subtotal = (taxableAmount - discountAmount) > 0
+          ? (taxableAmount - discountAmount)
+          : (pricePerBed * beds * months);
       gstAmount = bd.gstAmount;
-      totalPayable = bd.totalAmount > 0 ? bd.totalAmount : (subtotal + gstAmount);
+      totalPayable = bd.totalpayableAmount > 0
+          ? bd.totalpayableAmount
+          : (bd.totalAmount > 0 ? bd.totalAmount : (subtotal + gstAmount));
     } else {
       subtotal = pricePerBed * beds * months;
       if (mrpPerBed > pricePerBed) {
@@ -1292,6 +1296,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       } else {
         mrpTotal = subtotal;
       }
+      taxableAmount = mrpTotal;
       discountAmount = mrpTotal - subtotal;
       if (discountAmount < 0) discountAmount = 0;
       gstAmount = plan.priceIncludesGst
@@ -1413,7 +1418,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 _buildDetailRowItem(
                   icon: Icons.calculate_outlined,
                   label: 'Total Amount (Before Discount)',
-                  value: '₹${_formatNumber(mrpTotal.round())}',
+                  value: '₹${_formatNumber(taxableAmount.round())}',
                 ),
                 SizedBox(height: 10.h),
                 _buildDetailRowItem(
