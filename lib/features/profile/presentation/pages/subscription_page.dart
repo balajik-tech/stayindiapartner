@@ -450,6 +450,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         _buildHeader(
           context,
           title: 'Property Onboarding',
+          key:'',
           onBack: () => Navigator.pop(context),
         ),
 
@@ -792,6 +793,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           _buildHeader(
             context,
             title: 'Select Service Duration',
+            key:'plan',
             onBack: () => setState(() => _isSelectingPlan = false),
           ),
           const Expanded(
@@ -811,6 +813,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           _buildHeader(
             context,
             title: 'Select Service Duration',
+            key:'plan',
             onBack: () => setState(() => _isSelectingPlan = false),
           ),
           Expanded(
@@ -863,6 +866,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         _buildHeader(
           context,
           title: 'Select Service Duration',
+          key:'plan',
           onBack: () => setState(() => _isSelectingPlan = false),
         ),
 
@@ -1602,6 +1606,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Widget _buildHeader(
     BuildContext context, {
     required String title,
+    required String key,
     required VoidCallback onBack,
   }) {
     return Container(
@@ -1641,35 +1646,37 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               ),
             ),
           ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const MyInvoicesPage(),
+          if(key.isEmpty)...[
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MyInvoicesPage(),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(8.r),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.primaryBlue,
+                    width: 1.2,
+                  ),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-              );
-            },
-            borderRadius: BorderRadius.circular(8.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: AppColors.primaryBlue,
-                  width: 1.2,
-                ),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Text(
-                'MY INVOICES',
-                style: GoogleFonts.inter(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryBlue,
+                child: Text(
+                  'MY INVOICES',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryBlue,
+                  ),
                 ),
               ),
             ),
-          ),
+          ]
         ],
       ),
     );
