@@ -564,20 +564,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                       return GestureDetector(
                         onTap: () {
+                          _loadSubscriptionData(context, hostel.id);
                           setState(() {
                             _localSelectedIndex = originalIndex;
+                            _isSelectingPlan = true;
                           });
-                          _loadSubscriptionData(context, hostel.id);
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 12,horizontal: 8),
+                          padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 10.w),
                           decoration: BoxDecoration(
-                            color: isSelected ? Color(0xFFeef5fd) : Colors.white,
+                            color: isSelected ? const Color(0xFFeef5fd) : Colors.white,
                             borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
                               color: isSelected
                                   ? AppColors.primaryBlue
-                                  : Color(0xFFe5e9ec),
+                                  : const Color(0xFFe5e9ec),
                               width: isSelected ? 1.5 : 1,
                             ),
                             boxShadow: [
@@ -592,23 +593,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Radio Selection Dot
-                              Container(
-                                width: 18.w,
-                                height: 18.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? AppColors.primaryBlue
-                                        : Colors.grey.shade400,
-                                    width: isSelected ? 6.w : 1.5.w,
-                                  ),
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(width: 6.w),
-
                               // Property Thumbnail
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12.r),
@@ -636,7 +620,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                         ),
                                 ),
                               ),
-                              SizedBox(width: 6.w),
+                              SizedBox(width: 8.w),
 
                               // Property Details
                               Expanded(
