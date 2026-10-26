@@ -1212,7 +1212,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       plan.priceIncludesGst,
     );
 
-    final savings = mrpTotal - subtotal;
+    final savings = (mrpTotal - totalPayable).abs();
 
     final isShortTerm = durationMonths <= 6;
     final tagline = isShortTerm
@@ -1354,8 +1354,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                   _buildDetailRowItem(
                     icon: Icons.calculate_outlined,
-                    label: 'Total Amount (Before Discount)',
+                    label: 'Total Amount (Maximum Retail Price)',
                     value: '₹${_formatNumber(mrpTotal.round())}',
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildDetailRowItem(
+                    icon: Icons.percent_rounded,
+                    label: 'GST (${plan.gstPercentage}%)',
+                    value: '+ ₹${_formatNumber(gstAmount.round())}',
+                  ),
+                  SizedBox(height: 8.h),
+
+                  _buildDetailRowItem(
+                    icon: Icons.description_outlined,
+                    label: 'Subtotal (Including GST)',
+                    value: '₹${_formatNumber(subtotal.round())}',
+                    valueColor: const Color(0xFF1E293B),
+                    isBold: true,
                   ),
                   SizedBox(height: 8.h),
                   _buildDetailRowItem(
@@ -1363,20 +1378,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     label: 'Save Discount (${plan.discountPercent}%)',
                     value: '- ₹${_formatNumber(discountAmount.round())}',
                     valueColor: const Color(0xFF16A34A),
-                  ),
-                  SizedBox(height: 8.h),
-                  _buildDetailRowItem(
-                    icon: Icons.description_outlined,
-                    label: 'Subtotal (After Discount)',
-                    value: '₹${_formatNumber(subtotal.round())}',
-                    valueColor: const Color(0xFF1E293B),
-                    isBold: true,
-                  ),
-                  SizedBox(height: 8.h),
-                  _buildDetailRowItem(
-                    icon: Icons.percent_rounded,
-                    label: 'GST (${plan.gstPercentage}%)',
-                    value: '+ ₹${_formatNumber(gstAmount.round())}',
                   ),
                 ],
               ),
@@ -1428,7 +1429,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         ),
                       ),
                       Text(
-                        '(₹${_formatNumber(subtotal.round())} + ${plan.gstPercentage}% GST)',
+                        'Price Incl. ${plan.gstPercentage}% GST',
+                        // '(₹${_formatNumber(mrpTotal.round())} + ${plan.gstPercentage}% GST)',
                         style: GoogleFonts.inter(
                           fontSize: 10.sp,
                           color: Colors.grey.shade600,
