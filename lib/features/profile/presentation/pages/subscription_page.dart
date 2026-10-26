@@ -1284,9 +1284,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ? (taxableAmount - discountAmount)
           : (pricePerBed * beds * months);
       gstAmount = bd.gstAmount;
-      totalPayable = bd.totalpayableAmount > 0
-          ? bd.totalpayableAmount
-          : (bd.totalAmount > 0 ? bd.totalAmount : (subtotal + gstAmount));
+      totalPayable = bd.totalAmount > 0 ? bd.totalAmount : (subtotal + gstAmount);
     } else {
       subtotal = pricePerBed * beds * months;
       if (mrpPerBed > pricePerBed) {

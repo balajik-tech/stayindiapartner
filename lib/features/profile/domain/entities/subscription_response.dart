@@ -21,7 +21,6 @@ class SubscriptionPlanBreakdown {
   final double discountAmount;
   final double gstAmount;
   final double totalAmount;
-  final double totalpayableAmount;
   final String? savingsText;
   final double perBedPerMonth;
   final String? formula;
@@ -33,7 +32,6 @@ class SubscriptionPlanBreakdown {
     required this.discountAmount,
     required this.gstAmount,
     required this.totalAmount,
-    this.totalpayableAmount = 0.0,
     this.savingsText,
     required this.perBedPerMonth,
     this.formula,

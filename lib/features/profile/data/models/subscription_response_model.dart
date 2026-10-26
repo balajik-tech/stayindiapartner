@@ -55,7 +55,6 @@ class SubscriptionPlanBreakdownModel extends SubscriptionPlanBreakdown {
     required super.discountAmount,
     required super.gstAmount,
     required super.totalAmount,
-    super.totalpayableAmount = 0.0,
     super.savingsText,
     required super.perBedPerMonth,
     super.formula,
@@ -69,9 +68,6 @@ class SubscriptionPlanBreakdownModel extends SubscriptionPlanBreakdown {
       discountAmount: _parseDouble(json['discountAmount']),
       gstAmount: _parseDouble(json['gstAmount']),
       totalAmount: _parseDouble(json['totalAmount']),
-      totalpayableAmount: _parseDouble(
-        json['totalpayableAmount'] ?? json['totalPayableAmount'] ?? json['totalPayable'] ?? 0,
-      ),
       savingsText: json['savingsText']?.toString(),
       perBedPerMonth: _parseDouble(json['perBedPerMonth']),
       formula: json['formula'] as String?,
