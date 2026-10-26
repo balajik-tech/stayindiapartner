@@ -569,7 +569,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           _loadSubscriptionData(context, hostel.id);
                         },
                         child: Container(
-                          padding: EdgeInsets.all(12.w),
+                          padding: EdgeInsets.symmetric(vertical: 12,horizontal: 8),
                           decoration: BoxDecoration(
                             color: isSelected ? Color(0xFFeef5fd) : Colors.white,
                             borderRadius: BorderRadius.circular(12.r),
@@ -593,8 +593,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                             children: [
                               // Radio Selection Dot
                               Container(
-                                width: 22.w,
-                                height: 22.w,
+                                width: 18.w,
+                                height: 18.w,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
@@ -606,14 +606,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                   color: Colors.white,
                                 ),
                               ),
-                              SizedBox(width: 12.w),
+                              SizedBox(width: 6.w),
 
                               // Property Thumbnail
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12.r),
                                 child: Container(
-                                  width: 60.w,
-                                  height: 60.w,
+                                  width: 48.w,
+                                  height: 48.w,
                                   color: Colors.blue.shade50,
                                   child: (hostel.coverImage != null &&
                                           hostel.coverImage!.isNotEmpty &&
@@ -635,7 +635,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                         ),
                                 ),
                               ),
-                              SizedBox(width: 12.w),
+                              SizedBox(width: 6.w),
 
                               // Property Details
                               Expanded(
@@ -645,7 +645,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                     Text(
                                       hostel.name,
                                       style: GoogleFonts.inter(
-                                        fontSize: 15.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.w700,
                                         color: const Color(0xFF1E293B),
                                       ),
@@ -657,7 +657,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                       children: [
                                         Icon(
                                           Icons.location_on_outlined,
-                                          size: 13.sp,
+                                          size: 12.sp,
                                           color: Color(0xFF60677b),
                                         ),
                                         SizedBox(width: 3.w),
@@ -665,7 +665,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                           child: Text(
                                             hostel.address,
                                             style: GoogleFonts.inter(
-                                              fontSize: 12.sp,
+                                              fontSize: 11.sp,
                                               color: Color(0xFF60677b),
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -680,15 +680,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                       children: [
                                         Image.asset(
                                           'assets/images/bed_icon.png',
-                                          width: 13.w,
-                                          height: 13.w,
+                                          width: 12.w,
+                                          height: 12.w,
                                           color: Color(0xFF60677b),
                                         ),
                                         SizedBox(width: 4.w),
                                         Text(
                                           '${hostel.totalBeds ?? 0} beds',
                                           style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
+                                            fontSize: 11.sp,
                                             color: Color(0xFF60677b),
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -698,7 +698,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                   ],
                                 ),
                               ),
-                              SizedBox(width: 8.w),
+                              SizedBox(width: 6.w),
 
                               Row(
                                 children: [
@@ -1677,10 +1677,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   // Status Pill Widget
   Widget _buildStatusPill(_StatusInfo statusInfo) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: statusInfo.badgeBg,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1697,7 +1697,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           Text(
             statusInfo.label,
             style: GoogleFonts.inter(
-              fontSize: 11.sp,
+              fontSize: 9.sp,
               fontWeight: FontWeight.w700,
               color: statusInfo.badgeFg,
             ),
@@ -1713,7 +1713,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
     if (activeSubscription == null) {
       return Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
         decoration: BoxDecoration(
           color: const Color(0xFFFDE8E8),
           borderRadius: BorderRadius.circular(10.r),
@@ -1724,10 +1724,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           children: [
             Icon(
               Icons.calendar_today_outlined,
-              size: 18.sp,
+              size: 16.sp,
               color: const Color(0xFF991B1B),
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: 6.w),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -1735,8 +1735,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 Text(
                   'Service Stopped on',
                   style: GoogleFonts.inter(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w700,
                     color: const Color(0xFF991B1B),
                   ),
                 ),
@@ -1744,8 +1744,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 Text(
                   _formatDate(now),
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
                     color: const Color(0xFF991B1B),
                   ),
                 ),
@@ -1796,7 +1796,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       valueText = '$daysRemaining Days';
 
       if (daysRemaining > 90) {
-        badgeBg = const Color(0xFFEBF1FD);
+        badgeBg = const Color(0xFFdaeeff);
         badgeFg = const Color(0xFF2563EB);
       } else if (daysRemaining > 15) {
         badgeBg = const Color(0xFFDCFCE7);
@@ -1819,7 +1819,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         children: [
           Icon(
             Icons.calendar_today_outlined,
-            size: 18.sp,
+            size: 16.sp,
             color: badgeFg,
           ),
           SizedBox(width: 8.w),
@@ -1830,8 +1830,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               Text(
                 titleText,
                 style: GoogleFonts.inter(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.w700,
                   color: badgeFg,
                 ),
               ),
@@ -1839,8 +1839,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               Text(
                 valueText,
                 style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
                   color: badgeFg,
                 ),
               ),
