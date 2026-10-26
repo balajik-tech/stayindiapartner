@@ -198,9 +198,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   _StatusInfo _getSubscriptionStatus(ActiveSubscription? activeSubscription) {
     if (activeSubscription == null) {
       return const _StatusInfo(
-        label: 'Inactive',
-        badgeBg: Color(0xFFFEF3C7),
-        badgeFg: Color(0xFFD97706),
+        label: 'Service Stopped',
+        badgeBg: Color(0xFFFDE8E8),
+        badgeFg: Color(0xFF991B1B),
       );
     }
 
@@ -210,13 +210,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         endDate.difference(now).inDays;
 
     final isExpired = daysRemaining <= 0 || endDate.isBefore(now);
-    final isPaused = activeSubscription.status == 'PAUSED' || isExpired;
+    final isPaused = activeSubscription.status == 'PAUSED' ||
+        activeSubscription.status == 'EXPIRED' ||
+        activeSubscription.status == 'CANCELLED' ||
+        isExpired;
 
     if (isPaused) {
       return const _StatusInfo(
-        label: 'Paused',
-        badgeBg: Color(0xFFebf1fd),
-        badgeFg: Color(0xFF2563EB),
+        label: 'Service Stopped',
+        badgeBg: Color(0xFFFDE8E8),
+        badgeFg: Color(0xFF991B1B),
       );
     }
 
@@ -238,9 +241,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
 
     return const _StatusInfo(
-      label: 'Inactive',
-      badgeBg: Color(0xFFFEF3C7),
-      badgeFg: Color(0xFFD97706),
+      label: 'Service Stopped',
+      badgeBg: Color(0xFFFDE8E8),
+      badgeFg: Color(0xFF991B1B),
     );
   }
 
@@ -690,19 +693,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                               ),
                               SizedBox(width: 8.w),
 
-                              // Status Badge & Chevron Right
+                              // Status Badge & Service Validity
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   _buildStatusPill(statusInfo),
-                                  SizedBox(height: 2.h),
-                                  Icon(
-                                    Icons.chevron_right_rounded,
-                                    color: AppColors.primaryBlue,
-                                    size: 20.sp,
+                                  SizedBox(height: 6.h),
+                                  _buildServiceValidityBadge(
+                                    response?.activeSubscription,
                                   ),
-                                  SizedBox(height: 18.h),
                                 ],
                               ),
                             ],
@@ -1684,6 +1684,150 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               fontWeight: FontWeight.w700,
               color: statusInfo.badgeFg,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Service Validity Widget
+  Widget _buildServiceValidityBadge(ActiveSubscription? activeSubscription) {
+    final now = DateTime.now();
+
+    if (activeSubscription == null) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFDE8E8),
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.calendar_today_outlined,
+              size: 18.sp,
+              color: const Color(0xFF991B1B),
+            ),
+            SizedBox(width: 8.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Service Stopped on',
+                  style: GoogleFonts.inter(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF991B1B),
+                  ),
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  _formatDate(now),
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF991B1B),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    final endDate = activeSubscription.endDate;
+    int daysRemaining = activeSubscription.daysRemaining ?? 0;
+    if (activeSubscription.daysRemaining == null && endDate != null) {
+      daysRemaining = endDate.difference(now).inDays;
+    }
+    if (daysRemaining <= 0 &&
+        activeSubscription.status == 'ACTIVE' &&
+        endDate == null) {
+      final months = activeSubscription.planSnapshot.durationMonths;
+      daysRemaining = months * 30;
+    }
+
+    final isExpired = (daysRemaining <= 0 || (endDate != null && endDate.isBefore(now))) &&
+        activeSubscription.status != 'ACTIVE';
+    final isStopped = activeSubscription.status == 'PAUSED' ||
+        activeSubscription.status == 'EXPIRED' ||
+        activeSubscription.status == 'CANCELLED' ||
+        isExpired;
+
+    final Color badgeBg;
+    final Color badgeFg;
+    final String titleText;
+    final String valueText;
+
+    debugPrint("Service Stoppped ${activeSubscription.status}");
+
+    if (isStopped) {
+      titleText = 'Service Stopped on';
+      final stoppedDate = endDate ??
+          activeSubscription.cancelledAt ??
+          activeSubscription.updatedAt ??
+          now;
+      valueText = _formatDate(stoppedDate);
+      badgeBg = const Color(0xFFFDE8E8);
+      badgeFg = const Color(0xFF991B1B);
+    } else {
+      titleText = 'Service Validity';
+      valueText = '$daysRemaining Days';
+
+      if (daysRemaining > 90) {
+        badgeBg = const Color(0xFFEBF1FD);
+        badgeFg = const Color(0xFF2563EB);
+      } else if (daysRemaining > 15) {
+        badgeBg = const Color(0xFFDCFCE7);
+        badgeFg = const Color(0xFF166534);
+      } else {
+        badgeBg = const Color(0xFFFEF3C7);
+        badgeFg = const Color(0xFFD97706);
+      }
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: badgeBg,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.calendar_today_outlined,
+            size: 18.sp,
+            color: badgeFg,
+          ),
+          SizedBox(width: 8.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                titleText,
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w500,
+                  color: badgeFg,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              Text(
+                valueText,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                  color: badgeFg,
+                ),
+              ),
+            ],
           ),
         ],
       ),
