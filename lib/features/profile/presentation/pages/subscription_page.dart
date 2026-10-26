@@ -1032,10 +1032,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 ),
 
                 // Active Subscription Status Banner (If running or paused)
-                if (activeSub != null) ...[
-                  SizedBox(height: 12.h),
-                  _buildActiveSubscriptionBanner(context, activeSub),
-                ],
+                // Removed this current subscription
+                // if (activeSub != null) ...[
+                //   SizedBox(height: 12.h),
+                //   _buildActiveSubscriptionBanner(context, activeSub),
+                // ],
 
                 SizedBox(height: 16.h),
 
