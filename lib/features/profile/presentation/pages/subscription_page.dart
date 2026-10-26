@@ -396,6 +396,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               builder: (context, subscriptionState) {
                 final responses = subscriptionState.subscriptionResponses;
 
+                if (hostelState is HostelLoading ||
+                    (subscriptionState is SubscriptionLoading && responses.isEmpty)) {
+                  return const Scaffold(
+                    backgroundColor: Colors.white,
+                    body: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  );
+                }
+
                 if (subscriptionState is SubscriptionError &&
                     responses.isEmpty) {
                   return Scaffold(
@@ -442,6 +454,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                             hostels,
                             selectedIndex,
                             responses,
+                            subscriptionState,
                           ),
                   ),
                 );
@@ -461,6 +474,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     List<Hostel> hostels,
     int selectedIndex,
     Map<String, SubscriptionResponse> responses,
+    SubscriptionState subscriptionState,
   ) {
     final filteredHostels = hostels.where((h) {
       if (_searchQuery.trim().isEmpty) return true;
@@ -712,17 +726,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                               Row(
                                 children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      _buildStatusPill(statusInfo),
-                                      SizedBox(height: 6.h),
-                                      _buildServiceValidityBadge(
-                                        response?.activeSubscription,
-                                      ),
-                                    ],
-                                  ),
+                                  if (response == null ||
+                                      (subscriptionState is SubscriptionLoading &&
+                                          (subscriptionState.loadingPropertyId == hostel.id ||
+                                              subscriptionState.loadingPropertyId == null) &&
+                                          responses[hostel.id] == null))
+                                    _buildPropertyLoadingBadge()
+                                  else
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        _buildStatusPill(statusInfo),
+                                        SizedBox(height: 6.h),
+                                        _buildServiceValidityBadge(
+                                          response.activeSubscription,
+                                        ),
+                                      ],
+                                    ),
                                   const Icon(
                                     Icons.chevron_right,
                                     size: 20,
@@ -1753,6 +1774,38 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPropertyLoadingBadge() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 12.w,
+            height: 12.w,
+            child: const CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primaryBlue,
+            ),
+          ),
+          SizedBox(width: 6.w),
+          Text(
+            'Loading...',
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryBlue,
+            ),
+          ),
         ],
       ),
     );
