@@ -56,7 +56,7 @@ class _NotificationsViewState extends State<NotificationsView> {
             value: const SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
               statusBarIconBrightness: Brightness.dark, // Android: black icons
-              statusBarBrightness: Brightness.light,    // iOS
+              statusBarBrightness: Brightness.light, // iOS
               systemNavigationBarColor: Colors.transparent,
               systemNavigationBarIconBrightness: Brightness.dark,
             ),
@@ -68,23 +68,22 @@ class _NotificationsViewState extends State<NotificationsView> {
                   children: [
                     _buildHeader(context, unreadCount),
                     _buildFilterTabs(),
-                    Expanded(
-                      child: _buildBody(state, filteredNotifications),
-                    ),
+                    Expanded(child: _buildBody(state, filteredNotifications)),
                   ],
                 ),
               ),
             ),
           );
-
         },
       ),
     );
   }
 
-  List<NotificationEntity> _filterNotifications(List<NotificationEntity> notifications) {
+  List<NotificationEntity> _filterNotifications(
+    List<NotificationEntity> notifications,
+  ) {
     if (_selectedFilter == 'All') return notifications;
-    
+
     return notifications.where((n) {
       final type = n.type.toUpperCase();
       switch (_selectedFilter) {
@@ -108,14 +107,9 @@ class _NotificationsViewState extends State<NotificationsView> {
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF2C599D),
-            Color(0xFF1E3A8A),
-          ],
+          colors: [Color(0xFF2C599D), Color(0xFF1E3A8A)],
         ),
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(40.r),
-        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(40.r)),
       ),
       child: Row(
         children: [
@@ -185,11 +179,17 @@ class _NotificationsViewState extends State<NotificationsView> {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.done_all_rounded, color: Colors.white, size: 16.sp),
+                    Icon(
+                      Icons.done_all_rounded,
+                      color: Colors.white,
+                      size: 16.sp,
+                    ),
                     SizedBox(width: 6.w),
                     Text(
                       'Mark all read',
@@ -237,7 +237,9 @@ class _NotificationsViewState extends State<NotificationsView> {
                     ),
                 ],
                 border: Border.all(
-                  color: isSelected ? Colors.transparent : const Color(0xFFE2E8F0),
+                  color: isSelected
+                      ? Colors.transparent
+                      : const Color(0xFFE2E8F0),
                 ),
               ),
               child: Row(
@@ -251,8 +253,12 @@ class _NotificationsViewState extends State<NotificationsView> {
                   Text(
                     filter['label'] as String,
                     style: GoogleFonts.outfit(
-                      color: isSelected ? Colors.white : const Color(0xFF64748B),
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF64748B),
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w600,
                       fontSize: 14.sp,
                     ),
                   ),
@@ -265,7 +271,10 @@ class _NotificationsViewState extends State<NotificationsView> {
     );
   }
 
-  Widget _buildBody(NotificationState state, List<NotificationEntity> notifications) {
+  Widget _buildBody(
+    NotificationState state,
+    List<NotificationEntity> notifications,
+  ) {
     if (state is NotificationLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -296,7 +305,9 @@ class _NotificationsViewState extends State<NotificationsView> {
       }
 
       return RefreshIndicator(
-        onRefresh: () => context.read<NotificationCubit>().fetchNotifications(showLoading: false),
+        onRefresh: () => context.read<NotificationCubit>().fetchNotifications(
+          showLoading: false,
+        ),
         child: ListView.separated(
           padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
           itemCount: notifications.length,
@@ -371,87 +382,90 @@ class _NotificationItem extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16.r),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              Container(
-                width: 5.w,
-                color: type.borderColor,
-              ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(16.r),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 5.w,
+              child: ColoredBox(color: type.borderColor),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(5.w + 16.r, 16.r, 16.r, 16.r),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: type.borderColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          type.label,
+                          style: GoogleFonts.outfit(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w800,
+                            color: type.borderColor,
+                          ),
+                        ),
+                      ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: type.borderColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6.r),
+                          Text(
+                            _formatDate(notification.createdAt),
+                            style: GoogleFonts.outfit(
+                              fontSize: 11.sp,
+                              color: const Color(0xFF94A3B8),
+                              fontWeight: FontWeight.w500,
                             ),
-                            child: Text(
-                              type.label,
-                              style: GoogleFonts.outfit(
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.w800,
+                          ),
+                          if (isUnread) ...[
+                            SizedBox(width: 8.w),
+                            Container(
+                              width: 8.r,
+                              height: 8.r,
+                              decoration: BoxDecoration(
                                 color: type.borderColor,
+                                shape: BoxShape.circle,
                               ),
                             ),
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                _formatDate(notification.createdAt),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 11.sp,
-                                  color: const Color(0xFF94A3B8),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              if (isUnread) ...[
-                                SizedBox(width: 8.w),
-                                Container(
-                                  width: 8.r,
-                                  height: 8.r,
-                                  decoration: BoxDecoration(
-                                    color: type.borderColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
+                          ],
                         ],
-                      ),
-                      SizedBox(height: 10.h),
-                      Text(
-                        notification.title,
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15.sp,
-                          color: const Color(0xFF1E293B),
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        notification.message,
-                        style: GoogleFonts.outfit(
-                          fontSize: 13.sp,
-                          color: const Color(0xFF64748B),
-                          height: 1.4,
-                          fontWeight: FontWeight.w500,
-                        ),
                       ),
                     ],
                   ),
-                ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    notification.title,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15.sp,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    notification.message,
+                    style: GoogleFonts.outfit(
+                      fontSize: 13.sp,
+                      color: const Color(0xFF64748B),
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

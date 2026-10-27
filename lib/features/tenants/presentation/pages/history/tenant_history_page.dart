@@ -39,23 +39,56 @@ const _pendingOrange = Color(0xFFF79009);
 const _pendingOrangeBg = Color(0xFFFFFAEB);
 const _utilityPurple = Color(0xFF7A5AF8);
 const _utilityPurpleBg = Color(0xFFF4F3FF);
+const _maintenanceBlue = Color(0xFF2F6FEB);
+const _maintenanceBlueBg = Color(0xFFEFF4FF);
+const _outlineGrey = Color(0xFFD5DAE1);
 
 /// Payment components shown as filters and as the per-entry breakdown.
 enum _Category {
-  rent('Rent', Icons.home_rounded, _successGreen, _successGreenBg),
-  deposit('Deposit', Icons.shield_rounded, _pendingOrange, _pendingOrangeBg),
+  rent(
+    'Rent',
+    Icons.home_rounded,
+    Icons.payments_outlined,
+    _successGreen,
+    _successGreenBg,
+  ),
+  deposit(
+    'Deposit',
+    Icons.shield_rounded,
+    Icons.shield_rounded,
+    _pendingOrange,
+    _pendingOrangeBg,
+  ),
   maintenance(
     'Maintenance',
     Icons.build_rounded,
-    AppColors.primaryBlue,
-    AppColors.totalBlue,
+    Icons.description_outlined,
+    _maintenanceBlue,
+    _maintenanceBlueBg,
   ),
-  utility('Utility Bill', Icons.bolt_rounded, _utilityPurple, _utilityPurpleBg);
+  utility(
+    'Utility Bill',
+    Icons.bolt_rounded,
+    Icons.bolt_rounded,
+    _utilityPurple,
+    _utilityPurpleBg,
+  );
 
-  const _Category(this.label, this.icon, this.color, this.background);
+  const _Category(
+    this.label,
+    this.icon,
+    this.cardIcon,
+    this.color,
+    this.background,
+  );
 
   final String label;
+
+  /// Filter chip icon.
   final IconData icon;
+
+  /// Payment card icon.
+  final IconData cardIcon;
   final Color color;
   final Color background;
 
@@ -200,7 +233,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
         : _payments.where((p) => filter.amountOf(p) > 0).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(context),
       body: RefreshIndicator(
         color: AppColors.primaryBlue,
@@ -268,7 +301,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: AppColors.roomCardBorder),
+        child: Container(height: 1, color: AppColors.primaryBlue),
       ),
     );
   }
@@ -307,8 +340,10 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
               icon: Icons.currency_rupee_rounded,
               label: 'Paid Amount',
               color: _successGreen,
-              background: _successGreenBg,
-              value: _buildAmountText(_rupees.format(totalPaid), _successGreen),
+              value: _buildAmountText(
+                _rupees.format(totalPaid),
+                AppColors.primaryBlue,
+              ),
             ),
           ),
           SizedBox(width: 8.w),
@@ -317,12 +352,11 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
               icon: Icons.schedule_rounded,
               label: 'Number of Days',
               color: AppColors.primaryBlue,
-              background: AppColors.totalBlue,
               value: Text.rich(
                 TextSpan(
                   text: '$days',
                   style: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.darkText,
                   ),
@@ -330,7 +364,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                     TextSpan(
                       text: days == 1 ? ' Day' : ' Days',
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
                         color: AppColors.greyText,
                       ),
@@ -348,7 +382,6 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                   : Icons.verified_rounded,
               label: 'Dues',
               color: hasDues ? _dueRed : _successGreen,
-              background: hasDues ? _dueRedBg : _successGreenBg,
               value: _buildAmountText(
                 hasDues ? _rupees.format(dues) : 'Clear',
                 hasDues ? _dueRed : _successGreen,
@@ -367,11 +400,24 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 18.sp,
+          fontSize: 20.sp,
           fontWeight: FontWeight.bold,
           color: color,
         ),
       ),
+    );
+  }
+
+  Widget _buildOutlinedIcon(IconData icon, Color color, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: color, width: 1.2),
+      ),
+      child: Icon(icon, size: size * 0.5, color: color),
     );
   }
 
@@ -380,32 +426,24 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
     required String label,
     required Widget value,
     required Color color,
-    required Color background,
   }) {
     return Container(
       padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
-        color: background,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.7)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: EdgeInsets.all(5.w),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 14.sp, color: color),
-          ),
-          SizedBox(height: 6.h),
+          _buildOutlinedIcon(icon, color, 28.w),
+          SizedBox(height: 8.h),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 11.sp, color: AppColors.greyText),
+            style: TextStyle(fontSize: 12.sp, color: AppColors.greyText),
           ),
           SizedBox(height: 2.h),
           value,
@@ -416,7 +454,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
 
   Widget _buildFilterChips() {
     return SizedBox(
-      height: 36.h,
+      height: 38.h,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
@@ -457,14 +495,13 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
         decoration: BoxDecoration(
           color: selected ? background : Colors.white,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: selected
-                ? color.withValues(alpha: 0.4)
-                : AppColors.roomCardBorder,
+            color: selected ? color : _outlineGrey,
+            width: selected ? 1.2 : 1,
           ),
         ),
         child: Row(
@@ -473,7 +510,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
             Icon(
               icon,
               size: 16.sp,
-              color: selected ? color : AppColors.greyText,
+              color: selected ? color : AppColors.grayColor3,
             ),
             SizedBox(width: 6.w),
             Text(
@@ -496,7 +533,7 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.roomCardBorder),
+        border: Border.all(color: _outlineGrey),
       ),
       child: Column(
         children: [
@@ -550,56 +587,41 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
     final amount = isPaid || p.paidAmount > 0 ? p.paidAmount : p.totalAmount;
 
     // A single-component entry is titled after that component; mixed entries
-    // are a regular rent payment.
+    // are a regular payment.
     final present = _Category.values.where((c) => c.amountOf(p) > 0).toList();
     final single = present.length == 1 ? present.first : null;
-    final title = switch (single) {
-      _Category.deposit => 'Security Deposit',
-      _Category.maintenance => 'Maintenance Charge',
-      _Category.utility => 'Electricity Bill',
-      _ => isPaid ? 'Payment Received' : 'Payment Due',
-    };
+    final title = !isPaid
+        ? 'Payment Due'
+        : switch (single) {
+            _Category.rent => 'Rent Payment',
+            _Category.deposit => 'Deposit Received',
+            _Category.maintenance => 'Maintenance Payment',
+            _Category.utility => 'Utility Bill Payment',
+            null => 'Payment Received',
+          };
     final lead = single ?? _Category.rent;
 
     final subtitle = [
-      _formatDate(p.paymentDate ?? p.month, 'MMM d, yyyy • h:mm a'),
+      _formatDate(p.paymentDate ?? p.month, 'MMM dd, yyyy · hh:mm a'),
       if (!isPaid && (p.dueDate ?? '').isNotEmpty)
         'Due ${_formatDate(p.dueDate, 'd MMM')}',
-    ].where((s) => s.isNotEmpty).join(' • ');
+    ].where((s) => s.isNotEmpty).join(' · ');
 
     return Container(
-      margin: EdgeInsets.only(bottom: 8.h),
-      padding: EdgeInsets.all(10.w),
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 10.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.roomCardBorder),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: _outlineGrey),
       ),
       child: Column(
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  color: lead.background,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  single == null ? Icons.payments_rounded : lead.icon,
-                  size: 20.sp,
-                  color: lead.color,
-                ),
-              ),
-              SizedBox(width: 10.w),
+              _buildOutlinedIcon(lead.cardIcon, lead.color, 40.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -609,18 +631,18 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.darkText,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 3.h),
                     Text(
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         color: isPaid ? AppColors.greyText : style.color,
                       ),
                     ),
@@ -634,9 +656,9 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
                   Text(
                     _rupees.format(amount),
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 17.sp,
                       fontWeight: FontWeight.bold,
-                      color: isPaid ? AppColors.darkText : style.color,
+                      color: isPaid ? AppColors.primaryBlue : style.color,
                     ),
                   ),
                   if (!isPaid) ...[
@@ -647,14 +669,21 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
               ),
             ],
           ),
-          SizedBox(height: 8.h),
-          Row(
-            children: [
-              for (final c in _Category.values) ...[
-                if (c != _Category.values.first) SizedBox(width: 6.w),
-                Expanded(child: _buildBreakdownCell(c, c.amountOf(p))),
+          SizedBox(height: 12.h),
+          IntrinsicHeight(
+            child: Row(
+              children: [
+                for (final c in _Category.values) ...[
+                  if (c != _Category.values.first)
+                    VerticalDivider(
+                      width: 1,
+                      thickness: 1,
+                      color: _outlineGrey,
+                    ),
+                  Expanded(child: _buildBreakdownCell(c, c.amountOf(p))),
+                ],
               ],
-            ],
+            ),
           ),
         ],
       ),
@@ -663,12 +692,8 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
 
   Widget _buildBreakdownCell(_Category c, double value) {
     final active = value > 0;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: active ? c.background : AppColors.backgroundSecondary,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -677,22 +702,19 @@ class _TenantHistoryPageState extends State<TenantHistoryPage> {
             alignment: Alignment.centerLeft,
             child: Text(
               c.label,
-              style: TextStyle(
-                fontSize: 10.sp,
-                color: active ? c.color : AppColors.greyText,
-              ),
+              style: TextStyle(fontSize: 11.sp, color: AppColors.greyText),
             ),
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 4.h),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               _rupees.format(value),
               style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                color: active ? c.color : AppColors.textSecondary,
+                fontSize: 15.sp,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                color: active ? c.color : AppColors.grayColor3,
               ),
             ),
           ),

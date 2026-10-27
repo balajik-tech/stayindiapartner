@@ -122,7 +122,7 @@ class ApiLoggingInterceptor extends Interceptor {
     }
     if (value is Uint8List) {
       return '[binary payload omitted: ${value.length} bytes]';
-    }
+    } 
     if (value is Iterable) {
       return value.map(_sanitize).toList();
     }

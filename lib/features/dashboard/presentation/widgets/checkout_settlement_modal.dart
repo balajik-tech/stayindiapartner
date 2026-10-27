@@ -408,7 +408,7 @@ class _CheckoutSettlementModalState extends State<CheckoutSettlementModal> {
                       Text(
                         _finalSettlement >= 0
                             ? 'Refund to Tenant'
-                            : 'Tenant Owes Owner',
+                            : 'Tenant Pays Owner',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
@@ -656,7 +656,7 @@ class _SlideToConfirmButtonState extends State<_SlideToConfirmButton> {
                       widget.enabled
                           ? Icons.arrow_forward_rounded
                           : Icons.lock_outline_rounded,
-                      color: Colors.white,
+                      color: AppColors.primaryBlue,
                       size: 22.sp,
                     ),
                   ),
