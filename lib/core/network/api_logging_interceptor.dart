@@ -1,20 +1,30 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-import '../utils/logger.dart';
-
 class ApiLoggingInterceptor extends Interceptor {
   static const int _maxPayloadLength = 8000;
+
+  static const String _cyan = '\x1B[36m';
+  static const String _yellow = '\x1B[33m';
+  static const String _red = '\x1B[31m';
+  static const String _reset = '\x1B[0m';
+  static const String _divider =
+      '────────────────────────────────────────────────────────────';
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
-      AppLogger.debug(
-        '[API REQUEST] ${options.method} ${_safeUri(options.uri)}\n'
-        'Body: ${_formatPayload(options.data)}',
-      );
+      _print(_cyan, [
+        _divider,
+        '➡️  REQUEST  ${options.method} ${_safeUri(options.uri)}',
+        _divider,
+        'Headers: ${_formatPayload(options.headers)}',
+        if (options.data != null) 'Body: ${_formatPayload(options.data)}',
+        _divider,
+      ]);
     }
     handler.next(options);
   }
@@ -26,11 +36,14 @@ class ApiLoggingInterceptor extends Interceptor {
   ) {
     if (kDebugMode) {
       final request = response.requestOptions;
-      AppLogger.debug(
-        '[API RESPONSE] ${request.method} ${_safeUri(request.uri)} '
-        '-> Status: ${response.statusCode}\n'
-        'Body: ${_formatPayload(response.data)}',
-      );
+      _print(_yellow, [
+        _divider,
+        '⬅️  RESPONSE ${response.statusCode} ${request.method} '
+            '${_safeUri(request.uri)}',
+        _divider,
+        _formatPayload(response.data),
+        _divider,
+      ]);
     }
     handler.next(response);
   }
@@ -39,13 +52,29 @@ class ApiLoggingInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (kDebugMode) {
       final request = err.requestOptions;
-      AppLogger.debug(
-        '[API RESPONSE] ${request.method} ${_safeUri(request.uri)} '
-        '-> Status: ${err.response?.statusCode ?? 'No response'}\n'
-        'Body: ${_formatPayload(err.response?.data)}',
-      );
+      _print(_red, [
+        _divider,
+        '❌ ERROR ${err.response?.statusCode ?? 'No response'} '
+            '${request.method} ${_safeUri(request.uri)}',
+        _divider,
+        if (err.response?.data != null)
+          _formatPayload(err.response?.data)
+        else
+          '${err.type.name}: ${err.message}',
+        _divider,
+      ]);
     }
     handler.next(err);
+  }
+
+  /// Uses `dart:developer` log instead of `print` so the output isn't
+  /// prefixed with `I/flutter (pid):` per line or split by logcat.
+  void _print(String color, List<String> blocks) {
+    final colored = blocks
+        .expand((block) => block.split('\n'))
+        .map((line) => '$color$line$_reset')
+        .join('\n');
+    developer.log(colored, name: 'API');
   }
 
   String _safeUri(Uri uri) {
@@ -118,17 +147,19 @@ class ApiLoggingInterceptor extends Interceptor {
 
   bool _isSensitiveKey(String key) {
     final normalized = key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-    return normalized.contains('authorization') ||
-        normalized.contains('token') ||
-        normalized.contains('secret') ||
-        normalized.contains('password') ||
-        normalized.contains('otp') ||
-        normalized.contains('phone') ||
-        normalized.contains('mobile') ||
-        normalized.contains('email') ||
-        normalized.contains('apikey') ||
-        normalized == 'name' ||
-        normalized == 'userid' ||
-        normalized == 'portalid';
+    return normalized.contains('authorization');
+    //     normalized.contains('token') || 
+    // return normalized.contains('authorization') ||
+    //     normalized.contains('token') ||
+    //     normalized.contains('secret') ||
+    //     normalized.contains('password') ||
+    //     normalized.contains('otp') ||
+    //     normalized.contains('phone') ||
+    //     normalized.contains('mobile') ||
+    //     normalized.contains('email') ||
+    //     normalized.contains('apikey') ||
+    //     normalized == 'name' ||
+    //     normalized == 'userid' ||
+    //     normalized == 'portalid';
   }
 }
