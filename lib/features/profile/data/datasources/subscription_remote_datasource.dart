@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:stayindia_owner/core/constants/api_constants.dart';
-import '../models/subscription_response_model.dart';
-import '../models/payment_summary_model.dart';
+
+import '../../../../core/constants/api_constants.dart';
+import '../../domain/entities/subscription_receipt.dart';
 import '../../domain/entities/subscription_response.dart';
+import '../models/payment_summary_model.dart';
+import '../models/subscription_response_model.dart';
 
 abstract class SubscriptionRemoteDataSource {
   Future<SubscriptionResponseModel> getSubscriptionPlans(String propertyId);
@@ -18,6 +20,7 @@ abstract class SubscriptionRemoteDataSource {
   });
   Future<PaymentSummaryModel> getPaymentSummary(String paymentId);
   Future<Map<String, String>> getPaymentReceipt(String paymentId);
+  Future<List<SubscriptionReceipt>> getMyReceipts();
 }
 
 class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
@@ -152,6 +155,26 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       throw Exception('Failed to load payment receipt');
     } catch (e) {
       throw Exception('Error loading payment receipt: $e');
+    }
+  }
+
+  @override
+  Future<List<SubscriptionReceipt>> getMyReceipts() async {
+    try {
+      final response = await dio.get(ApiConstants.subscriptionMyReceipts);
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data is Map<String, dynamic> && data['receipts'] is List) {
+          final List receiptsList = data['receipts'];
+          return receiptsList
+              .map((e) => SubscriptionReceipt.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      throw Exception('Error loading receipts: $e');
     }
   }
 }

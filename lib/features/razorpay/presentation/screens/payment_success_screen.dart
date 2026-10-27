@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:stayindia_owner/features/profile/domain/entities/payment_summary.dart';
@@ -23,7 +24,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
 
   Future<void> _downloadInvoice() async {
     if (widget.summary?.id == null) return;
-    
+
     setState(() {
       _isDownloading = true;
     });
@@ -32,7 +33,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
       final useCase = sl<GetPaymentReceiptUseCase>();
       final result = await useCase(widget.summary!.id!);
       final fileUrl = result['fileUrl'];
-      
+
       if (fileUrl != null && fileUrl.isNotEmpty) {
         final uri = Uri.parse(fileUrl);
         if (await canLaunchUrl(uri)) {
@@ -63,7 +64,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F8),
+      backgroundColor: Colors.white,
       body: widget.summary == null
           ? const Center(child: CircularProgressIndicator())
           : _PaymentSuccessBody(
@@ -86,13 +87,14 @@ class _PaymentSuccessBody extends StatelessWidget {
     required this.onDownloadInvoice,
   });
 
-  static const Color _green = Color(0xFF2FA84F);
-  static const Color _blue = Color(0xFF1E3A8A);
-  static const Color _darkText = Color(0xFF1B2430);
-  static const Color _greyText = Color(0xFF6B7280);
-
-  String _formatDate(DateTime date) {
-    return DateFormat('dd MMM yyyy, h:mm a').format(date);
+  String _formatNumber(num n) {
+    final s = n.toStringAsFixed(0);
+    final buffer = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      if (i != 0 && (s.length - i) % 3 == 0) buffer.write(',');
+      buffer.write(s[i]);
+    }
+    return buffer.toString();
   }
 
   String _formatValidity(DateTime start, DateTime end) {
@@ -102,209 +104,435 @@ class _PaymentSuccessBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '₹', locale: 'en_IN', decimalDigits: 0);
-
     return SafeArea(
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ----- Top green-tinted gradient with success icon -----
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(top: 36, bottom: 24),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFE1F3E4), Color(0xFFF4F5F8)],
-                ),
-              ),
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
               child: Column(
                 children: [
-                  const _SuccessIcon(color: _green),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 10.h),
+
+                  // ----- Success Illustration -----
+                  const _ConfettiSuccessIcon(),
+
+                  SizedBox(height: 24.h),
+
+                  // ----- Title & Subtitle -----
                   Text(
-                    'Payment successful!',
+                    'Payment Successful!',
                     style: GoogleFonts.inter(
-                      fontSize: 26,
+                      fontSize: 22.sp,
                       fontWeight: FontWeight.w800,
-                      color: _darkText,
+                      color: const Color(0xFF1B2430),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 6.h),
                   Text(
-                    'Your subscription is now active',
+                    'Your service invoice has been paid successfully.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      fontSize: 15,
-                      color: _greyText,
+                      fontSize: 13.sp,
+                      color: const Color(0xFF6B7280),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    currencyFormat.format(summary.amount),
-                    style: GoogleFonts.inter(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
-                      color: _blue,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Paid on ${_formatDate(summary.paymentDate)}',
-                    style: GoogleFonts.inter(
-                      fontSize: 13.5,
-                      color: _greyText,
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ----- Details card -----
-                  _DetailsCard(
-                    details: [
-                      _DetailItem(label: 'Property', value: '${summary.propertyName} · ${summary.totalBeds} beds'),
-                      _DetailItem(label: 'Plan', value: '${summary.planName} · ₹${summary.pricePerBedPerMonth.round()}/bed/mo'),
-                      _DetailItem(label: 'Validity', value: _formatValidity(summary.startDate, summary.endDate)),
-                      if (summary.savedAmount > 0)
-                        _DetailItem(
-                          label: 'You saved',
-                          value: currencyFormat.format(summary.savedAmount),
-                          highlight: true,
+                  SizedBox(height: 28.h),
+
+                  // ----- Invoice Card (Screen 5 design) -----
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                      _DetailItem(label: 'Transaction ID', value: summary.transactionId),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ----- Primary button -----
-                  SizedBox(
-                    height: 54,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SubscriptionPage(),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Top Header Box
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 16.h,
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF0F7FF),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(16.r),
+                              topRight: Radius.circular(16.r),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              // Document Icon with check badge
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Container(
+                                    width: 44.w,
+                                    height: 44.w,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFDBEAFE),
+                                      borderRadius: BorderRadius.circular(12.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.article_outlined,
+                                      color: const Color(0xFF2563EB),
+                                      size: 24.sp,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: -2,
+                                    bottom: -2,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.check_circle_rounded,
+                                        color: const Color(0xFF22C55E),
+                                        size: 16.sp,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(width: 16.w),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Amount Paid',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      color: const Color(0xFF6B7280),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    '₹${_formatNumber(summary.amount.round())}',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 22.sp,
+                                      fontWeight: FontWeight.w800,
+                                      color: const Color(0xFF1D4ED8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        "Go to my subscriptions",
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
 
-                  // ----- Secondary button -----
-                  SizedBox(
-                    height: 54,
-                    child: OutlinedButton.icon(
-                      onPressed: isDownloading ? null : onDownloadInvoice,
-                      icon: isDownloading 
-                        ? const SizedBox(
-                            width: 20, 
-                            height: 20, 
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlue)
-                          )
-                        : const Icon(Icons.download, size: 20, color: AppColors.primaryBlue),
-                      label: Text(
-                        isDownloading ? "Downloading..." : "Download Invoice",
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: _blue,
+                        // Bottom Checklist Section
+                        Padding(
+                          padding: EdgeInsets.all(16.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildCheckRow('Payment processed securely'),
+                              SizedBox(height: 10.h),
+                              _buildCheckRow('Invoice updated automatically'),
+                              SizedBox(height: 10.h),
+                              _buildCheckRow(
+                                'Confirmation sent to your email & WhatsApp',
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.primaryBlue, width: 1.4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+
+                        // Compact Details Divider & Summary
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          child: const Divider(height: 1, color: Color(0xFFE5E7EB)),
                         ),
-                      ),
+                        Padding(
+                          padding: EdgeInsets.all(16.w),
+                          child: Column(
+                            children: [
+                              _buildDetailRow(
+                                'Property',
+                                '${summary.propertyName} · ${summary.totalBeds} beds',
+                              ),
+                              SizedBox(height: 8.h),
+                              _buildDetailRow(
+                                'Plan',
+                                summary.planName,
+                              ),
+                              SizedBox(height: 8.h),
+                              _buildDetailRow(
+                                'Validity',
+                                _formatValidity(
+                                  summary.startDate,
+                                  summary.endDate,
+                                ),
+                              ),
+                              if (summary.transactionId.isNotEmpty) ...[
+                                SizedBox(height: 8.h),
+                                _buildDetailRow(
+                                  'Transaction ID',
+                                  summary.transactionId,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+
+                  SizedBox(height: 24.h),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          // ----- Bottom Sticky Action Buttons -----
+          Container(
+            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(color: Colors.grey.shade200, width: 1),
+              ),
+            ),
+            child: Column(
+              children: [
+                // Primary Button: View / Download Invoice
+                SizedBox(
+                  width: double.infinity,
+                  height: 48.h,
+                  child: ElevatedButton(
+                    onPressed: isDownloading ? null : onDownloadInvoice,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                    child: isDownloading
+                        ? SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'View Invoice',
+                            style: GoogleFonts.inter(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+                SizedBox(height: 10.h),
+
+                // Secondary Outlined Button: Go to Home
+                SizedBox(
+                  width: double.infinity,
+                  height: 48.h,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SubscriptionPage(),
+                        ),
+                        (route) => route.isFirst,
+                      );
+                    },
+                    icon: Icon(
+                      Icons.home_outlined,
+                      size: 18.sp,
+                      color: AppColors.primaryBlue,
+                    ),
+                    label: Text(
+                      'Go to Home',
+                      style: GoogleFonts.inter(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(
+                        color: AppColors.primaryBlue,
+                        width: 1.2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildCheckRow(String text) {
+    return Row(
+      children: [
+        Icon(
+          Icons.check_circle_rounded,
+          color: const Color(0xFF22C55E),
+          size: 18.sp,
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF374151),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            color: const Color(0xFF6B7280),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1F2937),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _DetailItem {
-  final String label;
-  final String value;
-  final bool highlight;
-
-  _DetailItem({required this.label, required this.value, this.highlight = false});
-}
-
-class _SuccessIcon extends StatelessWidget {
-  const _SuccessIcon({required this.color});
-
-  final Color color;
+class _ConfettiSuccessIcon extends StatelessWidget {
+  const _ConfettiSuccessIcon();
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 140,
-      height: 140,
+      width: 140.w,
+      height: 140.w,
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // Outer ring
           Container(
-            width: 140,
-            height: 140,
+            width: 140.w,
+            height: 140.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.14),
+              color: const Color(0xFF22C55E).withValues(alpha: 0.08),
             ),
           ),
+          // Middle halo
           Container(
-            width: 120,
-            height: 120,
+            width: 115.w,
+            height: 115.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.14),
+              color: const Color(0xFF22C55E).withValues(alpha: 0.15),
             ),
           ),
+          // Solid green circle
           Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
+            width: 82.w,
+            height: 82.w,
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: color,
+              color: Color(0xFF22C55E),
             ),
-            child: const Center(
-              child: Icon(
-                Icons.check,
-                color: Colors.white,
-                size: 60,
-              ),
+            child: Icon(
+              Icons.check_rounded,
+              color: Colors.white,
+              size: 46.sp,
             ),
+          ),
+
+          // Confetti particles
+          Positioned(
+            top: 10.h,
+            left: 30.w,
+            child: _ConfettiDot(color: const Color(0xFF38BDF8), size: 7.r),
+          ),
+          Positioned(
+            top: 14.h,
+            right: 32.w,
+            child: _ConfettiDot(color: const Color(0xFFF97316), size: 6.r),
+          ),
+          Positioned(
+            top: 28.h,
+            right: 14.w,
+            child: _ConfettiDot(color: const Color(0xFF22C55E), size: 8.r),
+          ),
+          Positioned(
+            top: 55.h,
+            left: 10.w,
+            child: _ConfettiDot(color: const Color(0xFF3B82F6), size: 7.r),
+          ),
+          Positioned(
+            bottom: 40.h,
+            left: 14.w,
+            child: _ConfettiDot(color: const Color(0xFFF97316), size: 8.r),
+          ),
+          Positioned(
+            bottom: 20.h,
+            left: 30.w,
+            child: _ConfettiDot(color: const Color(0xFFEC4899), size: 6.r),
+          ),
+          Positioned(
+            top: 50.h,
+            right: 8.w,
+            child: _ConfettiDot(color: const Color(0xFFEF4444), size: 7.r),
+          ),
+          Positioned(
+            bottom: 35.h,
+            right: 12.w,
+            child: _ConfettiDot(color: const Color(0xFF3B82F6), size: 6.r),
+          ),
+          Positioned(
+            bottom: 18.h,
+            right: 32.w,
+            child: _ConfettiDot(color: const Color(0xFF22C55E), size: 8.r),
           ),
         ],
       ),
@@ -312,63 +540,20 @@ class _SuccessIcon extends StatelessWidget {
   }
 }
 
-class _DetailsCard extends StatelessWidget {
-  const _DetailsCard({required this.details});
+class _ConfettiDot extends StatelessWidget {
+  final Color color;
+  final double size;
 
-  final List<_DetailItem> details;
-
-  static const Color _greyText = Color(0xFF6B7280);
-  static const Color _darkText = Color(0xFF1B2430);
-  static const Color _green = Color(0xFF2FA84F);
+  const _ConfettiDot({required this.color, required this.size});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: size,
+      height: size,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE7E9EE)),
-      ),
-      child: Column(
-        children: List.generate(details.length, (index) {
-          final item = details[index];
-          final bool isLast = index == details.length - 1;
-          final Color labelColor = item.highlight ? _green : _greyText;
-          final Color valueColor = item.highlight ? _green : _darkText;
-
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              border: isLast
-                  ? null
-                  : const Border(
-                      bottom: BorderSide(color: Color(0xFFEEF0F3)),
-                    ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.label,
-                  style: GoogleFonts.inter(fontSize: 14.5, color: labelColor),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    item.value,
-                    textAlign: TextAlign.right,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w700,
-                      color: valueColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }

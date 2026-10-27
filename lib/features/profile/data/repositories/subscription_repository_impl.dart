@@ -1,5 +1,6 @@
 import '../../domain/entities/subscription_response.dart';
 import '../../domain/entities/payment_summary.dart';
+import '../../domain/entities/subscription_receipt.dart';
 import '../../domain/repositories/subscription_repository.dart';
 import '../datasources/subscription_remote_datasource.dart';
 
@@ -43,5 +44,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<Map<String, String>> getPaymentReceipt(String paymentId) {
     return remoteDataSource.getPaymentReceipt(paymentId);
+  }
+
+  @override
+  Future<List<SubscriptionReceipt>> getMyReceipts() {
+    return remoteDataSource.getMyReceipts();
   }
 }
