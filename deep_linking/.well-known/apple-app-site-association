@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["5BBMY4V86X.com.stayindia.stayindiaowner"],
+        "components": [
+          { "/": "/r/*", "comment": "Partner app referral links" }
+        ]
+      }
+    ]
+  }
+}

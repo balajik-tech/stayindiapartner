@@ -237,6 +237,17 @@ class ApiConstants {
     defaultValue: 'http://stayindia.in/partner',
   );
 
+  /// Base URL for share links that open the app (App Links / Universal Links).
+  static const String shareLinkBaseUrl = String.fromEnvironment(
+    'SHARE_LINK_BASE_URL',
+    defaultValue: 'https://share.stayindia.in',
+  );
+
+  static String get shareLinkHost => Uri.parse(shareLinkBaseUrl).host;
+
+  static String referralLink(String referralId) =>
+      '$shareLinkBaseUrl/r/${Uri.encodeComponent(referralId)}';
+
   static String? getImageUrl(String? path) {
     if (path == null || path.isEmpty) {
       return null;

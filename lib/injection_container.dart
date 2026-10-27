@@ -8,6 +8,7 @@ import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/socket/socket_service.dart';
 import 'package:stayindia_owner/core/services/notification_service.dart';
 import 'package:stayindia_owner/core/services/offline_queue_service.dart';
+import 'package:stayindia_owner/core/services/deep_link_service.dart';
 import 'package:stayindia_owner/features/auth/auth_injections.dart';
 import 'package:stayindia_owner/features/bookings/bookings_injections.dart';
 import 'package:stayindia_owner/features/dashboard/dashboard_injections.dart';
@@ -95,6 +96,7 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => NotificationService());
   sl.registerLazySingleton(() => OfflineQueueService());
+  sl.registerLazySingleton(() => DeepLinkService());
 
   sl.registerLazySingleton(
     () => const FlutterSecureStorage(

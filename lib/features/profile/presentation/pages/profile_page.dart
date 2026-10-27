@@ -289,7 +289,7 @@ class _ProfilePageState extends State<ProfilePage> with RouteAware {
                         await ShareAppBottomSheet.show(
                           context,
                           shareLink: referralId != null
-                              ? '${ApiConstants.partnerAppLink}?ref=$referralId'
+                              ? ApiConstants.referralLink(referralId)
                               : ApiConstants.partnerAppLink,
                         );
                       }),

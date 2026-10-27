@@ -19,6 +19,7 @@ import '../services/token_storage.dart';
 import '../widgets/app_scaffold_messenger.dart';
 import '../services/cache_service.dart';
 import '../services/notification_service.dart';
+import '../services/deep_link_service.dart';
 import '../services/app_config_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_cubit.dart';
@@ -148,6 +149,7 @@ class _AppBootstrapperState extends State<AppBootstrapper>
       await di.sl<CacheService>().checkAndFlushOnUpdate();
       await di.sl<NotificationService>().init();
       await di.sl<NotificationService>().requestPermissions();
+      await di.sl<DeepLinkService>().init();
 
       // Fetch user profile if logged in to warm up caches/state
       try {

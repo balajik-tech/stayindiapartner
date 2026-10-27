@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.stayindia.stayindiaowner",
+      "sha256_cert_fingerprints": [
+        "52:9F:5A:31:28:8F:47:57:09:F9:48:B3:27:9E:44:3F:44:B1:28:29:B0:7D:BB:E6:89:4E:2A:CF:78:17:33:95",
+        "60:45:72:BD:6A:83:10:1C:41:12:B7:FB:D2:F2:07:1F:DB:13:EB:0E:AA:05:BD:22:8E:7A:55:47:F1:EE:39:4D"
+      ]
+    }
+  }
+]
