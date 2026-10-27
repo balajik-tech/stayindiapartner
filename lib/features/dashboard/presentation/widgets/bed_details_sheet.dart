@@ -865,8 +865,12 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Wrap so the chips drop below the title on narrow screens.
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8.w,
+                runSpacing: 8.h,
                 children: [
                   Text(
                     'Room Configuration',
