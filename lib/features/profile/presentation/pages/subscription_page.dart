@@ -347,11 +347,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       );
                       planId = plan.id;
                       planName = plan.planName;
-                      amount = calculateTotalAmount(
-                        plan.breakdown?.totalAmount ?? 0,
-                        plan.breakdown?.gstAmount ?? 0,
-                        plan.priceIncludesGst,
-                      );
+                      amount = plan.breakdown != null && plan.breakdown!.totalAmount > 0
+                          ? plan.breakdown!.totalAmount
+                          : calculateTotalAmount(
+                              plan.breakdown?.taxableAmount ?? 0,
+                              plan.breakdown?.gstAmount ?? 0,
+                              plan.priceIncludesGst,
+                            );
                     } catch (_) {}
                   }
                 }
@@ -1288,41 +1290,43 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final discountPercent = plan.discountPercent;
     final gstPercentage = plan.gstPercentage;
 
-    double mrpTotal;
-    double subtotal;
+    double baseAmount;
+    double taxableAmount;
     double discountAmount;
     double gstAmount;
     double totalPayable;
-    double taxableAmount;
 
     if (plan.breakdown != null) {
       final bd = plan.breakdown!;
-      taxableAmount = bd.taxableAmount > 0 ? bd.taxableAmount : bd.mrpTotal;
-      mrpTotal = bd.mrpTotal > 0
-          ? bd.mrpTotal
-          : (mrpPerBed > 0 ? mrpPerBed * beds * months : pricePerBed * beds * months);
+      baseAmount = bd.baseAmount > 0
+          ? bd.baseAmount
+          : (bd.mrpTotal > 0
+              ? bd.mrpTotal
+              : (mrpPerBed > 0 ? mrpPerBed * beds * months : pricePerBed * beds * months));
       discountAmount = bd.discountAmount;
-      subtotal = (taxableAmount - discountAmount) > 0
-          ? (taxableAmount - discountAmount)
-          : (pricePerBed * beds * months);
+      taxableAmount = bd.taxableAmount > 0
+          ? bd.taxableAmount
+          : (bd.subtotalAmount > 0
+              ? bd.subtotalAmount
+              : (baseAmount - discountAmount > 0 ? baseAmount - discountAmount : pricePerBed * beds * months));
       gstAmount = bd.gstAmount;
-      totalPayable = bd.totalAmount > 0 ? bd.totalAmount : (subtotal + gstAmount);
+      totalPayable = bd.totalAmount > 0 ? bd.totalAmount : (taxableAmount + gstAmount);
     } else {
-      subtotal = pricePerBed * beds * months;
+      final subtotalFallback = pricePerBed * beds * months;
       if (mrpPerBed > pricePerBed) {
-        mrpTotal = mrpPerBed * beds * months;
+        baseAmount = mrpPerBed * beds * months;
       } else if (discountPercent > 0) {
-        mrpTotal = subtotal / (1 - (discountPercent / 100));
+        baseAmount = subtotalFallback / (1 - (discountPercent / 100));
       } else {
-        mrpTotal = subtotal;
+        baseAmount = subtotalFallback;
       }
-      taxableAmount = mrpTotal;
-      discountAmount = mrpTotal - subtotal;
+      discountAmount = baseAmount - subtotalFallback;
       if (discountAmount < 0) discountAmount = 0;
+      taxableAmount = baseAmount - discountAmount;
       gstAmount = plan.priceIncludesGst
           ? 0
-          : (subtotal * gstPercentage / 100);
-      totalPayable = subtotal + gstAmount;
+          : (taxableAmount * gstPercentage / 100);
+      totalPayable = taxableAmount + gstAmount;
     }
 
     final isShortTerm = months <= 6;
@@ -1438,7 +1442,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 _buildDetailRowItem(
                   icon: Icons.calculate_outlined,
                   label: 'Total Amount (Before Discount)',
-                  value: '₹${_formatNumber(taxableAmount.round())}',
+                  value: '₹${_formatNumber(baseAmount.round())}',
                 ),
                 SizedBox(height: 10.h),
                 _buildDetailRowItem(
@@ -1452,7 +1456,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 _buildDetailRowItem(
                   icon: Icons.description_outlined,
                   label: 'Subtotal (After Discount)',
-                  value: '₹${_formatNumber(subtotal.round())}',
+                  value: '₹${_formatNumber(taxableAmount.round())}',
                   valueColor: const Color(0xFF0F172A),
                   isBold: true,
                 ),
@@ -1509,7 +1513,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       ),
                     ),
                     Text(
-                      '(₹${_formatNumber(subtotal.round())} + $gstPercentage% GST)',
+                      '(₹${_formatNumber(taxableAmount.round())} + $gstPercentage% GST)',
                       style: GoogleFonts.inter(
                         fontSize: 10.sp,
                         color: Colors.grey.shade600,

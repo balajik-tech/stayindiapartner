@@ -16,6 +16,8 @@ class SubscriptionProperty {
 
 class SubscriptionPlanBreakdown {
   final int totalBeds;
+  final double baseAmount;
+  final double subtotalAmount;
   final double taxableAmount;
   final double mrpTotal;
   final double discountAmount;
@@ -23,10 +25,13 @@ class SubscriptionPlanBreakdown {
   final double totalAmount;
   final String? savingsText;
   final double perBedPerMonth;
+  final int totalValidityMonths;
   final String? formula;
 
   SubscriptionPlanBreakdown({
     required this.totalBeds,
+    this.baseAmount = 0.0,
+    this.subtotalAmount = 0.0,
     required this.taxableAmount,
     required this.mrpTotal,
     required this.discountAmount,
@@ -34,6 +39,7 @@ class SubscriptionPlanBreakdown {
     required this.totalAmount,
     this.savingsText,
     required this.perBedPerMonth,
+    this.totalValidityMonths = 0,
     this.formula,
   });
 }

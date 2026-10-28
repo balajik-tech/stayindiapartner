@@ -50,6 +50,8 @@ class SubscriptionPropertyModel extends SubscriptionProperty {
 class SubscriptionPlanBreakdownModel extends SubscriptionPlanBreakdown {
   SubscriptionPlanBreakdownModel({
     required super.totalBeds,
+    super.baseAmount = 0.0,
+    super.subtotalAmount = 0.0,
     required super.taxableAmount,
     required super.mrpTotal,
     required super.discountAmount,
@@ -57,12 +59,15 @@ class SubscriptionPlanBreakdownModel extends SubscriptionPlanBreakdown {
     required super.totalAmount,
     super.savingsText,
     required super.perBedPerMonth,
+    super.totalValidityMonths = 0,
     super.formula,
   });
 
   factory SubscriptionPlanBreakdownModel.fromJson(Map<String, dynamic> json) {
     return SubscriptionPlanBreakdownModel(
       totalBeds: _parseInt(json['totalBeds']),
+      baseAmount: _parseDouble(json['baseAmount']),
+      subtotalAmount: _parseDouble(json['subtotalAmount']),
       taxableAmount: _parseDouble(json['taxableAmount']),
       mrpTotal: _parseDouble(json['mrpTotal']),
       discountAmount: _parseDouble(json['discountAmount']),
@@ -70,6 +75,7 @@ class SubscriptionPlanBreakdownModel extends SubscriptionPlanBreakdown {
       totalAmount: _parseDouble(json['totalAmount']),
       savingsText: json['savingsText']?.toString(),
       perBedPerMonth: _parseDouble(json['perBedPerMonth']),
+      totalValidityMonths: _parseInt(json['totalValidityMonths']),
       formula: json['formula'] as String?,
     );
   }
