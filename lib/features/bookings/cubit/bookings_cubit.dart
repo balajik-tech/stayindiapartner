@@ -9,6 +9,7 @@ import 'package:stayindia_owner/features/profile/domain/usecases/room_usecases.d
 import 'package:stayindia_owner/features/dashboard/data/models/occupancy_model.dart';
 import 'package:stayindia_owner/core/utils/error_helper.dart';
 import 'bookings_state.dart';
+import 'package:stayindia_owner/features/bookings/domain/settlement_payment.dart';
 
 class BookingsCubit extends Cubit<BookingsState> {
   final GetBookingsUseCase getBookingsUseCase;
@@ -275,6 +276,7 @@ class BookingsCubit extends Cubit<BookingsState> {
     double? pendingRent,
     double? utilityDue,
     double? finalSettlement,
+    List<SettlementPayment> settlementPayments = const [],
   }) async {
     if (isClosed) return;
     emit(state.copyWith(status: BookingsStatus.loading));
@@ -285,6 +287,7 @@ class BookingsCubit extends Cubit<BookingsState> {
         pendingRent: pendingRent,
         utilityDue: utilityDue,
         finalSettlement: finalSettlement,
+        settlementPayments: settlementPayments,
       );
       if (isClosed) return;
       emit(

@@ -15,6 +15,7 @@ import 'package:stayindia_owner/features/bookings/pages/room_selection_page.dart
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/checkout_settlement_modal.dart';
 import 'package:stayindia_owner/features/movement_history/presentation/widgets/tenant_movement_history_section.dart';
 import 'package:stayindia_owner/injection_container.dart';
+import 'package:stayindia_owner/features/bookings/domain/settlement_payment.dart';
 
 const Color _navy = Color(0xFF1B2838);
 const Color _orange = Color(0xFFE8722A);
@@ -685,6 +686,7 @@ class OccupiedBedSheet extends StatelessWidget {
                     required double pendingRent,
                     required double utilityDue,
                     required double finalSettlement,
+                    required List<SettlementPayment> settlementPayments,
                   }) {
                     context
                         .read<BookingsCubit>()
@@ -694,6 +696,7 @@ class OccupiedBedSheet extends StatelessWidget {
                           pendingRent: pendingRent,
                           utilityDue: utilityDue,
                           finalSettlement: finalSettlement,
+                          settlementPayments: settlementPayments,
                         );
                   },
                 );

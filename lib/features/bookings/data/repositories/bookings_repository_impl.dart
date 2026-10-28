@@ -1,6 +1,7 @@
 import 'package:stayindia_owner/features/bookings/domain/booking.dart';
 import 'package:stayindia_owner/features/bookings/domain/bookings_repository.dart';
 import '../datasources/bookings_remote_datasource.dart';
+import 'package:stayindia_owner/features/bookings/domain/settlement_payment.dart';
 
 class BookingsRepositoryImpl implements BookingsRepository {
   final BookingsRemoteDataSource remote;
@@ -94,6 +95,7 @@ class BookingsRepositoryImpl implements BookingsRepository {
     double? pendingRent,
     double? utilityDue,
     double? finalSettlement,
+    List<SettlementPayment> settlementPayments = const [],
   }) {
     return remote.checkoutBooking(
       bookingId,
@@ -101,6 +103,7 @@ class BookingsRepositoryImpl implements BookingsRepository {
       pendingRent: pendingRent,
       utilityDue: utilityDue,
       finalSettlement: finalSettlement,
+      settlementPayments: settlementPayments,
     );
   }
 

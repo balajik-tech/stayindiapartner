@@ -1,4 +1,5 @@
 import '../bookings_repository.dart';
+import 'package:stayindia_owner/features/bookings/domain/settlement_payment.dart';
 
 class CheckoutBookingUseCase {
   final BookingsRepository repository;
@@ -11,6 +12,7 @@ class CheckoutBookingUseCase {
     double? pendingRent,
     double? utilityDue,
     double? finalSettlement,
+    List<SettlementPayment> settlementPayments = const [],
   }) {
     return repository.checkoutBooking(
       bookingId,
@@ -18,6 +20,7 @@ class CheckoutBookingUseCase {
       pendingRent: pendingRent,
       utilityDue: utilityDue,
       finalSettlement: finalSettlement,
+      settlementPayments: settlementPayments,
     );
   }
 }

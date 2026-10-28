@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/utils/logger.dart';
 import '../../models/booking_model.dart';
+import 'package:stayindia_owner/features/bookings/domain/settlement_payment.dart';
 
 abstract class BookingsRemoteDataSource {
   Future<List<BookingModel>> getOwnerBookings({
@@ -64,6 +65,7 @@ abstract class BookingsRemoteDataSource {
     double? pendingRent,
     double? utilityDue,
     double? finalSettlement,
+    List<SettlementPayment> settlementPayments = const [],
   });
   Future<void> cancelBooking(String bookingId);
 }
@@ -299,6 +301,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
     double? pendingRent,
     double? utilityDue,
     double? finalSettlement,
+    List<SettlementPayment> settlementPayments = const [],
   }) async {
     try {
       await dio.post(
@@ -308,6 +311,10 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
           'pendingRent': ?pendingRent,
           'utilityDue': ?utilityDue,
           'finalSettlement': ?finalSettlement,
+          if (settlementPayments.isNotEmpty)
+            'settlementPayments': settlementPayments
+                .map((p) => p.toJson())
+                .toList(),
         },
       );
     } catch (e) {

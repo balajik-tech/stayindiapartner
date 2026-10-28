@@ -12,6 +12,7 @@ import 'package:stayindia_owner/features/tenants/presentation/widgets/tenant_det
 import 'package:stayindia_owner/core/constants/api_constants.dart';
 import 'package:stayindia_owner/core/widgets/responsive_widgets.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/checkout_settlement_modal.dart';
+import 'package:stayindia_owner/features/bookings/domain/settlement_payment.dart';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
@@ -469,6 +470,7 @@ class BookingCard extends StatelessWidget {
         required double pendingRent,
         required double utilityDue,
         required double finalSettlement,
+        required List<SettlementPayment> settlementPayments,
       }) {
         context.read<BookingsCubit>().checkoutBooking(
               booking.id,
@@ -476,6 +478,7 @@ class BookingCard extends StatelessWidget {
               pendingRent: pendingRent,
               utilityDue: utilityDue,
               finalSettlement: finalSettlement,
+              settlementPayments: settlementPayments,
             );
       },
     );

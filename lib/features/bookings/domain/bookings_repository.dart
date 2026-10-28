@@ -1,4 +1,5 @@
 import 'booking.dart';
+import 'package:stayindia_owner/features/bookings/domain/settlement_payment.dart';
 
 abstract class BookingsRepository {
   Future<List<Booking>> getOwnerBookings({
@@ -60,6 +61,7 @@ abstract class BookingsRepository {
     double? pendingRent,
     double? utilityDue,
     double? finalSettlement,
+    List<SettlementPayment> settlementPayments = const [],
   });
   Future<void> cancelBooking(String bookingId);
 }

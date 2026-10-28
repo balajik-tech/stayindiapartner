@@ -26,6 +26,7 @@ import 'package:stayindia_owner/features/profile/data/datasources/room_remote_da
 import 'package:stayindia_owner/features/dashboard/presentation/widgets/checkout_settlement_modal.dart';
 import 'package:stayindia_owner/features/tenants/domain/entities/tenant_entity.dart';
 import 'package:stayindia_owner/features/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:stayindia_owner/features/bookings/domain/settlement_payment.dart';
 
 enum BedStatus { free, occupied, notice, away, booked, maintenance }
 
@@ -1679,6 +1680,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
         required double pendingRent,
         required double utilityDue,
         required double finalSettlement,
+        required List<SettlementPayment> settlementPayments,
       }) {
         context.read<BookingsCubit>().checkoutBooking(
           bookingId,
@@ -1686,6 +1688,7 @@ class _BedDetailsSheetState extends State<BedDetailsSheet> {
           pendingRent: pendingRent,
           utilityDue: utilityDue,
           finalSettlement: finalSettlement,
+          settlementPayments: settlementPayments,
         );
       },
     );
