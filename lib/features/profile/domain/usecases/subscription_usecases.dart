@@ -1,5 +1,6 @@
 import '../entities/subscription_response.dart';
 import '../entities/payment_summary.dart';
+import '../entities/subscription_receipt.dart';
 import '../repositories/subscription_repository.dart';
 
 class GetSubscriptionPlansUseCase {
@@ -61,5 +62,15 @@ class GetPaymentReceiptUseCase {
 
   Future<Map<String, String>> call(String paymentId) {
     return repository.getPaymentReceipt(paymentId);
+  }
+}
+
+class GetMyReceiptsUseCase {
+  final SubscriptionRepository repository;
+
+  GetMyReceiptsUseCase(this.repository);
+
+  Future<List<SubscriptionReceipt>> call() {
+    return repository.getMyReceipts();
   }
 }
