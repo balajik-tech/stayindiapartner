@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stay India Owner App - Developer & Requirements Documentation</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 15mm 20mm 15mm;
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 8pt;
+      color: #64748B;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1E293B;
+    line-height: 1.5;
+    font-size: 10pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Cover Header Block */
+  .header-container {
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
+    color: #FFFFFF;
+    padding: 28px 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+  .header-container h1 {
+    font-size: 22pt;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+  }
+  .header-container p {
+    font-size: 11pt;
+    color: #93C5FD;
+    margin: 0 0 16px 0;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 14px;
+    font-size: 8.5pt;
+  }
+  .meta-item {
+    color: #CBD5E1;
+  }
+  .meta-item strong {
+    color: #FFFFFF;
+    display: block;
+    font-size: 9.5pt;
+  }
+
+  /* Section Headers */
+  h2 {
+    font-size: 14pt;
+    color: #0F172A;
+    border-bottom: 2px solid #2563EB;
+    padding-bottom: 4px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 11.5pt;
+    color: #1E40AF;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 10pt;
+    color: #334155;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    page-break-after: avoid;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: justify;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 16px;
+    font-size: 8.5pt;
+    page-break-inside: avoid;
+  }
+  th {
+    background-color: #F1F5F9;
+    color: #0F172A;
+    font-weight: 700;
+    text-align: left;
+    padding: 8px 10px;
+    border: 1px solid #CBD5E1;
+  }
+  td {
+    padding: 7px 10px;
+    border: 1px solid #E2E8F0;
+    vertical-align: top;
+  }
+  tr:nth-child(even) {
+    background-color: #F8FAFC;
+  }
+
+  /* Badges & Pills */
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-get { background: #DCFCE7; color: #15803D; }
+  .badge-post { background: #DBEAFE; color: #1D4ED8; }
+  .badge-put { background: #FEF3C7; color: #B45309; }
+  .badge-delete { background: #FEE2E2; color: #B91C1C; }
+
+  /* Callout Boxes */
+  .callout {
+    background-color: #EFF6FF;
+    border-left: 4px solid #2563EB;
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 9pt;
+  }
+  .callout-warning {
+    background-color: #FFFBEB;
+    border-left-color: #D97706;
+  }
+
+  /* Formula Box */
+  .formula-box {
+    background: #F8FAFC;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8.5pt;
+    color: #0F172A;
+    margin: 10px 0;
+  }
+
+  /* Code Block */
+  pre {
+    background-color: #0F172A;
+    color: #F8FAFC;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Consolas', 'Courier New', Courier, monospace;
+    font-size: 8pt;
+    overflow-x: auto;
+    margin: 8px 0 12px 0;
+  }
+  code {
+    font-family: 'Consolas', 'Courier New', Courier, monospace;
+    background-color: #F1F5F9;
+    color: #0F172A;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 8.5pt;
+  }
+
+  ul, ol {
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding-left: 20px;
+  }
+  li {
+    margin-bottom: 4px;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header / Title -->
+<div class="header-container">
+  <h1>Stay India Owner App</h1>
+  <p>Comprehensive Developer Requirements, Architecture & Feature Technical Specification</p>
+  <div class="meta-grid">
+    <div class="meta-item">Application Name<strong>Stay-India-Owner</strong></div>
+    <div class="meta-item">Target Platforms<strong>Android & iOS (Flutter)</strong></div>
+    <div class="meta-item">Architecture<strong>Clean Architecture + BLoC</strong></div>
+    <div class="meta-item">Document Date<strong>November 2024 (v1.0)</strong></div>
+  </div>
+</div>
+
+<!-- Section 1 -->
+<h2>1. Executive Summary & Core Architecture</h2>
+<p>
+  <strong>Stay India Owner</strong> is a feature-complete property management mobile application designed for PG, hostel, and property owners. The application covers the complete operational lifecycle from owner onboarding, multi-property room/bed configuration, guest check-in/check-out via QR codes, automated rent collection (Cash/UPI), sub-meter electricity bill generation, DigiLocker KYC identity verification, maintenance ticket tracking, staff access delegation, software subscription billing through Razorpay, and community associations.
+</p>
+
+<h3>1.1 Technology Stack Matrix</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Technology / Package Used</th>
+      <th>Architectural Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Framework</strong></td>
+      <td>Flutter (Dart SDK 3.3+)</td>
+      <td>Cross-platform iOS and Android mobile compilation.</td>
+    </tr>
+    <tr>
+      <td><strong>Architecture</strong></td>
+      <td>Clean Architecture + Feature-First</td>
+      <td>Separation into Data, Domain, and Presentation layers per feature module.</td>
+    </tr>
+    <tr>
+      <td><strong>State Management</strong></td>
+      <td>Flutter BLoC / Cubit (`hydrated_bloc`)</td>
+      <td>Predictable state management with local UI state persistence.</td>
+    </tr>
+    <tr>
+      <td><strong>Service Locator</strong></td>
+      <td>GetIt (`sl`)</td>
+      <td>Dependency injection for singletons, repositories, use cases, and cubits.</td>
+    </tr>
+    <tr>
+      <td><strong>HTTP Networking</strong></td>
+      <td>Dio 5.x</td>
+      <td>Interceptor pipeline (Auth Headers, Retry, Connectivity, Offline Queue, Error handling).</td>
+    </tr>
+    <tr>
+      <td><strong>Local Storage</strong></td>
+      <td>`flutter_secure_storage`, `hive`, `shared_preferences`</td>
+      <td>Secure auth tokens, cached offline payloads, and preference key-values.</td>
+    </tr>
+    <tr>
+      <td><strong>Real-Time Messaging</strong></td>
+      <td>Socket.IO Client & Firebase FCM</td>
+      <td>WebSocket live chat/notifications & push notification delivery.</td>
+    </tr>
+    <tr>
+      <td><strong>Third-Party SDKs</strong></td>
+      <td>Razorpay Flutter SDK, DigiLocker KYC API</td>
+      <td>Subscription payment gateway & identity/bank account penny-drop verification.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+<!-- Section 2 -->
+<h2>2. Directory Structure & Layer Division</h2>
+<p>The codebase follows a modular feature-first architecture organized under <code>lib/</code>:</p>
+<pre>
+lib/
+├── core/                        # Shared framework infrastructure
+│   ├── constants/               # ApiConstants, UiConstants
+│   ├── network/                 # Dio Interceptors (Auth, Retry, Connectivity, Error)
+│   ├── services/                # AppBootstrapper, AppConfigService, TokenStorage, DeepLinkService, NotificationService
+│   ├── socket/                  # SocketService (Socket.IO client connection)
+│   └── theme/                   # AppTheme, AppColors, ThemeCubit
+├── features/                    # Independent domain feature modules (20+ features)
+│   ├── auth/                    # OTP auth, Google login, 4-step owner registration
+│   ├── bank_account/            # Bank account setup, IFSC lookup
+│   ├── bookings/                # Bookings list, QR check-in scan, checkout settlement
+│   ├── communities/             # Owner associations, working body, community feed
+│   ├── dashboard/               # Daily ops, occupancy stats, rent due alerts
+│   ├── digilocker/              # DigiLocker PAN & bank penny-drop verification
+│   ├── electricity_bills/       # Room sub-meter entries & bill generation engine
+│   ├── finance/                 # Financial analytics & revenue stats
+│   ├── maintenance/             # Service tickets & repair management
+│   ├── notices/                 # Notice broadcasts to tenants
+│   ├── notifications/           # Push notification center & FCM
+│   ├── offers/                  # Promotional offer creations & banners
+│   ├── payments/                # Cash/UPI rent collection & bulk reminders
+│   ├── profile/                 # Owner profile, hostel settings, software subscription
+│   ├── property_setup/          # Floor, room, bed setup wizard
+│   ├── razorpay/                # Razorpay checkout integration
+│   ├── staff/                   # Warden/staff role assignments & permissions
+│   ├── stock_management/        # Asset & inventory tracking
+│   └── tenants/                 # Active tenants, manual creation, bulk CSV import
+└── injection_container.dart     # Central GetIt dependency registration
+</pre>
+
+---
+
+<!-- Section 3 -->
+<h2>3. Application Startup Lifecycle & Bootstrapping</h2>
+<p>
+  App initialization is orchestrated by <code>AppBootstrapper</code> (<code>lib/core/services/app_bootstrapper.dart</code>).
+</p>
+
+<div class="callout">
+  <strong>Bootstrapping Order:</strong><br>
+  1. <code>SharedPreferences</code> & <code>AppConfigService.load()</code> (Fetches remote API URLs & flags).<br>
+  2. Native Device Orientation (Portrait lock) & System UI overlay configuration.<br>
+  3. <code>EasyLocalization.ensureInitialized()</code> & <code>HydratedBloc.storage</code> setup.<br>
+  4. Firebase Core Initialization & Crashlytics fatal error hooks.<br>
+  5. Service Locator setup (<code>di.init()</code>).<br>
+  6. <code>NotificationService</code> & <code>DeepLinkService</code> listeners startup.<br>
+  7. Auth session restoration (<code>AuthCubit.restoreSession()</code>).
+</div>
+
+<h3>3.1 Authentication Route Decision Tree</h3>
+<ol>
+  <li><strong>First Launch:</strong> Displays <code>OnboardingPage</code>. On completion, sets <code>has_seen_onboarding = true</code>.</li>
+  <li><strong>Session Restoring:</strong> Displays animated logo splash screen.</li>
+  <li><strong>Google Sign-In Needs Phone:</strong> Renders <code>LinkPhonePage</code>.</li>
+  <li><strong>Authenticated (Registration Pending):</strong> If <code>requiresRegistration == true</code>, redirects to <code>RegistrationPersonalPage</code> (4-step wizard).</li>
+  <li><strong>Authenticated (Active):</strong> Loads property list (<code>HostelCubit.getHostels()</code>), fetches notification count, and opens <code>MainNavigationPage</code>.</li>
+  <li><strong>Unauthenticated:</strong> Renders <code>LoginOnBoardingScreen</code>.</li>
+</ol>
+
+---
+
+<!-- Section 4 -->
+<div class="page-break"></div>
+<h2>4. In-Depth Feature Specifications & API Integration</h2>
+
+<!-- 4.1 Auth -->
+<h3>4.1 Authentication & Owner Onboarding (<code>features/auth</code>)</h3>
+<p><strong>Requirements:</strong> Support Phone OTP, Google Sign-In, and Staff login. Complete a 4-step onboarding flow for new property owners.</p>
+<ul>
+  <li><strong>Step 1: Personal Details</strong> (Name, Email, Alternate Contact, Address).</li>
+  <li><strong>Step 2: Hostel Details</strong> (Hostel Name, Gender Category, Address, Total Beds).</li>
+  <li><strong>Step 3: Hostel Images</strong> (Cover Photo & Gallery Photos upload).</li>
+  <li><strong>Step 4: Verification Documents</strong> (Aadhaar, PAN, Electricity Bill, Bank Passbook).</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/auth/request-otp</code></td>
+      <td>Triggers SMS OTP dispatch to user mobile number.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/auth/verify-otp</code></td>
+      <td>Validates OTP and returns JWT bearer token and owner object.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/auth/google-login</code></td>
+      <td>Authenticates using Google ID token.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/auth/me</code></td>
+      <td>Retrieves profile data for currently logged-in user.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/users/complete-profile</code></td>
+      <td>Submits 4-step owner registration details.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.2 Dashboard -->
+<h3>4.2 Navigation & Main Dashboard (<code>features/dashboard</code>)</h3>
+<p><strong>Requirements:</strong> Display daily operational summary, room occupancy breakdown, rent due list, and quick checkout settlement modal. Feature property switcher dropdown on top bar.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/dashboard/daily-operations</code></td>
+      <td>Fetches daily check-ins, check-outs, and pending tasks.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/dashboard/occupancy</code></td>
+      <td>Returns occupied, available, and reserved bed counts.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/dashboard/rent-due</code></td>
+      <td>Returns list of tenants with pending or overdue rent amounts.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.3 Property Setup -->
+<h3>4.3 Property Setup & Room Configuration (<code>features/property_setup</code>)</h3>
+<p><strong>Requirements:</strong> Define floor structures, rooms per floor, sharing types (Single, Double, 3-Share, 4-Share, etc.), per-bed monthly rent, amenities, house rules, and weekly food menu.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-get">GET</span> / <span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/hostels</code></td>
+      <td>Fetch owner property list / Create property profile.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span> / <span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/rooms</code></td>
+      <td>List rooms / Add new room with sharing type & bed count.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/rooms/floors</code></td>
+      <td>Fetch floor layout for selected property.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span> / <span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/food-menu/weekly</code></td>
+      <td>Fetch / Save weekly meal menu breakdown.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.4 Bookings -->
+<h3>4.4 Bookings & QR Check-In / Checkout (<code>features/bookings</code>)</h3>
+<p><strong>Requirements:</strong> Manage online guest reservations, manual walk-in bookings, QR code verification, room allocation, and checkout settlement calculation.</p>
+
+<div class="formula-box">
+  <strong>Checkout Settlement Formula:</strong><br>
+  Refund Balance = Security Deposit Paid - (Unpaid Rent Dues + Utility Charges + Property Damage Penalty)
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/bookings/owner-bookings</code></td>
+      <td>Fetches all bookings (Upcoming, Active, Checked-Out, Cancelled).</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/bookings/scan</code></td>
+      <td>Scans and verifies tenant app check-in QR code.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/bookings/manual-checkin</code></td>
+      <td>Creates a manual walk-in booking and check-in record.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/bookings/checkin</code></td>
+      <td>Assigns room & bed, finalizes check-in.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/bookings/checkout</code></td>
+      <td>Executes checkout and computes final settlement ledger.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.5 Tenants -->
+<h3>4.5 Tenant Management & Bulk Onboarding (<code>features/tenants</code>)</h3>
+<p><strong>Requirements:</strong> Active/past tenant records, manual tenant creation, and bulk CSV onboarding.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/tenants</code></td>
+      <td>Fetch list of active tenants for property.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/tenants/manual</code></td>
+      <td>Manually registers tenant record and bed allocation.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/tenants/:hostelId/bulk</code></td>
+      <td>Uploads CSV file to bulk import tenant records.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/tenants/hostels/:id/tenant-import-template</code></td>
+      <td>Downloads standard Excel/CSV bulk import template.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.6 Payments -->
+<div class="page-break"></div>
+<h3>4.6 Payments, Collection & Financial Analytics (<code>features/payments</code>, <code>features/finance</code>)</h3>
+<p><strong>Requirements:</strong> Collect rent via Cash or Online UPI, generate receipts, trigger bulk WhatsApp/SMS rent reminders, and view revenue analytics.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/tenant-rental/:id/payment/cash</code></td>
+      <td>Records manual cash rent payment.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/tenant-rental/:id/payment/upi</code></td>
+      <td>Records online UPI rent payment.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/payments/remind-bulk</code></td>
+      <td>Sends automated bulk rent payment reminders to overdue tenants.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/finance/stats</code></td>
+      <td>Retrieves monthly revenue, collections, and pending balances.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.7 Electricity Bills -->
+<h3>4.7 Room Electricity Bills Engine (<code>features/electricity_bills</code>)</h3>
+<p><strong>Requirements:</strong> Define sub-meter billing cycles, input room meter readings, and automatically calculate individual tenant bill shares.</p>
+
+<div class="formula-box">
+  <strong>Calculation Formula:</strong><br>
+  Consumption Units = Current Reading - Previous Reading<br>
+  Total Room Bill = Consumption Units &times; Rate per Unit<br>
+  Per Tenant Charge = Total Room Bill &divide; Active Room Occupants
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-get">GET</span> / <span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/electricity-bills</code></td>
+      <td>Fetch billing history / Post new room sub-meter entries & cycle.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.8 Bank & KYC -->
+<h3>4.8 Bank Account & DigiLocker KYC Verification (<code>features/bank_account</code>, <code>features/digilocker</code>)</h3>
+<p><strong>Requirements:</strong> Verify owner PAN card via DigiLocker API, execute penny-drop bank account verification, validate IFSC codes, and set primary payout accounts.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/digilocker/pan-verification</code></td>
+      <td>Verifies PAN card authenticity and full name match.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/digilocker/bank-verification</code></td>
+      <td>Executes penny-drop bank account verification.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span> / <span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/bankaccounts</code></td>
+      <td>List bank accounts / Add verified bank account.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.9 Subscription -->
+<h3>4.9 Software Subscription & Razorpay Payment Gateway (<code>features/profile/presentation/pages/subscription_page.dart</code>)</h3>
+<p><strong>Requirements:</strong> Software pricing based on total hostel beds. Service duration plans (1, 3, 6, 12 months) with discount savings, GST 18%, Razorpay order creation, payment verification, and invoice downloads.</p>
+
+<div class="formula-box">
+  <strong>Subscription Pricing Model:</strong><br>
+  Base Amount = Price per Bed &times; Total Beds &times; Plan Months<br>
+  Discount Amount = Base Amount &times; (Discount % / 100)<br>
+  Taxable Subtotal = Base Amount - Discount Amount<br>
+  GST Amount (18%) = Taxable Subtotal &times; 0.18<br>
+  Total Payable = Taxable Subtotal + GST Amount
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP Method</th>
+      <th>API Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/subscriptions/plans</code></td>
+      <td>Fetches software subscription plans & per-bed rate rules.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/subscriptions/subscribe</code></td>
+      <td>Generates Razorpay order ID for selected plan and property.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-post">POST</span></td>
+      <td><code>/api/v1/subscriptions/verify-payment</code></td>
+      <td>Verifies Razorpay payment signature & activates property service.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-get">GET</span></td>
+      <td><code>/api/v1/subscriptions/my/receipts</code></td>
+      <td>Fetches tax invoices and payment receipt PDFs (`my_invoices_page.dart`).</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4.10 - 4.15 Other Features -->
+<h3>4.10 Maintenance, Staff, Notices & Communities</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>HTTP Method & Endpoint</th>
+      <th>Functionality</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Maintenance</strong></td>
+      <td><span class="badge badge-get">GET</span> / <span class="badge badge-put">PUT</span> <code>/api/v1/tickets</code></td>
+      <td>View tenant maintenance issues, assign staff, update ticket status.</td>
+    </tr>
+    <tr>
+      <td><strong>Notices</strong></td>
+      <td><span class="badge badge-get">GET</span> / <span class="badge badge-post">POST</span> <code>/api/v1/notices</code></td>
+      <td>Broadcast notice announcements to tenant mobile app.</td>
+    </tr>
+    <tr>
+      <td><strong>Offers</strong></td>
+      <td><span class="badge badge-post">POST</span> <code>/api/v1/offers</code></td>
+      <td>Create promotional discount banners for online bookings.</td>
+    </tr>
+    <tr>
+      <td><strong>Staff</strong></td>
+      <td><span class="badge badge-get">GET</span> / <span class="badge badge-post">POST</span> <code>/api/v1/staff</code></td>
+      <td>Add wardens/caretakers and configure permission roles.</td>
+    </tr>
+    <tr>
+      <td><strong>Associations</strong></td>
+      <td><span class="badge badge-get">GET</span> <code>/api/v1/associations</code></td>
+      <td>Join owner chapters, view executive bodies, pay membership fees.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+<!-- Section 5 -->
+<h2>5. Master API Endpoint Reference Summary</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Module</th>
+      <th>Endpoint</th>
+      <th>Method</th>
+      <th>Auth</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Config</td><td>`/api/v1/app-config`</td><td>GET</td><td>No</td><td>Remote URLs, feature flags, Razorpay key.</td></tr>
+    <tr><td>Auth</td><td>`/api/v1/auth/request-otp`</td><td>POST</td><td>No</td><td>Send mobile SMS OTP.</td></tr>
+    <tr><td>Auth</td><td>`/api/v1/auth/verify-otp`</td><td>POST</td><td>No</td><td>Verify OTP & get JWT token.</td></tr>
+    <tr><td>Auth</td><td>`/api/v1/auth/me`</td><td>GET</td><td>Yes</td><td>Fetch logged-in owner profile.</td></tr>
+    <tr><td>Hostels</td><td>`/api/v1/hostels`</td><td>GET/POST</td><td>Yes</td><td>Fetch / Add properties.</td></tr>
+    <tr><td>Dashboard</td><td>`/api/v1/dashboard/daily-operations`</td><td>GET</td><td>Yes</td><td>Daily operational counts.</td></tr>
+    <tr><td>Dashboard</td><td>`/api/v1/dashboard/occupancy`</td><td>GET</td><td>Yes</td><td>Bed occupancy breakdown.</td></tr>
+    <tr><td>Dashboard</td><td>`/api/v1/dashboard/rent-due`</td><td>GET</td><td>Yes</td><td>Overdue tenant list.</td></tr>
+    <tr><td>Bookings</td><td>`/api/v1/bookings/owner-bookings`</td><td>GET</td><td>Yes</td><td>Fetch property bookings.</td></tr>
+    <tr><td>Bookings</td><td>`/api/v1/bookings/scan`</td><td>POST</td><td>Yes</td><td>Scan guest check-in QR.</td></tr>
+    <tr><td>Bookings</td><td>`/api/v1/bookings/checkin`</td><td>POST</td><td>Yes</td><td>Assign bed & check-in.</td></tr>
+    <tr><td>Bookings</td><td>`/api/v1/bookings/checkout`</td><td>POST</td><td>Yes</td><td>Compute dues & check out.</td></tr>
+    <tr><td>Tenants</td><td>`/api/v1/tenants`</td><td>GET</td><td>Yes</td><td>List active property tenants.</td></tr>
+    <tr><td>Tenants</td><td>`/api/v1/tenants/manual`</td><td>POST</td><td>Yes</td><td>Add single tenant manually.</td></tr>
+    <tr><td>Tenants</td><td>`/api/v1/tenants/:hostelId/bulk`</td><td>POST</td><td>Yes</td><td>Bulk upload tenant CSV.</td></tr>
+    <tr><td>Payments</td><td>`/api/v1/tenant-rental/:id/payment/cash`</td><td>POST</td><td>Yes</td><td>Record cash rent collection.</td></tr>
+    <tr><td>Payments</td><td>`/api/v1/tenant-rental/:id/payment/upi`</td><td>POST</td><td>Yes</td><td>Record UPI rent collection.</td></tr>
+    <tr><td>Payments</td><td>`/api/v1/payments/remind-bulk`</td><td>POST</td><td>Yes</td><td>Trigger bulk rent reminders.</td></tr>
+    <tr><td>Electricity</td><td>`/api/v1/electricity-bills`</td><td>GET/POST</td><td>Yes</td><td>Sub-meter readings & bill generation.</td></tr>
+    <tr><td>KYC</td><td>`/api/v1/digilocker/pan-verification`</td><td>POST</td><td>Yes</td><td>DigiLocker PAN verification.</td></tr>
+    <tr><td>KYC</td><td>`/api/v1/digilocker/bank-verification`</td><td>POST</td><td>Yes</td><td>Penny drop bank verification.</td></tr>
+    <tr><td>Subscription</td><td>`/api/v1/subscriptions/plans`</td><td>GET</td><td>Yes</td><td>Subscription plans & pricing.</td></tr>
+    <tr><td>Subscription</td><td>`/api/v1/subscriptions/subscribe`</td><td>POST</td><td>Yes</td><td>Create Razorpay payment order.</td></tr>
+    <tr><td>Subscription</td><td>`/api/v1/subscriptions/verify-payment`</td><td>POST</td><td>Yes</td><td>Verify Razorpay payment signature.</td></tr>
+    <tr><td>Subscription</td><td>`/api/v1/subscriptions/my/receipts`</td><td>GET</td><td>Yes</td><td>Download tax invoices & receipts.</td></tr>
+    <tr><td>Tickets</td><td>`/api/v1/tickets`</td><td>GET/PUT</td><td>Yes</td><td>Maintenance tickets management.</td></tr>
+    <tr><td>Notices</td><td>`/api/v1/notices`</td><td>GET/POST</td><td>Yes</td><td>Broadcast tenant notices.</td></tr>
+    <tr><td>Staff</td><td>`/api/v1/staff`</td><td>GET/POST</td><td>Yes</td><td>Staff access delegation.</td></tr>
+  </tbody>
+</table>
+
+---
+
+<!-- Section 6 -->
+<h2>6. Network Interceptors & Offline Queue Architecture</h2>
+<ol>
+  <li><strong>Authentication Interceptor:</strong> Intercepts every outgoing request and injects <code>Authorization: Bearer &lt;token&gt;</code> and <code>app-type: OWNER_APP</code>.</li>
+  <li><strong>Session Error Handling:</strong> On HTTP <code>401 Unauthorized</code> or "Owner not found" responses, automatically invokes <code>AuthCubit.logout()</code> to prevent desynchronized state.</li>
+  <li><strong>Offline Queue Service:</strong> <code>ConnectivityInterceptor</code> detects network drops. Mutating requests (POST/PUT) are cached locally by <code>OfflineQueueService</code> and replayed sequentially upon network restoration.</li>
+  <li><strong>Retry Mechanism:</strong> <code>RetryInterceptor</code> applies exponential backoff on transient timeout errors.</li>
+</ol>
+
+---
+
+<!-- Section 7 -->
+<h2>7. Developer Setup & Build Commands</h2>
+
+<pre>
+# 1. Install Flutter dependencies
+flutter pub get
+
+# 2. Generate localizations (assets/translations)
+flutter pub run easy_localization:generate -S assets/translations
+
+# 3. Execute Build Runner (for Hive & JSON serializable models)
+flutter pub run build_runner build --delete-conflicting-outputs
+
+# 4. Run App in Staging Environment
+flutter run --dart-define=APP_ENV=STAGING
+
+# 5. Build Production Release APK
+flutter build apk --release \
+  --dart-define=APP_ENV=PRODUCTION \
+  --dart-define=API_BASE_URL=https://api.stayindia.in/api/v1
+</pre>
+
+</body>
+</html>

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stay India Owner App - 4-Month Task & Functionality Documentation</title>
+<style>
+  @page {
+    size: A4;
+    margin: 15mm 15mm 18mm 15mm;
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 8pt;
+      color: #64748B;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1E293B;
+    line-height: 1.5;
+    font-size: 9.5pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Header Container */
+  .header-container {
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
+    color: #FFFFFF;
+    padding: 24px 28px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  }
+  .header-container h1 {
+    font-size: 20pt;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+    color: #FFFFFF;
+  }
+  .header-container p {
+    font-size: 10.5pt;
+    color: #93C5FD;
+    margin: 0 0 16px 0;
+    font-weight: 500;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 12px;
+  }
+  .meta-item {
+    font-size: 8.5pt;
+  }
+  .meta-label {
+    color: #94A3B8;
+    text-transform: uppercase;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .meta-value {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  /* Section Styling */
+  .section-title {
+    font-size: 13pt;
+    font-weight: 800;
+    color: #0F172A;
+    border-bottom: 2px solid #2563EB;
+    padding-bottom: 6px;
+    margin-top: 24px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .subsection-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #1E3A8A;
+    margin-top: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .badge-major {
+    background-color: #DBEAFE;
+    color: #1E40AF;
+  }
+  .badge-minor {
+    background-color: #F1F5F9;
+    color: #475569;
+  }
+  .badge-qa {
+    background-color: #FEF3C7;
+    color: #92400E;
+  }
+  .badge-commit {
+    font-family: monospace;
+    background-color: #E2E8F0;
+    color: #0F172A;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 8pt;
+  }
+
+  /* Task Card / List Item */
+  .task-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    page-break-inside: avoid;
+  }
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .task-title {
+    font-weight: 700;
+    font-size: 9.5pt;
+    color: #0F172A;
+  }
+  .task-desc {
+    color: #334155;
+    font-size: 9pt;
+    margin: 0;
+  }
+  .task-bullets {
+    margin: 4px 0 0 0;
+    padding-left: 18px;
+    color: #475569;
+    font-size: 8.5pt;
+  }
+  .task-bullets li {
+    margin-bottom: 3px;
+  }
+
+  /* Table Styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 20px;
+    font-size: 8.5pt;
+  }
+  th {
+    background-color: #0F172A;
+    color: #FFFFFF;
+    text-align: left;
+    padding: 8px 10px;
+    font-weight: 700;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #E2E8F0;
+    color: #334155;
+  }
+  tr:nth-child(even) {
+    background-color: #F8FAFC;
+  }
+
+  /* Summary Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-number {
+    font-size: 18pt;
+    font-weight: 800;
+    color: #2563EB;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 8pt;
+    color: #64748B;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .footer-note {
+    margin-top: 30px;
+    padding-top: 12px;
+    border-top: 1px solid #E2E8F0;
+    font-size: 8pt;
+    color: #94A3B8;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-container">
+  <h1>Stay India Owner Application</h1>
+  <p>Exhaustive 4-Month Task & Functionality Documentation (July 1st – October 28th)</p>
+  <div class="meta-grid">
+    <div class="meta-item">
+      <span class="meta-label">Project Name</span>
+      <span class="meta-value">Stay-India-Owner</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Timeframe</span>
+      <span class="meta-value">July 1 – Oct 28 (4 Months)</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Architecture</span>
+      <span class="meta-value">Clean Arch + Cubit</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Total Tasks</span>
+      <span class="meta-value">101 Items Completed</span>
+    </div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-number">101</div>
+    <div class="stat-label">Total Tasks Delivered</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">43</div>
+    <div class="stat-label">Major Feature Tasks</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">31</div>
+    <div class="stat-label">Minor UI Refinement Tasks</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">27</div>
+    <div class="stat-label">Bug & QA Fixes</div>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div class="section-title">
+  <span>1. Core Architecture, System Setup & Launch Infrastructure</span>
+  <span class="badge badge-major">12 Tasks</span>
+</div>
+
+<div class="subsection-title">Major Architectural Tasks</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Clean Architecture Migration & Feature Modularization</span>
+    <div><span class="badge badge-commit">9851d0a</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Migrated monolithic code directories into isolated feature modules (<code>auth</code>, <code>bookings</code>, <code>dashboard</code>, <code>tenants</code>, <code>finance</code>, <code>communities</code>, <code>bank_account</code>, <code>profile</code>).</li>
+    <li>Replaced legacy monolithic BLoCs with Cubit state handlers (<code>DashboardCubit</code>, <code>TenantCubit</code>, <code>BookingsCubit</code>, <code>FinanceCubit</code>, <code>HostelCubit</code>).</li>
+    <li>Modularized Dependency Injection into feature bindings (e.g. <code>auth_injections.dart</code>, <code>profile_injections.dart</code>) registered in <code>injection_container.dart</code>.</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Universal Deep Linking Infrastructure</span>
+    <div><span class="badge badge-commit">e2e9243</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Integrated <code>app_links</code> package for handling incoming referral URLs (<code>share.stayindia.in</code>).</li>
+    <li>Created <code>DeepLinkService</code> (<code>lib/core/services/deep_link_service.dart</code>) for routing parameters directly to specific app views.</li>
+    <li>Configured Android <code>AndroidManifest.xml</code> intent filters and iOS <code>Runner.entitlements</code> / <code>Info.plist</code> associated domains.</li>
+    <li>Deployed verification domain assets: <code>.well-known/apple-app-site-association</code> and <code>.well-known/assetlinks.json</code>.</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">3. Multi-Environment Build System & Flavors</span>
+    <div><span class="badge badge-commit">dfd398a</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Created environment config files (<code>config/env.dev.json</code> and <code>config/env.prod.json</code>) defining base API endpoints, Socket servers, and Razorpay client keys.</li>
+    <li>Created shell build script <code>build_app.sh</code> for automated production and development APK/IPA compilation.</li>
+    <li>Added <code>ImageCompressor</code> (<code>lib/core/utils/image_compressor.dart</code>) to prevent high-memory usage during image operations.</li>
+  </ul>
+</div>
+
+<div class="subsection-title">Minor UI & QA Tasks</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">4. Color-Coded API Logging Interceptor</span>
+    <div><span class="badge badge-commit">5b37228</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Created <code>ApiLoggingInterceptor</code> with formatted, color-coded ANSI blocks displaying HTTP requests, headers, query parameters, and JSON payloads.</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">5. Centralized Top Alert Banner System</span>
+    <div><span class="badge badge-commit">dc36889</span> <span class="badge badge-qa">QA Fix</span></div>
+  </div>
+  <p class="task-desc">Replaced overlapping SnackBars across the app with a clean, top-anchored <code>TopAlertOverlay</code> banner system.</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">6. Push Notifications & iOS Badging</span>
+    <div><span class="badge badge-commit">d57e23b</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Configured Firebase Cloud Messaging (FCM) background handlers on iOS and unread notification counter badges on navigation icons.</p>
+</div>
+
+
+<!-- SECTION 2 -->
+<div class="section-title">
+  <span>2. Authentication, Onboarding & User Setup</span>
+  <span class="badge badge-major">9 Tasks</span>
+</div>
+
+<div class="subsection-title">Major Tasks</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. DigiLocker Integration & eKYC Verification Flow</span>
+    <div><span class="badge badge-commit">5ba59a3</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Integrated <code>DigiLocker</code> module with OAuth webview flow to retrieve verified identity documents directly.</li>
+    <li>Created identity verification state machine (<code>DocumentCubit</code>) handling <code>Pending</code>, <code>Approved</code>, and <code>Rejected</code> KYC states.</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Deactivated Account Recovery Workflow</span>
+    <div><span class="badge badge-commit">a2a00b6</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Built account recovery modal on login for deactivated accounts, executing backend restoration API calls.</li>
+    <li>Added self-service account deletion and account deactivation options inside profile settings.</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">3. Geofence Intro Screen & Permission Flow</span>
+    <div><span class="badge badge-commit">807bf7b</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <p class="task-desc">Designed geofencing intro screen and location permission request workflow prior to property setup.</p>
+</div>
+
+<div class="subsection-title">Minor UI & QA Tasks</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">4. Automatic OTP Detection & 30-Second Timer</span>
+    <div><span class="badge badge-commit">a4c52a6</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Configured SMS retriever hash key listener on Android (<code>5afb6aa</code>) and <code>PinPut</code> auto-fill package on iOS (<code>a832b96</code>); updated OTP resend timer to 30 seconds (<code>22a1ded</code>).</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">5. Device SIM Card Auto-Detection</span>
+    <div><span class="badge badge-commit">86c2b96</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Added native SIM card detection on login screen launch to auto-populate mobile number text fields.</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">6. Privacy Policy & Terms Acceptance</span>
+    <div><span class="badge badge-commit">c08a414</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Embedded full-screen markdown HTML privacy policy webview and mandatory terms acceptance checkbox before owner registration.</p>
+</div>
+
+
+<!-- SECTION 3 -->
+<div class="section-title">
+  <span>3. Property Setup & Hostel Configuration</span>
+  <span class="badge badge-major">9 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Hostel Configuration Page Redesign</span>
+    <div><span class="badge badge-commit">036af24</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Redesigned <code>HostelConfigurationPage</code> featuring dashed border cards for adding properties.</li>
+    <li>Embedded property image upload step directly within <code>PropertySetupStepperPage</code> (<code>5b82260</code>).</li>
+    <li>Built <code>HostelCubit</code> state management for real-time hostel index switching and updating.</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Room Sharing & Pricing Rules Enforcement</span>
+    <div><span class="badge badge-commit">189f53e</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Added AC vs Non-AC room category toggling (<code>562be86</code>).</li>
+    <li>Capped custom sharing options to prevent UI overflow and fixed silent rewriting of room pricing amounts (<code>189f53e</code>).</li>
+    <li>Added delete room functionality (<code>3ae64fe</code>) and smooth room list scrolling (<code>8e838c0</code>).</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">3. Pricing Master & Bulk Editing Ceiling</span>
+    <div><span class="badge badge-commit">ba6726f</span> <span class="badge badge-qa">QA Fix</span></div>
+  </div>
+  <p class="task-desc">Defaulted tenant assignment pricing calculations to match <code>PriceMaster</code> defaults and enforced a ₹50,000 price ceiling check in bulk pricing editors (<code>7c820dd</code>).</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">4. AWS S3 Image URL Serialization</span>
+    <div><span class="badge badge-commit">5953597</span> <span class="badge badge-qa">QA Fix</span></div>
+  </div>
+  <p class="task-desc">Handled AWS S3 URL escaping for uploaded property images and multi-selection image payload serialization issues (<code>cd91dae</code>).</p>
+</div>
+
+
+<!-- SECTION 4 -->
+<div class="section-title">
+  <span>4. Dashboard & Bed Management</span>
+  <span class="badge badge-major">8 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Bed Details & Occupancy Status Mapping</span>
+    <div><span class="badge badge-commit">14e2a15</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Updated room floor accordion to show occupied bed counts accurately.</li>
+    <li>Mapped bed status enums (<code>Booked</code>, <code>Reserved</code>, <code>Occupied</code>, <code>Away</code>) with visual status color chips.</li>
+    <li>Fixed away bed counter logic bugs in summary cards (<code>12f8ba0</code>).</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Direct Room Selection Navigation</span>
+    <div><span class="badge badge-commit">523d6a9</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <p class="task-desc">Modified bed click action on occupied bed cards to directly launch <code>RoomSelectionPage</code> instead of triggering modal sheet wrappers (<code>9339a67</code>).</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">3. Partner Header Redesign & WhatsApp Support</span>
+    <div><span class="badge badge-commit">5af704f</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Redesigned top bar with Stay India Partner logo branding, instant WhatsApp floating chat launcher (<code>fcf30bd</code>), and unread notification bell.</p>
+</div>
+
+
+<!-- SECTION 5 -->
+<div class="section-title">
+  <span>5. Tenant Management & Onboarding</span>
+  <span class="badge badge-major">10 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Tenant Onboarding & Phone Validation Rules</span>
+    <div><span class="badge badge-commit">651fcfa</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Defaulted check-in date selection to current system date with custom date picker override (<code>d293d19</code>).</li>
+    <li>Enforced Indian mobile number validation (<code>+91</code> 10-digit check) (<code>651fcfa</code>).</li>
+    <li>Blocked adding owner's own phone number as tenant contact (<code>e2950e7</code>).</li>
+    <li>Added guardian mobile number, employee ID proof, and relation dropdown selector (<code>6843e0e</code>, <code>11caba5</code>, <code>b31bcff</code>).</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Aadhaar OCR & Image Cropper Integration</span>
+    <div><span class="badge badge-commit">dae4480</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Integrated camera/gallery OCR text recognition to parse tenant Aadhaar number and split full name into first/last name.</li>
+    <li>Integrated <code>image_cropper</code> package for cropping front and back Aadhaar card images (<code>8ac4f76</code>).</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">3. PAN Card Verification Engine</span>
+    <div><span class="badge badge-commit">b9c74be</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <p class="task-desc">Added PAN card text input with real-time API verification and green "PAN Verified" checkmarks (<code>61c6079</code>).</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">4. Standalone Bulk Tenant Upload Feature</span>
+    <div><span class="badge badge-commit">6b499ad</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Created <code>AddBulkTenantPage</code> supporting multipart CSV/Excel document uploads (<code>45c3389</code>).</li>
+    <li>Implemented row-by-row validation feedback and form reset capabilities (<code>b681f5c</code>).</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">5. Tenant History Log Redesign</span>
+    <div><span class="badge badge-commit">f481cf2</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Redesigned <code>TenantHistoryPage</code> into a compact movement log layout detailing check-in, check-out dates, room numbers, and financial payment histories (<code>fab84ee</code>).</p>
+</div>
+
+
+<!-- SECTION 6 -->
+<div class="section-title">
+  <span>6. Rent Payments, Billing & Checkout Settlement</span>
+  <span class="badge badge-major">11 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Offline Payment Collection (Cash & UPI)</span>
+    <div><span class="badge badge-commit">b46ee3d</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Created offline payment bottom sheet allowing owners to record Cash and UPI rent payments manually.</li>
+    <li>Integrated transaction API payloads to save reference IDs and payment timestamps (<code>6eef7dc</code>, <code>5aafe67</code>).</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Pro-Rata Daily Rent Engine</span>
+    <div><span class="badge badge-commit">cd6d18f</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <p class="task-desc">Built date-wise pro-rata daily rent engine for calculating partial month rent during tenant check-in.</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">3. Checkout Settlement Engine</span>
+    <div><span class="badge badge-commit">5941e37</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Developed complete Checkout Settlement workflow (<code>CheckoutSettlementModal</code>) (<code>6806c0d</code>).</li>
+    <li>Automatically computes total unpaid rent, pending electricity bills, security deposit deductions, and balance refunds into a single transaction payload (<code>5447da4</code>).</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">4. Digital PDF Invoice Export</span>
+    <div><span class="badge badge-commit">5b650d2</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Built PDF generator service to generate formatted digital invoice receipts for payments (<code>12d8ef3</code>).</p>
+</div>
+
+
+<!-- SECTION 7 -->
+<div class="section-title">
+  <span>7. Electricity Bill Management</span>
+  <span class="badge badge-major">8 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Electricity Bill Feature Launch</span>
+    <div><span class="badge badge-commit">f3661db</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Introduced complete <code>ElectricityBill</code> feature module under <code>lib/features/electricity_bills</code>.</li>
+    <li>Created Cubit state management for fetching, creating, editing, and deleting electricity bills per room.</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Duplicate Bill Creation Prevention</span>
+    <div><span class="badge badge-commit">2f336ed</span> <span class="badge badge-qa">QA Fix</span></div>
+  </div>
+  <p class="task-desc">Enforced date validation checks preventing creation of duplicate bills within the same billing month.</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">3. Pending Bill Editing & WhatsApp Sharing</span>
+    <div><span class="badge badge-commit">2e90024</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Added edit action triggers for pending bills (<code>d6611d7</code>) and formatted WhatsApp text summary sharing for room electricity bills.</p>
+</div>
+
+
+<!-- SECTION 8 -->
+<div class="section-title">
+  <span>8. Financial Analytics & Subscriptions</span>
+  <span class="badge badge-major">13 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Financial Insights Dashboard</span>
+    <div><span class="badge badge-commit">financial_dashboard</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Built <code>FinancialDashboardPage</code> with custom sliver app bar, dark blue gradient header, and translation key bindings.</li>
+    <li>Metric grid displaying Total Revenue, This Month Revenue, Occupancy Rate %, and Pending Payments.</li>
+    <li>Integrated daily revenue trend line chart (<code>RevenueChart</code>) and pie breakdown chart (<code>RevenueBreakdownChart</code>).</li>
+  </ul>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Razorpay Subscription Payment Gateway</span>
+    <div><span class="badge badge-commit">e3a8f10</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Integrated Razorpay checkout SDK with <code>RazorpayCubit</code> state handler.</li>
+    <li>Built <code>PaymentSuccessScreen</code> and <code>PaymentFailedScreen</code> with detailed transaction details and retry triggers (<code>8de75f5</code>).</li>
+    <li>Added validity tracking with 7-day prior expiry notification banners and lapsed state handling (<code>5cbe85e</code>, <code>7ab8fbf</code>).</li>
+  </ul>
+</div>
+
+
+<!-- SECTION 9 -->
+<div class="section-title">
+  <span>9. Bank Account & Unified Settings</span>
+  <span class="badge badge-major">6 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Penny-Drop Bank Account Verification</span>
+    <div><span class="badge badge-commit">148a0ec</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Implemented backend API penny-drop verification checking account holder name matches.</li>
+    <li>Added green "Verified" status badge UI on verified bank cards (<code>5220f74</code>).</li>
+    <li>Added entity type classification selector (Individual vs Business) (<code>ad53837</code>).</li>
+  </ul>
+</div>
+
+
+<!-- SECTION 10 -->
+<div class="section-title">
+  <span>10. Community, PG Owners Forum & Chat</span>
+  <span class="badge badge-major">7 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. PG Owners Forum / Association Portal</span>
+    <div><span class="badge badge-commit">182d7be</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <p class="task-desc">Built <code>AssociationPortal</code> displaying Executive Committee, IT Wing, and General Members, with search pages and join request modal sheets (<code>be9b23d</code>).</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. Real-Time Chat & WhatsApp Doodle Background</span>
+    <div><span class="badge badge-commit">0852ea5</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <ul class="task-bullets">
+    <li>Migrated chat routes to clean isolated <code>/community/chat</code> and <code>/chat/</code> sub-routes (<code>100a9ba</code>).</li>
+    <li>Integrated organic doodle wallpaper background for WhatsApp-style chat screens (<code>f4911c3</code>).</li>
+    <li>Fixed timestamp offset bugs by converting server UTC dates to device local dates (<code>885a684</code>).</li>
+  </ul>
+</div>
+
+
+<!-- SECTION 11 -->
+<div class="section-title">
+  <span>11. Service Requests, Notices & Referral</span>
+  <span class="badge badge-major">7 Tasks</span>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">1. Raise a Service Request Workflow</span>
+    <div><span class="badge badge-commit">cd865a3</span> <span class="badge badge-major">Major</span></div>
+  </div>
+  <p class="task-desc">Implemented Service Request workflow (<code>Select Service Modal</code>, <code>My Requests Tracker Page</code>, <code>Request Sent Confirmation Screen</code>) (<code>b0db6ed</code>).</p>
+</div>
+
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title">2. App Referral & Share Sheet Enhancement</span>
+    <div><span class="badge badge-commit">6b9532f</span> <span class="badge badge-minor">Minor</span></div>
+  </div>
+  <p class="task-desc">Enhanced <code>ShareAppBottomSheet</code> with custom copyable referral links (<code>share.stayindia.in</code>) and social sharing intent launchers (<code>e2e9243</code>).</p>
+</div>
+
+
+<!-- MASTER TASK MATRIX TABLE -->
+<div class="section-title" style="margin-top: 30px;">
+  <span>12. Master Task Summary Matrix</span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Module</th>
+      <th>Major Features</th>
+      <th>Minor Refinements</th>
+      <th>QA & Bug Fixes</th>
+      <th>Total Completed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Core System & Infrastructure</strong></td>
+      <td>5</td>
+      <td>4</td>
+      <td>3</td>
+      <td>12 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Auth & Onboarding</strong></td>
+      <td>3</td>
+      <td>4</td>
+      <td>2</td>
+      <td>9 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Hostel & Property Config</strong></td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>9 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Dashboard & Bed Management</strong></td>
+      <td>3</td>
+      <td>3</td>
+      <td>2</td>
+      <td>8 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Tenant Management</strong></td>
+      <td>5</td>
+      <td>2</td>
+      <td>3</td>
+      <td>10 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Payments & Checkout Settlement</strong></td>
+      <td>5</td>
+      <td>3</td>
+      <td>3</td>
+      <td>11 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Electricity Bill Management</strong></td>
+      <td>4</td>
+      <td>2</td>
+      <td>2</td>
+      <td>8 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Financial Analytics & Subscriptions</strong></td>
+      <td>4</td>
+      <td>5</td>
+      <td>4</td>
+      <td>13 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Bank Account & Settings</strong></td>
+      <td>3</td>
+      <td>1</td>
+      <td>2</td>
+      <td>6 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Community & Chat</strong></td>
+      <td>2</td>
+      <td>3</td>
+      <td>2</td>
+      <td>7 Tasks</td>
+    </tr>
+    <tr>
+      <td><strong>Service Requests & Support</strong></td>
+      <td>4</td>
+      <td>2</td>
+      <td>1</td>
+      <td>7 Tasks</td>
+    </tr>
+    <tr style="font-weight: bold; background-color: #EFF6FF;">
+      <td>TOTAL TASKS DELIVERED</td>
+      <td>43 Major</td>
+      <td>31 Minor</td>
+      <td>27 QA Fixes</td>
+      <td>101 Tasks</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer-note">
+  Stay India Owner Application Development Report • Generated automatically from Git repository history (July 1st – Present)
+</div>
+
+</body>
+</html>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stay India Owner App - Major Functionalities (Last 4 Months)</title>
+<style>
+  @page {
+    size: A4;
+    margin: 15mm 15mm 18mm 15mm;
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 8pt;
+      color: #64748B;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #0F172A;
+    line-height: 1.5;
+    font-size: 9.5pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Header Container */
+  .header-container {
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
+    color: #FFFFFF;
+    padding: 24px 28px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  }
+  .header-container h1 {
+    font-size: 20pt;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+    color: #FFFFFF;
+  }
+  .header-container p {
+    font-size: 10.5pt;
+    color: #93C5FD;
+    margin: 0 0 16px 0;
+    font-weight: 500;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 12px;
+  }
+  .meta-item {
+    font-size: 8.5pt;
+  }
+  .meta-label {
+    color: #94A3B8;
+    text-transform: uppercase;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .meta-value {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  /* Section Styling */
+  .section-title {
+    font-size: 13pt;
+    font-weight: 800;
+    color: #0F172A;
+    border-bottom: 2px solid #2563EB;
+    padding-bottom: 6px;
+    margin-top: 22px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .badge-major {
+    background-color: #DBEAFE;
+    color: #1E40AF;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* Task Card / Major Feature Block */
+  .feature-card {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-left: 4px solid #2563EB;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .feature-title {
+    font-weight: 800;
+    font-size: 10pt;
+    color: #0F172A;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .feature-desc {
+    color: #334155;
+    font-size: 9pt;
+    margin: 0 0 6px 0;
+  }
+  .feature-bullets {
+    margin: 4px 0 0 0;
+    padding-left: 18px;
+    color: #475569;
+    font-size: 8.5pt;
+  }
+  .feature-bullets li {
+    margin-bottom: 3px;
+  }
+
+  /* Table Styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    margin-bottom: 20px;
+    font-size: 8.5pt;
+  }
+  th {
+    background-color: #0F172A;
+    color: #FFFFFF;
+    text-align: left;
+    padding: 8px 10px;
+    font-weight: 700;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #E2E8F0;
+    color: #334155;
+  }
+  tr:nth-child(even) {
+    background-color: #F8FAFC;
+  }
+
+  .footer-note {
+    margin-top: 30px;
+    padding-top: 12px;
+    border-top: 1px solid #E2E8F0;
+    font-size: 8pt;
+    color: #94A3B8;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-container">
+  <h1>Stay India Owner Application</h1>
+  <p>Major Functionalities & Key Architectural Changes (July 1st – October 28th)</p>
+  <div class="meta-grid">
+    <div class="meta-item">
+      <span class="meta-label">Project Name</span>
+      <span class="meta-value">Stay-India-Owner</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Timeframe</span>
+      <span class="meta-value">Last 4 Months (July – Oct)</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Scope</span>
+      <span class="meta-value">Major Features & Capabilities</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Total Major Items</span>
+      <span class="meta-value">21 Major Features</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div class="section-title">
+  <span>1. Core Architecture & Infrastructure</span>
+  <span class="badge-major">Major System Upgrade</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>1. Modular Clean Architecture & Cubit Migration</span>
+    <span class="badge-major">Architecture</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Re-architected legacy monolithic codebase into feature-first modules (<code>auth</code>, <code>bookings</code>, <code>dashboard</code>, <code>tenants</code>, <code>payments</code>, <code>electricity_bills</code>, <code>finance</code>, <code>communities</code>, <code>bank_account</code>, <code>profile</code>).</li>
+    <li>Migrated legacy BLoCs to lightweight feature Cubits (<code>DashboardCubit</code>, <code>TenantCubit</code>, <code>BookingsCubit</code>, <code>FinanceCubit</code>, <code>HostelCubit</code>, <code>CommunityCubit</code>).</li>
+    <li>Decentralized Dependency Injection into modular bindings registered in <code>injection_container.dart</code>.</li>
+  </ul>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>2. Universal Deep Linking Framework (share.stayindia.in)</span>
+    <span class="badge-major">Deep Links</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Integrated <code>app_links</code> package with custom <code>DeepLinkService</code> to parse incoming referral parameters and navigate directly to target screens.</li>
+    <li>Configured Android <code>AndroidManifest.xml</code> intent filters and iOS <code>Runner.entitlements</code> / <code>Info.plist</code> associated domains.</li>
+    <li>Hosted verification domain assets: <code>.well-known/apple-app-site-association</code> and <code>.well-known/assetlinks.json</code>.</li>
+  </ul>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>3. Multi-Environment Flavor Build System</span>
+    <span class="badge-major">DevOps</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Created <code>config/env.dev.json</code> and <code>config/env.prod.json</code> defining base API URLs, Socket endpoints, S3 hosts, and Razorpay client keys.</li>
+    <li>Created shell build script <code>build_app.sh</code> for automated production and staging APK/IPA compilation.</li>
+  </ul>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section-title">
+  <span>2. Authentication & Account Onboarding</span>
+  <span class="badge-major">Auth Capabilities</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>4. DigiLocker Automated eKYC Integration</span>
+    <span class="badge-major">Identity eKYC</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Built DigiLocker eKYC OAuth webview module to retrieve verified identity documents directly from government servers.</li>
+    <li>Created <code>DocumentCubit</code> state machine handling <code>Pending</code>, <code>Approved</code>, and <code>Rejected</code> verification statuses.</li>
+  </ul>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>5. Deactivated Account Restoration Workflow</span>
+    <span class="badge-major">Account Recovery</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Developed account recovery modal on login for deactivated accounts, executing backend restore API calls.</li>
+    <li>Integrated self-service account deletion and deactivation controls inside profile settings.</li>
+  </ul>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section-title">
+  <span>3. Property Setup & Hostel Management</span>
+  <span class="badge-major">Hostel Management</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>6. Hostel Configuration Stepper & Draft Resume</span>
+    <span class="badge-major">Property Setup</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Redesigned <code>HostelConfigurationPage</code> supporting dashed property creation cards and multi-property management.</li>
+    <li>Embedded property image uploading directly inside property creation steppers.</li>
+    <li>Added feature to automatically detect and resume incomplete property setup drafts.</li>
+    <li>Allowed property creation without requiring upfront KYC verification.</li>
+  </ul>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>7. Room Sharing Caps & Pricing Master Rules</span>
+    <span class="badge-major">Pricing Rules</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Added AC vs Non-AC room category toggles.</li>
+    <li>Capped custom sharing values and fixed room amount silent rewriting bugs.</li>
+    <li>Defaulted pricing calculations to Pricing Master rates and enforced ₹50,000 price ceiling check on bulk edits.</li>
+  </ul>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section-title">
+  <span>4. Dashboard & Room Grid Management</span>
+  <span class="badge-major">Dashboard Engine</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>8. Occupancy Mapping & Direct Room Change</span>
+    <span class="badge-major">Bed Management</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Real-time bed status mapping (<code>Booked</code>, <code>Reserved</code>, <code>Occupied</code>, <code>Away</code>) across room floor grids.</li>
+    <li>Modified bed click action on occupied bed cards to directly launch <code>RoomSelectionPage</code> for instant room transfers.</li>
+  </ul>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section-title">
+  <span>5. Tenant Identity Verification & Bulk Upload</span>
+  <span class="badge-major">Tenant System</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>9. Aadhaar Camera OCR, Image Cropping & PAN Verification</span>
+    <span class="badge-major">OCR & Verification</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Built camera/gallery OCR text recognition to parse tenant Aadhaar numbers and automatically split full names into first/last name.</li>
+    <li>Integrated <code>image_cropper</code> package for cropping front and back Aadhaar photos.</li>
+    <li>Integrated real-time PAN card API verification with green checkmark verification badges.</li>
+  </ul>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>10. Standalone Bulk Tenant Upload Feature</span>
+    <span class="badge-major">Bulk Upload</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Created <code>AddBulkTenantPage</code> supporting multipart CSV/Excel document parsing and upload.</li>
+    <li>Implemented row-by-row payload validation feedback and form reset capabilities.</li>
+  </ul>
+</div>
+
+<!-- SECTION 6 -->
+<div class="section-title">
+  <span>6. Payments, Billing & Checkout Settlement</span>
+  <span class="badge-major">Financial Transactions</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>11. Offline Rent Collection (Cash & UPI Direct)</span>
+    <span class="badge-major">Offline Billing</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Created offline payment modal allowing owners to record Cash and UPI rent payments manually with reference IDs.</li>
+    <li>Built date-wise pro-rata daily rent calculation engine for partial month joiners.</li>
+    <li>Integrated offline renewal payment collection workflows.</li>
+  </ul>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>12. Unified Checkout Settlement Engine</span>
+    <span class="badge-major">Checkout Engine</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Developed complete Checkout Settlement workflow (<code>CheckoutSettlementModal</code>) embedded into active booking cards.</li>
+    <li>Automatically computes total unpaid rent, pending electricity bills, security deposit deductions, and balance refunds into a single transaction slip.</li>
+  </ul>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>13. Digital PDF Invoice Generator</span>
+    <span class="badge-major">PDF Invoice</span>
+  </div>
+  <p class="feature-desc">Built digital PDF invoice generator service to generate formatted digital invoice receipts upon payment completion.</p>
+</div>
+
+<!-- SECTION 7 -->
+<div class="section-title">
+  <span>7. Electricity Bill Management</span>
+  <span class="badge-major">Billing Module</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>14. Electricity Bill Module & WhatsApp Sharing</span>
+    <span class="badge-major">Electricity Bills</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Launched complete <code>ElectricityBill</code> feature module under <code>lib/features/electricity_bills</code>.</li>
+    <li>Enforced date validation checks preventing duplicate monthly bills.</li>
+    <li>Formatted WhatsApp text summary sharing for electricity bills and tied pending bills directly into tenant checkout slips.</li>
+  </ul>
+</div>
+
+<!-- SECTION 8 -->
+<div class="section-title">
+  <span>8. Financial Dashboard & Subscriptions</span>
+  <span class="badge-major">Analytics & Billing</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>15. Performance Insights Dashboard & Visual Charts</span>
+    <span class="badge-major">Analytics</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Built <code>FinancialDashboardPage</code> displaying Total Revenue, Monthly Revenue, Occupancy Rate %, and Pending Payments.</li>
+    <li>Integrated daily revenue line trend chart (<code>RevenueChart</code>) and pie breakdown chart (<code>RevenueBreakdownChart</code>).</li>
+    <li>Updated invoice calculation engine for GST tax handling compliance.</li>
+  </ul>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>16. Razorpay Payment SDK & Subscription Tiers</span>
+    <span class="badge-major">Razorpay Integration</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Integrated Razorpay payment SDK with <code>RazorpayCubit</code> state handler.</li>
+    <li>Built <code>PaymentSuccessScreen</code> and <code>PaymentFailedScreen</code> with detailed transaction breakdowns and retry triggers.</li>
+    <li>Displayed active subscription validity dates with 7-day prior renewal alerts and lapsed state handling.</li>
+  </ul>
+</div>
+
+<!-- SECTION 9 -->
+<div class="section-title">
+  <span>9. Bank Verification & Settings</span>
+  <span class="badge-major">Bank Settings</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>17. Penny-Drop Bank Account Verification API</span>
+    <span class="badge-major">Bank Verification</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Implemented backend API penny-drop verification checking account holder names and IFSC codes.</li>
+    <li>Added green "Verified" status badge UI on validated bank cards.</li>
+    <li>Added entity classification selector (Individual vs Business/Proprietorship).</li>
+  </ul>
+</div>
+
+<!-- SECTION 10 -->
+<div class="section-title">
+  <span>10. Community, Forum & Real-Time Chat</span>
+  <span class="badge-major">Community</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>18. PG Owners Forum & Executive Directory</span>
+    <span class="badge-major">Owners Forum</span>
+  </div>
+  <p class="feature-desc">Built <code>AssociationPortal</code> displaying Executive Committee members, IT Wing, and General Members, with searchable association lists and property join request modal sheets.</p>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>19. Real-Time Chat with WhatsApp Doodle Wallpaper</span>
+    <span class="badge-major">Messaging</span>
+  </div>
+  <ul class="feature-bullets">
+    <li>Migrated chat routes to clean isolated <code>/community/chat</code> and <code>/chat/</code> sub-routes.</li>
+    <li>Integrated high-density organic doodle wallpaper background for WhatsApp-style chat screens.</li>
+    <li>Converted server UTC timestamps to device local dates.</li>
+  </ul>
+</div>
+
+<!-- SECTION 11 -->
+<div class="section-title">
+  <span>11. Service Requests & Notices</span>
+  <span class="badge-major">Support & Notices</span>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>20. Raise a Service Request Workflow</span>
+    <span class="badge-major">Service Requests</span>
+  </div>
+  <p class="feature-desc">Implemented Service Request workflow (<code>Select Service Modal</code>, <code>My Requests Tracker Page</code>, <code>Request Sent Confirmation Screen</code>).</p>
+</div>
+
+<div class="feature-card">
+  <div class="feature-title">
+    <span>21. General & Vacate Notice Broadcasts</span>
+    <span class="badge-major">Notices</span>
+  </div>
+  <p class="feature-desc">Built dialog modals for issuing general hostel announcements or initiating tenant vacate notices.</p>
+</div>
+
+
+<!-- MASTER MAJOR FUNCTIONALITY MATRIX TABLE -->
+<div class="section-title" style="margin-top: 30px;">
+  <span>Master Summary Matrix of Major Functionalities</span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Major Capability</th>
+      <th>Module</th>
+      <th>Target Impact</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Clean Architecture & Cubit Migration</td>
+      <td>Core System</td>
+      <td>Modular codebase & lightweight state execution</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Universal Deep Linking (share.stayindia.in)</td>
+      <td>Core System</td>
+      <td>Referral tracking & direct screen launching</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Multi-Environment Build Infrastructure</td>
+      <td>Core System</td>
+      <td>Production vs Staging build separation</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>DigiLocker Automated eKYC Integration</td>
+      <td>Auth / Verification</td>
+      <td>Official government identity document retrieval</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Deactivated Account Recovery Workflow</td>
+      <td>Auth / Profile</td>
+      <td>Self-service account restoration & deletion</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Property Setup Wizard & Draft Resume</td>
+      <td>Hostel Config</td>
+      <td>Multi-property onboarding & setup draft resume</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Pricing Master & Room Category Rules</td>
+      <td>Hostel Config</td>
+      <td>AC/Non-AC pricing rules & bulk price caps</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Real-Time Bed Occupancy Mapping & Room Change</td>
+      <td>Dashboard</td>
+      <td>Direct room transfer & status color mapping</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Aadhaar Camera OCR with Cropping & PAN Check</td>
+      <td>Tenants</td>
+      <td>Automated document parsing & PAN API verification</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>Standalone Bulk Tenant Upload Feature</td>
+      <td>Tenants</td>
+      <td>CSV/Excel multi-tenant upload & row checks</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>Offline Rent Payment Engine (Cash & UPI)</td>
+      <td>Payments</td>
+      <td>Pro-rata daily rent calculation & offline tracking</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>Unified Checkout Settlement Engine</td>
+      <td>Payments</td>
+      <td>Automated rent, bill, deposit & refund summary</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>Digital PDF Invoice Generator</td>
+      <td>Payments</td>
+      <td>Formatted PDF payment receipt export</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>Dedicated Electricity Bill Management Module</td>
+      <td>Electricity Bills</td>
+      <td>Room-level billing, edit & WhatsApp summary share</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>Financial Analytics & Performance Dashboard</td>
+      <td>Finance</td>
+      <td>Daily revenue trends & breakdown charts</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>Razorpay Payment SDK & Subscription Tiers</td>
+      <td>Subscriptions</td>
+      <td>Razorpay checkout flow & 7-day expiry alerts</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>Penny-Drop Bank Account Verification API</td>
+      <td>Bank Settings</td>
+      <td>Validated account holder check & verified badges</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>PG Owners Forum & Executive Directory</td>
+      <td>Community</td>
+      <td>Association portal & property join requests</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>Real-Time Chat with WhatsApp Doodle Wallpaper</td>
+      <td>Community</td>
+      <td>High-performance messaging & UTC date fix</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>Raise a Service Request Workflow</td>
+      <td>Maintenance</td>
+      <td>Maintenance request category selection & tracking</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>Notice Broadcast & Vacate Notice Dialogs</td>
+      <td>Notices</td>
+      <td>General announcement & vacate notice dialogs</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer-note">
+  Stay India Owner Application Major Functionalities Document • Generated from Git Repository Commit Analysis (July 1st – Present)
+</div>
+
+</body>
+</html>
